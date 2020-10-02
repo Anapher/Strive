@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <PropertyGroup>
+    <LangVersion>8.0</LangVersion>
+    <Nullable>enable</Nullable>
+    <NullableContextOptions>enable</NullableContextOptions>
+    <WarningsAsErrors>$(WarningsAsErrors);CS8600;CS8602;CS8603;CS8604;CS8618;CS8613</WarningsAsErrors>
+  </PropertyGroup>
+</Project>
