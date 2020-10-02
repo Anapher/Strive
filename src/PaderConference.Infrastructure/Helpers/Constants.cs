@@ -6,12 +6,12 @@ namespace PaderConference.Infrastructure.Helpers
         {
             public static class JwtClaimIdentifiers
             {
-                public const string Rol = "rol", Id = "id";
+                public const string Email = "email";
             }
 
-            public static class JwtClaims
+            public static class JwtRoles
             {
-                public const string ApiAccess = "api_access";
+                public const string Moderator = "mod";
             }
         }
     }

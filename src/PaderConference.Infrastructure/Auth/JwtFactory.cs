@@ -1,18 +1,18 @@
-using PaderConference.Core.Interfaces.Services;
-using PaderConference.Infrastructure.Interfaces;
-using Microsoft.Extensions.Options;
 using System;
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Security.Principal;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using PaderConference.Core.Interfaces.Services;
+using PaderConference.Infrastructure.Helpers;
+using PaderConference.Infrastructure.Interfaces;
 
 namespace PaderConference.Infrastructure.Auth
 {
     public class JwtFactory : IJwtFactory
     {
-        private readonly JwtIssuerOptions _jwtOptions;
         private readonly IJwtHandler _jwtHandler;
+        private readonly JwtIssuerOptions _jwtOptions;
 
         public JwtFactory(IJwtHandler jwtHandler, IOptions<JwtIssuerOptions> options)
         {
@@ -22,38 +22,25 @@ namespace PaderConference.Infrastructure.Auth
             ThrowIfInvalidOptions(_jwtOptions);
         }
 
-        public async Task<string> GenerateEncodedToken(string id, string userName)
+        public ValueTask<string> GenerateEncodedToken(string id, string email)
         {
-            var identity = GenerateClaimsIdentity(id, userName);
-
-            var claims = new[]
+            var tokenDescriptor = new SecurityTokenDescriptor
             {
-                 new Claim(JwtRegisteredClaimNames.Sub, userName),
-                 new Claim(JwtRegisteredClaimNames.Jti, await _jwtOptions.JtiGenerator()),
-                 new Claim(JwtRegisteredClaimNames.Iat, _jwtOptions.IssuedAt.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64),
-                 identity.FindFirst(Helpers.Constants.Strings.JwtClaimIdentifiers.Rol),
-                 identity.FindFirst(Helpers.Constants.Strings.JwtClaimIdentifiers.Id)
-             };
+                Subject = new ClaimsIdentity(new[]
+                {
+                    new Claim(ClaimTypes.Name, id),
+                    new Claim(ClaimTypes.Role, Constants.Strings.JwtRoles.Moderator),
+                    new Claim(ClaimTypes.Email, email)
+                }),
+                Expires = _jwtOptions.Expiration.UtcDateTime,
+                SigningCredentials = _jwtOptions.SigningCredentials,
+                Issuer = _jwtOptions.Issuer,
+                Audience = _jwtOptions.Audience,
+                NotBefore = _jwtOptions.NotBefore.UtcDateTime,
+                IssuedAt = _jwtOptions.IssuedAt.UtcDateTime
+            };
 
-            // Create the JWT security token and encode it.
-            var jwt = new JwtSecurityToken(
-                _jwtOptions.Issuer,
-                _jwtOptions.Audience,
-                claims,
-                _jwtOptions.NotBefore.UtcDateTime,
-                _jwtOptions.Expiration.UtcDateTime,
-                _jwtOptions.SigningCredentials);
-
-            return _jwtHandler.WriteToken(jwt);
-        }
-
-        private static ClaimsIdentity GenerateClaimsIdentity(string id, string userName)
-        {
-            return new ClaimsIdentity(new GenericIdentity(userName, "Token"), new[]
-            {
-                new Claim(Helpers.Constants.Strings.JwtClaimIdentifiers.Id, id),
-                new Claim(Helpers.Constants.Strings.JwtClaimIdentifiers.Rol, Helpers.Constants.Strings.JwtClaims.ApiAccess)
-            });
+            return new ValueTask<string>(_jwtHandler.WriteToken(tokenDescriptor));
         }
 
         private static void ThrowIfInvalidOptions(JwtIssuerOptions options)
@@ -61,19 +48,12 @@ namespace PaderConference.Infrastructure.Auth
             if (options == null) throw new ArgumentNullException(nameof(options));
 
             if (options.ValidFor <= TimeSpan.Zero)
-            {
                 throw new ArgumentException("Must be a non-zero TimeSpan.", nameof(JwtIssuerOptions.ValidFor));
-            }
 
             if (options.SigningCredentials == null)
-            {
                 throw new ArgumentNullException(nameof(JwtIssuerOptions.SigningCredentials));
-            }
 
-            if (options.JtiGenerator == null)
-            {
-                throw new ArgumentNullException(nameof(JwtIssuerOptions.JtiGenerator));
-            }
+            if (options.JtiGenerator == null) throw new ArgumentNullException(nameof(JwtIssuerOptions.JtiGenerator));
         }
     }
 }

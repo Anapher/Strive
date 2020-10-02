@@ -2,6 +2,7 @@ using Autofac;
 using PaderConference.Core.Interfaces.Gateways.Repositories;
 using PaderConference.Core.Interfaces.Services;
 using PaderConference.Infrastructure.Auth;
+using PaderConference.Infrastructure.Conferencing;
 using PaderConference.Infrastructure.Interfaces;
 
 namespace PaderConference.Infrastructure
@@ -15,7 +16,10 @@ namespace PaderConference.Infrastructure
             builder.RegisterType<TokenFactory>().As<ITokenFactory>().SingleInstance();
             builder.RegisterType<JwtValidator>().As<IJwtValidator>().SingleInstance();
 
-            builder.RegisterAssemblyTypes(ThisAssembly).AsClosedTypesOf(typeof(IRepository<>)).AsImplementedInterfaces();
+            builder.RegisterType<ConferenceManager>().As<IConferenceManager>().SingleInstance();
+
+            builder.RegisterAssemblyTypes(ThisAssembly).AsClosedTypesOf(typeof(IRepository<>))
+                .AsImplementedInterfaces();
         }
     }
 }

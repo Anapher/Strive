@@ -1,9 +1,9 @@
-using PaderConference.Infrastructure.Interfaces;
-using Microsoft.Extensions.Logging;
-using Microsoft.IdentityModel.Tokens;
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
+using PaderConference.Infrastructure.Interfaces;
 
 namespace PaderConference.Infrastructure.Auth
 {
@@ -18,18 +18,23 @@ namespace PaderConference.Infrastructure.Auth
             _jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
         }
 
-        public string WriteToken(JwtSecurityToken jwt)
+        public string WriteToken(SecurityTokenDescriptor jwt)
         {
-            return _jwtSecurityTokenHandler.WriteToken(jwt);
+            var token = _jwtSecurityTokenHandler.CreateToken(jwt);
+
+            return _jwtSecurityTokenHandler.WriteToken(token);
         }
 
         public ClaimsPrincipal? ValidateToken(string token, TokenValidationParameters tokenValidationParameters)
         {
             try
             {
-                var principal = _jwtSecurityTokenHandler.ValidateToken(token, tokenValidationParameters, out var securityToken);
+                var principal =
+                    _jwtSecurityTokenHandler.ValidateToken(token, tokenValidationParameters, out var securityToken);
 
-                if (!(securityToken is JwtSecurityToken jwtSecurityToken) || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+                if (!(securityToken is JwtSecurityToken jwtSecurityToken) ||
+                    !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256,
+                        StringComparison.InvariantCultureIgnoreCase))
                     throw new SecurityTokenException("Invalid token");
 
                 return principal;

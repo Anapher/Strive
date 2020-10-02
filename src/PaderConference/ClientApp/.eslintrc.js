@@ -18,4 +18,8 @@ module.exports = {
          version: 'detect', // Tells eslint-plugin-react to automatically detect the version of React to use
       },
    },
+   rules: {
+      // disable the rule for all files
+      '@typescript-eslint/explicit-module-boundary-types': 'off',
+   },
 };

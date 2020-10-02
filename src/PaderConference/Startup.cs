@@ -1,30 +1,29 @@
-using Autofac;
-using Autofac.Extensions.DependencyInjection;
-using AutoMapper;
-using PaderConference.Core;
-using PaderConference.Core.Errors;
-using PaderConference.Hubs;
-using PaderConference.Infrastructure;
-using PaderConference.Infrastructure.Auth;
-using PaderConference.Infrastructure.Helpers;
-using FluentValidation.AspNetCore;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.IdentityModel.Tokens;
-using Swashbuckle.AspNetCore.Swagger;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Autofac;
+using Autofac.Extensions.DependencyInjection;
+using AutoMapper;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using PaderConference.Core;
+using PaderConference.Core.Errors;
+using PaderConference.Hubs;
+using PaderConference.Infrastructure;
+using PaderConference.Infrastructure.Auth;
+using Swashbuckle.AspNetCore.Swagger;
 
 namespace PaderConference
 {
@@ -46,7 +45,8 @@ namespace PaderConference
             var authSettings = Configuration.GetSection(nameof(AuthSettings));
             services.Configure<AuthSettings>(authSettings);
 
-            var signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(authSettings[nameof(AuthSettings.SecretKey)]));
+            var signingKey =
+                new SymmetricSecurityKey(Encoding.ASCII.GetBytes(authSettings[nameof(AuthSettings.SecretKey)]));
 
             // jwt wire up
             // Get options from app settings
@@ -80,7 +80,6 @@ namespace PaderConference
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-
             }).AddJwtBearer(configureOptions =>
             {
                 configureOptions.ClaimsIssuer = jwtAppSettingOptions[nameof(JwtIssuerOptions.Issuer)];
@@ -101,31 +100,22 @@ namespace PaderConference
                 };
             });
 
-            // api user claim policy
-            services.AddAuthorization(options =>
-            {
-                options.AddPolicy("ApiUser", policy => policy.RequireClaim(Constants.Strings.JwtClaimIdentifiers.Rol, Constants.Strings.JwtClaims.ApiAccess));
-            });
-
             services.AddSignalR();
 
             services.AddMvc()
-                        .ConfigureApiBehaviorOptions(options =>
-                        {
-                            options.InvalidModelStateResponseFactory = context =>
-                                new BadRequestObjectResult(new FieldValidationError(
-                                    context.ModelState.Where(x => x.Value.ValidationState == ModelValidationState.Invalid)
-                                    .ToDictionary(x => x.Key, x => x.Value.Errors.First().ErrorMessage)));
-                        })
-                        .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Startup>());
+                .ConfigureApiBehaviorOptions(options =>
+                {
+                    options.InvalidModelStateResponseFactory = context =>
+                        new BadRequestObjectResult(new FieldValidationError(
+                            context.ModelState.Where(x => x.Value.ValidationState == ModelValidationState.Invalid)
+                                .ToDictionary(x => x.Key, x => x.Value.Errors.First().ErrorMessage)));
+                })
+                .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Startup>());
 
             services.AddAutoMapper(Assembly.GetExecutingAssembly(), typeof(InfrastructureModule).Assembly);
 
             // In production, the React files will be served from this directory
-            services.AddSpaStaticFiles(configuration =>
-            {
-                configuration.RootPath = "ClientApp/build";
-            });
+            services.AddSpaStaticFiles(configuration => { configuration.RootPath = "ClientApp/build"; });
 
             // Register the Swagger generator, defining 1 or more Swagger documents
             services.AddSwaggerGen(c =>
@@ -163,13 +153,9 @@ namespace PaderConference
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
-            {
                 app.UseDeveloperExceptionPage();
-            }
             else
-            {
                 app.UseHsts();
-            }
 
             // Enable middleware to serve generated Swagger as a JSON endpoint.
             app.UseSwagger();
@@ -185,6 +171,7 @@ namespace PaderConference
             app.UseAuthentication();
 
             app.UseRouting();
+            app.UseAuthorization();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute("default", "{controller}/{action=Index}/{id?}");
@@ -196,11 +183,9 @@ namespace PaderConference
                 spa.Options.SourcePath = "ClientApp";
 
                 if (env.IsDevelopment())
-                {
                     // uncomment this if you want the React app to start with ASP.Net Core (else you have to start it manually)
                     //spa.UseReactDevelopmentServer(npmScript: "start"); 
                     spa.UseProxyToSpaDevelopmentServer("http://localhost:3000");
-                }
             });
         }
     }

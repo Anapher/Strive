@@ -1,11 +1,10 @@
+using System.Threading.Tasks;
 using PaderConference.Core.Dto.UseCaseRequests;
 using PaderConference.Core.Dto.UseCaseResponses;
 using PaderConference.Core.Errors;
 using PaderConference.Core.Interfaces;
-using PaderConference.Core.Interfaces.Gateways.Repositories;
 using PaderConference.Core.Interfaces.Services;
 using PaderConference.Core.Interfaces.UseCases;
-using System.Threading.Tasks;
 
 namespace PaderConference.Core.UseCases
 {
@@ -20,13 +19,15 @@ namespace PaderConference.Core.UseCases
             _tokenFactory = tokenFactory;
         }
 
-        public async Task<LoginResponse?> Handle(LoginRequest message)
+        public async ValueTask<LoginResponse?> Handle(LoginRequest message)
         {
             if (string.IsNullOrEmpty(message.UserName))
-                return ReturnError(new FieldValidationError(nameof(message.UserName), "The username must not be empty."));
+                return ReturnError(
+                    new FieldValidationError(nameof(message.UserName), "The username must not be empty."));
 
             if (string.IsNullOrEmpty(message.Password))
-                return ReturnError(new FieldValidationError(nameof(message.Password), "The password must not be empty."));
+                return ReturnError(
+                    new FieldValidationError(nameof(message.Password), "The password must not be empty."));
 
             //var user = await _userRepository.FindByName(message.UserName);
             //if (user == null)

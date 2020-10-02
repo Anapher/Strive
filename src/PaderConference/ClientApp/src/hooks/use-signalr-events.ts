@@ -3,7 +3,7 @@ import store from 'src/store';
 import { addHandler, removeHandler } from '../store/signalr/actions';
 import { useSignalrStatus } from './use-signalr-status';
 
-export default function useSignalrEvents(...events: string[]) {
+export default function useSignalrEvents(...events: string[]): void {
    const isConnected = useSignalrStatus();
 
    useEffect(() => {

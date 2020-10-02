@@ -6,6 +6,7 @@ namespace PaderConference.Core.Errors
         UserNotFound,
         InvalidPassword,
         InvalidToken,
+        UserNotModerator,
 
 
         Identity_DefaultError = 1500,
@@ -27,6 +28,6 @@ namespace PaderConference.Core.Errors
         Identity_PasswordRequiresNonAlphanumeric,
         Identity_PasswordRequiresDigit,
         Identity_PasswordRequiresLower,
-        Identity_PasswordRequiresUpper,
+        Identity_PasswordRequiresUpper
     }
 }
