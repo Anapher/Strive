@@ -1,8 +1,13 @@
 import { useEffect, useState } from 'react';
 import { AsyncFunction, GetPayload, PromiseListener, SetPayload } from 'redux-promise-listener';
 import { promiseListener } from 'src/store';
-import { getType } from 'typesafe-actions';
-import { ActionBuilderConstructor } from 'typesafe-actions/dist/type-helpers';
+import {
+   ActionCreator,
+   ActionCreatorBuilder,
+   ActionCreatorTypeMetadata,
+   getType,
+   TypeConstant,
+} from 'typesafe-actions';
 
 /**
  * Create an async function from redux actions (e. g. for Formik)
@@ -10,11 +15,11 @@ import { ActionBuilderConstructor } from 'typesafe-actions/dist/type-helpers';
  * @param success the success action of the process that resolves the promise
  * @param failure the failure action of the process that rejects the promise
  */
-export default function<T1 extends string, T2 extends string, T3 extends string, P1, P2, P3>(
-   request: ActionBuilderConstructor<T1, P1>,
-   success: ActionBuilderConstructor<T2, P2>,
-   failure: ActionBuilderConstructor<T3, P3>,
-): ((payload: P1) => Promise<P2>) | null {
+export default function <T1 extends TypeConstant, T2 extends TypeConstant, T3 extends TypeConstant, P, R>(
+   request: ActionCreatorBuilder<T1, P>,
+   success: ActionCreatorBuilder<T2, R>,
+   failure: ActionCreator<T3> & ActionCreatorTypeMetadata<T3>,
+): ((payload: P) => Promise<R>) | null {
    const requestType = getType(request);
    const successType = getType(success);
    const failureType = getType(failure);

@@ -11,7 +11,7 @@ namespace PaderConference
         {
             try
             {
-                CreateWebHostBuilder(args).Build().InitializeDatabase().Run();
+                CreateWebHostBuilder(args).Build().Run();
                 return 0;
             }
             catch (Exception e)

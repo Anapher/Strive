@@ -6,16 +6,12 @@ using PaderConference.Core.Errors;
 using PaderConference.Hubs;
 using PaderConference.Infrastructure;
 using PaderConference.Infrastructure.Auth;
-using PaderConference.Infrastructure.Data;
 using PaderConference.Infrastructure.Helpers;
-using PaderConference.Infrastructure.Identity;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
@@ -45,10 +41,6 @@ namespace PaderConference
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
             services.AddLogging();
-
-            // Add framework services.
-            services.AddDbContext<AppIdentityDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("Default"), b => b.MigrationsAssembly("PaderConference.Infrastructure")));
-            services.AddDbContext<AppDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("Default"), b => b.MigrationsAssembly("PaderConference.Infrastructure")));
 
             // Register the ConfigurationBuilder instance of AuthSettings
             var authSettings = Configuration.GetSection(nameof(AuthSettings));
@@ -116,23 +108,6 @@ namespace PaderConference
             });
 
             services.AddSignalR();
-
-            // use BCrypt to hash passwords
-            services.AddScoped<IPasswordHasher<AppUser>, BCryptPasswordHasher<AppUser>>();
-
-            // add identity
-            var identityBuilder = services.AddIdentityCore<AppUser>(o =>
-            {
-                // configure identity options
-                o.Password.RequireDigit = false;
-                o.Password.RequireLowercase = false;
-                o.Password.RequireUppercase = false;
-                o.Password.RequireNonAlphanumeric = false;
-                o.Password.RequiredLength = 6;
-            });
-
-            identityBuilder = new IdentityBuilder(identityBuilder.UserType, typeof(IdentityRole), identityBuilder.Services);
-            identityBuilder.AddEntityFrameworkStores<AppIdentityDbContext>().AddDefaultTokenProviders();
 
             services.AddMvc()
                         .ConfigureApiBehaviorOptions(options =>

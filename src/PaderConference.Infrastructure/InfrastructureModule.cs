@@ -2,7 +2,6 @@ using Autofac;
 using PaderConference.Core.Interfaces.Gateways.Repositories;
 using PaderConference.Core.Interfaces.Services;
 using PaderConference.Infrastructure.Auth;
-using PaderConference.Infrastructure.Identity.Repositories;
 using PaderConference.Infrastructure.Interfaces;
 
 namespace PaderConference.Infrastructure
@@ -11,7 +10,6 @@ namespace PaderConference.Infrastructure
     {
         protected override void Load(ContainerBuilder builder)
         {
-            builder.RegisterType<UserRepository>().As<IUserRepository>().InstancePerLifetimeScope();
             builder.RegisterType<JwtFactory>().As<IJwtFactory>().SingleInstance();
             builder.RegisterType<JwtHandler>().As<IJwtHandler>().SingleInstance();
             builder.RegisterType<TokenFactory>().As<ITokenFactory>().SingleInstance();

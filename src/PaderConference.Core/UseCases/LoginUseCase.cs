@@ -11,13 +11,11 @@ namespace PaderConference.Core.UseCases
 {
     public class LoginUseCase : UseCaseStatus<LoginResponse>, ILoginUseCase
     {
-        private readonly IUserRepository _userRepository;
         private readonly IJwtFactory _jwtFactory;
         private readonly ITokenFactory _tokenFactory;
 
-        public LoginUseCase(IUserRepository userRepository, IJwtFactory jwtFactory, ITokenFactory tokenFactory)
+        public LoginUseCase(IJwtFactory jwtFactory, ITokenFactory tokenFactory)
         {
-            _userRepository = userRepository;
             _jwtFactory = jwtFactory;
             _tokenFactory = tokenFactory;
         }
@@ -30,19 +28,19 @@ namespace PaderConference.Core.UseCases
             if (string.IsNullOrEmpty(message.Password))
                 return ReturnError(new FieldValidationError(nameof(message.Password), "The password must not be empty."));
 
-            var user = await _userRepository.FindByName(message.UserName);
-            if (user == null)
-                return ReturnError(AuthenticationError.UserNotFound.SetField(nameof(message.UserName)));
+            //var user = await _userRepository.FindByName(message.UserName);
+            //if (user == null)
+            //    return ReturnError(AuthenticationError.UserNotFound.SetField(nameof(message.UserName)));
 
-            if (!await _userRepository.CheckPassword(user, message.Password))
-                return ReturnError(new AuthenticationError("The password is invalid.", ErrorCode.InvalidPassword).SetField(nameof(message.Password)));
+            //if (!await _userRepository.CheckPassword(user, message.Password))
+            //    return ReturnError(new AuthenticationError("The password is invalid.", ErrorCode.InvalidPassword).SetField(nameof(message.Password)));
 
-            // generate refresh token
+            //// generate refresh token
             var refreshToken = _tokenFactory.GenerateToken();
-            user.AddRefreshToken(refreshToken, message.RemoteIpAddress);
-            await _userRepository.Update(user);
+            //user.AddRefreshToken(refreshToken, message.RemoteIpAddress);
+            //await _userRepository.Update(user);
 
-            var accessToken = await _jwtFactory.GenerateEncodedToken(user.Id, user.UserName);
+            var accessToken = await _jwtFactory.GenerateEncodedToken("123", "Vincent");
 
             return new LoginResponse(accessToken, refreshToken);
         }
