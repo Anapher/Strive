@@ -18,9 +18,25 @@ namespace PaderConference.Controllers
         // POST api/v1/conference
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [Authorize(Roles = AppRoles.Moderator)]
-        public async Task<ActionResult<StartConferenceResponseDto>> Login([FromBody] StartConferenceRequestDto request,
+        public async Task<ActionResult<StartConferenceResponseDto>> Create([FromBody] StartConferenceRequestDto request,
+            [FromServices] IStartConferenceUseCase useCase)
+        {
+            var result =
+                await useCase.Handle(new StartConferenceRequest(User.GetUserId(),
+                    request.Settings ?? new ConferenceSettings()));
+
+            if (useCase.HasError) return useCase.ToActionResult();
+
+            return new StartConferenceResponseDto(result!.ConferenceId);
+        }
+
+        // POST api/v1/conference/join
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [Authorize]
+        public async Task<ActionResult<StartConferenceResponseDto>> Join([FromBody] StartConferenceRequestDto request,
             [FromServices] IStartConferenceUseCase useCase)
         {
             var result =
