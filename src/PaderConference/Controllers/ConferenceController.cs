@@ -31,21 +31,5 @@ namespace PaderConference.Controllers
 
             return new StartConferenceResponseDto(result!.ConferenceId);
         }
-
-        // POST api/v1/conference/join
-        [HttpPost]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [Authorize]
-        public async Task<ActionResult<StartConferenceResponseDto>> Join([FromBody] StartConferenceRequestDto request,
-            [FromServices] IStartConferenceUseCase useCase)
-        {
-            var result =
-                await useCase.Handle(new StartConferenceRequest(User.GetUserId(),
-                    request.Settings ?? new ConferenceSettings()));
-
-            if (useCase.HasError) return useCase.ToActionResult();
-
-            return new StartConferenceResponseDto(result!.ConferenceId);
-        }
     }
 }

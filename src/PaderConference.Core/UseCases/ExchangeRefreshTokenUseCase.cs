@@ -38,7 +38,7 @@ namespace PaderConference.Core.UseCases
             //if (!user.HasValidRefreshToken(message.RefreshToken))
             //    return ReturnError(AuthenticationError.InvalidToken);
 
-            var jwToken = await _jwtFactory.GenerateEncodedToken("123", "Vincent");
+            var jwToken = await _jwtFactory.GenerateModeratorToken("123", "Vincent", "Vincent");
             var refreshToken = _tokenFactory.GenerateToken();
 
             //user.RemoveRefreshToken(message.RefreshToken);

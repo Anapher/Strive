@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Security.Claims;
 
 namespace PaderConference.Extensions
@@ -7,7 +8,8 @@ namespace PaderConference.Extensions
     {
         public static string GetUserId(this ClaimsPrincipal principal)
         {
-            return principal.Identity.Name ?? throw new InvalidOperationException("This claims principal has no id");
+            return principal.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value ??
+                   throw new InvalidOperationException("This claims principal has no id");
         }
     }
 }

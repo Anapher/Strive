@@ -31,5 +31,23 @@ namespace PaderConference.Core.Domain.Entities
         /// </summary>
         public ConcurrentDictionary<string, Participant> Participants { get; } =
             new ConcurrentDictionary<string, Participant>();
+
+        protected bool Equals(Conference other)
+        {
+            return ConferenceId == other.ConferenceId;
+        }
+
+        public override bool Equals(object? obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != GetType()) return false;
+            return Equals((Conference) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return ConferenceId.GetHashCode();
+        }
     }
 }

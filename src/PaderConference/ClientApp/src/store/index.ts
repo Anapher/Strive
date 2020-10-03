@@ -1,11 +1,12 @@
+import { DEFAULT_PREFIX } from './conference-signal/action-types';
 import { RootAction, RootState, Services } from 'pader-conference';
 import { applyMiddleware, createStore } from 'redux';
 import { createEpicMiddleware } from 'redux-observable';
 import createReduxPromiseListener from 'redux-promise-listener';
 import services from '../services';
+import createMiddleware from './conference-signal/create-middleware';
 import rootEpic from './root-epic';
 import rootReducer from './root-reducer';
-import createMiddleware from './signalr/create-middleware';
 import { loadState, persistState } from './storage';
 import { composeEnhancers } from './utils';
 
@@ -16,10 +17,11 @@ export const epicMiddleware = createEpicMiddleware<RootAction, RootAction, RootS
 const reduxPromiseListener = createReduxPromiseListener();
 
 const signalrMiddleware = createMiddleware({
-   getOptions: state => ({
+   getOptions: (state) => ({
       accessTokenFactory: () => (state() as RootState).auth.token!.accessToken,
    }),
    url: '/signalr',
+   prefix: DEFAULT_PREFIX,
 });
 
 // configure middlewares

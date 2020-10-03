@@ -1,9 +1,8 @@
+using Moq;
 using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Dto.UseCaseRequests;
-using PaderConference.Core.Interfaces.Gateways.Repositories;
 using PaderConference.Core.Interfaces.Services;
 using PaderConference.Core.UseCases;
-using Moq;
 using Xunit;
 
 namespace PaderConference.Core.Tests.UseCases
@@ -17,10 +16,13 @@ namespace PaderConference.Core.Tests.UseCases
             var mockUserRepository = new Mock<IUserRepository>();
             mockUserRepository.Setup(repo => repo.FindByName(It.IsAny<string>())).ReturnsAsync(new User("", "", ""));
 
-            mockUserRepository.Setup(repo => repo.CheckPassword(It.IsAny<User>(), It.IsAny<string>())).ReturnsAsync(true);
+            mockUserRepository.Setup(repo => repo.CheckPassword(It.IsAny<User>(), It.IsAny<string>()))
+                .ReturnsAsync(true);
 
             var mockJwtFactory = new Mock<IJwtFactory>();
-            mockJwtFactory.Setup(factory => factory.GenerateEncodedToken(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync("");
+            mockJwtFactory
+                .Setup(factory => factory.GenerateModeratorToken(It.IsAny<string>(), It.IsAny<string>(), TODO))
+                .ReturnsAsync("");
 
             var mockTokenFactory = new Mock<ITokenFactory>();
 
@@ -40,10 +42,13 @@ namespace PaderConference.Core.Tests.UseCases
             var mockUserRepository = new Mock<IUserRepository>();
             mockUserRepository.Setup(repo => repo.FindByName(It.IsAny<string>())).ReturnsAsync(new User("", "", ""));
 
-            mockUserRepository.Setup(repo => repo.CheckPassword(It.IsAny<User>(), It.IsAny<string>())).ReturnsAsync(false);
+            mockUserRepository.Setup(repo => repo.CheckPassword(It.IsAny<User>(), It.IsAny<string>()))
+                .ReturnsAsync(false);
 
             var mockJwtFactory = new Mock<IJwtFactory>();
-            mockJwtFactory.Setup(factory => factory.GenerateEncodedToken(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync("");
+            mockJwtFactory
+                .Setup(factory => factory.GenerateModeratorToken(It.IsAny<string>(), It.IsAny<string>(), TODO))
+                .ReturnsAsync("");
 
             var mockTokenFactory = new Mock<ITokenFactory>();
 
@@ -62,12 +67,15 @@ namespace PaderConference.Core.Tests.UseCases
         {
             // arrange
             var mockUserRepository = new Mock<IUserRepository>();
-            mockUserRepository.Setup(repo => repo.FindByName(It.IsAny<string>())).ReturnsAsync((User)null);
+            mockUserRepository.Setup(repo => repo.FindByName(It.IsAny<string>())).ReturnsAsync((User) null);
 
-            mockUserRepository.Setup(repo => repo.CheckPassword(It.IsAny<User>(), It.IsAny<string>())).ReturnsAsync(true);
+            mockUserRepository.Setup(repo => repo.CheckPassword(It.IsAny<User>(), It.IsAny<string>()))
+                .ReturnsAsync(true);
 
             var mockJwtFactory = new Mock<IJwtFactory>();
-            mockJwtFactory.Setup(factory => factory.GenerateEncodedToken(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync("");
+            mockJwtFactory
+                .Setup(factory => factory.GenerateModeratorToken(It.IsAny<string>(), It.IsAny<string>(), TODO))
+                .ReturnsAsync("");
 
             var mockTokenFactory = new Mock<ITokenFactory>();
 
@@ -86,12 +94,15 @@ namespace PaderConference.Core.Tests.UseCases
         {
             // arrange
             var mockUserRepository = new Mock<IUserRepository>();
-            mockUserRepository.Setup(repo => repo.FindByName(It.IsAny<string>())).ReturnsAsync((User)null);
+            mockUserRepository.Setup(repo => repo.FindByName(It.IsAny<string>())).ReturnsAsync((User) null);
 
-            mockUserRepository.Setup(repo => repo.CheckPassword(It.IsAny<User>(), It.IsAny<string>())).ReturnsAsync(false);
+            mockUserRepository.Setup(repo => repo.CheckPassword(It.IsAny<User>(), It.IsAny<string>()))
+                .ReturnsAsync(false);
 
             var mockJwtFactory = new Mock<IJwtFactory>();
-            mockJwtFactory.Setup(factory => factory.GenerateEncodedToken(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync("");
+            mockJwtFactory
+                .Setup(factory => factory.GenerateModeratorToken(It.IsAny<string>(), It.IsAny<string>(), TODO))
+                .ReturnsAsync("");
 
             var mockTokenFactory = new Mock<ITokenFactory>();
 

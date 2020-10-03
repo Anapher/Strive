@@ -43,7 +43,7 @@ namespace PaderConference.Infrastructure.Conferencing
                 throw new InvalidOperationException($"The conference with id {conferenceId} was not found.");
 
             var participantId = Guid.NewGuid().ToString("N");
-            var participant = new Participant(participantId, displayName, DateTimeOffset.UtcNow);
+            var participant = new Participant(participantId, displayName, DateTimeOffset.UtcNow, conference);
 
             _logger.LogDebug("A new user (display name: {name}) want's to participate in {conferenceId}", displayName,
                 conferenceId);

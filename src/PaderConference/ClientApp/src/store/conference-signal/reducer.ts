@@ -1,4 +1,4 @@
-import { DEFAULT_PREFIX, SIGNALR_CONNECTED, SIGNALR_DISCONNECTED } from './action-types';
+import { DEFAULT_PREFIX, ON_CONFERENCE_JOINED, ON_CONFERENCE_CONNECTION_CLOSED } from './action-types';
 
 interface SignalRState {
    isConnected: boolean;
@@ -8,12 +8,12 @@ const initialState: SignalRState = {
    isConnected: false,
 };
 
-export default function(prefix: string = DEFAULT_PREFIX) {
+export default function (prefix: string = DEFAULT_PREFIX) {
    return (state = initialState, action: any): SignalRState => {
       switch (action.type) {
-         case `${prefix}::${SIGNALR_CONNECTED}`:
+         case `${prefix}::${ON_CONFERENCE_JOINED}`:
             return { ...state, isConnected: true };
-         case `${prefix}::${SIGNALR_DISCONNECTED}`:
+         case `${prefix}::${ON_CONFERENCE_CONNECTION_CLOSED}`:
             return { ...state, isConnected: false };
          default:
             return state;

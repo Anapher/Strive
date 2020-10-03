@@ -9,4 +9,10 @@ declare module 'MyModels' {
       password: string;
       rememberMe: boolean;
    }
+
+   export type AccessToken = {
+      nameid: string;
+      unique_name: string;
+      role: 'mod' | 'usr';
+   };
 }

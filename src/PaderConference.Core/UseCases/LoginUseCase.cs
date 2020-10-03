@@ -41,7 +41,7 @@ namespace PaderConference.Core.UseCases
             //user.AddRefreshToken(refreshToken, message.RemoteIpAddress);
             //await _userRepository.Update(user);
 
-            var accessToken = await _jwtFactory.GenerateEncodedToken("123", "Vincent");
+            var accessToken = await _jwtFactory.GenerateModeratorToken("123", "Vincent@me.de", "Vincent");
 
             return new LoginResponse(accessToken, refreshToken);
         }

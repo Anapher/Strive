@@ -1,7 +1,6 @@
-import { Fab, makeStyles, Typography } from '@material-ui/core';
+import { makeStyles, Typography } from '@material-ui/core';
 import React from 'react';
-import NavigationIcon from '@material-ui/icons/Navigation';
-import AddIcon from '@material-ui/icons/Add';
+import ConferenceControls from 'src/features/conference/components/ConferenceControls';
 
 const useStyles = makeStyles((theme) => ({
    container: {
@@ -26,16 +25,6 @@ const useStyles = makeStyles((theme) => ({
       flexDirection: 'column',
       width: 400,
    },
-   extendedIcon: {
-      marginRight: theme.spacing(1),
-   },
-   fabMargin: {
-      marginTop: theme.spacing(2),
-   },
-   invisible: {
-      opacity: 0,
-      display: 'none',
-   },
 }));
 
 export default function MainRoute() {
@@ -48,14 +37,7 @@ export default function MainRoute() {
                Welcome to PaderConference
             </Typography>
             <div className={classes.buttonContainer}>
-               <Fab color="secondary" variant="extended">
-                  <AddIcon className={classes.extendedIcon} />
-                  Start new conference
-               </Fab>
-               <Fab color="primary" variant="extended" className={classes.fabMargin}>
-                  <NavigationIcon className={classes.extendedIcon} />
-                  Join conference
-               </Fab>
+               <ConferenceControls />
             </div>
          </div>
       </div>

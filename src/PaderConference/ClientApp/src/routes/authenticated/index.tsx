@@ -7,7 +7,7 @@ export default function AuthenticatedRoutes() {
    return (
       <Switch>
          <Route exact path="/" component={MainRoute} />
-         <Route path="/c/" component={ConferenceRoute} />
+         <Route path="/c/:id" component={ConferenceRoute} />
          <Route path="/" render={() => <Redirect to="/" />} />
       </Switch>
    );

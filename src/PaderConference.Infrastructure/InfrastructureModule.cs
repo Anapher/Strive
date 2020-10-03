@@ -4,6 +4,7 @@ using PaderConference.Core.Interfaces.Services;
 using PaderConference.Infrastructure.Auth;
 using PaderConference.Infrastructure.Conferencing;
 using PaderConference.Infrastructure.Interfaces;
+using PaderConference.Infrastructure.Sockets;
 
 namespace PaderConference.Infrastructure
 {
@@ -17,6 +18,7 @@ namespace PaderConference.Infrastructure
             builder.RegisterType<JwtValidator>().As<IJwtValidator>().SingleInstance();
 
             builder.RegisterType<ConferenceManager>().As<IConferenceManager>().SingleInstance();
+            builder.RegisterType<ConnectionMapping>().As<IConnectionMapping>().SingleInstance();
 
             builder.RegisterAssemblyTypes(ThisAssembly).AsClosedTypesOf(typeof(IRepository<>))
                 .AsImplementedInterfaces();

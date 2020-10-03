@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
@@ -22,16 +23,31 @@ namespace PaderConference.Infrastructure.Auth
             ThrowIfInvalidOptions(_jwtOptions);
         }
 
-        public ValueTask<string> GenerateEncodedToken(string id, string email)
+        public ValueTask<string> GenerateModeratorToken(string id, string email, string name)
+        {
+            return GenerateEncodedToken(new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, id),
+                new Claim(ClaimTypes.Name, name),
+                new Claim(ClaimTypes.Role, Constants.Strings.JwtRoles.Moderator),
+                new Claim(ClaimTypes.Email, email)
+            });
+        }
+
+        public ValueTask<string> GenerateUserToken(string name)
+        {
+            return GenerateEncodedToken(new[]
+            {
+                new Claim(ClaimTypes.Name, name),
+                new Claim(ClaimTypes.Role, Constants.Strings.JwtRoles.User)
+            });
+        }
+
+        private ValueTask<string> GenerateEncodedToken(IEnumerable<Claim> claims)
         {
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(new[]
-                {
-                    new Claim(ClaimTypes.Name, id),
-                    new Claim(ClaimTypes.Role, Constants.Strings.JwtRoles.Moderator),
-                    new Claim(ClaimTypes.Email, email)
-                }),
+                Subject = new ClaimsIdentity(claims),
                 Expires = _jwtOptions.Expiration.UtcDateTime,
                 SigningCredentials = _jwtOptions.SigningCredentials,
                 Issuer = _jwtOptions.Issuer,

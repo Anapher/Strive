@@ -1,13 +1,12 @@
-using PaderConference.Infrastructure.Auth;
 using System;
-using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Text;
-using Xunit;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Moq;
+using PaderConference.Infrastructure.Auth;
 using PaderConference.Infrastructure.Interfaces;
-using System.IdentityModel.Tokens.Jwt;
-using Microsoft.Extensions.Options;
+using Xunit;
 
 namespace PaderConference.Infrastructure.Tests.Auth
 {
@@ -23,7 +22,9 @@ namespace PaderConference.Infrastructure.Tests.Auth
             {
                 Issuer = "",
                 Audience = "",
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(Encoding.ASCII.GetBytes("secret_key")), SecurityAlgorithms.HmacSha256)
+                SigningCredentials =
+                    new SigningCredentials(new SymmetricSecurityKey(Encoding.ASCII.GetBytes("secret_key")),
+                        SecurityAlgorithms.HmacSha256)
             };
 
             var mockJwtTokenHandler = new Mock<IJwtHandler>();
@@ -32,7 +33,7 @@ namespace PaderConference.Infrastructure.Tests.Auth
             var jwtFactory = new JwtFactory(mockJwtTokenHandler.Object, Options.Create(jwtIssuerOptions));
 
             // act
-            var result = await jwtFactory.GenerateEncodedToken(id, "userName");
+            var result = await jwtFactory.GenerateModeratorToken(id, "userName", TODO);
 
             // assert
             Assert.Equal(token, result);

@@ -6,10 +6,17 @@ import { BrowserRouter } from 'react-router-dom';
 import AnonymousRoutes from './routes/anonymous';
 import AuthenticatedRoutes from './routes/authenticated';
 import { CssBaseline, createMuiTheme } from '@material-ui/core';
+import { blue, pink } from '@material-ui/core/colors';
 
 const theme = createMuiTheme({
    palette: {
       type: 'dark',
+      primary: {
+         main: blue[500],
+      },
+      secondary: {
+         main: pink[500],
+      },
    },
 });
 

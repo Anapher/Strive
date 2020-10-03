@@ -1,8 +1,7 @@
-import { RootEpic } from 'pader-conference';
 import { AxiosError } from 'axios';
+import { RootEpic } from 'pader-conference';
 import { from, of } from 'rxjs';
-import { catchError, filter, map, mapTo, switchMap } from 'rxjs/operators';
-import * as signalr from 'src/store/signalr';
+import { catchError, filter, map, switchMap } from 'rxjs/operators';
 import toErrorResult from 'src/utils/error-result';
 import { isActionOf } from 'typesafe-actions';
 import * as actions from './actions';
@@ -30,8 +29,3 @@ export const refreshTokenEpic: RootEpic = (action$, _, { api }) =>
          ),
       ),
    );
-
-// its very important that SignalR disconnected on sign out, because when a different user signs in,
-// it might still run with the auth token from the previous user -> very bad
-export const signOutEpic: RootEpic = (action$) =>
-   action$.pipe(filter(isActionOf(actions.signOut)), mapTo(signalr.disconnect()) as any);
