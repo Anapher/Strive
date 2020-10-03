@@ -1,5 +1,0 @@
-language: csharp
-dotnet: 3.0.100-preview5-011568
-script:
-  - dotnet tool install fake-cli -g
-  - fake build
