@@ -25,7 +25,7 @@ const theme = createMuiTheme({
 });
 
 function App() {
-   const isAuthenticated = useSelector<RootState>((state) => state.auth.isAuthenticated);
+   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
 
    return (
       <ThemeProvider theme={theme}>

@@ -5,6 +5,7 @@ import { RouteComponentProps } from 'react-router-dom';
 import ChatBar from 'src/features/chat/components/ChatBar';
 import ConferenceAppBar from 'src/features/conference/components/ConferenceAppBar';
 import ParticipantsList from 'src/features/conference/components/ParticipantsList';
+import Media from 'src/features/media/components/Media';
 import { RootState } from 'src/store';
 import { close, joinConference } from 'src/store/conference-signal/actions';
 import { IRestError } from 'src/utils/error-result';
@@ -59,9 +60,7 @@ function ConferenceRoute({
       params: { id },
    },
 }: Props) {
-   const connected = useSelector<RootState>((state) => state.signalr.isConnected);
-   const error = useSelector<RootState>((state) => state.conference.connectionError) as IRestError | null;
-
+   const error = useSelector((state: RootState) => state.conference.connectionError);
    const dispatch = useDispatch();
 
    useEffect(() => {
@@ -93,7 +92,9 @@ function ConferenceRoute({
             <div className={classes.participants}>
                <ParticipantsList />
             </div>
-            <div className={classes.flex}></div>
+            <div className={classes.flex}>
+               <Media />
+            </div>
             <div className={classes.chat}>
                <ChatBar />
             </div>

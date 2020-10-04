@@ -15,7 +15,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function ParticipantsList() {
-   const participants = useSelector<RootState>((state) => state.conference.participants) as ParticipantDto[] | null;
+   const participants = useSelector((state: RootState) => state.conference.participants);
    const classes = useStyles();
 
    return (

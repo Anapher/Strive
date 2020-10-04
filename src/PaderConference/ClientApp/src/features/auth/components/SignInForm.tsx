@@ -9,7 +9,7 @@ import { signInAsync } from '../signInReducer';
 export default function SignInForm() {
    const dispatch = useDispatch();
 
-   const isLoading = useSelector<RootState>((state) => state.signIn.isLoading);
+   const isLoading = useSelector((state: RootState) => state.signIn.isLoading);
    const { register, handleSubmit, formState } = useForm({ mode: 'onChange' });
 
    const handleSignIn = (dto: SignInRequest) => {

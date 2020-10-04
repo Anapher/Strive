@@ -1,6 +1,7 @@
-import { Typography } from '@material-ui/core';
+import { Box, Typography } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import React from 'react';
+import { Roles } from 'src/consts';
 import { ParticipantDto } from 'src/store/conference-signal/types';
 
 type Props = {
@@ -9,8 +10,10 @@ type Props = {
 
 export default function ParticipantItem({ participant }: Props) {
    return (
-      <div>
-         <Typography>{participant ? participant?.displayName : <Skeleton />}</Typography>
-      </div>
+      <Box mb={1}>
+         <Typography color={participant?.role === Roles.Moderator ? 'secondary' : undefined}>
+            {participant ? participant?.displayName : <Skeleton />}
+         </Typography>
+      </Box>
    );
 }

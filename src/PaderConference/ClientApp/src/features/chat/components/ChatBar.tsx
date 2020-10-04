@@ -21,9 +21,9 @@ const useStyles = makeStyles((theme) => ({
 
 export default function ChatBar() {
    const classes = useStyles();
-   const { chat } = useSelector<RootState>((state) => state.chat) as any;
-   const participants = useSelector<RootState>((state) => state.conference.participants) as any;
-   const connected = useSelector<RootState>((state) => state.signalr.isConnected) as boolean;
+   const { chat } = useSelector((state: RootState) => state.chat);
+   const participants = useSelector((state: RootState) => state.conference.participants);
+   const connected = useSelector((state: RootState) => state.signalr.isConnected);
    const dispatch = useDispatch();
 
    useEffect(() => {

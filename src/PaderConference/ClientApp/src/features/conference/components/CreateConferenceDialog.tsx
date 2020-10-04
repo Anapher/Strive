@@ -15,7 +15,7 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from 'src/store';
 import to from 'src/utils/to';
-import { closeCreateDialog, createConferenceAsync, CreateConferenceState } from '../createConferenceSlice';
+import { closeCreateDialog, createConferenceAsync } from '../createConferenceSlice';
 
 const useStyles = makeStyles({
    conferenceUrlField: {
@@ -29,9 +29,7 @@ function CreateConferenceDialog() {
    const classes = useStyles();
    const dispatch = useDispatch();
 
-   const { dialogOpen, createdConferenceId, isCreating } = useSelector<RootState>(
-      (state) => state.createConference,
-   ) as CreateConferenceState;
+   const { dialogOpen, createdConferenceId, isCreating } = useSelector((state: RootState) => state.createConference);
 
    const handleCreate = () => dispatch(createConferenceAsync({ settings: { allowUsersToUnmute: allowUsersUnmute } }));
    const handleClose = () => dispatch(closeCreateDialog());
