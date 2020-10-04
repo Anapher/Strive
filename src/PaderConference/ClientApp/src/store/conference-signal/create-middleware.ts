@@ -1,5 +1,6 @@
 import { HubConnection, HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
 import { Middleware, MiddlewareAPI } from 'redux';
+import { ErrorCodes } from 'src/utils/errors';
 import * as actions from './actions';
 import { Options } from './types';
 
@@ -25,6 +26,21 @@ export default (options: Options): Middleware => {
                .configureLogging(LogLevel.Information)
                .build();
 
+            connection.on('OnConferenceDoesNotExist', () => {
+               dispatch(
+                  actions.onConferenceJoinFailed({
+                     code: ErrorCodes.ConferenceDoesNotExist,
+                     message: 'The conference does not exist.',
+                     type: 'SignalR',
+                  }),
+               );
+               dispatch(actions.close());
+            });
+
+            connection.on('OnParticipantsUpdated', (args) => {
+               dispatch(actions.onParticipantsUpdated(args));
+            });
+
             try {
                await connection.start();
                connection.onclose((error) => dispatch(actions.onConferenceConnectionClosed(conferenceId, error)));
@@ -33,18 +49,24 @@ export default (options: Options): Middleware => {
 
                dispatch(actions.onConferenceJoined(conferenceId));
             } catch (error) {
-               dispatch(actions.onConferenceJoinFailed(conferenceId, error));
+               dispatch(
+                  actions.onConferenceJoinFailed({
+                     code: ErrorCodes.SignalRConnectionFailed,
+                     message: error.toString(),
+                     type: 'SignalR',
+                  }),
+               );
             }
          }
       },
-      [actions.subscribeEvent.type]: ({ dispatch }, { name }) => {
+      [actions.subscribeEvent.type]: ({ dispatch }, { payload: { name } }) => {
          if (connection) {
-            connection.on(name, (args) => dispatch(actions.onEventOccurred(name)(args.length === 1 ? args[0] : args)));
+            connection.on(name, (args) => dispatch(actions.onEventOccurred(name)(args)));
          }
       },
-      [actions.send.type]: (_, { name, payload }) => {
+      [actions.send.type]: (_, { payload: { payload, name } }) => {
          if (connection) {
-            connection.send(name, ...payload);
+            connection.send(name, ...(payload ? [payload] : []));
          }
       },
       [actions.close.type]: async () => {

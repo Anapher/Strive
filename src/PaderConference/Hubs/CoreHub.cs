@@ -1,5 +1,8 @@
 using System;
+using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
@@ -19,14 +22,16 @@ namespace PaderConference.Hubs
         private readonly IConferenceManager _conferenceManager;
         private readonly IConnectionMapping _connectionMapping;
         private readonly ILogger<CoreHub> _logger;
+        private readonly IMapper _mapper;
 
         public CoreHub(IConferenceManager conferenceManager, IConnectionMapping connectionMapping,
-            IChatManager chatManager, ILogger<CoreHub> logger)
+            IChatManager chatManager, IMapper mapper, ILogger<CoreHub> logger)
         {
             _conferenceManager = conferenceManager;
             _logger = logger;
             _connectionMapping = connectionMapping;
             _chatManager = chatManager;
+            _mapper = mapper;
         }
 
         public override async Task OnConnectedAsync()
@@ -36,6 +41,7 @@ namespace PaderConference.Hubs
             {
                 var conferenceId = httpContext.Request.Query["conferenceId"].ToString();
                 var userId = httpContext.User.GetUserId();
+                var role = httpContext.User.Claims.First(x => x.Type == ClaimTypes.Role).Value;
 
                 _logger.LogDebug(
                     "Client tries to connect (user: {userId}, connectionId: {connectionId}) to conference {conferenceId}",
@@ -45,11 +51,15 @@ namespace PaderConference.Hubs
                 Participant participant;
                 try
                 {
-                    participant = await _conferenceManager.Participate(conferenceId, httpContext.User.Identity.Name);
+                    participant =
+                        await _conferenceManager.Participate(conferenceId, userId, role,
+                            httpContext.User.Identity.Name);
                 }
                 catch (InvalidOperationException)
                 {
                     _logger.LogDebug("Conference {conferenceId} was not found. Abort connection", conferenceId);
+
+                    await Clients.Caller.SendAsync(CoreHubMessages.Response.OnConferenceDoesNotExist);
                     Context.Abort();
                     return;
                 }
@@ -63,9 +73,7 @@ namespace PaderConference.Hubs
                 }
 
                 await Groups.AddToGroupAsync(Context.ConnectionId, conferenceId);
-
-                //await Clients.Client(Context.ConnectionId).SendAsync("Welcome", "");
-                //await Clients.Group(conferenceId).SendAsync("OnUserJoined", "");
+                await UpdateParticipants(participant.Conference);
             }
         }
 
@@ -76,6 +84,8 @@ namespace PaderConference.Hubs
 
             _connectionMapping.Remove(Context.ConnectionId);
             await _conferenceManager.RemoveParticipant(participant);
+
+            await UpdateParticipants(participant.Conference);
         }
 
         public async Task SendChatMessage(SendChatMessageDto message)
@@ -101,5 +111,24 @@ namespace PaderConference.Hubs
             var chat = _chatManager.GetChat(participant.Conference);
             await chat.RequestAllMessages(Context, Clients);
         }
+
+        private async Task UpdateParticipants(Conference conference)
+        {
+            var participants = conference.Participants.Values.Select(_mapper.Map<ParticipantDto>).ToList();
+            await Clients.Group(conference.ConferenceId)
+                .SendAsync(CoreHubMessages.Response.OnParticipantsUpdated, participants);
+        }
+
+        //public async Task RequestParticipants()
+        //{
+        //    if (!_connectionMapping.Connections.TryGetValue(Context.ConnectionId, out var participant))
+        //    {
+        //        _logger.LogWarning("Connection {connectionId} is not mapped to a participant.", Context.ConnectionId);
+        //        return;
+        //    }
+
+        //    var participants = participant.Conference.Participants.Values.Select(_mapper.Map<ParticipantDto>).ToList();
+        //    await Clients.Caller.SendAsync("", participants);
+        //}
     }
 }

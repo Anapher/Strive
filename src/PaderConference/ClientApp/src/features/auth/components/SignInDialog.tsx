@@ -1,8 +1,7 @@
-import { Avatar, Box, Link, Paper, Theme, Typography } from '@material-ui/core';
+import { Avatar, Box, Paper, Theme, Typography } from '@material-ui/core';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import { makeStyles } from '@material-ui/styles';
 import React from 'react';
-import to from 'src/utils/to';
 import SignInForm from './SignInForm';
 
 const useStyles = makeStyles((theme: Theme) => ({

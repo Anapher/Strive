@@ -37,33 +37,32 @@ namespace PaderConference.Infrastructure.Conferencing
             return new ValueTask<Conference>(conference);
         }
 
-        public ValueTask<Participant> Participate(string conferenceId, string? displayName)
-        {
-            if (!Conferences.TryGetValue(conferenceId, out var conference))
-                throw new InvalidOperationException($"The conference with id {conferenceId} was not found.");
-
-            var participantId = Guid.NewGuid().ToString("N");
-            var participant = new Participant(participantId, displayName, DateTimeOffset.UtcNow, conference);
-
-            _logger.LogDebug("A new user (display name: {name}) want's to participate in {conferenceId}", displayName,
-                conferenceId);
-
-            if (!conference.Participants.TryAdd(participantId, participant))
-            {
-                _logger.LogCritical("A participant id ({id}) was generated that already exists. This must not happen.",
-                    participantId);
-                return Participate(conferenceId, displayName);
-            }
-
-            return new ValueTask<Participant>(participant);
-        }
-
         public ValueTask RemoveParticipant(Participant participant)
         {
             var conference = participant.Conference;
             conference.Participants.TryRemove(participant.ParticipantId, out _);
 
             return new ValueTask();
+        }
+
+        public ValueTask<Participant> Participate(string conferenceId, string userId, string role, string? displayName)
+        {
+            if (!Conferences.TryGetValue(conferenceId, out var conference))
+                throw new InvalidOperationException($"The conference with id {conferenceId} was not found.");
+
+            var participant = new Participant(userId, displayName, role, DateTimeOffset.UtcNow, conference);
+
+            _logger.LogDebug("A new user (display name: {name}) want's to participate in {conferenceId}", displayName,
+                conferenceId);
+
+            if (!conference.Participants.TryAdd(userId, participant))
+            {
+                _logger.LogCritical("A participant id ({id}) was generated that already exists. This must not happen.",
+                    userId);
+                return Participate(conferenceId, userId, role, displayName);
+            }
+
+            return new ValueTask<Participant>(participant);
         }
     }
 }

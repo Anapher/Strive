@@ -1,4 +1,6 @@
 import { ActionCreatorWithPayload, createAction } from '@reduxjs/toolkit';
+import { IRestError } from 'src/utils/error-result';
+import { ParticipantDto } from './types';
 
 export const DEFAULT_PREFIX = 'SIGNALR';
 
@@ -25,10 +27,17 @@ export const onConferenceJoined = createAction(`${DEFAULT_PREFIX}::ON_CONFERENCE
    payload: { conferenceId },
 }));
 
+export const onParticipantsUpdated = createAction(
+   `${DEFAULT_PREFIX}::ON_PARTICIPANTS_UPDATED`,
+   (participants?: ParticipantDto[]) => ({
+      payload: participants,
+   }),
+);
+
 export const onConferenceJoinFailed = createAction(
    `${DEFAULT_PREFIX}::ON_CONFERENCE_JOIN_FAILED`,
-   (conferenceId: string, error?: Error) => ({
-      payload: { conferenceId, error },
+   (error?: IRestError) => ({
+      payload: error,
    }),
 );
 

@@ -10,26 +10,11 @@ export default function SignInForm() {
    const dispatch = useDispatch();
 
    const isLoading = useSelector<RootState>((state) => state.signIn.isLoading);
-   const { register, handleSubmit, watch, errors, formState } = useForm({ mode: 'onChange' });
+   const { register, handleSubmit, formState } = useForm({ mode: 'onChange' });
 
    const handleSignIn = (dto: SignInRequest) => {
       dispatch(signInAsync(dto));
    };
-
-   // const signInCallback = useCallback(
-   //    async (values: SignInRequest, formikActions: FormikHelpers<SignInRequest>) => {
-   //       const { setSubmitting } = formikActions;
-   //       try {
-   //          await signInAction!(values);
-   //          // the view will automatically change when the user is authenticated
-   //       } catch (error) {
-   //          applyError(error, formikActions);
-   //       } finally {
-   //          setSubmitting(false);
-   //       }
-   //    },
-   //    [signInAction],
-   // );
 
    return (
       <form noValidate onSubmit={handleSubmit(handleSignIn)}>

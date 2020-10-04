@@ -1,10 +1,11 @@
-import { Box, Divider, IconButton, makeStyles, Paper, Typography, TextField } from '@material-ui/core';
+import { Box, Divider, IconButton, makeStyles, Paper, Typography } from '@material-ui/core';
 import React, { useEffect } from 'react';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
-import SendIcon from '@material-ui/icons/Send';
 import * as actions from '../actions';
 import { RootState } from 'src/store';
 import { useDispatch, useSelector } from 'react-redux';
+import ChatMessageList from './ChatMessageList';
+import SendMessageForm from './SendMessageForm';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -20,7 +21,8 @@ const useStyles = makeStyles((theme) => ({
 
 export default function ChatBar() {
    const classes = useStyles();
-   const chat = useSelector<RootState>((state) => state.chat);
+   const { chat } = useSelector<RootState>((state) => state.chat) as any;
+   const participants = useSelector<RootState>((state) => state.conference.participants) as any;
    const connected = useSelector<RootState>((state) => state.signalr.isConnected) as boolean;
    const dispatch = useDispatch();
 
@@ -32,6 +34,8 @@ export default function ChatBar() {
       }
    }, [connected]);
 
+   const handleSendMessage = (message: string) => dispatch(actions.sendChatMessage({ message }));
+
    return (
       <Paper className={classes.root} elevation={4}>
          <Box display="flex" flexDirection="row" m={1} ml={2} justifyContent="space-between" alignItems="center">
@@ -41,15 +45,11 @@ export default function ChatBar() {
             </IconButton>
          </Box>
          <Divider orientation="horizontal" />
-         <div className={classes.chat}></div>
+         <div className={classes.chat}>
+            <ChatMessageList chat={chat} participants={participants} />
+         </div>
          <Box m={1}>
-            <TextField id="standard-basic" placeholder="Type your message..." fullWidth />
-            <Box display="flex" flexDirection="row" justifyContent="space-between" alignItems="center">
-               <Typography>Vincent</Typography>
-               <IconButton aria-label="options">
-                  <SendIcon fontSize="small" />
-               </IconButton>
-            </Box>
+            <SendMessageForm onSendMessage={handleSendMessage} />
          </Box>
       </Paper>
    );

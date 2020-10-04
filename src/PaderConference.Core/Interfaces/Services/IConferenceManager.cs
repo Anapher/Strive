@@ -10,7 +10,7 @@ namespace PaderConference.Core.Interfaces.Services
 
         ValueTask<Conference> CreateConference(string userId, ConferenceSettings? settings);
 
-        ValueTask<Participant> Participate(string conferenceId, string? displayName);
+        ValueTask<Participant> Participate(string conferenceId, string userId, string role, string? displayName);
 
         ValueTask RemoveParticipant(Participant participant);
     }

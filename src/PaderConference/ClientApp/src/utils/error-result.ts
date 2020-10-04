@@ -23,9 +23,7 @@ export function isServerUnavailable(response: IRequestErrorResponse): boolean {
  * @param response the error response data
  */
 export function isRestError(response: any | IRestError): response is IRestError {
-   return (
-      response.code !== undefined && response.message !== undefined && response.type !== undefined
-   );
+   return response.code !== undefined && response.message !== undefined && response.type !== undefined;
 }
 
 /**
@@ -47,9 +45,9 @@ export function toString(error: IRequestErrorResponse): string {
    }
 
    if (response.type === 'ValidationError') {
-      return `The server responded with validation errors. Invalid fields: ${Object.keys(
-         response.fields!,
-      ).join(', ')}.`;
+      return `The server responded with validation errors. Invalid fields: ${Object.keys(response.fields!).join(
+         ', ',
+      )}.`;
    }
 
    return `${response.message} (code: ${response.code})`;
@@ -60,7 +58,7 @@ export function toString(error: IRequestErrorResponse): string {
  */
 export interface IRestError {
    /** the type of the error */
-   type: 'ValidationError';
+   type: string;
 
    /** a human readable error message */
    message: string;
@@ -69,7 +67,7 @@ export interface IRestError {
    code: number;
 
    /** fields that are responsible for this error including a more specific description about the error state */
-   fields?: {};
+   fields?: { [s: string]: string };
 }
 
 /**

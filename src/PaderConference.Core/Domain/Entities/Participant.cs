@@ -1,13 +1,16 @@
 ﻿using System;
+using System.Collections.Immutable;
 
 namespace PaderConference.Core.Domain.Entities
 {
     public class Participant
     {
-        public Participant(string participantId, string? displayName, DateTimeOffset timestamp, Conference conference)
+        public Participant(string participantId, string? displayName, string role, DateTimeOffset timestamp,
+            Conference conference)
         {
             ParticipantId = participantId;
             DisplayName = displayName;
+            Role = role;
             Timestamp = timestamp;
             Conference = conference;
         }
@@ -17,6 +20,11 @@ namespace PaderConference.Core.Domain.Entities
         public string ParticipantId { get; }
 
         public string? DisplayName { get; }
+
+        public string Role { get; }
+
+        public IImmutableDictionary<string, string> Attributes { get; set; } =
+            ImmutableDictionary<string, string>.Empty;
 
         public DateTimeOffset Timestamp { get; }
 
