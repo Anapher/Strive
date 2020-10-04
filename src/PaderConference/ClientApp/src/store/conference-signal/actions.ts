@@ -1,81 +1,60 @@
-import {
-   CONFERENCE_JOIN,
-   ON_CONFERENCE_JOINED,
-   DEFAULT_PREFIX,
-   ON_CONFERENCE_JOIN_FAILED,
-   ON_CONFERENCE_CONNECTION_CLOSED,
-   ON_CONFERENCE_RECONNECTING,
-   ON_CONFERENCE_RECONNECTED,
-   SUBSCRIBE_EVENT,
-   CLOSE,
-   SEND,
-} from './action-types';
+import { ActionCreatorWithPayload, createAction } from '@reduxjs/toolkit';
+
+export const DEFAULT_PREFIX = 'SIGNALR';
 
 // Action creators for user dispatched actions. These actions are all optionally
 // prefixed.
 
-/**
- * Join a conference
- * @param conferenceId The conference that should be joined
- * @param prefix The prefix of the SignalR middleware this action is intend for
- */
-export const joinConference = (conferenceId: string, prefix?: string) =>
-   buildAction(`${prefix || DEFAULT_PREFIX}::${CONFERENCE_JOIN}`, { conferenceId });
+export const joinConference = createAction(`${DEFAULT_PREFIX}::JOIN_CONFERENCE`, (conferenceId: string) => ({
+   payload: { conferenceId },
+}));
 
-export const subscribeEvent = (name: string, prefix?: string) =>
-   buildAction(`${prefix || DEFAULT_PREFIX}::${SUBSCRIBE_EVENT}`, { name });
+export const subscribeEvent = createAction(`${DEFAULT_PREFIX}::SUBSCRIBE_EVENT`, (name: string) => ({
+   payload: { name },
+}));
 
-export const send = (name: string, payload?: any, prefix?: string) =>
-   buildAction(`${prefix || DEFAULT_PREFIX}::${SEND}`, { name, payload });
+export const send = createAction(`${DEFAULT_PREFIX}::SEND`, (name: string, payload?: any) => ({
+   payload: { name, payload },
+}));
 
-export const close = (prefix?: string) => buildAction(`${prefix || DEFAULT_PREFIX}::${CLOSE}`);
+export const close = createAction(`${DEFAULT_PREFIX}::CLOSE`);
 
 // Events
 
-export const onConferenceJoined = (conferenceId: string, prefix?: string) =>
-   buildAction(`${prefix || DEFAULT_PREFIX}::${ON_CONFERENCE_JOINED}`, { conferenceId });
+export const onConferenceJoined = createAction(`${DEFAULT_PREFIX}::ON_CONFERENCE_JOINED`, (conferenceId: string) => ({
+   payload: { conferenceId },
+}));
 
-export const onConferenceJoinFailed = (conferenceId: string, error?: Error, prefix?: string) =>
-   buildAction(`${prefix || DEFAULT_PREFIX}::${ON_CONFERENCE_JOIN_FAILED}`, { conferenceId, error });
+export const onConferenceJoinFailed = createAction(
+   `${DEFAULT_PREFIX}::ON_CONFERENCE_JOIN_FAILED`,
+   (conferenceId: string, error?: Error) => ({
+      payload: { conferenceId, error },
+   }),
+);
 
-export const onConferenceConnectionClosed = (conferenceId: string, error?: Error, prefix?: string) =>
-   buildAction(`${prefix || DEFAULT_PREFIX}::${ON_CONFERENCE_CONNECTION_CLOSED}`, { conferenceId, error });
+export const onConferenceConnectionClosed = createAction(
+   `${DEFAULT_PREFIX}::ON_CONFERENCE_CONNECTION_CLOSED`,
+   (conferenceId: string, error?: Error) => ({
+      payload: { conferenceId, error },
+   }),
+);
 
-export const onConferenceReconnecting = (conferenceId: string, error?: Error, prefix?: string) =>
-   buildAction(`${prefix || DEFAULT_PREFIX}::${ON_CONFERENCE_RECONNECTING}`, { conferenceId, error });
+export const onConferenceReconnecting = createAction(
+   `${DEFAULT_PREFIX}::ON_CONFERENCE_RECONNECTING`,
+   (conferenceId: string, error?: Error) => ({
+      payload: { conferenceId, error },
+   }),
+);
 
-export const onConferenceReconnected = (conferenceId: string, error?: Error, prefix?: string) =>
-   buildAction(`${prefix || DEFAULT_PREFIX}::${ON_CONFERENCE_RECONNECTED}`, { conferenceId, error });
+export const onConferenceReconnected = createAction(
+   `${DEFAULT_PREFIX}::ON_CONFERENCE_RECONNECTED`,
+   (conferenceId: string, error?: Error) => ({
+      payload: { conferenceId, error },
+   }),
+);
 
-export const onEventOccurred = (name: string, payload: any, prefix?: string) =>
-   buildAction(`${prefix || DEFAULT_PREFIX}::ON_${name}`, payload);
-
-/**
- * Create an FSA compliant action.
- *
- * @param {string} actionType
- * @param {T} payload
- *
- * @returns {BuiltAction<T>}
- */
-function buildAction<T>(actionType: string, payload?: T, meta?: any): BuiltAction<T> {
-   const base = {
-      type: actionType,
-      meta: {
-         timestamp: new Date(),
-         ...meta,
-      },
-      // Mixin the `error` key if the payload is an Error.
-      ...(payload instanceof Error ? { error: true } : null),
-   };
-
-   return payload ? { ...base, payload } : base;
+export function onEventOccurred<T>(eventName: string): ActionCreatorWithPayload<T, string> {
+   return createAction(`${DEFAULT_PREFIX}::ON_${eventName}`, (payload: T) => ({
+      payload,
+   }));
 }
-
-type BuiltAction<T> = {
-   type: string;
-   meta: {
-      timestamp: Date;
-   };
-   payload?: T;
-};

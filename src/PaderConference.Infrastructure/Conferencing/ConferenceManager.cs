@@ -57,5 +57,13 @@ namespace PaderConference.Infrastructure.Conferencing
 
             return new ValueTask<Participant>(participant);
         }
+
+        public ValueTask RemoveParticipant(Participant participant)
+        {
+            var conference = participant.Conference;
+            conference.Participants.TryRemove(participant.ParticipantId, out _);
+
+            return new ValueTask();
+        }
     }
 }

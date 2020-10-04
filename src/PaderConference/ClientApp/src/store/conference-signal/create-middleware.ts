@@ -1,12 +1,10 @@
 import { HubConnection, HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
 import { Middleware, MiddlewareAPI } from 'redux';
-import * as actionTypes from './action-types';
 import * as actions from './actions';
 import { Options } from './types';
 
 export default (options: Options): Middleware => {
-   const { prefix, url } = options;
-   const actionPrefixExp = RegExp(`^${prefix}::`);
+   const { url } = options;
 
    let connection: HubConnection | undefined;
 
@@ -14,15 +12,15 @@ export default (options: Options): Middleware => {
    const handlers: {
       [s: string]: (middleware: MiddlewareAPI, action: any) => void;
    } = {
-      [actionTypes.CONFERENCE_JOIN]: async ({ dispatch }, action) => {
-         const conferenceId: string = action.conferenceId;
+      [actions.joinConference.type]: async ({ dispatch, getState }, action) => {
+         const conferenceId: string = action.payload.conferenceId;
 
          if (!connection) {
-            const conferenceUrl = new URL(url);
-            conferenceUrl.searchParams.append('conferenceId', conferenceId);
+            const conferenceUrl =
+               url + `?access_token=${options.getAccessToken(getState())}&conferenceId=${conferenceId}`;
 
             connection = new HubConnectionBuilder()
-               .withUrl(conferenceUrl.toString())
+               .withUrl(conferenceUrl)
                .withAutomaticReconnect()
                .configureLogging(LogLevel.Information)
                .build();
@@ -39,17 +37,17 @@ export default (options: Options): Middleware => {
             }
          }
       },
-      [actionTypes.SUBSCRIBE_EVENT]: ({ dispatch }, { name }) => {
+      [actions.subscribeEvent.type]: ({ dispatch }, { name }) => {
          if (connection) {
-            connection.on(name, (args) => dispatch(actions.onEventOccurred(name, args.length === 1 ? args[0] : args)));
+            connection.on(name, (args) => dispatch(actions.onEventOccurred(name)(args.length === 1 ? args[0] : args)));
          }
       },
-      [actionTypes.SEND]: (_, { name, payload }) => {
+      [actions.send.type]: (_, { name, payload }) => {
          if (connection) {
             connection.send(name, ...payload);
          }
       },
-      [actionTypes.CLOSE]: async () => {
+      [actions.close.type]: async () => {
          if (connection) {
             await connection.stop();
             connection = undefined;
@@ -62,9 +60,8 @@ export default (options: Options): Middleware => {
       const { type: actionType } = action;
 
       // Check if action type matches prefix
-      if (actionType && actionType.match(actionPrefixExp)) {
-         const baseActionType = action.type.replace(actionPrefixExp, '');
-         const handler = handlers[baseActionType];
+      if (actionType) {
+         const handler = handlers[actionType];
 
          if (handler) {
             try {

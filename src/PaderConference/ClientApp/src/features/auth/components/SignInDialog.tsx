@@ -33,12 +33,6 @@ export default function SignInDialog() {
          <Box mt={2}>
             <SignInForm />
          </Box>
-
-         <Box mt={2}>
-            <Typography>
-               <Link {...to('/register')}>Register here</Link>
-            </Typography>
-         </Box>
       </Paper>
    );
 }

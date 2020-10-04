@@ -1,6 +1,6 @@
 import _ from 'lodash';
-import { RootState } from 'pader-conference';
 import { Store } from 'redux';
+import { RootState } from '.';
 
 const storageKey = 'state';
 

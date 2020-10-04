@@ -8,6 +8,6 @@ declare module 'MyModels' {
    };
 
    export type StartConferenceResponseDto = {
-      conferenceId?: string;
+      conferenceId: string;
    };
 }

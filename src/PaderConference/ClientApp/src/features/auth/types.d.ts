@@ -4,9 +4,8 @@ declare module 'MyModels' {
       refreshToken: string;
    }>;
 
-   export interface SignInRequest {
-      userName: string;
-      password: string;
+   export interface SignInResponse {
+      accessInfo: AccessInfo;
       rememberMe: boolean;
    }
 
@@ -14,5 +13,11 @@ declare module 'MyModels' {
       nameid: string;
       unique_name: string;
       role: 'mod' | 'usr';
+   };
+
+   export type SignInRequest = {
+      userName: string;
+      password: string;
+      rememberMe: boolean;
    };
 }

@@ -1,7 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
-import { StoreContext } from 'redux-react-hook';
 import 'typeface-roboto';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
@@ -12,9 +11,7 @@ configure(store);
 
 ReactDOM.render(
    <Provider store={store}>
-      <StoreContext.Provider value={store}>
-         <App />
-      </StoreContext.Provider>
+      <App />
    </Provider>,
    document.getElementById('root'),
 );

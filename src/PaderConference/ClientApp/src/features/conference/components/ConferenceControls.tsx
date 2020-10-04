@@ -1,10 +1,9 @@
 import { Fab, makeStyles } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import NavigationIcon from '@material-ui/icons/Navigation';
-import { RootState } from 'pader-conference';
 import React from 'react';
-import { connect } from 'react-redux';
-import * as actions from '../actions';
+import { useDispatch } from 'react-redux';
+import { openCreateDialog } from '../createConferenceSlice';
 import CreateConferenceDialog from './CreateConferenceDialog';
 
 const useStyles = makeStyles((theme) => ({
@@ -16,22 +15,15 @@ const useStyles = makeStyles((theme) => ({
    },
 }));
 
-const mapStateToProps = (state: RootState) => ({
-   user: state.auth.token?.accessToken,
-});
-
-const dispatchProps = {
-   openCreateDialog: actions.openCreateDialog,
-};
-
-type Props = ReturnType<typeof mapStateToProps> & typeof dispatchProps;
-
-function ConferenceControls({ openCreateDialog }: Props) {
+function ConferenceControls() {
    const classes = useStyles();
+   const dispatch = useDispatch();
+
+   const handleCreateConference = () => dispatch(openCreateDialog());
 
    return (
       <>
-         <Fab color="secondary" variant="extended" onClick={openCreateDialog}>
+         <Fab color="secondary" variant="extended" onClick={handleCreateConference}>
             <AddIcon className={classes.extendedIcon} />
             Start new conference
          </Fab>
@@ -45,4 +37,4 @@ function ConferenceControls({ openCreateDialog }: Props) {
    );
 }
 
-export default connect(mapStateToProps, dispatchProps)(ConferenceControls);
+export default ConferenceControls;

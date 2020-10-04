@@ -11,10 +11,11 @@ import {
    Switch,
    TextField,
 } from '@material-ui/core';
-import { RootState } from 'pader-conference';
 import React, { useState } from 'react';
-import { connect } from 'react-redux';
-import * as actions from '../actions';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from 'src/store';
+import to from 'src/utils/to';
+import { closeCreateDialog, createConferenceAsync, CreateConferenceState } from '../createConferenceSlice';
 
 const useStyles = makeStyles({
    conferenceUrlField: {
@@ -23,39 +24,40 @@ const useStyles = makeStyles({
    },
 });
 
-const mapStateToProps = (state: RootState) => ({
-   open: state.conference.createDialogOpen,
-   loading: state.conference.isCreatingConference,
-   createdConference: state.conference.createdConferenceId,
-});
-
-const dispatchProps = {
-   createConference: actions.createConferenceAsync.request,
-   onClose: actions.closeCreateDialog,
-};
-
-type Props = ReturnType<typeof mapStateToProps> & typeof dispatchProps;
-
-function CreateConferenceDialog({ open, loading, createdConference, createConference, onClose }: Props) {
+function CreateConferenceDialog() {
    const [allowUsersUnmute, setAllowUsersUnmute] = useState(true);
-   const handleCreate = () => createConference({ settings: { allowUsersToUnmute: allowUsersUnmute } });
-
    const classes = useStyles();
+   const dispatch = useDispatch();
+
+   const { dialogOpen, createdConferenceId, isCreating } = useSelector<RootState>(
+      (state) => state.createConference,
+   ) as CreateConferenceState;
+
+   const handleCreate = () => dispatch(createConferenceAsync({ settings: { allowUsersToUnmute: allowUsersUnmute } }));
+   const handleClose = () => dispatch(closeCreateDialog());
 
    return (
-      <Dialog open={open} onClose={onClose} aria-labelledby="start-conference-dialog-title" fullWidth maxWidth="sm">
+      <Dialog
+         open={dialogOpen}
+         onClose={handleClose}
+         aria-labelledby="start-conference-dialog-title"
+         fullWidth
+         maxWidth="sm"
+      >
          <DialogTitle id="start-conference-dialog-title">Start a new conference</DialogTitle>
          <DialogContent>
-            {!createdConference ? (
+            {createdConferenceId ? (
                <Box display="flex" flexDirection="row" alignItems="center">
                   <TextField
                      variant="outlined"
                      label="Conference Url"
                      InputProps={{ readOnly: true }}
-                     value={createdConference}
+                     value={new URL('/c/' + createdConferenceId, document.baseURI).href}
                      className={classes.conferenceUrlField}
                   />
-                  <Button variant="contained">Join</Button>
+                  <Button variant="contained" {...to('/c/' + createdConferenceId)} color="primary">
+                     Join
+                  </Button>
                </Box>
             ) : (
                <FormControlLabel
@@ -72,18 +74,18 @@ function CreateConferenceDialog({ open, loading, createdConference, createConfer
             )}
          </DialogContent>
          <DialogActions>
-            <Button autoFocus onClick={onClose} color="primary" disabled={loading}>
-               {createdConference ? 'Close' : 'Cancel'}
+            <Button autoFocus onClick={handleClose} color="primary" disabled={isCreating}>
+               {createdConferenceId ? 'Close' : 'Cancel'}
             </Button>
-            {!createdConference && (
-               <Button onClick={handleCreate} color="primary" autoFocus disabled={loading}>
+            {!createdConferenceId && (
+               <Button onClick={handleCreate} color="primary" autoFocus disabled={isCreating}>
                   Start
                </Button>
             )}
          </DialogActions>
-         {loading && <LinearProgress />}
+         {isCreating && <LinearProgress />}
       </Dialog>
    );
 }
 
-export default connect(mapStateToProps, dispatchProps)(CreateConferenceDialog);
+export default CreateConferenceDialog;

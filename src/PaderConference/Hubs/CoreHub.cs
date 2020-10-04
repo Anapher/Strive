@@ -69,6 +69,15 @@ namespace PaderConference.Hubs
             }
         }
 
+        public override async Task OnDisconnectedAsync(Exception exception)
+        {
+            if (!_connectionMapping.Connections.TryGetValue(Context.ConnectionId, out var participant))
+                return;
+
+            _connectionMapping.Remove(Context.ConnectionId);
+            await _conferenceManager.RemoveParticipant(participant);
+        }
+
         public async Task SendChatMessage(SendChatMessageDto message)
         {
             if (!_connectionMapping.Connections.TryGetValue(Context.ConnectionId, out var participant))

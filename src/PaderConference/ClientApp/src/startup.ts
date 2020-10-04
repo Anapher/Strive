@@ -1,15 +1,14 @@
 // Everything defined in this class runs at the startup of the application, after the store is initialized
 // Initialization code goes here
-
-import { RootState } from 'pader-conference';
 import Axios, { AxiosError } from 'axios';
 import _ from 'lodash';
 import { AccessInfo } from 'MyModels';
 import { Store } from 'redux';
-import * as actions from './features/auth/actions';
+import { refreshToken } from './features/auth/authSlice';
+import { RootState } from './store';
 
 export default function configure(store: Store) {
-   [new AxiosService()].forEach(x => x.configure(store));
+   [new AxiosService()].forEach((x) => x.configure(store));
 }
 
 interface IServiceConfigurer {
@@ -41,7 +40,7 @@ class AxiosService implements IServiceConfigurer {
       });
 
       Axios.interceptors.response.use(
-         succeeded => succeeded,
+         (succeeded) => succeeded,
          (error: AxiosError) => {
             const { config, response } = error;
             if (!response || !config.url) {
@@ -49,7 +48,7 @@ class AxiosService implements IServiceConfigurer {
             }
 
             if (config.url.endsWith('auth/refreshtoken')) {
-               this.requestsAwaitingAccess.forEach(x => x.reject());
+               this.requestsAwaitingAccess.forEach((x) => x.reject());
                this.requestsAwaitingAccess = [];
                this.isRefreshingAccess = false;
                this.access = null;
@@ -62,7 +61,7 @@ class AxiosService implements IServiceConfigurer {
             if (status === 401 && this.access !== null) {
                if (!this.isRefreshingAccess) {
                   this.isRefreshingAccess = true;
-                  store.dispatch(actions.refreshTokenAsync.request(this.access));
+                  store.dispatch(refreshToken(this.access) as any);
                }
 
                const retryRequest = new Promise((resolve, reject) => {
@@ -84,7 +83,7 @@ class AxiosService implements IServiceConfigurer {
    }
 
    protected updateToken() {
-      if (this.access === null) {
+      if (!this.access) {
          // sign out
          delete Axios.defaults.headers.common;
          return;
@@ -94,7 +93,7 @@ class AxiosService implements IServiceConfigurer {
          Authorization: `Bearer ${this.access.accessToken}`,
       };
 
-      this.requestsAwaitingAccess.forEach(x => x.resolve());
+      this.requestsAwaitingAccess.forEach((x) => x.resolve());
       this.requestsAwaitingAccess = [];
       this.isRefreshingAccess = false;
    }

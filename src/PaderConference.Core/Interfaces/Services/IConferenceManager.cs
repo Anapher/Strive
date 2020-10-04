@@ -11,5 +11,7 @@ namespace PaderConference.Core.Interfaces.Services
         ValueTask<Conference> CreateConference(string userId, ConferenceSettings? settings);
 
         ValueTask<Participant> Participate(string conferenceId, string? displayName);
+
+        ValueTask RemoveParticipant(Participant participant);
     }
 }

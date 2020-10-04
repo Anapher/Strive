@@ -1,12 +1,12 @@
+import { createMuiTheme, CssBaseline } from '@material-ui/core';
+import { blue, pink } from '@material-ui/core/colors';
 import { ThemeProvider } from '@material-ui/styles';
-import { RootState } from 'pader-conference';
 import React from 'react';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
 import AnonymousRoutes from './routes/anonymous';
 import AuthenticatedRoutes from './routes/authenticated';
-import { CssBaseline, createMuiTheme } from '@material-ui/core';
-import { blue, pink } from '@material-ui/core/colors';
+import { RootState } from './store';
 
 const theme = createMuiTheme({
    palette: {
@@ -17,14 +17,16 @@ const theme = createMuiTheme({
       secondary: {
          main: pink[500],
       },
+      background: {
+         default: '#242424',
+         paper: '#383838',
+      },
    },
 });
 
-const mapStateToProps = (state: RootState) => ({ isAuthenticated: state.auth.isAuthenticated });
+function App() {
+   const isAuthenticated = useSelector<RootState>((state) => state.auth.isAuthenticated);
 
-type Props = ReturnType<typeof mapStateToProps>;
-
-function App({ isAuthenticated }: Props) {
    return (
       <ThemeProvider theme={theme}>
          <CssBaseline />
@@ -33,4 +35,4 @@ function App({ isAuthenticated }: Props) {
    );
 }
 
-export default connect(mapStateToProps)(App);
+export default App;
