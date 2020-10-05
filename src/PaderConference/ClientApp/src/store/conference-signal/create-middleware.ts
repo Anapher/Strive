@@ -1,4 +1,5 @@
 import { HubConnection, HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
+import { PayloadAction } from '@reduxjs/toolkit';
 import { Middleware, MiddlewareAPI } from 'redux';
 import { ErrorCodes } from 'src/utils/errors';
 import * as actions from './actions';
@@ -61,6 +62,7 @@ export default (options: Options): Middleware => {
       },
       [actions.subscribeEvent.type]: ({ dispatch }, { payload: { name } }) => {
          if (connection) {
+            console.log('subscribe ' + name);
             connection.on(name, (args) => dispatch(actions.onEventOccurred(name)(args)));
          }
       },
@@ -78,12 +80,12 @@ export default (options: Options): Middleware => {
    };
 
    // Middleware function.
-   return (store: MiddlewareAPI) => (next) => (action: any) => {
-      const { type: actionType } = action;
+   return (store: MiddlewareAPI) => (next) => (action: PayloadAction) => {
+      const { type } = action;
 
       // Check if action type matches prefix
-      if (actionType) {
-         const handler = handlers[actionType];
+      if (type) {
+         const handler = handlers[type];
 
          if (handler) {
             try {

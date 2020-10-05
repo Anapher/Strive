@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using PaderConference.Core.Dto.UseCaseRequests;
 using PaderConference.Core.Dto.UseCaseResponses;
@@ -10,6 +11,14 @@ namespace PaderConference.Core.UseCases
 {
     public class LoginUseCase : UseCaseStatus<LoginResponse>, ILoginUseCase
     {
+        private static readonly IReadOnlyDictionary<string, (string, int)> UserDb =
+            new Dictionary<string, (string, int)>
+            {
+                {
+                    "Vincent", ("123", 1)
+                }
+            };
+
         private readonly IJwtFactory _jwtFactory;
         private readonly ITokenFactory _tokenFactory;
 
@@ -25,23 +34,33 @@ namespace PaderConference.Core.UseCases
                 return ReturnError(
                     new FieldValidationError(nameof(message.UserName), "The username must not be empty."));
 
-            if (string.IsNullOrEmpty(message.Password))
-                return ReturnError(
-                    new FieldValidationError(nameof(message.Password), "The password must not be empty."));
+            string accessToken;
+            if (message.IsGuestAuth)
+            {
+                accessToken = await _jwtFactory.GenerateUserToken(message.UserName);
+            }
+            else
+            {
+                if (string.IsNullOrEmpty(message.Password))
+                    return ReturnError(
+                        new FieldValidationError(nameof(message.Password), "The password must not be empty."));
 
-            //var user = await _userRepository.FindByName(message.UserName);
-            //if (user == null)
-            //    return ReturnError(AuthenticationError.UserNotFound.SetField(nameof(message.UserName)));
+                if (!UserDb.TryGetValue(message.UserName!, out var userData))
+                    return ReturnError(AuthenticationError.UserNotFound.SetField(nameof(message.UserName)));
 
-            //if (!await _userRepository.CheckPassword(user, message.Password))
-            //    return ReturnError(new AuthenticationError("The password is invalid.", ErrorCode.InvalidPassword).SetField(nameof(message.Password)));
+                var (password, userId) = userData;
+
+                if (message.Password != password)
+                    return ReturnError(
+                        new AuthenticationError("The password is invalid.", ErrorCode.InvalidPassword).SetField(
+                            nameof(message.Password)));
+
+                accessToken =
+                    await _jwtFactory.GenerateModeratorToken(userId.ToString(), "Vincent@me.de", message.UserName);
+            }
 
             //// generate refresh token
             var refreshToken = _tokenFactory.GenerateToken();
-            //user.AddRefreshToken(refreshToken, message.RemoteIpAddress);
-            //await _userRepository.Update(user);
-
-            var accessToken = await _jwtFactory.GenerateModeratorToken("123", "Vincent@me.de", "Vincent");
 
             return new LoginResponse(accessToken, refreshToken);
         }

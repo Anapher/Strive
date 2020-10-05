@@ -10,6 +10,14 @@ export async function signIn(userName: string, password: string): Promise<Access
    return response.data;
 }
 
+export async function signInGuest(displayName: string): Promise<AccessInfo> {
+   const response = await Axios.post<AccessInfo>('/api/v1/auth/guest', {
+      displayName,
+   });
+
+   return response.data;
+}
+
 export async function refreshToken(access: AccessInfo): Promise<AccessInfo> {
    const response = await Axios.post<AccessInfo>('/api/v1/auth/refreshtoken', access);
    return response.data;

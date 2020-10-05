@@ -8,50 +8,50 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using PaderConference.Core.Domain.Entities;
 using PaderConference.Hubs.Chat.Filters;
-using PaderConference.Infrastructure.Sockets;
 using PaderConference.Models.Signal;
 
 namespace PaderConference.Hubs.Chat
 {
-    public class ConferenceChat
+    public class ChatService : IConferenceService
     {
         private readonly Conference _conference;
-        private readonly IConnectionMapping _connectionMapping;
-        private readonly ILogger<ConferenceChat> _logger;
+        private readonly ILogger<ChatService> _logger;
         private readonly IMapper _mapper;
         private readonly Queue<ChatMessage> _messages = new Queue<ChatMessage>();
         private readonly ReaderWriterLock _messagesLock = new ReaderWriterLock();
         private int _messageIdCounter = 1;
 
-        public ConferenceChat(Conference conference, IConnectionMapping connectionMapping, IMapper mapper,
-            ILogger<ConferenceChat> logger)
+        public ChatService(Conference conference, IMapper mapper,
+            ILogger<ChatService> logger)
         {
             _conference = conference;
-            _connectionMapping = connectionMapping;
             _mapper = mapper;
             _logger = logger;
         }
 
-        public async ValueTask SendMessage(SendChatMessageDto message, HubCallerContext context,
-            IHubCallerClients clients)
+        public ValueTask DisposeAsync()
         {
-            if (!_connectionMapping.Connections.TryGetValue(context.ConnectionId, out var participant))
-            {
-                _logger.LogWarning(
-                    "A connection {connectionId} tried to sent a chat message but is not associated with a conference.",
-                    context.ConnectionId);
-                throw new InvalidOperationException("Not associated to a conference");
-            }
+            return new ValueTask();
+        }
 
-            if (message.Message == null)
+        public ValueTask OnClientDisconnected(Participant participant)
+        {
+            return new ValueTask();
+        }
+
+        public async ValueTask SendMessage(IServiceMessage<SendChatMessageDto> message)
+        {
+            var messageDto = message.Payload;
+
+            if (messageDto.Message == null)
                 throw new InvalidOperationException("Null message not allowed");
 
             // here would be the point to implement e. g. language filter
 
-            if (message.Filter != null && message.Filter.Exclude == null && message.Filter.Include == null)
+            if (messageDto.Filter != null && messageDto.Filter.Exclude == null && messageDto.Filter.Include == null)
                 return; // the message would be sent to nobody
 
-            var filter = FilterFactory.CreateFilter(message.Filter, context.ConnectionId);
+            var filter = FilterFactory.CreateFilter(messageDto.Filter, message.Context.ConnectionId);
             if (!_conference.Settings.Chat.AllowPrivateConversation && !(filter is AtAllFilter))
                 return; // reject
 
@@ -61,7 +61,7 @@ namespace PaderConference.Hubs.Chat
             try
             {
                 chatMessage =
-                    new ChatMessage(_messageIdCounter++, participant.ParticipantId, message.Message, filter,
+                    new ChatMessage(_messageIdCounter++, message.Participant.ParticipantId, messageDto.Message, filter,
                         DateTimeOffset.UtcNow);
 
                 _messages.Enqueue(chatMessage);
@@ -76,25 +76,25 @@ namespace PaderConference.Hubs.Chat
             }
 
             var dto = _mapper.Map<ChatMessageDto>(chatMessage);
-            await chatMessage.Filter.SendTo(clients, participant.Conference.ConferenceId)
+            await chatMessage.Filter.SendTo(message.Clients, message.Participant.Conference.ConferenceId)
                 .SendAsync(CoreHubMessages.Response.ChatMessage, dto);
         }
 
-        public async ValueTask RequestAllMessages(HubCallerContext context, IHubCallerClients clients)
+        public async ValueTask RequestAllMessages(IServiceMessage message)
         {
             List<ChatMessage> messages;
 
             _messagesLock.AcquireReaderLock(Timeout.Infinite);
             try
             {
-                messages = _messages.Where(x => x.Filter.ShowMessageTo(context.ConnectionId)).ToList(); // copy
+                messages = _messages.Where(x => x.Filter.ShowMessageTo(message.Context.ConnectionId)).ToList(); // copy
             }
             finally
             {
                 _messagesLock.ReleaseReaderLock();
             }
 
-            await clients.Caller.SendAsync(CoreHubMessages.Response.Chat,
+            await message.Clients.Caller.SendAsync(CoreHubMessages.Response.Chat,
                 messages.Select(_mapper.Map<ChatMessageDto>).ToList());
         }
     }

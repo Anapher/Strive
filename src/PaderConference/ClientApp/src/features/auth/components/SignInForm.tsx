@@ -9,7 +9,8 @@ import { signInAsync } from '../signInReducer';
 export default function SignInForm() {
    const dispatch = useDispatch();
 
-   const isLoading = useSelector((state: RootState) => state.signIn.isLoading);
+   const isLoading = useSelector((state: RootState) => state.signIn.isSigningIn);
+   const isGuestLoading = useSelector((state: RootState) => state.signIn.isSigningInGuest);
    const { register, handleSubmit, formState } = useForm({ mode: 'onChange' });
 
    const handleSignIn = (dto: SignInRequest) => {
@@ -53,7 +54,7 @@ export default function SignInForm() {
                      type="submit"
                      fullWidth
                      variant="contained"
-                     disabled={!formState.isValid || !formState.isDirty}
+                     disabled={!formState.isValid || !formState.isDirty || isGuestLoading}
                      color="primary"
                   >
                      Sign in

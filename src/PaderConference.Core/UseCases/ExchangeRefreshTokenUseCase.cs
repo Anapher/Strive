@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using PaderConference.Core.Dto.UseCaseRequests;
 using PaderConference.Core.Dto.UseCaseResponses;
@@ -30,22 +31,24 @@ namespace PaderConference.Core.UseCases
                 // invalid token/signing key was passed and we can't extract user claims
                 return ReturnError(AuthenticationError.InvalidToken);
 
-            var id = claimsPrincipal.Claims.First(x => x.Type == "id");
-            //var user = await _userRepository.FindById(id.Value);
-            //if (user == null)
-            //    return ReturnError(AuthenticationError.UserNotFound);
+            var name = claimsPrincipal.Claims.First(x => x.Type == ClaimTypes.Name).Value;
 
-            //if (!user.HasValidRefreshToken(message.RefreshToken))
-            //    return ReturnError(AuthenticationError.InvalidToken);
+            var id = claimsPrincipal.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier);
+            if (id == null)
+            {
+                // guest
+                var jwToken = await _jwtFactory.GenerateUserToken(name);
+                var refreshToken = _tokenFactory.GenerateToken();
 
-            var jwToken = await _jwtFactory.GenerateModeratorToken("123", "Vincent", "Vincent");
-            var refreshToken = _tokenFactory.GenerateToken();
+                return new ExchangeRefreshTokenResponse(jwToken, refreshToken);
+            }
+            else
+            {
+                var jwToken = await _jwtFactory.GenerateModeratorToken(id.Value, "test@test.de", name);
+                var refreshToken = _tokenFactory.GenerateToken();
 
-            //user.RemoveRefreshToken(message.RefreshToken);
-            //user.AddRefreshToken(refreshToken, message.RemoteIpAddress);
-
-            //await _userRepository.Update(user);
-            return new ExchangeRefreshTokenResponse(jwToken, refreshToken);
+                return new ExchangeRefreshTokenResponse(jwToken, refreshToken);
+            }
         }
     }
 }

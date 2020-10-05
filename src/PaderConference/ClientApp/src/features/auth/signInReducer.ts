@@ -1,14 +1,16 @@
 import { createAsyncThunk, createReducer } from '@reduxjs/toolkit';
-import { SignInRequest } from 'MyModels';
+import { GuestSignInRequest, SignInRequest } from 'MyModels';
 import * as authServices from 'src/services/api/auth';
 
 export type SignInState = {
-   isLoading: boolean;
+   isSigningIn: boolean;
+   isSigningInGuest: boolean;
    error: string | null;
 };
 
 const initialState: SignInState = {
-   isLoading: false,
+   isSigningIn: false,
+   isSigningInGuest: false,
    error: null,
 };
 
@@ -17,15 +19,31 @@ export const signInAsync = createAsyncThunk('auth/signIn', async (info: SignInRe
    return { accessInfo, rememberMe: info.rememberMe };
 });
 
+export const signInGuestAsync = createAsyncThunk('auth/guestSignIn', async (info: GuestSignInRequest) => {
+   const accessInfo = await authServices.signInGuest(info.displayName);
+   return { accessInfo };
+});
+
 const signInReducer = createReducer(initialState, {
    [signInAsync.pending.type]: (state) => {
-      state.isLoading = true;
+      state.isSigningIn = true;
    },
    [signInAsync.fulfilled.type]: (state) => {
-      state.isLoading = false;
+      state.isSigningIn = false;
    },
    [signInAsync.rejected.type]: (state, action) => {
-      state.isLoading = false;
+      state.isSigningIn = false;
+      state.error = action.payload;
+   },
+
+   [signInGuestAsync.pending.type]: (state) => {
+      state.isSigningInGuest = true;
+   },
+   [signInGuestAsync.fulfilled.type]: (state) => {
+      state.isSigningInGuest = false;
+   },
+   [signInGuestAsync.rejected.type]: (state, action) => {
+      state.isSigningIn = false;
       state.error = action.payload;
    },
 });

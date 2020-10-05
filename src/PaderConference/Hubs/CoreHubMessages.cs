@@ -16,6 +16,9 @@
             public const string OnUserJoined = nameof(OnUserJoined);
             public const string OnConferenceDoesNotExist = nameof(OnConferenceDoesNotExist);
             public const string OnParticipantsUpdated = nameof(OnParticipantsUpdated);
+
+            public const string OnIceCandidate = nameof(OnIceCandidate);
+            public const string OnSdp = nameof(OnSdp);
         }
     }
 }

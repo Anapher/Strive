@@ -2,6 +2,10 @@
 {
     public class ChatOptions
     {
+        public bool IsEnabled { get; set; }
+
+        public bool AllowAnonymousMessages { get; set; }
+
         /// <summary>
         ///     Allow the participants to send private message (to include or exclude specific participants)
         /// </summary>

@@ -1,5 +1,6 @@
 ﻿using Autofac;
-using PaderConference.Hubs.Chat;
+using PaderConference.Hubs;
+using PaderConference.Hubs.Media;
 
 namespace PaderConference
 {
@@ -9,7 +10,9 @@ namespace PaderConference
         {
             base.Load(builder);
 
-            builder.RegisterType<ChatManager>().As<IChatManager>().SingleInstance();
+            builder.RegisterType<RtcMediaConnectionFactory>().As<IRtcMediaConnectionFactory>().SingleInstance();
+            builder.RegisterAssemblyTypes(ThisAssembly).AsClosedTypesOf(typeof(IConferenceServiceManager<>))
+                .AsImplementedInterfaces().SingleInstance();
         }
     }
 }

@@ -1,5 +1,7 @@
 import { makeStyles } from '@material-ui/core';
 import React, { useEffect, useRef } from 'react';
+import { useSelector } from 'react-redux';
+import { getRtc, RootState } from 'src/store';
 import MediaControls from './MediaControls';
 
 const useStyles = makeStyles({
@@ -16,25 +18,14 @@ export default function Media() {
    const videoElem = useRef<HTMLVideoElement>(null);
    const classes = useStyles();
 
-   const pcRef = useRef<RTCPeerConnection | null>(null);
+   const connected = useSelector((state: RootState) => state.signalr.isConnected);
 
    useEffect(() => {
-      pcRef.current = new RTCPeerConnection();
-
-      const pc = pcRef.current;
-      pc.onicecandidate = ({ candidate }) => console.log(candidate);
-      pc.onnegotiationneeded = async () => {
-         try {
-            await pc.setLocalDescription(await pc.createOffer());
-            // send the offer to the other peer
-            console.log({ desc: pc.localDescription });
-         } catch (err) {
-            console.error(err);
-         }
-      };
-
-      return pc.close;
-   }, []);
+      if (connected) {
+         const rtc = getRtc();
+         rtc.createConnection();
+      }
+   }, [connected]);
 
    const startStream = async () => {
       const stream = (await (navigator.mediaDevices as any).getDisplayMedia({ video: true })) as MediaStream;
@@ -42,7 +33,7 @@ export default function Media() {
 
       videoElem.current!.srcObject = stream;
 
-      stream.getTracks().forEach((track) => pc.current!.addTrack(track, stream));
+      stream.getTracks().forEach((track) => getRtc().getConnection()?.addTrack(track, stream));
    };
 
    return (

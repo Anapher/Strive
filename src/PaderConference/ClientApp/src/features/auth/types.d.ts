@@ -20,4 +20,8 @@ declare module 'MyModels' {
       password: string;
       rememberMe: boolean;
    };
+
+   export type GuestSignInRequest = {
+      displayName: string;
+   };
 }

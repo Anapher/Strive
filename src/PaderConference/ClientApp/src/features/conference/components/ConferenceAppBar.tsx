@@ -1,4 +1,4 @@
-import { IconButton, Toolbar, Typography, AppBar, makeStyles, createStyles } from '@material-ui/core';
+import { IconButton, Toolbar, Typography, AppBar, makeStyles, createStyles, Button } from '@material-ui/core';
 import React from 'react';
 import MenuIcon from '@material-ui/icons/Menu';
 
@@ -28,6 +28,7 @@ export default function ConferenceAppBar() {
             <Typography variant="h6" className={classes.title}>
                PaderConference
             </Typography>
+            <Button>Logout</Button>
          </Toolbar>
       </AppBar>
    );

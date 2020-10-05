@@ -1,4 +1,4 @@
-#pragma warning disable CS8618 // Non-nullable field is uninitialized. Validators gurantee that.
+#pragma warning disable CS8618 // Non-nullable field is uninitialized. Validators guarantee that.
 
 namespace PaderConference.Models.Request
 {

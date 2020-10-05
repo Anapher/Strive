@@ -2,7 +2,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { AccessInfo, SignInResponse } from 'MyModels';
 import * as authServices from 'src/services/api/auth';
 import { AppThunk } from 'src/store';
-import { signInAsync } from './signInReducer';
+import { signInAsync, signInGuestAsync } from './signInReducer';
 
 export type AuthState = {
    isAuthenticated: boolean;
@@ -30,6 +30,11 @@ const auth = createSlice({
    },
    extraReducers: {
       [signInAsync.fulfilled.type]: (state, action: PayloadAction<SignInResponse>) => {
+         state.isAuthenticated = true;
+         state.token = action.payload.accessInfo;
+         state.rememberMe = action.payload.rememberMe;
+      },
+      [signInGuestAsync.fulfilled.type]: (state, action: PayloadAction<SignInResponse>) => {
          state.isAuthenticated = true;
          state.token = action.payload.accessInfo;
          state.rememberMe = action.payload.rememberMe;
