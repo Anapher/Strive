@@ -5,6 +5,6 @@ namespace PaderConference.Core.Interfaces.Services
     public interface IJwtFactory
     {
         ValueTask<string> GenerateModeratorToken(string id, string email, string name);
-        ValueTask<string> GenerateUserToken(string name);
+        ValueTask<string> GenerateGuestToken(string name, string? id);
     }
 }

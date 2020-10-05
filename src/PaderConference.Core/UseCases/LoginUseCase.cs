@@ -37,7 +37,7 @@ namespace PaderConference.Core.UseCases
             string accessToken;
             if (message.IsGuestAuth)
             {
-                accessToken = await _jwtFactory.GenerateUserToken(message.UserName);
+                accessToken = await _jwtFactory.GenerateGuestToken(message.UserName, null);
             }
             else
             {

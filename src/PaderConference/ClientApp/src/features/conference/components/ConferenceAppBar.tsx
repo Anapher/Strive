@@ -1,6 +1,8 @@
 import { IconButton, Toolbar, Typography, AppBar, makeStyles, createStyles, Button } from '@material-ui/core';
 import React from 'react';
 import MenuIcon from '@material-ui/icons/Menu';
+import { useDispatch } from 'react-redux';
+import { signOut } from 'src/features/auth/authSlice';
 
 const useStyles = makeStyles((theme) =>
    createStyles({
@@ -18,6 +20,8 @@ const useStyles = makeStyles((theme) =>
 
 export default function ConferenceAppBar() {
    const classes = useStyles();
+   const dispatch = useDispatch();
+   const handleSignOut = () => dispatch(signOut());
 
    return (
       <AppBar position="static">
@@ -28,7 +32,7 @@ export default function ConferenceAppBar() {
             <Typography variant="h6" className={classes.title}>
                PaderConference
             </Typography>
-            <Button>Logout</Button>
+            <Button onClick={handleSignOut}>Sign out</Button>
          </Toolbar>
       </AppBar>
    );

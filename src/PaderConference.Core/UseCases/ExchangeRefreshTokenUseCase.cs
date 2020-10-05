@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using PaderConference.Core.Domain;
 using PaderConference.Core.Dto.UseCaseRequests;
 using PaderConference.Core.Dto.UseCaseResponses;
 using PaderConference.Core.Errors;
@@ -32,12 +33,13 @@ namespace PaderConference.Core.UseCases
                 return ReturnError(AuthenticationError.InvalidToken);
 
             var name = claimsPrincipal.Claims.First(x => x.Type == ClaimTypes.Name).Value;
+            var role = claimsPrincipal.Claims.First(x => x.Type == ClaimTypes.Role).Value;
+            var id = claimsPrincipal.Claims.First(x => x.Type == ClaimTypes.NameIdentifier);
 
-            var id = claimsPrincipal.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier);
-            if (id == null)
+            if (role == PrincipalRoles.Guest)
             {
                 // guest
-                var jwToken = await _jwtFactory.GenerateUserToken(name);
+                var jwToken = await _jwtFactory.GenerateGuestToken(name, id.Value);
                 var refreshToken = _tokenFactory.GenerateToken();
 
                 return new ExchangeRefreshTokenResponse(jwToken, refreshToken);

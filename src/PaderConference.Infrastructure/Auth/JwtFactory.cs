@@ -4,8 +4,8 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using PaderConference.Core.Domain;
 using PaderConference.Core.Interfaces.Services;
-using PaderConference.Infrastructure.Helpers;
 using PaderConference.Infrastructure.Interfaces;
 
 namespace PaderConference.Infrastructure.Auth
@@ -29,17 +29,18 @@ namespace PaderConference.Infrastructure.Auth
             {
                 new Claim(ClaimTypes.NameIdentifier, id),
                 new Claim(ClaimTypes.Name, name),
-                new Claim(ClaimTypes.Role, Constants.Strings.JwtRoles.Moderator),
+                new Claim(ClaimTypes.Role, PrincipalRoles.Moderator),
                 new Claim(ClaimTypes.Email, email)
             });
         }
 
-        public ValueTask<string> GenerateUserToken(string name)
+        public ValueTask<string> GenerateGuestToken(string name, string? id)
         {
             return GenerateEncodedToken(new[]
             {
+                new Claim(ClaimTypes.NameIdentifier, id ?? Guid.NewGuid().ToString("N")),
                 new Claim(ClaimTypes.Name, name),
-                new Claim(ClaimTypes.Role, Constants.Strings.JwtRoles.User)
+                new Claim(ClaimTypes.Role, PrincipalRoles.Guest)
             });
         }
 
