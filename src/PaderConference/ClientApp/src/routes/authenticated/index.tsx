@@ -8,7 +8,20 @@ export default function AuthenticatedRoutes() {
       <Switch>
          <Route exact path="/" component={MainRoute} />
          <Route path="/c/:id" component={ConferenceRoute} />
-         <Route path="/" render={() => <Redirect to="/" />} />
+         <Route
+            path="/"
+            render={({ location }) => {
+               if (location.search) {
+                  const params = new URLSearchParams(location.search);
+                  if (params.get('redirectToConference')) {
+                     return <Redirect to={`/c/${params.get('redirectToConference')}`} />;
+                  }
+               }
+               console.log(location);
+
+               return <Redirect to="/" />;
+            }}
+         />
       </Switch>
    );
 }
