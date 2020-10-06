@@ -90,7 +90,14 @@ namespace PaderConference.Hubs.Media
                 new TransceiverInitSettings
                     {InitialDesiredDirection = Transceiver.Direction.SendOnly, Name = "Screenshare"});
 
-            //tranceiver.LocalVideoTrack = LocalVideoTrack.CreateFromSource(new ExternalVideoTrackSource(track.), );
+            tranceiver.LocalVideoTrack =
+                LocalVideoTrack.CreateFromSource(ExternalVideoTrackSource.CreateFromI420ACallback(FrameCallback),
+                    new LocalVideoTrackInitConfig());
+        }
+
+        private void FrameCallback(in FrameRequest request)
+        {
+            request.CompleteRequest();
         }
 
         private void ConnectionOnIceCandidateReadytoSend(IceCandidate candidate)

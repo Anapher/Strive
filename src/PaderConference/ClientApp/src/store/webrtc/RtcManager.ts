@@ -59,12 +59,7 @@ export default function createRtcManager(): RtcListener {
             case onEventOccurred('OnSdp').type:
                console.log('OnSdp');
 
-               // eslint-disable-next-line no-case-declarations
-               const tmpConn = rtcManager?.getConnection();
-               if (tmpConn) {
-                  tmpConn.setRemoteDescription(action.payload as any).catch((x) => console.error(x));
-                  console.log(tmpConn);
-               }
+               rtcManager?.getConnection()?.setRemoteDescription(action.payload as any);
                break;
             case onConferenceJoined.type:
                dispatch(subscribeEvent('OnSdp'));
