@@ -1,4 +1,4 @@
-import { onEventOccurred, send, subscribeEvent } from 'src/store/conference-signal/actions';
+import { onConferenceJoined, onEventOccurred, send, subscribeEvent } from 'src/store/conference-signal/actions';
 import { AnyAction, Dispatch, Middleware, MiddlewareAPI } from 'redux';
 import { PayloadAction } from '@reduxjs/toolkit';
 
@@ -45,7 +45,6 @@ export type RtcListener = {
 export default function createRtcManager(): RtcListener {
    let dispatch: Dispatch<AnyAction>;
    let rtcManager: RtcManager | undefined;
-   let eventsInitialized = false;
 
    const middleware: Middleware = (store: MiddlewareAPI) => {
       dispatch = store.dispatch;
@@ -60,7 +59,16 @@ export default function createRtcManager(): RtcListener {
             case onEventOccurred('OnSdp').type:
                console.log('OnSdp');
 
-               rtcManager?.getConnection()?.setRemoteDescription(action.payload as any);
+               // eslint-disable-next-line no-case-declarations
+               const tmpConn = rtcManager?.getConnection();
+               if (tmpConn) {
+                  tmpConn.setRemoteDescription(action.payload as any).catch((x) => console.error(x));
+                  console.log(tmpConn);
+               }
+               break;
+            case onConferenceJoined.type:
+               dispatch(subscribeEvent('OnSdp'));
+               dispatch(subscribeEvent('OnIceCandidate'));
                break;
             default:
                break;
@@ -76,13 +84,6 @@ export default function createRtcManager(): RtcListener {
       }
 
       if (rtcManager) return rtcManager;
-
-      if (!eventsInitialized) {
-         eventsInitialized = true;
-         dispatch(subscribeEvent('OnSdp'));
-         dispatch(subscribeEvent('OnIceCandidate'));
-      }
-
       return (rtcManager = new RtcManager(dispatch));
    };
 

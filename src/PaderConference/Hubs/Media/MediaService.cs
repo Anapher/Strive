@@ -57,6 +57,14 @@ namespace PaderConference.Hubs.Media
             await (await GetConnection(message)).InitializeInfo(message.Payload);
         }
 
+        public async ValueTask RequestVideo(IServiceMessage message)
+        {
+            if (CurrentScreenShare == null) return;
+
+            var connection = await GetConnection(message);
+            //connection.AddVideo(CurrentScreenShare.VideoTrack);
+        }
+
         private async ValueTask<RtcMediaConnection> GetConnection(IServiceMessage message)
         {
             if (_connections.TryGetValue(message.Participant, out var connection))

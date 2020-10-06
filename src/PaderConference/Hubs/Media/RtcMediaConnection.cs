@@ -21,6 +21,8 @@ namespace PaderConference.Hubs.Media
             _connection = new PeerConnection();
         }
 
+        public RemoteVideoTrack? VideoTrack { get; private set; }
+
         public Participant Participant { get; }
 
         public void Dispose()
@@ -36,13 +38,31 @@ namespace PaderConference.Hubs.Media
             _connection.LocalSdpReadytoSend += ConnectionOnLocalSdpReadytoSend;
             _connection.Connected += ConnectionOnConnected;
             _connection.VideoTrackAdded += ConnectionOnVideoTrackAdded;
+            _connection.RenegotiationNeeded += ConnectionOnRenegotiationNeeded;
 
-            await _connection.InitializeAsync();
+            await _connection.InitializeAsync(new PeerConnectionConfiguration
+                {IceTransportType = IceTransportType.All});
+        }
+
+        private void ConnectionOnRenegotiationNeeded()
+        {
         }
 
         private void ConnectionOnVideoTrackAdded(RemoteVideoTrack track)
         {
+            VideoTrack = track;
             ScreenShareActivated?.Invoke(this, this);
+
+            track.Argb32VideoFrameReady += TrackOnArgb32VideoFrameReady;
+            track.I420AVideoFrameReady += TrackOnI420AVideoFrameReady;
+        }
+
+        private void TrackOnI420AVideoFrameReady(I420AVideoFrame frame)
+        {
+        }
+
+        private void TrackOnArgb32VideoFrameReady(Argb32VideoFrame frame)
+        {
         }
 
         private void ConnectionOnConnected()
@@ -58,7 +78,19 @@ namespace PaderConference.Hubs.Media
         public async Task InitializeInfo(RTCSessionDescription sessionDescription)
         {
             await _connection.SetRemoteDescriptionAsync(sessionDescription.ToSdpMessage());
-            _connection.CreateAnswer();
+
+            if (sessionDescription.Type == "offer")
+                if (!_connection.CreateAnswer())
+                    throw new InvalidOperationException("Creating answer failed");
+        }
+
+        public void AddVideo(RemoteVideoTrack track)
+        {
+            var tranceiver = _connection.AddTransceiver(MediaKind.Video,
+                new TransceiverInitSettings
+                    {InitialDesiredDirection = Transceiver.Direction.SendOnly, Name = "Screenshare"});
+
+            //tranceiver.LocalVideoTrack = LocalVideoTrack.CreateFromSource(new ExternalVideoTrackSource(track.), );
         }
 
         private void ConnectionOnIceCandidateReadytoSend(IceCandidate candidate)
