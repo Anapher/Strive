@@ -21,7 +21,7 @@ namespace PaderConference.Hubs.Media
             _connection = new PeerConnection();
         }
 
-        public RemoteVideoTrack? VideoTrack { get; private set; }
+        public VideoTrackRedirect? VideoTrack { get; private set; }
 
         public Participant Participant { get; }
 
@@ -50,7 +50,7 @@ namespace PaderConference.Hubs.Media
 
         private void ConnectionOnVideoTrackAdded(RemoteVideoTrack track)
         {
-            VideoTrack = track;
+            VideoTrack = new VideoTrackRedirect(track);
             ScreenShareActivated?.Invoke(this, this);
 
             track.Argb32VideoFrameReady += TrackOnArgb32VideoFrameReady;
@@ -84,20 +84,14 @@ namespace PaderConference.Hubs.Media
                     throw new InvalidOperationException("Creating answer failed");
         }
 
-        public void AddVideo(RemoteVideoTrack track)
+        public void AddVideo(VideoTrackRedirect videoTrackRedirect)
         {
             var tranceiver = _connection.AddTransceiver(MediaKind.Video,
                 new TransceiverInitSettings
                     {InitialDesiredDirection = Transceiver.Direction.SendOnly, Name = "Screenshare"});
 
             tranceiver.LocalVideoTrack =
-                LocalVideoTrack.CreateFromSource(ExternalVideoTrackSource.CreateFromI420ACallback(FrameCallback),
-                    new LocalVideoTrackInitConfig());
-        }
-
-        private void FrameCallback(in FrameRequest request)
-        {
-            request.CompleteRequest();
+                LocalVideoTrack.CreateFromSource(videoTrackRedirect.CreateSource(), new LocalVideoTrackInitConfig());
         }
 
         private void ConnectionOnIceCandidateReadytoSend(IceCandidate candidate)

@@ -121,6 +121,12 @@ namespace PaderConference.Hubs
                 await _mediaManager.GetService(message.Participant.Conference).SetDescription(message);
         }
 
+        public async Task RequestVideo()
+        {
+            if (GetMessage(out var message))
+                await _mediaManager.GetService(message.Participant.Conference).RequestVideo(message);
+        }
+
         private async Task UpdateParticipants(Conference conference)
         {
             var participants = conference.Participants.Values.Select(_mapper.Map<ParticipantDto>).ToList();

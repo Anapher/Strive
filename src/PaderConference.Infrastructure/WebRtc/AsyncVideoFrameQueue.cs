@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Threading;
 using Microsoft.MixedReality.WebRTC;
 
@@ -23,7 +24,7 @@ namespace PaderConference.Infrastructure.WebRtc
 
         public byte[]? Buffer { get; set; }
 
-        public bool IsLocked => _lockCounter > 0;
+        public object LockObj { get; } = new object();
 
         public bool Lock()
         {
@@ -37,13 +38,14 @@ namespace PaderConference.Infrastructure.WebRtc
 
         public bool TryDispose()
         {
-            return Interlocked.CompareExchange(ref _lockCounter, int.MinValue, 0) == int.MinValue;
+            var disposeVal = int.MinValue / 2;
+            return Interlocked.CompareExchange(ref _lockCounter, disposeVal, 0) == disposeVal;
         }
     }
 
     public class AsyncVideoFrameQueue
     {
-        public delegate void FrameUsageAction(I420AVideoFrame frame);
+        public delegate void FrameUsageAction(in I420AVideoFrame frame);
 
         /// <summary>
         ///     Queue of frames pending delivery to sink.
@@ -51,13 +53,7 @@ namespace PaderConference.Infrastructure.WebRtc
         private readonly ConcurrentQueue<I420AVideoFrameContainer> _frameQueue =
             new ConcurrentQueue<I420AVideoFrameContainer>();
 
-        private readonly int _maxQueueLength;
         private I420AVideoFrameContainer? _currentFrame;
-
-        public AsyncVideoFrameQueue(int maxQueueLength)
-        {
-            _maxQueueLength = maxQueueLength;
-        }
 
         /// <summary>
         ///     Enqueue a new video frame encoded in I420+Alpha format.
@@ -66,14 +62,22 @@ namespace PaderConference.Infrastructure.WebRtc
         /// <param name="frame">The video frame to enqueue</param>
         /// <returns>Return <c>true</c> if the frame was enqueued successfully, or <c>false</c> if it was dropped</returns>
         /// <remarks>This should only be used if the queue has storage for a compatible video frame encoding.</remarks>
-        public void Enqueue(I420AVideoFrame frame)
+        public void Enqueue(in I420AVideoFrame frame)
         {
             I420AVideoFrameContainer? container = null;
 
             for (var i = 0; i < _frameQueue.Count; i++)
-                if (_frameQueue.TryDequeue(out container))
-                    if (!container.TryDispose())
-                        _frameQueue.Enqueue(container);
+                if (_frameQueue.TryDequeue(out var tmpContainer))
+                    if (!tmpContainer.TryDispose())
+                    {
+                        _frameQueue.Enqueue(tmpContainer);
+                    }
+                    else
+                    {
+                        container = tmpContainer;
+                        break;
+                    }
+                else break;
 
             container ??= new I420AVideoFrameContainer();
 
@@ -98,25 +102,29 @@ namespace PaderConference.Infrastructure.WebRtc
             container.Width = frame.width;
             container.Height = frame.height;
 
-            if (_currentFrame != null)
-                _frameQueue.Enqueue(_currentFrame);
-
+            var oldFrame = _currentFrame;
             _currentFrame = container;
+
+            if (oldFrame != null)
+                _frameQueue.Enqueue(oldFrame);
         }
 
-        public unsafe void UseCurrentFrame(FrameUsageAction action)
+        public unsafe void UseCurrentFrame(in FrameRequest request)
         {
             if (_currentFrame == null) return;
-
             var frame = _currentFrame;
             if (!frame.Lock())
             {
-                UseCurrentFrame(action);
+                UseCurrentFrame(in request);
                 return;
             }
 
+            Debug.Print("enter frame");
+
             try
             {
+                if (frame.Buffer == null) return;
+
                 fixed (byte* ptr = frame.Buffer)
                 {
                     var frameStruct = new I420AVideoFrame
@@ -125,14 +133,29 @@ namespace PaderConference.Infrastructure.WebRtc
                         strideU = frame.StrideU, height = frame.Height, width = frame.Width
                     };
 
-                    frameStruct.dataY = new IntPtr(ptr);
-                    frameStruct.dataU = new IntPtr(ptr + frameStruct.strideY * frame.Height);
-                    frameStruct.dataV =
-                        new IntPtr(ptr + frameStruct.strideY * frame.Height + frame.StrideU * frame.Height / 2);
-                    frameStruct.dataA = new IntPtr(ptr + frameStruct.strideY * frame.Height +
-                                                   (frame.StrideU + frame.StrideV) * frame.Height / 2);
+                    var dstSizeYA = (ulong) frame.Width * frame.Height;
+                    var dstSizeUV = dstSizeYA / 4;
 
-                    action(frameStruct);
+                    void* src = ptr;
+                    frameStruct.dataY = new IntPtr(src);
+
+                    src = (void*) ((ulong) src + dstSizeYA);
+                    frameStruct.dataU = new IntPtr(src);
+
+                    src = (void*) ((ulong) src + dstSizeUV);
+                    frameStruct.dataV = new IntPtr(src);
+
+                    if (frame.StrideA != 0)
+                    {
+                        src = (void*) ((ulong) src + dstSizeUV);
+                        frameStruct.dataA = new IntPtr(src);
+                    }
+                    else
+                    {
+                        frameStruct.dataA = IntPtr.Zero;
+                    }
+
+                    request.CompleteRequest(in frameStruct);
                 }
             }
             finally
@@ -140,26 +163,5 @@ namespace PaderConference.Infrastructure.WebRtc
                 frame.Unlock();
             }
         }
-
-        /// <summary>
-        ///     Get some video frame storage for a frame of the given byte size.
-        /// </summary>
-        /// <param name="byteSize">The byte size of the frame that the storage should accomodate</param>
-        /// <returns>A new or recycled storage if possible, or <c>null</c> if the queue reached its maximum capacity</returns>
-        //private T GetStorageFor(ulong byteSize)
-        //{
-        //    if (_unusedFramePool.TryPop(out T storage))
-        //    {
-        //        if (storage.Capacity < byteSize) storage.Capacity = byteSize;
-        //        return storage;
-        //    }
-
-        //    if (_frameQueue.Count >= _maxQueueLength)
-        //        // Too many frames in queue, drop the current one
-        //        return null;
-        //    var newStorage = new T();
-        //    newStorage.Capacity = byteSize;
-        //    return newStorage;
-        //}
     }
 }

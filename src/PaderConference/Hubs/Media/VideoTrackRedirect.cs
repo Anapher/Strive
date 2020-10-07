@@ -1,24 +1,23 @@
-﻿using System;
-using Microsoft.MixedReality.WebRTC;
+﻿using Microsoft.MixedReality.WebRTC;
+using PaderConference.Infrastructure.WebRtc;
 
 namespace PaderConference.Hubs.Media
 {
-    public class VideoTrackRedirect : IDisposable
+    public class VideoTrackRedirect
     {
-        private readonly VideoFrameQueue<I420AVideoFrameStorage> _queue = new VideoFrameQueue<I420AVideoFrameStorage>(1);
-
+        private readonly AsyncVideoFrameQueue _queue = new AsyncVideoFrameQueue();
 
         public VideoTrackRedirect(RemoteVideoTrack track)
         {
             track.I420AVideoFrameReady += TrackOnI420AVideoFrameReady;
-            Source = ExternalVideoTrackSource.CreateFromI420ACallback(FrameCallback);
+            Track = track;
         }
 
-        public VideoTrackSource Source { get; }
+        public RemoteVideoTrack Track { get; }
 
-        public void Dispose()
+        public VideoTrackSource CreateSource()
         {
-            Source.Dispose();
+            return ExternalVideoTrackSource.CreateFromI420ACallback(FrameCallback);
         }
 
         private void TrackOnI420AVideoFrameReady(I420AVideoFrame frame)
@@ -28,32 +27,7 @@ namespace PaderConference.Hubs.Media
 
         private void FrameCallback(in FrameRequest request)
         {
-            if (_queue.TryDequeue(out var frame))
-            {
-                var frame = new 
-                request.CompleteRequest(frame.);
-            }
-        }
-    }
-
-    public class CachedFrame : IDisposable
-    {
-        private readonly byte[] _buffer;
-
-        public static CachedFrame FromI420AVideoFrame(I420AVideoFrame frame)
-        {
-            uint pixelSize = frame.width * frame.height;
-            uint byteSize = (pixelSize / 2 * 3); // I420 = 12 bits per pixel
-
-            var buffer = new byte[byteSize];
-            frame.CopyTo(buffer);
-
-
-            var bufferSize = frame.CopyTo()
-        }
-
-        public void Dispose()
-        {
+            _queue.UseCurrentFrame(in request);
         }
     }
 }

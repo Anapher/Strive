@@ -62,7 +62,7 @@ namespace PaderConference.Hubs.Media
             if (CurrentScreenShare == null) return;
 
             var connection = await GetConnection(message);
-            //connection.AddVideo(CurrentScreenShare.VideoTrack);
+            connection.AddVideo(CurrentScreenShare.VideoTrack!);
         }
 
         private async ValueTask<RtcMediaConnection> GetConnection(IServiceMessage message)

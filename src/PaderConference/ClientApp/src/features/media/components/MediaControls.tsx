@@ -6,6 +6,7 @@ import { useSelector } from 'react-redux';
 import { Roles } from 'src/consts';
 import { RootState } from 'src/store';
 import { parseJwt } from 'src/utils/token-helpers';
+import AccessibilityIcon from '@material-ui/icons/Accessibility';
 
 const selectUserRole = createSelector(
    (state: RootState) => state.auth.token?.accessToken,
@@ -14,9 +15,10 @@ const selectUserRole = createSelector(
 
 type Props = {
    startDesktopRecording: () => void;
+   getScreen: () => void;
 };
 
-export default function MediaControls({ startDesktopRecording }: Props) {
+export default function MediaControls({ startDesktopRecording, getScreen }: Props) {
    const role = useSelector(selectUserRole);
 
    return (
@@ -28,6 +30,9 @@ export default function MediaControls({ startDesktopRecording }: Props) {
                </Fab>
             </>
          )}
+         <Fab color="primary" aria-label="share screen" onClick={getScreen}>
+            <AccessibilityIcon />
+         </Fab>
       </div>
    );
 }
