@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using PaderConference.Core.Domain.Entities;
-using PaderConference.Hubs.Chat;
-using PaderConference.Models.Signal;
+using PaderConference.Infrastructure.Hubs.Dto;
+using PaderConference.Infrastructure.Services.Chat;
 
 namespace PaderConference
 {

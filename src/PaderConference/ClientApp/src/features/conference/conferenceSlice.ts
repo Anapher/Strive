@@ -1,10 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
-import {
-   joinConference,
-   onConferenceJoined,
-   onConferenceJoinFailed,
-   onParticipantsUpdated,
-} from 'src/store/conference-signal/actions';
+import { joinConference, onConferenceJoined, onConferenceJoinFailed } from 'src/store/conference-signal/actions';
+import { createSynchronizeObjectReducer } from 'src/store/conference-signal/synchronized-object';
 import { ParticipantDto } from 'src/store/conference-signal/types';
 import { IRestError } from 'src/utils/error-result';
 
@@ -40,9 +36,7 @@ const conferenceSlice = createSlice({
       [onConferenceJoinFailed.type]: (state, action) => {
          state.connectionError = action.payload;
       },
-      [onParticipantsUpdated.type]: (state, action) => {
-         state.participants = action.payload;
-      },
+      ...createSynchronizeObjectReducer('participants'),
    },
 });
 

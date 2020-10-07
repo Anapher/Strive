@@ -6,6 +6,7 @@ using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Dto.UseCaseRequests;
 using PaderConference.Core.Interfaces.UseCases;
 using PaderConference.Extensions;
+using PaderConference.Infrastructure.Extensions;
 using PaderConference.Models.Request;
 using PaderConference.Models.Response;
 

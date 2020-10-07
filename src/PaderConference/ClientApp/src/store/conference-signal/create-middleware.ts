@@ -5,6 +5,8 @@ import { ErrorCodes } from 'src/utils/errors';
 import * as actions from './actions';
 import { Options } from './types';
 
+const defaultEvents: string[] = [];
+
 export default (options: Options): Middleware => {
    const { url } = options;
 
@@ -38,9 +40,9 @@ export default (options: Options): Middleware => {
                dispatch(actions.close());
             });
 
-            connection.on('OnParticipantsUpdated', (args) => {
-               dispatch(actions.onParticipantsUpdated(args));
-            });
+            for (const eventName of defaultEvents) {
+               connection.on(eventName, (args) => dispatch(actions.onEventOccurred(eventName)(args)));
+            }
 
             try {
                await connection.start();

@@ -20,9 +20,9 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using PaderConference.Core;
 using PaderConference.Core.Errors;
-using PaderConference.Hubs;
 using PaderConference.Infrastructure;
 using PaderConference.Infrastructure.Auth;
+using PaderConference.Infrastructure.Hubs;
 using Swashbuckle.AspNetCore.Swagger;
 
 namespace PaderConference
@@ -110,7 +110,8 @@ namespace PaderConference
                             context.ModelState.Where(x => x.Value.ValidationState == ModelValidationState.Invalid)
                                 .ToDictionary(x => x.Key, x => x.Value.Errors.First().ErrorMessage)));
                 })
-                .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Startup>());
+                .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Startup>())
+                .AddNewtonsoftJson();
 
             services.AddAutoMapper(Assembly.GetExecutingAssembly(), typeof(InfrastructureModule).Assembly);
 

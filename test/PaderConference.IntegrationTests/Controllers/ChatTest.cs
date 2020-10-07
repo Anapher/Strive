@@ -4,11 +4,11 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR.Client;
-using PaderConference.Hubs;
+using PaderConference.Infrastructure;
+using PaderConference.Infrastructure.Hubs.Dto;
 using PaderConference.IntegrationTests._Helpers;
 using PaderConference.Models.Request;
 using PaderConference.Models.Response;
-using PaderConference.Models.Signal;
 using Xunit;
 
 namespace PaderConference.IntegrationTests.Controllers
