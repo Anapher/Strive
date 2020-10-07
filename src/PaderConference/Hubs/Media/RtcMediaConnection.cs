@@ -92,6 +92,8 @@ namespace PaderConference.Hubs.Media
 
             tranceiver.LocalVideoTrack =
                 LocalVideoTrack.CreateFromSource(videoTrackRedirect.CreateSource(), new LocalVideoTrackInitConfig());
+
+            _connection.CreateOffer();
         }
 
         private void ConnectionOnIceCandidateReadytoSend(IceCandidate candidate)

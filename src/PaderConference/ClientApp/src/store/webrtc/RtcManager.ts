@@ -49,7 +49,7 @@ export default function createRtcManager(): RtcListener {
    const middleware: Middleware = (store: MiddlewareAPI) => {
       dispatch = store.dispatch;
 
-      return (next) => (action: PayloadAction) => {
+      return (next) => async (action: PayloadAction<any>) => {
          switch (action.type) {
             case onEventOccurred('OnIceCandidate').type:
                console.log('OnIceCandidate');
@@ -59,7 +59,17 @@ export default function createRtcManager(): RtcListener {
             case onEventOccurred('OnSdp').type:
                console.log('OnSdp');
 
-               rtcManager?.getConnection()?.setRemoteDescription(action.payload as any);
+               // eslint-disable-next-line no-case-declarations
+               const sessionDesc = action.payload as RTCSessionDescriptionInit;
+               // eslint-disable-next-line no-case-declarations
+               const conn = rtcManager?.getConnection();
+               if (!conn) return;
+
+               conn.setRemoteDescription(sessionDesc);
+               if (sessionDesc.type === 'offer') {
+                  await conn.setLocalDescription(await conn.createAnswer());
+                  dispatch(send('RtcSetDescription', conn.localDescription));
+               }
                break;
             case onConferenceJoined.type:
                dispatch(subscribeEvent('OnSdp'));

@@ -40,7 +40,12 @@ export default function Media() {
    const getScreen = async () => {
       const conn = getRtc().getConnection();
       if (conn) {
-         conn.ontrack = (ev) => (videoElem.current!.srcObject = ev.streams[0]);
+         conn.ontrack = (ev) => {
+            console.log('on track');
+            console.log(ev);
+
+            videoElem.current!.srcObject = new MediaStream([ev.track]);
+         };
 
          dispatch(send('RequestVideo'));
       }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Diagnostics;
 using System.Threading;
 using Microsoft.MixedReality.WebRTC;
 
@@ -53,6 +52,8 @@ namespace PaderConference.Infrastructure.WebRtc
         private readonly ConcurrentQueue<I420AVideoFrameContainer> _frameQueue =
             new ConcurrentQueue<I420AVideoFrameContainer>();
 
+        private readonly object _lock = new object();
+
         private I420AVideoFrameContainer? _currentFrame;
 
         /// <summary>
@@ -64,73 +65,54 @@ namespace PaderConference.Infrastructure.WebRtc
         /// <remarks>This should only be used if the queue has storage for a compatible video frame encoding.</remarks>
         public void Enqueue(in I420AVideoFrame frame)
         {
-            I420AVideoFrameContainer? container = null;
+            lock (_lock)
+            {
+                var container = _currentFrame ?? new I420AVideoFrameContainer();
 
-            for (var i = 0; i < _frameQueue.Count; i++)
-                if (_frameQueue.TryDequeue(out var tmpContainer))
-                    if (!tmpContainer.TryDispose())
-                    {
-                        _frameQueue.Enqueue(tmpContainer);
-                    }
-                    else
-                    {
-                        container = tmpContainer;
-                        break;
-                    }
-                else break;
+                // Try to get some storage for that new frame
+                var byteSize = (frame.strideY + frame.strideA) * frame.height +
+                               (frame.strideU + frame.strideV) * frame.height / 2;
 
-            container ??= new I420AVideoFrameContainer();
+                if (container.Buffer != null)
+                    if (container.Buffer.Length < byteSize)
+                        container.Buffer = null;
 
-            // Try to get some storage for that new frame
-            var byteSize = (frame.strideY + frame.strideA) * frame.height +
-                           (frame.strideU + frame.strideV) * frame.height / 2;
+                if (container.Buffer == null)
+                    container.Buffer = new byte[byteSize];
 
-            if (container.Buffer != null)
-                if (container.Buffer.Length < byteSize)
-                    container.Buffer = null;
+                // Copy the new frame to its storage
+                frame.CopyTo(container.Buffer);
 
-            if (container.Buffer == null)
-                container.Buffer = new byte[byteSize];
+                container.StrideA = frame.strideA;
+                container.StrideU = frame.strideU;
+                container.StrideV = frame.strideV;
+                container.StrideY = frame.strideY;
+                container.Width = frame.width;
+                container.Height = frame.height;
 
-            // Copy the new frame to its storage
-            frame.CopyTo(container.Buffer);
-
-            container.StrideA = frame.strideA;
-            container.StrideU = frame.strideU;
-            container.StrideV = frame.strideV;
-            container.StrideY = frame.strideY;
-            container.Width = frame.width;
-            container.Height = frame.height;
-
-            var oldFrame = _currentFrame;
-            _currentFrame = container;
-
-            if (oldFrame != null)
-                _frameQueue.Enqueue(oldFrame);
+                _currentFrame = container;
+            }
         }
 
         public unsafe void UseCurrentFrame(in FrameRequest request)
         {
-            if (_currentFrame == null) return;
-            var frame = _currentFrame;
-            if (!frame.Lock())
+            lock (_lock)
             {
-                UseCurrentFrame(in request);
-                return;
-            }
+                if (_currentFrame == null) return;
 
-            Debug.Print("enter frame");
-
-            try
-            {
+                var frame = _currentFrame;
                 if (frame.Buffer == null) return;
 
                 fixed (byte* ptr = frame.Buffer)
                 {
                     var frameStruct = new I420AVideoFrame
                     {
-                        strideA = frame.StrideA, strideV = frame.StrideV, strideY = frame.StrideY,
-                        strideU = frame.StrideU, height = frame.Height, width = frame.Width
+                        strideA = frame.StrideA,
+                        strideV = frame.StrideV,
+                        strideY = frame.StrideY,
+                        strideU = frame.StrideU,
+                        height = frame.Height,
+                        width = frame.Width
                     };
 
                     var dstSizeYA = (ulong) frame.Width * frame.Height;
@@ -157,10 +139,6 @@ namespace PaderConference.Infrastructure.WebRtc
 
                     request.CompleteRequest(in frameStruct);
                 }
-            }
-            finally
-            {
-                frame.Unlock();
             }
         }
     }
