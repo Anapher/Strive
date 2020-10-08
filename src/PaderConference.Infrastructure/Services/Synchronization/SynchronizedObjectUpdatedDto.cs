@@ -1,15 +1,18 @@
-﻿namespace PaderConference.Infrastructure.Services.Synchronization
+﻿using System.Collections.Generic;
+using PaderConference.Infrastructure.Serialization;
+
+namespace PaderConference.Infrastructure.Services.Synchronization
 {
     public class SynchronizedObjectUpdatedDto
     {
-        public SynchronizedObjectUpdatedDto(string name, string patch)
+        public SynchronizedObjectUpdatedDto(string name, List<SerializableJsonPatchOperation> patch)
         {
             Name = name;
             Patch = patch;
         }
 
-        public string Name { get; set; }
+        public string Name { get; }
 
-        public string Patch { get; set; }
+        public List<SerializableJsonPatchOperation> Patch { get; }
     }
 }

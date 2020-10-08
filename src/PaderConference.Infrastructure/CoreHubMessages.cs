@@ -12,7 +12,7 @@
         public static class Response
         {
             public const string OnSynchronizedObjectUpdated = nameof(OnSynchronizedObjectUpdated);
-            public const string OnSynchronizedObjectState = nameof(OnSynchronizedObjectState);
+            public const string OnSynchronizeObjectState = nameof(OnSynchronizeObjectState);
 
             public const string ChatMessage = nameof(ChatMessage);
             public const string Chat = nameof(Chat);

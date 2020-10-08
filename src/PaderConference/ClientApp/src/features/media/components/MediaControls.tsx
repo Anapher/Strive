@@ -1,25 +1,16 @@
 import { Fab } from '@material-ui/core';
 import DesktopWindowsIcon from '@material-ui/icons/DesktopWindows';
-import { createSelector } from '@reduxjs/toolkit';
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { Roles } from 'src/consts';
-import { RootState } from 'src/store';
-import { parseJwt } from 'src/utils/token-helpers';
-import AccessibilityIcon from '@material-ui/icons/Accessibility';
-
-const selectUserRole = createSelector(
-   (state: RootState) => state.auth.token?.accessToken,
-   (token) => (token ? parseJwt(token).role : undefined),
-);
+import { selectAccessToken } from 'src/features/auth/selectors';
 
 type Props = {
    startDesktopRecording: () => void;
-   getScreen: () => void;
 };
 
-export default function MediaControls({ startDesktopRecording, getScreen }: Props) {
-   const role = useSelector(selectUserRole);
+export default function MediaControls({ startDesktopRecording }: Props) {
+   const role = useSelector(selectAccessToken)?.role;
 
    return (
       <div>
@@ -30,9 +21,6 @@ export default function MediaControls({ startDesktopRecording, getScreen }: Prop
                </Fab>
             </>
          )}
-         <Fab color="primary" aria-label="share screen" onClick={getScreen}>
-            <AccessibilityIcon />
-         </Fab>
       </div>
    );
 }

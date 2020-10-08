@@ -1,16 +1,29 @@
-import { applyOperation } from 'fast-json-patch';
+import { applyPatch } from 'fast-json-patch';
 import { onEventOccurred } from './actions';
 
-export function createSynchronizeObjectReducer(name: string, stateName?: string) {
-   if (!stateName) stateName = name;
+type SyncObjRequest = {
+   name: string;
+   stateName?: string;
+};
 
+export function createSynchronizeObjectReducer(
+   request: SyncObjRequest | (SyncObjRequest | string)[] | string | string,
+) {
+   if (!Array.isArray(request)) {
+      request = [request];
+   }
+
+   const triggers = request.map((x) => (typeof x === 'string' ? { name: x } : x)) as SyncObjRequest[];
    return {
-      [onEventOccurred('OnSynchronizedObjectState').type]: (state: any, action: any) => {
-         state[stateName!] = action.payload[name];
+      [onEventOccurred('OnSynchronizeObjectState').type]: (state: any, action: any) => {
+         for (const trigger of triggers) {
+            state[trigger.stateName ?? trigger.name] = action.payload[trigger.name];
+         }
       },
       [onEventOccurred('OnSynchronizedObjectUpdated').type]: (state: any, action: any) => {
-         if (action.payload.name === name) {
-            state[stateName!] = applyOperation(state[stateName!], action.payload.patch);
+         const trigger = triggers.find((x) => x.name === action.payload.name);
+         if (trigger) {
+            applyPatch(state[trigger.stateName ?? trigger.name], action.payload.patch);
          }
       },
    };

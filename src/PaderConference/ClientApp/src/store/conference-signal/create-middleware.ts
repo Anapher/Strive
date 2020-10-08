@@ -5,7 +5,7 @@ import { ErrorCodes } from 'src/utils/errors';
 import * as actions from './actions';
 import { Options } from './types';
 
-const defaultEvents: string[] = [];
+const defaultEvents: string[] = ['OnSynchronizeObjectState', 'OnSynchronizedObjectUpdated'];
 
 export default (options: Options): Middleware => {
    const { url } = options;

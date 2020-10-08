@@ -47,6 +47,12 @@ namespace PaderConference.Infrastructure.Services.Media
 
         public override ValueTask OnClientDisconnected(Participant participant)
         {
+            if (CurrentScreenShare?.Participant.ParticipantId == participant.ParticipantId)
+            {
+                CurrentScreenShare = null;
+                _synchronizedMedia.Update(new SynchronizedMedia());
+            }
+
             if (_connections.TryRemove(participant, out var connection)) connection.Dispose();
 
             return new ValueTask();

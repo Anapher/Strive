@@ -24,7 +24,7 @@ namespace JsonPatchGenerator.Tests
             var op = Assert.Single(patch.Operations);
             Assert.Equal(OperationType.Replace, op.OperationType);
             Assert.Equal("/Prop1", op.path);
-            Assert.Equal("Hello World", op.value.ToString());
+            Assert.Equal("Hello World", op.value);
         }
 
         [Fact]
@@ -42,12 +42,12 @@ namespace JsonPatchGenerator.Tests
             {
                 Assert.Equal(OperationType.Replace, op.OperationType);
                 Assert.Equal("/Prop2", op.path);
-                Assert.Equal("43", op.value.ToString());
+                Assert.Equal(43, op.value);
             }, op =>
             {
                 Assert.Equal(OperationType.Replace, op.OperationType);
                 Assert.Equal("/Prop3", op.path);
-                Assert.Equal("True", op.value.ToString());
+                Assert.Equal(true, op.value);
             });
         }
 
@@ -68,12 +68,12 @@ namespace JsonPatchGenerator.Tests
             {
                 Assert.Equal(OperationType.Replace, op.OperationType);
                 Assert.Equal("/Prop1/Prop1", op.path);
-                Assert.Equal("Hello Welt", op.value.ToString());
+                Assert.Equal("Hello Welt", op.value);
             }, op =>
             {
                 Assert.Equal(OperationType.Replace, op.OperationType);
                 Assert.Equal("/Prop2", op.path);
-                Assert.Equal("das", op.value.ToString());
+                Assert.Equal("das", op.value);
             });
         }
 
@@ -82,7 +82,7 @@ namespace JsonPatchGenerator.Tests
         {
             TestPatch(new TestClass3 {Prop1 = new List<SimpleObj>()},
                 new TestClass3 {Prop1 = new List<SimpleObj> {new SimpleObj {Value = "Hello"}}},
-                patch => patch.Add("/Prop1/0", JToken.FromObject(new SimpleObj {Value = "Hello"}))
+                patch => patch.Add("/Prop1/0", new SimpleObj {Value = "Hello"})
             );
         }
 
@@ -120,7 +120,23 @@ namespace JsonPatchGenerator.Tests
                     new SimpleObj {Value = "Corona"},
                     new SimpleObj {Value = "Plx dont kill me"}
                 }
-            }, patch => patch.Replace("/Prop1/1", JToken.FromObject(new SimpleObj {Value = "Plx dont kill me"})));
+            }, patch => patch.Replace("/Prop1/1", new SimpleObj {Value = "Plx dont kill me"}));
+        }
+
+        [Fact]
+        public void TestPatchStringListAddItemToEmptyList()
+        {
+            TestPatch(new List<string>(),
+                new List<string> {"Vincent"},
+                patch => patch.Add("/-", "Vincent"));
+        }
+
+        [Fact]
+        public void TestPatchStringListAddItemToEndOfList()
+        {
+            TestPatch(new List<string> {"Niklas", "Leo"},
+                new List<string> {"Niklas", "Leo", "Vincent"},
+                patch => patch.Add("/-", "Vincent"));
         }
 
         [Fact]
@@ -128,7 +144,7 @@ namespace JsonPatchGenerator.Tests
         {
             TestPatch(new List<string> {"Adam", "Eva", "Vincent", "Covid"},
                 new List<string> {"Adam", "Eva", "Niklas", "Vincent", "Covid"},
-                patch => patch.Add("/2", JToken.FromObject("Niklas")));
+                patch => patch.Add("/2", "Niklas"));
         }
 
         [Fact]
@@ -160,7 +176,7 @@ namespace JsonPatchGenerator.Tests
                 patch =>
                 {
                     patch.Remove("/1");
-                    patch.Add("/0", JToken.FromObject("Teufel"));
+                    patch.Add("/0", "Teufel");
                 });
         }
 
@@ -184,7 +200,11 @@ namespace JsonPatchGenerator.Tests
                     Assert.Equal(expected.OperationType, actual.OperationType);
                     Assert.Equal(expected.path, actual.path);
 
-                    Assert.Equal(expected.value?.ToString(), actual.value?.ToString());
+                    if (expected.value == null)
+                        Assert.Null(actual.value);
+                    else
+                        Assert.Equal(JToken.FromObject(expected.value)?.ToString(),
+                            JToken.FromObject(actual.value)?.ToString());
                 })).ToArray());
         }
 

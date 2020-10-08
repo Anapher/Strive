@@ -5,8 +5,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using JsonPatchGenerator;
 using Microsoft.AspNetCore.SignalR;
-using Newtonsoft.Json;
 using PaderConference.Core.Domain.Entities;
+using PaderConference.Infrastructure.Serialization;
 using PaderConference.Infrastructure.Sockets;
 
 namespace PaderConference.Infrastructure.Services.Synchronization
@@ -44,7 +44,7 @@ namespace PaderConference.Infrastructure.Services.Synchronization
             var connectionId = _connectionMapping.ConnectionsR[participant];
 
             await _clients.Client(connectionId)
-                .SendAsync(CoreHubMessages.Response.OnSynchronizedObjectState, GetState());
+                .SendAsync(CoreHubMessages.Response.OnSynchronizeObjectState, GetState());
         }
 
         public IReadOnlyDictionary<string, object> GetState()
@@ -58,7 +58,8 @@ namespace PaderConference.Infrastructure.Services.Synchronization
 
             await _clients.Group(_conference.ConferenceId).SendAsync(
                 CoreHubMessages.Response.OnSynchronizedObjectUpdated,
-                new SynchronizedObjectUpdatedDto(name, JsonConvert.SerializeObject(patch)));
+                new SynchronizedObjectUpdatedDto(name,
+                    patch.Operations.Select(x => new SerializableJsonPatchOperation(x)).ToList()));
         }
     }
 }

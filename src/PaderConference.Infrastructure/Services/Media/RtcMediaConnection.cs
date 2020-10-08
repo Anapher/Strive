@@ -41,9 +41,14 @@ namespace PaderConference.Infrastructure.Services.Media
             _connection.Connected += ConnectionOnConnected;
             _connection.VideoTrackAdded += ConnectionOnVideoTrackAdded;
             _connection.RenegotiationNeeded += ConnectionOnRenegotiationNeeded;
+            _connection.VideoTrackRemoved += ConnectionOnVideoTrackRemoved;
 
             await _connection.InitializeAsync(new PeerConnectionConfiguration
                 {IceTransportType = IceTransportType.All});
+        }
+
+        private void ConnectionOnVideoTrackRemoved(Transceiver transceiver, RemoteVideoTrack track)
+        {
         }
 
         private void ConnectionOnRenegotiationNeeded()
@@ -54,17 +59,6 @@ namespace PaderConference.Infrastructure.Services.Media
         {
             VideoTrack = new VideoTrackRedirect(track);
             ScreenShareActivated?.Invoke(this, this);
-
-            track.Argb32VideoFrameReady += TrackOnArgb32VideoFrameReady;
-            track.I420AVideoFrameReady += TrackOnI420AVideoFrameReady;
-        }
-
-        private void TrackOnI420AVideoFrameReady(I420AVideoFrame frame)
-        {
-        }
-
-        private void TrackOnArgb32VideoFrameReady(Argb32VideoFrame frame)
-        {
         }
 
         private void ConnectionOnConnected()

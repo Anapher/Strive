@@ -53,7 +53,12 @@ function CreateConferenceDialog() {
                      value={new URL('/c/' + createdConferenceId, document.baseURI).href}
                      className={classes.conferenceUrlField}
                   />
-                  <Button variant="contained" {...to('/c/' + createdConferenceId)} color="primary">
+                  <Button
+                     variant="contained"
+                     {...to('/c/' + createdConferenceId)}
+                     onClick={() => console.log('on join')}
+                     color="primary"
+                  >
                      Join
                   </Button>
                </Box>

@@ -46,7 +46,7 @@ namespace JsonPatchGenerator
 
             if (originalValue == null)
             {
-                patch.Replace(path, JToken.FromObject(newValue));
+                patch.Replace(path, newValue);
                 return;
             }
 
@@ -61,7 +61,7 @@ namespace JsonPatchGenerator
 
             if (originalObject.Type != newObject.Type)
             {
-                patch.Replace(path, newObject);
+                patch.Replace(path, newValue);
             }
             else if (!string.Equals(originalObject.ToString(Formatting.None), newObject.ToString(Formatting.None)))
             {
@@ -108,7 +108,11 @@ namespace JsonPatchGenerator
                             }
                             else
                             {
-                                patch.Add(path + $"/{i}", JToken.FromObject(newItem.obj));
+                                if (currentOriginal.Count == i)
+                                    patch.Add(path + "/-", newItem.obj);
+                                else
+                                    patch.Add(path + $"/{i}", newItem.obj);
+
                                 currentOriginal.Insert(i, newItem);
                             }
                         }
@@ -135,7 +139,7 @@ namespace JsonPatchGenerator
                     }
 
                 // Replace values directly
-                patch.Replace(path, newObject);
+                patch.Replace(path, newValue);
             }
         }
     }
