@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using PaderConference.Core.Domain.Entities;
+using PaderConference.Infrastructure.Extensions;
 using PaderConference.Infrastructure.Hubs;
 using PaderConference.Infrastructure.Sockets;
 
@@ -17,10 +19,11 @@ namespace PaderConference.Infrastructure.Services.Synchronization
             _connectionMapping = connectionMapping;
         }
 
-        protected override SynchronizationService ServiceFactory(Conference conference,
+        protected override ValueTask<SynchronizationService> ServiceFactory(Conference conference,
             IEnumerable<IConferenceServiceManager> services)
         {
-            return new SynchronizationService(_hubContext.Clients, conference, _connectionMapping);
+            return new SynchronizationService(_hubContext.Clients, conference,
+                _connectionMapping).ToValueTask();
         }
     }
 }

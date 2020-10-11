@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
@@ -13,7 +14,6 @@ using PaderConference.Infrastructure.Hubs.Dto;
 using PaderConference.Infrastructure.Services;
 using PaderConference.Infrastructure.Services.Chat;
 using PaderConference.Infrastructure.Services.Media;
-using PaderConference.Infrastructure.Services.Media.Data;
 using PaderConference.Infrastructure.Sockets;
 
 namespace PaderConference.Infrastructure.Hubs
@@ -76,9 +76,13 @@ namespace PaderConference.Infrastructure.Hubs
 
                 await Groups.AddToGroupAsync(Context.ConnectionId, conferenceId);
 
-                foreach (var service in _conferenceServices)
-                    await service.GetService(participant.Conference, _conferenceServices)
-                        .OnClientConnected(participant);
+                // initialize all services before submitting events
+                var services =
+                    _conferenceServices.Select(x => x.GetService(participant.Conference, _conferenceServices)).ToList();
+                foreach (var valueTask in services) await valueTask;
+
+                foreach (var service in services)
+                    await service.Result.OnClientConnected(participant);
             }
         }
 
@@ -91,10 +95,11 @@ namespace PaderConference.Infrastructure.Hubs
             await _conferenceManager.RemoveParticipant(participant);
 
             foreach (var service in _conferenceServices)
-                await service.GetService(participant.Conference, _conferenceServices).OnClientDisconnected(participant);
+                await (await service.GetService(participant.Conference, _conferenceServices))
+                    .OnClientDisconnected(participant);
         }
 
-        private T GetConferenceService<T>(Conference conference) where T : IConferenceService
+        private ValueTask<T> GetConferenceService<T>(Conference conference) where T : IConferenceService
         {
             return _conferenceServices.OfType<IConferenceServiceManager<T>>().First()
                 .GetService(conference, _conferenceServices);
@@ -103,32 +108,29 @@ namespace PaderConference.Infrastructure.Hubs
         public async Task SendChatMessage(SendChatMessageDto dto)
         {
             if (GetMessage(dto, out var message))
-                await GetConferenceService<ChatService>(message.Participant.Conference)
+                await (await GetConferenceService<ChatService>(message.Participant.Conference))
                     .SendMessage(message);
         }
 
         public async Task RequestChat()
         {
             if (GetMessage(out var message))
-                await GetConferenceService<ChatService>(message.Participant.Conference).RequestAllMessages(message);
+                await (await GetConferenceService<ChatService>(message.Participant.Conference))
+                    .RequestAllMessages(message);
         }
 
-        public async Task RtcSendIceCandidate(RTCIceCandidate iceCandidate)
+        public async Task InitializeConnection(JsonElement element)
         {
-            if (GetMessage(iceCandidate, out var message))
-                await GetConferenceService<MediaService>(message.Participant.Conference).OnIceCandidate(message);
+            if (GetMessage(element, out var message))
+                await (await GetConferenceService<MediaService>(message.Participant.Conference))
+                    .InitializeConnection(message);
         }
 
-        public async Task RtcSetDescription(RTCSessionDescription dto)
+        public async Task CreateTransport(JsonElement element)
         {
-            if (GetMessage(dto, out var message))
-                await GetConferenceService<MediaService>(message.Participant.Conference).SetDescription(message);
-        }
-
-        public async Task RequestVideo()
-        {
-            if (GetMessage(out var message))
-                await GetConferenceService<MediaService>(message.Participant.Conference).RequestVideo(message);
+            if (GetMessage(element, out var message))
+                await (await GetConferenceService<MediaService>(message.Participant.Conference))
+                    .CreateTransport(message);
         }
     }
 }

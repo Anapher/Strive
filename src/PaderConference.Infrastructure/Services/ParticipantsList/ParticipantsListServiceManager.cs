@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using AutoMapper;
 using PaderConference.Core.Domain.Entities;
 using PaderConference.Infrastructure.Services.Synchronization;
@@ -15,13 +16,14 @@ namespace PaderConference.Infrastructure.Services.ParticipantsList
             _mapper = mapper;
         }
 
-        protected override ParticipantsListService ServiceFactory(Conference conference,
+        protected override async ValueTask<ParticipantsListService> ServiceFactory(Conference conference,
             IEnumerable<IConferenceServiceManager> services)
         {
-            var synchronizeService = services.OfType<IConferenceServiceManager<SynchronizationService>>().First();
+            var synchronizeService = await services.OfType<IConferenceServiceManager<SynchronizationService>>().First()
+                .GetService(conference, services);
 
             return new ParticipantsListService(conference, _mapper,
-                synchronizeService.GetService(conference, services));
+                synchronizeService);
         }
     }
 }

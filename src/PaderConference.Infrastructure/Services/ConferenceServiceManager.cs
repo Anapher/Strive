@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using PaderConference.Core.Domain.Entities;
+using PaderConference.Infrastructure.Extensions;
 
 namespace PaderConference.Infrastructure.Services
 {
@@ -19,21 +20,31 @@ namespace PaderConference.Infrastructure.Services
             return new ValueTask();
         }
 
-        IConferenceService IConferenceServiceManager.GetService(Conference conference,
+        async ValueTask<IConferenceService> IConferenceServiceManager.GetService(Conference conference,
             IEnumerable<IConferenceServiceManager> services)
         {
-            return GetService(conference, services);
+            return await GetService(conference, services);
         }
 
-        public TService GetService(Conference conference, IEnumerable<IConferenceServiceManager> services)
+        public async ValueTask<TService> GetService(Conference conference,
+            IEnumerable<IConferenceServiceManager> services)
         {
             if (!_services.TryGetValue(conference, out var service))
-                return _services.GetOrAdd(conference, ServiceFactory, services);
+            {
+                service = await ServiceFactory(conference, services);
+                var actualService = _services.GetOrAdd(conference, service);
+
+                if (ReferenceEquals(service, actualService))
+                    await service.InitializeAsync();
+                else service.DisposeAsync().Forget();
+
+                return actualService;
+            }
 
             return service;
         }
 
-        protected abstract TService ServiceFactory(Conference conference,
+        protected abstract ValueTask<TService> ServiceFactory(Conference conference,
             IEnumerable<IConferenceServiceManager> services);
     }
 }

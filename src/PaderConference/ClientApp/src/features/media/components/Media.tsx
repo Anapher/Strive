@@ -2,8 +2,9 @@ import { Button, makeStyles } from '@material-ui/core';
 import React, { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectAccessToken } from 'src/features/auth/selectors';
-import { getRtc, RootState } from 'src/store';
+import { getMediasoup, RootState } from 'src/store';
 import { send } from 'src/store/conference-signal/actions';
+import { initialize } from 'src/store/webrtc/actions';
 import MediaControls from './MediaControls';
 
 const useStyles = makeStyles({
@@ -27,19 +28,20 @@ export default function Media() {
 
    useEffect(() => {
       if (connected) {
-         const rtc = getRtc();
-         rtc.createConnection();
+         dispatch(initialize());
+         // const mediasoup = getMediasoup();
+         // rtc.createConnection();
 
-         const conn = rtc.getConnection()!;
-         conn.ontrack = (e) => {
-            console.log('track event muted = ' + e.track.muted);
-            e.track.onunmute = () => {
-               console.log('track unmuted');
-               console.log(e);
+         // const conn = rtc.getConnection()!;
+         // conn.ontrack = (e) => {
+         //    console.log('track event muted = ' + e.track.muted);
+         //    e.track.onunmute = () => {
+         //       console.log('track unmuted');
+         //       console.log(e);
 
-               videoElem.current!.srcObject = new MediaStream([e.track]);
-            };
-         };
+         //       videoElem.current!.srcObject = new MediaStream([e.track]);
+         //    };
+         // };
       }
    }, [connected]);
 
@@ -50,12 +52,10 @@ export default function Media() {
    }, [mediaInfo?.isScreenshareActivated]);
 
    const startStream = async () => {
-      const constraints: MediaStreamConstraints = { video: { height: { ideal: 720 }, frameRate: 25 } };
-      const stream = (await (navigator.mediaDevices as any).getDisplayMedia(constraints)) as MediaStream;
-
-      videoElem.current!.srcObject = stream;
-
-      stream.getTracks().forEach((track) => getRtc().getConnection()?.addTrack(track, stream));
+      // const constraints: MediaStreamConstraints = { video: { height: { ideal: 720 }, frameRate: 25 } };
+      // const stream = (await (navigator.mediaDevices as any).getDisplayMedia(constraints)) as MediaStream;
+      // videoElem.current!.srcObject = stream;
+      // stream.getTracks().forEach((track) => getRtc().getConnection()?.addTrack(track, stream));
    };
 
    return (

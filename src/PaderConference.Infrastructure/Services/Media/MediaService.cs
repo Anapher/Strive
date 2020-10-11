@@ -1,10 +1,11 @@
-﻿using System.Collections.Concurrent;
-using System.Linq;
+﻿using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using PaderConference.Core.Domain.Entities;
-using PaderConference.Infrastructure.Services.Media.Data;
+using PaderConference.Infrastructure.Services.Media.Communication;
+using PaderConference.Infrastructure.Services.Permissions;
 using PaderConference.Infrastructure.Services.Synchronization;
+using StackExchange.Redis.Extensions.Core.Abstractions;
 
 namespace PaderConference.Infrastructure.Services.Media
 {
@@ -12,89 +13,53 @@ namespace PaderConference.Infrastructure.Services.Media
     {
         private readonly IHubClients _clients;
         private readonly Conference _conference;
-        private readonly IRtcMediaConnectionFactory _connectionFactory;
+        private readonly IPermissionsService _permissionsService;
+        private readonly IRedisDatabase _redisDatabase;
 
-        private readonly ConcurrentDictionary<Participant, RtcMediaConnection> _connections =
-            new ConcurrentDictionary<Participant, RtcMediaConnection>();
-
-        private readonly ISynchronizedObject<SynchronizedMedia> _synchronizedMedia;
-
-        public MediaService(Conference conference, IHubClients clients,
-            IRtcMediaConnectionFactory connectionFactory, ISynchronizationManager synchronizationManager)
+        public MediaService(Conference conference, IHubClients clients, ISynchronizationManager synchronizationManager,
+            IRedisDatabase redisDatabase, IPermissionsService permissionsService)
         {
             _conference = conference;
             _clients = clients;
-            _connectionFactory = connectionFactory;
-
-            _synchronizedMedia = synchronizationManager.Register("media", new SynchronizedMedia());
+            _redisDatabase = redisDatabase;
+            _permissionsService = permissionsService;
         }
 
-        public RtcMediaConnection? CurrentScreenShare { get; private set; }
-
-        public override ValueTask DisposeAsync()
+        public override async ValueTask InitializeAsync()
         {
-            while (!_connections.IsEmpty)
-            {
-                var item = _connections.Take(1).ToList();
-                if (!item.Any()) break;
-
-                if (_connections.TryRemove(item[0].Key, out var connection))
-                    connection.Dispose();
-            }
-
-            return new ValueTask();
+            await _redisDatabase.ListAddToLeftAsync(RedisCommunication.NewConferencesKey,
+                new ConferenceInfo(_conference));
+            await _redisDatabase.PublishAsync<object?>(RedisCommunication.NewConferenceChannel, null);
         }
 
-        public override ValueTask OnClientDisconnected(Participant participant)
+        public async ValueTask InitializeConnection(IServiceMessage<JsonElement> message)
         {
-            if (CurrentScreenShare?.Participant.ParticipantId == participant.ParticipantId)
-            {
-                CurrentScreenShare = null;
-                _synchronizedMedia.Update(new SynchronizedMedia());
-            }
+            var meta = new ConnectionMessageMetadata(_conference.ConferenceId, message.Context.ConnectionId,
+                message.Participant.ParticipantId);
+            var request = new ConnectionMessage<JsonElement>(message.Payload, meta);
 
-            if (_connections.TryRemove(participant, out var connection)) connection.Dispose();
+            await _redisDatabase.PublishAsync(
+                RedisCommunication.Request.InitializeConnection.GetName(_conference.ConferenceId),
+                request);
 
-            return new ValueTask();
+            var info = await _redisDatabase.GetAsync<JsonElement>(
+                RedisCommunication.RtpCapabilitiesKey.GetName(_conference.ConferenceId));
+            await message.Clients.Caller.SendAsync(CoreHubMessages.Response.OnRouterCapabilities, info);
         }
 
-        public async ValueTask OnIceCandidate(IServiceMessage<RTCIceCandidate> message)
+        public async ValueTask CreateTransport(IServiceMessage<JsonElement> message)
         {
-            (await GetConnection(message)).OnIceCandidate(message.Payload);
-        }
+            // SECURITY: if participant can produce audio/video
+            if (!(await _permissionsService.GetPermissions(message.Participant)).CanShareMedia()) return;
 
-        public async ValueTask SetDescription(IServiceMessage<RTCSessionDescription> message)
-        {
-            await (await GetConnection(message)).InitializeInfo(message.Payload);
-        }
+            var meta = new ConnectionMessageMetadata(_conference.ConferenceId, message.Context.ConnectionId,
+                message.Participant.ParticipantId);
 
-        public async ValueTask RequestVideo(IServiceMessage message)
-        {
-            if (CurrentScreenShare == null) return;
+            var request = new ConnectionMessage<JsonElement>(message.Payload, meta);
 
-            var connection = await GetConnection(message);
-            connection.AddVideo(CurrentScreenShare.VideoTrack!);
-        }
-
-        private async ValueTask<RtcMediaConnection> GetConnection(IServiceMessage message)
-        {
-            if (_connections.TryGetValue(message.Participant, out var connection))
-                return connection;
-
-            connection = await _connectionFactory.Create(message.Participant, message.Context.ConnectionId);
-            connection.ScreenShareActivated += ConnectionOnScreenShareActivated;
-
-            var result = _connections.GetOrAdd(message.Participant, connection);
-            if (result != connection) connection.Dispose();
-
-            return result;
-        }
-
-        private void ConnectionOnScreenShareActivated(object? sender, RtcMediaConnection e)
-        {
-            CurrentScreenShare = e;
-
-            _synchronizedMedia.Update(new SynchronizedMedia(true, e.Participant.ParticipantId));
+            await _redisDatabase.PublishAsync(
+                RedisCommunication.Request.CreateTransport.GetName(_conference.ConferenceId),
+                request);
         }
     }
 }

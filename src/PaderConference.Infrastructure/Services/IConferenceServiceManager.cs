@@ -8,6 +8,7 @@ namespace PaderConference.Infrastructure.Services
     {
         ValueTask Close(Conference conference);
 
-        IConferenceService GetService(Conference conference, IEnumerable<IConferenceServiceManager> services);
+        ValueTask<IConferenceService> GetService(Conference conference,
+            IEnumerable<IConferenceServiceManager> services);
     }
 }

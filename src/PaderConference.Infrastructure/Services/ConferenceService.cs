@@ -19,5 +19,10 @@ namespace PaderConference.Infrastructure.Services
         {
             return new ValueTask();
         }
+
+        public virtual ValueTask InitializeAsync()
+        {
+            return new ValueTask();
+        }
     }
 }

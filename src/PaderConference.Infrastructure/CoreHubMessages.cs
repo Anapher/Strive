@@ -7,6 +7,8 @@
             public const string SendChatMessage = nameof(SendChatMessage);
             public const string RequestChat = nameof(RequestChat);
             public const string RequestParticipants = nameof(RequestParticipants);
+
+            public const string RequestRouterCapabilities = nameof(RequestRouterCapabilities);
         }
 
         public static class Response
@@ -22,6 +24,8 @@
 
             public const string OnIceCandidate = nameof(OnIceCandidate);
             public const string OnSdp = nameof(OnSdp);
+
+            public const string OnRouterCapabilities = nameof(OnRouterCapabilities);
         }
     }
 }

@@ -1642,10 +1642,20 @@
   resolved "https://registry.yarnpkg.com/@types/color-name/-/color-name-1.1.1.tgz#1c1261bbeaa10a8055bbc5d8ab84b7b2afc846a0"
   integrity sha512-rr+OQyAjxze7GgWrSaJwydHStIhHq2lvY3BOC2Mj7KnzI7XK0Uw1TOOdI9lDoajEbSWLiYgoo4f1R51erQfhPQ==
 
+"@types/debug@^4.1.5":
+  version "4.1.5"
+  resolved "https://registry.yarnpkg.com/@types/debug/-/debug-4.1.5.tgz#b14efa8852b7768d898906613c23f688713e02cd"
+  integrity sha512-Q1y515GcOdTHgagaVFhHnIFQ38ygs/kmxdNpvpou+raI9UO3YZcHDngBSYKQklcKlvA7iuQlmIKbzvmxcOE9CQ==
+
 "@types/eslint-visitor-keys@^1.0.0":
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@types/eslint-visitor-keys/-/eslint-visitor-keys-1.0.0.tgz#1ee30d79544ca84d68d4b3cdb0af4f205663dd2d"
   integrity sha512-OCutwjDZ4aFS6PB1UZ988C4YgwlBHJd6wCeQqaLdmadZ/7e+w79+hbMUFC1QXDNCmdyoRfAFdm0RypzwR+Qpag==
+
+"@types/events@^3.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@types/events/-/events-3.0.0.tgz#2862f3f58a9a7f7c3e78d79f130dd4d71c25c2a7"
+  integrity sha512-EaObqwIvayI5a8dCzhFrjKzVwKLxjoG9T6Ppd5CEo07LRKfQ8Yokw54r5+Wq7FaBQ+yXRvQAYPrHwya1/UFt9g==
 
 "@types/glob@^7.1.1":
   version "7.1.3"
@@ -2461,6 +2471,11 @@ autoprefixer@^9.6.1:
     postcss "^7.0.32"
     postcss-value-parser "^4.1.0"
 
+awaitqueue@^2.2.3:
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/awaitqueue/-/awaitqueue-2.3.0.tgz#6cd982fabfb9c43639e1e99d324cd856c096975f"
+  integrity sha512-C9a5scw6I9PgwYX8tib8d2SgjAiLNjs3IpLVw/NYnNAHSQFYSAZzPGdKmZmT5ZnxkRA7fIqW4nnM1l9vnlu99g==
+
 aws-sign2@~0.7.0:
   version "0.7.0"
   resolved "https://registry.yarnpkg.com/aws-sign2/-/aws-sign2-0.7.0.tgz#b46e890934a9591f2d2f6f86d7e6a9f1b3fe76a8"
@@ -2737,6 +2752,11 @@ boolbase@^1.0.0, boolbase@~1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/boolbase/-/boolbase-1.0.0.tgz#68dff5fbe60c51eb37725ea9e3ed310dcc1e776e"
   integrity sha1-aN/1++YMUes3cl6p4+0xDcwed24=
+
+bowser@^2.11.0:
+  version "2.11.0"
+  resolved "https://registry.yarnpkg.com/bowser/-/bowser-2.11.0.tgz#5ca3c35757a7aa5771500c70a73a9f91ef420a8f"
+  integrity sha512-AlcaJBi/pqqJBIQ8U9Mcpc9i8Aqxn88Skv5d+xBX006BY5u8N3mGLHa5Lgppa7L/HfwgwLgZ6NYs+Ag6uUmJRA==
 
 brace-expansion@^1.1.7:
   version "1.1.11"
@@ -4617,7 +4637,7 @@ eventemitter3@^4.0.0:
   resolved "https://registry.yarnpkg.com/eventemitter3/-/eventemitter3-4.0.7.tgz#2de9b68f6528d5644ef5c59526a1b4a07306169f"
   integrity sha512-8guHBZCwKnFhYdHr2ysuRWErTwhoN2X8XELRlrRwpmfeY2jjuUN4taQMsULKUVo1K4DvZl+0pgfyoysHxvmvEw==
 
-events@^3.0.0:
+events@^3.0.0, events@^3.2.0:
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/events/-/events-3.2.0.tgz#93b87c18f8efcd4202a461aec4dfc0556b639379"
   integrity sha512-/46HWwbfCX2xTawVfkKLGxMifJYQBWMwY1mjywRtb4c9x8l5NP3KoJtnIOiL1hfdRkIuYhETxQlo62IF8tcnlg==
@@ -5318,6 +5338,13 @@ gzip-size@5.1.1:
   dependencies:
     duplexer "^0.1.1"
     pify "^4.0.1"
+
+h264-profile-level-id@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/h264-profile-level-id/-/h264-profile-level-id-1.0.1.tgz#92033c190766c846e57c6a97e4c1d922943a9cce"
+  integrity sha512-D3Rln/jKNjKDW5ZTJTK3niSoOGE+pFqPvRHHVgQN3G7umcn/zWGPUo8Q8VpDj16x3hKz++zVviRNRmXu5cpN+Q==
+  dependencies:
+    debug "^4.1.1"
 
 handle-thing@^2.0.0:
   version "2.0.1"
@@ -7186,6 +7213,21 @@ media-typer@0.3.0:
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/media-typer/-/media-typer-0.3.0.tgz#8710d7af0aa626f8fffa1ce00168545263255748"
   integrity sha1-hxDXrwqmJvj/+hzgAWhUUmMlV0g=
+
+mediasoup-client@^3.6.16:
+  version "3.6.16"
+  resolved "https://registry.yarnpkg.com/mediasoup-client/-/mediasoup-client-3.6.16.tgz#75fe808fc6a083729ca22d7bbb4f3523ead5bd1d"
+  integrity sha512-igDqXyKW9QvGR9pRXTw4ea/w4g0PsuppI29OA3WcDuvgsLzE4iEn5FTO8E0F25REYM5ifUO2BucILwdSiORCLQ==
+  dependencies:
+    "@types/debug" "^4.1.5"
+    "@types/events" "^3.0.0"
+    awaitqueue "^2.2.3"
+    bowser "^2.11.0"
+    debug "^4.1.1"
+    events "^3.2.0"
+    h264-profile-level-id "^1.0.1"
+    sdp-transform "^2.14.0"
+    supports-color "^7.2.0"
 
 memory-fs@^0.4.1:
   version "0.4.1"
@@ -9834,6 +9876,11 @@ schema-utils@^2.5.0, schema-utils@^2.6.0, schema-utils@^2.6.1, schema-utils@^2.6
     ajv "^6.12.4"
     ajv-keywords "^3.5.2"
 
+sdp-transform@^2.14.0:
+  version "2.14.0"
+  resolved "https://registry.yarnpkg.com/sdp-transform/-/sdp-transform-2.14.0.tgz#222452e79e335f000fb9a9a2850021265d1da12d"
+  integrity sha512-8ZYOau/o9PzRhY0aMuRzvmiM6/YVQR8yjnBScvZHSdBnywK5oZzAJK+412ZKkDq29naBmR3bRw8MFu0C01Gehg==
+
 select-hose@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/select-hose/-/select-hose-2.0.0.tgz#625d8658f865af43ec962bfc376a37359a4994ca"
@@ -10478,7 +10525,7 @@ supports-color@^6.1.0:
   dependencies:
     has-flag "^3.0.0"
 
-supports-color@^7.0.0, supports-color@^7.1.0:
+supports-color@^7.0.0, supports-color@^7.1.0, supports-color@^7.2.0:
   version "7.2.0"
   resolved "https://registry.yarnpkg.com/supports-color/-/supports-color-7.2.0.tgz#1b7dcdcb32b8138801b3e478ba6a51caa89648da"
   integrity sha512-qpCAvRl9stuOHveKsn7HncJRvv501qIacKzQlO/+Lwxc9+0q2wLyv4Dfvt80/DPn2pqOBsJdDiogXGR9+OvwRw==

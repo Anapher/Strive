@@ -5,7 +5,6 @@ using PaderConference.Infrastructure.Auth;
 using PaderConference.Infrastructure.Conferencing;
 using PaderConference.Infrastructure.Interfaces;
 using PaderConference.Infrastructure.Services;
-using PaderConference.Infrastructure.Services.Media;
 using PaderConference.Infrastructure.Sockets;
 
 namespace PaderConference.Infrastructure
@@ -25,7 +24,6 @@ namespace PaderConference.Infrastructure
             builder.RegisterAssemblyTypes(ThisAssembly).AsClosedTypesOf(typeof(IRepository<>))
                 .AsImplementedInterfaces();
 
-            builder.RegisterType<RtcMediaConnectionFactory>().As<IRtcMediaConnectionFactory>().SingleInstance();
             builder.RegisterAssemblyTypes(ThisAssembly).AsClosedTypesOf(typeof(IConferenceServiceManager<>))
                 .AsImplementedInterfaces().SingleInstance();
         }

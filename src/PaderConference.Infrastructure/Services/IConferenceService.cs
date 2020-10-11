@@ -6,6 +6,8 @@ namespace PaderConference.Infrastructure.Services
 {
     public interface IConferenceService : IAsyncDisposable
     {
+        ValueTask InitializeAsync();
+
         ValueTask OnClientDisconnected(Participant participant);
 
         ValueTask OnClientConnected(Participant participant);

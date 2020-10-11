@@ -23,6 +23,8 @@ using PaderConference.Core.Errors;
 using PaderConference.Infrastructure;
 using PaderConference.Infrastructure.Auth;
 using PaderConference.Infrastructure.Hubs;
+using StackExchange.Redis.Extensions.Core.Configuration;
+using StackExchange.Redis.Extensions.System.Text.Json;
 using Swashbuckle.AspNetCore.Swagger;
 
 namespace PaderConference
@@ -114,6 +116,9 @@ namespace PaderConference
                 .AddNewtonsoftJson();
 
             services.AddAutoMapper(Assembly.GetExecutingAssembly(), typeof(InfrastructureModule).Assembly);
+
+            var redisConfig = Configuration.GetSection("Redis").Get<RedisConfiguration>() ?? new RedisConfiguration();
+            services.AddStackExchangeRedisExtensions<SystemTextJsonSerializer>(redisConfig);
 
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration => { configuration.RootPath = "ClientApp/build"; });

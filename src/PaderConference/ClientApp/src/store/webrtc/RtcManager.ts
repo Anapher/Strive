@@ -1,79 +1,76 @@
 import { onConferenceJoined, onEventOccurred, send, subscribeEvent } from 'src/store/conference-signal/actions';
 import { AnyAction, Dispatch, Middleware, MiddlewareAPI } from 'redux';
 import { PayloadAction } from '@reduxjs/toolkit';
+import { Device } from 'mediasoup-client';
+import { initialize, initialized } from './actions';
+import { Producer, Transport, TransportOptions } from 'mediasoup-client/lib/types';
+import { JsonPatchError } from 'fast-json-patch';
 
-class RtcManager {
+export class SoupManager {
    constructor(private dispatch: Dispatch<AnyAction>) {
-      this.connection = null;
+      this.device = new Device();
    }
 
-   private connection: RTCPeerConnection | null;
+   private micProducer?: Producer;
 
-   public getConnection(): RTCPeerConnection | null {
-      return this.connection;
-   }
+   public device: Device;
+   public sendTransport: Transport | null = null;
 
-   public createConnection(): void {
-      if (this.connection) {
-         this.connection.close();
-      }
+   public createSendTransport(options: TransportOptions): void {
+      this.sendTransport = this.device.createSendTransport(options);
 
-      const conn = new RTCPeerConnection();
-      conn.onicecandidate = ({ candidate }) => {
-         if (candidate) this.dispatch(send('RtcSendIceCandidate', candidate));
-      };
-      conn.onnegotiationneeded = async () => {
-         try {
-            await conn.setLocalDescription(await conn.createOffer());
-
-            // send the offer to the other peer
-            this.dispatch(send('RtcSetDescription', conn.localDescription));
-         } catch (err) {
-            console.error(err);
-         }
-      };
-
-      this.connection = conn;
+      this.sendTransport.on('connect', ({ dtlsParameters }, callback, errback) => {
+         // wait
+      });
    }
 }
 
 export type RtcListener = {
    middleware: Middleware;
-   getRtcManager: () => RtcManager;
+   getSoupManager: () => SoupManager | undefined;
 };
 
 export default function createRtcManager(): RtcListener {
    let dispatch: Dispatch<AnyAction>;
-   let rtcManager: RtcManager | undefined;
+   let soupManager: SoupManager | undefined;
 
    const middleware: Middleware = (store: MiddlewareAPI) => {
       dispatch = store.dispatch;
 
       return (next) => async (action: PayloadAction<any>) => {
          switch (action.type) {
-            case onEventOccurred('OnIceCandidate').type:
-               console.log('OnIceCandidate');
+            case onEventOccurred('OnTransportCreated').type:
+               if (soupManager) {
+                  soupManager.createSendTransport(action.payload);
 
-               rtcManager?.getConnection()?.addIceCandidate(action.payload as any);
-               break;
-            case onEventOccurred('OnSdp').type:
-               console.log('OnSdp');
-
-               // eslint-disable-next-line no-case-declarations
-               const sessionDesc = action.payload as RTCSessionDescriptionInit;
-               // eslint-disable-next-line no-case-declarations
-               const conn = rtcManager?.getConnection();
-               if (!conn) return;
-
-               conn.setRemoteDescription(sessionDesc);
-               if (sessionDesc.type === 'offer') {
-                  await conn.setLocalDescription(await conn.createAnswer());
-                  dispatch(send('RtcSetDescription', conn.localDescription));
+                  const producer = soupManager.sendTransport?.produce({});
                }
                break;
-            case onConferenceJoined.type:
-               dispatch(subscribeEvent('OnSdp'));
-               dispatch(subscribeEvent('OnIceCandidate'));
+            case onEventOccurred('OnRouterCapabilities').type:
+               if (soupManager) {
+                  const { device } = soupManager;
+                  await device.load({ routerRtpCapabilities: action.payload });
+
+                  const canProduceAudio = device.canProduce('audio');
+                  const canProduceVideo = device.canProduce('video');
+
+                  dispatch(initialized({ canProduceAudio, canProduceVideo }));
+
+                  if (canProduceAudio || canProduceVideo) {
+                     dispatch(
+                        send('CreateTransport', {
+                           sctpCapabilities: device.sctpCapabilities,
+                        }),
+                     );
+                  }
+               }
+               break;
+            case initialize.type:
+               dispatch(subscribeEvent('OnRouterCapabilities'));
+               dispatch(subscribeEvent('OnTransportCreated'));
+
+               soupManager = new SoupManager(dispatch);
+               dispatch(send('RequestRouterCapabilities'));
                break;
             default:
                break;
@@ -88,9 +85,8 @@ export default function createRtcManager(): RtcListener {
          throw new Error('The rtc middleware is not installed');
       }
 
-      if (rtcManager) return rtcManager;
-      return (rtcManager = new RtcManager(dispatch));
+      return soupManager;
    };
 
-   return { middleware, getRtcManager };
+   return { middleware, getSoupManager: getRtcManager };
 }
