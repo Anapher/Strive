@@ -1,4 +1,6 @@
-export const rtpCapabilitiesKey = (conferenceId: string) => `${conferenceId}::routerRtpCapabilities`;
+export const rtpCapabilitiesKey = createChannelName('::routerRtpCapabilities');
+export const onSendMessageToConnection = createChannelName('::sendMessageToConnection');
+export const onClientDisconnected = createChannelName('::clientDisconnected');
 
 export const newConferencesKey = 'newConferences';
 
@@ -7,9 +9,9 @@ export const channels = {
    request: {
       initializeConnection: createChannelName('/req::initializeConnection'),
       createTransport: createChannelName('/req::createTransport'),
-   },
-   response: {
-      createTransport: createChannelName('/res::createTransport'),
+      connectTransport: createChannelName('/req::connectTransport'),
+      transportProduce: createChannelName('/req::transportProduce'),
+      transportProduceData: createChannelName('/req::transportProduceData'),
    },
 };
 

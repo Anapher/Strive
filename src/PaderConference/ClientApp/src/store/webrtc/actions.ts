@@ -7,3 +7,4 @@ export type MediaSoupInitializedPayload = {
 
 export const initialized = createAction<MediaSoupInitializedPayload>(`MEDIA_SOUP::INITIALIZED`);
 export const initialize = createAction(`MEDIA_SOUP::INITIALIZE`);
+export const initializationFailed = createAction(`MEDIA_SOUP::INITIALIZE_FAILED`);

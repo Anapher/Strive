@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
-using PaderConference.Core.Domain.Entities;
 using PaderConference.Infrastructure.Hubs;
 using PaderConference.Infrastructure.Services.Permissions;
 using PaderConference.Infrastructure.Services.Synchronization;
@@ -21,16 +20,15 @@ namespace PaderConference.Infrastructure.Services.Media
             _redisDatabase = redisDatabase;
         }
 
-        protected override async ValueTask<MediaService> ServiceFactory(Conference conference,
+        protected override async ValueTask<MediaService> ServiceFactory(string conferenceId,
             IEnumerable<IConferenceServiceManager> services)
         {
             var synchronizeService = await services.OfType<IConferenceServiceManager<SynchronizationService>>().First()
-                .GetService(conference, services);
+                .GetService(conferenceId, services);
             var permissionsService = await services.OfType<IConferenceServiceManager<PermissionsService>>().First()
-                .GetService(conference, services);
+                .GetService(conferenceId, services);
 
-            return new MediaService(conference, _hubContext.Clients,
-                synchronizeService, _redisDatabase,
+            return new MediaService(conferenceId, _hubContext.Clients, synchronizeService, _redisDatabase,
                 permissionsService);
         }
     }

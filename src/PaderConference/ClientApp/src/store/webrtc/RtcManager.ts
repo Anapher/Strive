@@ -1,36 +1,15 @@
-import { onConferenceJoined, onEventOccurred, send, subscribeEvent } from 'src/store/conference-signal/actions';
-import { AnyAction, Dispatch, Middleware, MiddlewareAPI } from 'redux';
+import { HubConnection } from '@microsoft/signalr';
 import { PayloadAction } from '@reduxjs/toolkit';
-import { Device } from 'mediasoup-client';
-import { initialize, initialized } from './actions';
-import { Producer, Transport, TransportOptions } from 'mediasoup-client/lib/types';
-import { JsonPatchError } from 'fast-json-patch';
-
-export class SoupManager {
-   constructor(private dispatch: Dispatch<AnyAction>) {
-      this.device = new Device();
-   }
-
-   private micProducer?: Producer;
-
-   public device: Device;
-   public sendTransport: Transport | null = null;
-
-   public createSendTransport(options: TransportOptions): void {
-      this.sendTransport = this.device.createSendTransport(options);
-
-      this.sendTransport.on('connect', ({ dtlsParameters }, callback, errback) => {
-         // wait
-      });
-   }
-}
+import { AnyAction, Dispatch, Middleware, MiddlewareAPI } from 'redux';
+import { initializationFailed, initialize, initialized } from './actions';
+import { SoupManager } from './SoupManager';
 
 export type RtcListener = {
    middleware: Middleware;
    getSoupManager: () => SoupManager | undefined;
 };
 
-export default function createRtcManager(): RtcListener {
+export default function createRtcManager(getConnection: () => HubConnection | undefined): RtcListener {
    let dispatch: Dispatch<AnyAction>;
    let soupManager: SoupManager | undefined;
 
@@ -39,39 +18,35 @@ export default function createRtcManager(): RtcListener {
 
       return (next) => async (action: PayloadAction<any>) => {
          switch (action.type) {
-            case onEventOccurred('OnTransportCreated').type:
-               if (soupManager) {
-                  soupManager.createSendTransport(action.payload);
-
-                  const producer = soupManager.sendTransport?.produce({});
+            case initialize.type: {
+               const connection = getConnection();
+               if (!connection) {
+                  dispatch(initializationFailed);
+                  return;
                }
-               break;
-            case onEventOccurred('OnRouterCapabilities').type:
-               if (soupManager) {
-                  const { device } = soupManager;
-                  await device.load({ routerRtpCapabilities: action.payload });
 
-                  const canProduceAudio = device.canProduce('audio');
-                  const canProduceVideo = device.canProduce('video');
+               soupManager = new SoupManager(dispatch, connection);
+               await soupManager.initializeDevice();
 
-                  dispatch(initialized({ canProduceAudio, canProduceVideo }));
+               const { device } = soupManager;
 
-                  if (canProduceAudio || canProduceVideo) {
-                     dispatch(
-                        send('CreateTransport', {
-                           sctpCapabilities: device.sctpCapabilities,
-                        }),
-                     );
-                  }
+               const canProduceAudio = device.canProduce('audio');
+               const canProduceVideo = device.canProduce('video');
+
+               await connection.invoke('InitializeConnection', {
+                  sctpCapabilities: device.sctpCapabilities,
+                  rtpCapabilities: device.rtpCapabilities,
+               });
+
+               dispatch(initialized({ canProduceAudio, canProduceVideo }));
+
+               if (canProduceAudio || canProduceVideo) {
+                  await soupManager.createSendTransport();
                }
-               break;
-            case initialize.type:
-               dispatch(subscribeEvent('OnRouterCapabilities'));
-               dispatch(subscribeEvent('OnTransportCreated'));
 
-               soupManager = new SoupManager(dispatch);
-               dispatch(send('RequestRouterCapabilities'));
+               await soupManager.createReceiveTransport();
                break;
+            }
             default:
                break;
          }

@@ -6,26 +6,29 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
-using PaderConference.Core.Domain.Entities;
 using PaderConference.Infrastructure.Hubs.Dto;
 using PaderConference.Infrastructure.Services.Chat.Filters;
+using PaderConference.Infrastructure.Services.Permissions;
 
 namespace PaderConference.Infrastructure.Services.Chat
 {
     public class ChatService : ConferenceService
     {
-        private readonly Conference _conference;
+        private const int MessageHistoryCount = 500;
+        private readonly string _conferenceId;
         private readonly ILogger<ChatService> _logger;
         private readonly IMapper _mapper;
         private readonly Queue<ChatMessage> _messages = new Queue<ChatMessage>();
         private readonly ReaderWriterLock _messagesLock = new ReaderWriterLock();
+        private readonly IPermissionsService _permissionsService;
         private int _messageIdCounter = 1;
 
-        public ChatService(Conference conference, IMapper mapper,
+        public ChatService(string conferenceId, IMapper mapper, IPermissionsService permissionsService,
             ILogger<ChatService> logger)
         {
-            _conference = conference;
+            _conferenceId = conferenceId;
             _mapper = mapper;
+            _permissionsService = permissionsService;
             _logger = logger;
         }
 
@@ -36,13 +39,15 @@ namespace PaderConference.Infrastructure.Services.Chat
             if (messageDto.Message == null)
                 throw new InvalidOperationException("Null message not allowed");
 
+            var permissions = await _permissionsService.GetPermissions(message.Participant);
+
             // here would be the point to implement e. g. language filter
 
             if (messageDto.Filter != null && messageDto.Filter.Exclude == null && messageDto.Filter.Include == null)
                 return; // the message would be sent to nobody
 
             var filter = FilterFactory.CreateFilter(messageDto.Filter, message.Context.ConnectionId);
-            if (!_conference.Settings.Chat.AllowPrivateConversation && !(filter is AtAllFilter))
+            if (!permissions.CanSendPrivateChatMessages && !(filter is AtAllFilter))
                 return; // reject
 
             ChatMessage chatMessage;
@@ -57,7 +62,7 @@ namespace PaderConference.Infrastructure.Services.Chat
                 _messages.Enqueue(chatMessage);
 
                 // limit the amount of saved chat messages
-                if (_messages.Count > _conference.Settings.Chat.MessageHistoryCount)
+                if (_messages.Count > MessageHistoryCount)
                     _messages.Dequeue();
             }
             finally
@@ -66,7 +71,7 @@ namespace PaderConference.Infrastructure.Services.Chat
             }
 
             var dto = _mapper.Map<ChatMessageDto>(chatMessage);
-            await chatMessage.Filter.SendTo(message.Clients, message.Participant.Conference.ConferenceId)
+            await chatMessage.Filter.SendTo(message.Clients, _conferenceId)
                 .SendAsync(CoreHubMessages.Response.ChatMessage, dto);
         }
 

@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using PaderConference.Core.Domain.Entities;
+using PaderConference.Core.Interfaces.Services;
 using PaderConference.Infrastructure.Hubs.Dto;
 using PaderConference.Infrastructure.Services.Synchronization;
 
@@ -10,15 +11,17 @@ namespace PaderConference.Infrastructure.Services.ParticipantsList
 {
     public class ParticipantsListService : ConferenceService
     {
-        private readonly Conference _conference;
+        private readonly string _conferenceId;
+        private readonly IConferenceManager _conferenceManager;
         private readonly IMapper _mapper;
         private readonly ISynchronizedObject<IImmutableList<ParticipantDto>> _synchronizedParticipants;
 
-        public ParticipantsListService(Conference conference, IMapper mapper,
+        public ParticipantsListService(string conferenceId, IMapper mapper, IConferenceManager conferenceManager,
             ISynchronizationManager synchronizationManager)
         {
-            _conference = conference;
+            _conferenceId = conferenceId;
             _mapper = mapper;
+            _conferenceManager = conferenceManager;
 
             _synchronizedParticipants =
                 synchronizationManager.Register<IImmutableList<ParticipantDto>>("participants",
@@ -30,15 +33,18 @@ namespace PaderConference.Infrastructure.Services.ParticipantsList
             return UpdateParticipantsList();
         }
 
-        public override ValueTask OnClientDisconnected(Participant participant)
+        public override ValueTask OnClientDisconnected(Participant participant, string connectionId)
         {
             return UpdateParticipantsList();
         }
 
         private ValueTask UpdateParticipantsList()
         {
-            var participants = _conference.Participants.Values.Select(_mapper.Map<ParticipantDto>).ToImmutableList();
-            return _synchronizedParticipants.Update(participants);
+            var participants = _conferenceManager.GetParticipants(_conferenceId);
+            if (participants == null)
+                return new ValueTask();
+
+            return _synchronizedParticipants.Update(participants.Select(_mapper.Map<ParticipantDto>).ToImmutableList());
         }
     }
 }

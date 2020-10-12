@@ -16,9 +16,19 @@ namespace PaderConference.Infrastructure.Services.Media.Communication
             new RedisChannel("newConferenceCreated", RedisChannel.PatternMode.Literal);
 
         /// <summary>
+        ///     Published once a new conference was added to <see cref="NewConferencesKey" />
+        /// </summary>
+        public static readonly ChannelName ClientDisconnectedChannel = CreateChannelName("::clientDisconnected");
+
+        /// <summary>
         ///     The key where the rtc capabilities of the router are stored, encoded in JSON
         /// </summary>
-        public static ChannelName RtpCapabilitiesKey = CreateChannelName("::routerRtpCapabilities");
+        public static readonly ChannelName RtpCapabilitiesKey = CreateChannelName("::routerRtpCapabilities");
+
+        /// <summary>
+        ///     On send a message back to a connection
+        /// </summary>
+        public static readonly ChannelName OnSendMessageToConnection = CreateChannelName("::sendMessageToConnection");
 
         private static ChannelName CreateChannelName(string postFix)
         {
@@ -36,14 +46,21 @@ namespace PaderConference.Infrastructure.Services.Media.Communication
             ///     Create a new transport
             /// </summary>
             public static readonly ChannelName CreateTransport = CreateChannelName("/req::createTransport");
-        }
 
-        public static class Response
-        {
             /// <summary>
-            ///     Create a new transport
+            ///     Connect a transport
             /// </summary>
-            public static readonly ChannelName CreateTransport = CreateChannelName("/res::createTransport");
+            public static readonly ChannelName ConnectTransport = CreateChannelName("/req::connectTransport");
+
+            /// <summary>
+            ///     On transport produce
+            /// </summary>
+            public static readonly ChannelName TransportProduce = CreateChannelName("/req::transportProduce");
+
+            /// <summary>
+            ///     On transport produce data
+            /// </summary>
+            public static readonly ChannelName TransportProduceData = CreateChannelName("/req::transportProduceData");
         }
 
         public class ChannelName

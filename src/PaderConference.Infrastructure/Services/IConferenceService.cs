@@ -8,7 +8,7 @@ namespace PaderConference.Infrastructure.Services
     {
         ValueTask InitializeAsync();
 
-        ValueTask OnClientDisconnected(Participant participant);
+        ValueTask OnClientDisconnected(Participant participant, string connectionId);
 
         ValueTask OnClientConnected(Participant participant);
     }

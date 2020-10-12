@@ -21,6 +21,8 @@ namespace PaderConference.Infrastructure.Services.Permissions
         public bool CanShareWebcam { get; } = true;
         public bool CanShareAudio { get; } = true;
         public bool CanShareScreen { get; } = true;
+
+        public bool CanSendPrivateChatMessages { get; } = true;
     }
 
     public interface IParticipantPermissions
@@ -30,6 +32,8 @@ namespace PaderConference.Infrastructure.Services.Permissions
         bool CanShareAudio { get; }
 
         bool CanShareScreen { get; }
+
+        bool CanSendPrivateChatMessages { get; }
     }
 
     public static class ParticipantPermissionsExtensions

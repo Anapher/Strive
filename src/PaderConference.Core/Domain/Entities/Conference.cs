@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+﻿// ReSharper disable AutoPropertyCanBeMadeGetOnly.Local
 
 namespace PaderConference.Core.Domain.Entities
 {
@@ -11,26 +11,27 @@ namespace PaderConference.Core.Domain.Entities
             Settings = settings ?? new ConferenceSettings();
         }
 
+#pragma warning disable 8618
+        // ReSharper disable once UnusedMember.Local
+        private Conference()
+        {
+        }
+#pragma warning restore 8618
+
         /// <summary>
         ///     The unique conference id
         /// </summary>
-        public string ConferenceId { get; }
+        public string ConferenceId { get; private set; }
 
         /// <summary>
         ///     The user id of the initiator of this conference
         /// </summary>
-        public string InitiatorUserId { get; }
+        public string InitiatorUserId { get; private set; }
 
         /// <summary>
         ///     The current conference settings
         /// </summary>
-        public ConferenceSettings Settings { get; set; }
-
-        /// <summary>
-        ///     The current participants of this conference
-        /// </summary>
-        public ConcurrentDictionary<string, Participant> Participants { get; } =
-            new ConcurrentDictionary<string, Participant>();
+        public ConferenceSettings Settings { get; private set; }
 
         protected bool Equals(Conference other)
         {

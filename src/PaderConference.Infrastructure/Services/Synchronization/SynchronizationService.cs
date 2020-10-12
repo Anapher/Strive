@@ -14,17 +14,17 @@ namespace PaderConference.Infrastructure.Services.Synchronization
     public class SynchronizationService : ConferenceService, ISynchronizationManager
     {
         private readonly IHubClients _clients;
-        private readonly Conference _conference;
+        private readonly string _conferenceId;
         private readonly IConnectionMapping _connectionMapping;
 
         private readonly ConcurrentDictionary<string, ISynchronizedObject> _registeredObjects =
             new ConcurrentDictionary<string, ISynchronizedObject>();
 
-        public SynchronizationService(IHubClients clients, Conference conference,
+        public SynchronizationService(IHubClients clients, string conferenceId,
             IConnectionMapping connectionMapping)
         {
             _clients = clients;
-            _conference = conference;
+            _conferenceId = conferenceId;
             _connectionMapping = connectionMapping;
         }
 
@@ -56,7 +56,7 @@ namespace PaderConference.Infrastructure.Services.Synchronization
         {
             var patch = JsonPatchFactory.CreatePatch(oldValue, newValue);
 
-            await _clients.Group(_conference.ConferenceId).SendAsync(
+            await _clients.Group(_conferenceId).SendAsync(
                 CoreHubMessages.Response.OnSynchronizedObjectUpdated,
                 new SynchronizedObjectUpdatedDto(name,
                     patch.Operations.Select(x => new SerializableJsonPatchOperation(x)).ToList()));

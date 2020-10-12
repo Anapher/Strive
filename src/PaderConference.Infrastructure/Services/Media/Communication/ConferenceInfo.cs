@@ -1,12 +1,10 @@
-﻿using PaderConference.Core.Domain.Entities;
-
-namespace PaderConference.Infrastructure.Services.Media.Communication
+﻿namespace PaderConference.Infrastructure.Services.Media.Communication
 {
     public class ConferenceInfo
     {
-        public ConferenceInfo(Conference conference)
+        public ConferenceInfo(string conferenceId)
         {
-            Id = conference.ConferenceId;
+            Id = conferenceId;
         }
 
         public string Id { get; set; }

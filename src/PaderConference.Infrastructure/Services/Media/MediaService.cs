@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using PaderConference.Core.Domain.Entities;
+using PaderConference.Infrastructure.Redis;
 using PaderConference.Infrastructure.Services.Media.Communication;
 using PaderConference.Infrastructure.Services.Permissions;
 using PaderConference.Infrastructure.Services.Synchronization;
@@ -12,14 +13,14 @@ namespace PaderConference.Infrastructure.Services.Media
     public class MediaService : ConferenceService
     {
         private readonly IHubClients _clients;
-        private readonly Conference _conference;
+        private readonly string _conferenceId;
         private readonly IPermissionsService _permissionsService;
         private readonly IRedisDatabase _redisDatabase;
 
-        public MediaService(Conference conference, IHubClients clients, ISynchronizationManager synchronizationManager,
+        public MediaService(string conferenceId, IHubClients clients, ISynchronizationManager synchronizationManager,
             IRedisDatabase redisDatabase, IPermissionsService permissionsService)
         {
-            _conference = conference;
+            _conferenceId = conferenceId;
             _clients = clients;
             _redisDatabase = redisDatabase;
             _permissionsService = permissionsService;
@@ -28,37 +29,60 @@ namespace PaderConference.Infrastructure.Services.Media
         public override async ValueTask InitializeAsync()
         {
             await _redisDatabase.ListAddToLeftAsync(RedisCommunication.NewConferencesKey,
-                new ConferenceInfo(_conference));
+                new ConferenceInfo(_conferenceId));
             await _redisDatabase.PublishAsync<object?>(RedisCommunication.NewConferenceChannel, null);
+
+            await _redisDatabase.SubscribeAsync<SendToConnectionDto>(
+                RedisCommunication.OnSendMessageToConnection.GetName(_conferenceId), OnSendMessageToConnection);
+        }
+
+        public override async ValueTask OnClientDisconnected(Participant participant, string connectionId)
+        {
+            var meta = new ConnectionMessageMetadata(_conferenceId, connectionId, participant.ParticipantId);
+
+            await _redisDatabase.PublishAsync(RedisCommunication.ClientDisconnectedChannel.GetName(_conferenceId),
+                new ConnectionMessage<object?>(null, meta));
+        }
+
+        public override async ValueTask DisposeAsync()
+        {
+            await _redisDatabase.UnsubscribeAsync<SendToConnectionDto>(
+                RedisCommunication.OnSendMessageToConnection.GetName(_conferenceId), OnSendMessageToConnection);
+        }
+
+        private async Task OnSendMessageToConnection(SendToConnectionDto arg)
+        {
+            await _clients.Client(arg.ConnectionId).SendAsync(arg.MethodName, arg.Payload);
+        }
+
+        private ConnectionMessageMetadata GetMeta(IServiceMessage message)
+        {
+            return new ConnectionMessageMetadata(_conferenceId, message.Context.ConnectionId,
+                message.Participant.ParticipantId);
+        }
+
+        public async ValueTask<JsonElement> Redirect(IServiceMessage<JsonElement> message,
+            RedisCommunication.ChannelName channelName)
+        {
+            var meta = GetMeta(message);
+            var request = new ConnectionMessage<JsonElement>(message.Payload, meta);
+
+            return await _redisDatabase.InvokeAsync<JsonElement, ConnectionMessage<JsonElement>>(
+                channelName.GetName(_conferenceId), request);
+        }
+
+        public async ValueTask<JsonElement> GetRouterCapabilities(IServiceMessage message)
+        {
+            return await _redisDatabase.GetAsync<JsonElement>(
+                RedisCommunication.RtpCapabilitiesKey.GetName(_conferenceId));
         }
 
         public async ValueTask InitializeConnection(IServiceMessage<JsonElement> message)
         {
-            var meta = new ConnectionMessageMetadata(_conference.ConferenceId, message.Context.ConnectionId,
-                message.Participant.ParticipantId);
+            var meta = GetMeta(message);
             var request = new ConnectionMessage<JsonElement>(message.Payload, meta);
 
-            await _redisDatabase.PublishAsync(
-                RedisCommunication.Request.InitializeConnection.GetName(_conference.ConferenceId),
-                request);
-
-            var info = await _redisDatabase.GetAsync<JsonElement>(
-                RedisCommunication.RtpCapabilitiesKey.GetName(_conference.ConferenceId));
-            await message.Clients.Caller.SendAsync(CoreHubMessages.Response.OnRouterCapabilities, info);
-        }
-
-        public async ValueTask CreateTransport(IServiceMessage<JsonElement> message)
-        {
-            // SECURITY: if participant can produce audio/video
-            if (!(await _permissionsService.GetPermissions(message.Participant)).CanShareMedia()) return;
-
-            var meta = new ConnectionMessageMetadata(_conference.ConferenceId, message.Context.ConnectionId,
-                message.Participant.ParticipantId);
-
-            var request = new ConnectionMessage<JsonElement>(message.Payload, meta);
-
-            await _redisDatabase.PublishAsync(
-                RedisCommunication.Request.CreateTransport.GetName(_conference.ConferenceId),
+            await _redisDatabase.InvokeAsync(RedisCommunication.Request.InitializeConnection.GetName(_conferenceId),
                 request);
         }
     }

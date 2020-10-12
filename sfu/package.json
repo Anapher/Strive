@@ -6,7 +6,8 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "dev": "tsnd --respawn --files -r @babel/register --inspect -- src/index.ts",
+    "debug": "ts-node-dev --inspect --respawn --transpileOnly src/index.ts",
+    "dev": "@powershell -Command $env:DEBUG='paderconference-mediasoup*'; tsnd --respawn --files -r @babel/register --inspect -- src/index.ts",
     "build": "babel ./src -d ./dist --extensions .ts --copy-files",
     "typecheck": "tsc",
     "start": "node dist/index.js",
@@ -32,6 +33,7 @@
     "@babel/preset-typescript": "^7.10.4",
     "@babel/register": "^7.11.5",
     "@types/debug": "^4.1.5",
+    "@types/lodash": "^4.14.162",
     "@types/node": "^14.6.3",
     "@typescript-eslint/eslint-plugin": "^4.0.1",
     "@typescript-eslint/parser": "^4.0.1",
@@ -51,6 +53,7 @@
     "@types/ioredis": "^4.17.4",
     "debug": "^4.2.0",
     "ioredis": "^4.17.3",
+    "lodash": "^4.17.20",
     "mediasoup": "3"
   }
 }

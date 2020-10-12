@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.Extensions.Logging;
-using PaderConference.Core.Domain.Entities;
-using PaderConference.Infrastructure.Extensions;
+using PaderConference.Infrastructure.Services.Permissions;
 
 namespace PaderConference.Infrastructure.Services.Chat
 {
@@ -18,10 +18,13 @@ namespace PaderConference.Infrastructure.Services.Chat
             _logger = logger;
         }
 
-        protected override ValueTask<ChatService> ServiceFactory(Conference conference,
+        protected override async ValueTask<ChatService> ServiceFactory(string conferenceId,
             IEnumerable<IConferenceServiceManager> services)
         {
-            return new ChatService(conference, _mapper, _logger).ToValueTask();
+            var permissionsService = await services.OfType<IConferenceServiceManager<PermissionsService>>().First()
+                .GetService(conferenceId, services);
+
+            return new ChatService(conferenceId, _mapper, permissionsService, _logger);
         }
     }
 }

@@ -1,10 +1,12 @@
-import { Button, makeStyles } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core';
 import React, { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectAccessToken } from 'src/features/auth/selectors';
 import { getMediasoup, RootState } from 'src/store';
 import { send } from 'src/store/conference-signal/actions';
 import { initialize } from 'src/store/webrtc/actions';
+import useConsumers from 'src/store/webrtc/useConsumers';
+import { useScreen } from 'src/store/webrtc/useScreen';
 import MediaControls from './MediaControls';
 
 const useStyles = makeStyles({
@@ -29,19 +31,6 @@ export default function Media() {
    useEffect(() => {
       if (connected) {
          dispatch(initialize());
-         // const mediasoup = getMediasoup();
-         // rtc.createConnection();
-
-         // const conn = rtc.getConnection()!;
-         // conn.ontrack = (e) => {
-         //    console.log('track event muted = ' + e.track.muted);
-         //    e.track.onunmute = () => {
-         //       console.log('track unmuted');
-         //       console.log(e);
-
-         //       videoElem.current!.srcObject = new MediaStream([e.track]);
-         //    };
-         // };
       }
    }, [connected]);
 
@@ -51,12 +40,19 @@ export default function Media() {
       }
    }, [mediaInfo?.isScreenshareActivated]);
 
-   const startStream = async () => {
-      // const constraints: MediaStreamConstraints = { video: { height: { ideal: 720 }, frameRate: 25 } };
-      // const stream = (await (navigator.mediaDevices as any).getDisplayMedia(constraints)) as MediaStream;
-      // videoElem.current!.srcObject = stream;
-      // stream.getTracks().forEach((track) => getRtc().getConnection()?.addTrack(track, stream));
-   };
+   const { enable, stream } = useScreen(getMediasoup());
+   const consumers = useConsumers(getMediasoup());
+
+   useEffect(() => {
+      if (consumers.length > 0) {
+         console.log(consumers);
+
+         const stream = new MediaStream();
+         stream.addTrack(consumers[0].track);
+
+         videoElem.current!.srcObject = stream;
+      }
+   }, [consumers]);
 
    return (
       <div className={classes.root}>
@@ -68,7 +64,7 @@ export default function Media() {
                ref={videoElem}
                style={{ backgroundColor: 'black', marginBottom: 32 }}
             />
-            <MediaControls startDesktopRecording={startStream} />
+            <MediaControls startDesktopRecording={enable} />
          </div>
       </div>
    );

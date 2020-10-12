@@ -2,12 +2,20 @@ import Redis from 'ioredis';
 import * as mediasoup from 'mediasoup';
 import { Worker } from 'mediasoup/lib/types';
 import config from './config';
-import createConference from './lib/conference-factory';
+import conferenceFactory from './lib/conference-factory';
 import ConferenceManager from './lib/conference-manager';
 import Connection from './lib/connection';
 import Logger from './lib/Logger';
-import { ConferenceInfo, CreateTransportRequest, InitializeConnectionRequest } from './lib/types';
-import { channels, newConferencesKey, rtpCapabilitiesKey } from './redis';
+import {
+   CallbackMessage,
+   ConferenceInfo,
+   ConnectionMessage,
+   ConnectTransportRequest,
+   CreateTransportRequest,
+   InitializeConnectionRequest,
+   TransportProduceRequest,
+} from './lib/types';
+import { channels, newConferencesKey, onClientDisconnected, rtpCapabilitiesKey } from './redis-communication';
 
 const logger = new Logger();
 
@@ -25,6 +33,8 @@ let nextMediasoupWorkerIdx = 0;
 
 const conferenceManager = new ConferenceManager();
 
+logger.info('Starting server...');
+
 main();
 
 async function main() {
@@ -32,52 +42,97 @@ async function main() {
    await runMediasoupWorkers();
 
    await subscribeRedis();
+
+   initializeExistingConferences();
+}
+
+function initializeExistingConferences() {
+   redis.hgetall('conferences', (err, result) => {
+      for (const key in result) {
+         initializeConference({ id: key });
+      }
+   });
+}
+
+async function initializeConference(conferenceInfo: ConferenceInfo) {
+   const worker = getMediasoupWorker();
+   const conference = await conferenceFactory(conferenceInfo, worker, redis);
+   conferenceManager.createConference(conference);
+
+   await redis.set(rtpCapabilitiesKey.getName(conferenceInfo.id), JSON.stringify(conference.routerCapabilities));
+
+   logger.info(`Added new conference ${conferenceInfo.id}`);
+
+   // subscribe to all requests targeting this conference
+   subRedis.psubscribe(`${conference.conferenceId}/req::*`);
+   subRedis.subscribe(onClientDisconnected.getName(conferenceInfo.id));
 }
 
 async function subscribeRedis() {
    subRedis.subscribe(channels.newConferenceCreated);
 
+   subRedis.on('pmessage', async (_, channel, message) => {
+      logger.debug('Redis pmessage in channel %s received: %s', channel, message);
+
+      if (channels.request.initializeConnection.match(channel)) {
+         const { callbackChannel, payload: request }: CallbackMessage<InitializeConnectionRequest> = JSON.parse(
+            message,
+         );
+
+         const conference = conferenceManager.getConference(request.meta.conferenceId);
+
+         logger.debug('Initialize connection in conference %s', conference.conferenceId);
+
+         const connection = new Connection(
+            request.payload.rtpCapabilities,
+            request.payload.sctpCapabilities,
+            request.meta.connectionId,
+            request.meta.participantId,
+         );
+
+         conference.addConnection(connection);
+
+         redis.publish(callbackChannel, 'null');
+      } else if (channels.request.createTransport.match(channel)) {
+         const { payload: request, callbackChannel }: CallbackMessage<CreateTransportRequest> = JSON.parse(message);
+
+         const conference = conferenceManager.getConference(request.meta.conferenceId);
+         const response = await conference.createTransport(request);
+         await redis.publish(callbackChannel, JSON.stringify(response));
+      } else if (channels.request.connectTransport.match(channel)) {
+         const { payload: request, callbackChannel }: CallbackMessage<ConnectTransportRequest> = JSON.parse(message);
+
+         const conference = conferenceManager.getConference(request.meta.conferenceId);
+         await conference.connectTransport(request);
+
+         redis.publish(callbackChannel, 'null');
+      } else if (channels.request.transportProduce.match(channel)) {
+         const { payload: request, callbackChannel }: CallbackMessage<TransportProduceRequest> = JSON.parse(message);
+
+         const conference = conferenceManager.getConference(request.meta.conferenceId);
+         const response = await conference.transportProduce(request);
+
+         redis.publish(callbackChannel, JSON.stringify(response));
+      }
+   });
+
    subRedis.on('message', async (channel: string, message: string) => {
+      logger.debug('Redis message in channel %s received: %s', channel, message);
+
       switch (channel) {
          case channels.newConferenceCreated:
             const conferenceStr = await redis.lpop(newConferencesKey);
             if (conferenceStr) {
                const conferenceInfo: ConferenceInfo = JSON.parse(conferenceStr);
-
-               const worker = getMediasoupWorker();
-               const conference = await createConference(conferenceInfo, worker);
-               conferenceManager.createConference(conference);
-
-               await redis.set(rtpCapabilitiesKey(conferenceInfo.id), JSON.stringify(conference.routerCapabilities));
-
-               logger.info(`Added new conference ${conferenceInfo.id}`);
-
-               // subscribe to all requests targeting this conference
-               subRedis.psubscribe(`${conference.conferenceId}/req::*`);
+               initializeConference(conferenceInfo);
             }
             break;
          default:
-            if (channels.request.initializeConnection.match(channel)) {
-               const request: InitializeConnectionRequest = JSON.parse(message);
-               const conference = conferenceManager.getConference(request.meta.conferenceId);
-
-               const connection = new Connection(
-                  request.payload.rtpCapabilities,
-                  request.payload.sctpCapabilities,
-                  request.meta.connectionId,
-                  request.meta.participantId,
-               );
-
-               conference.addConnection(connection);
-            } else if (channels.request.createTransport.match(channel)) {
-               const request: CreateTransportRequest = JSON.parse(message);
+            if (onClientDisconnected.match(channel)) {
+               const request: ConnectionMessage<undefined> = JSON.parse(message);
 
                const conference = conferenceManager.getConference(request.meta.conferenceId);
-               const response = await conference.createTransport(request);
-               await redis.publish(
-                  channels.response.createTransport.getName(request.meta.conferenceId),
-                  JSON.stringify(response),
-               );
+               conference.removeConnection(request.meta.connectionId);
             }
             break;
       }

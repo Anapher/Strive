@@ -5,17 +5,13 @@ namespace PaderConference.Core.Domain.Entities
 {
     public class Participant
     {
-        public Participant(string participantId, string? displayName, string role, DateTimeOffset timestamp,
-            Conference conference)
+        public Participant(string participantId, string? displayName, string role, DateTimeOffset timestamp)
         {
             ParticipantId = participantId;
             DisplayName = displayName;
             Role = role;
             Timestamp = timestamp;
-            Conference = conference;
         }
-
-        public Conference Conference { get; }
 
         public string ParticipantId { get; }
 

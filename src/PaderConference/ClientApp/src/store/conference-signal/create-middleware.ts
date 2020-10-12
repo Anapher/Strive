@@ -7,7 +7,12 @@ import { Options } from './types';
 
 const defaultEvents: string[] = ['OnSynchronizeObjectState', 'OnSynchronizedObjectUpdated'];
 
-export default (options: Options): Middleware => {
+type SignalRResult = {
+   middleware: Middleware;
+   getConnection: () => HubConnection | undefined;
+};
+
+export default (options: Options): SignalRResult => {
    const { url } = options;
 
    let connection: HubConnection | undefined;
@@ -82,7 +87,7 @@ export default (options: Options): Middleware => {
    };
 
    // Middleware function.
-   return (store: MiddlewareAPI) => (next) => (action: PayloadAction) => {
+   const middleware: Middleware = (store: MiddlewareAPI) => (next) => (action: PayloadAction) => {
       const { type } = action;
 
       // Check if action type matches prefix
@@ -100,4 +105,8 @@ export default (options: Options): Middleware => {
 
       return next(action);
    };
+
+   const getConnection = () => connection;
+
+   return { middleware, getConnection };
 };

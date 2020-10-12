@@ -1,25 +1,34 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Interfaces.Services;
+using StackExchange.Redis.Extensions.Core.Abstractions;
 
 namespace PaderConference.Infrastructure.Conferencing
 {
     public class ConferenceManager : IConferenceManager
     {
+        private const string RedisConferencesKey = "conferences";
+        private readonly IRedisDatabase _database;
         private readonly ILogger<ConferenceManager> _logger;
 
-        public ConferenceManager(ILogger<ConferenceManager> logger)
+        public ConferenceManager(IRedisDatabase database, ILogger<ConferenceManager> logger)
         {
+            _database = database;
             _logger = logger;
         }
 
-        public ConcurrentDictionary<string, Conference> Conferences { get; } =
-            new ConcurrentDictionary<string, Conference>();
+        public ConcurrentDictionary<string, string> ParticipantToConference { get; } =
+            new ConcurrentDictionary<string, string>();
 
-        public ValueTask<Conference> CreateConference(string userId, ConferenceSettings? settings)
+        public ConcurrentDictionary<string, ConcurrentDictionary<string, Participant>> ConferenceParticipants { get; } =
+            new ConcurrentDictionary<string, ConcurrentDictionary<string, Participant>>();
+
+        public async ValueTask<Conference> CreateConference(string userId, ConferenceSettings? settings)
         {
             var conferenceId = Guid.NewGuid().ToString("D");
             var conference = new Conference(conferenceId, userId, settings);
@@ -27,42 +36,70 @@ namespace PaderConference.Infrastructure.Conferencing
             _logger.LogDebug("Creating new conference with id {conferenceId} initiated by {userId}", conferenceId,
                 userId);
 
-            if (!Conferences.TryAdd(conferenceId, conference))
+            if (!await _database.HashSetAsync(RedisConferencesKey, conferenceId, conference))
             {
                 _logger.LogCritical("A conference id ({id}) was generated that already exists. This must not happen.",
                     conferenceId);
-                return CreateConference(userId, settings);
+                return await CreateConference(userId, settings);
             }
 
-            return new ValueTask<Conference>(conference);
+            return conference;
         }
 
-        public ValueTask RemoveParticipant(Participant participant)
+        public async ValueTask<Conference?> GetConference(string conferenceId)
         {
-            var conference = participant.Conference;
-            conference.Participants.TryRemove(participant.ParticipantId, out _);
-
-            return new ValueTask();
+            return await _database.HashGetAsync<Conference>(RedisConferencesKey, conferenceId);
         }
 
-        public ValueTask<Participant> Participate(string conferenceId, string userId, string role, string? displayName)
+        public ICollection<Participant>? GetParticipants(string conferenceId)
         {
-            if (!Conferences.TryGetValue(conferenceId, out var conference))
+            if (ConferenceParticipants.TryGetValue(conferenceId, out var participants))
+                return participants.Values;
+
+            return ImmutableList<Participant>.Empty;
+        }
+
+        public async ValueTask<Participant> Participate(string conferenceId, string userId, string role,
+            string? displayName)
+        {
+            var conference = await GetConference(conferenceId);
+            if (conference == null)
                 throw new InvalidOperationException($"The conference with id {conferenceId} was not found.");
 
-            var participant = new Participant(userId, displayName, role, DateTimeOffset.UtcNow, conference);
+            var participant = new Participant(userId, displayName, role, DateTimeOffset.UtcNow);
 
             _logger.LogDebug("A new user (display name: {name}) want's to participate in {conferenceId}", displayName,
                 conferenceId);
 
-            if (!conference.Participants.TryAdd(userId, participant))
+            var participants =
+                ConferenceParticipants.GetOrAdd(conferenceId, _ => new ConcurrentDictionary<string, Participant>());
+
+            if (!participants.TryAdd(userId, participant))
             {
                 _logger.LogCritical("A participant id ({id}) was generated that already exists. This must not happen.",
                     userId);
-                return Participate(conferenceId, userId, role, displayName);
+                return await Participate(conferenceId, userId, role, displayName);
             }
 
-            return new ValueTask<Participant>(participant);
+            ParticipantToConference.TryAdd(participant.ParticipantId, conferenceId);
+
+            return participant;
+        }
+
+        public ValueTask RemoveParticipant(Participant participant)
+        {
+            if (!ParticipantToConference.TryRemove(participant.ParticipantId, out var conferenceId))
+                throw new InvalidOperationException("The participant wasn't in a conference.");
+
+            if (ConferenceParticipants.TryGetValue(conferenceId, out var participants))
+                participants.TryRemove(participant.ParticipantId, out _);
+
+            return new ValueTask();
+        }
+
+        public string GetConferenceOfParticipant(Participant participant)
+        {
+            return ParticipantToConference[participant.ParticipantId];
         }
     }
 }

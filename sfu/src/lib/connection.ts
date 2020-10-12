@@ -1,4 +1,4 @@
-import { RtpCapabilities, SctpCapabilities, Transport } from 'mediasoup/lib/types';
+import { Consumer, Producer, RtpCapabilities, SctpCapabilities, Transport } from 'mediasoup/lib/types';
 
 export default class Connection {
    constructor(
@@ -13,4 +13,6 @@ export default class Connection {
    ) {}
 
    public transport: Map<string, Transport> = new Map();
+   public producers: Map<string, Producer> = new Map();
+   public consumers: Map<string, Consumer> = new Map();
 }

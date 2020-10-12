@@ -14,6 +14,7 @@ using PaderConference.Infrastructure.Hubs.Dto;
 using PaderConference.Infrastructure.Services;
 using PaderConference.Infrastructure.Services.Chat;
 using PaderConference.Infrastructure.Services.Media;
+using PaderConference.Infrastructure.Services.Media.Communication;
 using PaderConference.Infrastructure.Sockets;
 
 namespace PaderConference.Infrastructure.Hubs
@@ -77,8 +78,8 @@ namespace PaderConference.Infrastructure.Hubs
                 await Groups.AddToGroupAsync(Context.ConnectionId, conferenceId);
 
                 // initialize all services before submitting events
-                var services =
-                    _conferenceServices.Select(x => x.GetService(participant.Conference, _conferenceServices)).ToList();
+                var services = _conferenceServices.Select(x => x.GetService(conferenceId, _conferenceServices))
+                    .ToList();
                 foreach (var valueTask in services) await valueTask;
 
                 foreach (var service in services)
@@ -91,46 +92,82 @@ namespace PaderConference.Infrastructure.Hubs
             if (!_connectionMapping.Connections.TryGetValue(Context.ConnectionId, out var participant))
                 return;
 
+            var conferenceId = _conferenceManager.GetConferenceOfParticipant(participant);
+
             _connectionMapping.Remove(Context.ConnectionId);
             await _conferenceManager.RemoveParticipant(participant);
 
             foreach (var service in _conferenceServices)
-                await (await service.GetService(participant.Conference, _conferenceServices))
-                    .OnClientDisconnected(participant);
+                await (await service.GetService(conferenceId, _conferenceServices))
+                    .OnClientDisconnected(participant, Context.ConnectionId);
         }
 
-        private ValueTask<T> GetConferenceService<T>(Conference conference) where T : IConferenceService
+        private ValueTask<T> GetConferenceService<T>(Participant participant) where T : IConferenceService
         {
+            var conferenceId = _conferenceManager.GetConferenceOfParticipant(participant);
+
             return _conferenceServices.OfType<IConferenceServiceManager<T>>().First()
-                .GetService(conference, _conferenceServices);
+                .GetService(conferenceId, _conferenceServices);
         }
 
         public async Task SendChatMessage(SendChatMessageDto dto)
         {
             if (GetMessage(dto, out var message))
-                await (await GetConferenceService<ChatService>(message.Participant.Conference))
+                await (await GetConferenceService<ChatService>(message.Participant))
                     .SendMessage(message);
         }
 
         public async Task RequestChat()
         {
             if (GetMessage(out var message))
-                await (await GetConferenceService<ChatService>(message.Participant.Conference))
+                await (await GetConferenceService<ChatService>(message.Participant))
                     .RequestAllMessages(message);
+        }
+
+        public async Task<JsonElement?> RequestRouterCapabilities()
+        {
+            if (GetMessage(out var message))
+                return await (await GetConferenceService<MediaService>(message.Participant)).GetRouterCapabilities(
+                    message);
+            return null;
         }
 
         public async Task InitializeConnection(JsonElement element)
         {
             if (GetMessage(element, out var message))
-                await (await GetConferenceService<MediaService>(message.Participant.Conference))
-                    .InitializeConnection(message);
+                await (await GetConferenceService<MediaService>(message.Participant)).InitializeConnection(message);
         }
 
-        public async Task CreateTransport(JsonElement element)
+        public async Task<JsonElement?> CreateWebRtcTransport(JsonElement element)
         {
             if (GetMessage(element, out var message))
-                await (await GetConferenceService<MediaService>(message.Participant.Conference))
-                    .CreateTransport(message);
+                return await (await GetConferenceService<MediaService>(message.Participant)).Redirect(
+                    message, RedisCommunication.Request.CreateTransport);
+            return null;
+        }
+
+        public async Task<JsonElement?> ConnectWebRtcTransport(JsonElement element)
+        {
+            if (GetMessage(element, out var message))
+                return await (await GetConferenceService<MediaService>(message.Participant)).Redirect(
+                    message, RedisCommunication.Request.ConnectTransport);
+            return null;
+        }
+
+        public async Task<JsonElement?> ProduceWebRtcTransport(JsonElement element)
+        {
+            if (GetMessage(element, out var message))
+                return await (await GetConferenceService<MediaService>(message.Participant)).Redirect(
+                    message, RedisCommunication.Request.TransportProduce);
+            return null;
+        }
+
+        public async Task<JsonElement?> ProduceDataWebRtcTransport(JsonElement element)
+        {
+            if (GetMessage(element, out var message))
+                return await (await GetConferenceService<MediaService>(message.Participant)).Redirect(
+                    message, RedisCommunication.Request.TransportProduceData);
+            return null;
         }
     }
 }

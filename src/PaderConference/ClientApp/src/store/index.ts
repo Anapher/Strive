@@ -4,12 +4,12 @@ import rootReducer from './root-reducer';
 import { loadState, persistState } from './storage';
 import createRtcMiddleware from './webrtc/RtcManager';
 
-const signalrMiddleware = createMiddleware({
+const { middleware: signalrMiddleware, getConnection } = createMiddleware({
    getAccessToken: (state) => state.auth.token!.accessToken,
    url: '/signalr',
 });
 
-const { getSoupManager, middleware: rtcMiddleware } = createRtcMiddleware();
+const { getSoupManager, middleware: rtcMiddleware } = createRtcMiddleware(getConnection);
 
 // configure middlewares
 const middlewares = [rtcMiddleware, signalrMiddleware];

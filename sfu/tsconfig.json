@@ -15,7 +15,8 @@
       "noImplicitAny": true,
       "resolveJsonModule": true,
       /* Advanced Options */
-      "forceConsistentCasingInFileNames": true /* Disallow inconsistently-cased references to the same file. */
+      "forceConsistentCasingInFileNames": true /* Disallow inconsistently-cased references to the same file. */,
+      "downlevelIteration": true
    },
    "include": ["src"]
 }
