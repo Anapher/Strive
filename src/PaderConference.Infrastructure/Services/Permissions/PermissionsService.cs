@@ -1,39 +1,33 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Immutable;
+using System.Text.Json;
+using System.Threading.Tasks;
 using PaderConference.Core.Domain.Entities;
 
 namespace PaderConference.Infrastructure.Services.Permissions
 {
     public interface IPermissionsService
     {
-        ValueTask<IParticipantPermissions> GetPermissions(Participant participant);
+        ValueTask<IPermissionStack> GetPermissions(Participant participant);
     }
 
     public class PermissionsService : ConferenceService, IPermissionsService
     {
-        public ValueTask<IParticipantPermissions> GetPermissions(Participant participant)
+        public PermissionsService()
         {
-            return new ValueTask<IParticipantPermissions>(new AllPermissions());
+            ConferencePermissions = ImmutableDictionary<string, JsonElement>.Empty;
         }
-    }
 
-    public class AllPermissions : IParticipantPermissions
-    {
-        public bool CanShareWebcam { get; } = true;
-        public bool CanShareAudio { get; } = true;
-        public bool CanShareScreen { get; } = true;
+        public IImmutableDictionary<string, JsonElement> ConferencePermissions { get; }
 
-        public bool CanSendPrivateChatMessages { get; } = true;
-    }
+        public ValueTask<IPermissionStack> GetPermissions(Participant participant)
+        {
+            return new ValueTask<IPermissionStack>(new PermissionStack());
+        }
 
-    public interface IParticipantPermissions
-    {
-        bool CanShareWebcam { get; }
-
-        bool CanShareAudio { get; }
-
-        bool CanShareScreen { get; }
-
-        bool CanSendPrivateChatMessages { get; }
+        public override ValueTask InitializeAsync()
+        {
+            return base.InitializeAsync();
+        }
     }
 
     public static class ParticipantPermissionsExtensions

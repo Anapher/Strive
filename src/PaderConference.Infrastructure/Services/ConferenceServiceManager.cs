@@ -1,13 +1,15 @@
 ﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using PaderConference.Infrastructure.Extensions;
+using Nito.AsyncEx;
 
 namespace PaderConference.Infrastructure.Services
 {
     public abstract class ConferenceServiceManager<TService> : IConferenceServiceManager<TService>
         where TService : IConferenceService
     {
+        private readonly AsyncLock _serviceCreationLock = new AsyncLock();
+
         private readonly ConcurrentDictionary<string, TService> _services =
             new ConcurrentDictionary<string, TService>();
 
@@ -30,14 +32,17 @@ namespace PaderConference.Infrastructure.Services
         {
             if (!_services.TryGetValue(conferenceId, out var service))
             {
-                service = await ServiceFactory(conferenceId, services);
-                var actualService = _services.GetOrAdd(conferenceId, service);
+                // double check lock
+                using (await _serviceCreationLock.LockAsync())
+                {
+                    if (!_services.TryGetValue(conferenceId, out service))
+                    {
+                        service = await ServiceFactory(conferenceId, services);
+                        await service.InitializeAsync();
+                    }
+                }
 
-                if (ReferenceEquals(service, actualService))
-                    await service.InitializeAsync();
-                else service.DisposeAsync().Forget();
-
-                return actualService;
+                return service;
             }
 
             return service;

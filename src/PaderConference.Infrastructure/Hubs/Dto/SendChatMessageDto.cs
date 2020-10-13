@@ -6,6 +6,8 @@ namespace PaderConference.Infrastructure.Hubs.Dto
     {
         public string? Message { get; set; }
 
+        public bool SendAnonymously { get; set; }
+
         public ChatMessageFilter? Filter { get; set; }
     }
 }
