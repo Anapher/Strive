@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Operations;
@@ -26,20 +27,11 @@ namespace JsonPatchGenerator
 
         private static void FillPatchForObject(object original, object modified, JsonPatchDocument patch, string path)
         {
-            var type = original.GetType();
-            if (type != modified.GetType())
-                throw new ArgumentException("Both objects must have the same type.");
-
-            foreach (var property in type.GetProperties())
-            {
-                var originalValue = property.GetValue(original);
-                var newValue = property.GetValue(modified);
-
-                PatchValue(originalValue, newValue, patch, $"{path}/{property.Name}");
-            }
+            foreach (var property in CompareObjects(original, modified))
+                PatchValue(property.OriginalValue, property.NewValue, patch, $"{path}/{property.Name}");
         }
 
-        private static void PatchValue(object originalValue, object newValue, JsonPatchDocument patch, string path)
+        private static void PatchValue(object? originalValue, object? newValue, JsonPatchDocument patch, string path)
         {
             if (originalValue == newValue)
                 return;
@@ -117,17 +109,26 @@ namespace JsonPatchGenerator
                             }
                         }
 
+                        bool ComparePaths(string pathAdd, string pathRemove)
+                        {
+                            if (pathAdd == pathRemove) return true;
+                            if (pathAdd.EndsWith("-") &&
+                                pathRemove.Split('/').Last() == (originalItems.Count - 1).ToString()) return true;
+
+                            return false;
+                        }
+
                         // optimize remove & add on the same index to replace
                         foreach (var addOp in patch.Operations.Where(x =>
                             x.OperationType == OperationType.Add && x.path.StartsWith(path + "/")).ToList())
                         {
                             var removeOp = patch.Operations.FirstOrDefault(x =>
-                                x.path == addOp.path && x.OperationType == OperationType.Remove);
+                                ComparePaths(addOp.path, x.path) && x.OperationType == OperationType.Remove);
                             if (removeOp != null)
                             {
                                 patch.Operations.Remove(addOp);
                                 patch.Operations.Remove(removeOp);
-                                patch.Replace(addOp.path, addOp.value);
+                                patch.Replace(removeOp.path, addOp.value);
                             }
                         }
 
@@ -141,6 +142,55 @@ namespace JsonPatchGenerator
                 // Replace values directly
                 patch.Replace(path, newValue);
             }
+        }
+
+        private static IEnumerable<ObjectComparisonValue> CompareObjects(object original, object modified)
+        {
+            var type = original.GetType();
+            if (type != modified.GetType())
+                throw new ArgumentException("Both objects must have the same type.");
+
+            if (typeof(IDictionary).IsAssignableFrom(type))
+            {
+                var originalDict = (IDictionary) original;
+                var modifiedDict = (IDictionary) modified;
+
+                var keys = new HashSet<object>(
+                    originalDict.Keys.Cast<object>().Concat(modifiedDict.Keys.Cast<object>()));
+
+                foreach (object key in keys)
+                {
+                    var originalValue = originalDict.Contains(key) ? originalDict[key] : null;
+                    var newValue = modifiedDict.Contains(key) ? modifiedDict[key] : null;
+
+                    yield return new ObjectComparisonValue(key.ToString(), originalValue, newValue);
+                }
+            }
+            else
+            {
+                foreach (var property in type.GetProperties())
+                {
+                    var originalValue = property.GetValue(original);
+                    var newValue = property.GetValue(modified);
+
+                    yield return new ObjectComparisonValue(property.Name, originalValue, newValue);
+                }
+            }
+        }
+
+        private struct ObjectComparisonValue
+        {
+            public ObjectComparisonValue(string name, object? originalValue, object? newValue)
+            {
+                Name = name;
+                OriginalValue = originalValue;
+                NewValue = newValue;
+            }
+
+            public string Name { get; }
+
+            public object? OriginalValue { get; }
+            public object? NewValue { get; }
         }
     }
 }

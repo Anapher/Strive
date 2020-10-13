@@ -1,17 +1,19 @@
-﻿using System.Collections.Immutable;
+﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using PaderConference.Core.Domain.Entities;
+using PaderConference.Infrastructure.Extensions;
 
 namespace PaderConference.Infrastructure.Services.Permissions
 {
-    public interface IPermissionsService
-    {
-        ValueTask<IPermissionStack> GetPermissions(Participant participant);
-    }
-
     public class PermissionsService : ConferenceService, IPermissionsService
     {
+        private readonly ConcurrentBag<FetchPermissionsDelegate> _fetchPermissionsDelegates =
+            new ConcurrentBag<FetchPermissionsDelegate>();
+
         public PermissionsService()
         {
             ConferencePermissions = ImmutableDictionary<string, JsonElement>.Empty;
@@ -19,22 +21,30 @@ namespace PaderConference.Infrastructure.Services.Permissions
 
         public IImmutableDictionary<string, JsonElement> ConferencePermissions { get; }
 
-        public ValueTask<IPermissionStack> GetPermissions(Participant participant)
+        public async ValueTask<IPermissionStack> GetPermissions(Participant participant)
         {
-            return new ValueTask<IPermissionStack>(new PermissionStack());
+            var layers = new List<PermissionLayer>();
+            foreach (var fetchPermissionsDelegate in _fetchPermissionsDelegates)
+                layers.AddRange(await fetchPermissionsDelegate(participant));
+
+            return new PermissionStack(layers.OrderBy(x => x.Order).Select(x => x.Permissions).ToList());
+        }
+
+        public void RegisterLayerProvider(FetchPermissionsDelegate fetchPermissions)
+        {
+            _fetchPermissionsDelegates.Add(fetchPermissions);
         }
 
         public override ValueTask InitializeAsync()
         {
-            return base.InitializeAsync();
-        }
-    }
+            RegisterLayerProvider(FetchConferencePermissions);
 
-    public static class ParticipantPermissionsExtensions
-    {
-        public static bool CanShareMedia(this IParticipantPermissions permissions)
+            return new ValueTask();
+        }
+
+        private ValueTask<IEnumerable<PermissionLayer>> FetchConferencePermissions(Participant participant)
         {
-            return permissions.CanShareAudio || permissions.CanShareWebcam || permissions.CanShareScreen;
+            return new ValueTask<IEnumerable<PermissionLayer>>(new PermissionLayer(20, ConferencePermissions).Yield());
         }
     }
 }

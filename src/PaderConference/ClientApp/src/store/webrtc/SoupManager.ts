@@ -80,9 +80,12 @@ export class SoupManager {
    public sendTransport: Transport | null = null;
    public receiveTransport: Transport | null = null;
 
-   public async initializeDevice(): Promise<void> {
+   public async initializeDevice(): Promise<boolean> {
       const routerRtpCapabilities = await this.connection.invoke<RtpCapabilities>('RequestRouterCapabilities');
+      if (!routerRtpCapabilities) return false;
+
       await this.device.load({ routerRtpCapabilities });
+      return true;
    }
 
    public async createSendTransport(): Promise<Transport> {

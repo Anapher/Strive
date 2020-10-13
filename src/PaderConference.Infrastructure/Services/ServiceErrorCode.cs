@@ -9,6 +9,10 @@ namespace PaderConference.Infrastructure.Services
         Chat_PermissionDenied_SendMessage = 1000001,
         Chat_PermissionDenied_SendAnonymousMessage = 1000002,
         Chat_PermissionDenied_SendPrivateMessage = 1000002,
-        Chat_InvalidFilter = 1000003
+        Chat_InvalidFilter = 1000003,
+
+        // Rooms
+        Rooms_SwitchRoomFailed = 1000100,
+        Rooms_SwitchRoomDenied = 1000101
     }
 }

@@ -51,34 +51,53 @@ namespace PaderConference.Infrastructure.Services.Chat
                 synchronizationManager.Register("chatInfo", new ChatSynchronizedObject(ImmutableList<string>.Empty));
             _refreshUsersTypingTimer = new Timer();
             _refreshUsersTypingTimer.Elapsed += OnRefreshUsersTyping;
+            _refreshUsersTypingTimer.Interval = _options.CancelParticipantIsTypingInterval * 1000;
         }
 
         public override async ValueTask OnClientDisconnected(Participant participant, string connectionId)
         {
-            lock (_currentlyTypingLock)
+            using (_logger.BeginScope("OnClientDisconnected()"))
+            using (_logger.BeginScope(new Dictionary<string, object>
+                {{"connectionId", connectionId}, {"participantId", participant.ParticipantId}}))
             {
-                if (!_currentlyTyping.Remove(participant.ParticipantId)) return;
-            }
+                lock (_currentlyTypingLock)
+                {
+                    if (!_currentlyTyping.Remove(participant.ParticipantId)) return;
+                }
 
-            await UpdateUsersTyping();
+                await UpdateUsersTyping();
+            }
         }
 
         public async ValueTask SetUserIsTyping(IServiceMessage<bool> serviceMessage)
         {
-            lock (_currentlyTypingLock)
+            using (_logger.BeginScope("SendMessage()"))
+            using (_logger.BeginScope(serviceMessage.GetScopeData()))
             {
-                if (serviceMessage.Payload)
-                {
-                    var now = DateTimeOffset.UtcNow;
-                    _currentlyTyping[serviceMessage.Participant.ParticipantId] = now;
-                }
-                else
-                {
-                    if (!_currentlyTyping.Remove(serviceMessage.Participant.ParticipantId)) return;
-                }
-            }
+                _logger.LogDebug("is typing: {typing}", serviceMessage.Payload);
 
-            await UpdateUsersTyping();
+                lock (_currentlyTypingLock)
+                {
+                    if (serviceMessage.Payload)
+                    {
+                        var now = DateTimeOffset.UtcNow;
+                        _currentlyTyping[serviceMessage.Participant.ParticipantId] = now;
+                        _logger.LogDebug("Update participant currently typing to {time}", now);
+                    }
+                    else
+                    {
+                        if (!_currentlyTyping.Remove(serviceMessage.Participant.ParticipantId))
+                        {
+                            _logger.LogDebug("Participant did not exist in currentlyTyping, return");
+                            return;
+                        }
+
+                        _logger.LogDebug("Removed participant from currently typing.");
+                    }
+                }
+
+                await UpdateUsersTyping();
+            }
         }
 
         public async ValueTask SendMessage(IServiceMessage<SendChatMessageDto> message)
@@ -168,37 +187,51 @@ namespace PaderConference.Infrastructure.Services.Chat
 
         private async ValueTask UpdateUsersTyping()
         {
-            IImmutableList<string> usersCurrentlyTyping;
-
-            lock (_currentlyTypingLock)
+            using (_logger.BeginScope("UpdateUsersTyping()"))
             {
-                // query all users that are currently typing and order them
-                usersCurrentlyTyping = _currentlyTyping.Keys.OrderBy(x => x).ToImmutableList();
-            }
+                IImmutableList<string> usersCurrentlyTyping;
 
-            // if the list changed, push an update
-            if (!usersCurrentlyTyping.SequenceEqual(_synchronizedObject.Current.ParticipantsTyping))
-                await _synchronizedObject.Update(new ChatSynchronizedObject(usersCurrentlyTyping));
+                lock (_currentlyTypingLock)
+                {
+                    // query all users that are currently typing and order them
+                    usersCurrentlyTyping = _currentlyTyping.Keys.OrderBy(x => x).ToImmutableList();
+                }
 
-            lock (_refreshUsersTypingTimerLock)
-            {
-                if (usersCurrentlyTyping.Any()) _refreshUsersTypingTimer.Start();
-                else _refreshUsersTypingTimer.Stop();
+                _logger.LogDebug("New users currently typing: {@users}", usersCurrentlyTyping);
+
+                // if the list changed, push an update
+                if (!usersCurrentlyTyping.SequenceEqual(_synchronizedObject.Current.ParticipantsTyping))
+                {
+                    _logger.LogDebug("Users currently typing changed, update synchronized object");
+                    await _synchronizedObject.Update(new ChatSynchronizedObject(usersCurrentlyTyping));
+                }
+
+                lock (_refreshUsersTypingTimerLock)
+                {
+                    if (usersCurrentlyTyping.Any()) _refreshUsersTypingTimer.Start();
+                    else _refreshUsersTypingTimer.Stop();
+                }
             }
         }
 
         private void OnRefreshUsersTyping(object sender, ElapsedEventArgs e)
         {
-            var now = DateTimeOffset.UtcNow.AddSeconds(-_options.CancelParticipantIsTypingAfter);
-
-            lock (_currentlyTypingLock)
+            using (_logger.BeginScope("OnRefreshUsersTyping()"))
             {
-                foreach (var (id, dateTimeOffset) in _currentlyTyping)
-                    if (now > dateTimeOffset)
-                        _currentlyTyping.Remove(id);
-            }
+                _logger.LogDebug("Update users currently typing, timeout is {timeout}",
+                    _options.CancelParticipantIsTypingAfter);
 
-            UpdateUsersTyping().Forget();
+                var now = DateTimeOffset.UtcNow.AddSeconds(-_options.CancelParticipantIsTypingAfter);
+
+                lock (_currentlyTypingLock)
+                {
+                    foreach (var (id, dateTimeOffset) in _currentlyTyping)
+                        if (now > dateTimeOffset)
+                            _currentlyTyping.Remove(id);
+                }
+
+                UpdateUsersTyping().Forget();
+            }
         }
     }
 }

@@ -17,6 +17,8 @@ namespace PaderConference.Infrastructure.Services.Synchronization
         private readonly string _conferenceId;
         private readonly IConnectionMapping _connectionMapping;
 
+        private readonly Guid _id = Guid.NewGuid();
+
         private readonly ConcurrentDictionary<string, ISynchronizedObject> _registeredObjects =
             new ConcurrentDictionary<string, ISynchronizedObject>();
 
@@ -42,9 +44,10 @@ namespace PaderConference.Infrastructure.Services.Synchronization
         public override async ValueTask OnClientConnected(Participant participant)
         {
             var connectionId = _connectionMapping.ConnectionsR[participant];
+            var state = GetState();
 
             await _clients.Client(connectionId)
-                .SendAsync(CoreHubMessages.Response.OnSynchronizeObjectState, GetState());
+                .SendAsync(CoreHubMessages.Response.OnSynchronizeObjectState, state);
         }
 
         public IReadOnlyDictionary<string, object> GetState()
@@ -55,6 +58,7 @@ namespace PaderConference.Infrastructure.Services.Synchronization
         private async ValueTask UpdateObject<T>(T oldValue, T newValue, string name) where T : notnull
         {
             var patch = JsonPatchFactory.CreatePatch(oldValue, newValue);
+            if (!patch.Operations.Any()) return;
 
             await _clients.Group(_conferenceId).SendAsync(
                 CoreHubMessages.Response.OnSynchronizedObjectUpdated,

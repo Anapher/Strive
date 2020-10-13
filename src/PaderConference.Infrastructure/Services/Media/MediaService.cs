@@ -71,10 +71,14 @@ namespace PaderConference.Infrastructure.Services.Media
                 channelName.GetName(_conferenceId), request);
         }
 
-        public async ValueTask<JsonElement> GetRouterCapabilities(IServiceMessage message)
+        public async ValueTask<JsonElement?> GetRouterCapabilities(IServiceMessage message)
         {
-            return await _redisDatabase.GetAsync<JsonElement>(
+            var routerCapabilities = await _redisDatabase.GetAsync<JsonElement>(
                 RedisCommunication.RtpCapabilitiesKey.GetName(_conferenceId));
+            if (routerCapabilities.ValueKind == JsonValueKind.Undefined)
+                return null;
+
+            return routerCapabilities;
         }
 
         public async ValueTask InitializeConnection(IServiceMessage<JsonElement> message)

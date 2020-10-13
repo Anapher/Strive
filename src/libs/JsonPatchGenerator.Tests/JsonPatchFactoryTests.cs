@@ -82,7 +82,7 @@ namespace JsonPatchGenerator.Tests
         {
             TestPatch(new TestClass3 {Prop1 = new List<SimpleObj>()},
                 new TestClass3 {Prop1 = new List<SimpleObj> {new SimpleObj {Value = "Hello"}}},
-                patch => patch.Add("/Prop1/0", new SimpleObj {Value = "Hello"})
+                patch => patch.Add("/Prop1/-", new SimpleObj {Value = "Hello"})
             );
         }
 
@@ -121,6 +121,31 @@ namespace JsonPatchGenerator.Tests
                     new SimpleObj {Value = "Plx dont kill me"}
                 }
             }, patch => patch.Replace("/Prop1/1", new SimpleObj {Value = "Plx dont kill me"}));
+        }
+
+        [Fact]
+        public void TestCreatePatchFlatListPatchItemAndChangeLast()
+        {
+            TestPatch(new TestClass3
+            {
+                Prop1 = new List<SimpleObj>
+                {
+                    new SimpleObj {Value = "Corona"},
+                    new SimpleObj {Value = "Pls dont kill me"}
+                }
+            }, new TestClass3
+            {
+                Prop1 = new List<SimpleObj>
+                {
+                    new SimpleObj {Value = "Corona"},
+                    new SimpleObj {Value = "Plx dont kill me"},
+                    new SimpleObj {Value = "it's me"}
+                }
+            }, patch =>
+            {
+                patch.Replace("/Prop1/1", new SimpleObj {Value = "Plx dont kill me"});
+                patch.Add("/Prop1/-", new SimpleObj {Value = "it's me"});
+            });
         }
 
         [Fact]
@@ -178,6 +203,30 @@ namespace JsonPatchGenerator.Tests
                     patch.Remove("/1");
                     patch.Add("/0", "Teufel");
                 });
+        }
+
+        [Fact]
+        public void TestPatchDictionaryAddItem()
+        {
+            TestPatch(new Dictionary<string, string>(),
+                new Dictionary<string, string> {{"hello", "world"}},
+                patch => { patch.Replace("hello", "world"); });
+        }
+
+        [Fact]
+        public void TestPatchDictionaryRemoveItem()
+        {
+            TestPatch(new Dictionary<string, string> {{"hello", "world"}},
+                new Dictionary<string, string>(),
+                patch => { patch.Remove("hello"); });
+        }
+
+        [Fact]
+        public void TestPatchDictionaryChangeItem()
+        {
+            TestPatch(new Dictionary<string, string> {{"hello", "world"}},
+                new Dictionary<string, string> {{"hello", "welt"}},
+                patch => { patch.Replace("hello", "welt"); });
         }
 
         private void TestPatch(object obj, object update, Action<JsonPatchDocument> patchCreator)

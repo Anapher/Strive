@@ -8,7 +8,6 @@ import ParticipantsList from 'src/features/conference/components/ParticipantsLis
 import Media from 'src/features/media/components/Media';
 import { RootState } from 'src/store';
 import { close, joinConference } from 'src/store/conference-signal/actions';
-import { IRestError } from 'src/utils/error-result';
 import to from 'src/utils/to';
 
 const useStyles = makeStyles({

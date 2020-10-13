@@ -1,28 +1,29 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AutoMapper;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using PaderConference.Infrastructure.Services.Permissions;
 using PaderConference.Infrastructure.Services.Synchronization;
+using StackExchange.Redis.Extensions.Core.Abstractions;
 
-namespace PaderConference.Infrastructure.Services.Chat
+namespace PaderConference.Infrastructure.Services.Rooms
 {
-    public class ChatServiceManager : ConferenceServiceManager<ChatService>
+    public class RoomsServiceManager : ConferenceServiceManager<RoomsService>
     {
-        private readonly ILogger<ChatService> _logger;
-        private readonly IMapper _mapper;
-        private readonly IOptions<ChatOptions> _options;
+        private readonly ILogger<RoomsService> _logger;
+        private readonly IOptions<RoomOptions> _options;
+        private readonly IRedisDatabase _redisDatabase;
 
-        public ChatServiceManager(IMapper mapper, IOptions<ChatOptions> options, ILogger<ChatService> logger)
+        public RoomsServiceManager(IRedisDatabase redisDatabase, IOptions<RoomOptions> options,
+            ILogger<RoomsService> logger)
         {
-            _mapper = mapper;
+            _redisDatabase = redisDatabase;
             _options = options;
             _logger = logger;
         }
 
-        protected override async ValueTask<ChatService> ServiceFactory(string conferenceId,
+        protected override async ValueTask<RoomsService> ServiceFactory(string conferenceId,
             IEnumerable<IConferenceServiceManager> services)
         {
             var permissionsService = await services.OfType<IConferenceServiceManager<PermissionsService>>().First()
@@ -30,7 +31,8 @@ namespace PaderConference.Infrastructure.Services.Chat
             var synchronizeService = await services.OfType<IConferenceServiceManager<SynchronizationService>>().First()
                 .GetService(conferenceId, services);
 
-            return new ChatService(conferenceId, _mapper, permissionsService, synchronizeService, _options, _logger);
+            return new RoomsService(conferenceId, _redisDatabase, synchronizeService, permissionsService, _options,
+                _logger);
         }
     }
 }

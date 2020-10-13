@@ -26,7 +26,7 @@ export default function createRtcManager(getConnection: () => HubConnection | un
                }
 
                soupManager = new SoupManager(dispatch, connection);
-               await soupManager.initializeDevice();
+               if (!(await soupManager.initializeDevice())) return;
 
                const { device } = soupManager;
 

@@ -5,13 +5,13 @@
         public static class Chat
         {
             public static readonly PermissionDescriptor<bool> CanSendChatMessage =
-                new PermissionDescriptor<bool>("media.canSendMessage");
+                new PermissionDescriptor<bool>("chat.canSendMessage");
 
             public static readonly PermissionDescriptor<bool> CanSendPrivateChatMessage =
-                new PermissionDescriptor<bool>("media.canSendPrivateMessage");
+                new PermissionDescriptor<bool>("chat.canSendPrivateMessage");
 
             public static readonly PermissionDescriptor<bool> CanSendAnonymousMessage =
-                new PermissionDescriptor<bool>("media.canSendAnonymousMessage");
+                new PermissionDescriptor<bool>("chat.canSendAnonymousMessage");
         }
 
         public static class Media
@@ -24,6 +24,12 @@
 
             public static readonly PermissionDescriptor<bool> CanShareWebcam =
                 new PermissionDescriptor<bool>("media.canShareWebcam");
+        }
+
+        public static class Rooms
+        {
+            public static readonly PermissionDescriptor<bool> CanSwitchRoom =
+                new PermissionDescriptor<bool>("rooms.canSwitchRoom");
         }
     }
 }

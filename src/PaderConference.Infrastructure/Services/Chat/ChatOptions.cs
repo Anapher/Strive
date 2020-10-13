@@ -13,5 +13,11 @@
         ///     be automatically updated to not typing
         /// </summary>
         public int CancelParticipantIsTypingAfter { get; set; } = 30;
+
+        /// <summary>
+        ///     The interval in seconds of the timer that will check if any participant is typing and exceeds
+        ///     <see cref="CancelParticipantIsTypingAfter" />
+        /// </summary>
+        public int CancelParticipantIsTypingInterval { get; set; } = 5;
     }
 }
