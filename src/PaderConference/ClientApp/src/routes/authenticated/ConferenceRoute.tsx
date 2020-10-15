@@ -4,8 +4,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RouteComponentProps } from 'react-router-dom';
 import ChatBar from 'src/features/chat/components/ChatBar';
 import ConferenceAppBar from 'src/features/conference/components/ConferenceAppBar';
-import ParticipantsList from 'src/features/conference/components/ParticipantsList';
 import Media from 'src/features/media/components/Media';
+import RoomsList from 'src/features/rooms/components/RoomsList';
 import { RootState } from 'src/store';
 import { close, joinConference } from 'src/store/conference-signal/actions';
 import to from 'src/utils/to';
@@ -89,7 +89,7 @@ function ConferenceRoute({
          <ConferenceAppBar />
          <div className={classes.conferenceMain}>
             <div className={classes.participants}>
-               <ParticipantsList />
+               <RoomsList />
             </div>
             <div className={classes.flex}>
                <Media />

@@ -2,7 +2,7 @@ import { Action, configureStore, ThunkAction } from '@reduxjs/toolkit';
 import createMiddleware from './conference-signal/create-middleware';
 import rootReducer from './root-reducer';
 import { loadState, persistState } from './storage';
-import createRtcMiddleware from './webrtc/RtcManager';
+import createRtcMiddleware from './webrtc/create-middleware';
 
 const { middleware: signalrMiddleware, getConnection } = createMiddleware({
    getAccessToken: (state) => state.auth.token!.accessToken,

@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Logging;
 using PaderConference.Infrastructure.Hubs;
 using PaderConference.Infrastructure.Services.Permissions;
 using PaderConference.Infrastructure.Services.Synchronization;
@@ -12,12 +13,15 @@ namespace PaderConference.Infrastructure.Services.Media
     public class MediaServiceManager : ConferenceServiceManager<MediaService>
     {
         private readonly IHubContext<CoreHub> _hubContext;
+        private readonly ILogger<MediaService> _logger;
         private readonly IRedisDatabase _redisDatabase;
 
-        public MediaServiceManager(IHubContext<CoreHub> hubContext, IRedisDatabase redisDatabase)
+        public MediaServiceManager(IHubContext<CoreHub> hubContext, IRedisDatabase redisDatabase,
+            ILogger<MediaService> logger)
         {
             _hubContext = hubContext;
             _redisDatabase = redisDatabase;
+            _logger = logger;
         }
 
         protected override async ValueTask<MediaService> ServiceFactory(string conferenceId,
@@ -29,7 +33,7 @@ namespace PaderConference.Infrastructure.Services.Media
                 .GetService(conferenceId, services);
 
             return new MediaService(conferenceId, _hubContext.Clients, synchronizeService, _redisDatabase,
-                permissionsService);
+                permissionsService, _logger);
         }
     }
 }

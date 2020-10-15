@@ -33,10 +33,11 @@ export default function createRtcManager(getConnection: () => HubConnection | un
                const canProduceAudio = device.canProduce('audio');
                const canProduceVideo = device.canProduce('video');
 
-               await connection.invoke('InitializeConnection', {
+               const result = await connection.invoke('InitializeConnection', {
                   sctpCapabilities: device.sctpCapabilities,
                   rtpCapabilities: device.rtpCapabilities,
                });
+               if (result) return;
 
                dispatch(initialized({ canProduceAudio, canProduceVideo }));
 

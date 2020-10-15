@@ -11,11 +11,14 @@ import {
    Switch,
    TextField,
 } from '@material-ui/core';
+import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from 'src/store';
 import to from 'src/utils/to';
 import { closeCreateDialog, createConferenceAsync } from '../createConferenceSlice';
+import CreateConferenceForm, { CreateConferenceFormState } from './CreateConferenceForm';
 
 const useStyles = makeStyles({
    conferenceUrlField: {
@@ -33,6 +36,11 @@ function CreateConferenceDialog() {
 
    const handleCreate = () => dispatch(createConferenceAsync({ settings: { allowUsersToUnmute: allowUsersUnmute } }));
    const handleClose = () => dispatch(closeCreateDialog());
+
+   const form = useForm<CreateConferenceFormState>({
+      mode: 'onChange',
+      defaultValues: { conferenceType: 'class', repeat: false, schedule: false, repeatCron: '0 0 15 ? * MON *' },
+   });
 
    return (
       <Dialog
@@ -63,17 +71,7 @@ function CreateConferenceDialog() {
                   </Button>
                </Box>
             ) : (
-               <FormControlLabel
-                  control={
-                     <Switch
-                        checked={allowUsersUnmute}
-                        onChange={() => setAllowUsersUnmute(!allowUsersUnmute)}
-                        name="allowUsersUnmute"
-                        color="primary"
-                     />
-                  }
-                  label="Allow users to unmute themselves"
-               />
+               <CreateConferenceForm form={form} />
             )}
          </DialogContent>
          <DialogActions>

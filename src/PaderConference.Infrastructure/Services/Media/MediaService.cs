@@ -1,7 +1,10 @@
-﻿using System.Text.Json;
+﻿using System;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Logging;
 using PaderConference.Core.Domain.Entities;
+using PaderConference.Core.Dto;
 using PaderConference.Infrastructure.Redis;
 using PaderConference.Infrastructure.Services.Media.Communication;
 using PaderConference.Infrastructure.Services.Permissions;
@@ -14,16 +17,18 @@ namespace PaderConference.Infrastructure.Services.Media
     {
         private readonly IHubClients _clients;
         private readonly string _conferenceId;
+        private readonly ILogger<MediaService> _logger;
         private readonly IPermissionsService _permissionsService;
         private readonly IRedisDatabase _redisDatabase;
 
         public MediaService(string conferenceId, IHubClients clients, ISynchronizationManager synchronizationManager,
-            IRedisDatabase redisDatabase, IPermissionsService permissionsService)
+            IRedisDatabase redisDatabase, IPermissionsService permissionsService, ILogger<MediaService> logger)
         {
             _conferenceId = conferenceId;
             _clients = clients;
             _redisDatabase = redisDatabase;
             _permissionsService = permissionsService;
+            _logger = logger;
         }
 
         public override async ValueTask InitializeAsync()
@@ -81,13 +86,23 @@ namespace PaderConference.Infrastructure.Services.Media
             return routerCapabilities;
         }
 
-        public async ValueTask InitializeConnection(IServiceMessage<JsonElement> message)
+        public async ValueTask<Error?> InitializeConnection(IServiceMessage<JsonElement> message)
         {
             var meta = GetMeta(message);
             var request = new ConnectionMessage<JsonElement>(message.Payload, meta);
 
-            await _redisDatabase.InvokeAsync(RedisCommunication.Request.InitializeConnection.GetName(_conferenceId),
-                request);
+            try
+            {
+                await _redisDatabase.InvokeAsync(RedisCommunication.Request.InitializeConnection.GetName(_conferenceId),
+                    request);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error occurred on contacting database");
+                return new Error("Test", "TODO", -1);
+            }
+
+            return null;
         }
     }
 }

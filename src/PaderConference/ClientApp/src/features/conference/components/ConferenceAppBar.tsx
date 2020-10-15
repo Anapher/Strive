@@ -1,19 +1,29 @@
-import { IconButton, Toolbar, Typography, AppBar, makeStyles, createStyles, Button } from '@material-ui/core';
-import React from 'react';
+import {
+   AppBar,
+   Box,
+   Button,
+   ButtonBase,
+   createStyles,
+   IconButton,
+   makeStyles,
+   Toolbar,
+   Typography,
+} from '@material-ui/core';
 import MenuIcon from '@material-ui/icons/Menu';
+import React from 'react';
 import { useDispatch } from 'react-redux';
 import { signOut } from 'src/features/auth/authSlice';
+import to from 'src/utils/to';
 
 const useStyles = makeStyles((theme) =>
    createStyles({
       root: {
          flexGrow: 1,
       },
-      menuButton: {
-         marginRight: theme.spacing(2),
-      },
+      menuButton: {},
       title: {
-         flexGrow: 1,
+         padding: theme.spacing(1, 3),
+         borderRadius: theme.shape.borderRadius,
       },
    }),
 );
@@ -29,9 +39,11 @@ export default function ConferenceAppBar() {
             <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
                <MenuIcon />
             </IconButton>
-            <Typography variant="h6" className={classes.title}>
-               PaderConference
-            </Typography>
+            <Box flex={1}>
+               <ButtonBase className={classes.title} {...to('/')}>
+                  <Typography variant="h6">PaderConference</Typography>
+               </ButtonBase>
+            </Box>
             <Button onClick={handleSignOut}>Sign out</Button>
          </Toolbar>
       </AppBar>

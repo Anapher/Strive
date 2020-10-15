@@ -7,6 +7,8 @@ import { BrowserRouter } from 'react-router-dom';
 import AnonymousRoutes from './routes/anonymous';
 import AuthenticatedRoutes from './routes/authenticated';
 import { RootState } from './store';
+import { MuiPickersUtilsProvider } from '@material-ui/pickers';
+import LuxonUtils from '@date-io/luxon';
 
 const theme = createMuiTheme({
    palette: {
@@ -28,10 +30,12 @@ function App() {
    const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
 
    return (
-      <ThemeProvider theme={theme}>
-         <CssBaseline />
-         <BrowserRouter>{isAuthenticated ? <AuthenticatedRoutes /> : <AnonymousRoutes />}</BrowserRouter>
-      </ThemeProvider>
+      <MuiPickersUtilsProvider utils={LuxonUtils}>
+         <ThemeProvider theme={theme}>
+            <CssBaseline />
+            <BrowserRouter>{isAuthenticated ? <AuthenticatedRoutes /> : <AnonymousRoutes />}</BrowserRouter>
+         </ThemeProvider>
+      </MuiPickersUtilsProvider>
    );
 }
 

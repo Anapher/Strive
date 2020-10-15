@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using PaderConference.Core.Domain.Entities;
+using PaderConference.Core.Dto;
 using PaderConference.Core.Interfaces.Services;
 using PaderConference.Infrastructure.Extensions;
 using PaderConference.Infrastructure.Hubs.Dto;
@@ -132,10 +133,13 @@ namespace PaderConference.Infrastructure.Hubs
             return null;
         }
 
-        public async Task InitializeConnection(JsonElement element)
+        public async Task<Error?> InitializeConnection(JsonElement element)
         {
             if (GetMessage(element, out var message))
-                await (await GetConferenceService<MediaService>(message.Participant)).InitializeConnection(message);
+                return await (await GetConferenceService<MediaService>(message.Participant)).InitializeConnection(
+                    message);
+
+            return null;
         }
 
         public async Task<JsonElement?> CreateWebRtcTransport(JsonElement element)

@@ -1,11 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
-import 'typeface-roboto';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 import configure from './startup';
 import store from './store';
+import 'fontsource-roboto';
 
 configure(store);
 
