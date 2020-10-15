@@ -31,9 +31,9 @@ namespace PaderConference.Services
             _logger = logger;
         }
 
-        public ValueTask ScheduleConference(IConferenceScheduleInfo scheduleInfo)
+        public ValueTask ScheduleConference(IConferenceScheduleInfo scheduleInfo, bool startAtLeast)
         {
-            return ScheduleConference(scheduleInfo, true);
+            return ScheduleConference(scheduleInfo, startAtLeast, true);
         }
 
         public ValueTask RemoveConference(string conferenceId)
@@ -46,7 +46,13 @@ namespace PaderConference.Services
             return new ValueTask();
         }
 
-        private async ValueTask ScheduleConference(IConferenceScheduleInfo scheduleInfo, bool reschedule)
+
+        /// <param name="reschedule">
+        ///     if false, this method will not force the worker to reset. Useful if this method is invoked by
+        ///     the worker
+        /// </param>
+        private async ValueTask ScheduleConference(IConferenceScheduleInfo scheduleInfo, bool startAtLeast,
+            bool reschedule)
         {
             using (_logger.BeginScope("ScheduleConference()"))
             using (_logger.BeginScope(new Dictionary<string, object>
@@ -64,6 +70,13 @@ namespace PaderConference.Services
 
                 if (next == null)
                 {
+                    if (startAtLeast)
+                    {
+                        _logger.LogDebug("Start conference immediately (startAtLeast flag) and don't schedule");
+                        await _conferenceManager.StartConference(scheduleInfo.ConferenceId);
+                        return;
+                    }
+
                     _logger.LogDebug("Mark conference as inactive");
                     await _conferenceManager.MarkConferenceAsInactive(scheduleInfo.ConferenceId);
                     return;
@@ -130,7 +143,7 @@ namespace PaderConference.Services
                         {
                             _logger.LogDebug("Start conference {conferenceId}", next.ConferenceId);
                             await _conferenceManager.StartConference(next.ConferenceId);
-                            await ScheduleConference(next, false); // reschedule
+                            await ScheduleConference(next, false, false); // reschedule
                         }
                     }
 

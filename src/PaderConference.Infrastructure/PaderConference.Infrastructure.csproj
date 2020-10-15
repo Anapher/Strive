@@ -10,6 +10,7 @@
     <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.8" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="3.1.8" />
+    <PackageReference Include="MongoDB.Driver" Version="2.11.2" />
     <PackageReference Include="Nito.AsyncEx.Coordination" Version="5.1.0" />
     <PackageReference Include="StackExchange.Redis" Version="2.1.58" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.7.1" />

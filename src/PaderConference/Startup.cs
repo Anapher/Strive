@@ -24,6 +24,7 @@ using PaderConference.Core.Interfaces.Services;
 using PaderConference.Extensions;
 using PaderConference.Infrastructure;
 using PaderConference.Infrastructure.Auth;
+using PaderConference.Infrastructure.Data;
 using PaderConference.Infrastructure.Hubs;
 using PaderConference.Services;
 using StackExchange.Redis.Extensions.Core.Configuration;
@@ -63,6 +64,15 @@ namespace PaderConference
                 options.Audience = jwtAppSettingOptions[nameof(JwtIssuerOptions.Audience)];
                 options.SigningCredentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
             });
+
+            // Configure MongoDb options
+            services.Configure<MongoDbOptions>(Configuration.GetSection("MongoDb"));
+
+            // add MongoDb
+            //services.AddSingleton(services =>
+            //    new MongoClient(services.GetRequiredService<MongoDbOptions>().ConnectionString));
+
+            services.AddHostedService<MongoDbBuilder>();
 
             var tokenValidationParameters = new TokenValidationParameters
             {
@@ -145,6 +155,7 @@ namespace PaderConference
                 c.AddFluentValidationRules();
             });
 
+            // add conference scheduler
             services.AddSingleton<IConferenceScheduler, ConferenceScheduler>();
             services.AddHostedService(services =>
                 (ConferenceScheduler) services.GetRequiredService<IConferenceScheduler>());

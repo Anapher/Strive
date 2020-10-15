@@ -39,6 +39,11 @@ namespace PaderConference.Core.Domain.Entities
         public IImmutableDictionary<string, string> Permissions { get; set; }
 
         /// <summary>
+        ///     The type of the conference. Set by the front end to synchronize devices
+        /// </summary>
+        public string? ConferenceType { get; set; }
+
+        /// <summary>
         ///     The unique conference id
         /// </summary>
         public string ConferenceId { get; private set; }

@@ -9,7 +9,11 @@ namespace PaderConference.Core.Interfaces.Services
         ///     Schedule a conference. If the conference is already scheduled, it will be updated
         /// </summary>
         /// <param name="scheduleInfo">Schedule info about the conference</param>
-        ValueTask ScheduleConference(IConferenceScheduleInfo scheduleInfo);
+        /// <param name="startAtLeast">
+        ///     If true, the conference will be started immediately if it cannot be scheduled, even if the
+        ///     start time is in past.
+        /// </param>
+        ValueTask ScheduleConference(IConferenceScheduleInfo scheduleInfo, bool startAtLeast);
 
         /// <summary>
         ///     Remove a conference from schedule.

@@ -1,8 +1,8 @@
 using Autofac;
-using PaderConference.Core.Interfaces.Gateways.Repositories;
 using PaderConference.Core.Interfaces.Services;
 using PaderConference.Infrastructure.Auth;
 using PaderConference.Infrastructure.Conferencing;
+using PaderConference.Infrastructure.Data;
 using PaderConference.Infrastructure.Interfaces;
 using PaderConference.Infrastructure.Services;
 using PaderConference.Infrastructure.Sockets;
@@ -21,11 +21,11 @@ namespace PaderConference.Infrastructure
             builder.RegisterType<ConferenceManager>().As<IConferenceManager>().SingleInstance();
             builder.RegisterType<ConnectionMapping>().As<IConnectionMapping>().SingleInstance();
 
-            builder.RegisterAssemblyTypes(ThisAssembly).AsClosedTypesOf(typeof(IRepository<>))
-                .AsImplementedInterfaces();
-
             builder.RegisterAssemblyTypes(ThisAssembly).AsClosedTypesOf(typeof(IConferenceServiceManager<>))
                 .AsImplementedInterfaces().SingleInstance();
+
+            builder.RegisterAssemblyTypes(ThisAssembly).AsClosedTypesOf(typeof(MongoRepo<>)).AsImplementedInterfaces()
+                .SingleInstance();
         }
     }
 }
