@@ -1,14 +1,19 @@
 ﻿// ReSharper disable AutoPropertyCanBeMadeGetOnly.Local
 
+using System;
+using System.Collections.Immutable;
+using PaderConference.Core.Interfaces.Services;
+
 namespace PaderConference.Core.Domain.Entities
 {
-    public class Conference
+    public class Conference : IConferenceScheduleInfo
     {
-        public Conference(string conferenceId, string initiatorUserId, ConferenceSettings? settings = null)
+        public Conference(string conferenceId, IImmutableList<string> organizers)
         {
             ConferenceId = conferenceId;
-            InitiatorUserId = initiatorUserId;
-            Settings = settings ?? new ConferenceSettings();
+            Organizers = organizers;
+
+            Permissions = ImmutableDictionary<string, string>.Empty;
         }
 
 #pragma warning disable 8618
@@ -19,19 +24,36 @@ namespace PaderConference.Core.Domain.Entities
 #pragma warning restore 8618
 
         /// <summary>
+        ///     The name of the conference. May be null
+        /// </summary>
+        public string? Name { get; set; }
+
+        /// <summary>
+        ///     Participant ids of organizers
+        /// </summary>
+        public IImmutableList<string> Organizers { get; set; }
+
+        /// <summary>
+        ///     Conference permission
+        /// </summary>
+        public IImmutableDictionary<string, string> Permissions { get; set; }
+
+        /// <summary>
         ///     The unique conference id
         /// </summary>
         public string ConferenceId { get; private set; }
 
         /// <summary>
-        ///     The user id of the initiator of this conference
+        ///     The starting time of this conference. If <see cref="ScheduleCron" /> is not null, this is the first time the
+        ///     conference starts
         /// </summary>
-        public string InitiatorUserId { get; private set; }
+        public DateTimeOffset? StartTime { get; set; }
 
         /// <summary>
-        ///     The current conference settings
+        ///     A cron string that determines the scheduled time of this conference. The schedule starts after
+        ///     <see cref="StartTime" />
         /// </summary>
-        public ConferenceSettings Settings { get; private set; }
+        public string? ScheduleCron { get; set; }
 
         protected bool Equals(Conference other)
         {
@@ -48,7 +70,15 @@ namespace PaderConference.Core.Domain.Entities
 
         public override int GetHashCode()
         {
+            // ReSharper disable once NonReadonlyMemberInGetHashCode
             return ConferenceId.GetHashCode();
         }
+    }
+
+    public enum ConferenceState
+    {
+        Open,
+        Scheduled,
+        Closed
     }
 }

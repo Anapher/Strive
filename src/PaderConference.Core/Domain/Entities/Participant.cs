@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Immutable;
 
 namespace PaderConference.Core.Domain.Entities
 {
@@ -18,9 +17,6 @@ namespace PaderConference.Core.Domain.Entities
         public string? DisplayName { get; }
 
         public string Role { get; }
-
-        public IImmutableDictionary<string, string> Attributes { get; set; } =
-            ImmutableDictionary<string, string>.Empty;
 
         public DateTimeOffset Timestamp { get; }
 

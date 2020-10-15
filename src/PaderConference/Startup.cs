@@ -20,10 +20,12 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using PaderConference.Core;
 using PaderConference.Core.Errors;
+using PaderConference.Core.Interfaces.Services;
 using PaderConference.Extensions;
 using PaderConference.Infrastructure;
 using PaderConference.Infrastructure.Auth;
 using PaderConference.Infrastructure.Hubs;
+using PaderConference.Services;
 using StackExchange.Redis.Extensions.Core.Configuration;
 using Swashbuckle.AspNetCore.Swagger;
 
@@ -142,6 +144,10 @@ namespace PaderConference
 
                 c.AddFluentValidationRules();
             });
+
+            services.AddSingleton<IConferenceScheduler, ConferenceScheduler>();
+            services.AddHostedService(services =>
+                (ConferenceScheduler) services.GetRequiredService<IConferenceScheduler>());
 
             // Now register our services with Autofac container.
             var builder = new ContainerBuilder();

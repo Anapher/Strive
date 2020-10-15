@@ -28,27 +28,19 @@ namespace PaderConference.Infrastructure.Conferencing
         public ConcurrentDictionary<string, ConcurrentDictionary<string, Participant>> ConferenceParticipants { get; } =
             new ConcurrentDictionary<string, ConcurrentDictionary<string, Participant>>();
 
-        public async ValueTask<Conference> CreateConference(string userId, ConferenceSettings? settings)
+        public async ValueTask<Conference> StartConference(string conferenceId)
         {
-            var conferenceId = Guid.NewGuid().ToString("D");
-            var conference = new Conference(conferenceId, userId, settings);
-
-            _logger.LogDebug("Creating new conference with id {conferenceId} initiated by {userId}", conferenceId,
-                userId);
-
-            if (!await _database.HashSetAsync(RedisConferencesKey, conferenceId, conference))
-            {
-                _logger.LogCritical("A conference id ({id}) was generated that already exists. This must not happen.",
-                    conferenceId);
-                return await CreateConference(userId, settings);
-            }
-
-            return conference;
+            throw new NotImplementedException();
         }
 
         public async ValueTask<Conference?> GetConference(string conferenceId)
         {
             return await _database.HashGetAsync<Conference>(RedisConferencesKey, conferenceId);
+        }
+
+        public ValueTask MarkConferenceAsInactive(string conferenceId)
+        {
+            throw new NotImplementedException();
         }
 
         public ICollection<Participant>? GetParticipants(string conferenceId)
@@ -101,5 +93,23 @@ namespace PaderConference.Infrastructure.Conferencing
         {
             return ParticipantToConference[participant.ParticipantId];
         }
+
+        //public async ValueTask<Conference> CreateConference(string userId, ConferenceSettings? settings)
+        //{
+        //    var conferenceId = Guid.NewGuid().ToString("D");
+        //    var conference = new Conference(conferenceId, userId, settings);
+
+        //    _logger.LogDebug("Creating new conference with id {conferenceId} initiated by {userId}", conferenceId,
+        //        userId);
+
+        //    if (!await _database.HashSetAsync(RedisConferencesKey, conferenceId, conference))
+        //    {
+        //        _logger.LogCritical("A conference id ({id}) was generated that already exists. This must not happen.",
+        //            conferenceId);
+        //        return await CreateConference(userId, settings);
+        //    }
+
+        //    return conference;
+        //}
     }
 }

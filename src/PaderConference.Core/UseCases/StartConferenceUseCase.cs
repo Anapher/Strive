@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using PaderConference.Core.Dto.UseCaseRequests;
 using PaderConference.Core.Dto.UseCaseResponses;
 using PaderConference.Core.Interfaces;
@@ -18,8 +19,9 @@ namespace PaderConference.Core.UseCases
 
         public async ValueTask<StartConferenceResponse?> Handle(StartConferenceRequest message)
         {
-            var conference = await _conferenceManager.CreateConference(message.UserId, null);
-            return new StartConferenceResponse(conference.ConferenceId);
+            throw new NotImplementedException();
+            //var conference = await _conferenceManager.CreateConference(message.UserId, null);
+            //return new StartConferenceResponse(conference.ConferenceId);
         }
     }
 }
