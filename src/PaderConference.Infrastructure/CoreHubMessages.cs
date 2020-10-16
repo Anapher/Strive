@@ -20,6 +20,8 @@
             public const string Chat = nameof(Chat);
             public const string OnUserJoined = nameof(OnUserJoined);
             public const string OnConferenceDoesNotExist = nameof(OnConferenceDoesNotExist);
+            public const string OnConferenceNotStarted = nameof(OnConferenceNotStarted);
+
             public const string OnParticipantsUpdated = nameof(OnParticipantsUpdated);
 
             public const string OnIceCandidate = nameof(OnIceCandidate);

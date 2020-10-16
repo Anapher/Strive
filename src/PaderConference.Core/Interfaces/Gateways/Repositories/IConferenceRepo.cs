@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using PaderConference.Core.Domain.Entities;
 
 namespace PaderConference.Core.Interfaces.Gateways.Repositories
@@ -10,5 +11,9 @@ namespace PaderConference.Core.Interfaces.Gateways.Repositories
         Task Create(Conference conference);
 
         Task Update(Conference conference);
+
+        Task SetConferenceState(string conferenceId, ConferenceState state);
+
+        Task<IReadOnlyList<Conference>> GetActiveConferences();
     }
 }

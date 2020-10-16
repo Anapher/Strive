@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
@@ -9,7 +10,7 @@ using PaderConference.Core.Interfaces.Gateways.Repositories;
 
 namespace PaderConference.Infrastructure.Data.Repos
 {
-    public class ConferenceRepo : MongoRepo<Conference>, IConferenceRepo, IMongoIndexBuilder
+    public class ConferenceRepo : MongoRepo<Conference>, IConferenceRepo
     {
         static ConferenceRepo()
         {
@@ -39,12 +40,15 @@ namespace PaderConference.Infrastructure.Data.Repos
             return Collection.ReplaceOneAsync(c => c.ConferenceId == conference.ConferenceId, conference);
         }
 
-        public Task CreateIndexes()
+        public Task SetConferenceState(string conferenceId, ConferenceState state)
         {
-            return Task.CompletedTask;
-            //var indexKeysDefinition = Builders<Conference>.IndexKeys.Ascending(conference => conference.ConferenceId);
-            //await Collection.Indexes.CreateOneAsync(new CreateIndexModel<Conference>(indexKeysDefinition,
-            //    new CreateIndexOptions {Unique = true}));
+            return Collection.UpdateOneAsync(x => x.ConferenceId == conferenceId,
+                new UpdateDefinitionBuilder<Conference>().Set(x => x.State, state));
+        }
+
+        public async Task<IReadOnlyList<Conference>> GetActiveConferences()
+        {
+            return await Collection.Find(x => x.State == ConferenceState.Active).ToListAsync();
         }
     }
 }

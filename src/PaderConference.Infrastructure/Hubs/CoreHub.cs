@@ -29,7 +29,8 @@ namespace PaderConference.Infrastructure.Hubs
         private readonly ILogger<CoreHub> _logger;
 
         public CoreHub(IConferenceManager conferenceManager, IConnectionMapping connectionMapping,
-            IEnumerable<IConferenceServiceManager> conferenceServices, ILogger<CoreHub> logger) : base(
+            IEnumerable<IConferenceServiceManager> conferenceServices, IConferenceScheduler conferenceScheduler,
+            ILogger<CoreHub> logger) : base(
             connectionMapping, logger)
         {
             _conferenceManager = conferenceManager;
@@ -40,51 +41,62 @@ namespace PaderConference.Infrastructure.Hubs
 
         public override async Task OnConnectedAsync()
         {
-            var httpContext = Context.GetHttpContext();
-            if (httpContext != null)
+            using (_logger.BeginScope($"{nameof(OnConnectedAsync)}()"))
+            using (_logger.BeginScope(new Dictionary<string, object> {{"connectionId", Context.ConnectionId}}))
             {
-                var conferenceId = httpContext.Request.Query["conferenceId"].ToString();
-                var userId = httpContext.User.GetUserId();
-                var role = httpContext.User.Claims.First(x => x.Type == ClaimTypes.Role).Value;
-
-                _logger.LogDebug(
-                    "Client tries to connect (user: {userId}, connectionId: {connectionId}) to conference {conferenceId}",
-                    userId,
-                    Context.ConnectionId, conferenceId);
-
-                Participant participant;
-                try
+                var httpContext = Context.GetHttpContext();
+                if (httpContext != null)
                 {
-                    participant =
-                        await _conferenceManager.Participate(conferenceId, userId, role,
-                            httpContext.User.Identity.Name);
+                    var conferenceId = httpContext.Request.Query["conferenceId"].ToString();
+                    var userId = httpContext.User.GetUserId();
+                    var role = httpContext.User.Claims.First(x => x.Type == ClaimTypes.Role).Value;
+
+                    using (_logger.BeginScope(new Dictionary<string, object>
+                    {
+                        {"conferenceId", conferenceId}, {"userId", userId}, {"role", role}
+                    }))
+                    {
+                        _logger.LogDebug("Client tries to connect");
+
+                        if (await _conferenceManager.GetIsConferenceStarted(conferenceId))
+                        {
+                        }
+
+                        Participant participant;
+                        try
+                        {
+                            participant =
+                                await _conferenceManager.Participate(conferenceId, userId, role,
+                                    httpContext.User.Identity.Name);
+                        }
+                        catch (InvalidOperationException)
+                        {
+                            _logger.LogDebug("Conference {conferenceId} was not found. Abort connection", conferenceId);
+
+                            await Clients.Caller.SendAsync(CoreHubMessages.Response.OnConferenceDoesNotExist);
+                            Context.Abort();
+                            return;
+                        }
+
+                        if (!_connectionMapping.Add(Context.ConnectionId, participant))
+                        {
+                            _logger.LogWarning("Participant {participantId} could not be added to connection mapping.",
+                                participant.ParticipantId);
+                            Context.Abort();
+                            return;
+                        }
+
+                        await Groups.AddToGroupAsync(Context.ConnectionId, conferenceId);
+
+                        // initialize all services before submitting events
+                        var services = _conferenceServices.Select(x => x.GetService(conferenceId, _conferenceServices))
+                            .ToList();
+                        foreach (var valueTask in services) await valueTask;
+
+                        foreach (var service in services)
+                            await service.Result.OnClientConnected(participant);
+                    }
                 }
-                catch (InvalidOperationException)
-                {
-                    _logger.LogDebug("Conference {conferenceId} was not found. Abort connection", conferenceId);
-
-                    await Clients.Caller.SendAsync(CoreHubMessages.Response.OnConferenceDoesNotExist);
-                    Context.Abort();
-                    return;
-                }
-
-                if (!_connectionMapping.Add(Context.ConnectionId, participant))
-                {
-                    _logger.LogWarning("Participant {participantId} could not be added to connection mapping.",
-                        participant.ParticipantId);
-                    Context.Abort();
-                    return;
-                }
-
-                await Groups.AddToGroupAsync(Context.ConnectionId, conferenceId);
-
-                // initialize all services before submitting events
-                var services = _conferenceServices.Select(x => x.GetService(conferenceId, _conferenceServices))
-                    .ToList();
-                foreach (var valueTask in services) await valueTask;
-
-                foreach (var service in services)
-                    await service.Result.OnClientConnected(participant);
             }
         }
 

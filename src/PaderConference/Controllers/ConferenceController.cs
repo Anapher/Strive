@@ -1,9 +1,11 @@
-﻿using System;
+﻿using System.Collections.Immutable;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using PaderConference.Core.Dto.UseCaseRequests;
 using PaderConference.Core.Interfaces.UseCases;
+using PaderConference.Extensions;
 using PaderConference.Models.Request;
 using PaderConference.Models.Response;
 
@@ -18,17 +20,17 @@ namespace PaderConference.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [Authorize(Roles = AppRoles.Moderator)]
-        public async Task<ActionResult<StartConferenceResponseDto>> Create([FromBody] StartConferenceRequestDto request,
-            [FromServices] IStartConferenceUseCase useCase)
+        public async Task<ActionResult<StartConferenceResponseDto>> Create(
+            [FromBody] CreateConferenceRequestDto request, [FromServices] ICreateConferenceUseCase useCase)
         {
-            throw new NotImplementedException();
-            //var result =
-            //    await useCase.Handle(new StartConferenceRequest(User.GetUserId(),
-            //        request.Settings ?? new ConferenceSettings()));
+            var result =
+                await useCase.Handle(new CreateConferenceRequest(request.Name, request.ConferenceType,
+                    request.Organizers, request.StartTime, request.EndTime, request.ScheduleCron,
+                    request.Permissions ?? ImmutableDictionary<string, string>.Empty));
 
-            //if (useCase.HasError) return useCase.ToActionResult();
+            if (useCase.HasError) return useCase.ToActionResult();
 
-            //return new StartConferenceResponseDto(result!.ConferenceId);
+            return new StartConferenceResponseDto(result!.ConferenceId);
         }
     }
 }

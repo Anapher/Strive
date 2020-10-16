@@ -35,7 +35,7 @@ namespace PaderConference.IntegrationTests.Controllers
             _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", result.AccessToken);
 
             response = await _client.PostAsync("/api/v1/conference",
-                new JsonContent(new StartConferenceRequestDto()));
+                new JsonContent(new CreateConferenceRequestDto()));
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
             var conferenceInfo = await response.Content.DeserializeJsonObject<StartConferenceResponseDto>();

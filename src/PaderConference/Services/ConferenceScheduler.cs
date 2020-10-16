@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using PaderConference.Core.Domain.Entities;
+using PaderConference.Core.Interfaces.Gateways.Repositories;
 using PaderConference.Core.Interfaces.Services;
 using PaderConference.Extensions;
 
@@ -14,6 +16,7 @@ namespace PaderConference.Services
     public class ConferenceScheduler : BackgroundService, IConferenceScheduler
     {
         private readonly IConferenceManager _conferenceManager;
+        private readonly IConferenceRepo _conferenceRepo;
         private readonly ILogger<ConferenceScheduler> _logger;
         private readonly ConferenceSchedulerOptions _options;
 
@@ -23,10 +26,12 @@ namespace PaderConference.Services
         private readonly object _scheduleLock = new object();
         private CancellationTokenSource _cancellationToken = new CancellationTokenSource();
 
-        public ConferenceScheduler(IConferenceManager conferenceManager, IOptions<ConferenceSchedulerOptions> options,
+        public ConferenceScheduler(IConferenceManager conferenceManager, IConferenceRepo conferenceRepo,
+            IOptions<ConferenceSchedulerOptions> options,
             ILogger<ConferenceScheduler> logger)
         {
             _conferenceManager = conferenceManager;
+            _conferenceRepo = conferenceRepo;
             _options = options.Value;
             _logger = logger;
         }
@@ -60,8 +65,17 @@ namespace PaderConference.Services
             {
                 if (scheduleInfo.ScheduleCron == null && scheduleInfo.StartTime == null)
                 {
-                    _logger.LogDebug("Start conference immediately and don't schedule");
-                    await _conferenceManager.StartConference(scheduleInfo.ConferenceId);
+                    if (startAtLeast)
+                    {
+                        _logger.LogDebug("Start conference immediately and don't schedule");
+                        await _conferenceManager.StartConference(scheduleInfo.ConferenceId);
+                    }
+                    else
+                    {
+                        _logger.LogDebug("Mark conference as inactive");
+                        await _conferenceRepo.SetConferenceState(scheduleInfo.ConferenceId, ConferenceState.Inactive);
+                    }
+
                     return;
                 }
 
@@ -96,6 +110,12 @@ namespace PaderConference.Services
         {
             using (_logger.BeginScope("ExecuteAsync"))
             {
+                _logger.LogDebug("Fetch active conferences...");
+                var conferences = await _conferenceRepo.GetActiveConferences();
+                foreach (var conference in conferences) await ScheduleConference(conference, false, false);
+
+                _logger.LogDebug("Conferences from database initialized");
+
                 while (true)
                 {
                     using (_cancellationToken)

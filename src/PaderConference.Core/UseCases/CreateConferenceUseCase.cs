@@ -52,7 +52,6 @@ namespace PaderConference.Core.UseCases
             }
 
             await _scheduler.ScheduleConference(conference, true);
-
             return new CreateConferenceResponse(id);
         }
 

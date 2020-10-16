@@ -44,6 +44,11 @@ namespace PaderConference.Core.Domain.Entities
         public string? ConferenceType { get; set; }
 
         /// <summary>
+        ///     Conference state
+        /// </summary>
+        public ConferenceState State { get; set; } = ConferenceState.Active;
+
+        /// <summary>
         ///     The unique conference id
         /// </summary>
         public string ConferenceId { get; private set; }
@@ -82,8 +87,7 @@ namespace PaderConference.Core.Domain.Entities
 
     public enum ConferenceState
     {
-        Open,
-        Scheduled,
-        Closed
+        Active,
+        Inactive
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Collections.Immutable;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
@@ -9,11 +10,11 @@ using Xunit;
 
 namespace PaderConference.IntegrationTests.Controllers
 {
-    public class StartConferenceTest : IClassFixture<CustomWebApplicationFactory>
+    public class CreateConferenceTest : IClassFixture<CustomWebApplicationFactory>
     {
         private readonly HttpClient _client;
 
-        public StartConferenceTest(CustomWebApplicationFactory factory)
+        public CreateConferenceTest(CustomWebApplicationFactory factory)
         {
             _client = factory.CreateClient();
         }
@@ -29,7 +30,10 @@ namespace PaderConference.IntegrationTests.Controllers
             _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", result.AccessToken);
 
             response = await _client.PostAsync("/api/v1/conference",
-                new JsonContent(new StartConferenceRequestDto()));
+                new JsonContent(new CreateConferenceRequestDto
+                    {ConferenceType = "class", Organizers = new[] {"test"}.ToImmutableList(), Name = "Test con"}));
+
+            var asd = await response.Content.ReadAsStringAsync();
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
             var conferenceInfo = await response.Content.DeserializeJsonObject<StartConferenceResponseDto>();
