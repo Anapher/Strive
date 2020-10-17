@@ -25,7 +25,10 @@ namespace PaderConference.Infrastructure.Conferencing
             _logger = logger;
         }
 
-        public async ValueTask<Conference> StartConference(string conferenceId)
+        public event EventHandler<Conference>? ConferenceOpened;
+        public event EventHandler<string>? ConferenceClosed;
+
+        public async ValueTask<Conference> OpenConference(string conferenceId)
         {
             using (_logger.BeginScope("StartConference()"))
             using (_logger.BeginScope(new Dictionary<string, object> {{"conferenceId", conferenceId}}))
@@ -37,10 +40,15 @@ namespace PaderConference.Infrastructure.Conferencing
                     throw new InvalidOperationException($"The conference {conferenceId} was not found in database.");
                 }
 
-                if (!await _database.HashSetAsync(RedisActiveConferencesKey, conferenceId, conference))
-                    _logger.LogDebug("The conference is already active.");
+                if (await _database.HashSetAsync(RedisActiveConferencesKey, conferenceId, conference))
+                {
+                    _logger.LogDebug("Conference opened");
+                    ConferenceOpened?.Invoke(this, conference);
+                }
                 else
-                    _logger.LogDebug("Conference activated");
+                {
+                    _logger.LogDebug("The conference is already active.");
+                }
 
                 return conference;
             }
@@ -49,15 +57,10 @@ namespace PaderConference.Infrastructure.Conferencing
         public async ValueTask CloseConference(string conferenceId)
         {
             if (await _database.HashDeleteAsync(RedisActiveConferencesKey, conferenceId))
-                _participantsMap.RemoveConference(conferenceId);
+                ConferenceClosed?.Invoke(this, conferenceId);
         }
 
-        public async ValueTask MarkConferenceAsInactive(string conferenceId)
-        {
-            await _conferenceRepo.SetConferenceState(conferenceId, ConferenceState.Inactive);
-        }
-
-        public async ValueTask<bool> GetIsConferenceStarted(string conferenceId)
+        public async ValueTask<bool> GetIsConferenceOpen(string conferenceId)
         {
             return await _database.HashExistsAsync(RedisActiveConferencesKey, conferenceId);
         }
@@ -74,17 +77,21 @@ namespace PaderConference.Infrastructure.Conferencing
             using (_logger.BeginScope(new Dictionary<string, object>
                 {{"conferenceId", conferenceId}, {"userId", userId}}))
             {
-                if (!await GetIsConferenceStarted(conferenceId))
+                var conference = await _conferenceRepo.FindById(conferenceId);
+                if (conference == null)
                 {
-                    _logger.LogDebug("The conference is not active.");
-                    throw new InvalidOperationException(
-                        $"The conference with id {conferenceId} is not currently active.");
+                    _logger.LogDebug("The conference was not found.");
+                    throw new ConferenceNotFoundException(conferenceId);
                 }
+
+                // conference must not be open to participate
+
+                _logger.LogDebug("Conference: {@conference}", conference);
 
                 var participant = new Participant(userId, displayName, role, DateTimeOffset.UtcNow);
                 if (!_participantsMap.AddParticipant(conferenceId, participant))
                 {
-                    _logger.LogDebug("The participant already participates in the conference.");
+                    _logger.LogError("The participant already participates in the conference.");
                     throw new InvalidOperationException("The participant already participates in the conference.");
                 }
 
@@ -101,6 +108,25 @@ namespace PaderConference.Infrastructure.Conferencing
         public string GetConferenceOfParticipant(Participant participant)
         {
             return _participantsMap.ParticipantToConference[participant.ParticipantId];
+        }
+
+        public async ValueTask SetConferenceState(string conferenceId, ConferenceState state)
+        {
+            await _conferenceRepo.SetConferenceState(conferenceId, state);
+
+            var conference = await _conferenceRepo.FindById(conferenceId);
+            if (conference == null)
+            {
+                _logger.LogDebug("The conference was not found.");
+                throw new ConferenceNotFoundException(conferenceId);
+            }
+
+            await UpdateConference(conference);
+        }
+
+        private Task UpdateConference(Conference conference)
+        {
+            return _database.PublishAsync(RedisChannels.OnConferenceUpdated(conference.ConferenceId), conference);
         }
     }
 }

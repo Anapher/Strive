@@ -4,22 +4,46 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using PaderConference.Core.Domain.Entities;
+using PaderConference.Core.Interfaces.Gateways.Repositories;
 using PaderConference.Infrastructure.Extensions;
+using PaderConference.Infrastructure.Services.Permissions.Dto;
+using StackExchange.Redis.Extensions.Core.Abstractions;
 
 namespace PaderConference.Infrastructure.Services.Permissions
 {
     public class PermissionsService : ConferenceService, IPermissionsService
     {
+        private readonly string _conferenceId;
+        private readonly IConferenceRepo _conferenceRepo;
+
         private readonly ConcurrentBag<FetchPermissionsDelegate> _fetchPermissionsDelegates =
             new ConcurrentBag<FetchPermissionsDelegate>();
 
-        public PermissionsService()
+        private readonly ILogger<PermissionsService> _logger;
+        private readonly IRedisDatabase _redisDatabase;
+
+        private IImmutableDictionary<string, JsonElement> _conferencePermissions;
+        private IImmutableDictionary<string, JsonElement> _moderatorPermissions;
+        private IImmutableList<string> _moderators;
+
+        public PermissionsService(string conferenceId, IConferenceRepo conferenceRepo, IRedisDatabase redisDatabase,
+            ILogger<PermissionsService> logger)
         {
-            ConferencePermissions = ImmutableDictionary<string, JsonElement>.Empty;
+            _conferenceId = conferenceId;
+            _conferenceRepo = conferenceRepo;
+            _redisDatabase = redisDatabase;
+            _logger = logger;
+
+            _conferencePermissions = ImmutableDictionary<string, JsonElement>.Empty;
+            _moderatorPermissions = ImmutableDictionary<string, JsonElement>.Empty;
+            _moderators = ImmutableList<string>.Empty;
+
+            RegisterLayerProvider(FetchPermissions);
         }
 
-        public IImmutableDictionary<string, JsonElement> ConferencePermissions { get; }
+        // TODO: invidivual permissions
 
         public async ValueTask<IPermissionStack> GetPermissions(Participant participant)
         {
@@ -35,16 +59,82 @@ namespace PaderConference.Infrastructure.Services.Permissions
             _fetchPermissionsDelegates.Add(fetchPermissions);
         }
 
-        public override ValueTask InitializeAsync()
+        private ValueTask<IEnumerable<PermissionLayer>> FetchPermissions(Participant participant)
         {
-            RegisterLayerProvider(FetchConferencePermissions);
+            var result = new List<PermissionLayer> {new PermissionLayer(10, _conferencePermissions)};
 
-            return new ValueTask();
+            if (_moderators.Contains(participant.ParticipantId))
+                result.Add(new PermissionLayer(30, _moderatorPermissions));
+
+            return new ValueTask<IEnumerable<PermissionLayer>>(result);
         }
 
-        private ValueTask<IEnumerable<PermissionLayer>> FetchConferencePermissions(Participant participant)
+        public override async ValueTask InitializeAsync()
         {
-            return new ValueTask<IEnumerable<PermissionLayer>>(new PermissionLayer(20, ConferencePermissions).Yield());
+            var conference = await _conferenceRepo.FindById(_conferenceId);
+            if (conference == null)
+            {
+                _logger.LogError("Conference was not found in database.");
+                return;
+            }
+
+            _conferencePermissions = ParseDictionary(conference.Permissions);
+            _moderatorPermissions = ParseDictionary(conference.ModeratorPermissions);
+            _moderators = conference.Moderators;
+
+            await _redisDatabase.SubscribeAsync<Conference>(RedisChannels.OnConferenceUpdated(_conferenceId),
+                OnConferenceUpdated);
+        }
+
+        private static IImmutableDictionary<string, JsonElement> ParseDictionary(
+            IReadOnlyDictionary<string, string> dictionary)
+        {
+            return dictionary.ToImmutableDictionary(x => x.Key,
+                x => JsonSerializer.Deserialize<JsonElement>(x.Value));
+        }
+
+        public async Task OnRoomPermissionsUpdated(string roomId)
+        {
+            await _redisDatabase.PublishAsync(RedisChannels.OnPermissionsUpdated,
+                new PermissionUpdateDto(_conferenceId, roomId, null));
+        }
+
+        public async Task OnParticipantPermissionsUpdated(string participantId)
+        {
+            await _redisDatabase.PublishAsync(RedisChannels.OnPermissionsUpdated,
+                new PermissionUpdateDto(_conferenceId, null, participantId));
+        }
+
+        public async Task OnConferencePermissionsUpdated()
+        {
+            await _redisDatabase.PublishAsync(RedisChannels.OnPermissionsUpdated,
+                new PermissionUpdateDto(_conferenceId, null, null));
+        }
+
+        public override async ValueTask DisposeAsync()
+        {
+            await _redisDatabase.UnsubscribeAsync<Conference>(RedisChannels.OnConferenceUpdated(_conferenceId),
+                OnConferenceUpdated);
+        }
+
+        private async Task OnConferenceUpdated(Conference arg)
+        {
+            _moderators = arg.Moderators;
+
+            bool PermissionsEqual(IReadOnlyDictionary<string, string> source,
+                IReadOnlyDictionary<string, JsonElement> target)
+            {
+                return source.EqualItems(target.ToDictionary(x => x.Key, x => x.Value.ToString()));
+            }
+
+            if (!PermissionsEqual(arg.Permissions, _conferencePermissions) ||
+                !PermissionsEqual(arg.ModeratorPermissions, _conferencePermissions))
+            {
+                _conferencePermissions = ParseDictionary(arg.Permissions);
+                _moderatorPermissions = ParseDictionary(arg.ModeratorPermissions);
+
+                await OnConferencePermissionsUpdated();
+            }
         }
     }
 }

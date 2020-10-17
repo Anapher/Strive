@@ -9,7 +9,7 @@ namespace PaderConference.Models.Validation
     {
         public CreateConferenceRequestValidator()
         {
-            RuleFor(x => x.Organizers).NotEmpty();
+            RuleFor(x => x.Moderators).NotEmpty();
             RuleFor(x => x.ScheduleCron).Must(x =>
             {
                 if (x == null) return true;

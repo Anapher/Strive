@@ -8,12 +8,14 @@ namespace PaderConference.Core.Domain.Entities
 {
     public class Conference : IConferenceScheduleInfo
     {
-        public Conference(string conferenceId, IImmutableList<string> organizers)
+        public Conference(string conferenceId, IImmutableList<string> moderators)
         {
             ConferenceId = conferenceId;
-            Organizers = organizers;
+            Moderators = moderators;
 
             Permissions = ImmutableDictionary<string, string>.Empty;
+            ModeratorPermissions = ImmutableDictionary<string, string>.Empty;
+            DefaultRoomPermissions = ImmutableDictionary<string, string>.Empty;
         }
 
 #pragma warning disable 8618
@@ -31,12 +33,22 @@ namespace PaderConference.Core.Domain.Entities
         /// <summary>
         ///     Participant ids of organizers
         /// </summary>
-        public IImmutableList<string> Organizers { get; set; }
+        public IImmutableList<string> Moderators { get; set; }
 
         /// <summary>
         ///     Conference permission
         /// </summary>
         public IImmutableDictionary<string, string> Permissions { get; set; }
+
+        /// <summary>
+        ///     Permissions of moderators
+        /// </summary>
+        public IImmutableDictionary<string, string> ModeratorPermissions { get; set; }
+
+        /// <summary>
+        ///     Default permissions for rooms
+        /// </summary>
+        public IImmutableDictionary<string, string> DefaultRoomPermissions { get; set; }
 
         /// <summary>
         ///     The type of the conference. Set by the front end to synchronize devices

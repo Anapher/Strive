@@ -19,8 +19,7 @@
             public const string ChatMessage = nameof(ChatMessage);
             public const string Chat = nameof(Chat);
             public const string OnUserJoined = nameof(OnUserJoined);
-            public const string OnConferenceDoesNotExist = nameof(OnConferenceDoesNotExist);
-            public const string OnConferenceNotStarted = nameof(OnConferenceNotStarted);
+            public const string OnConferenceJoinError = nameof(OnConferenceJoinError);
 
             public const string OnParticipantsUpdated = nameof(OnParticipantsUpdated);
 

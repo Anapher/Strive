@@ -11,7 +11,7 @@ namespace PaderConference.Models.Request
 
         public string ConferenceType { get; set; }
 
-        public IImmutableList<string> Organizers { get; set; }
+        public IImmutableList<string> Moderators { get; set; }
 
         public DateTimeOffset? StartTime { get; set; }
 
@@ -20,5 +20,9 @@ namespace PaderConference.Models.Request
         public string? ScheduleCron { get; set; }
 
         public IImmutableDictionary<string, string>? Permissions { get; set; }
+
+        public IImmutableDictionary<string, string>? DefaultRoomPermissions { get; set; }
+
+        public IImmutableDictionary<string, string>? ModeratorPermissions { get; set; }
     }
 }

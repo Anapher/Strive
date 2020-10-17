@@ -3,7 +3,7 @@
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iisExpress": {
-      "applicationUrl": "http://localhost:50700",
+      "applicationUrl": "http://localhost:4000",
       "sslPort": 44364
     }
   },
@@ -16,7 +16,6 @@
     },
     "PaderConference": {
       "commandName": "Project",
-      "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },

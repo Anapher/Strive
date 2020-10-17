@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Dto;
 using PaderConference.Core.Interfaces.Services;
+using PaderConference.Infrastructure.Conferencing;
 using PaderConference.Infrastructure.Extensions;
 using PaderConference.Infrastructure.Hubs.Dto;
 using PaderConference.Infrastructure.Services;
@@ -29,8 +30,7 @@ namespace PaderConference.Infrastructure.Hubs
         private readonly ILogger<CoreHub> _logger;
 
         public CoreHub(IConferenceManager conferenceManager, IConnectionMapping connectionMapping,
-            IEnumerable<IConferenceServiceManager> conferenceServices, IConferenceScheduler conferenceScheduler,
-            ILogger<CoreHub> logger) : base(
+            IEnumerable<IConferenceServiceManager> conferenceServices, ILogger<CoreHub> logger) : base(
             connectionMapping, logger)
         {
             _conferenceManager = conferenceManager;
@@ -58,30 +58,36 @@ namespace PaderConference.Infrastructure.Hubs
                     {
                         _logger.LogDebug("Client tries to connect");
 
-                        if (await _conferenceManager.GetIsConferenceStarted(conferenceId))
-                        {
-                        }
-
                         Participant participant;
                         try
                         {
-                            participant =
-                                await _conferenceManager.Participate(conferenceId, userId, role,
-                                    httpContext.User.Identity.Name);
+                            participant = await _conferenceManager.Participate(conferenceId, userId, role,
+                                httpContext.User.Identity.Name);
                         }
-                        catch (InvalidOperationException)
+                        catch (ConferenceNotFoundException)
                         {
-                            _logger.LogDebug("Conference {conferenceId} was not found. Abort connection", conferenceId);
-
-                            await Clients.Caller.SendAsync(CoreHubMessages.Response.OnConferenceDoesNotExist);
+                            _logger.LogDebug("Abort connection");
+                            await Clients.Caller.SendAsync(CoreHubMessages.Response.OnConferenceJoinError,
+                                ConferenceError.NotFound);
+                            Context.Abort();
+                            return;
+                        }
+                        catch (Exception e)
+                        {
+                            _logger.LogError(e, "Unexpected exception occurred.");
+                            await Clients.Caller.SendAsync(CoreHubMessages.Response.OnConferenceJoinError,
+                                ConferenceError.UnexpectedError(e.Message));
                             Context.Abort();
                             return;
                         }
 
                         if (!_connectionMapping.Add(Context.ConnectionId, participant))
                         {
-                            _logger.LogWarning("Participant {participantId} could not be added to connection mapping.",
+                            _logger.LogError("Participant {participantId} could not be added to connection mapping.",
                                 participant.ParticipantId);
+                            await Clients.Caller.SendAsync(CoreHubMessages.Response.OnConferenceJoinError,
+                                ConferenceError.UnexpectedError(
+                                    "Participant could not be added to connection mapping."));
                             Context.Abort();
                             return;
                         }
@@ -102,6 +108,7 @@ namespace PaderConference.Infrastructure.Hubs
 
         public override async Task OnDisconnectedAsync(Exception exception)
         {
+            // Todo: close conference if it was the last participant and some time passed
             if (!_connectionMapping.Connections.TryGetValue(Context.ConnectionId, out var participant))
                 return;
 
@@ -123,67 +130,91 @@ namespace PaderConference.Infrastructure.Hubs
                 .GetService(conferenceId, _conferenceServices);
         }
 
-        public async Task SendChatMessage(SendChatMessageDto dto)
+        private async Task InvokeService<TService, T>(T dto,
+            Func<TService, Func<IServiceMessage<T>, ValueTask>> action) where TService : IConferenceService
         {
             if (GetMessage(dto, out var message))
-                await (await GetConferenceService<ChatService>(message.Participant))
-                    .SendMessage(message);
+            {
+                var service = await GetConferenceService<TService>(message.Participant);
+                var method = action(service);
+                await method(message);
+            }
         }
 
-        public async Task RequestChat()
+        private async Task InvokeService<TService>(Func<TService, Func<IServiceMessage, ValueTask>> action)
+            where TService : IConferenceService
         {
             if (GetMessage(out var message))
-                await (await GetConferenceService<ChatService>(message.Participant))
-                    .RequestAllMessages(message);
+            {
+                var service = await GetConferenceService<TService>(message.Participant);
+                var method = action(service);
+                await method(message);
+            }
         }
 
-        public async Task<JsonElement?> RequestRouterCapabilities()
+        private async Task<TResult> InvokeService<TService, T, TResult>(T dto,
+            Func<TService, Func<IServiceMessage<T>, ValueTask<TResult>>> action) where TService : IConferenceService
+        {
+            if (GetMessage(dto, out var message))
+            {
+                var service = await GetConferenceService<TService>(message.Participant);
+                var method = action(service);
+                return await method(message);
+            }
+
+            return default!;
+        }
+
+        private async Task<TResult> InvokeService<TService, TResult>(
+            Func<TService, Func<IServiceMessage, ValueTask<TResult>>> action) where TService : IConferenceService
         {
             if (GetMessage(out var message))
-                return await (await GetConferenceService<MediaService>(message.Participant)).GetRouterCapabilities(
-                    message);
-            return null;
+            {
+                var service = await GetConferenceService<TService>(message.Participant);
+                var method = action(service);
+                return await method(message);
+            }
+
+            return default!;
         }
 
-        public async Task<Error?> InitializeConnection(JsonElement element)
+        public Task SendChatMessage(SendChatMessageDto dto)
         {
-            if (GetMessage(element, out var message))
-                return await (await GetConferenceService<MediaService>(message.Participant)).InitializeConnection(
-                    message);
-
-            return null;
+            return InvokeService<ChatService, SendChatMessageDto>(dto, service => service.SendMessage);
         }
 
-        public async Task<JsonElement?> CreateWebRtcTransport(JsonElement element)
+        public Task RequestChat()
         {
-            if (GetMessage(element, out var message))
-                return await (await GetConferenceService<MediaService>(message.Participant)).Redirect(
-                    message, RedisCommunication.Request.CreateTransport);
-            return null;
+            return InvokeService<ChatService>(service => service.RequestAllMessages);
         }
 
-        public async Task<JsonElement?> ConnectWebRtcTransport(JsonElement element)
+        public Task<JsonElement?> RequestRouterCapabilities()
         {
-            if (GetMessage(element, out var message))
-                return await (await GetConferenceService<MediaService>(message.Participant)).Redirect(
-                    message, RedisCommunication.Request.ConnectTransport);
-            return null;
+            return InvokeService<MediaService, JsonElement?>(service => service.GetRouterCapabilities);
         }
 
-        public async Task<JsonElement?> ProduceWebRtcTransport(JsonElement element)
+        public Task<Error?> InitializeConnection(JsonElement element)
         {
-            if (GetMessage(element, out var message))
-                return await (await GetConferenceService<MediaService>(message.Participant)).Redirect(
-                    message, RedisCommunication.Request.TransportProduce);
-            return null;
+            return InvokeService<MediaService, JsonElement, Error?>(element,
+                service => service.InitializeConnection);
         }
 
-        public async Task<JsonElement?> ProduceDataWebRtcTransport(JsonElement element)
+        public Task<JsonElement?> CreateWebRtcTransport(JsonElement element)
         {
-            if (GetMessage(element, out var message))
-                return await (await GetConferenceService<MediaService>(message.Participant)).Redirect(
-                    message, RedisCommunication.Request.TransportProduceData);
-            return null;
+            return InvokeService<MediaService, JsonElement, JsonElement?>(element, service =>
+                service.Redirect(RedisCommunication.Request.CreateTransport));
+        }
+
+        public Task<JsonElement?> ConnectWebRtcTransport(JsonElement element)
+        {
+            return InvokeService<MediaService, JsonElement, JsonElement?>(element, service =>
+                service.Redirect(RedisCommunication.Request.ConnectTransport));
+        }
+
+        public Task<JsonElement?> ProduceWebRtcTransport(JsonElement element)
+        {
+            return InvokeService<MediaService, JsonElement, JsonElement?>(element, service =>
+                service.Redirect(RedisCommunication.Request.TransportProduce));
         }
     }
 }

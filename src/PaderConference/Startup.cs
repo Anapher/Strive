@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -18,6 +19,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using MongoDB.Bson.Serialization;
 using PaderConference.Core;
 using PaderConference.Core.Errors;
 using PaderConference.Core.Interfaces.Services;
@@ -26,6 +28,7 @@ using PaderConference.Infrastructure;
 using PaderConference.Infrastructure.Auth;
 using PaderConference.Infrastructure.Data;
 using PaderConference.Infrastructure.Hubs;
+using PaderConference.Infrastructure.Serialization;
 using PaderConference.Services;
 using StackExchange.Redis.Extensions.Core.Configuration;
 using Swashbuckle.AspNetCore.Swagger;
@@ -73,6 +76,11 @@ namespace PaderConference
             //    new MongoClient(services.GetRequiredService<MongoDbOptions>().ConnectionString));
 
             services.AddHostedService<MongoDbBuilder>();
+
+            BsonSerializer.RegisterGenericSerializerDefinition(typeof(IImmutableList<>),
+                typeof(ImmutableListSerializer<>));
+            BsonSerializer.RegisterGenericSerializerDefinition(typeof(IImmutableDictionary<,>),
+                typeof(ImmutableDictionarySerializer<,>));
 
             var tokenValidationParameters = new TokenValidationParameters
             {
@@ -159,6 +167,8 @@ namespace PaderConference
             services.AddSingleton<IConferenceScheduler, ConferenceScheduler>();
             services.AddHostedService(services =>
                 (ConferenceScheduler) services.GetRequiredService<IConferenceScheduler>());
+
+            services.AddHostedService<ConferenceInitializer>();
 
             // Now register our services with Autofac container.
             var builder = new ContainerBuilder();

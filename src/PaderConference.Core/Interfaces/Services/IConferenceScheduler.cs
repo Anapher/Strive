@@ -20,6 +20,13 @@ namespace PaderConference.Core.Interfaces.Services
         /// </summary>
         /// <param name="conferenceId">The id of the conference</param>
         ValueTask RemoveConference(string conferenceId);
+
+        /// <summary>
+        ///     Get the next timestamp the conference is scheduled for
+        /// </summary>
+        /// <param name="conferenceId">The id of the conference</param>
+        /// <returns>Return null if the conference is not scheduled, else return the timestamp.</returns>
+        ValueTask<DateTimeOffset?> GetNextOccurrence(string conferenceId);
     }
 
     public interface IConferenceScheduleInfo

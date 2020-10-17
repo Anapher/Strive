@@ -34,7 +34,7 @@ namespace PaderConference.Infrastructure.Services.Media
         public override async ValueTask InitializeAsync()
         {
             await _redisDatabase.ListAddToLeftAsync(RedisCommunication.NewConferencesKey,
-                new ConferenceInfo(_conferenceId));
+                new Communication.ConferenceInfo(_conferenceId));
             await _redisDatabase.PublishAsync<object?>(RedisCommunication.NewConferenceChannel, null);
 
             await _redisDatabase.SubscribeAsync<SendToConnectionDto>(
@@ -66,14 +66,19 @@ namespace PaderConference.Infrastructure.Services.Media
                 message.Participant.ParticipantId);
         }
 
-        public async ValueTask<JsonElement> Redirect(IServiceMessage<JsonElement> message,
+        public Func<IServiceMessage<JsonElement>, ValueTask<JsonElement?>> Redirect(
             RedisCommunication.ChannelName channelName)
         {
-            var meta = GetMeta(message);
-            var request = new ConnectionMessage<JsonElement>(message.Payload, meta);
+            async ValueTask<JsonElement?> Invoke(IServiceMessage<JsonElement> message)
+            {
+                var meta = GetMeta(message);
+                var request = new ConnectionMessage<JsonElement>(message.Payload, meta);
 
-            return await _redisDatabase.InvokeAsync<JsonElement, ConnectionMessage<JsonElement>>(
-                channelName.GetName(_conferenceId), request);
+                return await _redisDatabase.InvokeAsync<JsonElement?, ConnectionMessage<JsonElement>>(
+                    channelName.GetName(_conferenceId), request);
+            }
+
+            return Invoke;
         }
 
         public async ValueTask<JsonElement?> GetRouterCapabilities(IServiceMessage message)

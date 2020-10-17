@@ -26,18 +26,20 @@ namespace PaderConference.Core.UseCases
 
         public async ValueTask<CreateConferenceResponse?> Handle(CreateConferenceRequest message)
         {
-            if (!message.Organizers.Any())
+            if (!message.Moderators.Any())
                 return ReturnError(
-                    new FieldValidationError(nameof(message.Organizers), "Organizers must not be empty."));
+                    new FieldValidationError(nameof(message.Moderators), "Organizers must not be empty."));
 
             var id = GenerateId();
-            var conference = new Conference(id, message.Organizers)
+            var conference = new Conference(id, message.Moderators)
             {
                 Name = message.Name,
                 StartTime = message.StartTime,
                 ScheduleCron = message.ScheduleCron,
                 ConferenceType = message.ConferenceType,
-                Permissions = message.Permissions
+                Permissions = message.Permissions,
+                DefaultRoomPermissions = message.DefaultRoomPermissions,
+                ModeratorPermissions = message.ModeratorPermissions
             };
 
             try

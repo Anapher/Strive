@@ -25,11 +25,12 @@ namespace PaderConference.Controllers
         {
             var result =
                 await useCase.Handle(new CreateConferenceRequest(request.Name, request.ConferenceType,
-                    request.Organizers, request.StartTime, request.EndTime, request.ScheduleCron,
-                    request.Permissions ?? ImmutableDictionary<string, string>.Empty));
+                    request.Moderators, request.StartTime, request.EndTime, request.ScheduleCron,
+                    request.Permissions ?? ImmutableDictionary<string, string>.Empty,
+                    request.DefaultRoomPermissions ?? ImmutableDictionary<string, string>.Empty,
+                    request.ModeratorPermissions ?? ImmutableDictionary<string, string>.Empty));
 
             if (useCase.HasError) return useCase.ToActionResult();
-
             return new StartConferenceResponseDto(result!.ConferenceId);
         }
     }

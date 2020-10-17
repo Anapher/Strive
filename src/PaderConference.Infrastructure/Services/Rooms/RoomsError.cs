@@ -1,17 +1,13 @@
-﻿using PaderConference.Infrastructure.Services.Chat;
+﻿using PaderConference.Core.Dto;
 
 namespace PaderConference.Infrastructure.Services.Rooms
 {
-    public class RoomsError : ServiceError
+    public static class RoomsError
     {
-        public RoomsError(string message, ServiceErrorCode code) : base(message, code)
-        {
-        }
+        public static Error SwitchRoomFailed =>
+            new ServiceError("Switching the room failed.", ServiceErrorCode.Rooms_SwitchRoomFailed);
 
-        public static ChatError SwitchRoomFailed =>
-            new ChatError("Switching the room failed.", ServiceErrorCode.Rooms_SwitchRoomFailed);
-
-        public static ChatError PermissionToSwitchRoomDenied =>
-            new ChatError("Permissions to switch room denied.", ServiceErrorCode.Rooms_SwitchRoomFailed);
+        public static Error PermissionToSwitchRoomDenied =>
+            new ServiceError("Permissions to switch room denied.", ServiceErrorCode.Rooms_SwitchRoomFailed);
     }
 }

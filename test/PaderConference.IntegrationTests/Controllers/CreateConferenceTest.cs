@@ -31,7 +31,7 @@ namespace PaderConference.IntegrationTests.Controllers
 
             response = await _client.PostAsync("/api/v1/conference",
                 new JsonContent(new CreateConferenceRequestDto
-                    {ConferenceType = "class", Organizers = new[] {"test"}.ToImmutableList(), Name = "Test con"}));
+                    {ConferenceType = "class", Moderators = new[] {"test"}.ToImmutableList(), Name = "Test con"}));
 
             var asd = await response.Content.ReadAsStringAsync();
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);

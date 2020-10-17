@@ -51,6 +51,14 @@ namespace PaderConference.Services
             return new ValueTask();
         }
 
+        public ValueTask<DateTimeOffset?> GetNextOccurrence(string conferenceId)
+        {
+            if (_scheduledConferences.TryGetValue(conferenceId, out var result))
+                return new ValueTask<DateTimeOffset?>(result.Item1);
+
+            return new ValueTask<DateTimeOffset?>((DateTimeOffset?) null);
+        }
+
 
         /// <param name="reschedule">
         ///     if false, this method will not force the worker to reset. Useful if this method is invoked by
@@ -68,12 +76,13 @@ namespace PaderConference.Services
                     if (startAtLeast)
                     {
                         _logger.LogDebug("Start conference immediately and don't schedule");
-                        await _conferenceManager.StartConference(scheduleInfo.ConferenceId);
+                        await _conferenceManager.OpenConference(scheduleInfo.ConferenceId);
                     }
                     else
                     {
                         _logger.LogDebug("Mark conference as inactive");
-                        await _conferenceRepo.SetConferenceState(scheduleInfo.ConferenceId, ConferenceState.Inactive);
+                        await _conferenceManager.SetConferenceState(scheduleInfo.ConferenceId,
+                            ConferenceState.Inactive);
                     }
 
                     return;
@@ -87,12 +96,12 @@ namespace PaderConference.Services
                     if (startAtLeast)
                     {
                         _logger.LogDebug("Start conference immediately (startAtLeast flag) and don't schedule");
-                        await _conferenceManager.StartConference(scheduleInfo.ConferenceId);
+                        await _conferenceManager.OpenConference(scheduleInfo.ConferenceId);
                         return;
                     }
 
                     _logger.LogDebug("Mark conference as inactive");
-                    await _conferenceManager.MarkConferenceAsInactive(scheduleInfo.ConferenceId);
+                    await _conferenceManager.SetConferenceState(scheduleInfo.ConferenceId, ConferenceState.Inactive);
                     return;
                 }
 
@@ -110,6 +119,8 @@ namespace PaderConference.Services
         {
             using (_logger.BeginScope("ExecuteAsync"))
             {
+                // TODO: subscribe redis update, reschedule
+
                 _logger.LogDebug("Fetch active conferences...");
                 var conferences = await _conferenceRepo.GetActiveConferences();
                 foreach (var conference in conferences) await ScheduleConference(conference, false, false);
@@ -162,7 +173,7 @@ namespace PaderConference.Services
                         if (next != null)
                         {
                             _logger.LogDebug("Start conference {conferenceId}", next.ConferenceId);
-                            await _conferenceManager.StartConference(next.ConferenceId);
+                            await _conferenceManager.OpenConference(next.ConferenceId);
                             await ScheduleConference(next, false, false); // reschedule
                         }
                     }

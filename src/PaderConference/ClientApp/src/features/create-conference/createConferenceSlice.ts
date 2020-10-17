@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { StartConferenceRequestDto, StartConferenceResponseDto } from 'MyModels';
 import * as conferenceServices from 'src/services/api/conference';
+import { CreateConferenceDto, CreateConferenceResponse } from './types';
 
 export type CreateConferenceState = {
    dialogOpen: boolean;
@@ -14,12 +14,9 @@ const initialState: CreateConferenceState = {
    createdConferenceId: null,
 };
 
-export const createConferenceAsync = createAsyncThunk(
-   'createConference/create',
-   async (dto: StartConferenceRequestDto) => {
-      return await conferenceServices.create(dto);
-   },
-);
+export const createConferenceAsync = createAsyncThunk('createConference/create', async (dto: CreateConferenceDto) => {
+   return await conferenceServices.create(dto);
+});
 
 const createConference = createSlice({
    name: 'createConference',
@@ -40,7 +37,7 @@ const createConference = createSlice({
       [createConferenceAsync.rejected.type]: (state) => {
          state.isCreating = false;
       },
-      [createConferenceAsync.fulfilled.type]: (state, action: PayloadAction<StartConferenceResponseDto>) => {
+      [createConferenceAsync.fulfilled.type]: (state, action: PayloadAction<CreateConferenceResponse>) => {
          state.isCreating = false;
          state.createdConferenceId = action.payload.conferenceId;
       },
