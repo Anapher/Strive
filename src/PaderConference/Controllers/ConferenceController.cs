@@ -1,5 +1,4 @@
-﻿using System.Collections.Immutable;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -25,10 +24,8 @@ namespace PaderConference.Controllers
         {
             var result =
                 await useCase.Handle(new CreateConferenceRequest(request.Name, request.ConferenceType,
-                    request.Moderators, request.StartTime, request.EndTime, request.ScheduleCron,
-                    request.Permissions ?? ImmutableDictionary<string, string>.Empty,
-                    request.DefaultRoomPermissions ?? ImmutableDictionary<string, string>.Empty,
-                    request.ModeratorPermissions ?? ImmutableDictionary<string, string>.Empty));
+                    request.Moderators, request.StartTime, request.EndTime, request.ScheduleCron, request.Permissions,
+                    request.DefaultRoomPermissions, request.ModeratorPermissions));
 
             if (useCase.HasError) return useCase.ToActionResult();
             return new StartConferenceResponseDto(result!.ConferenceId);

@@ -2,7 +2,6 @@ import { makeStyles, Paper } from '@material-ui/core';
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from 'src/store';
-import { ParticipantDto } from 'src/store/conference-signal/types';
 import ParticipantItem from './ParticipantItem';
 
 const useStyles = makeStyles((theme) => ({

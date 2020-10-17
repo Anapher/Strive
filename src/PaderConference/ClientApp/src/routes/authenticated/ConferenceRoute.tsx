@@ -2,37 +2,14 @@ import { Link, makeStyles, Typography } from '@material-ui/core';
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RouteComponentProps } from 'react-router-dom';
-import ChatBar from 'src/features/chat/components/ChatBar';
-import ConferenceAppBar from 'src/features/conference/components/ConferenceAppBar';
-import Media from 'src/features/media/components/Media';
-import RoomsList from 'src/features/rooms/components/RoomsList';
+import ClassConference from 'src/features/conference/components/ClassConference';
+import ConferenceConnecting from 'src/features/conference/components/ConferenceConnecting';
+import ConferenceNotOpen from 'src/features/conference/components/ConferenceNotOpen';
 import { RootState } from 'src/store';
 import { close, joinConference } from 'src/store/conference-signal/actions';
 import to from 'src/utils/to';
 
 const useStyles = makeStyles({
-   root: {
-      height: '100%',
-      display: 'flex',
-      flexDirection: 'column',
-   },
-   conferenceMain: {
-      flex: 1,
-      display: 'flex',
-      flexDirection: 'row',
-   },
-   flex: {
-      flex: 1,
-   },
-   chat: {
-      flex: 1,
-      maxWidth: 360,
-      padding: 8,
-   },
-   participants: {
-      flex: 1,
-      maxWidth: 180,
-   },
    errorRoot: {
       height: '100%',
       display: 'flex',
@@ -60,6 +37,9 @@ function ConferenceRoute({
    },
 }: Props) {
    const error = useSelector((state: RootState) => state.conference.connectionError);
+   const conferenceState = useSelector((state: RootState) => state.conference.conferenceState);
+   const { isConnected, isReconnecting } = useSelector((state: RootState) => state.signalr);
+
    const dispatch = useDispatch();
 
    useEffect(() => {
@@ -84,22 +64,18 @@ function ConferenceRoute({
       );
    }
 
-   return (
-      <div className={classes.root}>
-         <ConferenceAppBar />
-         <div className={classes.conferenceMain}>
-            <div className={classes.participants}>
-               <RoomsList />
-            </div>
-            <div className={classes.flex}>
-               <Media />
-            </div>
-            <div className={classes.chat}>
-               <ChatBar />
-            </div>
-         </div>
-      </div>
-   );
+   if (!conferenceState || !isConnected) {
+      return <ConferenceConnecting isReconnecting={isReconnecting} />;
+   }
+
+   if (!conferenceState.isOpen) {
+      return <ConferenceNotOpen conferenceInfo={conferenceState} />;
+   }
+
+   switch (conferenceState.conferenceType) {
+      default:
+         return <ClassConference />;
+   }
 }
 
 export default ConferenceRoute;

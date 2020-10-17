@@ -1,4 +1,5 @@
 import { ActionCreatorWithPayload, createAction } from '@reduxjs/toolkit';
+import { DomainError } from 'src/types';
 import { IRestError } from 'src/utils/error-result';
 
 export const DEFAULT_PREFIX = 'SIGNALR';

@@ -8,6 +8,7 @@ import createConference from '../features/create-conference/createConferenceSlic
 import signalr from './conference-signal/reducer';
 import media from '../features/media/mediaSlice';
 import rooms from '../features/rooms/roomsSlice';
+import notifier from '../features/notifier/notifierSlice';
 
 const rootReducer = combineReducers({
    auth,
@@ -18,6 +19,7 @@ const rootReducer = combineReducers({
    signalr,
    media,
    rooms,
+   notifier,
 });
 
 export default rootReducer;

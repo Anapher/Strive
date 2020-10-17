@@ -2,6 +2,12 @@
 {
     public static class PermissionsList
     {
+        public static class Conference
+        {
+            public static readonly PermissionDescriptor<bool> CanOpenAndClose =
+                new PermissionDescriptor<bool>("conference.canOpenAndClose");
+        }
+
         public static class Chat
         {
             public static readonly PermissionDescriptor<bool> CanSendChatMessage =

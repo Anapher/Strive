@@ -9,9 +9,9 @@ namespace PaderConference.Core.Dto.UseCaseRequests
     {
         public CreateConferenceRequest(string? name, string conferenceType, IImmutableList<string> moderators,
             DateTimeOffset? startTime, DateTimeOffset? endTime, string? scheduleCron,
-            IImmutableDictionary<string, string> permissions,
-            IImmutableDictionary<string, string> defaultRoomPermissions,
-            IImmutableDictionary<string, string> moderatorPermissions)
+            IImmutableDictionary<string, string>? permissions,
+            IImmutableDictionary<string, string>? defaultRoomPermissions,
+            IImmutableDictionary<string, string>? moderatorPermissions)
         {
             Name = name;
             ConferenceType = conferenceType;
@@ -36,10 +36,10 @@ namespace PaderConference.Core.Dto.UseCaseRequests
 
         public string? ScheduleCron { get; }
 
-        public IImmutableDictionary<string, string> Permissions { get; }
+        public IImmutableDictionary<string, string>? Permissions { get; }
 
-        public IImmutableDictionary<string, string> DefaultRoomPermissions { get; }
+        public IImmutableDictionary<string, string>? DefaultRoomPermissions { get; }
 
-        public IImmutableDictionary<string, string> ModeratorPermissions { get; }
+        public IImmutableDictionary<string, string>? ModeratorPermissions { get; }
     }
 }

@@ -7,6 +7,8 @@ namespace PaderConference.Infrastructure.Services
         // Conference
         Conference_NotFound = 1000000,
         Conference_UnexpectedError,
+        Conference_NotOpen,
+        Conference_PermissionDeniedToOpenOrClose,
 
         // Chat
         Chat_EmptyMessage = 1000100,

@@ -13,6 +13,7 @@ import MenuIcon from '@material-ui/icons/Menu';
 import React from 'react';
 import { useDispatch } from 'react-redux';
 import { signOut } from 'src/features/auth/authSlice';
+import { send } from 'src/store/conference-signal/actions';
 import to from 'src/utils/to';
 
 const useStyles = makeStyles((theme) =>
@@ -33,6 +34,8 @@ export default function ConferenceAppBar() {
    const dispatch = useDispatch();
    const handleSignOut = () => dispatch(signOut());
 
+   const handleCloseConference = () => dispatch(send('CloseConference'));
+
    return (
       <AppBar position="static">
          <Toolbar>
@@ -44,6 +47,7 @@ export default function ConferenceAppBar() {
                   <Typography variant="h6">PaderConference</Typography>
                </ButtonBase>
             </Box>
+            <Button onClick={handleCloseConference}>Close Conference</Button>
             <Button onClick={handleSignOut}>Sign out</Button>
          </Toolbar>
       </AppBar>

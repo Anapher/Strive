@@ -5,7 +5,7 @@ import { ErrorCodes } from 'src/utils/errors';
 import * as actions from './actions';
 import { Options } from './types';
 
-const defaultEvents: string[] = ['OnSynchronizeObjectState', 'OnSynchronizedObjectUpdated'];
+const defaultEvents: string[] = ['OnSynchronizeObjectState', 'OnSynchronizedObjectUpdated', 'OnError'];
 
 type SignalRResult = {
    middleware: Middleware;
@@ -52,7 +52,7 @@ export default (options: Options): SignalRResult => {
             try {
                await connection.start();
                connection.onclose((error) => dispatch(actions.onConferenceConnectionClosed(conferenceId, error)));
-               connection.onreconnecting((error) => dispatch(actions.onConferenceReconnected(conferenceId, error)));
+               connection.onreconnected(() => dispatch(actions.onConferenceReconnected(conferenceId)));
                connection.onreconnecting((error) => dispatch(actions.onConferenceReconnecting(conferenceId, error)));
 
                dispatch(actions.onConferenceJoined(conferenceId));

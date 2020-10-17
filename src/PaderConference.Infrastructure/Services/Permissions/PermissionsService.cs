@@ -5,8 +5,10 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Interfaces.Gateways.Repositories;
+using PaderConference.Infrastructure.Conferencing;
 using PaderConference.Infrastructure.Extensions;
 using PaderConference.Infrastructure.Services.Permissions.Dto;
 using StackExchange.Redis.Extensions.Core.Abstractions;
@@ -17,6 +19,7 @@ namespace PaderConference.Infrastructure.Services.Permissions
     {
         private readonly string _conferenceId;
         private readonly IConferenceRepo _conferenceRepo;
+        private readonly DefaultPermissionOptions _defaultPermissions;
 
         private readonly ConcurrentBag<FetchPermissionsDelegate> _fetchPermissionsDelegates =
             new ConcurrentBag<FetchPermissionsDelegate>();
@@ -24,20 +27,19 @@ namespace PaderConference.Infrastructure.Services.Permissions
         private readonly ILogger<PermissionsService> _logger;
         private readonly IRedisDatabase _redisDatabase;
 
-        private IImmutableDictionary<string, JsonElement> _conferencePermissions;
-        private IImmutableDictionary<string, JsonElement> _moderatorPermissions;
+        private IImmutableDictionary<string, JsonElement>? _conferencePermissions;
+        private IImmutableDictionary<string, JsonElement>? _moderatorPermissions;
         private IImmutableList<string> _moderators;
 
         public PermissionsService(string conferenceId, IConferenceRepo conferenceRepo, IRedisDatabase redisDatabase,
-            ILogger<PermissionsService> logger)
+            IOptions<DefaultPermissionOptions> defaultPermissions, ILogger<PermissionsService> logger)
         {
             _conferenceId = conferenceId;
             _conferenceRepo = conferenceRepo;
             _redisDatabase = redisDatabase;
+            _defaultPermissions = defaultPermissions.Value;
             _logger = logger;
 
-            _conferencePermissions = ImmutableDictionary<string, JsonElement>.Empty;
-            _moderatorPermissions = ImmutableDictionary<string, JsonElement>.Empty;
             _moderators = ImmutableList<string>.Empty;
 
             RegisterLayerProvider(FetchPermissions);
@@ -61,10 +63,13 @@ namespace PaderConference.Infrastructure.Services.Permissions
 
         private ValueTask<IEnumerable<PermissionLayer>> FetchPermissions(Participant participant)
         {
-            var result = new List<PermissionLayer> {new PermissionLayer(10, _conferencePermissions)};
+            var result = new List<PermissionLayer>
+            {
+                new PermissionLayer(10, _conferencePermissions ?? _defaultPermissions.Conference)
+            };
 
             if (_moderators.Contains(participant.ParticipantId))
-                result.Add(new PermissionLayer(30, _moderatorPermissions));
+                result.Add(new PermissionLayer(30, _moderatorPermissions ?? _defaultPermissions.Moderator));
 
             return new ValueTask<IEnumerable<PermissionLayer>>(result);
         }
@@ -86,10 +91,10 @@ namespace PaderConference.Infrastructure.Services.Permissions
                 OnConferenceUpdated);
         }
 
-        private static IImmutableDictionary<string, JsonElement> ParseDictionary(
-            IReadOnlyDictionary<string, string> dictionary)
+        private static IImmutableDictionary<string, JsonElement>? ParseDictionary(
+            IReadOnlyDictionary<string, string>? dictionary)
         {
-            return dictionary.ToImmutableDictionary(x => x.Key,
+            return dictionary?.ToImmutableDictionary(x => x.Key,
                 x => JsonSerializer.Deserialize<JsonElement>(x.Value));
         }
 
@@ -121,9 +126,12 @@ namespace PaderConference.Infrastructure.Services.Permissions
         {
             _moderators = arg.Moderators;
 
-            bool PermissionsEqual(IReadOnlyDictionary<string, string> source,
-                IReadOnlyDictionary<string, JsonElement> target)
+            bool PermissionsEqual(IReadOnlyDictionary<string, string>? source,
+                IReadOnlyDictionary<string, JsonElement>? target)
             {
+                if (source == null && target == null) return true;
+                if (source == null || target == null) return false;
+
                 return source.EqualItems(target.ToDictionary(x => x.Key, x => x.Value.ToString()));
             }
 

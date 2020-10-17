@@ -9,12 +9,12 @@ namespace PaderConference.Infrastructure.Hubs
 {
     public abstract class HubBase : Hub
     {
-        private readonly IConnectionMapping _connectionMapping;
         private readonly ILogger _logger;
+        protected readonly IConnectionMapping ConnectionMapping;
 
-        public HubBase(IConnectionMapping connectionMapping, ILogger logger)
+        protected HubBase(IConnectionMapping connectionMapping, ILogger logger)
         {
-            _connectionMapping = connectionMapping;
+            ConnectionMapping = connectionMapping;
             _logger = logger;
         }
 
@@ -44,7 +44,7 @@ namespace PaderConference.Infrastructure.Hubs
 
         protected bool AssertParticipant([NotNullWhen(true)] out Participant? participant)
         {
-            if (!_connectionMapping.Connections.TryGetValue(Context.ConnectionId, out participant))
+            if (!ConnectionMapping.Connections.TryGetValue(Context.ConnectionId, out participant))
             {
                 _logger.LogWarning("Connection {connectionId} is not mapped to a participant.", Context.ConnectionId);
                 return false;

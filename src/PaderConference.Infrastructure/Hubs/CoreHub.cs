@@ -15,6 +15,7 @@ using PaderConference.Infrastructure.Extensions;
 using PaderConference.Infrastructure.Hubs.Dto;
 using PaderConference.Infrastructure.Services;
 using PaderConference.Infrastructure.Services.Chat;
+using PaderConference.Infrastructure.Services.ConferenceControl;
 using PaderConference.Infrastructure.Services.Media;
 using PaderConference.Infrastructure.Services.Media.Communication;
 using PaderConference.Infrastructure.Sockets;
@@ -22,21 +23,17 @@ using PaderConference.Infrastructure.Sockets;
 namespace PaderConference.Infrastructure.Hubs
 {
     [Authorize]
-    public class CoreHub : HubBase
+    public class CoreHub : ServiceHubBase
     {
-        private readonly IConferenceManager _conferenceManager;
-        private readonly IEnumerable<IConferenceServiceManager> _conferenceServices;
         private readonly IConnectionMapping _connectionMapping;
         private readonly ILogger<CoreHub> _logger;
 
         public CoreHub(IConferenceManager conferenceManager, IConnectionMapping connectionMapping,
             IEnumerable<IConferenceServiceManager> conferenceServices, ILogger<CoreHub> logger) : base(
-            connectionMapping, logger)
+            connectionMapping, conferenceManager, conferenceServices, logger)
         {
-            _conferenceManager = conferenceManager;
             _logger = logger;
             _connectionMapping = connectionMapping;
-            _conferenceServices = conferenceServices;
         }
 
         public override async Task OnConnectedAsync()
@@ -61,7 +58,7 @@ namespace PaderConference.Infrastructure.Hubs
                         Participant participant;
                         try
                         {
-                            participant = await _conferenceManager.Participate(conferenceId, userId, role,
+                            participant = await ConferenceManager.Participate(conferenceId, userId, role,
                                 httpContext.User.Identity.Name);
                         }
                         catch (ConferenceNotFoundException)
@@ -95,7 +92,7 @@ namespace PaderConference.Infrastructure.Hubs
                         await Groups.AddToGroupAsync(Context.ConnectionId, conferenceId);
 
                         // initialize all services before submitting events
-                        var services = _conferenceServices.Select(x => x.GetService(conferenceId, _conferenceServices))
+                        var services = ConferenceServices.Select(x => x.GetService(conferenceId, ConferenceServices))
                             .ToList();
                         foreach (var valueTask in services) await valueTask;
 
@@ -112,70 +109,25 @@ namespace PaderConference.Infrastructure.Hubs
             if (!_connectionMapping.Connections.TryGetValue(Context.ConnectionId, out var participant))
                 return;
 
-            var conferenceId = _conferenceManager.GetConferenceOfParticipant(participant);
+            var conferenceId = ConferenceManager.GetConferenceOfParticipant(participant);
 
             _connectionMapping.Remove(Context.ConnectionId);
-            await _conferenceManager.RemoveParticipant(participant);
+            await ConferenceManager.RemoveParticipant(participant);
 
-            foreach (var service in _conferenceServices)
-                await (await service.GetService(conferenceId, _conferenceServices))
+            foreach (var service in ConferenceServices)
+                await (await service.GetService(conferenceId, ConferenceServices))
                     .OnClientDisconnected(participant, Context.ConnectionId);
         }
 
-        private ValueTask<T> GetConferenceService<T>(Participant participant) where T : IConferenceService
+        public Task OpenConference()
         {
-            var conferenceId = _conferenceManager.GetConferenceOfParticipant(participant);
-
-            return _conferenceServices.OfType<IConferenceServiceManager<T>>().First()
-                .GetService(conferenceId, _conferenceServices);
+            return InvokeService<ConferenceControlService>(service => service.OpenConference,
+                new MethodOptions {ConferenceCanBeClosed = true});
         }
 
-        private async Task InvokeService<TService, T>(T dto,
-            Func<TService, Func<IServiceMessage<T>, ValueTask>> action) where TService : IConferenceService
+        public Task CloseConference()
         {
-            if (GetMessage(dto, out var message))
-            {
-                var service = await GetConferenceService<TService>(message.Participant);
-                var method = action(service);
-                await method(message);
-            }
-        }
-
-        private async Task InvokeService<TService>(Func<TService, Func<IServiceMessage, ValueTask>> action)
-            where TService : IConferenceService
-        {
-            if (GetMessage(out var message))
-            {
-                var service = await GetConferenceService<TService>(message.Participant);
-                var method = action(service);
-                await method(message);
-            }
-        }
-
-        private async Task<TResult> InvokeService<TService, T, TResult>(T dto,
-            Func<TService, Func<IServiceMessage<T>, ValueTask<TResult>>> action) where TService : IConferenceService
-        {
-            if (GetMessage(dto, out var message))
-            {
-                var service = await GetConferenceService<TService>(message.Participant);
-                var method = action(service);
-                return await method(message);
-            }
-
-            return default!;
-        }
-
-        private async Task<TResult> InvokeService<TService, TResult>(
-            Func<TService, Func<IServiceMessage, ValueTask<TResult>>> action) where TService : IConferenceService
-        {
-            if (GetMessage(out var message))
-            {
-                var service = await GetConferenceService<TService>(message.Participant);
-                var method = action(service);
-                return await method(message);
-            }
-
-            return default!;
+            return InvokeService<ConferenceControlService>(service => service.CloseConference);
         }
 
         public Task SendChatMessage(SendChatMessageDto dto)

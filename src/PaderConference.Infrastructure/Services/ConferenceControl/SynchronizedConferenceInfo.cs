@@ -2,7 +2,7 @@
 using System.Collections.Immutable;
 using PaderConference.Core.Domain.Entities;
 
-namespace PaderConference.Infrastructure.Services.ConferenceInfo
+namespace PaderConference.Infrastructure.Services.ConferenceControl
 {
     public class SynchronizedConferenceInfo
     {

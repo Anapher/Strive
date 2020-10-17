@@ -3,17 +3,29 @@ import { joinConference, onConferenceJoined, onConferenceJoinFailed } from 'src/
 import { createSynchronizeObjectReducer } from 'src/store/conference-signal/synchronized-object';
 import { ParticipantDto } from 'src/store/conference-signal/types';
 import { IRestError } from 'src/utils/error-result';
+import { ConferenceType, Permissions } from '../create-conference/types';
 
 export type ConferenceState = {
    conferenceId: string | null;
    connectionError: IRestError | null;
    participants: ParticipantDto[] | null;
+   conferenceState: ConferenceInfo | null;
+};
+
+export type ConferenceInfo = {
+   conferenceState: 'active' | 'inactive';
+   scheduledDate?: string;
+   isOpen: boolean;
+   conferenceType?: ConferenceType;
+   permissions: Permissions;
+   moderators: string[];
 };
 
 const initialState: ConferenceState = {
    conferenceId: null,
    connectionError: null,
    participants: null,
+   conferenceState: null,
 };
 
 const conferenceSlice = createSlice({
@@ -36,7 +48,7 @@ const conferenceSlice = createSlice({
       [onConferenceJoinFailed.type]: (state, action) => {
          state.connectionError = action.payload;
       },
-      ...createSynchronizeObjectReducer('participants'),
+      ...createSynchronizeObjectReducer(['participants', 'conferenceState']),
    },
 });
 

@@ -38,17 +38,17 @@ namespace PaderConference.Core.Domain.Entities
         /// <summary>
         ///     Conference permission
         /// </summary>
-        public IImmutableDictionary<string, string> Permissions { get; set; }
+        public IImmutableDictionary<string, string>? Permissions { get; set; }
 
         /// <summary>
         ///     Permissions of moderators
         /// </summary>
-        public IImmutableDictionary<string, string> ModeratorPermissions { get; set; }
+        public IImmutableDictionary<string, string>? ModeratorPermissions { get; set; }
 
         /// <summary>
         ///     Default permissions for rooms
         /// </summary>
-        public IImmutableDictionary<string, string> DefaultRoomPermissions { get; set; }
+        public IImmutableDictionary<string, string>? DefaultRoomPermissions { get; set; }
 
         /// <summary>
         ///     The type of the conference. Set by the front end to synchronize devices

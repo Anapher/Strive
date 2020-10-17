@@ -5,31 +5,36 @@ using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Interfaces.Gateways.Repositories;
 using PaderConference.Core.Interfaces.Services;
 using PaderConference.Infrastructure.Extensions;
+using PaderConference.Infrastructure.Hubs;
+using PaderConference.Infrastructure.Services.Permissions;
 using PaderConference.Infrastructure.Services.Synchronization;
 using StackExchange.Redis.Extensions.Core.Abstractions;
 
-namespace PaderConference.Infrastructure.Services.ConferenceInfo
+namespace PaderConference.Infrastructure.Services.ConferenceControl
 {
-    public class ConferenceInfoService : ConferenceService
+    public class ConferenceControlService : ConferenceService
     {
         private readonly string _conferenceId;
         private readonly IConferenceManager _conferenceManager;
         private readonly IConferenceRepo _conferenceRepo;
         private readonly IConferenceScheduler _conferenceScheduler;
-        private readonly ILogger<ConferenceInfoService> _logger;
+        private readonly ILogger<ConferenceControlService> _logger;
+        private readonly IPermissionsService _permissionsService;
         private readonly IRedisDatabase _redisDatabase;
         private readonly ISynchronizedObject<SynchronizedConferenceInfo> _synchronizedObject;
 
-        public ConferenceInfoService(Conference conference, IConferenceScheduler conferenceScheduler,
+        public ConferenceControlService(Conference conference, IConferenceScheduler conferenceScheduler,
             IConferenceManager conferenceManager, IConferenceRepo conferenceRepo,
-            ISynchronizationManager synchronizationManager, IRedisDatabase redisDatabase,
-            ILogger<ConferenceInfoService> logger)
+            ISynchronizationManager synchronizationManager, IPermissionsService permissionsService,
+            IRedisDatabase redisDatabase,
+            ILogger<ConferenceControlService> logger)
         {
             _conferenceId = conference.ConferenceId;
 
             _conferenceScheduler = conferenceScheduler;
             _conferenceManager = conferenceManager;
             _conferenceRepo = conferenceRepo;
+            _permissionsService = permissionsService;
             _redisDatabase = redisDatabase;
             _logger = logger;
             _synchronizedObject = synchronizationManager.Register("conferenceState",
@@ -72,6 +77,30 @@ namespace PaderConference.Infrastructure.Services.ConferenceInfo
 
             _conferenceManager.ConferenceOpened -= ConferenceManagerOnConferenceOpened;
             _conferenceManager.ConferenceClosed -= ConferenceManagerOnConferenceClosed;
+        }
+
+        public async ValueTask OpenConference(IServiceMessage message)
+        {
+            var permissions = await _permissionsService.GetPermissions(message.Participant);
+            if (!permissions.GetPermission(PermissionsList.Conference.CanOpenAndClose))
+            {
+                await message.ResponseError(ConferenceError.PermissionDeniedToOpenOrClose);
+                return;
+            }
+
+            await _conferenceManager.OpenConference(_conferenceId);
+        }
+
+        public async ValueTask CloseConference(IServiceMessage message)
+        {
+            var permissions = await _permissionsService.GetPermissions(message.Participant);
+            if (!permissions.GetPermission(PermissionsList.Conference.CanOpenAndClose))
+            {
+                await message.ResponseError(ConferenceError.PermissionDeniedToOpenOrClose);
+                return;
+            }
+
+            await _conferenceManager.CloseConference(_conferenceId);
         }
 
         private async Task OnConferenceUpdated(Conference arg)

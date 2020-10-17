@@ -9,6 +9,8 @@ import AuthenticatedRoutes from './routes/authenticated';
 import { RootState } from './store';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import LuxonUtils from '@date-io/luxon';
+import { SnackbarProvider } from 'notistack';
+import Notifier from './features/notifier/components/Notifier';
 
 const theme = createMuiTheme({
    palette: {
@@ -31,10 +33,13 @@ function App() {
 
    return (
       <MuiPickersUtilsProvider utils={LuxonUtils}>
-         <ThemeProvider theme={theme}>
-            <CssBaseline />
-            <BrowserRouter>{isAuthenticated ? <AuthenticatedRoutes /> : <AnonymousRoutes />}</BrowserRouter>
-         </ThemeProvider>
+         <SnackbarProvider maxSnack={4}>
+            <ThemeProvider theme={theme}>
+               <Notifier />
+               <CssBaseline />
+               <BrowserRouter>{isAuthenticated ? <AuthenticatedRoutes /> : <AnonymousRoutes />}</BrowserRouter>
+            </ThemeProvider>
+         </SnackbarProvider>
       </MuiPickersUtilsProvider>
    );
 }
