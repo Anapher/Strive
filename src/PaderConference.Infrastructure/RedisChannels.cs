@@ -20,9 +20,6 @@ namespace PaderConference.Infrastructure
         ///     Invoked once a conference was updated. The parameter is a <see cref="Conference" />
         /// </summary>
         /// <param name="conferenceId">The conference id</param>
-        public static string OnConferenceUpdated(string conferenceId)
-        {
-            return $"conferenceUpdated::{conferenceId}";
-        }
+        public static string OnConferenceUpdated(string conferenceId) => $"conferenceUpdated::{conferenceId}";
     }
 }

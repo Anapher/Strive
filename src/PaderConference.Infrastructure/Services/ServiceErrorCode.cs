@@ -19,6 +19,12 @@ namespace PaderConference.Infrastructure.Services
 
         // Rooms
         Rooms_SwitchRoomFailed = 1000200,
-        Rooms_SwitchRoomDenied = 1000201
+        Rooms_SwitchRoomDenied = 1000201,
+
+        // Permissions
+        Permissions_PermissionKeyNotFound = 1000300,
+        Permissions_DeniedGiveTemporaryPermission = 1000301,
+        Permissions_InvalidPermissionValueType = 1000302,
+        Permissions_ParticipantNotFound = 1000303,
     }
 }

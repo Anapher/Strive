@@ -1,27 +1,25 @@
-﻿namespace PaderConference.Infrastructure.Services.Chat
+﻿using PaderConference.Core.Dto;
+
+namespace PaderConference.Infrastructure.Services.Chat
 {
-    public class ChatError : ServiceError
+    public class ChatError
     {
-        public ChatError(string message, ServiceErrorCode code) : base(message, code)
-        {
-        }
+        public static Error EmptyMessageNotAllowed =>
+            new ServiceError("An empty message is not allowed.", ServiceErrorCode.Chat_EmptyMessage);
 
-        public static ChatError EmptyMessageNotAllowed =>
-            new ChatError("An empty message is not allowed.", ServiceErrorCode.Chat_EmptyMessage);
-
-        public static ChatError PermissionToSendMessageDenied =>
-            new ChatError("Permissions to send a chat message denied.",
+        public static Error PermissionToSendMessageDenied =>
+            new ServiceError("Permissions to send a chat message denied.",
                 ServiceErrorCode.Chat_PermissionDenied_SendMessage);
 
-        public static ChatError PermissionToSendAnonymousMessageDenied =>
-            new ChatError("Permissions to send this message as anonymous denied.",
+        public static Error PermissionToSendAnonymousMessageDenied =>
+            new ServiceError("Permissions to send this message as anonymous denied.",
                 ServiceErrorCode.Chat_PermissionDenied_SendAnonymousMessage);
 
-        public static ChatError PermissionToSendPrivateMessageDenied =>
-            new ChatError("Permissions to send private messages denied.",
+        public static Error PermissionToSendPrivateMessageDenied =>
+            new ServiceError("Permissions to send private messages denied.",
                 ServiceErrorCode.Chat_PermissionDenied_SendPrivateMessage);
 
-        public static ChatError InvalidFilter =>
-            new ChatError("Invalid chat message filter.", ServiceErrorCode.Chat_InvalidFilter);
+        public static Error InvalidFilter =>
+            new ServiceError("Invalid chat message filter.", ServiceErrorCode.Chat_InvalidFilter);
     }
 }

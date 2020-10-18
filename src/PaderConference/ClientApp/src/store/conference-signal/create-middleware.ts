@@ -5,7 +5,12 @@ import { ErrorCodes } from 'src/utils/errors';
 import * as actions from './actions';
 import { Options } from './types';
 
-const defaultEvents: string[] = ['OnSynchronizeObjectState', 'OnSynchronizedObjectUpdated', 'OnError'];
+const defaultEvents: string[] = [
+   'OnSynchronizeObjectState',
+   'OnSynchronizedObjectUpdated',
+   'OnError',
+   'OnPermissionsUpdated',
+];
 
 type SignalRResult = {
    middleware: Middleware;

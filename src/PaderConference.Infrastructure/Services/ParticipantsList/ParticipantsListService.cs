@@ -33,7 +33,7 @@ namespace PaderConference.Infrastructure.Services.ParticipantsList
             return UpdateParticipantsList();
         }
 
-        public override ValueTask OnClientDisconnected(Participant participant, string connectionId)
+        public override ValueTask OnClientDisconnected(Participant participant)
         {
             return UpdateParticipantsList();
         }

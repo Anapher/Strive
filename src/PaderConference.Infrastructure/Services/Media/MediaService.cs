@@ -9,6 +9,7 @@ using PaderConference.Infrastructure.Redis;
 using PaderConference.Infrastructure.Services.Media.Communication;
 using PaderConference.Infrastructure.Services.Permissions;
 using PaderConference.Infrastructure.Services.Synchronization;
+using PaderConference.Infrastructure.Sockets;
 using StackExchange.Redis.Extensions.Core.Abstractions;
 
 namespace PaderConference.Infrastructure.Services.Media
@@ -19,34 +20,40 @@ namespace PaderConference.Infrastructure.Services.Media
         private readonly string _conferenceId;
         private readonly ILogger<MediaService> _logger;
         private readonly IPermissionsService _permissionsService;
+        private readonly IConnectionMapping _connectionMapping;
         private readonly IRedisDatabase _redisDatabase;
 
         public MediaService(string conferenceId, IHubClients clients, ISynchronizationManager synchronizationManager,
-            IRedisDatabase redisDatabase, IPermissionsService permissionsService, ILogger<MediaService> logger)
+            IRedisDatabase redisDatabase, IPermissionsService permissionsService, IConnectionMapping connectionMapping,
+            ILogger<MediaService> logger)
         {
             _conferenceId = conferenceId;
             _clients = clients;
             _redisDatabase = redisDatabase;
             _permissionsService = permissionsService;
+            _connectionMapping = connectionMapping;
             _logger = logger;
         }
 
         public override async ValueTask InitializeAsync()
         {
             await _redisDatabase.ListAddToLeftAsync(RedisCommunication.NewConferencesKey,
-                new Communication.ConferenceInfo(_conferenceId));
+                new ConferenceInfo(_conferenceId));
             await _redisDatabase.PublishAsync<object?>(RedisCommunication.NewConferenceChannel, null);
 
             await _redisDatabase.SubscribeAsync<SendToConnectionDto>(
                 RedisCommunication.OnSendMessageToConnection.GetName(_conferenceId), OnSendMessageToConnection);
         }
 
-        public override async ValueTask OnClientDisconnected(Participant participant, string connectionId)
+        public override async ValueTask OnClientDisconnected(Participant participant)
         {
-            var meta = new ConnectionMessageMetadata(_conferenceId, connectionId, participant.ParticipantId);
+            if (_connectionMapping.ConnectionsR.TryGetValue(participant, out var connectionId))
+            {
+                var meta = new ConnectionMessageMetadata(_conferenceId, connectionId, participant.ParticipantId);
 
-            await _redisDatabase.PublishAsync(RedisCommunication.ClientDisconnectedChannel.GetName(_conferenceId),
-                new ConnectionMessage<object?>(null, meta));
+                await _redisDatabase.PublishAsync(RedisCommunication.ClientDisconnectedChannel.GetName(_conferenceId),
+                    new ConnectionMessage<object?>(null, meta));
+            }
         }
 
         public override async ValueTask DisposeAsync()

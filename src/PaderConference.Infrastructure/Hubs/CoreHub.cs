@@ -89,8 +89,6 @@ namespace PaderConference.Infrastructure.Hubs
                             return;
                         }
 
-                        await Groups.AddToGroupAsync(Context.ConnectionId, conferenceId);
-
                         // initialize all services before submitting events
                         var services = ConferenceServices.Select(x => x.GetService(conferenceId, ConferenceServices))
                             .ToList();
@@ -98,6 +96,11 @@ namespace PaderConference.Infrastructure.Hubs
 
                         foreach (var service in services)
                             await service.Result.OnClientConnected(participant);
+
+                        await Groups.AddToGroupAsync(Context.ConnectionId, conferenceId);
+
+                        foreach (var service in services)
+                            await service.Result.InitializeParticipant(participant);
                     }
                 }
             }
@@ -111,12 +114,11 @@ namespace PaderConference.Infrastructure.Hubs
 
             var conferenceId = ConferenceManager.GetConferenceOfParticipant(participant);
 
+            foreach (var service in ConferenceServices)
+                await (await service.GetService(conferenceId, ConferenceServices)).OnClientDisconnected(participant);
+
             _connectionMapping.Remove(Context.ConnectionId);
             await ConferenceManager.RemoveParticipant(participant);
-
-            foreach (var service in ConferenceServices)
-                await (await service.GetService(conferenceId, ConferenceServices))
-                    .OnClientDisconnected(participant, Context.ConnectionId);
         }
 
         public Task OpenConference()

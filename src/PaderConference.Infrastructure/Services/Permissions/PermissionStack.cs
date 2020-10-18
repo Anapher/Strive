@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace PaderConference.Infrastructure.Services.Permissions
 {
     public interface IPermissionStack
     {
-        T GetPermission<T>(PermissionDescriptor<T> descriptor);
+        ValueTask<T> GetPermission<T>(PermissionDescriptor<T> descriptor);
     }
 
     public class PermissionStack : IPermissionStack
@@ -19,7 +20,23 @@ namespace PaderConference.Infrastructure.Services.Permissions
             _stack = stack;
         }
 
-        public T GetPermission<T>(PermissionDescriptor<T> descriptor)
+        public Dictionary<string, JsonElement> Flatten()
+        {
+            var result = new Dictionary<string, JsonElement>();
+
+            foreach (var key in _stack.SelectMany(x => x.Keys).Distinct())
+            foreach (var layer in _stack.Reverse())
+                if (layer.TryGetValue(key, out var value))
+                {
+                    result[key] = value;
+                    break;
+                }
+
+            return result;
+        }
+
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+        public async ValueTask<T> GetPermission<T>(PermissionDescriptor<T> descriptor)
         {
             foreach (var layer in _stack.Reverse())
                 if (layer.TryGetValue(descriptor.Key, out var value))
@@ -39,5 +56,6 @@ namespace PaderConference.Infrastructure.Services.Permissions
 
             return (T) descriptor.DefaultValue;
         }
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     }
 }

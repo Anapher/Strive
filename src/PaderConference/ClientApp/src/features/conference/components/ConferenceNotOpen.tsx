@@ -14,6 +14,7 @@ import { DateTime } from 'luxon';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectAccessToken } from 'src/features/auth/selectors';
+import usePermission, { CONFERENCE_CAN_OPEN_AND_CLOSE } from 'src/hooks/usePermission';
 import { RootState } from 'src/store';
 import { send } from 'src/store/conference-signal/actions';
 import { ConferenceInfo } from '../conferenceSlice';
@@ -92,6 +93,7 @@ export default function ConferenceNotOpen({ conferenceInfo }: Props) {
 
    const dispatch = useDispatch();
    const handleOpenConference = () => dispatch(send('OpenConference'));
+   const canOpen = usePermission(CONFERENCE_CAN_OPEN_AND_CLOSE);
 
    return (
       <div className={classes.root}>
@@ -107,7 +109,7 @@ export default function ConferenceNotOpen({ conferenceInfo }: Props) {
                {isUserModerator && <Typography gutterBottom>You are a moderator of this conference.</Typography>}
             </div>
             <div>
-               {isUserModerator ? (
+               {canOpen ? (
                   <Button variant="contained" color="primary" onClick={handleOpenConference}>
                      Open conference
                   </Button>

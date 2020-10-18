@@ -41,7 +41,7 @@ namespace PaderConference.Infrastructure.Services.Synchronization
             return obj;
         }
 
-        public override async ValueTask OnClientConnected(Participant participant)
+        public override async ValueTask InitializeParticipant(Participant participant)
         {
             var connectionId = _connectionMapping.ConnectionsR[participant];
             var state = GetState();

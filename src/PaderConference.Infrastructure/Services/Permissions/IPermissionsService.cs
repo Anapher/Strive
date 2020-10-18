@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using PaderConference.Core.Domain.Entities;
 
 namespace PaderConference.Infrastructure.Services.Permissions
@@ -8,5 +9,7 @@ namespace PaderConference.Infrastructure.Services.Permissions
         ValueTask<IPermissionStack> GetPermissions(Participant participant);
 
         void RegisterLayerProvider(FetchPermissionsDelegate fetchPermissions);
+
+        ValueTask UpdatePermissions(IEnumerable<Participant> participants);
     }
 }

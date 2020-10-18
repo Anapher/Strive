@@ -22,6 +22,7 @@
             public const string OnConferenceJoinError = nameof(OnConferenceJoinError);
 
             public const string OnParticipantsUpdated = nameof(OnParticipantsUpdated);
+            public const string OnPermissionsUpdated = nameof(OnPermissionsUpdated);
 
             public const string OnIceCandidate = nameof(OnIceCandidate);
             public const string OnSdp = nameof(OnSdp);

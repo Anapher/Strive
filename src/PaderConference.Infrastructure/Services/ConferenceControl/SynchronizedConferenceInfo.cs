@@ -11,7 +11,6 @@ namespace PaderConference.Infrastructure.Services.ConferenceControl
             ConferenceState = conference.State;
             ScheduledDate = scheduledDate;
             IsOpen = isOpen;
-            Permissions = conference.Permissions;
             ConferenceType = conference.ConferenceType;
             Moderators = conference.Moderators;
         }
@@ -23,8 +22,6 @@ namespace PaderConference.Infrastructure.Services.ConferenceControl
         public bool IsOpen { get; }
 
         public string? ConferenceType { get; }
-
-        public IImmutableDictionary<string, string> Permissions { get; }
 
         public IImmutableList<string> Moderators { get; }
     }

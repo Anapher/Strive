@@ -6,6 +6,9 @@
         {
             public static readonly PermissionDescriptor<bool> CanOpenAndClose =
                 new PermissionDescriptor<bool>("conference.canOpenAndClose");
+
+            public static readonly PermissionDescriptor<bool> CanGiveTemporaryPermission =
+                new PermissionDescriptor<bool>("conference.canGiveTemporaryPermission");
         }
 
         public static class Chat

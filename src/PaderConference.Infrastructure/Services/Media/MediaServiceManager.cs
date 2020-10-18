@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using PaderConference.Infrastructure.Hubs;
 using PaderConference.Infrastructure.Services.Permissions;
 using PaderConference.Infrastructure.Services.Synchronization;
+using PaderConference.Infrastructure.Sockets;
 using StackExchange.Redis.Extensions.Core.Abstractions;
 
 namespace PaderConference.Infrastructure.Services.Media
@@ -15,12 +16,14 @@ namespace PaderConference.Infrastructure.Services.Media
         private readonly IHubContext<CoreHub> _hubContext;
         private readonly ILogger<MediaService> _logger;
         private readonly IRedisDatabase _redisDatabase;
+        private readonly IConnectionMapping _connectionMapping;
 
         public MediaServiceManager(IHubContext<CoreHub> hubContext, IRedisDatabase redisDatabase,
-            ILogger<MediaService> logger)
+            IConnectionMapping connectionMapping, ILogger<MediaService> logger)
         {
             _hubContext = hubContext;
             _redisDatabase = redisDatabase;
+            _connectionMapping = connectionMapping;
             _logger = logger;
         }
 
@@ -33,7 +36,7 @@ namespace PaderConference.Infrastructure.Services.Media
                 .GetService(conferenceId, services);
 
             return new MediaService(conferenceId, _hubContext.Clients, synchronizeService, _redisDatabase,
-                permissionsService, _logger);
+                permissionsService, _connectionMapping, _logger);
         }
     }
 }

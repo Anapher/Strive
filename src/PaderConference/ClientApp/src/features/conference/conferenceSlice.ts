@@ -1,16 +1,14 @@
-import { createSlice } from '@reduxjs/toolkit';
-import { joinConference, onConferenceJoined, onConferenceJoinFailed } from 'src/store/conference-signal/actions';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import {
+   joinConference,
+   onConferenceJoined,
+   onConferenceJoinFailed,
+   onEventOccurred,
+} from 'src/store/conference-signal/actions';
 import { createSynchronizeObjectReducer } from 'src/store/conference-signal/synchronized-object';
 import { ParticipantDto } from 'src/store/conference-signal/types';
 import { IRestError } from 'src/utils/error-result';
 import { ConferenceType, Permissions } from '../create-conference/types';
-
-export type ConferenceState = {
-   conferenceId: string | null;
-   connectionError: IRestError | null;
-   participants: ParticipantDto[] | null;
-   conferenceState: ConferenceInfo | null;
-};
 
 export type ConferenceInfo = {
    conferenceState: 'active' | 'inactive';
@@ -21,11 +19,20 @@ export type ConferenceInfo = {
    moderators: string[];
 };
 
+export type ConferenceState = {
+   conferenceId: string | null;
+   connectionError: IRestError | null;
+   participants: ParticipantDto[] | null;
+   conferenceState: ConferenceInfo | null;
+   myPermissions: Permissions | null;
+};
+
 const initialState: ConferenceState = {
    conferenceId: null,
    connectionError: null,
    participants: null,
    conferenceState: null,
+   myPermissions: null,
 };
 
 const conferenceSlice = createSlice({
@@ -47,6 +54,9 @@ const conferenceSlice = createSlice({
       },
       [onConferenceJoinFailed.type]: (state, action) => {
          state.connectionError = action.payload;
+      },
+      [onEventOccurred('OnPermissionsUpdated').type]: (state, action: PayloadAction<Permissions>) => {
+         state.myPermissions = action.payload;
       },
       ...createSynchronizeObjectReducer(['participants', 'conferenceState']),
    },

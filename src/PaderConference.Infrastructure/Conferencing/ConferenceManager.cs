@@ -11,7 +11,6 @@ namespace PaderConference.Infrastructure.Conferencing
 {
     public class ConferenceManager : IConferenceManager
     {
-        private const string RedisActiveConferencesKey = "conferences";
         private readonly IConferenceRepo _conferenceRepo;
         private readonly IRedisDatabase _database;
         private readonly ILogger<ConferenceManager> _logger;
@@ -40,7 +39,7 @@ namespace PaderConference.Infrastructure.Conferencing
                     throw new InvalidOperationException($"The conference {conferenceId} was not found in database.");
                 }
 
-                if (await _database.HashSetAsync(RedisActiveConferencesKey, conferenceId, conference))
+                if (await _database.HashSetAsync(RedisKeys.OpenConferences, conferenceId, conference))
                 {
                     _logger.LogDebug("Conference opened");
                     ConferenceOpened?.Invoke(this, conference);
@@ -56,13 +55,13 @@ namespace PaderConference.Infrastructure.Conferencing
 
         public async ValueTask CloseConference(string conferenceId)
         {
-            if (await _database.HashDeleteAsync(RedisActiveConferencesKey, conferenceId))
+            if (await _database.HashDeleteAsync(RedisKeys.OpenConferences, conferenceId))
                 ConferenceClosed?.Invoke(this, conferenceId);
         }
 
         public async ValueTask<bool> GetIsConferenceOpen(string conferenceId)
         {
-            return await _database.HashExistsAsync(RedisActiveConferencesKey, conferenceId);
+            return await _database.HashExistsAsync(RedisKeys.OpenConferences, conferenceId);
         }
 
         public ICollection<Participant>? GetParticipants(string conferenceId)

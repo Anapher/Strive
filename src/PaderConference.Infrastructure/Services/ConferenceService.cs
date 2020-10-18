@@ -10,7 +10,12 @@ namespace PaderConference.Infrastructure.Services
             return new ValueTask();
         }
 
-        public virtual ValueTask OnClientDisconnected(Participant participant, string connectionId)
+        public virtual ValueTask InitializeParticipant(Participant participant)
+        {
+            return new ValueTask();
+        }
+
+        public virtual ValueTask OnClientDisconnected(Participant participant)
         {
             return new ValueTask();
         }

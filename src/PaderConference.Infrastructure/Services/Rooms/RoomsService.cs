@@ -60,7 +60,7 @@ namespace PaderConference.Infrastructure.Services.Rooms
             using (_logger.BeginScope(message.GetScopeData()))
             {
                 var permissions = await _permissionsService.GetPermissions(message.Participant);
-                if (!permissions.GetPermission(PermissionsList.Rooms.CanSwitchRoom))
+                if (!await permissions.GetPermission(PermissionsList.Rooms.CanSwitchRoom))
                 {
                     _logger.LogDebug("Permissions to switch room denied.");
                     await message.ResponseError(RoomsError.PermissionToSwitchRoomDenied);

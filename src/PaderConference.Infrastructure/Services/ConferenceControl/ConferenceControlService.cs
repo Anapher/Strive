@@ -82,7 +82,7 @@ namespace PaderConference.Infrastructure.Services.ConferenceControl
         public async ValueTask OpenConference(IServiceMessage message)
         {
             var permissions = await _permissionsService.GetPermissions(message.Participant);
-            if (!permissions.GetPermission(PermissionsList.Conference.CanOpenAndClose))
+            if (!await permissions.GetPermission(PermissionsList.Conference.CanOpenAndClose))
             {
                 await message.ResponseError(ConferenceError.PermissionDeniedToOpenOrClose);
                 return;
@@ -94,7 +94,7 @@ namespace PaderConference.Infrastructure.Services.ConferenceControl
         public async ValueTask CloseConference(IServiceMessage message)
         {
             var permissions = await _permissionsService.GetPermissions(message.Participant);
-            if (!permissions.GetPermission(PermissionsList.Conference.CanOpenAndClose))
+            if (!await permissions.GetPermission(PermissionsList.Conference.CanOpenAndClose))
             {
                 await message.ResponseError(ConferenceError.PermissionDeniedToOpenOrClose);
                 return;

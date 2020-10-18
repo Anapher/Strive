@@ -1,6 +1,8 @@
 export type ConferenceType = 'class' | 'presentation';
 
-export type Permissions = { [key: string]: string };
+export type PermissionValue = number | string | boolean;
+
+export type Permissions = { [key: string]: PermissionValue };
 
 export type CreateConferenceDto = {
    name?: string | null;
@@ -12,7 +14,6 @@ export type CreateConferenceDto = {
    endTime?: string | null;
 
    scheduleCron?: string | null;
-
    permissions?: Permissions | null;
    defaultRoomPermissions?: Permissions | null;
    moderatorPermissions?: Permissions | null;

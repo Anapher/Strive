@@ -54,11 +54,10 @@ namespace PaderConference.Infrastructure.Services.Chat
             _refreshUsersTypingTimer.Interval = _options.CancelParticipantIsTypingInterval * 1000;
         }
 
-        public override async ValueTask OnClientDisconnected(Participant participant, string connectionId)
+        public override async ValueTask OnClientDisconnected(Participant participant)
         {
             using (_logger.BeginScope("OnClientDisconnected()"))
-            using (_logger.BeginScope(new Dictionary<string, object>
-                {{"connectionId", connectionId}, {"participantId", participant.ParticipantId}}))
+            using (_logger.BeginScope(new Dictionary<string, object> {{"participantId", participant.ParticipantId}}))
             {
                 lock (_currentlyTypingLock)
                 {
@@ -116,7 +115,7 @@ namespace PaderConference.Infrastructure.Services.Chat
                 }
 
                 var permissions = await _permissionsService.GetPermissions(message.Participant);
-                if (!permissions.GetPermission(PermissionsList.Chat.CanSendChatMessage))
+                if (!await permissions.GetPermission(PermissionsList.Chat.CanSendChatMessage))
                 {
                     _logger.LogDebug("Permissions to send chat message denied");
                     await message.ResponseError(ChatError.PermissionToSendMessageDenied);
@@ -133,7 +132,7 @@ namespace PaderConference.Infrastructure.Services.Chat
                 }
 
                 var filter = FilterFactory.CreateFilter(messageDto.Filter, message.Context.ConnectionId);
-                if (!permissions.GetPermission(PermissionsList.Chat.CanSendPrivateChatMessage) &&
+                if (!await permissions.GetPermission(PermissionsList.Chat.CanSendPrivateChatMessage) &&
                     !(filter is AtAllFilter))
                 {
                     await message.ResponseError(ChatError.PermissionToSendPrivateMessageDenied);
