@@ -27,6 +27,8 @@ const useStyles = makeStyles((theme) => ({
    participants: {
       width: 200,
       backgroundColor: fade(theme.palette.background.paper, 0.5),
+      borderTopLeftRadius: 0,
+      borderBottomLeftRadius: 0,
    },
 }));
 

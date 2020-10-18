@@ -1,26 +1,69 @@
-import { Fab } from '@material-ui/core';
+import { Fab, makeStyles } from '@material-ui/core';
 import DesktopWindowsIcon from '@material-ui/icons/DesktopWindows';
 import React from 'react';
-import { useSelector } from 'react-redux';
-import { Roles } from 'src/consts';
-import { selectAccessToken } from 'src/features/auth/selectors';
+import usePermission, {
+   MEDIA_CAN_SHARE_AUDIO,
+   MEDIA_CAN_SHARE_SCREEN,
+   MEDIA_CAN_SHARE_WEBCAM,
+} from 'src/hooks/usePermission';
+import VideocamIcon from '@material-ui/icons/Videocam';
+import MicIcon from '@material-ui/icons/Mic';
+import BugReportIcon from '@material-ui/icons/BugReport';
+import DesktopAccessDisabledIcon from '@material-ui/icons/DesktopAccessDisabled';
+import VideocamOffIcon from '@material-ui/icons/VideocamOff';
+import MicOffIcon from '@material-ui/icons/MicOff';
+
+const useStyles = makeStyles((theme) => ({
+   root: {
+      display: 'flex',
+      flexDirection: 'row',
+   },
+   leftActions: {
+      flex: 1,
+      display: 'flex',
+      flexDirection: 'row-reverse',
+   },
+   fab: {
+      margin: theme.spacing(0, 1),
+   },
+}));
 
 type Props = {
    startDesktopRecording: () => void;
 };
 
 export default function MediaControls({ startDesktopRecording }: Props) {
-   const role = useSelector(selectAccessToken)?.role;
+   const classes = useStyles();
+
+   const canShareScreen = usePermission(MEDIA_CAN_SHARE_SCREEN);
+   const canShareAudio = usePermission(MEDIA_CAN_SHARE_AUDIO);
+   const canShareWebcam = usePermission(MEDIA_CAN_SHARE_WEBCAM);
 
    return (
-      <div>
-         {role === Roles.Moderator && (
-            <>
-               <Fab color="primary" aria-label="share screen" onClick={startDesktopRecording}>
-                  <DesktopWindowsIcon />
+      <div className={classes.root}>
+         <div className={classes.leftActions}></div>
+         <div style={{ display: 'flex', flexDirection: 'row' }}>
+            {canShareScreen && (
+               <Fab color="primary" aria-label="share screen" onClick={startDesktopRecording} className={classes.fab}>
+                  <DesktopAccessDisabledIcon />
                </Fab>
-            </>
-         )}
+            )}
+            {canShareWebcam && (
+               <Fab color="primary" aria-label="share webcam" className={classes.fab}>
+                  <VideocamOffIcon />
+               </Fab>
+            )}
+            {canShareAudio && (
+               <Fab color="primary" aria-label="share microphone" className={classes.fab}>
+                  <MicOffIcon />
+               </Fab>
+            )}
+         </div>
+         <div className={classes.leftActions}>
+            <Fab color="default" aria-label="share microphone" className={classes.fab}>
+               <BugReportIcon />
+            </Fab>
+         </div>
       </div>
    );
 }
