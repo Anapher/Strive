@@ -9,7 +9,8 @@ namespace PaderConference.Infrastructure.Serialization
         {
             path = operation.path.ToCamelCasePath();
             op = operation.op;
-            from = operation.from;
+            if (!string.IsNullOrEmpty(operation.from))
+                from = operation.from.ToCamelCasePath();
             value = operation.value;
         }
 
@@ -19,6 +20,6 @@ namespace PaderConference.Infrastructure.Serialization
 
         public string op { get; set; }
 
-        public string from { get; set; }
+        public string? from { get; set; }
     }
 }

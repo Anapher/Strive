@@ -37,6 +37,9 @@
 
         public static class Rooms
         {
+            public static readonly PermissionDescriptor<bool> CanCreateAndRemove =
+                new PermissionDescriptor<bool>("rooms.canCreateAndRemove");
+
             public static readonly PermissionDescriptor<bool> CanSwitchRoom =
                 new PermissionDescriptor<bool>("rooms.canSwitchRoom");
         }

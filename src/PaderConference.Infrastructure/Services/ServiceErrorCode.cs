@@ -20,6 +20,8 @@ namespace PaderConference.Infrastructure.Services
         // Rooms
         Rooms_SwitchRoomFailed = 1000200,
         Rooms_SwitchRoomDenied = 1000201,
+        Rooms_CreateDenied = 1000202,
+        Rooms_RemoveDenied = 1000203,
 
         // Permissions
         Permissions_PermissionKeyNotFound = 1000300,

@@ -3,6 +3,7 @@ import { PermissionValue } from 'src/features/create-conference/types';
 import { RootState } from 'src/store';
 
 export const CONFERENCE_CAN_OPEN_AND_CLOSE = newPerm<boolean>('conference.canOpenAndClose');
+export const ROOMS_CAN_CREATE_REMOVE = newPerm<boolean>('rooms.canCreateAndRemove');
 
 export default function usePermission<T>(perm: Permission<T>): T | undefined {
    const permissions = useSelector((state: RootState) => state.conference.myPermissions);

@@ -17,10 +17,10 @@ namespace PaderConference.Infrastructure.Services.Rooms
         }
 #pragma warning restore 8618
 
-        public string RoomId { get; private set; }
+        public string RoomId { get; set; }
 
-        public string DisplayName { get; private set; }
+        public string DisplayName { get; set; }
 
-        public bool IsEnabled { get; private set; }
+        public bool IsEnabled { get; set; }
     }
 }

@@ -1,7 +1,5 @@
 ﻿using System.Collections.Immutable;
 
-// ReSharper disable AutoPropertyCanBeMadeGetOnly.Local
-
 namespace PaderConference.Infrastructure.Services.Rooms
 {
     public class ConferenceRooms
@@ -14,10 +12,10 @@ namespace PaderConference.Infrastructure.Services.Rooms
             Participants = participants;
         }
 
-        public IImmutableList<Room> Rooms { get; private set; }
+        public IImmutableList<Room> Rooms { get; }
 
-        public string DefaultRoomId { get; private set; }
+        public string DefaultRoomId { get; }
 
-        public IImmutableDictionary<string, string> Participants { get; private set; }
+        public IImmutableDictionary<string, string> Participants { get; }
     }
 }

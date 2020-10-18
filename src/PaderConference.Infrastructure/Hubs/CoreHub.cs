@@ -18,6 +18,8 @@ using PaderConference.Infrastructure.Services.Chat;
 using PaderConference.Infrastructure.Services.ConferenceControl;
 using PaderConference.Infrastructure.Services.Media;
 using PaderConference.Infrastructure.Services.Media.Communication;
+using PaderConference.Infrastructure.Services.Rooms;
+using PaderConference.Infrastructure.Services.Rooms.Messages;
 using PaderConference.Infrastructure.Sockets;
 
 namespace PaderConference.Infrastructure.Hubs
@@ -130,6 +132,21 @@ namespace PaderConference.Infrastructure.Hubs
         public Task CloseConference()
         {
             return InvokeService<ConferenceControlService>(service => service.CloseConference);
+        }
+
+        public Task CreateRooms(IReadOnlyList<CreateRoomMessage> dto)
+        {
+            return InvokeService<RoomsService, IReadOnlyList<CreateRoomMessage>>(dto, service => service.CreateRooms);
+        }
+
+        public Task RemoveRooms(IReadOnlyList<string> dto)
+        {
+            return InvokeService<RoomsService, IReadOnlyList<string>>(dto, service => service.RemoveRooms);
+        }
+
+        public Task SwitchRoom(SwitchRoomMessage dto)
+        {
+            return InvokeService<RoomsService, SwitchRoomMessage>(dto, service => service.SwitchRoom);
         }
 
         public Task SendChatMessage(SendChatMessageDto dto)

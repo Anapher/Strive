@@ -37,7 +37,7 @@ namespace PaderConference.Infrastructure.Services.Rooms
             _permissionsService = permissionsService;
             _options = options.Value;
             _logger = logger;
-            _participantToRoomHashSetKey = RedisKeys.ParticipantsToRoom(conferenceId);
+            _participantToRoomHashSetKey = RedisKeys.Rooms.ParticipantsToRoom(conferenceId);
 
             _synchronizedRooms = synchronizationManager.Register("rooms",
                 new ConferenceRooms(ImmutableList<Room>.Empty, DefaultRoomId,
@@ -54,7 +54,7 @@ namespace PaderConference.Infrastructure.Services.Rooms
             }
         }
 
-        public async Task SwitchRoom(IServiceMessage<SwitchRoomMessage> message)
+        public async ValueTask SwitchRoom(IServiceMessage<SwitchRoomMessage> message)
         {
             using (_logger.BeginScope("SwitchRoom()"))
             using (_logger.BeginScope(message.GetScopeData()))
@@ -79,8 +79,69 @@ namespace PaderConference.Infrastructure.Services.Rooms
             }
         }
 
+        public async ValueTask CreateRooms(IServiceMessage<IReadOnlyList<CreateRoomMessage>> message)
+        {
+            using (_logger.BeginScope("CreateRooms()"))
+            using (_logger.BeginScope(message.GetScopeData()))
+            {
+                var permissions = await _permissionsService.GetPermissions(message.Participant);
+                if (!await permissions.GetPermission(PermissionsList.Rooms.CanCreateAndRemove))
+                {
+                    _logger.LogDebug("Permissions denied.");
+                    await message.ResponseError(RoomsError.PermissionToCreateRoomDenied);
+                    return;
+                }
+
+                foreach (var createRoomMessage in message.Payload)
+                {
+                    var id = Guid.NewGuid().ToString("N");
+                    await _redisDatabase.HashSetAsync(RedisKeys.Rooms.RoomList(_conferenceId), id,
+                        new Room(id, createRoomMessage.DisplayName, true));
+                }
+
+                await UpdateSynchronizedRooms();
+            }
+        }
+
+        public async ValueTask RemoveRooms(IServiceMessage<IReadOnlyList<string>> message)
+        {
+            using (_logger.BeginScope("CreateRooms()"))
+            using (_logger.BeginScope(message.GetScopeData()))
+            {
+                var permissions = await _permissionsService.GetPermissions(message.Participant);
+                if (!await permissions.GetPermission(PermissionsList.Rooms.CanCreateAndRemove))
+                {
+                    _logger.LogDebug("Permissions denied.");
+                    await message.ResponseError(RoomsError.PermissionToRemoveRoomDenied);
+                    return;
+                }
+
+                using (await _roomLock.WriterLockAsync())
+                {
+                    var defaultRoomId = await GetDefaultRoomId();
+                    if (message.Payload.Contains(defaultRoomId))
+                        throw new InvalidOperationException("Cannot delete default room.");
+
+                    var participantToRooms = await _redisDatabase.HashGetAllAsync<string>(_participantToRoomHashSetKey);
+                    foreach (var (participantId, roomId) in participantToRooms)
+                        if (message.Payload.Contains(roomId))
+                            await SetRoom(participantId, defaultRoomId);
+
+                    await _redisDatabase.HashDeleteAsync(RedisKeys.Rooms.RoomList(_conferenceId), message.Payload);
+                }
+
+                await UpdateSynchronizedRooms();
+            }
+        }
+
         public override async ValueTask InitializeAsync()
         {
+            await _redisDatabase.RemoveAsync(RedisKeys.Rooms.RoomList(_conferenceId));
+            await _redisDatabase.RemoveAsync(RedisKeys.Rooms.ParticipantsToRoom(_conferenceId));
+
+            await _redisDatabase.HashSetAsync(RedisKeys.Rooms.RoomList(_conferenceId), DefaultRoomId,
+                new Room(DefaultRoomId, _options.DefaultRoomName, true));
+
             await UpdateSynchronizedRooms();
         }
 
@@ -89,13 +150,8 @@ namespace PaderConference.Infrastructure.Services.Rooms
             var participantToRooms = await _redisDatabase.HashGetAllAsync<string>(_participantToRoomHashSetKey);
             var defaultRoomId = await GetDefaultRoomId();
 
-            var roomInfos = (await _redisDatabase.HashGetAllAsync<Room>(RedisKeys.Rooms(_conferenceId))).Values
-                .ToImmutableList();
-            if (roomInfos.IsEmpty)
-            {
-                var defaultRoom = await GetRoomInfo(DefaultRoomId);
-                roomInfos = new[] {defaultRoom!}.ToImmutableList();
-            }
+            var roomInfos = (await _redisDatabase.HashGetAllAsync<Room>(RedisKeys.Rooms.RoomList(_conferenceId))).Values
+                .OrderBy(x => x.RoomId).ToImmutableList();
 
             var data = new ConferenceRooms(roomInfos, defaultRoomId,
                 participantToRooms?.ToImmutableDictionary() ?? ImmutableDictionary<string, string>.Empty);
@@ -106,14 +162,7 @@ namespace PaderConference.Infrastructure.Services.Rooms
 
         private async Task<Room?> GetRoomInfo(string roomId)
         {
-            var roomInfo =
-                await _redisDatabase.HashGetAsync<Room>(RedisKeys.Rooms(_conferenceId), roomId);
-
-            // if the room doesn't exist in redis but it is the default room (that always exists)
-            if (roomInfo == null && roomId == _synchronizedRooms.Current.DefaultRoomId)
-                return new Room(_synchronizedRooms.Current.DefaultRoomId, _options.DefaultRoomName, true);
-
-            return roomInfo;
+            return await _redisDatabase.HashGetAsync<Room>(RedisKeys.Rooms.RoomList(_conferenceId), roomId);
         }
 
         private async Task SetRoom(string participantId, string roomId)
@@ -146,7 +195,7 @@ namespace PaderConference.Infrastructure.Services.Rooms
 
                     _logger.LogDebug("Update room in redis");
                     await _redisDatabase.HashSetAsync(_participantToRoomHashSetKey, participantId, roomId);
-                    await _redisDatabase.PublishAsync(RedisKeys.RoomSwitchedChannel(_conferenceId),
+                    await _redisDatabase.PublishAsync(RedisChannels.RoomSwitchedChannel(_conferenceId),
                         new ConnectionMessage<RoomSwitchInfo>(new RoomSwitchInfo(previousRoom, roomId),
                             new ConnectionMessageMetadata(_conferenceId, null, participantId)));
                 }
@@ -157,12 +206,14 @@ namespace PaderConference.Infrastructure.Services.Rooms
 
         private async Task<IReadOnlyDictionary<string, JsonElement>?> GetRoomPermissions(string roomId)
         {
-            return await _redisDatabase.HashGetAllAsync<JsonElement>(RedisKeys.RoomPermissions(_conferenceId, roomId));
+            return await _redisDatabase.HashGetAllAsync<JsonElement>(
+                RedisKeys.Rooms.RoomPermissions(_conferenceId, roomId));
         }
 
         private async Task<string> GetDefaultRoomId()
         {
-            return await _redisDatabase.GetAsync<string>(RedisKeys.GetDefaultRoomId(_conferenceId)) ?? DefaultRoomId;
+            return await _redisDatabase.GetAsync<string>(RedisKeys.Rooms.GetDefaultRoomId(_conferenceId)) ??
+                   DefaultRoomId;
         }
 
         private async ValueTask<IEnumerable<PermissionLayer>> FetchRoomPermissions(Participant participant)

@@ -1,11 +1,11 @@
-import { makeStyles } from '@material-ui/core';
+import { fade, makeStyles, Paper } from '@material-ui/core';
 import React from 'react';
 import ChatBar from 'src/features/chat/components/ChatBar';
 import ConferenceAppBar from 'src/features/conference/components/ConferenceAppBar';
 import Media from 'src/features/media/components/Media';
 import RoomsList from 'src/features/rooms/components/RoomsList';
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
    root: {
       height: '100%',
       display: 'flex',
@@ -25,10 +25,10 @@ const useStyles = makeStyles({
       padding: 8,
    },
    participants: {
-      flex: 1,
-      maxWidth: 180,
+      width: 200,
+      backgroundColor: fade(theme.palette.background.paper, 0.5),
    },
-});
+}));
 
 export default function ClassConference() {
    const classes = useStyles();
@@ -37,9 +37,9 @@ export default function ClassConference() {
       <div className={classes.root}>
          <ConferenceAppBar />
          <div className={classes.conferenceMain}>
-            <div className={classes.participants}>
+            <Paper className={classes.participants} elevation={4}>
                <RoomsList />
-            </div>
+            </Paper>
             <div className={classes.flex}>
                <Media />
             </div>
