@@ -1,7 +1,11 @@
+import { Redis } from 'ioredis';
+import _ from 'lodash';
 import { Router } from 'mediasoup/lib/Router';
-import { RtpCapabilities, WebRtcTransportOptions } from 'mediasoup/lib/types';
+import { Producer, RtpCapabilities, WebRtcTransportOptions } from 'mediasoup/lib/types';
 import config from '../config';
 import Connection from './connection';
+import Logger from './logger';
+import { Participant, ProducerSource } from './participant';
 import { RoomManager } from './room-manager';
 import { ISignalWrapper } from './signal-wrapper';
 import {
@@ -12,42 +16,75 @@ import {
    TransportProduceResponse,
 } from './types';
 
+const logger = new Logger('Conference');
+
 export class Conference {
    private connections: Map<string, Connection> = new Map();
    private roomManager: RoomManager;
 
-   constructor(private router: Router, public conferenceId: string, private signal: ISignalWrapper) {
-      this.roomManager = new RoomManager(signal, router);
+   /** participantId -> Participant */
+   private participants: Map<string, Participant> = new Map();
+
+   constructor(private router: Router, public conferenceId: string, private signal: ISignalWrapper, redis: Redis) {
+      this.roomManager = new RoomManager(conferenceId, signal, router, redis);
    }
 
    get routerCapabilities(): RtpCapabilities {
       return this.router.rtpCapabilities;
    }
 
-   close(): void {
+   public close(): void {
       this.router.close();
    }
 
-   addConnection(connection: Connection): void {
-      // create Consumer
+   public async addConnection(connection: Connection): Promise<void> {
+      // create locally
       this.connections.set(connection.connectionId, connection);
-      this.roomManager.addConnection(connection);
+
+      // search participant, check if it already exists
+      let participant = this.participants.get(connection.participantId);
+      if (!participant) {
+         participant = new Participant(connection.participantId);
+
+         // does not exist, add
+         this.participants.set(connection.participantId, participant);
+      }
+
+      // add connection
+      participant.connections.push(connection);
+
+      // notify room manager
+      await this.roomManager.updateParticipant(participant);
    }
 
-   removeConnection(connectionId: string): void {
+   public async removeConnection(connectionId: string): Promise<void> {
       const connection = this.connections.get(connectionId);
       if (connection) {
-         this.roomManager.removeConnection(connection);
          this.connections.delete(connection.connectionId);
+
+         // if that was the last connection of this participant, remove participant
+         const participant = this.participants.get(connection.participantId);
+         if (participant) {
+            // remove connection from participant
+            _.remove(participant.connections, (x) => x.connectionId === connection.connectionId);
+            if (participant.connections.length === 0) {
+               // remove participant
+               this.participants.delete(participant.participantId);
+               await this.roomManager.removeParticipant(participant);
+            }
+         }
       }
    }
 
-   async transportProduce({
+   public async transportProduce({
       payload: { transportId, appData, ...producerOptions },
       meta,
    }: TransportProduceRequest): Promise<TransportProduceResponse> {
       const connection = this.connections.get(meta.connectionId);
       if (!connection) throw new Error('Connection was not found');
+
+      const participant = this.participants.get(connection.participantId);
+      if (!participant) throw new Error('Participant was not found');
 
       const transport = connection.transport.get(transportId);
       if (!transport) throw new Error(`transport with id "${transportId}" not found`);
@@ -60,20 +97,24 @@ export class Conference {
          // keyFrameRequestDelay: 5000
       });
 
+      const source = this.classifyProducer(producer);
+      if (participant.producers[source]) {
+         producer.close();
+         throw new Error('A producer for this target already exists.');
+      }
+
       producer.on('score', (score) => {
          this.signal.sendToConnection(connection.connectionId, 'producerScore', { producerId: producer.id, score });
       });
 
       connection.producers.set(producer.id, producer);
-      const room = this.roomManager.getRoom(connection.participantId);
-      if (room) {
-         room.produce(connection.participantId, producer);
-      }
+      participant.producers[source] = producer;
 
+      await this.roomManager.updateParticipant(participant);
       return { id: producer.id };
    }
 
-   async connectTransport({ payload, meta }: ConnectTransportRequest): Promise<void> {
+   public async connectTransport({ payload, meta }: ConnectTransportRequest): Promise<void> {
       const connection = this.connections.get(meta.connectionId);
       if (!connection) throw new Error('Connection was not found');
 
@@ -83,7 +124,7 @@ export class Conference {
       await transport.connect(payload);
    }
 
-   async createTransport({
+   public async createTransport({
       payload: { sctpCapabilities, forceTcp, producing, consuming },
       meta,
    }: CreateTransportRequest): Promise<CreateTransportResponse> {
@@ -121,5 +162,11 @@ export class Conference {
          dtlsParameters: transport.dtlsParameters,
          sctpParameters: transport.sctpParameters,
       };
+   }
+
+   private classifyProducer(producer: Producer): ProducerSource {
+      if (producer.kind === 'audio') return 'mic';
+      if (producer.appData.screen) return 'screen';
+      return 'webcam';
    }
 }

@@ -3,7 +3,7 @@ import { Redis } from 'ioredis';
 import { Worker } from 'mediasoup/lib/types';
 import config from '../config';
 import { Conference } from './conference';
-import Logger from './Logger';
+import Logger from './logger';
 import { ConferenceInfo } from './types';
 
 const logger = new Logger('conference-factory');
@@ -19,5 +19,5 @@ export default async function conferenceFactory(
    const mediasoupRouter = await assignedWorker.createRouter(config.router);
    const wrapper = new SignalWrapper(redis, conferenceInfo.id);
 
-   return new Conference(mediasoupRouter, conferenceInfo.id, wrapper);
+   return new Conference(mediasoupRouter, conferenceInfo.id, wrapper, redis);
 }

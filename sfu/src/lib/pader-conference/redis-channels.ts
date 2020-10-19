@@ -2,8 +2,6 @@ export const rtpCapabilitiesKey = createChannelName('::routerRtpCapabilities');
 export const onSendMessageToConnection = createChannelName('::sendMessageToConnection');
 export const onClientDisconnected = createChannelName('::clientDisconnected');
 
-export const newConferencesKey = 'newConferences';
-
 export const channels = {
    newConferenceCreated: 'newConferenceCreated',
    request: {
@@ -22,7 +20,7 @@ function createChannelName(postFix: string): ChannelName {
    };
 }
 
-type ChannelName = {
+export type ChannelName = {
    match: (s: string) => boolean;
    getName: (conferenceId: string) => string;
 };

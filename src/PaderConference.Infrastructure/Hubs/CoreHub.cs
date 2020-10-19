@@ -17,7 +17,6 @@ using PaderConference.Infrastructure.Services;
 using PaderConference.Infrastructure.Services.Chat;
 using PaderConference.Infrastructure.Services.ConferenceControl;
 using PaderConference.Infrastructure.Services.Media;
-using PaderConference.Infrastructure.Services.Media.Communication;
 using PaderConference.Infrastructure.Services.Rooms;
 using PaderConference.Infrastructure.Services.Rooms.Messages;
 using PaderConference.Infrastructure.Sockets;
@@ -172,20 +171,20 @@ namespace PaderConference.Infrastructure.Hubs
 
         public Task<JsonElement?> CreateWebRtcTransport(JsonElement element)
         {
-            return InvokeService<MediaService, JsonElement, JsonElement?>(element, service =>
-                service.Redirect(RedisCommunication.Request.CreateTransport));
+            return InvokeService<MediaService, JsonElement, JsonElement?>(element,
+                service => service.Redirect(RedisChannels.Media.Request.CreateTransport));
         }
 
         public Task<JsonElement?> ConnectWebRtcTransport(JsonElement element)
         {
-            return InvokeService<MediaService, JsonElement, JsonElement?>(element, service =>
-                service.Redirect(RedisCommunication.Request.ConnectTransport));
+            return InvokeService<MediaService, JsonElement, JsonElement?>(element,
+                service => service.Redirect(RedisChannels.Media.Request.ConnectTransport));
         }
 
         public Task<JsonElement?> ProduceWebRtcTransport(JsonElement element)
         {
-            return InvokeService<MediaService, JsonElement, JsonElement?>(element, service =>
-                service.Redirect(RedisCommunication.Request.TransportProduce));
+            return InvokeService<MediaService, JsonElement, JsonElement?>(element,
+                service => service.Redirect(RedisChannels.Media.Request.TransportProduce));
         }
     }
 }

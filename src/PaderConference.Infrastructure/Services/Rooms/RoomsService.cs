@@ -212,8 +212,7 @@ namespace PaderConference.Infrastructure.Services.Rooms
 
         private async Task<string> GetDefaultRoomId()
         {
-            return await _redisDatabase.GetAsync<string>(RedisKeys.Rooms.GetDefaultRoomId(_conferenceId)) ??
-                   DefaultRoomId;
+            return await _redisDatabase.GetAsync<string>(RedisKeys.Rooms.DefaultRoomId(_conferenceId)) ?? DefaultRoomId;
         }
 
         private async ValueTask<IEnumerable<PermissionLayer>> FetchRoomPermissions(Participant participant)

@@ -15,4 +15,13 @@ export default class Connection {
    public transport: Map<string, Transport> = new Map();
    public producers: Map<string, Producer> = new Map();
    public consumers: Map<string, Consumer> = new Map();
+
+   public getReceiveTransport(): Transport | undefined {
+      // find first consuming transport
+      for (const [, transport] of this.transport) {
+         if (transport.appData.consuming) return transport;
+      }
+
+      return undefined;
+   }
 }

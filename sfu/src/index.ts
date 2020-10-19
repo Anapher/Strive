@@ -4,18 +4,10 @@ import { Worker } from 'mediasoup/lib/types';
 import config from './config';
 import conferenceFactory from './lib/conference-factory';
 import ConferenceManager from './lib/conference-manager';
-import Connection from './lib/connection';
-import Logger from './lib/Logger';
-import {
-   CallbackMessage,
-   ConferenceInfo,
-   ConnectionMessage,
-   ConnectTransportRequest,
-   CreateTransportRequest,
-   InitializeConnectionRequest,
-   TransportProduceRequest,
-} from './lib/types';
-import { channels, newConferencesKey, onClientDisconnected, rtpCapabilitiesKey } from './redis-communication';
+import Logger from './lib/logger';
+import { RedisMessageProcessor } from './lib/redis-message-processor';
+import { CallbackMessage, CallbackResponse, ConferenceInfo } from './lib/types';
+import { ChannelName, channels, onClientDisconnected, rtpCapabilitiesKey } from './lib/pader-conference/redis-channels';
 
 const logger = new Logger();
 
@@ -54,7 +46,7 @@ function initializeExistingConferences() {
    });
 }
 
-async function initializeConference(conferenceInfo: ConferenceInfo) {
+async function initializeConference(conferenceInfo: ConferenceInfo): Promise<void> {
    const worker = getMediasoupWorker();
    const conference = await conferenceFactory(conferenceInfo, worker, redis);
    conferenceManager.createConference(conference);
@@ -68,75 +60,69 @@ async function initializeConference(conferenceInfo: ConferenceInfo) {
    subRedis.subscribe(onClientDisconnected.getName(conferenceInfo.id));
 }
 
+type MappedMessage = {
+   channel: ChannelName | string;
+   handler: (request: any) => any | Promise<any>;
+};
+
+const processor = new RedisMessageProcessor(redis, conferenceManager, initializeConference);
+
+const messagesMap: MappedMessage[] = [
+   { channel: channels.request.initializeConnection, handler: processor.initializeConnection },
+   { channel: channels.request.createTransport, handler: processor.createTransport },
+   { channel: channels.request.connectTransport, handler: processor.connectTransport },
+   { channel: channels.request.transportProduce, handler: processor.transportProduce },
+   { channel: onClientDisconnected, handler: processor.clientDisconnected },
+   { channel: channels.newConferenceCreated, handler: processor.newConferenceCreated },
+];
+
 async function subscribeRedis() {
    subRedis.subscribe(channels.newConferenceCreated);
 
-   subRedis.on('pmessage', async (_, channel, message) => {
+   const handleMessage = async (channel: string, message: string) => {
       logger.debug('Redis pmessage in channel %s received: %s', channel, message);
+      let callbackChannel: string | undefined;
 
-      if (channels.request.initializeConnection.match(channel)) {
-         const { callbackChannel, payload: request }: CallbackMessage<InitializeConnectionRequest> = JSON.parse(
-            message,
-         );
+      try {
+         // try to find the mapped message
+         const mappedMessage = messagesMap.find((x) => x.channel.match(channel));
+         if (!mappedMessage) {
+            throw new Error('Channel is not mapped');
+         }
 
-         const conference = conferenceManager.getConference(request.meta.conferenceId);
+         let param: any | undefined;
+         if (message) {
+            // extract the parameter
+            const data: CallbackMessage<any> = JSON.parse(message);
+            if (data.callbackChannel) {
+               // we have a callback message with a channel
+               callbackChannel = data.callbackChannel;
+               param = data.payload;
+            } else param = data;
+         }
 
-         logger.debug('Initialize connection in conference %s', conference.conferenceId);
+         // resolve
+         const methodResponse = mappedMessage.handler(param);
+         const result = await Promise.resolve(methodResponse);
 
-         const connection = new Connection(
-            request.payload.rtpCapabilities,
-            request.payload.sctpCapabilities,
-            request.meta.connectionId,
-            request.meta.participantId,
-         );
+         if (callbackChannel) {
+            // return response
+            const response: CallbackResponse<any> = { payload: result };
+            redis.publish(callbackChannel, JSON.stringify(response));
+         }
+      } catch (error) {
+         logger.error('Error occurred when executing channel %s: %s', channel, error.toString());
 
-         conference.addConnection(connection);
-
-         redis.publish(callbackChannel, 'null');
-      } else if (channels.request.createTransport.match(channel)) {
-         const { payload: request, callbackChannel }: CallbackMessage<CreateTransportRequest> = JSON.parse(message);
-
-         const conference = conferenceManager.getConference(request.meta.conferenceId);
-         const response = await conference.createTransport(request);
-         await redis.publish(callbackChannel, JSON.stringify(response));
-      } else if (channels.request.connectTransport.match(channel)) {
-         const { payload: request, callbackChannel }: CallbackMessage<ConnectTransportRequest> = JSON.parse(message);
-
-         const conference = conferenceManager.getConference(request.meta.conferenceId);
-         await conference.connectTransport(request);
-
-         redis.publish(callbackChannel, 'null');
-      } else if (channels.request.transportProduce.match(channel)) {
-         const { payload: request, callbackChannel }: CallbackMessage<TransportProduceRequest> = JSON.parse(message);
-
-         const conference = conferenceManager.getConference(request.meta.conferenceId);
-         const response = await conference.transportProduce(request);
-
-         redis.publish(callbackChannel, JSON.stringify(response));
+         if (callbackChannel) {
+            // return error
+            const response: CallbackResponse<undefined> = { error: true, errorMesage: error.toString() };
+            redis.publish(callbackChannel, JSON.stringify(response));
+         }
       }
-   });
+   };
 
-   subRedis.on('message', async (channel: string, message: string) => {
-      logger.debug('Redis message in channel %s received: %s', channel, message);
-
-      switch (channel) {
-         case channels.newConferenceCreated:
-            const conferenceStr = await redis.lpop(newConferencesKey);
-            if (conferenceStr) {
-               const conferenceInfo: ConferenceInfo = JSON.parse(conferenceStr);
-               initializeConference(conferenceInfo);
-            }
-            break;
-         default:
-            if (onClientDisconnected.match(channel)) {
-               const request: ConnectionMessage<undefined> = JSON.parse(message);
-
-               const conference = conferenceManager.getConference(request.meta.conferenceId);
-               conference.removeConnection(request.meta.connectionId);
-            }
-            break;
-      }
-   });
+   subRedis.on('pmessage', (_, channel, message) => handleMessage(channel, message));
+   subRedis.on('message', async (channel: string, message: string) => handleMessage(channel, message));
 }
 
 /**

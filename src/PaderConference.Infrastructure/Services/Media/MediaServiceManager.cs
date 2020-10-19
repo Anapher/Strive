@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using PaderConference.Infrastructure.Hubs;
-using PaderConference.Infrastructure.Services.Permissions;
 using PaderConference.Infrastructure.Services.Synchronization;
 using PaderConference.Infrastructure.Sockets;
 using StackExchange.Redis.Extensions.Core.Abstractions;
@@ -32,11 +31,9 @@ namespace PaderConference.Infrastructure.Services.Media
         {
             var synchronizeService = await services.OfType<IConferenceServiceManager<SynchronizationService>>().First()
                 .GetService(conferenceId, services);
-            var permissionsService = await services.OfType<IConferenceServiceManager<PermissionsService>>().First()
-                .GetService(conferenceId, services);
 
             return new MediaService(conferenceId, _hubContext.Clients, synchronizeService, _redisDatabase,
-                permissionsService, _connectionMapping, _logger);
+                _connectionMapping, _logger);
         }
     }
 }

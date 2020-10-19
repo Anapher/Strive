@@ -16,13 +16,16 @@ namespace PaderConference.Infrastructure.Redis
 
             var completionSource = new TaskCompletionSource<TResult>();
 
-            Task OnProcessResponse(TResult arg)
+            Task OnProcessResponse(CallbackResponse<TResult> arg)
             {
-                completionSource.SetResult(arg);
+                if (arg.Error)
+                    completionSource.SetException(new RedisResponseException(arg.ErrorMessage));
+                else
+                    completionSource.SetResult(arg.Payload);
                 return Task.CompletedTask;
             }
 
-            await database.SubscribeAsync<TResult>(responseChannel, OnProcessResponse);
+            await database.SubscribeAsync<CallbackResponse<TResult>>(responseChannel, OnProcessResponse);
 
             try
             {
@@ -31,7 +34,7 @@ namespace PaderConference.Infrastructure.Redis
             }
             finally
             {
-                await database.UnsubscribeAsync<TResult>(responseChannel, OnProcessResponse);
+                await database.UnsubscribeAsync<CallbackResponse<TResult>>(responseChannel, OnProcessResponse);
             }
         }
 
@@ -53,4 +56,15 @@ namespace PaderConference.Infrastructure.Redis
 
         public string CallbackChannel { get; }
     }
+
+#pragma warning disable 8618
+    public class CallbackResponse<T>
+    {
+        public T Payload { get; set; }
+
+        public bool Error { get; set; }
+
+        public string? ErrorMessage { get; set; }
+    }
+#pragma warning restore 8618
 }

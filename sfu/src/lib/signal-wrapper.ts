@@ -1,5 +1,5 @@
 import { Redis } from 'ioredis';
-import { onSendMessageToConnection } from '../redis-communication';
+import { onSendMessageToConnection } from './pader-conference/redis-channels';
 import { SendToConnectionDto } from './types';
 
 export interface ISignalWrapper {

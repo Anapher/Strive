@@ -1,4 +1,5 @@
 ﻿using PaderConference.Core.Domain.Entities;
+using PaderConference.Infrastructure.Services.Media.Communication;
 using PaderConference.Infrastructure.Services.Rooms;
 
 namespace PaderConference.Infrastructure
@@ -41,15 +42,27 @@ namespace PaderConference.Infrastructure
                 return $"{conferenceId}::roomPermissions/{roomId}";
             }
 
-            public static string RoomSwitchedChannel(string conferenceId)
-            {
-                return $"{conferenceId}::roomSwitched";
-            }
-
-            public static string GetDefaultRoomId(string conferenceId)
+            /// <summary>
+            ///     The default room id of the conference. String.
+            /// </summary>
+            public static string DefaultRoomId(string conferenceId)
             {
                 return $"{conferenceId}::defaultRoomId";
             }
+        }
+
+        public static class Media
+        {
+            /// <summary>
+            ///     The key where the new conferences (List of <see cref="ConferenceInfo" />) are stored
+            /// </summary>
+            public const string NewConferencesKey = "newConferences";
+
+            /// <summary>
+            ///     The key where the rtc capabilities of the router are stored, encoded in JSON
+            /// </summary>
+            public static readonly ConferenceDependentKey RtpCapabilitiesKey =
+                new ConferenceDependentKey("::routerRtpCapabilities");
         }
     }
 }
