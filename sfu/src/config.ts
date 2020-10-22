@@ -6,7 +6,7 @@ const config: Config = {
    mediasoup: {
       numWorkers: 10,
       workerSettings: {
-         logLevel: 'warn',
+         logLevel: 'debug',
          logTags: ['info', 'ice', 'dtls', 'rtp', 'srtp', 'rtcp', 'rtx', 'bwe', 'score', 'simulcast', 'svc', 'sctp'],
          rtcMinPort: Number(process.env.MEDIASOUP_MIN_PORT) || 40000,
          rtcMaxPort: Number(process.env.MEDIASOUP_MAX_PORT) || 49999,

@@ -11,6 +11,10 @@ import {
 } from 'mediasoup-client/lib/types';
 import { AnyAction, Dispatch } from 'redux';
 
+const PC_PROPRIETARY_CONSTRAINTS = {
+   optional: [{ googDscp: true }],
+};
+
 type OnNewConsumerPayload = {
    participantId: string;
    producerId: string;
@@ -95,7 +99,13 @@ export class SoupManager {
          consuming: false,
       };
       const transportOptions = await this.connection.invoke<TransportOptions>('CreateWebRtcTransport', request);
-      const transport = this.device.createSendTransport(transportOptions);
+      console.log(transportOptions);
+
+      const transport = this.device.createSendTransport({
+         ...transportOptions,
+         iceServers: [],
+         proprietaryConstraints: PC_PROPRIETARY_CONSTRAINTS,
+      });
 
       transport.on('connect', ({ dtlsParameters }, callback, errback) => {
          this.connection

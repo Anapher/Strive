@@ -2527,10 +2527,10 @@ autoprefixer@^9.6.1:
     postcss "^7.0.32"
     postcss-value-parser "^4.1.0"
 
-awaitqueue@^2.2.3:
-  version "2.3.0"
-  resolved "https://registry.yarnpkg.com/awaitqueue/-/awaitqueue-2.3.0.tgz#6cd982fabfb9c43639e1e99d324cd856c096975f"
-  integrity sha512-C9a5scw6I9PgwYX8tib8d2SgjAiLNjs3IpLVw/NYnNAHSQFYSAZzPGdKmZmT5ZnxkRA7fIqW4nnM1l9vnlu99g==
+awaitqueue@^2.3.3:
+  version "2.3.3"
+  resolved "https://registry.yarnpkg.com/awaitqueue/-/awaitqueue-2.3.3.tgz#35e6568970fcac3de1644a2c28abc1074045b570"
+  integrity sha512-RbzQg6VtPUtyErm55iuQLTrBJ2uihy5BKBOEkyBwv67xm5Fn2o/j+Bz+a5BmfSoe2oZ5dcz9Z3fExS8pL+LLhw==
 
 aws-sign2@~0.7.0:
   version "0.7.0"
@@ -3927,7 +3927,7 @@ debug@^3.1.1, debug@^3.2.5:
   dependencies:
     ms "^2.1.1"
 
-debug@^4.0.1, debug@^4.1.0, debug@^4.1.1:
+debug@^4.0.1, debug@^4.1.0, debug@^4.1.1, debug@^4.2.0:
   version "4.2.0"
   resolved "https://registry.yarnpkg.com/debug/-/debug-4.2.0.tgz#7f150f93920e94c58f5574c2fd01a3110effe7f1"
   integrity sha512-IX2ncY78vDTjZMFUdmsvIRFY2Cf4FnD0wRs+nQwJU8Lu99/tPFdb0VybiiMTPe3I6rQmwsqQqRBvxU+bZ/I8sg==
@@ -7313,16 +7313,16 @@ media-typer@0.3.0:
   resolved "https://registry.yarnpkg.com/media-typer/-/media-typer-0.3.0.tgz#8710d7af0aa626f8fffa1ce00168545263255748"
   integrity sha1-hxDXrwqmJvj/+hzgAWhUUmMlV0g=
 
-mediasoup-client@^3.6.16:
-  version "3.6.16"
-  resolved "https://registry.yarnpkg.com/mediasoup-client/-/mediasoup-client-3.6.16.tgz#75fe808fc6a083729ca22d7bbb4f3523ead5bd1d"
-  integrity sha512-igDqXyKW9QvGR9pRXTw4ea/w4g0PsuppI29OA3WcDuvgsLzE4iEn5FTO8E0F25REYM5ifUO2BucILwdSiORCLQ==
+mediasoup-client@^3.6.20:
+  version "3.6.20"
+  resolved "https://registry.yarnpkg.com/mediasoup-client/-/mediasoup-client-3.6.20.tgz#339fd1d6644c1d36f08d2aab9983825ad77c5f20"
+  integrity sha512-ZKGd/mpTxY9ybguQVet3cACWySZHygmTJcG0EGZNjTQdidvpA4oKf9aC0HKduCy8YaF76bIqrHfmxR1NOSFrzw==
   dependencies:
     "@types/debug" "^4.1.5"
     "@types/events" "^3.0.0"
-    awaitqueue "^2.2.3"
+    awaitqueue "^2.3.3"
     bowser "^2.11.0"
-    debug "^4.1.1"
+    debug "^4.2.0"
     events "^3.2.0"
     h264-profile-level-id "^1.0.1"
     sdp-transform "^2.14.0"

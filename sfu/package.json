@@ -54,6 +54,6 @@
     "debug": "^4.2.0",
     "ioredis": "^4.17.3",
     "lodash": "^4.17.20",
-    "mediasoup": "3"
+    "mediasoup": "^3.6.24"
   }
 }

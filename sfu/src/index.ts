@@ -1,3 +1,5 @@
+process.env.DEBUG = 'mediasoup*';
+
 import Redis from 'ioredis';
 import * as mediasoup from 'mediasoup';
 import { Worker } from 'mediasoup/lib/types';
