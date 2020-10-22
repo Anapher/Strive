@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using PaderConference.Core.Domain.Entities;
-using PaderConference.Core.Dto;
 using PaderConference.Core.Interfaces.Services;
 using PaderConference.Infrastructure.Conferencing;
 using PaderConference.Infrastructure.Extensions;
@@ -17,6 +16,7 @@ using PaderConference.Infrastructure.Services;
 using PaderConference.Infrastructure.Services.Chat;
 using PaderConference.Infrastructure.Services.ConferenceControl;
 using PaderConference.Infrastructure.Services.Media;
+using PaderConference.Infrastructure.Services.Media.Communication;
 using PaderConference.Infrastructure.Services.Rooms;
 using PaderConference.Infrastructure.Services.Rooms.Messages;
 using PaderConference.Infrastructure.Sockets;
@@ -163,28 +163,34 @@ namespace PaderConference.Infrastructure.Hubs
             return InvokeService<MediaService, JsonElement?>(service => service.GetRouterCapabilities);
         }
 
-        public Task<Error?> InitializeConnection(JsonElement element)
+        public Task InitializeConnection(JsonElement element)
         {
-            return InvokeService<MediaService, JsonElement, Error?>(element,
-                service => service.InitializeConnection);
+            return InvokeService<MediaService, JsonElement, JsonElement?>(element,
+                service => service.Redirect<JsonElement>(RedisChannels.Media.Request.InitializeConnection));
         }
 
         public Task<JsonElement?> CreateWebRtcTransport(JsonElement element)
         {
             return InvokeService<MediaService, JsonElement, JsonElement?>(element,
-                service => service.Redirect(RedisChannels.Media.Request.CreateTransport));
+                service => service.Redirect<JsonElement>(RedisChannels.Media.Request.CreateTransport));
         }
 
         public Task<JsonElement?> ConnectWebRtcTransport(JsonElement element)
         {
             return InvokeService<MediaService, JsonElement, JsonElement?>(element,
-                service => service.Redirect(RedisChannels.Media.Request.ConnectTransport));
+                service => service.Redirect<JsonElement>(RedisChannels.Media.Request.ConnectTransport));
         }
 
         public Task<JsonElement?> ProduceWebRtcTransport(JsonElement element)
         {
             return InvokeService<MediaService, JsonElement, JsonElement?>(element,
-                service => service.Redirect(RedisChannels.Media.Request.TransportProduce));
+                service => service.Redirect<JsonElement>(RedisChannels.Media.Request.TransportProduce));
+        }
+
+        public Task ChangeStream(ChangeStreamDto dto)
+        {
+            return InvokeService<MediaService, ChangeStreamDto, JsonElement?>(dto,
+                service => service.Redirect<ChangeStreamDto>(RedisChannels.Media.Request.ChangeStream));
         }
     }
 }

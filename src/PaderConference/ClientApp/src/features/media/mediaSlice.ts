@@ -1,17 +1,15 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { createSynchronizeObjectReducer } from 'src/store/conference-signal/synchronized-object';
+import { ConferenceParticipantStreamInfo } from './types';
 
-type SynchronizedMedia = {
-   isScreenshareActivated: boolean;
-   partipantScreensharing: string;
+export type MediaState = {
+   streams: ConferenceParticipantStreamInfo | null;
+   audioLevel: { [key: string]: number } | null;
 };
 
-export type ConferenceState = {
-   synchronized: SynchronizedMedia | null;
-};
-
-const initialState: ConferenceState = {
-   synchronized: null,
+const initialState: MediaState = {
+   streams: null,
+   audioLevel: null,
 };
 
 const mediaSlice = createSlice({
@@ -19,11 +17,14 @@ const mediaSlice = createSlice({
    initialState,
    reducers: {
       test(state) {
-         state.synchronized = null;
+         state.streams = null;
       },
    },
    extraReducers: {
-      ...createSynchronizeObjectReducer({ name: 'media', stateName: 'synchronized' }),
+      ...createSynchronizeObjectReducer([
+         { name: 'mediaStreams', stateName: 'streams' },
+         { name: 'mediaAudioLevel', stateName: 'audioLevel' },
+      ]),
    },
 });
 

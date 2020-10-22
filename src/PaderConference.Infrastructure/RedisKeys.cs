@@ -1,5 +1,6 @@
 ﻿using PaderConference.Core.Domain.Entities;
 using PaderConference.Infrastructure.Services.Media.Communication;
+using PaderConference.Infrastructure.Services.Media.Mediasoup;
 using PaderConference.Infrastructure.Services.Rooms;
 
 namespace PaderConference.Infrastructure
@@ -63,6 +64,11 @@ namespace PaderConference.Infrastructure
             /// </summary>
             public static readonly ConferenceDependentKey RtpCapabilitiesKey =
                 new ConferenceDependentKey("::routerRtpCapabilities");
+
+            /// <summary>
+            ///     The key where the current streams are stored (dictionary participant -> <see cref="ParticipantStreamInfo" />)
+            /// </summary>
+            public static readonly ConferenceDependentKey Streams = new ConferenceDependentKey("::streams");
         }
     }
 }

@@ -1,7 +1,6 @@
 ﻿using PaderConference.Core.Domain.Entities;
-using PaderConference.Infrastructure.Services;
+using PaderConference.Infrastructure.Services.Media.Communication;
 using PaderConference.Infrastructure.Services.Permissions.Dto;
-using PaderConference.Infrastructure.Services.Rooms.Messages;
 using StackExchange.Redis;
 
 namespace PaderConference.Infrastructure
@@ -26,13 +25,24 @@ namespace PaderConference.Infrastructure
         public static string OnConferenceUpdated(string conferenceId) => $"conferenceUpdated::{conferenceId}";
 
         /// <summary>
-        ///     Invoked once a participant switched the room. The parameter is <see cref="ConnectionMessage{TPayload}" /> of
-        ///     <see cref="RoomSwitchInfo" />
+        ///     Invoked once a participant switched the room.
         /// </summary>
         public static string RoomSwitchedChannel(string conferenceId)
         {
             return $"{conferenceId}::roomSwitched";
         }
+
+        /// <summary>
+        ///     Published once a client disconnected
+        /// </summary>
+        public static readonly ConferenceDependentKey ClientDisconnectedChannel =
+            CreateChannelName("::clientDisconnected");
+
+        /// <summary>
+        ///     On send a message back to a connection
+        /// </summary>
+        public static readonly ConferenceDependentKey OnSendMessageToConnection =
+            CreateChannelName("::sendMessageToConnection");
 
         public static class Media
         {
@@ -42,16 +52,14 @@ namespace PaderConference.Infrastructure
             public static readonly RedisChannel NewConferenceCreated = "newConferenceCreated";
 
             /// <summary>
-            ///     Published once a client disconnected
+            ///     Published in a given interval to notify about participant volumes. Parameter is an array
             /// </summary>
-            public static readonly ConferenceDependentKey ClientDisconnectedChannel =
-                CreateChannelName("::clientDisconnected");
+            public static readonly ConferenceDependentKey AudioObserver = CreateChannelName("::audioObserver");
 
             /// <summary>
-            ///     On send a message back to a connection
+            ///     The streams changed. Can be retrieved from <see cref="RedisKeys.Media.Streams" />
             /// </summary>
-            public static readonly ConferenceDependentKey OnSendMessageToConnection =
-                CreateChannelName("::sendMessageToConnection");
+            public static readonly ConferenceDependentKey StreamsChanged = CreateChannelName("::streamsChanged");
 
             public static class Request
             {
@@ -78,6 +86,11 @@ namespace PaderConference.Infrastructure
                 /// </summary>
                 public static readonly ConferenceDependentKey TransportProduce =
                     CreateChannelName("/req::transportProduce");
+
+                /// <summary>
+                ///     Change stream. Parameter is <see cref="ChangeStreamDto" />
+                /// </summary>
+                public static readonly ConferenceDependentKey ChangeStream = CreateChannelName("/req::changeStream");
             }
         }
 

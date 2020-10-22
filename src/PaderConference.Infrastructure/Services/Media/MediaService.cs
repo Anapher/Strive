@@ -1,12 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using PaderConference.Core.Domain.Entities;
-using PaderConference.Core.Dto;
 using PaderConference.Infrastructure.Redis;
 using PaderConference.Infrastructure.Services.Media.Communication;
+using PaderConference.Infrastructure.Services.Media.Mediasoup;
 using PaderConference.Infrastructure.Services.Synchronization;
 using PaderConference.Infrastructure.Sockets;
 using StackExchange.Redis.Extensions.Core.Abstractions;
@@ -20,6 +22,8 @@ namespace PaderConference.Infrastructure.Services.Media
         private readonly ILogger<MediaService> _logger;
         private readonly IConnectionMapping _connectionMapping;
         private readonly IRedisDatabase _redisDatabase;
+        private readonly ISynchronizedObject<Dictionary<string, double>> _synchronizedAudioLevels;
+        private readonly ISynchronizedObject<Dictionary<string, ParticipantStreamInfo>> _synchronizedStreams;
 
         public MediaService(string conferenceId, IHubClients clients, ISynchronizationManager synchronizationManager,
             IRedisDatabase redisDatabase, IConnectionMapping connectionMapping, ILogger<MediaService> logger)
@@ -29,6 +33,12 @@ namespace PaderConference.Infrastructure.Services.Media
             _redisDatabase = redisDatabase;
             _connectionMapping = connectionMapping;
             _logger = logger;
+
+            _synchronizedAudioLevels =
+                synchronizationManager.Register("mediaAudioLevel", new Dictionary<string, double>());
+
+            _synchronizedStreams =
+                synchronizationManager.Register("mediaStreams", new Dictionary<string, ParticipantStreamInfo>());
         }
 
         public override async ValueTask InitializeAsync()
@@ -40,7 +50,28 @@ namespace PaderConference.Infrastructure.Services.Media
 
             // initialize synchronous message sending
             await _redisDatabase.SubscribeAsync<SendToConnectionDto>(
-                RedisChannels.Media.OnSendMessageToConnection.GetName(_conferenceId), OnSendMessageToConnection);
+                RedisChannels.OnSendMessageToConnection.GetName(_conferenceId), OnSendMessageToConnection);
+
+            await _redisDatabase.SubscribeAsync<AudioLevelObserverVolume[]>(
+                RedisChannels.Media.AudioObserver.GetName(_conferenceId), OnAudioObserver);
+
+            await _redisDatabase.SubscribeAsync<object?>(RedisChannels.Media.StreamsChanged.GetName(_conferenceId),
+                OnStreamsChanged);
+        }
+
+        private async Task OnStreamsChanged(object? arg)
+        {
+            var streams =
+                await _redisDatabase.GetAsync<Dictionary<string, ParticipantStreamInfo>>(
+                    RedisKeys.Media.Streams.GetName(_conferenceId));
+
+            await _synchronizedStreams.Update(streams);
+        }
+
+        private async Task OnAudioObserver(AudioLevelObserverVolume[] arg)
+        {
+            await _synchronizedAudioLevels.Update(arg.Where(x => x.ParticipantId != null)
+                .ToDictionary(x => x.ParticipantId!, x => x.Volume));
         }
 
         public override async ValueTask OnClientDisconnected(Participant participant)
@@ -49,7 +80,7 @@ namespace PaderConference.Infrastructure.Services.Media
             {
                 var meta = new ConnectionMessageMetadata(_conferenceId, connectionId, participant.ParticipantId);
 
-                await _redisDatabase.PublishAsync(RedisChannels.Media.ClientDisconnectedChannel.GetName(_conferenceId),
+                await _redisDatabase.PublishAsync(RedisChannels.ClientDisconnectedChannel.GetName(_conferenceId),
                     new ConnectionMessage<object?>(null, meta));
             }
         }
@@ -57,7 +88,13 @@ namespace PaderConference.Infrastructure.Services.Media
         public override async ValueTask DisposeAsync()
         {
             await _redisDatabase.UnsubscribeAsync<SendToConnectionDto>(
-                RedisChannels.Media.OnSendMessageToConnection.GetName(_conferenceId), OnSendMessageToConnection);
+                RedisChannels.OnSendMessageToConnection.GetName(_conferenceId), OnSendMessageToConnection);
+
+            await _redisDatabase.UnsubscribeAsync<AudioLevelObserverVolume[]>(
+                RedisChannels.Media.AudioObserver.GetName(_conferenceId), OnAudioObserver);
+
+            await _redisDatabase.UnsubscribeAsync<object?>(RedisChannels.Media.StreamsChanged.GetName(_conferenceId),
+                OnStreamsChanged);
         }
 
         private async Task OnSendMessageToConnection(SendToConnectionDto arg)
@@ -71,14 +108,15 @@ namespace PaderConference.Infrastructure.Services.Media
                 message.Participant.ParticipantId);
         }
 
-        public Func<IServiceMessage<JsonElement>, ValueTask<JsonElement?>> Redirect(ConferenceDependentKey dependentKey)
+        public Func<IServiceMessage<TRequest>, ValueTask<JsonElement?>> Redirect<TRequest>(
+            ConferenceDependentKey dependentKey)
         {
-            async ValueTask<JsonElement?> Invoke(IServiceMessage<JsonElement> message)
+            async ValueTask<JsonElement?> Invoke(IServiceMessage<TRequest> message)
             {
                 var meta = GetMeta(message);
-                var request = new ConnectionMessage<JsonElement>(message.Payload, meta);
+                var request = new ConnectionMessage<TRequest>(message.Payload, meta);
 
-                return await _redisDatabase.InvokeAsync<JsonElement?, ConnectionMessage<JsonElement>>(
+                return await _redisDatabase.InvokeAsync<JsonElement?, ConnectionMessage<TRequest>>(
                     dependentKey.GetName(_conferenceId), request);
             }
 
@@ -93,25 +131,6 @@ namespace PaderConference.Infrastructure.Services.Media
                 return null;
 
             return routerCapabilities;
-        }
-
-        public async ValueTask<Error?> InitializeConnection(IServiceMessage<JsonElement> message)
-        {
-            var meta = GetMeta(message);
-            var request = new ConnectionMessage<JsonElement>(message.Payload, meta);
-
-            try
-            {
-                await _redisDatabase.InvokeAsync(
-                    RedisChannels.Media.Request.InitializeConnection.GetName(_conferenceId), request);
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e, "Error occurred on contacting database");
-                return new Error("Test", "TODO", -1);
-            }
-
-            return null;
         }
     }
 }

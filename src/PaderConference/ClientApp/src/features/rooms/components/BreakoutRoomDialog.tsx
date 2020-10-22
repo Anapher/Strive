@@ -15,8 +15,8 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from 'src/store';
-import { send } from 'src/store/conference-signal/actions';
 import { selectRooms } from '../selectors';
+import * as coreHub from 'src/core-hub';
 
 const NATO_ALPHA = [
    'Alfa',
@@ -98,12 +98,7 @@ export default function BreakoutRoomDialog({ open, onClose }: Props) {
          names.push(name);
       }
 
-      dispatch(
-         send(
-            'CreateRooms',
-            names.map((x) => ({ displayName: x })),
-         ),
-      );
+      dispatch(coreHub.createRooms(names.map((x) => ({ displayName: x }))));
    };
 
    const handleRemoveRooms = (amount: number) => {
@@ -112,9 +107,9 @@ export default function BreakoutRoomDialog({ open, onClose }: Props) {
          .orderBy([(x) => x.participants.length, (x) => x.displayName], ['asc', 'desc']) // delete rooms with no participants first
          .take(amount)
          .map((x) => x.roomId)
-         .toArray();
+         .value();
 
-      dispatch(send('RemoveRooms', targetRooms));
+      dispatch(coreHub.removeRooms(targetRooms));
    };
 
    const handleApplyForm = ({ amount }: CreateBreakoutRoomsForm) => {

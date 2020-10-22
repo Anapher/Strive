@@ -7,6 +7,7 @@ import {
    SctpCapabilities,
    SctpParameters,
 } from 'mediasoup/lib/types';
+import { ProducerSource } from './participant';
 
 export type ConferenceInfo = {
    id: string;
@@ -57,6 +58,14 @@ export type TransportProduceRequest = ConnectionMessage<
    } & ProducerOptions
 >;
 
+export type StreamType = 'producer' | 'consumer';
+
+export type ChangeStreamRequest = ConnectionMessage<{
+   id: string;
+   type: 'producer' | 'consumer';
+   action: 'pause' | 'resume' | 'close';
+}>;
+
 export type CreateTransportResponse = {
    id: string;
    iceParameters: IceParameters;
@@ -74,3 +83,23 @@ export type SendToConnectionDto<T> = {
    connectionId: string;
    methodName: string;
 };
+
+export type ConsumerInfo = {
+   paused: boolean;
+   participantId: string;
+};
+
+export type ProducerInfo = {
+   paused: boolean;
+   selected: boolean;
+   kind?: ProducerSource;
+};
+
+export type ParticipantStreams = {
+   consumers: {
+      [key: string]: ConsumerInfo;
+   };
+   producers: { [key: string]: ProducerInfo };
+};
+
+export type ConferenceParticipantStreamInfo = { [key: string]: ParticipantStreams };

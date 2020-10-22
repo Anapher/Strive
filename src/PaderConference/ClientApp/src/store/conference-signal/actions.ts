@@ -1,5 +1,4 @@
 import { ActionCreatorWithPayload, createAction } from '@reduxjs/toolkit';
-import { DomainError } from 'src/types';
 import { IRestError } from 'src/utils/error-result';
 
 export const DEFAULT_PREFIX = 'SIGNALR';
@@ -27,8 +26,8 @@ export const onConferenceJoined = createAction(`${DEFAULT_PREFIX}::ON_CONFERENCE
    payload: { conferenceId },
 }));
 
-export const onConferenceJoinFailed = createAction(
-   `${DEFAULT_PREFIX}::ON_CONFERENCE_JOIN_FAILED`,
+export const onConferenceJoinError = createAction(
+   `${DEFAULT_PREFIX}::ON_CONFERENCE_JOIN_ERROR`,
    (error?: IRestError) => ({
       payload: error,
    }),

@@ -39,14 +39,8 @@ export default (options: Options): SignalRResult => {
                .configureLogging(LogLevel.Information)
                .build();
 
-            connection.on('OnConferenceDoesNotExist', () => {
-               dispatch(
-                  actions.onConferenceJoinFailed({
-                     code: ErrorCodes.ConferenceDoesNotExist,
-                     message: 'The conference does not exist.',
-                     type: 'SignalR',
-                  }),
-               );
+            connection.on('OnConferenceJoinError', (err) => {
+               dispatch(actions.onConferenceJoinError(err));
                dispatch(actions.close());
             });
 
@@ -63,7 +57,7 @@ export default (options: Options): SignalRResult => {
                dispatch(actions.onConferenceJoined(conferenceId));
             } catch (error) {
                dispatch(
-                  actions.onConferenceJoinFailed({
+                  actions.onConferenceJoinError({
                      code: ErrorCodes.SignalRConnectionFailed,
                      message: error.toString(),
                      type: 'SignalR',

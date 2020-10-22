@@ -1,7 +1,7 @@
-import { send } from 'src/store/conference-signal/actions';
 import { Producer, Transport } from 'mediasoup-client/lib/types';
 import { useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
+import * as coreHub from 'src/core-hub';
 
 export type UseMediaState = {
    enable: () => Promise<void>;
@@ -15,7 +15,7 @@ export type UseMediaState = {
 
 export function useMedia(
    getMediaTrack: () => Promise<MediaStreamTrack>,
-   getSendTranspot: () => Transport | null | undefined,
+   getSendTransport: () => Transport | null | undefined,
 ): UseMediaState {
    const producerRef = useRef<Producer | null>(null);
    const [enabled, setEnabled] = useState(false);
@@ -27,7 +27,7 @@ export function useMedia(
       if (!producerRef.current) return;
 
       producerRef.current.close();
-      dispatch(send('MediaSoup_CloseProducer', { producerId: producerRef.current.id }));
+      dispatch(coreHub.changeSteam({ id: producerRef.current.id, type: 'producer', action: 'close' }));
       producerRef.current = null;
 
       setEnabled(false);
@@ -36,7 +36,7 @@ export function useMedia(
    const enable = async () => {
       if (producerRef.current) return;
 
-      const sendTransport = getSendTranspot();
+      const sendTransport = getSendTransport();
       if (!sendTransport) {
          throw new Error('Send transport must first be initialized');
       }
@@ -62,7 +62,7 @@ export function useMedia(
          producerRef.current.pause();
          setPaused(true);
 
-         dispatch(send('MediaSoup_PauseProducer', { producerId: producerRef.current.id }));
+         dispatch(coreHub.changeSteam({ id: producerRef.current.id, type: 'producer', action: 'pause' }));
       }
    };
 
@@ -71,7 +71,7 @@ export function useMedia(
          producerRef.current.resume();
          setPaused(false);
 
-         dispatch(send('MediaSoup_ResumeProducer', { producerId: producerRef.current.id }));
+         dispatch(coreHub.changeSteam({ id: producerRef.current.id, type: 'producer', action: 'resume' }));
       }
    };
 

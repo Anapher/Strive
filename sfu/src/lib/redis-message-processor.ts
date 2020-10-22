@@ -4,6 +4,7 @@ import ConferenceManager from './conference-manager';
 import Connection from './connection';
 import Logger from './logger';
 import {
+   ChangeStreamRequest,
    ConferenceInfo,
    ConnectionMessage,
    ConnectTransportRequest,
@@ -51,6 +52,16 @@ export class RedisMessageProcessor {
    public async transportProduce(request: TransportProduceRequest): Promise<TransportProduceResponse> {
       const conference = this.conferenceManager.getConference(request.meta.conferenceId);
       return await conference.transportProduce(request);
+   }
+
+   public async roomSwitched(request: ConnectionMessage<any>): Promise<void> {
+      const conference = this.conferenceManager.getConference(request.meta.conferenceId);
+      return await conference.roomSwitched(request);
+   }
+
+   public async changeStream(request: ChangeStreamRequest): Promise<void> {
+      const conference = this.conferenceManager.getConference(request.meta.conferenceId);
+      return await conference.changeStream(request);
    }
 
    public async clientDisconnected(request: ConnectionMessage<undefined>): Promise<void> {

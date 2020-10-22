@@ -3,7 +3,6 @@ import {
    Button,
    Checkbox,
    Container,
-   FormControl,
    FormControlLabel,
    makeStyles,
    Typography,
@@ -16,8 +15,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { selectAccessToken } from 'src/features/auth/selectors';
 import usePermission, { CONFERENCE_CAN_OPEN_AND_CLOSE } from 'src/hooks/usePermission';
 import { RootState } from 'src/store';
-import { send } from 'src/store/conference-signal/actions';
 import { ConferenceInfo } from '../conferenceSlice';
+import * as coreHub from 'src/core-hub';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -92,7 +91,7 @@ export default function ConferenceNotOpen({ conferenceInfo }: Props) {
    const theme = useTheme();
 
    const dispatch = useDispatch();
-   const handleOpenConference = () => dispatch(send('OpenConference'));
+   const handleOpenConference = () => dispatch(coreHub.openConference());
    const canOpen = usePermission(CONFERENCE_CAN_OPEN_AND_CLOSE);
 
    return (

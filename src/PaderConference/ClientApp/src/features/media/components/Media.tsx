@@ -25,7 +25,7 @@ export default function Media() {
    const dispatch = useDispatch();
 
    const connected = useSelector((state: RootState) => state.signalr.isConnected);
-   const mediaInfo = useSelector((state: RootState) => state.media.synchronized);
+   const mediaInfo = useSelector((state: RootState) => state.media.streams);
    const accessToken = useSelector(selectAccessToken);
 
    useEffect(() => {
@@ -33,12 +33,6 @@ export default function Media() {
          dispatch(initialize());
       }
    }, [connected]);
-
-   useEffect(() => {
-      if (mediaInfo?.isScreenshareActivated && accessToken?.nameid !== mediaInfo.partipantScreensharing) {
-         dispatch(send('RequestVideo'));
-      }
-   }, [mediaInfo?.isScreenshareActivated]);
 
    const { enable, stream } = useScreen(getMediasoup());
    const consumers = useConsumers(getMediasoup());

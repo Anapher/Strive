@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { send } from 'src/store/conference-signal/actions';
 import { selectRooms } from '../selectors';
 import BreakoutRoomDialog from './BreakoutRoomDialog';
+import * as coreHub from 'src/core-hub';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -29,7 +30,7 @@ export default function RoomManagement({ className }: Props) {
    const handleCloseBreakoutRooms = () => {
       if (!rooms) return;
       const breakoutRooms = rooms.filter((x) => !x.isDefaultRoom).map((x) => x.roomId);
-      dispatch(send('RemoveRooms', breakoutRooms));
+      dispatch(coreHub.removeRooms(breakoutRooms));
    };
 
    return (

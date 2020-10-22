@@ -1,14 +1,17 @@
 import { Redis } from 'ioredis';
 import _ from 'lodash';
 import { Router } from 'mediasoup/lib/Router';
-import { Producer, RtpCapabilities, WebRtcTransportOptions } from 'mediasoup/lib/types';
+import { AudioLevelObserver, Consumer, Producer, RtpCapabilities, WebRtcTransportOptions } from 'mediasoup/lib/types';
 import config from '../config';
 import Connection from './connection';
 import Logger from './logger';
+import { StreamInfoRepo } from './pader-conference/steam-info-repo';
 import { Participant, ProducerSource } from './participant';
 import { RoomManager } from './room-manager';
 import { ISignalWrapper } from './signal-wrapper';
 import {
+   ChangeStreamRequest,
+   ConnectionMessage,
    ConnectTransportRequest,
    CreateTransportRequest,
    CreateTransportResponse,
@@ -24,9 +27,17 @@ export class Conference {
 
    /** participantId -> Participant */
    private participants: Map<string, Participant> = new Map();
+   private streamInfoRepo: StreamInfoRepo;
 
-   constructor(private router: Router, public conferenceId: string, private signal: ISignalWrapper, redis: Redis) {
-      this.roomManager = new RoomManager(conferenceId, signal, router, redis);
+   constructor(
+      private router: Router,
+      public conferenceId: string,
+      private signal: ISignalWrapper,
+      redis: Redis,
+      private audioLevelObserver: AudioLevelObserver,
+   ) {
+      this.roomManager = new RoomManager(conferenceId, signal, router, redis, audioLevelObserver);
+      this.streamInfoRepo = new StreamInfoRepo(redis, conferenceId);
    }
 
    get routerCapabilities(): RtpCapabilities {
@@ -34,7 +45,9 @@ export class Conference {
    }
 
    public close(): void {
+      logger.info('Close conference %s', this.conferenceId);
       this.router.close();
+      this.audioLevelObserver.close();
    }
 
    public async addConnection(connection: Connection): Promise<void> {
@@ -55,6 +68,9 @@ export class Conference {
 
       // notify room manager
       await this.roomManager.updateParticipant(participant);
+
+      // update streams
+      await this.streamInfoRepo.updateStreams(this.participants.values());
    }
 
    public async removeConnection(connectionId: string): Promise<void> {
@@ -73,6 +89,44 @@ export class Conference {
                await this.roomManager.removeParticipant(participant);
             }
          }
+
+         // update streams
+         await this.streamInfoRepo.updateStreams(this.participants.values());
+      }
+   }
+
+   public async roomSwitched({ meta: { participantId } }: ConnectionMessage<any>): Promise<void> {
+      const participant = this.participants.get(participantId);
+      if (participant) {
+         await this.roomManager.updateParticipant(participant);
+
+         // update streams
+         await this.streamInfoRepo.updateStreams(this.participants.values());
+      }
+   }
+
+   public async changeStream({ payload: { id, type, action }, meta }: ChangeStreamRequest): Promise<void> {
+      const connection = this.connections.get(meta.connectionId);
+      if (connection) {
+         let stream: Producer | Consumer | undefined;
+         if (type === 'consumer') {
+            stream = connection.consumers.get(id);
+         } else if (type === 'producer') {
+            stream = connection.producers.get(id);
+         }
+
+         if (stream) {
+            if (action === 'pause') {
+               await stream.pause();
+            } else if (action === 'close') {
+               stream.close();
+            } else if (action === 'resume') {
+               await stream.resume();
+            }
+
+            // update streams
+            await this.streamInfoRepo.updateStreams(this.participants.values());
+         }
       }
    }
 
@@ -89,7 +143,7 @@ export class Conference {
       const transport = connection.transport.get(transportId);
       if (!transport) throw new Error(`transport with id "${transportId}" not found`);
 
-      appData = { ...appData, participantId: meta.participantId };
+      appData = { ...appData, participantId: participant.participantId };
 
       const producer = await transport.produce({
          ...producerOptions,
@@ -111,6 +165,10 @@ export class Conference {
       participant.producers[source] = producer;
 
       await this.roomManager.updateParticipant(participant);
+
+      // update streams
+      await this.streamInfoRepo.updateStreams(this.participants.values());
+
       return { id: producer.id };
    }
 
@@ -121,6 +179,11 @@ export class Conference {
       const transport = connection.transport.get(payload.transportId);
       if (!transport) throw new Error(`transport with id "${payload.transportId}" not found`);
 
+      const participant = this.participants.get(connection.participantId);
+      if (!participant) throw new Error(`participant with id "${connection.participantId}" not found`);
+
+      logger.debug('connectTransport() | participantId: %s', participant.participantId);
+
       await transport.connect(payload);
    }
 
@@ -130,6 +193,11 @@ export class Conference {
    }: CreateTransportRequest): Promise<CreateTransportResponse> {
       const connection = this.connections.get(meta.connectionId);
       if (!connection) throw new Error('Connection was not found');
+
+      const participant = this.participants.get(connection.participantId);
+      if (!participant) throw new Error(`participant with id "${connection.participantId}" not found`);
+
+      logger.debug('createTransport() | participantId: %s', connection.participantId);
 
       const webRtcTransportOptions: WebRtcTransportOptions = {
          ...config.webRtcTransport.options,
@@ -154,6 +222,8 @@ export class Conference {
             await transport.setMaxIncomingBitrate(maxIncomingBitrate);
          } catch (error) {}
       }
+
+      await this.roomManager.updateParticipant(participant);
 
       return {
          id: transport.id,

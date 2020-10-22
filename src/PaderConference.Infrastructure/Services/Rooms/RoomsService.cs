@@ -46,6 +46,12 @@ namespace PaderConference.Infrastructure.Services.Rooms
             permissionsService.RegisterLayerProvider(FetchRoomPermissions);
         }
 
+        public override async ValueTask OnClientDisconnected(Participant participant)
+        {
+            await _redisDatabase.HashDeleteAsync(_participantToRoomHashSetKey, participant.ParticipantId);
+            await UpdateSynchronizedRooms();
+        }
+
         public override async ValueTask OnClientConnected(Participant participant)
         {
             using (_logger.BeginScope("OnClientConnected()"))
@@ -173,11 +179,6 @@ namespace PaderConference.Infrastructure.Services.Rooms
             {
                 using (await _roomLock.ReaderLockAsync())
                 {
-                    var previousRoom =
-                        await _redisDatabase.HashGetAsync<string>(_participantToRoomHashSetKey, participantId);
-
-                    _logger.LogDebug("Previous room: {roomId}", previousRoom);
-
                     var roomInfo = await GetRoomInfo(roomId);
                     if (roomInfo == null)
                     {
@@ -196,7 +197,7 @@ namespace PaderConference.Infrastructure.Services.Rooms
                     _logger.LogDebug("Update room in redis");
                     await _redisDatabase.HashSetAsync(_participantToRoomHashSetKey, participantId, roomId);
                     await _redisDatabase.PublishAsync(RedisChannels.RoomSwitchedChannel(_conferenceId),
-                        new ConnectionMessage<RoomSwitchInfo>(new RoomSwitchInfo(previousRoom, roomId),
+                        new ConnectionMessage<object?>(null,
                             new ConnectionMessageMetadata(_conferenceId, null, participantId)));
                 }
 

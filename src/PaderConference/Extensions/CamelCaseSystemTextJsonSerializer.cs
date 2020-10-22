@@ -1,5 +1,6 @@
 ﻿using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using StackExchange.Redis.Extensions.Core;
 
 namespace PaderConference.Extensions
@@ -20,7 +21,8 @@ namespace PaderConference.Extensions
                 IgnoreNullValues = true,
                 WriteIndented = false,
                 Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                Converters = {new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)},
             };
         }
 

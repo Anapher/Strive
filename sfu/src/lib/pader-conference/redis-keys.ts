@@ -3,3 +3,5 @@ export const participantPermissions = (participantId: string): string => `partic
 export const participantToRoom = (conferenceId: string): string => `${conferenceId}::participantToRoom`;
 
 export const newConferences = 'newConferences';
+
+export const conferenceStreams = (conferenceId: string): string => `${conferenceId}::streams`;

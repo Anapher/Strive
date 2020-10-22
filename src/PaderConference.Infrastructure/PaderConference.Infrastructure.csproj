@@ -25,9 +25,5 @@
     <ProjectReference Include="..\PaderConference.Core\PaderConference.Core.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Services\Media\Mediasoup\" />
-  </ItemGroup>
-
   <Import Project="../nullable.props" />
 </Project>

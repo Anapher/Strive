@@ -1,11 +1,11 @@
 import { makeStyles } from '@material-ui/core';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import * as coreHub from 'src/core-hub';
 import { selectAccessToken } from 'src/features/auth/selectors';
 import ParticipantItem from 'src/features/conference/components/ParticipantItem';
 import usePermission, { ROOMS_CAN_CREATE_REMOVE } from 'src/hooks/usePermission';
 import { RootState } from 'src/store';
-import { send } from 'src/store/conference-signal/actions';
 import { selectRooms } from '../selectors';
 import RoomHeader from './RoomHeader';
 import RoomManagement from './RoomManagement';
@@ -41,7 +41,7 @@ export default function RoomsList() {
    const canCreateRemove = usePermission(ROOMS_CAN_CREATE_REMOVE);
 
    const dispatch = useDispatch();
-   const handleSwitchRoom = (roomId: string) => dispatch(send('SwitchRoom', { roomId }));
+   const handleSwitchRoom = (roomId: string) => dispatch(coreHub.switchRoom({ roomId }));
 
    return (
       <div className={classes.root}>

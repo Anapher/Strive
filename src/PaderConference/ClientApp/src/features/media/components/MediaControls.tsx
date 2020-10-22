@@ -8,10 +8,13 @@ import usePermission, {
 } from 'src/hooks/usePermission';
 import VideocamIcon from '@material-ui/icons/Videocam';
 import MicIcon from '@material-ui/icons/Mic';
+import MicOffIcon from '@material-ui/icons/MicOff';
 import BugReportIcon from '@material-ui/icons/BugReport';
 import DesktopAccessDisabledIcon from '@material-ui/icons/DesktopAccessDisabled';
 import VideocamOffIcon from '@material-ui/icons/VideocamOff';
-import MicOffIcon from '@material-ui/icons/MicOff';
+import { useMicrophone } from 'src/store/webrtc/useMicrophone';
+import { getMediasoup, RootState } from 'src/store';
+import MediaFab from './MediaFab';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -35,6 +38,8 @@ type Props = {
 export default function MediaControls({ startDesktopRecording }: Props) {
    const classes = useStyles();
 
+   const micState = useMicrophone(getMediasoup()!);
+
    const canShareScreen = usePermission(MEDIA_CAN_SHARE_SCREEN);
    const canShareAudio = usePermission(MEDIA_CAN_SHARE_AUDIO);
    const canShareWebcam = usePermission(MEDIA_CAN_SHARE_WEBCAM);
@@ -54,9 +59,13 @@ export default function MediaControls({ startDesktopRecording }: Props) {
                </Fab>
             )}
             {canShareAudio && (
-               <Fab color="primary" aria-label="share microphone" className={classes.fab}>
-                  <MicOffIcon />
-               </Fab>
+               <MediaFab
+                  aria-label="share microphone"
+                  className={classes.fab}
+                  IconEnable={MicIcon}
+                  IconDisable={MicOffIcon}
+                  mediaState={micState}
+               />
             )}
          </div>
          <div className={classes.leftActions}>

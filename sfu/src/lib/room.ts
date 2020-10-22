@@ -1,5 +1,5 @@
 import { Redis } from 'ioredis';
-import { Producer, Router } from 'mediasoup/lib/types';
+import { AudioLevelObserver, Producer, Router } from 'mediasoup/lib/types';
 import { MEDIA_CAN_SHARE_AUDIO, MEDIA_CAN_SHARE_SCREEN, MEDIA_CAN_SHARE_WEBCAM, Permission } from '../permissions';
 import Connection from './connection';
 import Logger from './logger';
@@ -30,8 +30,14 @@ const logger = new Logger('Room');
 export default class Room {
    private mixer: MediasoupMixer;
 
-   constructor(public id: string, private signal: ISignalWrapper, private router: Router, private redis: Redis) {
-      this.mixer = new MediasoupMixer(router, signal);
+   constructor(
+      public id: string,
+      signal: ISignalWrapper,
+      router: Router,
+      private redis: Redis,
+      audioObserver: AudioLevelObserver,
+   ) {
+      this.mixer = new MediasoupMixer(router, signal, audioObserver);
    }
 
    public participants = new Map<string, Participant>();
@@ -41,7 +47,7 @@ export default class Room {
       return this.participants.has(participantId);
    }
 
-   join(participant: Participant): void {
+   async join(participant: Participant): Promise<void> {
       logger.info('join() | participantId: %s | roomId: %s', participant.participantId, this.id);
 
       const status: ParticipantStatus = {
@@ -57,18 +63,27 @@ export default class Room {
       if (receiveConn) {
          this.mixer.addReceiveTransport(receiveConn);
          status.receivingConns.push(receiveConn);
+      } else {
+         logger.debug('No receive transport for %s', participant.participantId);
       }
 
       this.participantStatus.set(participant.participantId, status);
       this.participants.set(participant.participantId, participant);
 
-      this.updateParticipant(participant);
+      await this.updateParticipant(participant);
    }
 
-   updateParticipant(participant: Participant): void {
+   async updateParticipant(participant: Participant): Promise<void> {
       const status = this.participantStatus.get(participant.participantId);
       if (status) {
          logger.info('updateParticipant() | participantId: %s | roomId: %s', participant.participantId, this.id);
+
+         const receiveConn = participant.getReceiveConnection();
+         if (receiveConn && !status.receivingConns.includes(receiveConn)) {
+            await this.mixer.addReceiveTransport(receiveConn);
+            status.receivingConns.push(receiveConn);
+         }
+
          const permissions = new ParticipantPermissions(participant.participantId, this.redis);
 
          for (const { permission, source } of producerPermissions) {
@@ -91,7 +106,7 @@ export default class Room {
             }
 
             if (newActiveProducer) {
-               this.mixer.addProducer({ participantId: participant.participantId, producer: newActiveProducer });
+               await this.mixer.addProducer({ participantId: participant.participantId, producer: newActiveProducer });
                status.activeProducers[source] = newActiveProducer;
             }
          }

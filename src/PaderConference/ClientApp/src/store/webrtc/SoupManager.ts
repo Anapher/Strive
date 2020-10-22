@@ -100,7 +100,7 @@ export class SoupManager {
       transport.on('connect', ({ dtlsParameters }, callback, errback) => {
          this.connection
             .invoke('ConnectWebRtcTransport', { transportId: transport.id, dtlsParameters })
-            .then(callback)
+            .then(callback())
             .catch(errback);
       });
 
@@ -118,6 +118,8 @@ export class SoupManager {
             errback(error);
          }
       });
+
+      transport.on('connectionstatechange', (state) => console.log('connection state ', state));
 
       this.sendTransport = transport;
       return transport;

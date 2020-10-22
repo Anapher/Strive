@@ -7,7 +7,13 @@ import ConferenceManager from './lib/conference-manager';
 import Logger from './lib/logger';
 import { RedisMessageProcessor } from './lib/redis-message-processor';
 import { CallbackMessage, CallbackResponse, ConferenceInfo } from './lib/types';
-import { ChannelName, channels, onClientDisconnected, rtpCapabilitiesKey } from './lib/pader-conference/redis-channels';
+import {
+   ChannelName,
+   channels,
+   onClientDisconnected,
+   onRoomSwitched,
+   rtpCapabilitiesKey,
+} from './lib/pader-conference/redis-channels';
 
 const logger = new Logger();
 
@@ -24,6 +30,7 @@ const mediasoupWorkers: Worker[] = [];
 let nextMediasoupWorkerIdx = 0;
 
 const conferenceManager = new ConferenceManager();
+const processor = new RedisMessageProcessor(redis, conferenceManager, initializeConference);
 
 logger.info('Starting server...');
 
@@ -65,15 +72,15 @@ type MappedMessage = {
    handler: (request: any) => any | Promise<any>;
 };
 
-const processor = new RedisMessageProcessor(redis, conferenceManager, initializeConference);
-
 const messagesMap: MappedMessage[] = [
-   { channel: channels.request.initializeConnection, handler: processor.initializeConnection },
-   { channel: channels.request.createTransport, handler: processor.createTransport },
-   { channel: channels.request.connectTransport, handler: processor.connectTransport },
-   { channel: channels.request.transportProduce, handler: processor.transportProduce },
-   { channel: onClientDisconnected, handler: processor.clientDisconnected },
-   { channel: channels.newConferenceCreated, handler: processor.newConferenceCreated },
+   { channel: channels.request.initializeConnection, handler: processor.initializeConnection.bind(processor) },
+   { channel: channels.request.createTransport, handler: processor.createTransport.bind(processor) },
+   { channel: channels.request.connectTransport, handler: processor.connectTransport.bind(processor) },
+   { channel: channels.request.transportProduce, handler: processor.transportProduce.bind(processor) },
+   { channel: channels.request.changeStream, handler: processor.changeStream.bind(processor) },
+   { channel: onRoomSwitched, handler: processor.roomSwitched.bind(processor) },
+   { channel: onClientDisconnected, handler: processor.clientDisconnected.bind(processor) },
+   { channel: channels.newConferenceCreated, handler: processor.newConferenceCreated.bind(processor) },
 ];
 
 async function subscribeRedis() {

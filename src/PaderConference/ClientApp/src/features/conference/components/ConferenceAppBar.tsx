@@ -14,8 +14,8 @@ import React from 'react';
 import { useDispatch } from 'react-redux';
 import { signOut } from 'src/features/auth/authSlice';
 import usePermission, { CONFERENCE_CAN_OPEN_AND_CLOSE } from 'src/hooks/usePermission';
-import { send } from 'src/store/conference-signal/actions';
 import to from 'src/utils/to';
+import * as coreHub from 'src/core-hub';
 
 const useStyles = makeStyles((theme) =>
    createStyles({
@@ -36,7 +36,7 @@ export default function ConferenceAppBar() {
    const handleSignOut = () => dispatch(signOut());
 
    const canCloseConference = usePermission(CONFERENCE_CAN_OPEN_AND_CLOSE);
-   const handleCloseConference = () => dispatch(send('CloseConference'));
+   const handleCloseConference = () => dispatch(coreHub.closeConference());
 
    return (
       <AppBar position="static">

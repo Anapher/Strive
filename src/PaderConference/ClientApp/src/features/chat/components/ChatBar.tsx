@@ -6,6 +6,7 @@ import { RootState } from 'src/store';
 import { useDispatch, useSelector } from 'react-redux';
 import ChatMessageList from './ChatMessageList';
 import SendMessageForm from './SendMessageForm';
+import * as coreHub from 'src/core-hub';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -30,11 +31,11 @@ export default function ChatBar() {
       if (connected) {
          dispatch(actions.subscribeFullChat());
          dispatch(actions.subscribeChatMessages());
-         dispatch(actions.loadFullChat());
+         dispatch(coreHub.loadFullChat());
       }
    }, [connected]);
 
-   const handleSendMessage = (message: string) => dispatch(actions.sendChatMessage({ message }));
+   const handleSendMessage = (message: string) => dispatch(coreHub.sendChatMessage({ message }));
 
    return (
       <Paper className={classes.root} elevation={4}>

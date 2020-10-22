@@ -2,7 +2,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import {
    joinConference,
    onConferenceJoined,
-   onConferenceJoinFailed,
+   onConferenceJoinError,
    onEventOccurred,
 } from 'src/store/conference-signal/actions';
 import { createSynchronizeObjectReducer } from 'src/store/conference-signal/synchronized-object';
@@ -52,7 +52,7 @@ const conferenceSlice = createSlice({
       [onConferenceJoined.type]: (state, action) => {
          state.conferenceId = action.conferenceId;
       },
-      [onConferenceJoinFailed.type]: (state, action) => {
+      [onConferenceJoinError.type]: (state, action) => {
          state.connectionError = action.payload;
       },
       [onEventOccurred('OnPermissionsUpdated').type]: (state, action: PayloadAction<Permissions>) => {
