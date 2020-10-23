@@ -1,5 +1,3 @@
-process.env.DEBUG = 'mediasoup*';
-
 import Redis from 'ioredis';
 import * as mediasoup from 'mediasoup';
 import { Worker } from 'mediasoup/lib/types';
@@ -16,6 +14,7 @@ import {
    onRoomSwitched,
    rtpCapabilitiesKey,
 } from './lib/pader-conference/redis-channels';
+import { newConferences, openConferences } from './lib/pader-conference/redis-keys';
 
 const logger = new Logger();
 
@@ -32,7 +31,7 @@ const mediasoupWorkers: Worker[] = [];
 let nextMediasoupWorkerIdx = 0;
 
 const conferenceManager = new ConferenceManager();
-const processor = new RedisMessageProcessor(redis, conferenceManager, initializeConference);
+const processor = new RedisMessageProcessor(conferenceManager);
 
 logger.info('Starting server...');
 
@@ -48,7 +47,7 @@ async function main() {
 }
 
 function initializeExistingConferences() {
-   redis.hgetall('conferences', (err, result) => {
+   redis.hgetall(openConferences, (err, result) => {
       for (const key in result) {
          initializeConference({ id: key });
       }
@@ -69,6 +68,14 @@ async function initializeConference(conferenceInfo: ConferenceInfo): Promise<voi
    subRedis.subscribe(onClientDisconnected.getName(conferenceInfo.id));
 }
 
+const onNewConferenceCreated = async () => {
+   const conferenceStr = await redis.lpop(newConferences);
+   if (conferenceStr) {
+      const conferenceInfo: ConferenceInfo = JSON.parse(conferenceStr);
+      initializeConference(conferenceInfo);
+   }
+};
+
 type MappedMessage = {
    channel: ChannelName | string;
    handler: (request: any) => any | Promise<any>;
@@ -82,7 +89,7 @@ const messagesMap: MappedMessage[] = [
    { channel: channels.request.changeStream, handler: processor.changeStream.bind(processor) },
    { channel: onRoomSwitched, handler: processor.roomSwitched.bind(processor) },
    { channel: onClientDisconnected, handler: processor.clientDisconnected.bind(processor) },
-   { channel: channels.newConferenceCreated, handler: processor.newConferenceCreated.bind(processor) },
+   { channel: channels.newConferenceCreated, handler: onNewConferenceCreated },
 ];
 
 async function subscribeRedis() {
@@ -102,8 +109,8 @@ async function subscribeRedis() {
          let param: any | undefined;
          if (message) {
             // extract the parameter
-            const data: CallbackMessage<any> = JSON.parse(message);
-            if (data.callbackChannel) {
+            const data: CallbackMessage<any> | null = JSON.parse(message);
+            if (data?.callbackChannel) {
                // we have a callback message with a channel
                callbackChannel = data.callbackChannel;
                param = data.payload;

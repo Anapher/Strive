@@ -43,6 +43,8 @@ export function useMedia(
 
       const track = await getMediaTrack();
       const producer = await sendTransport.produce({ track });
+      console.log('producer created');
+
       producerRef.current = producer;
 
       producer.on('transportclose', () => {

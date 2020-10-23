@@ -38,7 +38,7 @@ type Props = {
 export default function MediaControls({ startDesktopRecording }: Props) {
    const classes = useStyles();
 
-   const micState = useMicrophone(getMediasoup()!);
+   const micState = useMicrophone(getMediasoup);
 
    const canShareScreen = usePermission(MEDIA_CAN_SHARE_SCREEN);
    const canShareAudio = usePermission(MEDIA_CAN_SHARE_AUDIO);

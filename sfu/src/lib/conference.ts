@@ -179,10 +179,7 @@ export class Conference {
       const transport = connection.transport.get(payload.transportId);
       if (!transport) throw new Error(`transport with id "${payload.transportId}" not found`);
 
-      const participant = this.participants.get(connection.participantId);
-      if (!participant) throw new Error(`participant with id "${connection.participantId}" not found`);
-
-      logger.debug('connectTransport() | participantId: %s', participant.participantId);
+      logger.debug('connectTransport() | participantId: %s', connection.participantId);
 
       await transport.connect(payload);
    }

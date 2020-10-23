@@ -33,7 +33,7 @@ type ConsumerInfoPayload = {
 export class SoupManager {
    private consumers = new Map<string, Consumer>();
 
-   constructor(private dispatch: Dispatch<AnyAction>, private connection: HubConnection) {
+   constructor(private connection: HubConnection) {
       this.device = new Device();
 
       connection.on('newConsumer', this.onNewConsumer.bind(this));
@@ -68,6 +68,8 @@ export class SoupManager {
 
          this.eventEmitter.emit('onConsumersChanged');
       } catch (error) {
+         console.log(error);
+
          // TODO: Handle
       }
    }
@@ -99,7 +101,7 @@ export class SoupManager {
          consuming: false,
       };
       const transportOptions = await this.connection.invoke<TransportOptions>('CreateWebRtcTransport', request);
-      console.log(transportOptions);
+      console.log('create send transport #1');
 
       const transport = this.device.createSendTransport({
          ...transportOptions,
@@ -107,15 +109,25 @@ export class SoupManager {
          proprietaryConstraints: PC_PROPRIETARY_CONSTRAINTS,
       });
 
-      transport.on('connect', ({ dtlsParameters }, callback, errback) => {
-         this.connection
-            .invoke('ConnectWebRtcTransport', { transportId: transport.id, dtlsParameters })
-            .then(callback)
-            .catch(errback);
+      transport.on('connect', async ({ dtlsParameters }, callback, errback) => {
+         console.log('connect send transport #2');
+
+         try {
+            await this.connection.invoke('ConnectWebRtcTransport', { transportId: transport.id, dtlsParameters });
+
+            console.log('server connected send transport #3');
+
+            callback();
+         } catch (error) {
+            console.log('server error send transport #3', error);
+            errback(error);
+         }
       });
 
       transport.on('produce', async ({ kind, rtpParameters, appData }, callback, errback) => {
          try {
+            console.log('send transport produce #4');
+
             const { id } = await this.connection.invoke('ProduceWebRtcTransport', {
                transportId: transport.id,
                kind,
@@ -123,8 +135,12 @@ export class SoupManager {
                appData,
             });
 
+            console.log('send transport produce succeeded #5', id);
+
             callback({ id });
          } catch (error) {
+            console.log('send transport produce failed #5', error);
+
             errback(error);
          }
       });

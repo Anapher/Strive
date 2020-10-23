@@ -38,15 +38,15 @@ export default function Media() {
    const consumers = useConsumers(getMediasoup());
 
    useEffect(() => {
-      if (consumers.length > 0) {
-         console.log(consumers);
+      // if (consumers.length > 0) {
+      //    console.log(consumers);
 
-         const stream = new MediaStream();
-         stream.addTrack(consumers[0].track);
+      //    const stream = new MediaStream();
+      //    stream.addTrack(consumers[0].track);
 
-         videoElem.current!.srcObject = stream;
-      }
-   }, [consumers]);
+      // }
+      videoElem.current!.srcObject = stream;
+   }, [stream]);
 
    return (
       <div className={classes.root}>

@@ -5,3 +5,5 @@ export const participantToRoom = (conferenceId: string): string => `${conference
 export const newConferences = 'newConferences';
 
 export const conferenceStreams = (conferenceId: string): string => `${conferenceId}::streams`;
+
+export const openConferences = 'openConferences';

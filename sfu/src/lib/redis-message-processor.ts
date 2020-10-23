@@ -1,11 +1,8 @@
-import { newConferences } from './pader-conference/redis-keys';
-import { Redis } from 'ioredis';
 import ConferenceManager from './conference-manager';
 import Connection from './connection';
 import Logger from './logger';
 import {
    ChangeStreamRequest,
-   ConferenceInfo,
    ConnectionMessage,
    ConnectTransportRequest,
    CreateTransportRequest,
@@ -18,11 +15,7 @@ import {
 const logger = new Logger('RedisMessageProcessor');
 
 export class RedisMessageProcessor {
-   constructor(
-      private redis: Redis,
-      private conferenceManager: ConferenceManager,
-      private initializeConference: (conferenceInfo: ConferenceInfo) => Promise<void>,
-   ) {}
+   constructor(private conferenceManager: ConferenceManager) {}
 
    public initializeConnection(request: InitializeConnectionRequest): void {
       const conference = this.conferenceManager.getConference(request.meta.conferenceId);
@@ -67,13 +60,5 @@ export class RedisMessageProcessor {
    public async clientDisconnected(request: ConnectionMessage<undefined>): Promise<void> {
       const conference = this.conferenceManager.getConference(request.meta.conferenceId);
       await conference.removeConnection(request.meta.connectionId);
-   }
-
-   public async newConferenceCreated(): Promise<void> {
-      const conferenceStr = await this.redis.lpop(newConferences);
-      if (conferenceStr) {
-         const conferenceInfo: ConferenceInfo = JSON.parse(conferenceStr);
-         this.initializeConference(conferenceInfo);
-      }
    }
 }

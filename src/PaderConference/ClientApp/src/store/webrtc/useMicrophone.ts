@@ -1,9 +1,9 @@
 import { SoupManager } from './SoupManager';
 import { useMedia, UseMediaState } from './useMedia';
 
-export function useMicrophone(soup: SoupManager): UseMediaState {
+export function useMicrophone(getSoupManager: () => SoupManager | undefined): UseMediaState {
    const getMic = async () => {
-      if (!soup.device.canProduce('audio')) {
+      if (!getSoupManager()?.device.canProduce('audio')) {
          throw new Error('Cannot produce audio');
       }
 
@@ -11,5 +11,5 @@ export function useMicrophone(soup: SoupManager): UseMediaState {
       return stream.getAudioTracks()[0];
    };
 
-   return useMedia(getMic, () => soup.sendTransport);
+   return useMedia(getMic, () => getSoupManager()?.sendTransport);
 }
