@@ -7,7 +7,7 @@
   "type": "module",
   "scripts": {
     "debug": "ts-node-dev --inspect --respawn --transpileOnly src/index.ts",
-    "dev": "@powershell -Command $env:DEBUG='mediasoup*'; tsnd --respawn --files -r @babel/register --inspect -- src/index.ts",
+    "dev": "@powershell -Command $env:DEBUG='pader-conference*'; tsnd --respawn --files -r @babel/register --inspect -- src/index.ts",
     "build": "babel ./src -d ./dist --extensions .ts --copy-files",
     "typecheck": "tsc",
     "start": "node dist/index.js",
