@@ -1,12 +1,8 @@
 import { makeStyles } from '@material-ui/core';
 import React, { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectAccessToken } from 'src/features/auth/selectors';
-import { getMediasoup, RootState } from 'src/store';
-import { send } from 'src/store/conference-signal/actions';
+import { RootState } from 'src/store';
 import { initialize } from 'src/store/webrtc/actions';
-import useConsumers from 'src/store/webrtc/useConsumers';
-import { useScreen } from 'src/store/webrtc/useScreen';
 import MediaControls from './MediaControls';
 
 const useStyles = makeStyles({
@@ -25,28 +21,12 @@ export default function Media() {
    const dispatch = useDispatch();
 
    const connected = useSelector((state: RootState) => state.signalr.isConnected);
-   const mediaInfo = useSelector((state: RootState) => state.media.streams);
-   const accessToken = useSelector(selectAccessToken);
 
    useEffect(() => {
       if (connected) {
          dispatch(initialize());
       }
    }, [connected]);
-
-   const { enable, stream } = useScreen(getMediasoup());
-   const consumers = useConsumers(getMediasoup());
-
-   useEffect(() => {
-      // if (consumers.length > 0) {
-      //    console.log(consumers);
-
-      //    const stream = new MediaStream();
-      //    stream.addTrack(consumers[0].track);
-
-      // }
-      videoElem.current!.srcObject = stream;
-   }, [stream]);
 
    return (
       <div className={classes.root}>
@@ -58,7 +38,7 @@ export default function Media() {
                ref={videoElem}
                style={{ backgroundColor: 'black', marginBottom: 32 }}
             />
-            <MediaControls startDesktopRecording={enable} />
+            <MediaControls />
          </div>
       </div>
    );

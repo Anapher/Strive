@@ -4,6 +4,12 @@ import { RootState } from 'src/store';
 
 const getId = (_: unknown, id: string | undefined) => id;
 const getStreams = (state: RootState) => state.media.streams;
+const getAudioLevel = (state: RootState) => state.media.audioLevel;
+
+export const getParticipantAudioLevel = createSelector(getAudioLevel, getId, (audioLevels, participantId) => {
+   if (!participantId) return undefined;
+   return audioLevels?.[participantId];
+});
 
 export const getParticipantProducers = createSelector(getStreams, getId, (streams, participantId) => {
    if (!streams) return undefined;

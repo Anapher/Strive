@@ -6,7 +6,7 @@ type UseScreenState = UseMediaState & {
    stream: MediaStream | null;
 };
 
-export function useScreen(soup?: SoupManager): UseScreenState {
+export function useScreen(soup: SoupManager | null): UseScreenState {
    const [stream, setStream] = useState<MediaStream | null>(null);
 
    const getScreen = async () => {

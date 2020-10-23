@@ -1,16 +1,17 @@
+import LuxonUtils from '@date-io/luxon';
 import { createMuiTheme, CssBaseline } from '@material-ui/core';
 import { blue, pink } from '@material-ui/core/colors';
+import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import { ThemeProvider } from '@material-ui/styles';
+import { SnackbarProvider } from 'notistack';
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
+import Notifier from './features/notifier/components/Notifier';
 import AnonymousRoutes from './routes/anonymous';
 import AuthenticatedRoutes from './routes/authenticated';
 import { RootState } from './store';
-import { MuiPickersUtilsProvider } from '@material-ui/pickers';
-import LuxonUtils from '@date-io/luxon';
-import { SnackbarProvider } from 'notistack';
-import Notifier from './features/notifier/components/Notifier';
+import SoupManagerProvider from './store/webrtc/SoupManagerProvider';
 
 const theme = createMuiTheme({
    palette: {
@@ -34,11 +35,13 @@ function App() {
    return (
       <MuiPickersUtilsProvider utils={LuxonUtils}>
          <SnackbarProvider maxSnack={4}>
-            <ThemeProvider theme={theme}>
-               <Notifier />
-               <CssBaseline />
-               <BrowserRouter>{isAuthenticated ? <AuthenticatedRoutes /> : <AnonymousRoutes />}</BrowserRouter>
-            </ThemeProvider>
+            <SoupManagerProvider>
+               <ThemeProvider theme={theme}>
+                  <Notifier />
+                  <CssBaseline />
+                  <BrowserRouter>{isAuthenticated ? <AuthenticatedRoutes /> : <AnonymousRoutes />}</BrowserRouter>
+               </ThemeProvider>
+            </SoupManagerProvider>
          </SnackbarProvider>
       </MuiPickersUtilsProvider>
    );

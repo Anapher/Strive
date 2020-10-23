@@ -9,7 +9,6 @@ import {
    Transport,
    TransportOptions,
 } from 'mediasoup-client/lib/types';
-import { AnyAction, Dispatch } from 'redux';
 
 const PC_PROPRIETARY_CONSTRAINTS = {
    optional: [{ googDscp: true }],

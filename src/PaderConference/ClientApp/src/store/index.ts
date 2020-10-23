@@ -9,7 +9,7 @@ const { middleware: signalrMiddleware, getConnection } = createMiddleware({
    url: '/signalr',
 });
 
-const { getSoupManager, middleware: rtcMiddleware } = createRtcMiddleware(getConnection);
+const { middleware: rtcMiddleware } = createRtcMiddleware(getConnection);
 
 // configure middlewares
 const middlewares = [rtcMiddleware, signalrMiddleware];
@@ -32,7 +32,6 @@ export default store;
 export type AppThunk = ThunkAction<void, RootState, unknown, Action<string>>;
 export type RootState = ReturnType<typeof rootReducer>;
 export type AppDispatch = typeof store.dispatch;
-export const getMediasoup = getSoupManager;
 
 // Store persistence
 function persistInLocalStorage(state: RootState): Partial<RootState> {

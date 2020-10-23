@@ -13,8 +13,9 @@ import BugReportIcon from '@material-ui/icons/BugReport';
 import DesktopAccessDisabledIcon from '@material-ui/icons/DesktopAccessDisabled';
 import VideocamOffIcon from '@material-ui/icons/VideocamOff';
 import { useMicrophone } from 'src/store/webrtc/useMicrophone';
-import { getMediasoup, RootState } from 'src/store';
+import { RootState } from 'src/store';
 import MediaFab from './MediaFab';
+import useSoupManager from 'src/store/webrtc/useSoupManager';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -31,14 +32,12 @@ const useStyles = makeStyles((theme) => ({
    },
 }));
 
-type Props = {
-   startDesktopRecording: () => void;
-};
-
-export default function MediaControls({ startDesktopRecording }: Props) {
+export default function MediaControls() {
    const classes = useStyles();
 
-   const micState = useMicrophone(getMediasoup);
+   const soupManager = useSoupManager();
+
+   const micState = useMicrophone(soupManager);
 
    const canShareScreen = usePermission(MEDIA_CAN_SHARE_SCREEN);
    const canShareAudio = usePermission(MEDIA_CAN_SHARE_AUDIO);
@@ -49,7 +48,7 @@ export default function MediaControls({ startDesktopRecording }: Props) {
          <div className={classes.leftActions}></div>
          <div style={{ display: 'flex', flexDirection: 'row' }}>
             {canShareScreen && (
-               <Fab color="primary" aria-label="share screen" onClick={startDesktopRecording} className={classes.fab}>
+               <Fab color="primary" aria-label="share screen" className={classes.fab}>
                   <DesktopAccessDisabledIcon />
                </Fab>
             )}

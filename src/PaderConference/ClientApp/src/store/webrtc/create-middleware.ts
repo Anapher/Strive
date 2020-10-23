@@ -2,11 +2,11 @@ import { HubConnection } from '@microsoft/signalr';
 import { PayloadAction } from '@reduxjs/toolkit';
 import { AnyAction, Dispatch, Middleware, MiddlewareAPI } from 'redux';
 import { initializationFailed, initialize, initialized } from './actions';
+import app from './application-soup';
 import { SoupManager } from './SoupManager';
 
 export type RtcListener = {
    middleware: Middleware;
-   getSoupManager: () => SoupManager | undefined;
 };
 
 export default function createRtcManager(getConnection: () => HubConnection | undefined): RtcListener {
@@ -44,6 +44,8 @@ export default function createRtcManager(getConnection: () => HubConnection | un
 
                dispatch(initialized({ canProduceAudio, canProduceVideo }));
 
+               app.registerSoupManager(soupManager);
+
                if (canProduceAudio || canProduceVideo) {
                   await soupManager.createSendTransport();
                }
@@ -59,13 +61,5 @@ export default function createRtcManager(getConnection: () => HubConnection | un
       };
    };
 
-   const getRtcManager = () => {
-      if (!dispatch) {
-         throw new Error('The rtc middleware is not installed');
-      }
-
-      return soupManager;
-   };
-
-   return { middleware, getSoupManager: getRtcManager };
+   return { middleware };
 }
