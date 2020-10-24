@@ -32,6 +32,7 @@
       "fast-json-patch": "^3.0.0-1",
       "fontsource-roboto": "^3.0.3",
       "framer-motion": "^2.9.4",
+      "hark": "^1.2.3",
       "history": "^5.0.0",
       "lodash": "^4.17.15",
       "luxon": "^1.25.0",
@@ -70,5 +71,8 @@
          "last 1 firefox version",
          "last 1 safari version"
       ]
+   },
+   "devDependencies": {
+      "@types/hark": "^1.2.1"
    }
 }

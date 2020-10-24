@@ -1,25 +1,29 @@
-import { ButtonBase, ClickAwayListener, Grow, makeStyles, Paper, Popper, Typography } from '@material-ui/core';
+import {
+   ButtonBase,
+   ClickAwayListener,
+   Container,
+   Grow,
+   makeStyles,
+   Paper,
+   Popper,
+   Typography,
+} from '@material-ui/core';
+import MicIcon from '@material-ui/icons/Mic';
+import MicOffIcon from '@material-ui/icons/MicOff';
 import { Skeleton } from '@material-ui/lab';
+import { motion, useMotionValue, useTransform } from 'framer-motion';
+import hark from 'hark';
 import React, { useEffect, useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Roles } from 'src/consts';
+import { getParticipantProducers } from 'src/features/media/selectors';
+import { showMessage } from 'src/features/notifier/actions';
 import { RootState } from 'src/store';
 import { ParticipantDto } from 'src/store/conference-signal/types';
-import MicOffIcon from '@material-ui/icons/MicOff';
-import MicIcon from '@material-ui/icons/Mic';
-import { getParticipantAudioLevel, getParticipantProducers } from 'src/features/media/selectors';
-import ToggleIcon from './ToggleIcon';
-import { motion } from 'framer-motion';
 import useConsumer from 'src/store/webrtc/useConsumer';
 import useSoupManager from 'src/store/webrtc/useSoupManager';
-
-const interpolateVolume = (volume: number) => {
-   volume = Math.abs(volume);
-   if (volume > 70) return 0; // very quiet
-   if (volume < 30) return 1; // very loud
-
-   return 1 - (volume - 30) / 40;
-};
+import ParticipantItemPopper from './ParticipantItemPopper';
+import ToggleIcon from './ToggleIcon';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -43,20 +47,60 @@ type Props = {
 export default function ParticipantItem({ participant }: Props) {
    const classes = useStyles();
    const producers = useSelector((state: RootState) => getParticipantProducers(state, participant?.participantId));
-   const audioLevel = useSelector((state: RootState) => getParticipantAudioLevel(state, participant?.participantId));
 
    const soupManager = useSoupManager();
+   const dispatch = useDispatch();
 
    const consumer = useConsumer(soupManager, participant?.participantId, 'audio');
+   const audioElem = useRef<HTMLAudioElement>(null);
+   const audioVol = useMotionValue(0);
+   const audioVolBackground = useTransform(audioVol, (value) => `rgba(41, 128, 185, ${value})`);
+   const [muted, setMuted] = useState(false);
+   const [volume, setVolume] = useState(0.75);
 
    useEffect(() => {
-      console.log('consumer ', consumer);
-   }, [consumer]);
+      if (consumer && audioElem.current) {
+         const stream = new MediaStream();
+         stream.addTrack(consumer.track);
+
+         const analyser = hark(stream, { play: false });
+         analyser.on('volume_change', (dBs) => {
+            // The exact formula to convert from dBs (-100..0) to linear (0..1) is:
+            //   Math.pow(10, dBs / 20)
+            // However it does not produce a visually useful output, so let exagerate
+            // it a bit. Also, let convert it from 0..1 to 0..10 and avoid value 1 to
+            // minimize component renderings.
+            let audioVolume = Math.round(Math.pow(10, dBs / 85) * 10);
+
+            if (audioVolume === 1) audioVolume = 0;
+
+            audioVol.set(audioVolume / 10);
+         });
+
+         audioElem.current.srcObject = stream;
+         audioElem.current.volume = volume;
+         audioElem.current
+            .play()
+            .catch((error) => dispatch(showMessage({ message: error.toString(), variant: 'error' })));
+
+         return () => {
+            analyser.stop();
+         };
+      }
+   }, [consumer, audioElem.current]);
+
+   const handleChangeMuted = (mute: boolean) => {
+      setMuted(mute);
+   };
+
+   const handleChangeVolume = (volume: number) => {
+      setVolume(volume);
+
+      if (audioElem.current) audioElem.current.volume = volume;
+   };
 
    const [popperOpen, setPopperOpen] = useState(false);
    const buttonRef = useRef<HTMLButtonElement>(null);
-
-   const audioElem = useRef<HTMLAudioElement>(null);
 
    const handleClose = (event: React.MouseEvent<Document, MouseEvent>) => {
       if (buttonRef.current && buttonRef.current?.contains(event.target as HTMLElement)) {
@@ -77,24 +121,29 @@ export default function ParticipantItem({ participant }: Props) {
             ref={buttonRef}
             component={motion.button}
             className={classes.button}
-            animate={{
-               backgroundColor: `rgba(41, 128, 185, ${
-                  audioLevel === undefined ? 0 : interpolateVolume(audioLevel) * 0.4
-               })`,
-            }}
+            style={{ backgroundColor: audioVolBackground as any }}
          >
             <Typography color={participant?.role === Roles.Moderator ? 'secondary' : undefined} variant="subtitle1">
                {participant ? participant?.displayName : <Skeleton />}
             </Typography>
             <ToggleIcon IconEnable={MicIcon} IconDisable={MicOffIcon} enabled={producers?.mic?.paused} />
          </ButtonBase>
-         <audio ref={audioElem} autoPlay playsInline muted={false} controls={false} />
+         <audio ref={audioElem} autoPlay playsInline muted={muted} controls={false} />
          <Popper open={popperOpen} anchorEl={buttonRef.current} transition disablePortal placement="right">
             {({ TransitionProps }) => (
                <Grow {...TransitionProps}>
-                  <Paper>
+                  <Paper style={{ width: 400 }}>
                      <ClickAwayListener onClickAway={handleClose}>
-                        <Typography>Hello</Typography>
+                        {participant && (
+                           <ParticipantItemPopper
+                              participant={participant}
+                              audioLevel={audioVol}
+                              muted={muted}
+                              onChangeMuted={handleChangeMuted}
+                              volume={volume}
+                              onChangeVolume={handleChangeVolume}
+                           />
+                        )}
                      </ClickAwayListener>
                   </Paper>
                </Grow>
