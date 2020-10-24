@@ -13,9 +13,10 @@
       "resolveJsonModule": true,
       "isolatedModules": true,
       "noEmit": true,
-      "jsx": "preserve",
+      "jsx": "react",
       "baseUrl": ".",
-      "downlevelIteration": true
+      "downlevelIteration": true,
+      "noFallthroughCasesInSwitch": true
    },
    "include": ["src"]
 }
