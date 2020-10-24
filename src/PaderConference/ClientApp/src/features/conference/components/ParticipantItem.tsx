@@ -1,13 +1,4 @@
-import {
-   ButtonBase,
-   ClickAwayListener,
-   Container,
-   Grow,
-   makeStyles,
-   Paper,
-   Popper,
-   Typography,
-} from '@material-ui/core';
+import { Box, ButtonBase, ClickAwayListener, Grow, makeStyles, Paper, Popper, Typography } from '@material-ui/core';
 import MicIcon from '@material-ui/icons/Mic';
 import MicOffIcon from '@material-ui/icons/MicOff';
 import { Skeleton } from '@material-ui/lab';
@@ -129,26 +120,28 @@ export default function ParticipantItem({ participant }: Props) {
             <ToggleIcon IconEnable={MicIcon} IconDisable={MicOffIcon} enabled={producers?.mic?.paused} />
          </ButtonBase>
          <audio ref={audioElem} autoPlay playsInline muted={muted} controls={false} />
-         <Popper open={popperOpen} anchorEl={buttonRef.current} transition disablePortal placement="right">
-            {({ TransitionProps }) => (
-               <Grow {...TransitionProps}>
-                  <Paper style={{ width: 400 }}>
-                     <ClickAwayListener onClickAway={handleClose}>
-                        {participant && (
-                           <ParticipantItemPopper
-                              participant={participant}
-                              audioLevel={audioVol}
-                              muted={muted}
-                              onChangeMuted={handleChangeMuted}
-                              volume={volume}
-                              onChangeVolume={handleChangeVolume}
-                           />
-                        )}
-                     </ClickAwayListener>
-                  </Paper>
-               </Grow>
-            )}
-         </Popper>
+         {participant && (
+            <Popper open={popperOpen} anchorEl={buttonRef.current} transition placement="right-start">
+               {({ TransitionProps }) => (
+                  <Grow {...TransitionProps}>
+                     <Paper style={{ width: 400 }}>
+                        <ClickAwayListener onClickAway={handleClose}>
+                           <Box p={2}>
+                              <ParticipantItemPopper
+                                 participant={participant}
+                                 audioLevel={audioVol}
+                                 muted={muted}
+                                 onChangeMuted={handleChangeMuted}
+                                 volume={volume}
+                                 onChangeVolume={handleChangeVolume}
+                              />
+                           </Box>
+                        </ClickAwayListener>
+                     </Paper>
+                  </Grow>
+               )}
+            </Popper>
+         )}
       </div>
    );
 }

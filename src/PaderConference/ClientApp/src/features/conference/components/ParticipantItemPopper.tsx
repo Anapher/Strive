@@ -32,8 +32,8 @@ export default function ParticipantItemPopper({ participant, volume, onChangeVol
    };
 
    return (
-      <Box p={2}>
-         <Typography variant="h5" gutterBottom>
+      <div>
+         <Typography variant="h6" gutterBottom>
             {participant.displayName}
          </Typography>
          <Grid container spacing={2} alignItems="center">
@@ -50,24 +50,33 @@ export default function ParticipantItemPopper({ participant, volume, onChangeVol
                />
             </Grid>
             <Grid item>
-               <Button onClick={handleToggleMute} variant="contained">
+               <Button
+                  onClick={handleToggleMute}
+                  variant="contained"
+                  size="small"
+                  color={muted ? 'default' : 'primary'}
+               >
                   {muted ? 'Unmute' : 'Mute'}
                </Button>
             </Grid>
          </Grid>
 
-         <Typography variant="subtitle1">Temporary Permissions</Typography>
-         <ToggleButtonGroup aria-label="temporary permissions">
-            <ToggleButton value="mic" aria-label="allow microphone">
-               <MicIcon />
-            </ToggleButton>
-            <ToggleButton value="webcam" aria-label="allow webcam">
-               <VideocamIcon />
-            </ToggleButton>
-            <ToggleButton value="screen" aria-label="allow screen sharing">
-               <DesktopWindowsIcon />
-            </ToggleButton>
-         </ToggleButtonGroup>
-      </Box>
+         <Box mt={2}>
+            <Typography variant="subtitle1" gutterBottom>
+               Temporary Permissions
+            </Typography>
+            <ToggleButtonGroup aria-label="temporary permissions" size="small">
+               <ToggleButton value="mic" aria-label="allow microphone">
+                  <MicIcon />
+               </ToggleButton>
+               <ToggleButton value="webcam" aria-label="allow webcam">
+                  <VideocamIcon />
+               </ToggleButton>
+               <ToggleButton value="screen" aria-label="allow screen sharing">
+                  <DesktopWindowsIcon />
+               </ToggleButton>
+            </ToggleButtonGroup>
+         </Box>
+      </div>
    );
 }
