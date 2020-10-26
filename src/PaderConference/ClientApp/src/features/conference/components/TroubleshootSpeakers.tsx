@@ -15,6 +15,12 @@ const useStyles = makeStyles((theme) => ({
       width: 160,
       marginRight: theme.spacing(2),
    },
+   accordionSummary: {
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'center',
+      flex: 1,
+   },
 }));
 
 type Props = {
@@ -44,17 +50,19 @@ export default function TroubleshootSpeakers({ expanded, onChange }: Props) {
             aria-controls="troubleshoot-speakers-content"
             id="troubleshoot-speakers-header"
          >
-            <Typography className={classes.heading}>Speakers</Typography>
-            <Button
-               size="small"
-               variant="contained"
-               onClick={handleToggleAudio}
-               onFocus={(event) => event.stopPropagation()}
-               className={classes.playButton}
-            >
-               {isPlaying ? <StopIcon fontSize="small" /> : <PlayArrowIcon fontSize="small" />}
-               {isPlaying ? 'Stop' : 'Play test audio'}
-            </Button>
+            <div className={classes.accordionSummary}>
+               <Typography className={classes.heading}>Speakers</Typography>
+               <Button
+                  size="small"
+                  variant="contained"
+                  onClick={handleToggleAudio}
+                  onFocus={(event) => event.stopPropagation()}
+                  className={classes.playButton}
+               >
+                  {isPlaying ? <StopIcon fontSize="small" /> : <PlayArrowIcon fontSize="small" />}
+                  {isPlaying ? 'Stop' : 'Play test audio'}
+               </Button>
+            </div>
          </AccordionSummary>
          <AccordionDetails>
             <Typography gutterBottom>

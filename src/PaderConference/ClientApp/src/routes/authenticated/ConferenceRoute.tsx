@@ -5,6 +5,7 @@ import { RouteComponentProps } from 'react-router-dom';
 import ClassConference from 'src/features/conference/components/ClassConference';
 import ConferenceConnecting from 'src/features/conference/components/ConferenceConnecting';
 import ConferenceNotOpen from 'src/features/conference/components/ConferenceNotOpen';
+import SettingsDialog from 'src/features/settings/components/SettingsDialog';
 import { RootState } from 'src/store';
 import { close, joinConference } from 'src/store/conference-signal/actions';
 import to from 'src/utils/to';
@@ -74,7 +75,12 @@ function ConferenceRoute({
 
    switch (conferenceState.conferenceType) {
       default:
-         return <ClassConference />;
+         return (
+            <>
+               <ClassConference />
+               <SettingsDialog />
+            </>
+         );
    }
 }
 

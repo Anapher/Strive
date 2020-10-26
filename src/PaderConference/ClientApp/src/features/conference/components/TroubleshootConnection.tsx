@@ -176,22 +176,23 @@ export default function TroubleshootConnection({ expanded, onChange }: Props) {
                               <TableCell>{formatBytes(row.bytesSent)}</TableCell>
                            </TableRow>
                         ))}
-                        {transports.length === 0 && (
-                           <TableRow>
-                              <TableCell>
-                                 <Skeleton />
-                              </TableCell>
-                              <TableCell>
-                                 <Skeleton />
-                              </TableCell>
-                              <TableCell>
-                                 <Skeleton />
-                              </TableCell>
-                              <TableCell>
-                                 <Skeleton />
-                              </TableCell>
-                           </TableRow>
-                        )}
+                        {transports.length === 0 &&
+                           Array.from({ length: 2 }).map((_, i) => (
+                              <TableRow key={i}>
+                                 <TableCell>
+                                    <Skeleton />
+                                 </TableCell>
+                                 <TableCell>
+                                    <Skeleton />
+                                 </TableCell>
+                                 <TableCell>
+                                    <Skeleton />
+                                 </TableCell>
+                                 <TableCell>
+                                    <Skeleton />
+                                 </TableCell>
+                              </TableRow>
+                           ))}
                      </TableBody>
                   </Table>
                )}

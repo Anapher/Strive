@@ -7,6 +7,7 @@ import {
    IconButton,
    makeStyles,
    Toolbar,
+   Tooltip,
    Typography,
 } from '@material-ui/core';
 import MenuIcon from '@material-ui/icons/Menu';
@@ -16,6 +17,8 @@ import { signOut } from 'src/features/auth/authSlice';
 import usePermission, { CONFERENCE_CAN_OPEN_AND_CLOSE } from 'src/hooks/usePermission';
 import to from 'src/utils/to';
 import * as coreHub from 'src/core-hub';
+import { openSettings } from 'src/features/settings/settingsSlice';
+import SettingsIcon from '@material-ui/icons/Settings';
 
 const useStyles = makeStyles((theme) =>
    createStyles({
@@ -24,7 +27,7 @@ const useStyles = makeStyles((theme) =>
       },
       menuButton: {},
       title: {
-         padding: theme.spacing(1, 3),
+         padding: theme.spacing(1, 2),
          borderRadius: theme.shape.borderRadius,
       },
    }),
@@ -37,6 +40,7 @@ export default function ConferenceAppBar() {
 
    const canCloseConference = usePermission(CONFERENCE_CAN_OPEN_AND_CLOSE);
    const handleCloseConference = () => dispatch(coreHub.closeConference());
+   const handleOpenSettings = () => dispatch(openSettings());
 
    return (
       <AppBar position="static">
@@ -51,6 +55,11 @@ export default function ConferenceAppBar() {
             </Box>
             {canCloseConference && <Button onClick={handleCloseConference}>Close Conference</Button>}
             <Button onClick={handleSignOut}>Sign out</Button>
+            <Tooltip title="Open Settings" aria-label="open settings">
+               <IconButton aria-label="settings" color="inherit" onClick={handleOpenSettings}>
+                  <SettingsIcon />
+               </IconButton>
+            </Tooltip>
          </Toolbar>
       </AppBar>
    );
