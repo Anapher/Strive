@@ -1,7 +1,8 @@
-import { Fab, makeStyles } from '@material-ui/core';
+import { Dialog, DialogContent, DialogTitle, Fab, makeStyles, Tooltip } from '@material-ui/core';
 import DesktopWindowsIcon from '@material-ui/icons/DesktopWindows';
-import React from 'react';
+import React, { useState } from 'react';
 import usePermission, {
+   CONFERENCE_CAN_RAISE_HAND,
    MEDIA_CAN_SHARE_AUDIO,
    MEDIA_CAN_SHARE_SCREEN,
    MEDIA_CAN_SHARE_WEBCAM,
@@ -13,9 +14,10 @@ import BugReportIcon from '@material-ui/icons/BugReport';
 import DesktopAccessDisabledIcon from '@material-ui/icons/DesktopAccessDisabled';
 import VideocamOffIcon from '@material-ui/icons/VideocamOff';
 import { useMicrophone } from 'src/store/webrtc/useMicrophone';
-import { RootState } from 'src/store';
 import MediaFab from './MediaFab';
 import useSoupManager from 'src/store/webrtc/useSoupManager';
+import PanToolIcon from '@material-ui/icons/PanTool';
+import Debug from 'src/features/conference/components/Troubleshooting';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -25,10 +27,18 @@ const useStyles = makeStyles((theme) => ({
    leftActions: {
       flex: 1,
       display: 'flex',
+      flexDirection: 'row',
+   },
+   rightActions: {
+      flex: 1,
+      display: 'flex',
       flexDirection: 'row-reverse',
    },
    fab: {
       margin: theme.spacing(0, 1),
+   },
+   dialog: {
+      backgroundColor: theme.palette.background.default,
    },
 }));
 
@@ -42,10 +52,24 @@ export default function MediaControls() {
    const canShareScreen = usePermission(MEDIA_CAN_SHARE_SCREEN);
    const canShareAudio = usePermission(MEDIA_CAN_SHARE_AUDIO);
    const canShareWebcam = usePermission(MEDIA_CAN_SHARE_WEBCAM);
+   const canRaiseHand = usePermission(CONFERENCE_CAN_RAISE_HAND);
+
+   const [debugDialogOpen, setDebugDialogOpen] = useState(false);
+
+   const handleCloseDebugDialog = () => setDebugDialogOpen(false);
+   const handleOpenDebugDialog = () => setDebugDialogOpen(true);
 
    return (
       <div className={classes.root}>
-         <div className={classes.leftActions}></div>
+         <div className={classes.leftActions}>
+            {canRaiseHand && (
+               <Tooltip title="Raise Hand" aria-label="raise hand">
+                  <Fab color="secondary" className={classes.fab}>
+                     <PanToolIcon />
+                  </Fab>
+               </Tooltip>
+            )}
+         </div>
          <div style={{ display: 'flex', flexDirection: 'row' }}>
             {canShareScreen && (
                <Fab color="primary" aria-label="share screen" className={classes.fab}>
@@ -67,11 +91,19 @@ export default function MediaControls() {
                />
             )}
          </div>
-         <div className={classes.leftActions}>
-            <Fab color="default" aria-label="share microphone" className={classes.fab}>
-               <BugReportIcon />
-            </Fab>
+         <div className={classes.rightActions}>
+            <Tooltip title="Troubleshooting" aria-label="troubleshooting">
+               <Fab color="default" className={classes.fab} onClick={handleOpenDebugDialog}>
+                  <BugReportIcon />
+               </Fab>
+            </Tooltip>
          </div>
+         <Dialog open={debugDialogOpen} onClose={handleCloseDebugDialog} PaperProps={{ className: classes.dialog }}>
+            <DialogTitle>Troubleshooting</DialogTitle>
+            <DialogContent>
+               <Debug />
+            </DialogContent>
+         </Dialog>
       </div>
    );
 }

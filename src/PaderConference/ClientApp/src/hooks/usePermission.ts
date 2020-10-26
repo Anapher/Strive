@@ -3,6 +3,9 @@ import { PermissionValue } from 'src/features/create-conference/types';
 import { RootState } from 'src/store';
 
 export const CONFERENCE_CAN_OPEN_AND_CLOSE = newPerm<boolean>('conference.canOpenAndClose');
+export const CONFERENCE_CAN_RAISE_HAND = newPerm<boolean>('conference.canRaiseHand');
+export const CONFERENCE_CAN_GIVE_TEMPORARY_PERMISSION = newPerm<boolean>('conference.canGiveTemporaryPermission');
+
 export const ROOMS_CAN_CREATE_REMOVE = newPerm<boolean>('rooms.canCreateAndRemove');
 
 export const MEDIA_CAN_SHARE_AUDIO = newPerm<boolean>('media.canShareAudio');

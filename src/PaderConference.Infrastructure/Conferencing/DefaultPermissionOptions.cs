@@ -11,11 +11,13 @@ namespace PaderConference.Infrastructure.Conferencing
         {
             PermissionsList.Chat.CanSendChatMessage.Configure(true),
             PermissionsList.Rooms.CanSwitchRoom.Configure(true),
+            PermissionsList.Conference.CanRaiseHand.Configure(true),
         }.ToImmutableDictionary();
 
         public ImmutableDictionary<string, JsonElement> Moderator { get; set; } = new[]
         {
             PermissionsList.Conference.CanOpenAndClose.Configure(true),
+            PermissionsList.Conference.CanGiveTemporaryPermission.Configure(true),
             PermissionsList.Media.CanShareAudio.Configure(true),
             PermissionsList.Media.CanShareScreen.Configure(true),
             PermissionsList.Media.CanShareWebcam.Configure(true),

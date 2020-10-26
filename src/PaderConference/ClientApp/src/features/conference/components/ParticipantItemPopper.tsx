@@ -9,7 +9,11 @@ import MicIcon from '@material-ui/icons/Mic';
 import VolumeUpIcon from '@material-ui/icons/VolumeUp';
 import VolumeMuteIcon from '@material-ui/icons/VolumeMute';
 
-const useStyles = makeStyles({});
+const useStyles = makeStyles({
+   muteButton: {
+      width: 80,
+   },
+});
 
 type Props = {
    audioLevel: MotionValue<number>;
@@ -52,6 +56,7 @@ export default function ParticipantItemPopper({ participant, volume, onChangeVol
             <Grid item>
                <Button
                   onClick={handleToggleMute}
+                  className={classes.muteButton}
                   variant="contained"
                   size="small"
                   color={muted ? 'default' : 'primary'}
@@ -66,14 +71,14 @@ export default function ParticipantItemPopper({ participant, volume, onChangeVol
                Temporary Permissions
             </Typography>
             <ToggleButtonGroup aria-label="temporary permissions" size="small">
-               <ToggleButton value="mic" aria-label="allow microphone">
-                  <MicIcon />
-               </ToggleButton>
                <ToggleButton value="webcam" aria-label="allow webcam">
                   <VideocamIcon />
                </ToggleButton>
                <ToggleButton value="screen" aria-label="allow screen sharing">
                   <DesktopWindowsIcon />
+               </ToggleButton>
+               <ToggleButton value="mic" aria-label="allow microphone">
+                  <MicIcon />
                </ToggleButton>
             </ToggleButtonGroup>
          </Box>

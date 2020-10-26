@@ -49,6 +49,7 @@
       "redux": "^4.0.5",
       "redux-promise-listener": "^1.1.1",
       "typescript": "^4.0.3",
+      "use-sound": "^1.0.2",
       "yup": "^0.29.3"
    },
    "scripts": {
