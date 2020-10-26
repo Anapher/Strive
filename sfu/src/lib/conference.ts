@@ -1,7 +1,7 @@
 import { Redis } from 'ioredis';
 import _ from 'lodash';
 import { Router } from 'mediasoup/lib/Router';
-import { AudioLevelObserver, Consumer, Producer, RtpCapabilities, WebRtcTransportOptions } from 'mediasoup/lib/types';
+import { Consumer, Producer, RtpCapabilities, WebRtcTransportOptions } from 'mediasoup/lib/types';
 import config from '../config';
 import Connection from './connection';
 import Logger from './logger';
@@ -29,14 +29,8 @@ export class Conference {
    private participants: Map<string, Participant> = new Map();
    private streamInfoRepo: StreamInfoRepo;
 
-   constructor(
-      private router: Router,
-      public conferenceId: string,
-      private signal: ISignalWrapper,
-      redis: Redis,
-      private audioLevelObserver: AudioLevelObserver,
-   ) {
-      this.roomManager = new RoomManager(conferenceId, signal, router, redis, audioLevelObserver);
+   constructor(private router: Router, public conferenceId: string, private signal: ISignalWrapper, redis: Redis) {
+      this.roomManager = new RoomManager(conferenceId, signal, router, redis);
       this.streamInfoRepo = new StreamInfoRepo(redis, conferenceId);
    }
 
@@ -47,7 +41,6 @@ export class Conference {
    public close(): void {
       logger.info('Close conference %s', this.conferenceId);
       this.router.close();
-      this.audioLevelObserver.close();
    }
 
    public async addConnection(connection: Connection): Promise<void> {

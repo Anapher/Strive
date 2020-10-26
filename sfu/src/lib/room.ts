@@ -1,5 +1,5 @@
 import { Redis } from 'ioredis';
-import { AudioLevelObserver, Producer, Router } from 'mediasoup/lib/types';
+import { Producer, Router } from 'mediasoup/lib/types';
 import { MEDIA_CAN_SHARE_AUDIO, MEDIA_CAN_SHARE_SCREEN, MEDIA_CAN_SHARE_WEBCAM, Permission } from '../permissions';
 import Connection from './connection';
 import Logger from './logger';
@@ -30,14 +30,8 @@ const logger = new Logger('Room');
 export default class Room {
    private mixer: MediasoupMixer;
 
-   constructor(
-      public id: string,
-      signal: ISignalWrapper,
-      router: Router,
-      private redis: Redis,
-      audioObserver: AudioLevelObserver,
-   ) {
-      this.mixer = new MediasoupMixer(router, signal, audioObserver);
+   constructor(public id: string, signal: ISignalWrapper, router: Router, private redis: Redis) {
+      this.mixer = new MediasoupMixer(router, signal);
    }
 
    public participants = new Map<string, Participant>();

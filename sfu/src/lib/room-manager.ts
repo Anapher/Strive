@@ -1,5 +1,5 @@
 import { Redis } from 'ioredis';
-import { AudioLevelObserver, Router } from 'mediasoup/lib/types';
+import { Router } from 'mediasoup/lib/types';
 import * as redisKeys from './pader-conference/redis-keys';
 import { Participant } from './participant';
 import Room from './room';
@@ -8,13 +8,7 @@ import { ISignalWrapper } from './signal-wrapper';
 export class RoomManager {
    private participantToRoomKey: string;
 
-   constructor(
-      conferenceId: string,
-      private signal: ISignalWrapper,
-      private router: Router,
-      private redis: Redis,
-      private audioObserver: AudioLevelObserver,
-   ) {
+   constructor(conferenceId: string, private signal: ISignalWrapper, private router: Router, private redis: Redis) {
       this.participantToRoomKey = redisKeys.participantToRoom(conferenceId);
    }
 
@@ -31,7 +25,7 @@ export class RoomManager {
       // get the room or create a new one
       let room = this.roomMap.get(roomId);
       if (!room) {
-         room = new Room(roomId, this.signal, this.router, this.redis, this.audioObserver);
+         room = new Room(roomId, this.signal, this.router, this.redis);
          this.roomMap.set(roomId, room);
       }
 

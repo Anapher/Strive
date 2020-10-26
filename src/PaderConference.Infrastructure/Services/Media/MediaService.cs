@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
@@ -22,7 +21,6 @@ namespace PaderConference.Infrastructure.Services.Media
         private readonly ILogger<MediaService> _logger;
         private readonly IConnectionMapping _connectionMapping;
         private readonly IRedisDatabase _redisDatabase;
-        private readonly ISynchronizedObject<Dictionary<string, double>> _synchronizedAudioLevels;
         private readonly ISynchronizedObject<Dictionary<string, ParticipantStreamInfo>> _synchronizedStreams;
 
         public MediaService(string conferenceId, IHubClients clients, ISynchronizationManager synchronizationManager,
@@ -33,9 +31,6 @@ namespace PaderConference.Infrastructure.Services.Media
             _redisDatabase = redisDatabase;
             _connectionMapping = connectionMapping;
             _logger = logger;
-
-            _synchronizedAudioLevels =
-                synchronizationManager.Register("mediaAudioLevel", new Dictionary<string, double>());
 
             _synchronizedStreams =
                 synchronizationManager.Register("mediaStreams", new Dictionary<string, ParticipantStreamInfo>());
@@ -52,9 +47,6 @@ namespace PaderConference.Infrastructure.Services.Media
             await _redisDatabase.SubscribeAsync<SendToConnectionDto>(
                 RedisChannels.OnSendMessageToConnection.GetName(_conferenceId), OnSendMessageToConnection);
 
-            await _redisDatabase.SubscribeAsync<AudioLevelObserverVolume[]>(
-                RedisChannels.Media.AudioObserver.GetName(_conferenceId), OnAudioObserver);
-
             await _redisDatabase.SubscribeAsync<object?>(RedisChannels.Media.StreamsChanged.GetName(_conferenceId),
                 OnStreamsChanged);
         }
@@ -66,12 +58,6 @@ namespace PaderConference.Infrastructure.Services.Media
                     RedisKeys.Media.Streams.GetName(_conferenceId));
 
             await _synchronizedStreams.Update(streams);
-        }
-
-        private async Task OnAudioObserver(AudioLevelObserverVolume[] arg)
-        {
-            await _synchronizedAudioLevels.Update(arg.Where(x => x.ParticipantId != null)
-                .ToDictionary(x => x.ParticipantId!, x => x.Volume));
         }
 
         public override async ValueTask OnClientDisconnected(Participant participant)
@@ -89,9 +75,6 @@ namespace PaderConference.Infrastructure.Services.Media
         {
             await _redisDatabase.UnsubscribeAsync<SendToConnectionDto>(
                 RedisChannels.OnSendMessageToConnection.GetName(_conferenceId), OnSendMessageToConnection);
-
-            await _redisDatabase.UnsubscribeAsync<AudioLevelObserverVolume[]>(
-                RedisChannels.Media.AudioObserver.GetName(_conferenceId), OnAudioObserver);
 
             await _redisDatabase.UnsubscribeAsync<object?>(RedisChannels.Media.StreamsChanged.GetName(_conferenceId),
                 OnStreamsChanged);

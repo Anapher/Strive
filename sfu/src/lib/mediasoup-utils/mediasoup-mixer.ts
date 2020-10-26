@@ -1,4 +1,4 @@
-import { AudioLevelObserver, Consumer, Producer, Router } from 'mediasoup/lib/types';
+import { Consumer, Producer, Router } from 'mediasoup/lib/types';
 import Connection from '../connection';
 import Logger from '../logger';
 import { ISignalWrapper } from '../signal-wrapper';
@@ -17,11 +17,7 @@ export class MediasoupMixer {
    private producers = new Map<string, ProducerInfo>();
    private receivers = new Map<string, Connection>();
 
-   constructor(
-      private router: Router,
-      private signal: ISignalWrapper,
-      private audioLevelObserver: AudioLevelObserver,
-   ) {}
+   constructor(private router: Router, private signal: ISignalWrapper) {}
 
    /**
     * Add a new producer and consume it by all receivers of this mixer. If the producer already exists, do nothing
@@ -31,12 +27,6 @@ export class MediasoupMixer {
       if (this.producers.has(producerInfo.producer.id)) return;
 
       this.producers.set(producerInfo.producer.id, producerInfo);
-
-      // Add into the audioLevelObserver.
-      if (producerInfo.producer.kind === 'audio') {
-         logger.debug('Add producer %s to audioLevelObserver', producerInfo.producer.id);
-         this.audioLevelObserver.addProducer({ producerId: producerInfo.producer.id }).catch((x) => logger.error(x));
-      }
 
       for (const receiver of this.receivers.values()) {
          if (receiver.participantId !== producerInfo.participantId) await this.createConsumer(receiver, producerInfo);
@@ -51,10 +41,6 @@ export class MediasoupMixer {
       const producer = this.producers.get(producerId);
       if (producer) {
          this.producers.delete(producerId);
-         if (producer.producer.kind === 'audio') {
-            logger.debug('Remove producer %s to audioLevelObserver', producerId);
-            this.audioLevelObserver.removeProducer({ producerId: producer.producer.id }).catch((x) => logger.error(x));
-         }
 
          for (const receiver of this.receivers.values()) {
             for (const consumer of receiver.consumers.values()) {

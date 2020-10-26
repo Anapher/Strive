@@ -4,12 +4,10 @@ import { ConferenceParticipantStreamInfo } from './types';
 
 export type MediaState = {
    streams: ConferenceParticipantStreamInfo | null;
-   audioLevel: { [key: string]: number } | null;
 };
 
 const initialState: MediaState = {
    streams: null,
-   audioLevel: null,
 };
 
 const mediaSlice = createSlice({
@@ -21,10 +19,7 @@ const mediaSlice = createSlice({
       },
    },
    extraReducers: {
-      ...createSynchronizeObjectReducer([
-         { name: 'mediaStreams', stateName: 'streams' },
-         { name: 'mediaAudioLevel', stateName: 'audioLevel' },
-      ]),
+      ...createSynchronizeObjectReducer([{ name: 'mediaStreams', stateName: 'streams' }]),
    },
 });
 
