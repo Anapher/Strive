@@ -76,6 +76,17 @@ export class Conference {
          if (participant) {
             // remove connection from participant
             _.remove(participant.connections, (x) => x.connectionId === connection.connectionId);
+
+            for (const [, producer] of connection.producers) {
+               producer.close();
+               for (const [k, activeProducer] of Object.entries(participant.producers)) {
+                  if (activeProducer?.id === producer.id) {
+                     participant.producers[k as ProducerSource] = undefined;
+                  }
+               }
+            }
+            await this.roomManager.updateParticipant(participant);
+
             if (participant.connections.length === 0) {
                // remove participant
                this.participants.delete(participant.participantId);
