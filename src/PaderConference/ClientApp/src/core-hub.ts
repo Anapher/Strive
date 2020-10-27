@@ -1,5 +1,5 @@
 import { ChangeStreamDto, SendChatMessageDto, CreateRoomDto, SwitchRoomDto } from './core-hub.types';
-import { send } from './store/conference-signal/actions';
+import { invoke, send } from './store/conference-signal/actions';
 
 export const openConference = () => send('OpenConference');
 export const closeConference = () => send('CloseConference');
@@ -13,3 +13,6 @@ export const changeSteam = (request: ChangeStreamDto) => send('ChangeStream', re
 export const loadFullChat = () => send('RequestChat');
 
 export const sendChatMessage = (dto: SendChatMessageDto) => send('SendChatMessage', dto);
+
+export const _getEquipmentToken = 'GetEquipmentToken';
+export const getEquipmentToken = () => invoke(_getEquipmentToken);

@@ -17,8 +17,6 @@ namespace PaderConference.Infrastructure.Services.Synchronization
         private readonly string _conferenceId;
         private readonly IConnectionMapping _connectionMapping;
 
-        private readonly Guid _id = Guid.NewGuid();
-
         private readonly ConcurrentDictionary<string, ISynchronizedObject> _registeredObjects =
             new ConcurrentDictionary<string, ISynchronizedObject>();
 
@@ -43,10 +41,10 @@ namespace PaderConference.Infrastructure.Services.Synchronization
 
         public override async ValueTask InitializeParticipant(Participant participant)
         {
-            var connectionId = _connectionMapping.ConnectionsR[participant];
+            var connections = _connectionMapping.ConnectionsR[participant];
             var state = GetState();
 
-            await _clients.Client(connectionId)
+            await _clients.Client(connections.MainConnectionId)
                 .SendAsync(CoreHubMessages.Response.OnSynchronizeObjectState, state);
         }
 

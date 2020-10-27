@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using PaderConference.Core.Domain.Entities;
@@ -69,12 +70,14 @@ namespace PaderConference.Infrastructure.Conferencing
             return _participantsMap.GetParticipants(conferenceId);
         }
 
-        public async ValueTask<Participant> Participate(string conferenceId, string userId, string role,
+        public async ValueTask<Participant> Participate(string conferenceId, string participantId, string role,
             string? displayName)
         {
             using (_logger.BeginScope("Participate()"))
             using (_logger.BeginScope(new Dictionary<string, object>
-                {{"conferenceId", conferenceId}, {"userId", userId}}))
+            {
+                {"conferenceId", conferenceId}, {"participantId", participantId},
+            }))
             {
                 var conference = await _conferenceRepo.FindById(conferenceId);
                 if (conference == null)
@@ -87,7 +90,7 @@ namespace PaderConference.Infrastructure.Conferencing
 
                 _logger.LogDebug("Conference: {@conference}", conference);
 
-                var participant = new Participant(userId, displayName, role, DateTimeOffset.UtcNow);
+                var participant = new Participant(participantId, displayName, role, DateTimeOffset.UtcNow);
                 if (!_participantsMap.AddParticipant(conferenceId, participant))
                 {
                     _logger.LogError("The participant already participates in the conference.");
@@ -121,6 +124,14 @@ namespace PaderConference.Infrastructure.Conferencing
             }
 
             await UpdateConference(conference);
+        }
+
+        public bool TryGetParticipant(string conferenceId, string participantId,
+            [NotNullWhen(true)] out Participant? participant)
+        {
+            participant = null;
+            return _participantsMap.ConferenceParticipants.TryGetValue(conferenceId, out var conferenceParticipants) &&
+                   conferenceParticipants.TryGetValue(participantId, out participant);
         }
 
         private Task UpdateConference(Conference conference)

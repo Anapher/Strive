@@ -184,8 +184,8 @@ namespace PaderConference.Infrastructure.Services.Permissions
                 participants.Select(x => x.ParticipantId).ToArray());
 
             foreach (var (participant, permissions) in newPermissions)
-                if (_connectionMapping.ConnectionsR.TryGetValue(participant, out var connectionId))
-                    await _clients.Client(connectionId)
+                if (_connectionMapping.ConnectionsR.TryGetValue(participant, out var connections))
+                    await _clients.Client(connections.MainConnectionId)
                         .SendAsync(CoreHubMessages.Response.OnPermissionsUpdated, permissions);
         }
         // ReSharper restore PossibleMultipleEnumeration

@@ -23,6 +23,6 @@ export function useScreen(soup: SoupManager | null): UseScreenState {
       return stream.getVideoTracks()[0];
    };
 
-   const result = useMedia(getScreen, () => soup?.sendTransport);
+   const result = useMedia('screen', getScreen, () => soup?.sendTransport);
    return { ...result, stream };
 }

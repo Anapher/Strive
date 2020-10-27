@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using PaderConference.Core.Interfaces.Gateways.Repositories;
@@ -18,25 +16,28 @@ namespace PaderConference.Infrastructure.Services.ConferenceControl
         private readonly IConferenceScheduler _conferenceScheduler;
         private readonly ILogger<ConferenceControlService> _logger;
         private readonly IRedisDatabase _redisDatabase;
+        private readonly IConferenceServiceManager<SynchronizationService> _synchronizationServiceManager;
+        private readonly IConferenceServiceManager<PermissionsService> _permissionsServiceManager;
 
         public ConferenceControlServiceManager(IConferenceScheduler conferenceScheduler,
             IConferenceManager conferenceManager, IConferenceRepo conferenceRepo, IRedisDatabase redisDatabase,
+            IConferenceServiceManager<SynchronizationService> synchronizationServiceManager,
+            IConferenceServiceManager<PermissionsService> permissionsServiceManager,
             ILogger<ConferenceControlService> logger)
         {
             _conferenceScheduler = conferenceScheduler;
             _conferenceManager = conferenceManager;
             _conferenceRepo = conferenceRepo;
             _redisDatabase = redisDatabase;
+            _synchronizationServiceManager = synchronizationServiceManager;
+            _permissionsServiceManager = permissionsServiceManager;
             _logger = logger;
         }
 
-        protected override async ValueTask<ConferenceControlService> ServiceFactory(string conferenceId,
-            IEnumerable<IConferenceServiceManager> services)
+        protected override async ValueTask<ConferenceControlService> ServiceFactory(string conferenceId)
         {
-            var synchronizeService = await services.OfType<IConferenceServiceManager<SynchronizationService>>().First()
-                .GetService(conferenceId, services);
-            var permissionsService = await services.OfType<IConferenceServiceManager<PermissionsService>>().First()
-                .GetService(conferenceId, services);
+            var synchronizeService = await _synchronizationServiceManager.GetService(conferenceId);
+            var permissionsService = await _permissionsServiceManager.GetService(conferenceId);
 
             var conference = await _conferenceRepo.FindById(conferenceId);
             if (conference == null) throw new InvalidOperationException("Conference not found.");

@@ -29,7 +29,9 @@ export class MediasoupMixer {
       this.producers.set(producerInfo.producer.id, producerInfo);
 
       for (const receiver of this.receivers.values()) {
-         if (receiver.participantId !== producerInfo.participantId) await this.createConsumer(receiver, producerInfo);
+         if (receiver.participantId !== producerInfo.participantId) {
+            await this.createConsumer(receiver, producerInfo);
+         }
       }
    }
 
@@ -125,7 +127,6 @@ export class MediasoupMixer {
          });
       } catch (error) {
          logger.warn('createConsumer() | transport.consume():%o', error);
-
          return;
       }
 

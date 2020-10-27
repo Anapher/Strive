@@ -36,5 +36,5 @@ export function useMicrophone(soupManager: SoupManager | null): UseMediaState {
       return audioDestination.stream.getAudioTracks()[0];
    };
 
-   return useMedia(getMic, () => soupManager?.sendTransport);
+   return useMedia('mic', getMic, () => soupManager?.sendTransport);
 }

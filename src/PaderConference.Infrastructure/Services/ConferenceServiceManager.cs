@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Nito.AsyncEx;
 
@@ -22,14 +21,12 @@ namespace PaderConference.Infrastructure.Services
             return new ValueTask();
         }
 
-        async ValueTask<IConferenceService> IConferenceServiceManager.GetService(string conferenceId,
-            IEnumerable<IConferenceServiceManager> services)
+        async ValueTask<IConferenceService> IConferenceServiceManager.GetService(string conferenceId)
         {
-            return await GetService(conferenceId, services);
+            return await GetService(conferenceId);
         }
 
-        public async ValueTask<TService> GetService(string conferenceId,
-            IEnumerable<IConferenceServiceManager> services)
+        public async ValueTask<TService> GetService(string conferenceId)
         {
             if (!_services.TryGetValue(conferenceId, out var service))
             {
@@ -38,7 +35,7 @@ namespace PaderConference.Infrastructure.Services
                 {
                     if (!_services.TryGetValue(conferenceId, out service))
                     {
-                        service = await ServiceFactory(conferenceId, services);
+                        service = await ServiceFactory(conferenceId);
                         await service.InitializeAsync();
 
                         if (!_services.TryAdd(conferenceId, service)) throw new InvalidOperationException("wtf");
@@ -51,7 +48,6 @@ namespace PaderConference.Infrastructure.Services
             return service;
         }
 
-        protected abstract ValueTask<TService> ServiceFactory(string conferenceId,
-            IEnumerable<IConferenceServiceManager> services);
+        protected abstract ValueTask<TService> ServiceFactory(string conferenceId);
     }
 }

@@ -9,6 +9,7 @@ import SettingsDialog from 'src/features/settings/components/SettingsDialog';
 import { RootState } from 'src/store';
 import { close, joinConference } from 'src/store/conference-signal/actions';
 import to from 'src/utils/to';
+import { ConferenceRouteParams } from '../types';
 
 const useStyles = makeStyles({
    errorRoot: {
@@ -26,11 +27,7 @@ const useStyles = makeStyles({
    },
 });
 
-type RouteParams = {
-   id: string;
-};
-
-type Props = RouteComponentProps<RouteParams>;
+type Props = RouteComponentProps<ConferenceRouteParams>;
 
 function ConferenceRoute({
    match: {

@@ -20,12 +20,12 @@ import { closeCreateDialog, createConferenceAsync } from '../createConferenceSli
 import { CreateConferenceFormState, mapFormToDto } from '../form';
 import CreateConferenceForm from './CreateConferenceForm';
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
    conferenceUrlField: {
       flex: 1,
-      marginRight: 16,
+      marginRight: theme.spacing(2),
    },
-});
+}));
 
 function CreateConferenceDialog() {
    const classes = useStyles();

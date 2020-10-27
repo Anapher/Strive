@@ -2,6 +2,7 @@ import { Producer, Transport } from 'mediasoup-client/lib/types';
 import { useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import * as coreHub from 'src/core-hub';
+import { ProducerSource } from 'src/features/media/types';
 
 export type UseMediaState = {
    enable: () => Promise<void>;
@@ -14,6 +15,7 @@ export type UseMediaState = {
 };
 
 export function useMedia(
+   source: ProducerSource,
    getMediaTrack: () => Promise<MediaStreamTrack>,
    getSendTransport: () => Transport | null | undefined,
 ): UseMediaState {
@@ -42,7 +44,7 @@ export function useMedia(
       }
 
       const track = await getMediaTrack();
-      const producer = await sendTransport.produce({ track });
+      const producer = await sendTransport.produce({ track, appData: { source } });
       console.log('producer created');
 
       producerRef.current = producer;

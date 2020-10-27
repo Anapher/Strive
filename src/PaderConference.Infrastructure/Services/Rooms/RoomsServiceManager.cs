@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using PaderConference.Infrastructure.Services.Permissions;
@@ -14,22 +12,25 @@ namespace PaderConference.Infrastructure.Services.Rooms
         private readonly ILogger<RoomsService> _logger;
         private readonly IOptions<RoomOptions> _options;
         private readonly IRedisDatabase _redisDatabase;
+        private readonly IConferenceServiceManager<PermissionsService> _permissionServiceManager;
+        private readonly IConferenceServiceManager<SynchronizationService> _synchronizationServiceManager;
 
-        public RoomsServiceManager(IRedisDatabase redisDatabase, IOptions<RoomOptions> options,
-            ILogger<RoomsService> logger)
+        public RoomsServiceManager(IRedisDatabase redisDatabase,
+            IConferenceServiceManager<PermissionsService> permissionServiceManager,
+            IConferenceServiceManager<SynchronizationService> synchronizationServiceManager,
+            IOptions<RoomOptions> options, ILogger<RoomsService> logger)
         {
             _redisDatabase = redisDatabase;
+            _permissionServiceManager = permissionServiceManager;
+            _synchronizationServiceManager = synchronizationServiceManager;
             _options = options;
             _logger = logger;
         }
 
-        protected override async ValueTask<RoomsService> ServiceFactory(string conferenceId,
-            IEnumerable<IConferenceServiceManager> services)
+        protected override async ValueTask<RoomsService> ServiceFactory(string conferenceId)
         {
-            var permissionsService = await services.OfType<IConferenceServiceManager<PermissionsService>>().First()
-                .GetService(conferenceId, services);
-            var synchronizeService = await services.OfType<IConferenceServiceManager<SynchronizationService>>().First()
-                .GetService(conferenceId, services);
+            var permissionsService = await _permissionServiceManager.GetService(conferenceId);
+            var synchronizeService = await _synchronizationServiceManager.GetService(conferenceId);
 
             return new RoomsService(conferenceId, _redisDatabase, synchronizeService, permissionsService, _options,
                 _logger);

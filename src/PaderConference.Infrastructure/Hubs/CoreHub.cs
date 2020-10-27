@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
+using PaderConference.Core.Domain;
 using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Interfaces.Services;
 using PaderConference.Infrastructure.Conferencing;
@@ -15,6 +16,7 @@ using PaderConference.Infrastructure.Hubs.Dto;
 using PaderConference.Infrastructure.Services;
 using PaderConference.Infrastructure.Services.Chat;
 using PaderConference.Infrastructure.Services.ConferenceControl;
+using PaderConference.Infrastructure.Services.Equipment;
 using PaderConference.Infrastructure.Services.Media;
 using PaderConference.Infrastructure.Services.Media.Communication;
 using PaderConference.Infrastructure.Services.Rooms;
@@ -46,62 +48,102 @@ namespace PaderConference.Infrastructure.Hubs
                 if (httpContext != null)
                 {
                     var conferenceId = httpContext.Request.Query["conferenceId"].ToString();
-                    var userId = httpContext.User.GetUserId();
+                    var participantId = httpContext.User.GetUserId();
                     var role = httpContext.User.Claims.First(x => x.Type == ClaimTypes.Role).Value;
 
                     using (_logger.BeginScope(new Dictionary<string, object>
                     {
-                        {"conferenceId", conferenceId}, {"userId", userId}, {"role", role}
+                        {"conferenceId", conferenceId}, {"participantId", participantId}, {"role", role},
                     }))
                     {
                         _logger.LogDebug("Client tries to connect");
 
-                        Participant participant;
-                        try
-                        {
-                            participant = await ConferenceManager.Participate(conferenceId, userId, role,
-                                httpContext.User.Identity.Name);
-                        }
-                        catch (ConferenceNotFoundException)
-                        {
-                            _logger.LogDebug("Abort connection");
-                            await Clients.Caller.SendAsync(CoreHubMessages.Response.OnConferenceJoinError,
-                                ConferenceError.NotFound);
-                            Context.Abort();
-                            return;
-                        }
-                        catch (Exception e)
-                        {
-                            _logger.LogError(e, "Unexpected exception occurred.");
-                            await Clients.Caller.SendAsync(CoreHubMessages.Response.OnConferenceJoinError,
-                                ConferenceError.UnexpectedError(e.Message));
-                            Context.Abort();
-                            return;
-                        }
-
-                        if (!_connectionMapping.Add(Context.ConnectionId, participant))
-                        {
-                            _logger.LogError("Participant {participantId} could not be added to connection mapping.",
-                                participant.ParticipantId);
-                            await Clients.Caller.SendAsync(CoreHubMessages.Response.OnConferenceJoinError,
-                                ConferenceError.UnexpectedError(
-                                    "Participant could not be added to connection mapping."));
-                            Context.Abort();
-                            return;
-                        }
-
                         // initialize all services before submitting events
-                        var services = ConferenceServices.Select(x => x.GetService(conferenceId, ConferenceServices))
-                            .ToList();
+                        var services = ConferenceServices.Select(x => x.GetService(conferenceId)).ToList();
                         foreach (var valueTask in services) await valueTask;
 
-                        foreach (var service in services)
-                            await service.Result.OnClientConnected(participant);
+                        switch (role)
+                        {
+                            case PrincipalRoles.Equipment:
+                            {
+                                if (!ConferenceManager.TryGetParticipant(conferenceId, participantId,
+                                    out var participant))
+                                {
+                                    await Clients.Caller.SendAsync(CoreHubMessages.Response.OnConferenceJoinError,
+                                        ConferenceError.UnexpectedError(
+                                            "Participant is not connected to this conference."));
+                                    Context.Abort();
+                                    return;
+                                }
 
-                        await Groups.AddToGroupAsync(Context.ConnectionId, conferenceId);
+                                if (!_connectionMapping.Add(Context.ConnectionId, participant))
+                                {
+                                    _logger.LogError(
+                                        "Participant {participantId} could not be added to connection mapping.",
+                                        participant.ParticipantId);
+                                    await Clients.Caller.SendAsync(CoreHubMessages.Response.OnConferenceJoinError,
+                                        ConferenceError.UnexpectedError(
+                                            "Participant could not be added to connection mapping."));
+                                    Context.Abort();
+                                    return;
+                                }
 
-                        foreach (var service in services)
-                            await service.Result.InitializeParticipant(participant);
+                                var equipmentService = await ConferenceServices
+                                    .OfType<IConferenceServiceManager<EquipmentService>>().First()
+                                    .GetService(conferenceId);
+
+                                await equipmentService.OnEquipmentConnected(Context.ConnectionId);
+                                break;
+                            }
+                            case PrincipalRoles.Moderator:
+                            case PrincipalRoles.User:
+                            case PrincipalRoles.Guest:
+                            {
+                                Participant participant;
+                                try
+                                {
+                                    participant = await ConferenceManager.Participate(conferenceId, participantId, role,
+                                        httpContext.User.Identity.Name);
+                                }
+                                catch (ConferenceNotFoundException)
+                                {
+                                    _logger.LogDebug("Abort connection");
+                                    await Clients.Caller.SendAsync(CoreHubMessages.Response.OnConferenceJoinError,
+                                        ConferenceError.NotFound);
+                                    Context.Abort();
+                                    return;
+                                }
+                                catch (Exception e)
+                                {
+                                    _logger.LogError(e, "Unexpected exception occurred.");
+                                    await Clients.Caller.SendAsync(CoreHubMessages.Response.OnConferenceJoinError,
+                                        ConferenceError.UnexpectedError(e.Message));
+                                    Context.Abort();
+                                    return;
+                                }
+
+                                if (!_connectionMapping.Add(Context.ConnectionId, participant))
+                                {
+                                    _logger.LogError(
+                                        "Participant {participantId} could not be added to connection mapping.",
+                                        participant.ParticipantId);
+                                    await Clients.Caller.SendAsync(CoreHubMessages.Response.OnConferenceJoinError,
+                                        ConferenceError.UnexpectedError(
+                                            "Participant could not be added to connection mapping."));
+                                    Context.Abort();
+                                    return;
+                                }
+
+                                foreach (var service in services)
+                                    await service.Result.OnClientConnected(participant);
+
+                                await Groups.AddToGroupAsync(Context.ConnectionId, conferenceId);
+
+                                foreach (var service in services)
+                                    await service.Result.InitializeParticipant(participant);
+                                break;
+                            }
+                        }
                     }
                 }
             }
@@ -109,14 +151,25 @@ namespace PaderConference.Infrastructure.Hubs
 
         public override async Task OnDisconnectedAsync(Exception exception)
         {
-            // Todo: close conference if it was the last participant and some time passed
             if (!_connectionMapping.Connections.TryGetValue(Context.ConnectionId, out var participant))
                 return;
 
             var conferenceId = ConferenceManager.GetConferenceOfParticipant(participant);
 
+            var role = Context.User.Claims.First(x => x.Type == ClaimTypes.Role).Value;
+            if (role == PrincipalRoles.Equipment)
+            {
+                var equipmentService = await ConferenceServices.OfType<IConferenceServiceManager<EquipmentService>>()
+                    .First().GetService(conferenceId);
+
+                await equipmentService.OnEquipmentDisconnected(Context.ConnectionId);
+                _connectionMapping.Remove(Context.ConnectionId);
+                return;
+            }
+
+            // Todo: close conference if it was the last participant and some time passed
             foreach (var service in ConferenceServices)
-                await (await service.GetService(conferenceId, ConferenceServices)).OnClientDisconnected(participant);
+                await (await service.GetService(conferenceId)).OnClientDisconnected(participant);
 
             _connectionMapping.Remove(Context.ConnectionId);
             await ConferenceManager.RemoveParticipant(participant);
@@ -191,6 +244,11 @@ namespace PaderConference.Infrastructure.Hubs
         {
             return InvokeService<MediaService, ChangeStreamDto, JsonElement?>(dto,
                 service => service.Redirect<ChangeStreamDto>(RedisChannels.Media.Request.ChangeStream));
+        }
+
+        public Task<string> GetEquipmentToken()
+        {
+            return InvokeService<EquipmentService, string>(service => service.GetEquipmentToken);
         }
     }
 }

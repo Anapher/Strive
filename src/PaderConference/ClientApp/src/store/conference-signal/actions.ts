@@ -18,6 +18,10 @@ export const send = createAction(`${DEFAULT_PREFIX}::SEND`, (name: string, paylo
    payload: { name, payload },
 }));
 
+export const invoke = createAction(`${DEFAULT_PREFIX}::INVOKE`, (name: string, payload?: any) => ({
+   payload: { name, payload },
+}));
+
 export const close = createAction(`${DEFAULT_PREFIX}::CLOSE`);
 
 // Events
@@ -56,6 +60,18 @@ export const onConferenceReconnected = createAction(
 
 export function onEventOccurred<T>(eventName: string): ActionCreatorWithPayload<T, string> {
    return createAction(`${DEFAULT_PREFIX}::ON_${eventName}`, (payload: T) => ({
+      payload,
+   }));
+}
+
+export function onInvokeReturn<T>(methodName: string): ActionCreatorWithPayload<T, string> {
+   return createAction(`${DEFAULT_PREFIX}::ONINVOKE_${methodName}`, (payload: T) => ({
+      payload,
+   }));
+}
+
+export function onInvokeFailed<T>(methodName: string): ActionCreatorWithPayload<T, string> {
+   return createAction(`${DEFAULT_PREFIX}::ONINVOKE_FAILED_${methodName}`, (payload: T) => ({
       payload,
    }));
 }

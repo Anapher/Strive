@@ -1,7 +1,7 @@
 import { Redis } from 'ioredis';
 import _ from 'lodash';
 import { Router } from 'mediasoup/lib/Router';
-import { Consumer, Producer, RtpCapabilities, WebRtcTransportOptions } from 'mediasoup/lib/types';
+import { Consumer, MediaKind, Producer, RtpCapabilities, WebRtcTransportOptions } from 'mediasoup/lib/types';
 import config from '../config';
 import Connection from './connection';
 import Logger from './logger';
@@ -79,11 +79,7 @@ export class Conference {
 
             for (const [, producer] of connection.producers) {
                producer.close();
-               for (const [k, activeProducer] of Object.entries(participant.producers)) {
-                  if (activeProducer?.id === producer.id) {
-                     participant.producers[k as ProducerSource] = undefined;
-                  }
-               }
+               this.removeProducer(producer, participant);
             }
             await this.roomManager.updateParticipant(participant);
 
@@ -111,12 +107,16 @@ export class Conference {
 
    public async changeStream({ payload: { id, type, action }, meta }: ChangeStreamRequest): Promise<void> {
       const connection = this.connections.get(meta.connectionId);
+      const participant = this.participants.get(meta.participantId);
+
       if (connection) {
          let stream: Producer | Consumer | undefined;
          if (type === 'consumer') {
             stream = connection.consumers.get(id);
          } else if (type === 'producer') {
             stream = connection.producers.get(id);
+
+            if (participant && stream) this.removeProducer(stream, participant);
          }
 
          if (stream) {
@@ -124,6 +124,12 @@ export class Conference {
                await stream.pause();
             } else if (action === 'close') {
                stream.close();
+
+               if (type === 'consumer') {
+                  connection.consumers.delete(id);
+               } else {
+                  connection.producers.delete(id);
+               }
             } else if (action === 'resume') {
                await stream.resume();
             }
@@ -135,7 +141,7 @@ export class Conference {
    }
 
    public async transportProduce({
-      payload: { transportId, appData, ...producerOptions },
+      payload: { transportId, appData, kind, ...producerOptions },
       meta,
    }: TransportProduceRequest): Promise<TransportProduceResponse> {
       const connection = this.connections.get(meta.connectionId);
@@ -147,18 +153,22 @@ export class Conference {
       const transport = connection.transport.get(transportId);
       if (!transport) throw new Error(`transport with id "${transportId}" not found`);
 
+      const source: ProducerSource = appData.source;
+      if (!this.verifyProducerSource(kind, source))
+         throw new Error(`Cannot create a producer with source ${source} and kind ${kind}!`);
+
       appData = { ...appData, participantId: participant.participantId };
 
       const producer = await transport.produce({
          ...producerOptions,
+         kind,
          appData,
          // keyFrameRequestDelay: 5000
       });
 
-      const source = this.classifyProducer(producer);
       if (participant.producers[source]) {
-         producer.close();
-         throw new Error('A producer for this target already exists.');
+         participant.producers[source]?.close();
+         participant.producers[source] = undefined;
       }
 
       producer.on('score', (score) => {
@@ -235,9 +245,19 @@ export class Conference {
       };
    }
 
-   private classifyProducer(producer: Producer): ProducerSource {
-      if (producer.kind === 'audio') return 'mic';
-      if (producer.appData.screen) return 'screen';
-      return 'webcam';
+   private removeProducer(producer: Producer, participant: Participant): void {
+      for (const [k, activeProducer] of Object.entries(participant.producers)) {
+         if (activeProducer?.id === producer.id) {
+            participant.producers[k as ProducerSource] = undefined;
+         }
+      }
+   }
+
+   private verifyProducerSource(kind: MediaKind, source: ProducerSource): boolean {
+      if (source === 'mic' && kind === 'audio') return true;
+      if (source === 'screen' && kind === 'video') return true;
+      if (source === 'webcam' && kind === 'video') return true;
+
+      return false;
    }
 }

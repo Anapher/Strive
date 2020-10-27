@@ -1,11 +1,9 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace PaderConference.Infrastructure.Services
 {
-    public interface IConferenceServiceManager<TService> : IConferenceServiceManager
-        where TService : IConferenceService
+    public interface IConferenceServiceManager<TService> : IConferenceServiceManager where TService : IConferenceService
     {
-        new ValueTask<TService> GetService(string conferenceId, IEnumerable<IConferenceServiceManager> services);
+        new ValueTask<TService> GetService(string conferenceId);
     }
 }

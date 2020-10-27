@@ -8,18 +8,39 @@ namespace PaderConference.Infrastructure.Sockets
         public ConcurrentDictionary<string, Participant> Connections { get; } =
             new ConcurrentDictionary<string, Participant>();
 
-        public ConcurrentDictionary<Participant, string> ConnectionsR { get; } =
-            new ConcurrentDictionary<Participant, string>();
+        public ConcurrentDictionary<Participant, IParticipantConnections> ConnectionsR { get; } =
+            new ConcurrentDictionary<Participant, IParticipantConnections>();
 
-        public bool Add(string connectionId, Participant participant)
+        public bool Add(string connectionId, Participant participant, bool equipment)
         {
             if (!Connections.TryAdd(connectionId, participant))
                 return false;
 
-            if (!ConnectionsR.TryAdd(participant, connectionId))
+            if (equipment)
             {
-                Connections.TryRemove(connectionId, out _);
-                return false;
+                // receive participant connections object
+                if (!ConnectionsR.TryGetValue(participant, out var connections))
+                {
+                    Connections.TryRemove(connectionId, out _);
+                    return false;
+                }
+
+                // add connection id to equipment
+                if (!((ParticipantConnections) connections).Equipment.TryAdd(connectionId, default))
+                {
+                    Connections.TryRemove(connectionId, out _);
+                    return false;
+                }
+            }
+            else
+            {
+                // create participant connections object and try to add
+                var connections = new ParticipantConnections(connectionId);
+                if (!ConnectionsR.TryAdd(participant, connections))
+                {
+                    Connections.TryRemove(connectionId, out _);
+                    return false;
+                }
             }
 
             return true;
@@ -30,17 +51,13 @@ namespace PaderConference.Infrastructure.Sockets
             if (!Connections.TryRemove(connectionId, out var participant))
                 return false;
 
-            ConnectionsR.TryRemove(participant, out _);
-
-            return true;
-        }
-
-        public bool Remove(Participant participant)
-        {
-            if (!ConnectionsR.TryRemove(participant, out var connectionId))
-                return false;
-
-            Connections.TryRemove(connectionId, out _);
+            if (ConnectionsR.TryGetValue(participant, out var connections))
+            {
+                if (connections.MainConnectionId == connectionId)
+                    ConnectionsR.TryRemove(participant, out _);
+                else
+                    ((ParticipantConnections) connections).Equipment.TryRemove(connectionId, out _);
+            }
 
             return true;
         }

@@ -3,6 +3,7 @@ import { PayloadAction } from '@reduxjs/toolkit';
 import { Middleware, MiddlewareAPI } from 'redux';
 import { ErrorCodes } from 'src/utils/errors';
 import * as actions from './actions';
+import { onInvokeFailed, onInvokeReturn } from './actions';
 import { Options } from './types';
 
 const defaultEvents: string[] = [
@@ -75,6 +76,16 @@ export default (options: Options): SignalRResult => {
       [actions.send.type]: (_, { payload: { payload, name } }) => {
          if (connection) {
             connection.send(name, ...(payload ? [payload] : []));
+         }
+      },
+      [actions.invoke.type]: ({ dispatch }, { payload: { payload, name } }) => {
+         if (connection) {
+            connection.invoke(name, ...(payload ? [payload] : [])).then(
+               (returnVal) => {
+                  dispatch(actions.onInvokeReturn(name)(returnVal));
+               },
+               (error) => dispatch(actions.onInvokeFailed(name)(error)),
+            );
          }
       },
       [actions.close.type]: async () => {

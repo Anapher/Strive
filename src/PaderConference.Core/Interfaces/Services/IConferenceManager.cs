@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using PaderConference.Core.Domain.Entities;
 
@@ -14,7 +15,7 @@ namespace PaderConference.Core.Interfaces.Services
 
         ValueTask CloseConference(string conferenceId);
 
-        ValueTask<Participant> Participate(string conferenceId, string userId, string role, string? displayName);
+        ValueTask<Participant> Participate(string conferenceId, string participantId, string role, string? displayName);
 
         ValueTask<bool> GetIsConferenceOpen(string conferenceId);
 
@@ -25,5 +26,8 @@ namespace PaderConference.Core.Interfaces.Services
         string GetConferenceOfParticipant(Participant participant);
 
         ValueTask SetConferenceState(string conferenceId, ConferenceState state);
+
+        bool TryGetParticipant(string conferenceId, string participantId,
+            [NotNullWhen(true)] out Participant? participant);
     }
 }

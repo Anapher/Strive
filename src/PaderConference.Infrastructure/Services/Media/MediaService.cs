@@ -62,9 +62,10 @@ namespace PaderConference.Infrastructure.Services.Media
 
         public override async ValueTask OnClientDisconnected(Participant participant)
         {
-            if (_connectionMapping.ConnectionsR.TryGetValue(participant, out var connectionId))
+            if (_connectionMapping.ConnectionsR.TryGetValue(participant, out var connections))
             {
-                var meta = new ConnectionMessageMetadata(_conferenceId, connectionId, participant.ParticipantId);
+                var meta = new ConnectionMessageMetadata(_conferenceId, connections.MainConnectionId,
+                    participant.ParticipantId);
 
                 await _redisDatabase.PublishAsync(RedisChannels.ClientDisconnectedChannel.GetName(_conferenceId),
                     new ConnectionMessage<object?>(null, meta));

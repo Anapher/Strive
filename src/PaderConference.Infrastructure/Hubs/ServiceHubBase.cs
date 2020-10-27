@@ -28,8 +28,7 @@ namespace PaderConference.Infrastructure.Hubs
         {
             var conferenceId = ConferenceManager.GetConferenceOfParticipant(participant);
 
-            return ConferenceServices.OfType<IConferenceServiceManager<T>>().First()
-                .GetService(conferenceId, ConferenceServices);
+            return ConferenceServices.OfType<IConferenceServiceManager<T>>().First().GetService(conferenceId);
         }
 
         protected async Task<bool> AssertConference(IServiceMessage message, MethodOptions options)

@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -36,8 +35,7 @@ namespace PaderConference.Infrastructure.Services.Permissions
             _logger = logger;
         }
 
-        protected override ValueTask<PermissionsService> ServiceFactory(string conferenceId,
-            IEnumerable<IConferenceServiceManager> services)
+        protected override ValueTask<PermissionsService> ServiceFactory(string conferenceId)
         {
             return new PermissionsService(conferenceId, _conferenceRepo, _redisDatabase, _hubContext.Clients,
                 _connectionMapping, _conferenceManager, _options, _logger).ToValueTask();

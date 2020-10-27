@@ -22,6 +22,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using MongoDB.Bson.Serialization;
+using PaderConference.Auth;
 using PaderConference.Core;
 using PaderConference.Core.Errors;
 using PaderConference.Core.Interfaces.Services;
@@ -120,9 +121,9 @@ namespace PaderConference
                         if (!string.IsNullOrEmpty(accessToken))
                             context.Token = accessToken;
                         return Task.CompletedTask;
-                    }
+                    },
                 };
-            });
+            }).AddEquipmentAuth(options => { });
 
             services.AddSignalR().AddJsonProtocol(options =>
             {
@@ -171,8 +172,8 @@ namespace PaderConference
 
             // add conference scheduler
             services.AddSingleton<IConferenceScheduler, ConferenceScheduler>();
-            services.AddHostedService(services =>
-                (ConferenceScheduler) services.GetRequiredService<IConferenceScheduler>());
+            services.AddHostedService(provider =>
+                (ConferenceScheduler) provider.GetRequiredService<IConferenceScheduler>());
 
             services.AddHostedService<ConferenceInitializer>();
 

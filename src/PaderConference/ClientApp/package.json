@@ -39,6 +39,7 @@
       "mediasoup-client": "^3.6.20",
       "notistack": "^1.0.1",
       "prettier": "^2.1.2",
+      "qrcode.react": "^1.0.0",
       "react": "^16.12.0",
       "react-countdown": "^2.3.0",
       "react-dom": "^16.12.0",
@@ -74,6 +75,7 @@
       ]
    },
    "devDependencies": {
-      "@types/hark": "^1.2.1"
+      "@types/hark": "^1.2.1",
+      "@types/qrcode.react": "^1.0.1"
    }
 }

@@ -27,10 +27,8 @@ namespace PaderConference.Infrastructure.Auth
         {
             return GenerateEncodedToken(new[]
             {
-                new Claim(ClaimTypes.NameIdentifier, id),
-                new Claim(ClaimTypes.Name, name),
-                new Claim(ClaimTypes.Role, PrincipalRoles.Moderator),
-                new Claim(ClaimTypes.Email, email)
+                new Claim(ClaimTypes.NameIdentifier, id), new Claim(ClaimTypes.Name, name),
+                new Claim(ClaimTypes.Role, PrincipalRoles.Moderator), new Claim(ClaimTypes.Email, email),
             });
         }
 
@@ -39,8 +37,7 @@ namespace PaderConference.Infrastructure.Auth
             return GenerateEncodedToken(new[]
             {
                 new Claim(ClaimTypes.NameIdentifier, id ?? Guid.NewGuid().ToString("N")),
-                new Claim(ClaimTypes.Name, name),
-                new Claim(ClaimTypes.Role, PrincipalRoles.Guest)
+                new Claim(ClaimTypes.Name, name), new Claim(ClaimTypes.Role, PrincipalRoles.Guest),
             });
         }
 
@@ -54,7 +51,7 @@ namespace PaderConference.Infrastructure.Auth
                 Issuer = _jwtOptions.Issuer,
                 Audience = _jwtOptions.Audience,
                 NotBefore = _jwtOptions.NotBefore.UtcDateTime,
-                IssuedAt = _jwtOptions.IssuedAt.UtcDateTime
+                IssuedAt = _jwtOptions.IssuedAt.UtcDateTime,
             };
 
             return new ValueTask<string>(_jwtHandler.WriteToken(tokenDescriptor));

@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace PaderConference.Infrastructure.Services
 {
@@ -7,7 +6,6 @@ namespace PaderConference.Infrastructure.Services
     {
         ValueTask Close(string conferenceId);
 
-        ValueTask<IConferenceService> GetService(string conferenceId,
-            IEnumerable<IConferenceServiceManager> services);
+        ValueTask<IConferenceService> GetService(string conferenceId);
     }
 }

@@ -1,6 +1,7 @@
 import { makeStyles, Tab, Tabs } from '@material-ui/core';
 import React from 'react';
 import AudioSettings from './AudioSettings';
+import EquipmentSettings from './EquipmentSettings';
 
 interface TabPanelProps {
    children?: React.ReactNode;
@@ -67,12 +68,16 @@ export default function Settings() {
          >
             <Tab label="Common" {...a11yProps(0)} />
             <Tab label="Audio" {...a11yProps(1)} />
+            <Tab label="Equipment" {...a11yProps(2)} />
          </Tabs>
          <TabPanel value={value} index={0} className={classes.tab}>
             Item One
          </TabPanel>
          <TabPanel value={value} index={1} className={classes.tab}>
             <AudioSettings />
+         </TabPanel>
+         <TabPanel value={value} index={2} className={classes.tab}>
+            <EquipmentSettings />
          </TabPanel>
       </div>
    );
