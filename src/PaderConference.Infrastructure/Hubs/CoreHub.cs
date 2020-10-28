@@ -69,7 +69,7 @@ namespace PaderConference.Infrastructure.Hubs
                                 if (!ConferenceManager.TryGetParticipant(conferenceId, participantId,
                                     out var participant))
                                 {
-                                    await Clients.Caller.SendAsync(CoreHubMessages.Response.OnConferenceJoinError,
+                                    await Clients.Caller.SendAsync(CoreHubMessages.Response.OnConnectionError,
                                         ConferenceError.UnexpectedError(
                                             "Participant is not connected to this conference."));
                                     Context.Abort();
@@ -81,7 +81,7 @@ namespace PaderConference.Infrastructure.Hubs
                                     _logger.LogError(
                                         "Participant {participantId} could not be added to connection mapping.",
                                         participant.ParticipantId);
-                                    await Clients.Caller.SendAsync(CoreHubMessages.Response.OnConferenceJoinError,
+                                    await Clients.Caller.SendAsync(CoreHubMessages.Response.OnConnectionError,
                                         ConferenceError.UnexpectedError(
                                             "Participant could not be added to connection mapping."));
                                     Context.Abort();
@@ -108,7 +108,7 @@ namespace PaderConference.Infrastructure.Hubs
                                 catch (ConferenceNotFoundException)
                                 {
                                     _logger.LogDebug("Abort connection");
-                                    await Clients.Caller.SendAsync(CoreHubMessages.Response.OnConferenceJoinError,
+                                    await Clients.Caller.SendAsync(CoreHubMessages.Response.OnConnectionError,
                                         ConferenceError.NotFound);
                                     Context.Abort();
                                     return;
@@ -116,7 +116,7 @@ namespace PaderConference.Infrastructure.Hubs
                                 catch (Exception e)
                                 {
                                     _logger.LogError(e, "Unexpected exception occurred.");
-                                    await Clients.Caller.SendAsync(CoreHubMessages.Response.OnConferenceJoinError,
+                                    await Clients.Caller.SendAsync(CoreHubMessages.Response.OnConnectionError,
                                         ConferenceError.UnexpectedError(e.Message));
                                     Context.Abort();
                                     return;
@@ -127,7 +127,7 @@ namespace PaderConference.Infrastructure.Hubs
                                     _logger.LogError(
                                         "Participant {participantId} could not be added to connection mapping.",
                                         participant.ParticipantId);
-                                    await Clients.Caller.SendAsync(CoreHubMessages.Response.OnConferenceJoinError,
+                                    await Clients.Caller.SendAsync(CoreHubMessages.Response.OnConnectionError,
                                         ConferenceError.UnexpectedError(
                                             "Participant could not be added to connection mapping."));
                                     Context.Abort();
