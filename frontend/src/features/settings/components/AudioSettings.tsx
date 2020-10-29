@@ -1,8 +1,10 @@
-import { makeStyles, Mark, Slider, Typography } from '@material-ui/core';
-import React, { useEffect } from 'react';
+import { Box, makeStyles, Mark, Slider, Typography } from '@material-ui/core';
+import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from 'src/store';
+import { selectAvailableInputDevices } from '../selectors';
 import { setAudioGain } from '../settingsSlice';
+import DeviceSelector from './DeviceSelector';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -23,42 +25,42 @@ const marks: Mark[] = [
 
 export default function AudioSettings() {
    const classes = useStyles();
-   const audioGain = useSelector((state: RootState) => state.settings.obj.audioGain);
+   const audioGain = useSelector((state: RootState) => state.settings.obj.audio.audioGain);
    const dispatch = useDispatch();
 
    const handleChangeGain = (_: React.ChangeEvent<unknown>, value: number | number[]) => {
       dispatch(setAudioGain(value as number));
    };
 
-   useEffect(() => {
-      const loadDevices = async () => {
-         const devices = await navigator.mediaDevices.enumerateDevices();
-         for (const asd of devices) {
-            asd.kind === 'audioinput';
-         }
-         console.log(devices);
-      };
-
-      loadDevices();
-   }, []);
+   const audioDevices = useSelector((state: RootState) => selectAvailableInputDevices(state, 'mic'));
 
    return (
       <div className={classes.root}>
-         <Typography variant="h6" gutterBottom>
-            Gain
-         </Typography>
-         <div className={classes.slider}>
-            <Slider
-               value={audioGain}
-               min={0}
-               max={3}
-               onChange={handleChangeGain}
-               step={0.2}
-               valueLabelDisplay="auto"
-               marks={marks}
-               valueLabelFormat={(val) => `${Math.round((val - 1) * 100)}%`}
-            />
-         </div>
+         <DeviceSelector
+            devices={audioDevices}
+            label="Microphone"
+            defaultName="Microphone"
+            onChange={(x) => {
+               console.log(x);
+            }}
+         />
+         <Box mt={4}>
+            <Typography variant="h6" gutterBottom>
+               Gain
+            </Typography>
+            <div className={classes.slider}>
+               <Slider
+                  value={audioGain}
+                  min={0}
+                  max={3}
+                  onChange={handleChangeGain}
+                  step={0.2}
+                  valueLabelDisplay="auto"
+                  marks={marks}
+                  valueLabelFormat={(val) => `${Math.round((val - 1) * 100)}%`}
+               />
+            </div>
+         </Box>
       </div>
    );
 }

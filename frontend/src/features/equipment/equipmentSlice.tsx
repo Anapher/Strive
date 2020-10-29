@@ -1,24 +1,16 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { fetchDevices } from './thunks';
-import { EquipmentDeviceInfo } from './types';
+import { createSlice } from '@reduxjs/toolkit';
 
 type EquipmentState = {
-   availableEquipment: EquipmentDeviceInfo[] | null;
+   test?: string;
 };
 
-const initialState: EquipmentState = {
-   availableEquipment: null,
-};
+const initialState: EquipmentState = {};
 
 const equipmentSlice = createSlice({
    name: 'equipment',
    initialState,
    reducers: {},
-   extraReducers: {
-      [fetchDevices.fulfilled.type]: (state, { payload }: PayloadAction<EquipmentDeviceInfo[]>) => {
-         state.availableEquipment = payload;
-      },
-   },
+   extraReducers: {},
 });
 
 export default equipmentSlice.reducer;

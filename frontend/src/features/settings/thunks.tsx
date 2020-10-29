@@ -1,12 +1,10 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import { EquipmentDeviceInfo } from './types';
+import { InputDeviceDto } from './types';
 
 export const fetchDevices = createAsyncThunk('equipment/fetchDevices', async () => {
    const devices = await navigator.mediaDevices.enumerateDevices();
 
-   console.log(devices);
-
-   const result: EquipmentDeviceInfo[] = [];
+   const result: InputDeviceDto[] = [];
    for (const device of devices) {
       switch (device.kind) {
          case 'audioinput':

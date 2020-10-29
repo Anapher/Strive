@@ -1,4 +1,4 @@
-import { EquipmentDeviceInfo } from '../equipment/types';
+import { InputDeviceDto } from '../settings/types';
 
 export type ProducerSource = 'mic' | 'webcam' | 'screen';
 
@@ -29,5 +29,5 @@ export type ParticipantEquipmentStatusDto = {
 export type ConnectedEquipmentDto = {
    equipmentId: string;
    name?: string;
-   devices?: EquipmentDeviceInfo[];
+   devices?: InputDeviceDto[];
 };

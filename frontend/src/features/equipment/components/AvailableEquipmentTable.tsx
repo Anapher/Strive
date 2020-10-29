@@ -7,7 +7,7 @@ import MicIcon from '@material-ui/icons/Mic';
 import DesktopWindowsIcon from '@material-ui/icons/DesktopWindows';
 
 export default function AvailableEquipmentTable() {
-   const availableEquipment = useSelector((state: RootState) => state.equipment.availableEquipment);
+   const devices = useSelector((state: RootState) => state.settings.availableDevices);
 
    return (
       <List
@@ -18,8 +18,8 @@ export default function AvailableEquipmentTable() {
             </ListSubheader>
          }
       >
-         {availableEquipment &&
-            availableEquipment.map((x) => (
+         {devices &&
+            devices.map((x) => (
                <ListItem key={x.deviceId}>
                   <ListItemIcon>
                      {x.source === 'mic' ? (

@@ -46,7 +46,7 @@ const useStyles = makeStyles((theme) => ({
 export default function MediaControls() {
    const classes = useStyles();
 
-   const gain = useSelector((state: RootState) => state.settings.obj.audioGain);
+   const gain = useSelector((state: RootState) => state.settings.obj.audio.audioGain);
    const micState = useMicrophone(gain);
 
    const canShareScreen = usePermission(MEDIA_CAN_SHARE_SCREEN);

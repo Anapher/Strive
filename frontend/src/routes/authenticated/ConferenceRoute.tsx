@@ -8,6 +8,7 @@ import ClassConference from 'src/features/conference/components/ClassConference'
 import ConferenceConnecting from 'src/features/conference/components/ConferenceConnecting';
 import ConferenceNotOpen from 'src/features/conference/components/ConferenceNotOpen';
 import SettingsDialog from 'src/features/settings/components/SettingsDialog';
+import { fetchDevices } from 'src/features/settings/thunks';
 import { RootState } from 'src/store';
 import { close } from 'src/store/signal/actions';
 import { WebRtcContext } from 'src/store/webrtc/WebRtcContext';
@@ -37,6 +38,10 @@ function ConferenceRoute({
    const webRtc = useRef(new WebRtcManager()).current;
 
    const dispatch = useDispatch();
+
+   useEffect(() => {
+      dispatch(fetchDevices());
+   }, []);
 
    useEffect(() => {
       if (!accessToken) return; // should not happen as this is an authenticated route
