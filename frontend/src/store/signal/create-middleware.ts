@@ -1,6 +1,7 @@
 import { HubConnection, HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
 import { PayloadAction } from '@reduxjs/toolkit';
 import { Middleware, MiddlewareAPI } from 'redux';
+import { events } from 'src/core-hub';
 import { ErrorCodes } from 'src/utils/errors';
 import * as actions from './actions';
 import appHubConn from './app-hub-connection';
@@ -34,7 +35,7 @@ export default (options: Options): SignalRResult => {
                .configureLogging(LogLevel.Information)
                .build();
 
-            connection.on('OnConnectionError', (err) => {
+            connection.on(events.onConnectionError, (err) => {
                dispatch(actions.onConnectionError(err));
                dispatch(actions.close());
             });

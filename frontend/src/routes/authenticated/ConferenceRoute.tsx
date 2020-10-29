@@ -16,11 +16,11 @@ import to from 'src/utils/to';
 import { ConferenceRouteParams } from '../types';
 
 const defaultEvents: string[] = [
-   'OnSynchronizeObjectState',
-   'OnSynchronizedObjectUpdated',
+   coreHub.events.onSynchronizeObjectState,
+   coreHub.events.onSynchronizedObjectUpdated,
    'OnError',
-   'OnPermissionsUpdated',
-   'OnEquipmentUpdated',
+   coreHub.events.onPermissionsUpdated,
+   coreHub.events.onEquipmentUpdated,
 ];
 
 type Props = RouteComponentProps<ConferenceRouteParams>;

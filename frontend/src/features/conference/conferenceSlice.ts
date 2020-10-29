@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { events } from 'src/core-hub';
 import { connectSignal, onConnected, onConnectionError, onEventOccurred } from 'src/store/signal/actions';
 import { createSynchronizeObjectReducer } from 'src/store/signal/synchronized-object';
 import { IRestError } from 'src/utils/error-result';
@@ -50,7 +51,7 @@ const conferenceSlice = createSlice({
       [onConnectionError.type]: (state, action) => {
          state.connectionError = action.payload.error;
       },
-      [onEventOccurred('OnPermissionsUpdated').type]: (state, action: PayloadAction<Permissions>) => {
+      [onEventOccurred(events.onPermissionsUpdated).type]: (state, action: PayloadAction<Permissions>) => {
          state.myPermissions = action.payload;
       },
       ...createSynchronizeObjectReducer(['participants', 'conferenceState']),

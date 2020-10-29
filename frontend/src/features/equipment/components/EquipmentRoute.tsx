@@ -13,10 +13,10 @@ import FullScreenError from 'src/components/FullscreenError';
 import RequestPermissions from './RequestPermissions';
 
 const defaultEvents: string[] = [
-   'OnSynchronizeObjectState',
-   'OnSynchronizedObjectUpdated',
+   coreHub.events.onSynchronizeObjectState,
+   coreHub.events.onSynchronizedObjectUpdated,
    'OnError',
-   'OnPermissionsUpdated',
+   coreHub.events.onPermissionsUpdated,
 ];
 
 type Props = RouteComponentProps<ConferenceRouteParams>;

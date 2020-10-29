@@ -27,11 +27,11 @@ export const registerEquipment = (dto: RegisterEquipmentRequestDto) => send('Reg
 export const events = {
    onConnectionError: 'OnConnectionError',
 
-   onSynchronizedObjectUpdated: 'OnSynchronizedObjectUpdated',
    onSynchronizeObjectState: 'OnSynchronizeObjectState',
+   onSynchronizedObjectUpdated: 'OnSynchronizedObjectUpdated',
 
    chatMessage: 'ChatMessage',
-   chat: 'chat',
+   chat: 'Chat',
 
    onPermissionsUpdated: 'OnPermissionsUpdated',
    onEquipmentUpdated: 'OnEquipmentUpdated',
