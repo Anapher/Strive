@@ -29,12 +29,12 @@ export const close = createAction(`${DEFAULT_PREFIX}::CLOSE`);
 
 // Events
 
-export const onConnected = createAction(`${DEFAULT_PREFIX}::ON_CONFERENCE_JOINED`, (appData?: any) => ({
+export const onConnected = createAction(`${DEFAULT_PREFIX}::ON_CONNECTED`, (appData?: any) => ({
    payload: { appData },
 }));
 
 export const onConnectionError = createAction(
-   `${DEFAULT_PREFIX}::ON_CONFERENCE_JOIN_ERROR`,
+   `${DEFAULT_PREFIX}::ON_CONNECTION_ERROR`,
    (error?: IRestError, appData?: any) => ({
       payload: { error, appData },
    }),

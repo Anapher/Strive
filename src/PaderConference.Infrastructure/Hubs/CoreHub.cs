@@ -17,6 +17,7 @@ using PaderConference.Infrastructure.Services;
 using PaderConference.Infrastructure.Services.Chat;
 using PaderConference.Infrastructure.Services.ConferenceControl;
 using PaderConference.Infrastructure.Services.Equipment;
+using PaderConference.Infrastructure.Services.Equipment.Dto;
 using PaderConference.Infrastructure.Services.Media;
 using PaderConference.Infrastructure.Services.Media.Communication;
 using PaderConference.Infrastructure.Services.Rooms;
@@ -76,7 +77,7 @@ namespace PaderConference.Infrastructure.Hubs
                                     return;
                                 }
 
-                                if (!_connectionMapping.Add(Context.ConnectionId, participant))
+                                if (!_connectionMapping.Add(Context.ConnectionId, participant, true))
                                 {
                                     _logger.LogError(
                                         "Participant {participantId} could not be added to connection mapping.",
@@ -92,7 +93,7 @@ namespace PaderConference.Infrastructure.Hubs
                                     .OfType<IConferenceServiceManager<EquipmentService>>().First()
                                     .GetService(conferenceId);
 
-                                await equipmentService.OnEquipmentConnected(Context.ConnectionId);
+                                await equipmentService.OnEquipmentConnected(participant, Context.ConnectionId);
                                 break;
                             }
                             case PrincipalRoles.Moderator:
@@ -162,7 +163,7 @@ namespace PaderConference.Infrastructure.Hubs
                 var equipmentService = await ConferenceServices.OfType<IConferenceServiceManager<EquipmentService>>()
                     .First().GetService(conferenceId);
 
-                await equipmentService.OnEquipmentDisconnected(Context.ConnectionId);
+                await equipmentService.OnEquipmentDisconnected(participant, Context.ConnectionId);
                 _connectionMapping.Remove(Context.ConnectionId);
                 return;
             }
@@ -249,6 +250,12 @@ namespace PaderConference.Infrastructure.Hubs
         public Task<string> GetEquipmentToken()
         {
             return InvokeService<EquipmentService, string>(service => service.GetEquipmentToken);
+        }
+
+        public Task RegisterEquipment(RegisterEquipmentRequestDto dto)
+        {
+            return InvokeService<EquipmentService, RegisterEquipmentRequestDto>(dto,
+                service => service.RegisterEquipment);
         }
     }
 }

@@ -1,13 +1,17 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { onEventOccurred } from 'src/store/signal/actions';
 import { createSynchronizeObjectReducer } from 'src/store/signal/synchronized-object';
-import { ConferenceParticipantStreamInfo } from './types';
+import { ConferenceParticipantStreamInfo, ParticipantEquipmentStatusDto } from './types';
+import { events } from 'src/core-hub';
 
 export type MediaState = {
    streams: ConferenceParticipantStreamInfo | null;
+   equipment: ParticipantEquipmentStatusDto | null;
 };
 
 const initialState: MediaState = {
    streams: null,
+   equipment: null,
 };
 
 const mediaSlice = createSlice({
@@ -20,6 +24,12 @@ const mediaSlice = createSlice({
    },
    extraReducers: {
       ...createSynchronizeObjectReducer([{ name: 'mediaStreams', stateName: 'streams' }]),
+      [onEventOccurred(events.onEquipmentUpdated).type]: (
+         state,
+         { payload }: PayloadAction<ParticipantEquipmentStatusDto>,
+      ) => {
+         state.equipment = payload;
+      },
    },
 });
 

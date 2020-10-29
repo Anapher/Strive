@@ -1,20 +1,11 @@
-﻿using System.Threading.Tasks;
-using PaderConference.Core.Interfaces.Services;
+﻿using Autofac;
 
 namespace PaderConference.Infrastructure.Services.Equipment
 {
-    public class EquipmentServiceManager : ConferenceServiceManager<EquipmentService>
+    public class EquipmentServiceManager : AutowiredConferenceServiceManager<EquipmentService>
     {
-        private readonly ITokenFactory _tokenFactory;
-
-        public EquipmentServiceManager(ITokenFactory tokenFactory)
+        public EquipmentServiceManager(IComponentContext context) : base(context)
         {
-            _tokenFactory = tokenFactory;
-        }
-
-        protected override ValueTask<EquipmentService> ServiceFactory(string conferenceId)
-        {
-            return new ValueTask<EquipmentService>(new EquipmentService(conferenceId, _tokenFactory));
         }
     }
 }

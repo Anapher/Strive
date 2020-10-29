@@ -13,6 +13,8 @@ namespace PaderConference.Infrastructure.Services
         private readonly ConcurrentDictionary<string, TService> _services =
             new ConcurrentDictionary<string, TService>();
 
+        public Type ServiceType { get; } = typeof(TService);
+
         public ValueTask Close(string conferenceId)
         {
             if (_services.TryRemove(conferenceId, out var service))

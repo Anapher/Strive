@@ -1,4 +1,4 @@
-import { Box, TextField, Typography } from '@material-ui/core';
+import { Box, Chip, Grid, TextField, Typography } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import QRCode from 'qrcode.react';
 import React, { useEffect } from 'react';
@@ -7,9 +7,11 @@ import { useRouteMatch } from 'react-router-dom';
 import { getEquipmentToken } from 'src/core-hub';
 import { ConferenceRouteParams } from 'src/routes/types';
 import { RootState } from 'src/store';
+import CheckIcon from '@material-ui/icons/Check';
 
 export default function EquipmentSettings() {
-   const token = useSelector((state: RootState) => state.equipment.token);
+   const token = useSelector((state: RootState) => state.settings.equipmentToken);
+   const equipment = useSelector((state: RootState) => state.media.equipment);
    const {
       params: { id },
    } = useRouteMatch<ConferenceRouteParams>();
@@ -47,6 +49,17 @@ export default function EquipmentSettings() {
                <Typography>{token ? '3. Change the default device here in settings' : <Skeleton />}</Typography>
             </Box>
          </Box>
+         {equipment && (
+            <Box mt={2}>
+               <Grid container>
+                  {equipment.connectedEquipment.map((x) => (
+                     <Grid item key={x.equipmentId}>
+                        <Chip color="secondary" label={x.name} icon={<CheckIcon />} />
+                     </Grid>
+                  ))}
+               </Grid>
+            </Box>
+         )}
       </Box>
    );
 }

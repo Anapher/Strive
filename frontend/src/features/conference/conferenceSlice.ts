@@ -48,7 +48,7 @@ const conferenceSlice = createSlice({
          state.conferenceId = action.conferenceId;
       },
       [onConnectionError.type]: (state, action) => {
-         state.connectionError = action.payload;
+         state.connectionError = action.payload.error;
       },
       [onEventOccurred('OnPermissionsUpdated').type]: (state, action: PayloadAction<Permissions>) => {
          state.myPermissions = action.payload;

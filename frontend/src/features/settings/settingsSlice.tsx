@@ -1,4 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { _getEquipmentToken } from 'src/core-hub';
+import { onInvokeReturn } from 'src/store/signal/actions';
 
 type PaderConferenceSettings = {
    audioGain: number;
@@ -7,6 +9,7 @@ type PaderConferenceSettings = {
 type SettingsState = {
    open: boolean;
    obj: PaderConferenceSettings;
+   equipmentToken: string | null;
 };
 
 const initialState: SettingsState = {
@@ -14,6 +17,7 @@ const initialState: SettingsState = {
    obj: {
       audioGain: 1,
    },
+   equipmentToken: null,
 };
 
 const settingsSlice = createSlice({
@@ -28,6 +32,11 @@ const settingsSlice = createSlice({
       },
       setAudioGain(state, { payload }: PayloadAction<number>) {
          state.obj.audioGain = payload;
+      },
+   },
+   extraReducers: {
+      [onInvokeReturn(_getEquipmentToken).type]: (state, action: PayloadAction<string>) => {
+         state.equipmentToken = action.payload;
       },
    },
 });

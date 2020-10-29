@@ -1,4 +1,5 @@
 import { SendChatMessageDto, CreateRoomDto, SwitchRoomDto } from './core-hub.types';
+import { RegisterEquipmentRequestDto } from './features/equipment/types';
 import { connectSignal, invoke, send } from './store/signal/actions';
 
 export const joinConference = (conferenceId: string, defaultEvents: string[], accessToken: string) =>
@@ -20,3 +21,18 @@ export const sendChatMessage = (dto: SendChatMessageDto) => send('SendChatMessag
 
 export const _getEquipmentToken = 'GetEquipmentToken';
 export const getEquipmentToken = () => invoke(_getEquipmentToken);
+
+export const registerEquipment = (dto: RegisterEquipmentRequestDto) => send('RegisterEquipment', dto);
+
+export const events = {
+   onConnectionError: 'OnConnectionError',
+
+   onSynchronizedObjectUpdated: 'OnSynchronizedObjectUpdated',
+   onSynchronizeObjectState: 'OnSynchronizeObjectState',
+
+   chatMessage: 'ChatMessage',
+   chat: 'chat',
+
+   onPermissionsUpdated: 'OnPermissionsUpdated',
+   onEquipmentUpdated: 'OnEquipmentUpdated',
+};

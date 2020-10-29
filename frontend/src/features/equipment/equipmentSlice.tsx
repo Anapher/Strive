@@ -1,13 +1,13 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { _getEquipmentToken } from 'src/core-hub';
-import { onInvokeReturn } from 'src/store/signal/actions';
+import { fetchDevices } from './thunks';
+import { EquipmentDeviceInfo } from './types';
 
 type EquipmentState = {
-   token: string | null;
+   availableEquipment: EquipmentDeviceInfo[] | null;
 };
 
 const initialState: EquipmentState = {
-   token: null,
+   availableEquipment: null,
 };
 
 const equipmentSlice = createSlice({
@@ -15,8 +15,8 @@ const equipmentSlice = createSlice({
    initialState,
    reducers: {},
    extraReducers: {
-      [onInvokeReturn(_getEquipmentToken).type]: (state, action: PayloadAction<string>) => {
-         state.token = action.payload;
+      [fetchDevices.fulfilled.type]: (state, { payload }: PayloadAction<EquipmentDeviceInfo[]>) => {
+         state.availableEquipment = payload;
       },
    },
 });

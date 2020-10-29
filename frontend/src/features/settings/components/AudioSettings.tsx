@@ -1,5 +1,5 @@
 import { makeStyles, Mark, Slider, Typography } from '@material-ui/core';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from 'src/store';
 import { setAudioGain } from '../settingsSlice';
@@ -29,6 +29,18 @@ export default function AudioSettings() {
    const handleChangeGain = (_: React.ChangeEvent<unknown>, value: number | number[]) => {
       dispatch(setAudioGain(value as number));
    };
+
+   useEffect(() => {
+      const loadDevices = async () => {
+         const devices = await navigator.mediaDevices.enumerateDevices();
+         for (const asd of devices) {
+            asd.kind === 'audioinput';
+         }
+         console.log(devices);
+      };
+
+      loadDevices();
+   }, []);
 
    return (
       <div className={classes.root}>

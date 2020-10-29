@@ -1,3 +1,5 @@
+import { EquipmentDeviceInfo } from '../equipment/types';
+
 export type ProducerSource = 'mic' | 'webcam' | 'screen';
 
 export type ConsumerInfo = {
@@ -19,3 +21,13 @@ export type ParticipantStreams = {
 };
 
 export type ConferenceParticipantStreamInfo = { [key: string]: ParticipantStreams | undefined };
+
+export type ParticipantEquipmentStatusDto = {
+   connectedEquipment: ConnectedEquipmentDto[];
+};
+
+export type ConnectedEquipmentDto = {
+   equipmentId: string;
+   name?: string;
+   devices?: EquipmentDeviceInfo[];
+};

@@ -4,30 +4,22 @@
     {
         public static class Request
         {
-            public const string SendChatMessage = nameof(SendChatMessage);
-            public const string RequestChat = nameof(RequestChat);
-            public const string RequestParticipants = nameof(RequestParticipants);
-
-            public const string RequestRouterCapabilities = nameof(RequestRouterCapabilities);
+            public const string SendChatMessage = "SendChatMessage";
+            public const string RequestChat = "RequestChat";
         }
 
         public static class Response
         {
-            public const string OnSynchronizedObjectUpdated = nameof(OnSynchronizedObjectUpdated);
-            public const string OnSynchronizeObjectState = nameof(OnSynchronizeObjectState);
+            public const string OnConnectionError = "OnConnectionError";
 
-            public const string ChatMessage = nameof(ChatMessage);
-            public const string Chat = nameof(Chat);
-            public const string OnUserJoined = nameof(OnUserJoined);
-            public const string OnConnectionError = nameof(OnConnectionError);
+            public const string OnSynchronizedObjectUpdated = "OnSynchronizedObjectUpdated";
+            public const string OnSynchronizeObjectState = "OnSynchronizeObjectState";
 
-            public const string OnParticipantsUpdated = nameof(OnParticipantsUpdated);
-            public const string OnPermissionsUpdated = nameof(OnPermissionsUpdated);
+            public const string ChatMessage = "ChatMessage";
+            public const string Chat = "Chat";
 
-            public const string OnIceCandidate = nameof(OnIceCandidate);
-            public const string OnSdp = nameof(OnSdp);
-
-            public const string OnRouterCapabilities = nameof(OnRouterCapabilities);
+            public const string OnPermissionsUpdated = "OnPermissionsUpdated";
+            public const string OnEquipmentUpdated = "OnEquipmentUpdated";
         }
     }
 }
