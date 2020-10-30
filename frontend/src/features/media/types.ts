@@ -1,6 +1,6 @@
+import { UseMediaStateInfo } from 'src/store/webrtc/hooks/useMedia';
+import { ProducerSource } from 'src/store/webrtc/types';
 import { InputDeviceDto } from '../settings/types';
-
-export type ProducerSource = 'mic' | 'webcam' | 'screen';
 
 export type ConsumerInfo = {
    paused: boolean;
@@ -22,12 +22,10 @@ export type ParticipantStreams = {
 
 export type ConferenceParticipantStreamInfo = { [key: string]: ParticipantStreams | undefined };
 
-export type ParticipantEquipmentStatusDto = {
-   connectedEquipment: ConnectedEquipmentDto[];
-};
-
 export type ConnectedEquipmentDto = {
    equipmentId: string;
    name?: string;
    devices?: InputDeviceDto[];
+
+   status?: { [key in ProducerSource]: UseMediaStateInfo };
 };

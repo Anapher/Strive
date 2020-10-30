@@ -1,13 +1,20 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { _getEquipmentToken } from 'src/core-hub';
 import { onInvokeReturn } from 'src/store/signal/actions';
+import { ProducerSource } from 'src/store/webrtc/types';
 import { fetchDevices } from './thunks';
 import { AnyInputDevice, InputDeviceDto } from './types';
 
 type PaderConferenceSettings = {
-   audio: {
+   mic: {
       device?: AnyInputDevice;
       audioGain: number;
+   };
+   webcam: {
+      device?: AnyInputDevice;
+   };
+   screen: {
+      device?: AnyInputDevice;
    };
 };
 
@@ -21,9 +28,11 @@ type SettingsState = {
 const initialState: SettingsState = {
    open: false,
    obj: {
-      audio: {
+      mic: {
          audioGain: 1,
       },
+      webcam: {},
+      screen: {},
    },
    equipmentToken: null,
    availableDevices: null,
@@ -40,7 +49,13 @@ const settingsSlice = createSlice({
          state.open = false;
       },
       setAudioGain(state, { payload }: PayloadAction<number>) {
-         state.obj.audio.audioGain = payload;
+         state.obj.mic.audioGain = payload;
+      },
+      setCurrentDevice(
+         state,
+         { payload: { source, device } }: PayloadAction<{ source: ProducerSource; device: AnyInputDevice | undefined }>,
+      ) {
+         state.obj[source].device = device;
       },
    },
    extraReducers: {
@@ -53,6 +68,6 @@ const settingsSlice = createSlice({
    },
 });
 
-export const { closeSettings, openSettings, setAudioGain } = settingsSlice.actions;
+export const { closeSettings, openSettings, setAudioGain, setCurrentDevice } = settingsSlice.actions;
 
 export default settingsSlice.reducer;

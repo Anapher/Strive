@@ -3,7 +3,7 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from 'src/store';
 import { selectAvailableInputDevices } from '../selectors';
-import { setAudioGain } from '../settingsSlice';
+import { setAudioGain, setCurrentDevice } from '../settingsSlice';
 import DeviceSelector from './DeviceSelector';
 
 const useStyles = makeStyles((theme) => ({
@@ -25,7 +25,8 @@ const marks: Mark[] = [
 
 export default function AudioSettings() {
    const classes = useStyles();
-   const audioGain = useSelector((state: RootState) => state.settings.obj.audio.audioGain);
+   const audioGain = useSelector((state: RootState) => state.settings.obj.mic.audioGain);
+   const audioDevice = useSelector((state: RootState) => state.settings.obj.mic.device);
    const dispatch = useDispatch();
 
    const handleChangeGain = (_: React.ChangeEvent<unknown>, value: number | number[]) => {
@@ -40,9 +41,8 @@ export default function AudioSettings() {
             devices={audioDevices}
             label="Microphone"
             defaultName="Microphone"
-            onChange={(x) => {
-               console.log(x);
-            }}
+            selectedDevice={audioDevice}
+            onChange={(device) => dispatch(setCurrentDevice({ device, source: 'mic' }))}
          />
          <Box mt={4}>
             <Typography variant="h6" gutterBottom>

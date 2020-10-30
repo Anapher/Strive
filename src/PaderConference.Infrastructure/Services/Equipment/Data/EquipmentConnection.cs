@@ -17,5 +17,7 @@ namespace PaderConference.Infrastructure.Services.Equipment.Data
         public string? Name { get; set; }
 
         public List<EquipmentDeviceInfo>? Devices { get; set; }
+
+        public Dictionary<string, UseMediaStateInfo>? Status { get; set; }
     }
 }

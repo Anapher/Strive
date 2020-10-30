@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using PaderConference.Core.Domain;
 using PaderConference.Core.Domain.Entities;
+using PaderConference.Core.Dto;
 using PaderConference.Core.Interfaces.Services;
 using PaderConference.Infrastructure.Conferencing;
 using PaderConference.Infrastructure.Extensions;
@@ -17,6 +18,7 @@ using PaderConference.Infrastructure.Services;
 using PaderConference.Infrastructure.Services.Chat;
 using PaderConference.Infrastructure.Services.ConferenceControl;
 using PaderConference.Infrastructure.Services.Equipment;
+using PaderConference.Infrastructure.Services.Equipment.Data;
 using PaderConference.Infrastructure.Services.Equipment.Dto;
 using PaderConference.Infrastructure.Services.Media;
 using PaderConference.Infrastructure.Services.Media.Communication;
@@ -256,6 +258,22 @@ namespace PaderConference.Infrastructure.Hubs
         {
             return InvokeService<EquipmentService, RegisterEquipmentRequestDto>(dto,
                 service => service.RegisterEquipment);
+        }
+
+        public Task SendEquipmentCommand(EquipmentCommand dto)
+        {
+            return InvokeService<EquipmentService, EquipmentCommand>(dto, service => service.SendEquipmentCommand);
+        }
+
+        public Task EquipmentErrorOccurred(Error dto)
+        {
+            return InvokeService<EquipmentService, Error>(dto, service => service.EquipmentErrorOccurred);
+        }
+
+        public Task EquipmentUpdateStatus(Dictionary<string, UseMediaStateInfo> dto)
+        {
+            return InvokeService<EquipmentService, Dictionary<string, UseMediaStateInfo>>(dto,
+                service => service.EquipmentUpdateStatus);
         }
     }
 }

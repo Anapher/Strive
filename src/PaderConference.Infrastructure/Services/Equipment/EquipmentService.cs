@@ -4,9 +4,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using PaderConference.Core.Domain.Entities;
+using PaderConference.Core.Dto;
 using PaderConference.Core.Interfaces.Services;
 using PaderConference.Infrastructure.Extensions;
 using PaderConference.Infrastructure.Hubs;
+using PaderConference.Infrastructure.Services.Equipment.Data;
 using PaderConference.Infrastructure.Services.Equipment.Dto;
 using PaderConference.Infrastructure.Sockets;
 
@@ -79,6 +81,38 @@ namespace PaderConference.Infrastructure.Services.Equipment
             if (_participantEquipment.TryGetValue(message.Participant.ParticipantId, out var equipment))
             {
                 await equipment.RegisterEquipment(message.Context.ConnectionId, message.Payload);
+                await UpdateParticipantEquipment(message.Participant, equipment);
+            }
+        }
+
+        public async ValueTask SendEquipmentCommand(IServiceMessage<EquipmentCommand> message)
+        {
+            if (_participantEquipment.TryGetValue(message.Participant.ParticipantId, out var equipment))
+            {
+                var connection = equipment.GetConnection(message.Payload.EquipmentId);
+                if (connection == null)
+                {
+                    await message.ResponseError(EquipmentError.NotFound);
+                    return;
+                }
+
+                await _hubContext.Clients.Client(connection.ConnectionId)
+                    .SendAsync(CoreHubMessages.Response.OnEquipmentCommand, message.Payload);
+            }
+        }
+
+        public async ValueTask EquipmentErrorOccurred(IServiceMessage<Error> message)
+        {
+            if (_connectionMapping.ConnectionsR.TryGetValue(message.Participant, out var connections))
+                await _hubContext.Clients.Client(connections.MainConnectionId)
+                    .SendAsync(CoreHubMessages.Response.OnError, message.Payload);
+        }
+
+        public async ValueTask EquipmentUpdateStatus(IServiceMessage<Dictionary<string, UseMediaStateInfo>> message)
+        {
+            if (_participantEquipment.TryGetValue(message.Participant.ParticipantId, out var equipment))
+            {
+                equipment.UpdateStatus(message.Context.ConnectionId, message.Payload);
                 await UpdateParticipantEquipment(message.Participant, equipment);
             }
         }

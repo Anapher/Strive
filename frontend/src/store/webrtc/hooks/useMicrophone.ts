@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
-import { useMedia, UseMediaState } from './useMedia';
+import useMedia, { UseMediaState } from './useMedia';
 
-export function useMicrophone(gain?: number): UseMediaState {
+export default function useMicrophone(gain?: number): UseMediaState {
    const audioGainNode = useRef<GainNode | null>(null);
 
    useEffect(() => {
@@ -10,11 +10,11 @@ export function useMicrophone(gain?: number): UseMediaState {
       }
    }, [gain]);
 
-   const getMic = async () => {
+   const getMic = async (deviceId?: string) => {
       const audioContext = new AudioContext();
       const gainNode = audioContext.createGain();
 
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: { deviceId } });
 
       const audioSource = audioContext.createMediaStreamSource(stream);
       const audioDestination = audioContext.createMediaStreamDestination();

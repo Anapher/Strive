@@ -1,4 +1,4 @@
-import { ProducerSource } from '../media/types';
+import { ProducerSource } from 'src/store/webrtc/types';
 
 export type InputDeviceDto = {
    deviceId: string;

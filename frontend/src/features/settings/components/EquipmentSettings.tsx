@@ -52,7 +52,7 @@ export default function EquipmentSettings() {
          {equipment && (
             <Box mt={2}>
                <Grid container>
-                  {equipment.connectedEquipment.map((x) => (
+                  {equipment.map((x) => (
                      <Grid item key={x.equipmentId}>
                         <Chip color="secondary" label={x.name} icon={<CheckIcon />} />
                      </Grid>

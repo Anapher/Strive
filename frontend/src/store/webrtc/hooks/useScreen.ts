@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useMedia, UseMediaState } from './useMedia';
+import useMedia, { UseMediaState } from './useMedia';
 
 type UseScreenState = UseMediaState & {
    stream: MediaStream | null;

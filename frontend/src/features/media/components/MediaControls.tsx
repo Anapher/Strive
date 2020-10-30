@@ -1,24 +1,24 @@
 import { Dialog, DialogContent, DialogTitle, Fab, makeStyles, Tooltip } from '@material-ui/core';
-import DesktopWindowsIcon from '@material-ui/icons/DesktopWindows';
+import BugReportIcon from '@material-ui/icons/BugReport';
+import DesktopAccessDisabledIcon from '@material-ui/icons/DesktopAccessDisabled';
+import MicIcon from '@material-ui/icons/Mic';
+import MicOffIcon from '@material-ui/icons/MicOff';
+import PanToolIcon from '@material-ui/icons/PanTool';
+import VideocamOffIcon from '@material-ui/icons/VideocamOff';
 import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
+import Debug from 'src/features/conference/components/Troubleshooting';
 import usePermission, {
    CONFERENCE_CAN_RAISE_HAND,
    MEDIA_CAN_SHARE_AUDIO,
    MEDIA_CAN_SHARE_SCREEN,
    MEDIA_CAN_SHARE_WEBCAM,
 } from 'src/hooks/usePermission';
-import VideocamIcon from '@material-ui/icons/Videocam';
-import MicIcon from '@material-ui/icons/Mic';
-import MicOffIcon from '@material-ui/icons/MicOff';
-import BugReportIcon from '@material-ui/icons/BugReport';
-import DesktopAccessDisabledIcon from '@material-ui/icons/DesktopAccessDisabled';
-import VideocamOffIcon from '@material-ui/icons/VideocamOff';
-import { useMicrophone } from 'src/store/webrtc/hooks/useMicrophone';
-import MediaFab from './MediaFab';
-import PanToolIcon from '@material-ui/icons/PanTool';
-import Debug from 'src/features/conference/components/Troubleshooting';
 import { RootState } from 'src/store';
-import { useSelector } from 'react-redux';
+import useMicrophone from 'src/store/webrtc/hooks/useMicrophone';
+import useDeviceManagement from '../useDeviceManagement';
+import useWatchSelectedDevice from '../useWatchDevice';
+import MediaFab from './MediaFab';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -46,8 +46,12 @@ const useStyles = makeStyles((theme) => ({
 export default function MediaControls() {
    const classes = useStyles();
 
-   const gain = useSelector((state: RootState) => state.settings.obj.audio.audioGain);
-   const micState = useMicrophone(gain);
+   const gain = useSelector((state: RootState) => state.settings.obj.mic.audioGain);
+   const localMic = useMicrophone(gain);
+   const audioDevice = useSelector((state: RootState) => state.settings.obj.mic.device);
+
+   const micController = useDeviceManagement('mic', localMic, audioDevice);
+   useWatchSelectedDevice('mic');
 
    const canShareScreen = usePermission(MEDIA_CAN_SHARE_SCREEN);
    const canShareAudio = usePermission(MEDIA_CAN_SHARE_AUDIO);
@@ -87,7 +91,7 @@ export default function MediaControls() {
                   className={classes.fab}
                   IconEnable={MicIcon}
                   IconDisable={MicOffIcon}
-                  mediaState={micState}
+                  control={micController}
                />
             )}
          </div>

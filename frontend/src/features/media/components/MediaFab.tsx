@@ -5,7 +5,7 @@ import { UseMediaState } from 'src/store/webrtc/hooks/useMedia';
 
 type Props = {
    className?: string;
-   mediaState: UseMediaState;
+   control: UseMediaState;
 
    IconEnable: OverridableComponent<SvgIconTypeMap>;
    IconDisable: OverridableComponent<SvgIconTypeMap>;
@@ -14,7 +14,7 @@ type Props = {
 export default function MediaFab({
    IconDisable,
    IconEnable,
-   mediaState: { enabled, paused, enable, pause, resume },
+   control: { enable, pause, resume, enabled, paused },
    ...fabProps
 }: Props) {
    const handleClick = () => {

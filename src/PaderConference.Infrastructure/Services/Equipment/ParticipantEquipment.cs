@@ -57,13 +57,37 @@ namespace PaderConference.Infrastructure.Services.Equipment
             return new ValueTask();
         }
 
-        public ParticipantEquipmentStatusDto GetStatus()
+        public EquipmentConnection? GetConnection(Guid equipmentId)
         {
             lock (_lock)
             {
-                return new ParticipantEquipmentStatusDto(_equipmentIdToEquipment.Values.Select(x =>
-                        new ConnectedEquipmentDto {Name = x.Name, Devices = x.Devices, EquipmentId = x.EquipmentId})
-                    .ToList());
+                _equipmentIdToEquipment.TryGetValue(equipmentId, out var connection);
+                return connection;
+            }
+        }
+
+        public void UpdateStatus(string connectionId, Dictionary<string, UseMediaStateInfo> status)
+        {
+            lock (_lock)
+            {
+                if (!_connectionIdToEquipment.TryGetValue(connectionId, out var connection))
+                    throw new InvalidOperationException("Equipment not found");
+
+                connection.Status = status;
+            }
+        }
+
+        public List<ConnectedEquipmentDto> GetStatus()
+        {
+            lock (_lock)
+            {
+                var connectedEquipment = _equipmentIdToEquipment.Values.Select(x =>
+                    new ConnectedEquipmentDto
+                    {
+                        Name = x.Name, Devices = x.Devices, EquipmentId = x.EquipmentId, Status = x.Status,
+                    }).ToList();
+
+                return connectedEquipment;
             }
         }
     }

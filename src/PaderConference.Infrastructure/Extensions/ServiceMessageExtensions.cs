@@ -19,7 +19,7 @@ namespace PaderConference.Infrastructure.Extensions
 
         public static async Task ResponseError(this IServiceMessage serviceMessage, Error error)
         {
-            await serviceMessage.Clients.Caller.SendAsync("OnError", error);
+            await serviceMessage.Clients.Caller.SendAsync(CoreHubMessages.Response.OnError, error);
         }
     }
 }

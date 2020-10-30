@@ -24,7 +24,7 @@ export const selectAvailableInputDevices = createSelector(
       }
 
       if (equipment) {
-         for (const connected of equipment.connectedEquipment) {
+         for (const connected of equipment) {
             if (connected.devices)
                result.push({
                   type: 'equipment',

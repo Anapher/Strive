@@ -1,6 +1,7 @@
-import { SendChatMessageDto, CreateRoomDto, SwitchRoomDto } from './core-hub.types';
+import { SendChatMessageDto, CreateRoomDto, SwitchRoomDto, EquipmentCommand, EquipmentStatus } from './core-hub.types';
 import { RegisterEquipmentRequestDto } from './features/equipment/types';
 import { connectSignal, invoke, send } from './store/signal/actions';
+import { IRestError } from './utils/error-result';
 
 export const joinConference = (conferenceId: string, defaultEvents: string[], accessToken: string) =>
    connectSignal({ conferenceId, access_token: accessToken }, defaultEvents, { conferenceId });
@@ -23,6 +24,9 @@ export const _getEquipmentToken = 'GetEquipmentToken';
 export const getEquipmentToken = () => invoke(_getEquipmentToken);
 
 export const registerEquipment = (dto: RegisterEquipmentRequestDto) => send('RegisterEquipment', dto);
+export const sendEquipmentCommand = (dto: EquipmentCommand) => send('SendEquipmentCommand', dto);
+export const equipmentErrorOccurred = (dto: IRestError) => send('EquipmentErrorOccurred', dto);
+export const equipmentUpdateStatus = (dto: EquipmentStatus) => send('EquipmentUpdateStatus', dto);
 
 export const events = {
    onConnectionError: 'OnConnectionError',
@@ -35,4 +39,5 @@ export const events = {
 
    onPermissionsUpdated: 'OnPermissionsUpdated',
    onEquipmentUpdated: 'OnEquipmentUpdated',
+   onEquipmentCommand: 'OnEquipmentCommand',
 };

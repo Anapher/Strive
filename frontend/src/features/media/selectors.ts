@@ -1,6 +1,8 @@
-import { ProducerInfo, ProducerSource } from './types';
+import { ProducerInfo } from './types';
 import { createSelector } from '@reduxjs/toolkit';
 import { RootState } from 'src/store';
+import { ProducerSource } from 'src/store/webrtc/types';
+import { selectAccessToken } from '../auth/selectors';
 
 const getId = (_: unknown, id: string | undefined) => id;
 const getStreams = (state: RootState) => state.media.streams;
@@ -26,6 +28,22 @@ export const getParticipantProducers = createSelector(getStreams, getId, (stream
 
    return result;
 });
+
+// const getSource = (_: unknown, source: ProducerSource) => source;
+
+// const defaultMediaStatus: MediaStatus = { enabled: false, paused: false };
+
+// export const selectDeviceState = createSelector(getStreams, selectAccessToken, getSource, (streams, token, source) => {
+//    if (!streams) return defaultMediaStatus;
+//    if (!token) return defaultMediaStatus;
+
+//    const participantStreams = streams[token.nameid];
+//    if (!participantStreams) return defaultMediaStatus;
+
+//    const producer = Object.entries(participantStreams.producers).find((x) => x[1].selected && x[1].kind === source);
+//    if (!producer) return defaultMediaStatus;
+//    return { enabled: true, paused: producer[1].paused };
+// });
 
 export type ProducerViewModel = ProducerInfo & {
    id: string;
