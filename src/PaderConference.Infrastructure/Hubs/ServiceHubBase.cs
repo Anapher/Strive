@@ -4,10 +4,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using PaderConference.Core.Domain.Entities;
+using PaderConference.Core.Extensions;
 using PaderConference.Core.Interfaces.Services;
-using PaderConference.Infrastructure.Extensions;
-using PaderConference.Infrastructure.Services;
-using PaderConference.Infrastructure.Sockets;
+using PaderConference.Core.Services;
+using PaderConference.Core.Services.ConferenceControl;
 
 namespace PaderConference.Infrastructure.Hubs
 {
@@ -17,8 +17,7 @@ namespace PaderConference.Infrastructure.Hubs
         protected readonly IEnumerable<IConferenceServiceManager> ConferenceServices;
 
         protected ServiceHubBase(IConnectionMapping connectionMapping, IConferenceManager conferenceManager,
-            IEnumerable<IConferenceServiceManager> conferenceServices,
-            ILogger logger) : base(connectionMapping, logger)
+            IEnumerable<IConferenceServiceManager> conferenceServices, ILogger logger) : base(connectionMapping, logger)
         {
             ConferenceManager = conferenceManager;
             ConferenceServices = conferenceServices;
@@ -59,8 +58,7 @@ namespace PaderConference.Infrastructure.Hubs
         }
 
         protected async Task InvokeService<TService>(Func<TService, Func<IServiceMessage, ValueTask>> action,
-            MethodOptions options = default)
-            where TService : IConferenceService
+            MethodOptions options = default) where TService : IConferenceService
         {
             if (GetMessage(out var message) && await AssertConference(message, options))
             {

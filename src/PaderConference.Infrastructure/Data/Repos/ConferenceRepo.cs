@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Interfaces.Gateways.Repositories;
+using StackExchange.Redis.Extensions.Core.Abstractions;
 
 #pragma warning disable 8619
 
@@ -12,6 +14,8 @@ namespace PaderConference.Infrastructure.Data.Repos
 {
     public class ConferenceRepo : MongoRepo<Conference>, IConferenceRepo
     {
+        private readonly IRedisDatabase _database;
+
         static ConferenceRepo()
         {
             BsonClassMap.RegisterClassMap<Conference>(x =>
@@ -21,8 +25,9 @@ namespace PaderConference.Infrastructure.Data.Repos
             });
         }
 
-        public ConferenceRepo(IOptions<MongoDbOptions> options) : base(options)
+        public ConferenceRepo(IOptions<MongoDbOptions> options, IRedisDatabase database) : base(options)
         {
+            _database = database;
         }
 
         public Task<Conference?> FindById(string conferenceId)
@@ -49,6 +54,14 @@ namespace PaderConference.Infrastructure.Data.Repos
         public async Task<IReadOnlyList<Conference>> GetActiveConferences()
         {
             return await Collection.Find(x => x.State == ConferenceState.Active).ToListAsync();
+        }
+
+        public async Task<Func<Task>> SubscribeConferenceUpdated(string conferenceId, Func<Conference, Task> handler)
+        {
+            var channelName = RedisChannels.OnConferenceUpdated(conferenceId);
+            await _database.SubscribeAsync(channelName, handler);
+
+            return () => _database.UnsubscribeAsync(channelName, handler);
         }
     }
 }

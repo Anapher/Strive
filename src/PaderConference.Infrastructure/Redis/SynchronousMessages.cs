@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using PaderConference.Infrastructure.Extensions;
+using PaderConference.Core.Extensions;
 using StackExchange.Redis;
 using StackExchange.Redis.Extensions.Core.Abstractions;
 

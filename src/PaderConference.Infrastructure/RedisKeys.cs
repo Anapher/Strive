@@ -1,7 +1,8 @@
 ﻿using PaderConference.Core.Domain.Entities;
-using PaderConference.Infrastructure.Services.Media.Communication;
-using PaderConference.Infrastructure.Services.Media.Mediasoup;
-using PaderConference.Infrastructure.Services.Rooms;
+using PaderConference.Core.Services;
+using PaderConference.Core.Services.Media.Communication;
+using PaderConference.Core.Services.Media.Mediasoup;
+using PaderConference.Core.Services.Rooms;
 
 namespace PaderConference.Infrastructure
 {

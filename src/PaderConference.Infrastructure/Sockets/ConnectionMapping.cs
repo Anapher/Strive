@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using PaderConference.Core.Domain.Entities;
+using PaderConference.Core.Interfaces.Services;
 
 namespace PaderConference.Infrastructure.Sockets
 {

@@ -1,7 +1,7 @@
 using System;
 using System.Security.Cryptography;
+using PaderConference.Core.Extensions;
 using PaderConference.Core.Interfaces.Services;
-using PaderConference.Infrastructure.Extensions;
 
 namespace PaderConference.Infrastructure.Auth
 {

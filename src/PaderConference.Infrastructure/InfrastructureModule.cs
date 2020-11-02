@@ -1,10 +1,13 @@
 using Autofac;
 using PaderConference.Core.Interfaces.Services;
+using PaderConference.Core.Services;
 using PaderConference.Infrastructure.Auth;
 using PaderConference.Infrastructure.Conferencing;
 using PaderConference.Infrastructure.Data;
+using PaderConference.Infrastructure.Hubs;
 using PaderConference.Infrastructure.Interfaces;
-using PaderConference.Infrastructure.Services;
+using PaderConference.Infrastructure.Redis;
+using PaderConference.Infrastructure.ServiceFactories.Base;
 using PaderConference.Infrastructure.Sockets;
 
 namespace PaderConference.Infrastructure
@@ -26,6 +29,11 @@ namespace PaderConference.Infrastructure
 
             builder.RegisterAssemblyTypes(ThisAssembly).AssignableTo<IConferenceService>().AsSelf()
                 .InstancePerDependency();
+
+            builder.RegisterAssemblyTypes(ThisAssembly).AssignableTo<IRedisRepo>().AsImplementedInterfaces()
+                .SingleInstance();
+
+            builder.RegisterType<SignalrMessenger<CoreHub>>().AsImplementedInterfaces().SingleInstance();
 
             builder.RegisterAssemblyTypes(ThisAssembly).AsClosedTypesOf(typeof(MongoRepo<>)).AsImplementedInterfaces()
                 .SingleInstance();

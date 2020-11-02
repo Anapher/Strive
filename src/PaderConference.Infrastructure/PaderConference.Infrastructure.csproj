@@ -5,23 +5,19 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="automapper" Version="10.0.0" />
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.8" />
-    <PackageReference Include="Microsoft.Extensions.Options" Version="3.1.8" />
     <PackageReference Include="MongoDB.Driver" Version="2.11.2" />
-    <PackageReference Include="Nito.AsyncEx.Coordination" Version="5.1.0" />
     <PackageReference Include="StackExchange.Redis" Version="2.1.58" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.7.1" />
     <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.7.1" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.8" />
     <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="3.1.8" />
     <PackageReference Include="StackExchange.Redis.Extensions.Core" Version="6.3.5" />
+    <PackageReference Include="System.Text.Json" Version="4.7.2" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\libs\JsonPatchGenerator\JsonPatchGenerator.csproj" />
     <ProjectReference Include="..\PaderConference.Core\PaderConference.Core.csproj" />
   </ItemGroup>
 

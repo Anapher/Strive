@@ -1,6 +1,7 @@
 ﻿using PaderConference.Core.Domain.Entities;
-using PaderConference.Infrastructure.Services.Media.Communication;
-using PaderConference.Infrastructure.Services.Permissions.Dto;
+using PaderConference.Core.Services;
+using PaderConference.Core.Services.Media.Communication;
+using PaderConference.Core.Services.Permissions.Dto;
 using StackExchange.Redis;
 
 namespace PaderConference.Infrastructure
@@ -97,26 +98,6 @@ namespace PaderConference.Infrastructure
         private static ConferenceDependentKey CreateChannelName(string postFix)
         {
             return new ConferenceDependentKey(postFix);
-        }
-    }
-
-    public class ConferenceDependentKey
-    {
-        private readonly string _postFix;
-
-        public ConferenceDependentKey(string postFix)
-        {
-            _postFix = postFix;
-        }
-
-        public string GetName(string conferenceId)
-        {
-            return conferenceId + _postFix;
-        }
-
-        public bool Match(string s)
-        {
-            return s.EndsWith(_postFix);
         }
     }
 }

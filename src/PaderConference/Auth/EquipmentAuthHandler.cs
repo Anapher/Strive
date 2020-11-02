@@ -6,8 +6,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using PaderConference.Core.Domain;
 using PaderConference.Core.Interfaces.Services;
-using PaderConference.Infrastructure.Services;
-using PaderConference.Infrastructure.Services.Equipment;
+using PaderConference.Core.Services;
+using PaderConference.Core.Services.Equipment;
 
 namespace PaderConference.Auth
 {

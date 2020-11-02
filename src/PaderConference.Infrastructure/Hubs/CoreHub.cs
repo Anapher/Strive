@@ -11,20 +11,20 @@ using PaderConference.Core.Domain;
 using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Dto;
 using PaderConference.Core.Interfaces.Services;
+using PaderConference.Core.Services;
+using PaderConference.Core.Services.Chat;
+using PaderConference.Core.Services.Chat.Dto;
+using PaderConference.Core.Services.ConferenceControl;
+using PaderConference.Core.Services.Equipment;
+using PaderConference.Core.Services.Equipment.Data;
+using PaderConference.Core.Services.Equipment.Dto;
+using PaderConference.Core.Services.Media;
+using PaderConference.Core.Services.Media.Communication;
+using PaderConference.Core.Services.Rooms;
+using PaderConference.Core.Services.Rooms.Messages;
+using PaderConference.Core.Signaling;
 using PaderConference.Infrastructure.Conferencing;
 using PaderConference.Infrastructure.Extensions;
-using PaderConference.Infrastructure.Hubs.Dto;
-using PaderConference.Infrastructure.Services;
-using PaderConference.Infrastructure.Services.Chat;
-using PaderConference.Infrastructure.Services.ConferenceControl;
-using PaderConference.Infrastructure.Services.Equipment;
-using PaderConference.Infrastructure.Services.Equipment.Data;
-using PaderConference.Infrastructure.Services.Equipment.Dto;
-using PaderConference.Infrastructure.Services.Media;
-using PaderConference.Infrastructure.Services.Media.Communication;
-using PaderConference.Infrastructure.Services.Rooms;
-using PaderConference.Infrastructure.Services.Rooms.Messages;
-using PaderConference.Infrastructure.Sockets;
 
 namespace PaderConference.Infrastructure.Hubs
 {
@@ -209,9 +209,9 @@ namespace PaderConference.Infrastructure.Hubs
             return InvokeService<ChatService, SendChatMessageDto>(dto, service => service.SendMessage);
         }
 
-        public Task RequestChat()
+        public Task<IReadOnlyList<ChatMessageDto>> RequestChat()
         {
-            return InvokeService<ChatService>(service => service.RequestAllMessages);
+            return InvokeService<ChatService, IReadOnlyList<ChatMessageDto>>(service => service.RequestAllMessages);
         }
 
         public Task<JsonElement?> RequestRouterCapabilities()

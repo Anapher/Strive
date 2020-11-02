@@ -27,6 +27,7 @@ using PaderConference.Auth;
 using PaderConference.Core;
 using PaderConference.Core.Errors;
 using PaderConference.Core.Interfaces.Services;
+using PaderConference.Core.Services.Chat.Dto;
 using PaderConference.Extensions;
 using PaderConference.Infrastructure;
 using PaderConference.Infrastructure.Auth;
@@ -130,6 +131,14 @@ namespace PaderConference
             {
                 options.PayloadSerializerOptions.Converters.Add(
                     new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
+
+                // i know that this is quite bad, but until System.Text.Json doesn't support adding properties to serialization, we must do it like that...
+                options.PayloadSerializerOptions.Converters.Add(new TypeDiscriminatorConverter<SendingMode>(
+                    new Dictionary<string, Type>(StringComparer.OrdinalIgnoreCase)
+                    {
+                        {new SendAnonymously().Type, typeof(SendAnonymously)},
+                        {new SendPrivately().Type, typeof(SendPrivately)},
+                    }));
             });
 
             services.AddMvc()
@@ -143,7 +152,7 @@ namespace PaderConference
                 .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Startup>())
                 .AddNewtonsoftJson();
 
-            services.AddAutoMapper(Assembly.GetExecutingAssembly(), typeof(InfrastructureModule).Assembly);
+            services.AddAutoMapper(Assembly.GetExecutingAssembly(), typeof(CoreModule).Assembly);
 
             var redisConfig = Configuration.GetSection("Redis").Get<RedisConfiguration>() ?? new RedisConfiguration();
             services.AddStackExchangeRedisExtensions<CamelCaseSystemTextJsonSerializer>(redisConfig);

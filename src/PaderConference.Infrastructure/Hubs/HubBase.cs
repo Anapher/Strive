@@ -2,8 +2,9 @@
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using PaderConference.Core.Domain.Entities;
+using PaderConference.Core.Interfaces.Services;
+using PaderConference.Core.Services;
 using PaderConference.Infrastructure.Services;
-using PaderConference.Infrastructure.Sockets;
 
 namespace PaderConference.Infrastructure.Hubs
 {

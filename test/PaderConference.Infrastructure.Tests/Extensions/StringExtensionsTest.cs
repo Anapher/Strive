@@ -1,4 +1,4 @@
-﻿using PaderConference.Infrastructure.Extensions;
+﻿using PaderConference.Core.Extensions;
 using Xunit;
 
 namespace PaderConference.Infrastructure.Tests.Extensions
