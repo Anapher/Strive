@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Interfaces.Services;
 using PaderConference.Core.Services;
-using PaderConference.Infrastructure.Services;
+using PaderConference.Infrastructure.ServiceFactories.Base;
 
 namespace PaderConference.Infrastructure.Hubs
 {

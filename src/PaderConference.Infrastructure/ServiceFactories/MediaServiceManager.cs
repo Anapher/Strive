@@ -1,7 +1,8 @@
 ﻿using Autofac;
 using PaderConference.Core.Services.Media;
+using PaderConference.Infrastructure.ServiceFactories.Base;
 
-namespace PaderConference.Infrastructure.Services.Media
+namespace PaderConference.Infrastructure.ServiceFactories
 {
     public class MediaServiceManager : AutowiredConferenceServiceManager<MediaService>
     {

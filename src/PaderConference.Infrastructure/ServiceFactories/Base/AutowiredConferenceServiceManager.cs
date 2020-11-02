@@ -6,7 +6,7 @@ using Autofac.Core;
 using PaderConference.Core.Extensions;
 using PaderConference.Core.Services;
 
-namespace PaderConference.Infrastructure.Services
+namespace PaderConference.Infrastructure.ServiceFactories.Base
 {
     public class AutowiredConferenceServiceManager<TService> : ConferenceServiceManager<TService>
         where TService : IConferenceService

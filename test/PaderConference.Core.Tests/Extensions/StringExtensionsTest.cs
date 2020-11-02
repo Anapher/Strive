@@ -1,7 +1,7 @@
 ﻿using PaderConference.Core.Extensions;
 using Xunit;
 
-namespace PaderConference.Infrastructure.Tests.Extensions
+namespace PaderConference.Core.Tests.Extensions
 {
     public class StringExtensionsTest
     {

@@ -2,7 +2,7 @@
 using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Services;
 
-namespace PaderConference.Infrastructure.Services
+namespace PaderConference.Infrastructure.ServiceFactories.Base
 {
     public class ServiceMessage<TPayload> : ServiceMessage, IServiceMessage<TPayload>
     {

@@ -1,7 +1,8 @@
 ﻿using Autofac;
 using PaderConference.Core.Services.Equipment;
+using PaderConference.Infrastructure.ServiceFactories.Base;
 
-namespace PaderConference.Infrastructure.Services.Equipment
+namespace PaderConference.Infrastructure.ServiceFactories
 {
     public class EquipmentServiceManager : AutowiredConferenceServiceManager<EquipmentService>
     {

@@ -12,12 +12,12 @@
         ///     If the participant is currently noted typing and the info that he is typing exceeds this value in seconds, it will
         ///     be automatically updated to not typing
         /// </summary>
-        public int CancelParticipantIsTypingAfter { get; set; } = 30;
+        public double CancelParticipantIsTypingAfter { get; set; } = 30;
 
         /// <summary>
         ///     The interval in seconds of the timer that will check if any participant is typing and exceeds
         ///     <see cref="CancelParticipantIsTypingAfter" />
         /// </summary>
-        public int CancelParticipantIsTypingInterval { get; set; } = 5;
+        public double CancelParticipantIsTypingInterval { get; set; } = 5;
     }
 }

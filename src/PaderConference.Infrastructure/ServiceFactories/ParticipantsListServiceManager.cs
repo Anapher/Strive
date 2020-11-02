@@ -1,7 +1,8 @@
 ﻿using Autofac;
 using PaderConference.Core.Services.ParticipantsList;
+using PaderConference.Infrastructure.ServiceFactories.Base;
 
-namespace PaderConference.Infrastructure.Services.ParticipantsList
+namespace PaderConference.Infrastructure.ServiceFactories
 {
     public class ParticipantsListServiceManager : AutowiredConferenceServiceManager<ParticipantsListService>
     {
