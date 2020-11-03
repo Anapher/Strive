@@ -46,6 +46,13 @@ namespace PaderConference.Core.Tests.Services.Chat
                 _connectionMapping, _signalMessenger.Object, new OptionsWrapper<ChatOptions>(_options), Logger);
         }
 
+        private ChatSynchronizedObject GetSyncObj()
+        {
+            return (ChatSynchronizedObject) _synchronizationManager.Objects.Single().Value.GetCurrent();
+        }
+
+        #region Send Message
+
         [Fact]
         public async Task TestSendEmptyMessage()
         {
@@ -73,13 +80,23 @@ namespace PaderConference.Core.Tests.Services.Chat
             var message = TestServiceMessage.Create(new SendChatMessageDto {Message = "Hello world"},
                 TestParticipants.Default, "connectionId");
 
+            _signalMessenger
+                .Setup(x => x.SendToConferenceAsync(ConferenceId, CoreHubMessages.Response.ChatMessage,
+                    It.IsAny<object>())).Callback<string, string, object>((_, __, obj) =>
+                {
+                    var dto = Assert.IsType<ChatMessageDto>(obj);
+                    Assert.Equal("Hello world", dto.Message);
+                    Assert.Equal(TestParticipants.Default.ParticipantId, dto.ParticipantId);
+                    Assert.False(dto.IsPrivate);
+                });
+
             // act
             await service.SendMessage(message.Object);
 
             // assert
             _signalMessenger.Verify(
-                x => x.SendToConferenceAsync(ConferenceId, CoreHubMessages.Response.ChatMessage, It.IsAny<object>()),
-                Times.Once);
+                x => x.SendToConferenceAsync(ConferenceId, CoreHubMessages.Response.ChatMessage,
+                    It.IsAny<ChatMessageDto>()), Times.Once);
             _signalMessenger.VerifyNoOtherCalls();
 
             var requestChatMessage = TestServiceMessage.Create(TestParticipants.Default, "connectionId").Object;
@@ -137,8 +154,8 @@ namespace PaderConference.Core.Tests.Services.Chat
 
             // assert
             _signalMessenger.Verify(
-                x => x.SendToConferenceAsync(ConferenceId, CoreHubMessages.Response.ChatMessage, It.IsAny<object>()),
-                Times.Once);
+                x => x.SendToConferenceAsync(ConferenceId, CoreHubMessages.Response.ChatMessage,
+                    It.Is<ChatMessageDto>(x => x.ParticipantId == null)), Times.Once);
             _signalMessenger.VerifyNoOtherCalls();
 
             var requestChatMessage = TestServiceMessage.Create(TestParticipants.Default, "connectionId").Object;
@@ -169,6 +186,9 @@ namespace PaderConference.Core.Tests.Services.Chat
             Assert.Empty(messages);
         }
 
+        #endregion
+
+        #region User Typing
 
         [Fact]
         public async Task TestSetUserTyping()
@@ -282,9 +302,81 @@ namespace PaderConference.Core.Tests.Services.Chat
             Assert.Empty(GetSyncObj().ParticipantsTyping);
         }
 
-        private ChatSynchronizedObject GetSyncObj()
+        #endregion
+
+        #region Private Messages
+
+        [Fact]
+        public async Task TestSendPrivateMessageWithoutPermissions()
         {
-            return (ChatSynchronizedObject) _synchronizationManager.Objects.Single().Value.GetCurrent();
+            // arrange
+            var service = Create();
+            var message = TestServiceMessage.Create(
+                new SendChatMessageDto {Message = "Hello", Mode = new SendPrivately {ToParticipant = "test"}},
+                TestParticipants.Default, "connectionId");
+
+            // act
+            await service.SendMessage(message.Object);
+
+            // assert
+            message.Verify(x => x.SendToCallerAsync(CoreHubMessages.Response.OnError, It.IsAny<object>()), Times.Once);
+            message.Verify(x => x.SendToCallerAsync(It.IsAny<string>(), It.IsAny<object>()), Times.Once);
+
+            var requestChatMessage = TestServiceMessage.Create(TestParticipants.Default, "connectionId").Object;
+            var messages = await service.RequestAllMessages(requestChatMessage);
+            Assert.Empty(messages);
         }
+
+        [Fact]
+        public async Task TestSendPrivateMessage()
+        {
+            // arrange
+            _permissionsService = new MockPermissionsService(
+                new Dictionary<string, IReadOnlyDictionary<string, JsonElement>>
+                {
+                    {
+                        TestParticipants.Default.ParticipantId,
+                        new[]
+                        {
+                            PermissionsList.Chat.CanSendChatMessage.Configure(true),
+                            PermissionsList.Chat.CanSendPrivateChatMessage.Configure(true),
+                        }.ToDictionary(x => x.Key, x => x.Value)
+                    },
+                });
+            _connectionMapping.Add("conn1", TestParticipants.Default, false);
+            _connectionMapping.Add("conn2", TestParticipants.Default2, false);
+
+            var service = Create();
+            var message = TestServiceMessage.Create(
+                new SendChatMessageDto
+                {
+                    Message = "Hello",
+                    Mode = new SendPrivately {ToParticipant = TestParticipants.Default2.ParticipantId},
+                }, TestParticipants.Default, "conn1");
+
+            // act
+            await service.SendMessage(message.Object);
+
+            // assert
+            message.Verify(x => x.SendToCallerAsync(It.IsAny<string>(), It.IsAny<object>()), Times.Never);
+
+            _signalMessenger.Verify(
+                x => x.SendToConnectionAsync("conn1", CoreHubMessages.Response.ChatMessage,
+                    It.Is<ChatMessageDto>(x => x.IsPrivate)), Times.Once);
+            _signalMessenger.Verify(
+                x => x.SendToConnectionAsync("conn2", CoreHubMessages.Response.ChatMessage,
+                    It.Is<ChatMessageDto>(x => x.IsPrivate)), Times.Once);
+            _signalMessenger.VerifyNoOtherCalls();
+
+            var requestChatMessage = TestServiceMessage.Create(TestParticipants.Default2, "conn1").Object;
+            var messages = await service.RequestAllMessages(requestChatMessage);
+            Assert.Single(messages);
+
+            requestChatMessage = TestServiceMessage.Create(TestParticipants.Default, "conn1").Object;
+            messages = await service.RequestAllMessages(requestChatMessage);
+            Assert.Single(messages);
+        }
+
+        #endregion
     }
 }

@@ -41,7 +41,7 @@ namespace PaderConference.Core.Services.Synchronization
 
         public override async ValueTask InitializeParticipant(Participant participant)
         {
-            var connections = _connectionMapping.ConnectionsR[participant];
+            var connections = _connectionMapping.ConnectionsR[participant.ParticipantId];
             var state = GetState();
 
             await _clients.SendToConnectionAsync(connections.MainConnectionId,

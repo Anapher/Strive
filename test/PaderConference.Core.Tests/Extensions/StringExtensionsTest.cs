@@ -30,5 +30,14 @@ namespace PaderConference.Core.Tests.Extensions
         {
             Assert.Equal(expected, s.ToCamelCasePath());
         }
+
+        [Theory]
+        [InlineData("helloworld", "world", "hello")]
+        [InlineData("hello", "world", "hello")]
+        [InlineData("", "world", "")]
+        public void TestTrimEnd(string s, string trim, string expected)
+        {
+            Assert.Equal(expected, s.TrimEnd(trim));
+        }
     }
 }

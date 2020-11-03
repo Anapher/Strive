@@ -8,7 +8,7 @@ namespace PaderConference.Core.Interfaces.Services
     {
         ConcurrentDictionary<string, Participant> Connections { get; }
 
-        ConcurrentDictionary<Participant, IParticipantConnections> ConnectionsR { get; }
+        ConcurrentDictionary<string, IParticipantConnections> ConnectionsR { get; }
 
         bool Add(string connectionId, Participant participant, bool equipment = false);
 

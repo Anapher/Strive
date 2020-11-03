@@ -9,8 +9,8 @@ namespace PaderConference.Infrastructure.Sockets
         public ConcurrentDictionary<string, Participant> Connections { get; } =
             new ConcurrentDictionary<string, Participant>();
 
-        public ConcurrentDictionary<Participant, IParticipantConnections> ConnectionsR { get; } =
-            new ConcurrentDictionary<Participant, IParticipantConnections>();
+        public ConcurrentDictionary<string, IParticipantConnections> ConnectionsR { get; } =
+            new ConcurrentDictionary<string, IParticipantConnections>();
 
         public bool Add(string connectionId, Participant participant, bool equipment)
         {
@@ -20,7 +20,7 @@ namespace PaderConference.Infrastructure.Sockets
             if (equipment)
             {
                 // receive participant connections object
-                if (!ConnectionsR.TryGetValue(participant, out var connections))
+                if (!ConnectionsR.TryGetValue(participant.ParticipantId, out var connections))
                 {
                     Connections.TryRemove(connectionId, out _);
                     return false;
@@ -37,7 +37,7 @@ namespace PaderConference.Infrastructure.Sockets
             {
                 // create participant connections object and try to add
                 var connections = new ParticipantConnections(connectionId);
-                if (!ConnectionsR.TryAdd(participant, connections))
+                if (!ConnectionsR.TryAdd(participant.ParticipantId, connections))
                 {
                     Connections.TryRemove(connectionId, out _);
                     return false;
@@ -52,10 +52,10 @@ namespace PaderConference.Infrastructure.Sockets
             if (!Connections.TryRemove(connectionId, out var participant))
                 return false;
 
-            if (ConnectionsR.TryGetValue(participant, out var connections))
+            if (ConnectionsR.TryGetValue(participant.ParticipantId, out var connections))
             {
                 if (connections.MainConnectionId == connectionId)
-                    ConnectionsR.TryRemove(participant, out _);
+                    ConnectionsR.TryRemove(participant.ParticipantId, out _);
                 else
                     ((ParticipantConnections) connections).Equipment.TryRemove(connectionId, out _);
             }

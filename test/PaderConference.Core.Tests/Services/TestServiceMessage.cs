@@ -4,7 +4,7 @@ using PaderConference.Core.Services;
 
 namespace PaderConference.Core.Tests.Services
 {
-    public class TestServiceMessage
+    public static class TestServiceMessage
     {
         public static Mock<IServiceMessage<T>> Create<T>(T payload, Participant participant, string connectionId)
         {

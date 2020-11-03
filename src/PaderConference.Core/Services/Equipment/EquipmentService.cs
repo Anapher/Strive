@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Dto;
 using PaderConference.Core.Extensions;
@@ -14,10 +15,10 @@ namespace PaderConference.Core.Services.Equipment
 {
     public class EquipmentService : ConferenceService
     {
-        private readonly string _conferenceId;
         private readonly ITokenFactory _tokenFactory;
-        private readonly ISignalMessenger _hubContext;
+        private readonly ISignalMessenger _messenger;
         private readonly IConnectionMapping _connectionMapping;
+        private readonly ILogger<EquipmentService> _logger;
         private readonly ReaderWriterLock _tokenGeneratorLock = new ReaderWriterLock();
         private readonly Dictionary<string, string> _participantToToken = new Dictionary<string, string>();
         private readonly Dictionary<string, string> _tokenToParticipant = new Dictionary<string, string>();
@@ -25,36 +26,51 @@ namespace PaderConference.Core.Services.Equipment
         private readonly ConcurrentDictionary<string, ParticipantEquipment> _participantEquipment =
             new ConcurrentDictionary<string, ParticipantEquipment>();
 
-        public EquipmentService(string conferenceId, ITokenFactory tokenFactory, ISignalMessenger hubContext,
-            IConnectionMapping connectionMapping)
+        public EquipmentService(ITokenFactory tokenFactory, ISignalMessenger messenger,
+            IConnectionMapping connectionMapping, ILogger<EquipmentService> logger)
         {
-            _conferenceId = conferenceId;
             _tokenFactory = tokenFactory;
-            _hubContext = hubContext;
+            _messenger = messenger;
             _connectionMapping = connectionMapping;
+            _logger = logger;
         }
 
         // TODO: on participant disconnect, disconnect equipment
 
         public ValueTask<EquipmentAuthResponse> AuthenticateEquipment(string token)
         {
+            using var _ = _logger.BeginMethodScope();
+
+            _logger.LogDebug("Try to authenticate with token {token}", token);
+
             lock (_tokenGeneratorLock)
             {
                 if (_tokenToParticipant.TryGetValue(token, out var participantId))
+                {
+                    _logger.LogInformation("Authentication succeeded, participantId: {id}", participantId);
                     return new EquipmentAuthResponse(participantId).ToValueTask();
+                }
 
+                _logger.LogDebug("Authentication failed");
                 return new EquipmentAuthResponse().ToValueTask();
             }
         }
 
         public ValueTask<string> GetEquipmentToken(IServiceMessage message)
         {
+            using var _ = _logger.BeginMethodScope(message.GetScopeData());
+
             // check if the participant already has an equipment token
             lock (_tokenGeneratorLock)
             {
                 if (_participantToToken.TryGetValue(message.Participant.ParticipantId, out var token))
+                {
+                    _logger.LogDebug("Participant already has a token, return {token}", token);
                     return token.ToValueTask();
+                }
             }
+
+            _logger.LogDebug("Generate new token...");
 
             // generate a new token
             var newToken = _tokenFactory.GenerateToken(16);
@@ -62,10 +78,20 @@ namespace PaderConference.Core.Services.Equipment
             {
                 // check if the participant got a new token between the locks
                 if (_participantToToken.TryGetValue(message.Participant.ParticipantId, out var token))
+                {
+                    _logger.LogDebug("Race condition, discard generated token and return existing one.");
                     return token.ToValueTask();
+                }
 
                 if (_tokenToParticipant.ContainsKey(newToken))
+                {
+                    _logger.LogError(
+                        "Generated a token that already exists. Generated token: {token}, _tokenToParticipant: {@tokenToParticipant}",
+                        token, _tokenToParticipant);
                     return GetEquipmentToken(message); // when our random would be broken (or we are a little unlucky)
+                }
+
+                _logger.LogDebug("Remember new token and return");
 
                 _participantToToken[message.Participant.ParticipantId] = newToken;
                 _tokenToParticipant[newToken] = message.Participant.ParticipantId;
@@ -85,38 +111,71 @@ namespace PaderConference.Core.Services.Equipment
 
         public async ValueTask SendEquipmentCommand(IServiceMessage<EquipmentCommand> message)
         {
+            using var _ = _logger.BeginMethodScope(message.GetScopeData());
+
             if (_participantEquipment.TryGetValue(message.Participant.ParticipantId, out var equipment))
             {
                 var connection = equipment.GetConnection(message.Payload.EquipmentId);
                 if (connection == null)
                 {
                     await message.ResponseError(EquipmentError.NotFound);
+                    _logger.LogWarning(
+                        "Sending command to equipment failed, equipment {eqId} was not found for participant {pid}",
+                        message.Payload.EquipmentId, message.Participant.ParticipantId);
                     return;
                 }
 
-                await _hubContext.SendToConnectionAsync(connection.ConnectionId,
+                _logger.LogInformation("Send equipment command to {connId}, command: {@cmd}", connection.ConnectionId,
+                    message.Payload);
+
+                await _messenger.SendToConnectionAsync(connection.ConnectionId,
                     CoreHubMessages.Response.OnEquipmentCommand, message.Payload);
+            }
+            else
+            {
+                _logger.LogWarning("Participant {pid} was not found.", message.Participant.ParticipantId);
             }
         }
 
         public async ValueTask EquipmentErrorOccurred(IServiceMessage<Error> message)
         {
-            if (_connectionMapping.ConnectionsR.TryGetValue(message.Participant, out var connections))
-                await _hubContext.SendToConnectionAsync(connections.MainConnectionId, CoreHubMessages.Response.OnError,
+            using var _ = _logger.BeginMethodScope(message.GetScopeData());
+
+            _logger.LogDebug("Equipment error occurred: {@error}", message.Payload);
+
+            if (_connectionMapping.ConnectionsR.TryGetValue(message.Participant.ParticipantId, out var connections))
+                await _messenger.SendToConnectionAsync(connections.MainConnectionId, CoreHubMessages.Response.OnError,
                     message.Payload);
+            else
+                _logger.LogWarning("The participant was not found.");
         }
 
         public async ValueTask EquipmentUpdateStatus(IServiceMessage<Dictionary<string, UseMediaStateInfo>> message)
         {
+            using var _ = _logger.BeginMethodScope(message.GetScopeData());
+
+            _logger.LogDebug("Update equipment status: {@payload}", message.Payload);
+
             if (_participantEquipment.TryGetValue(message.Participant.ParticipantId, out var equipment))
             {
                 equipment.UpdateStatus(message.ConnectionId, message.Payload);
                 await UpdateParticipantEquipment(message.Participant, equipment);
             }
+            else
+            {
+                _logger.LogWarning("The participant was not found.");
+            }
         }
 
         public async ValueTask OnEquipmentConnected(Participant participant, string connectionId)
         {
+            using var _ = _logger.BeginMethodScope(new Dictionary<string, object>
+            {
+                {"participantId", participant.ParticipantId}, {"connectionId", connectionId},
+            });
+
+            _logger.LogDebug("Connect equipment from {connId}", connectionId);
+
             var equipment = _participantEquipment.GetOrAdd(participant.ParticipantId, _ => new ParticipantEquipment());
             await equipment.OnEquipmentConnected(connectionId);
             await UpdateParticipantEquipment(participant, equipment);
@@ -124,19 +183,32 @@ namespace PaderConference.Core.Services.Equipment
 
         public async ValueTask OnEquipmentDisconnected(Participant participant, string connectionId)
         {
+            using var _ = _logger.BeginMethodScope(new Dictionary<string, object>
+            {
+                {"participantId", participant.ParticipantId}, {"connectionId", connectionId},
+            });
+
+            _logger.LogDebug("Disconnect equipment from {connId}", connectionId);
+
+
             if (_participantEquipment.TryGetValue(participant.ParticipantId, out var equipment))
             {
                 await equipment.OnEquipmentDisconnected(connectionId);
                 await UpdateParticipantEquipment(participant, equipment);
+            }
+            else
+            {
+                _logger.LogDebug("Equipment could not be disconnected as it was not found.");
             }
         }
 
         private async ValueTask UpdateParticipantEquipment(Participant participant, ParticipantEquipment equipment)
         {
             var status = equipment.GetStatus();
-            var connectionId = _connectionMapping.ConnectionsR[participant].MainConnectionId;
+            _logger.LogDebug("Update equipment for participant {id}: {@status}", participant.ParticipantId, status);
 
-            await _hubContext.SendToConnectionAsync(connectionId, CoreHubMessages.Response.OnEquipmentUpdated, status);
+            var connectionId = _connectionMapping.ConnectionsR[participant.ParticipantId].MainConnectionId;
+            await _messenger.SendToConnectionAsync(connectionId, CoreHubMessages.Response.OnEquipmentUpdated, status);
         }
     }
 }

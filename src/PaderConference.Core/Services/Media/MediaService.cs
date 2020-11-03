@@ -73,7 +73,7 @@ namespace PaderConference.Core.Services.Media
 
         public override async ValueTask OnClientDisconnected(Participant participant)
         {
-            if (_connectionMapping.ConnectionsR.TryGetValue(participant, out var connections))
+            if (_connectionMapping.ConnectionsR.TryGetValue(participant.ParticipantId, out var connections))
             {
                 var meta = new ConnectionMessageMetadata(_conferenceId, connections.MainConnectionId,
                     participant.ParticipantId);

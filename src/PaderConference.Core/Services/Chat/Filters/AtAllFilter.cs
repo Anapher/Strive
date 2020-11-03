@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using PaderConference.Core.Interfaces.Services;
 using PaderConference.Core.Signaling;
 
 namespace PaderConference.Core.Services.Chat.Filters
@@ -13,7 +14,8 @@ namespace PaderConference.Core.Services.Chat.Filters
             return true;
         }
 
-        public Task SendAsync(ISignalMessenger clients, string conferenceId, string method, object dto)
+        public Task SendAsync(ISignalMessenger clients, IConnectionMapping connectionMapping, string conferenceId,
+            string method, object dto)
         {
             return clients.SendToConferenceAsync(conferenceId, method, dto);
         }

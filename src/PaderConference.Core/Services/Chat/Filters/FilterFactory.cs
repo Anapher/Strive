@@ -5,7 +5,7 @@ namespace PaderConference.Core.Services.Chat.Filters
 {
     public class FilterFactory
     {
-        public static IMessageFilter CreateFilter(SendingMode? mode, string senderConnectionId)
+        public static IMessageFilter CreateFilter(SendingMode? mode, string senderParticipantId)
         {
             if (mode is SendPrivately sendPrivately)
             {
@@ -13,7 +13,7 @@ namespace PaderConference.Core.Services.Chat.Filters
                     throw new ArgumentException(
                         $"{nameof(SendPrivately)}.{nameof(SendPrivately.ToParticipant)} must not be null");
 
-                return new IncludeFilter(new[] {sendPrivately.ToParticipant}, senderConnectionId);
+                return new IncludeFilter(new[] {sendPrivately.ToParticipant}, senderParticipantId);
             }
 
             return new AtAllFilter();

@@ -182,7 +182,7 @@ namespace PaderConference.Core.Services.Permissions
             await _permissionsRepo.PublishPermissionsUpdated(participants.Select(x => x.ParticipantId).ToArray());
 
             foreach (var (participant, permissions) in newPermissions)
-                if (_connectionMapping.ConnectionsR.TryGetValue(participant, out var connections))
+                if (_connectionMapping.ConnectionsR.TryGetValue(participant.ParticipantId, out var connections))
                     await _clients.SendToConnectionAsync(connections.MainConnectionId,
                         CoreHubMessages.Response.OnPermissionsUpdated, permissions);
         }

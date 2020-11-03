@@ -11,7 +11,8 @@ namespace PaderConference.Core
         public MapperProfile()
         {
             CreateMap<ChatMessage, ChatMessageDto>().ForMember(x => x.ParticipantId,
-                options => options.PreCondition(x => !(x.Mode is SendAnonymously)));
+                options => options.PreCondition(x => !(x.Mode is SendAnonymously))).ForMember(x => x.IsPrivate,
+                opt => opt.MapFrom(x => x.Mode is SendPrivately));
             CreateMap<Participant, ParticipantDto>();
         }
     }
