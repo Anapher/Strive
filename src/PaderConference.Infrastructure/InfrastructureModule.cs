@@ -27,9 +27,6 @@ namespace PaderConference.Infrastructure
             builder.RegisterAssemblyTypes(ThisAssembly).AsClosedTypesOf(typeof(IConferenceServiceManager<>))
                 .AsImplementedInterfaces().SingleInstance();
 
-            builder.RegisterAssemblyTypes(ThisAssembly).AssignableTo<IConferenceService>().AsSelf()
-                .InstancePerDependency();
-
             builder.RegisterAssemblyTypes(ThisAssembly).AssignableTo<IRedisRepo>().AsImplementedInterfaces()
                 .SingleInstance();
 

@@ -29,9 +29,8 @@ export default function ChatBar() {
 
    useEffect(() => {
       if (connected) {
-         dispatch(actions.subscribeFullChat());
          dispatch(actions.subscribeChatMessages());
-         dispatch(coreHub.loadFullChat());
+         dispatch(coreHub.requestChat());
       }
    }, [connected]);
 

@@ -1,6 +1,8 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { ChatMessageDto } from 'MyModels';
+import { onInvokeReturn } from 'src/store/signal/actions';
 import * as actions from './actions';
+import * as coreHub from 'src/core-hub';
 
 export type ChatState = Readonly<{
    chat: ChatMessageDto[] | null;
@@ -19,7 +21,7 @@ const chatSlice = createSlice({
       },
    },
    extraReducers: {
-      [actions.onFullChat.type]: (state, action: PayloadAction<ChatMessageDto[]>) => {
+      [onInvokeReturn(coreHub._requestChat).type]: (state, action: PayloadAction<ChatMessageDto[]>) => {
          state.chat = action.payload;
       },
       [actions.onChatMessage.type]: (state, action: PayloadAction<ChatMessageDto>) => {

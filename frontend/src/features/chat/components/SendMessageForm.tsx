@@ -60,7 +60,7 @@ export default function SendMessageForm({ onSendMessage }: Props) {
 
          <Popper open={emojisPopperOpen} anchorEl={emojisButtonRef.current} transition placement="top-end">
             {({ TransitionProps }) => (
-               <Grow {...TransitionProps}>
+               <Grow {...TransitionProps} style={{ transformOrigin: 'right bottom' }}>
                   <Paper>
                      <ClickAwayListener onClickAway={handleCloseEmojis}>
                         <Box p={1}>

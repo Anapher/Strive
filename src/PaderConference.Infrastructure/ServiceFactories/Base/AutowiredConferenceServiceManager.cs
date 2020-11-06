@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Autofac;
 using Autofac.Core;
@@ -12,21 +14,26 @@ namespace PaderConference.Infrastructure.ServiceFactories.Base
         where TService : IConferenceService
     {
         private readonly IComponentContext _context;
+        private readonly Lazy<IReadOnlyDictionary<Type, IConferenceServiceManager>> _typeToServiceManager;
 
         public AutowiredConferenceServiceManager(IComponentContext context)
         {
             _context = context;
+
+            _typeToServiceManager = new Lazy<IReadOnlyDictionary<Type, IConferenceServiceManager>>(
+                () => context.Resolve<IEnumerable<IConferenceServiceManager>>()
+                    .SelectMany(serviceManager =>
+                        serviceManager.ServiceType.GetInterfaces().Select(x => (x, serviceManager))).GroupBy(x => x.x)
+                    .ToDictionary(x => x.Key, x => x.First().serviceManager),
+                LazyThreadSafetyMode.ExecutionAndPublication);
         }
 
         protected override ValueTask<TService> ServiceFactory(string conferenceId)
         {
-            var serviceManagers = _context.Resolve<IEnumerable<IConferenceServiceManager>>();
-
             var serviceParam = new ResolvedParameter(
-                (param, context) => typeof(IConferenceService).IsAssignableFrom(param.ParameterType),
-                (param, context) =>
+                (param, context) => _typeToServiceManager.Value.ContainsKey(param.ParameterType), (param, context) =>
                 {
-                    var manager = serviceManagers.First(x => param.ParameterType.IsAssignableFrom(x.ServiceType));
+                    var manager = _typeToServiceManager.Value[param.ParameterType];
                     return manager.GetService(conferenceId).Result; // TODO: maybe execute this task async before?
                 });
 

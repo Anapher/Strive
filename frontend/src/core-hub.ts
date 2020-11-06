@@ -16,7 +16,8 @@ export const createRooms = (rooms: CreateRoomDto[]) => send('CreateRooms', rooms
 export const removeRooms = (roomIds: string[]) => send('RemoveRooms', roomIds);
 export const switchRoom = (dto: SwitchRoomDto) => send('SwitchRoom', dto);
 
-export const loadFullChat = () => send('RequestChat');
+export const _requestChat = 'RequestChat';
+export const requestChat = () => invoke(_requestChat);
 
 export const sendChatMessage = (dto: SendChatMessageDto) => send('SendChatMessage', dto);
 
