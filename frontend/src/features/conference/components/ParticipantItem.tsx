@@ -1,11 +1,11 @@
 import { Box, ButtonBase, ClickAwayListener, Grow, makeStyles, Paper, Popper, Typography } from '@material-ui/core';
-import MicIcon from '@material-ui/icons/Mic';
-import MicOffIcon from '@material-ui/icons/MicOff';
 import { Skeleton } from '@material-ui/lab';
 import { motion, useMotionValue, useTransform } from 'framer-motion';
 import hark from 'hark';
 import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import AnimatedMicIcon from 'src/assets/animated-icons/AnimatedMicIcon';
+import IconHide from 'src/components/IconHide';
 import { Roles } from 'src/consts';
 import { getParticipantProducers } from 'src/features/media/selectors';
 import { showMessage } from 'src/features/notifier/actions';
@@ -13,7 +13,6 @@ import { RootState } from 'src/store';
 import useConsumer from 'src/store/webrtc/hooks/useConsumer';
 import { ParticipantDto } from '../types';
 import ParticipantItemPopper from './ParticipantItemPopper';
-import ToggleIcon from './ToggleIcon';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -115,13 +114,15 @@ export default function ParticipantItem({ participant }: Props) {
             <Typography color={participant?.role === Roles.Moderator ? 'secondary' : undefined} variant="subtitle1">
                {participant ? participant?.displayName : <Skeleton />}
             </Typography>
-            <ToggleIcon IconEnable={MicIcon} IconDisable={MicOffIcon} enabled={producers?.mic?.paused} />
+            <IconHide hidden={!producers?.mic}>
+               <AnimatedMicIcon activated={producers?.mic?.paused} />
+            </IconHide>
          </ButtonBase>
          <audio ref={audioElem} autoPlay playsInline muted={muted} controls={false} />
          {participant && (
             <Popper open={popperOpen} anchorEl={buttonRef.current} transition placement="right-start">
                {({ TransitionProps }) => (
-                  <Grow {...TransitionProps}>
+                  <Grow {...TransitionProps} style={{ transformOrigin: 'left top' }}>
                      <Paper style={{ width: 400 }}>
                         <ClickAwayListener onClickAway={handleClose}>
                            <Box p={2}>
