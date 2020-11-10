@@ -1,9 +1,9 @@
-import { fade, makeStyles, Paper } from '@material-ui/core';
-import React from 'react';
+import { makeStyles } from '@material-ui/core';
+import React, { useRef, useState } from 'react';
 import ChatBar from 'src/features/chat/components/ChatBar';
 import ConferenceAppBar from 'src/features/conference/components/ConferenceAppBar';
-import Media from 'src/features/media/components/Media';
-import RoomsList from 'src/features/rooms/components/RoomsList';
+import PinnableSidebar from './PinnableSidebar';
+import SceneView from './SceneView';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -15,35 +15,38 @@ const useStyles = makeStyles((theme) => ({
       flex: 1,
       display: 'flex',
       flexDirection: 'row',
+      position: 'relative',
    },
-   flex: {
+   scene: {
       flex: 1,
+      display: 'flex',
+      flexDirection: 'column',
    },
    chat: {
       flex: 1,
       maxWidth: 360,
-      padding: 8,
-   },
-   participants: {
-      width: 200,
-      backgroundColor: fade(theme.palette.background.paper, 0.5),
-      borderTopLeftRadius: 0,
-      borderBottomLeftRadius: 0,
+      padding: theme.spacing(1, 1, 1, 0),
    },
 }));
 
 export default function ClassConference() {
    const classes = useStyles();
+   const [roomsPinned, setRoomsPinned] = useState(true);
+   const hamburgerRef = useRef<HTMLButtonElement>(null);
+
+   const handleGetHamburger = () => hamburgerRef.current;
 
    return (
       <div className={classes.root}>
-         <ConferenceAppBar />
+         <ConferenceAppBar hamburgerRef={hamburgerRef} />
          <div className={classes.conferenceMain}>
-            <Paper className={classes.participants} elevation={4}>
-               <RoomsList />
-            </Paper>
-            <div className={classes.flex}>
-               <Media />
+            <PinnableSidebar
+               pinned={roomsPinned}
+               onTogglePinned={() => setRoomsPinned((x) => !x)}
+               getHamburger={handleGetHamburger}
+            />
+            <div className={classes.scene}>
+               <SceneView />
             </div>
             <div className={classes.chat}>
                <ChatBar />

@@ -21,6 +21,7 @@ export type ConferenceState = {
    participants: ParticipantDto[] | null;
    conferenceState: ConferenceInfo | null;
    myPermissions: Permissions | null;
+   participantsOpen: boolean;
 };
 
 const initialState: ConferenceState = {
@@ -29,14 +30,15 @@ const initialState: ConferenceState = {
    participants: null,
    conferenceState: null,
    myPermissions: null,
+   participantsOpen: true,
 };
 
 const conferenceSlice = createSlice({
    name: 'conference',
    initialState,
    reducers: {
-      test(state) {
-         state.conferenceId = null;
+      setParticipantsOpen(state, { payload }: PayloadAction<boolean>) {
+         state.participantsOpen = payload;
       },
    },
    extraReducers: {
@@ -57,5 +59,7 @@ const conferenceSlice = createSlice({
       ...createSynchronizeObjectReducer(['participants', 'conferenceState']),
    },
 });
+
+export const { setParticipantsOpen } = conferenceSlice.actions;
 
 export default conferenceSlice.reducer;

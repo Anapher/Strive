@@ -1,13 +1,24 @@
 import { makeStyles } from '@material-ui/core';
 import React, { useRef } from 'react';
 import MediaControls from './MediaControls';
+import ParticipantsGrid from './ParticipantsGrid';
 
 const useStyles = makeStyles({
    root: {
+      flex: 1,
       display: 'flex',
       flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
+   },
+   videoContainer: {
+      flex: 1,
+      position: 'relative',
+      paddingTop: '56.25%',
+   },
+   video: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      width: '100%',
       height: '100%',
    },
 });
@@ -18,14 +29,10 @@ export default function Media() {
 
    return (
       <div className={classes.root}>
+         {/* <div className={classes.videoContainer}>
+            <video autoPlay ref={videoElem} style={{ backgroundColor: 'black' }} className={classes.video} />
+         </div> */}
          <div>
-            <video
-               width={1280}
-               height={720}
-               autoPlay
-               ref={videoElem}
-               style={{ backgroundColor: 'black', marginBottom: 32 }}
-            />
             <MediaControls />
          </div>
       </div>

@@ -6,3 +6,8 @@ export type DomainError = {
    code: number;
    fields?: { [key: string]: string };
 };
+
+export type Size = {
+   width: number;
+   height: number;
+};

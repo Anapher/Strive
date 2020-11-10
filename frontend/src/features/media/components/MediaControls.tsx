@@ -19,6 +19,7 @@ import useMicrophone from 'src/store/webrtc/hooks/useMicrophone';
 import useDeviceManagement from '../useDeviceManagement';
 import useWatchSelectedDevice from '../useWatchDevice';
 import MediaFab from './MediaFab';
+import clsx from 'classnames';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -43,7 +44,11 @@ const useStyles = makeStyles((theme) => ({
    },
 }));
 
-export default function MediaControls() {
+type Props = {
+   className?: string;
+};
+
+export default function MediaControls({ className }: Props) {
    const classes = useStyles();
 
    const gain = useSelector((state: RootState) => state.settings.obj.mic.audioGain);
@@ -64,7 +69,7 @@ export default function MediaControls() {
    const handleOpenDebugDialog = () => setDebugDialogOpen(true);
 
    return (
-      <div className={classes.root}>
+      <div className={clsx(classes.root, className)}>
          <div className={classes.leftActions}>
             {canRaiseHand && (
                <Tooltip title="Raise Hand" aria-label="raise hand">

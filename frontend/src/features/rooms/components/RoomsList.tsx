@@ -1,9 +1,27 @@
-import { makeStyles } from '@material-ui/core';
+import {
+   Button,
+   Divider,
+   IconButton,
+   List,
+   ListItem,
+   ListItemIcon,
+   ListItemSecondaryAction,
+   ListItemText,
+   makeStyles,
+   Radio,
+   Typography,
+} from '@material-ui/core';
+import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
+import DesktopWindowsIcon from '@material-ui/icons/DesktopWindows';
+import FileIcon from '@material-ui/icons/InsertDriveFile';
+import StarIcon from '@material-ui/icons/Star';
+import { Pin, PinOff } from 'mdi-material-ui';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import * as coreHub from 'src/core-hub';
 import { selectAccessToken } from 'src/features/auth/selectors';
 import ParticipantItem from 'src/features/conference/components/ParticipantItem';
+import SceneManagement from 'src/features/conference/components/SceneManagement';
 import usePermission, { ROOMS_CAN_CREATE_REMOVE } from 'src/hooks/usePermission';
 import { RootState } from 'src/store';
 import { selectRooms } from '../selectors';
@@ -29,9 +47,20 @@ const useStyles = makeStyles((theme) => ({
    roomManagement: {
       marginTop: theme.spacing(1),
    },
+   header: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      margin: theme.spacing(1, 1, 0, 1),
+   },
 }));
 
-export default function RoomsList() {
+type Props = {
+   pinned: boolean;
+   onTogglePinned: () => void;
+};
+
+export default function RoomsList({ pinned, onTogglePinned }: Props) {
    const classes = useStyles();
 
    const rooms = useSelector(selectRooms);
@@ -45,6 +74,12 @@ export default function RoomsList() {
 
    return (
       <div className={classes.root}>
+         <div className={classes.header}>
+            <Typography variant="subtitle2">Participants</Typography>
+            <IconButton size="small" onClick={onTogglePinned}>
+               {pinned ? <Pin fontSize="small" /> : <PinOff fontSize="small" />}
+            </IconButton>
+         </div>
          <div className={classes.rooms}>
             {rooms?.map((x) => (
                <div key={x.roomId} className={classes.room}>
@@ -60,7 +95,9 @@ export default function RoomsList() {
                </div>
             ))}
          </div>
-         {canCreateRemove && <RoomManagement className={classes.roomManagement} />}
+         <Divider style={{ marginLeft: 16 }} />
+         <SceneManagement />
+         {/* {canCreateRemove && <RoomManagement className={classes.roomManagement} />} */}
       </div>
    );
 }
