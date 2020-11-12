@@ -1,5 +1,10 @@
 import { Size } from 'src/types';
 
+/**
+ * Calculate the maximum size the content can get to to be contained in the bounding box while maintaining the aspect ratio
+ * @param content the size of the content
+ * @param boundingBox the bounding box (container)
+ */
 export function expandToBox(content: Size, boundingBox: Size): Size {
    let widthScale = 0;
    let heightScale = 0;
@@ -11,6 +16,11 @@ export function expandToBox(content: Size, boundingBox: Size): Size {
    return { width: content.width * scale, height: content.height * scale };
 }
 
+/**
+ * if the width of the size exceeds the maxWidth, return a new size with maxWidth while maintaining the aspect ratio
+ * @param size the size of the object
+ * @param maxWidth the maximum with the object should be
+ */
 export function maxWidth(size: Size, maxWidth: number): Size {
    if (size.width > maxWidth) {
       return { width: maxWidth, height: (size.height / size.width) * maxWidth };

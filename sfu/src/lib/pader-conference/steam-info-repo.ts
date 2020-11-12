@@ -35,12 +35,12 @@ export class StreamInfoRepo {
          }
 
          for (const [, producer] of connection.producers) {
-            const selected = selectedEntries.find((x) => x[1]?.id === producer.id);
+            const selected = selectedEntries.find(([, x]) => x?.id === producer.id);
 
             info.producers[producer.id] = {
                paused: producer.paused,
                selected: !!selected,
-               kind: selected?.[0] as ProducerSource,
+               kind: producer.appData.source,
             };
          }
       }

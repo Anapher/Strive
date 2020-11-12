@@ -21,9 +21,15 @@ export default function IconHide({ hidden, children }: Props) {
    return (
       <AnimatePresence>
          {!hidden && (
-            <motion.div variants={variants} initial="hidden" animate="shown" exit="hidden">
+            <motion.span
+               variants={variants}
+               initial="hidden"
+               animate="shown"
+               exit="hidden"
+               style={{ display: 'inline-block' }}
+            >
                {children}
-            </motion.div>
+            </motion.span>
          )}
       </AnimatePresence>
    );

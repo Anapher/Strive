@@ -159,7 +159,6 @@ namespace PaderConference.Core.Services.Rooms
             await _synchronizedRooms.Update(data);
         }
 
-
         private async Task<Room?> GetRoomInfo(string roomId)
         {
             return await _roomRepo.Get(_conferenceId, roomId);

@@ -107,7 +107,6 @@ export class Conference {
 
    public async changeStream({ payload: { id, type, action }, meta }: ChangeStreamRequest): Promise<void> {
       const connection = this.connections.get(meta.connectionId);
-      const participant = this.participants.get(meta.participantId);
 
       if (connection) {
          let stream: Producer | Consumer | undefined;
@@ -115,8 +114,6 @@ export class Conference {
             stream = connection.consumers.get(id);
          } else if (type === 'producer') {
             stream = connection.producers.get(id);
-
-            if (participant && stream) this.removeProducer(stream, participant);
          }
 
          if (stream) {

@@ -1,25 +1,29 @@
-import { Fab, SvgIconTypeMap } from '@material-ui/core';
-import { OverridableComponent } from '@material-ui/core/OverridableComponent';
+import { Fab, useTheme } from '@material-ui/core';
 import React from 'react';
+import { useDispatch } from 'react-redux';
+import { AnimatedIconProps } from 'src/assets/animated-icons/AnimatedIconBase';
+import { showMessage } from 'src/features/notifier/actions';
 import { UseMediaState } from 'src/store/webrtc/hooks/useMedia';
 
 type Props = {
    className?: string;
    control: UseMediaState;
 
-   IconEnable: OverridableComponent<SvgIconTypeMap>;
-   IconDisable: OverridableComponent<SvgIconTypeMap>;
+   Icon: React.ComponentType<AnimatedIconProps>;
 } & Omit<React.ComponentProps<typeof Fab>, 'children'>;
 
-export default function MediaFab({
-   IconDisable,
-   IconEnable,
-   control: { enable, pause, resume, enabled, paused },
-   ...fabProps
-}: Props) {
-   const handleClick = () => {
+export default function MediaFab({ Icon, control: { enable, pause, resume, enabled, paused }, ...fabProps }: Props) {
+   const dispatch = useDispatch();
+   const theme = useTheme();
+
+   const handleClick = async () => {
       if (!enabled) {
-         enable();
+         try {
+            await enable();
+         } catch (error) {
+            const { message } = error as DOMException;
+            dispatch(showMessage({ message, variant: 'error' }));
+         }
       } else {
          if (paused) {
             resume();
@@ -31,7 +35,12 @@ export default function MediaFab({
 
    return (
       <Fab color={enabled ? 'primary' : 'default'} onClick={handleClick} {...fabProps}>
-         {paused ? <IconEnable /> : <IconDisable />}
+         <Icon
+            activated={!paused}
+            color={enabled ? theme.palette.primary.contrastText : theme.palette.background.default}
+            width={24}
+            height={24}
+         />
       </Fab>
    );
 }

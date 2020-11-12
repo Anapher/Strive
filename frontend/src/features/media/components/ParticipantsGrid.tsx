@@ -1,15 +1,16 @@
 import { makeStyles } from '@material-ui/core';
 import clsx from 'classnames';
+import { motion } from 'framer-motion';
 import _ from 'lodash';
-import React from 'react';
+import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { ParticipantDto } from 'src/features/conference/types';
+import { GridScene } from 'src/features/conference/types';
 import { RootState } from 'src/store';
 import { Size } from 'src/types';
-import { expandToBox, generateGrid, maxWidth } from '../calculations';
+import { generateGrid } from '../calculations';
 import ParticipantTile from './ParticipantTile';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
    center: {
       display: 'flex',
       alignItems: 'center',
@@ -26,51 +27,41 @@ const useStyles = makeStyles((theme) => ({
       flexDirection: 'row',
       justifyContent: 'space-between',
    },
-   flex: {
-      flex: 1,
-   },
 }));
 
 type Props = {
    className?: string;
    dimensions: Size;
+   options: GridScene;
 };
 
 export default function ParticipantsGrid({ dimensions, className }: Props) {
-   let participants = useSelector((state: RootState) => state.conference.participants);
+   const participants = useSelector((state: RootState) => state.conference.participants);
    const classes = useStyles();
 
    if (!participants) return <div className={className} />;
 
-   participants = Array.from({ length: 32 }).map((_, i) => ({
-      displayName: 'test',
-      participantId: i.toString(),
-      attributes: {},
-      role: 'mod',
-   }));
-
-   if (!dimensions || !dimensions.width || !dimensions.height) return <div />;
-
    const spacing = 8;
    const grid = generateGrid(participants.length, 640, dimensions, spacing);
-   console.log(grid);
 
    return (
       <div className={clsx(className, classes.center)}>
          <div className={classes.tilesGrid} style={{ width: grid.containerWidth, height: grid.containerHeight }}>
-            {Array.from({ length: grid.rows }).map((foo, i) => (
+            {Array.from({ length: grid.rows }).map((__, i) => (
                <div key={i.toString()} className={classes.tilesRow}>
                   {_(participants)
                      .drop(i * grid.itemsPerRow)
                      .take(grid.itemsPerRow)
                      .value()
                      .map((x, pi) => (
-                        <div
+                        <motion.div
+                           layout
+                           layoutId={x.participantId}
                            key={x.participantId}
-                           style={{ ...grid.itemSize, backgroundColor: 'red', marginLeft: pi === 0 ? 0 : spacing }}
+                           style={{ ...grid.itemSize, marginLeft: pi === 0 ? 0 : spacing }}
                         >
-                           <ParticipantTile />
-                        </div>
+                           <ParticipantTile participant={x} size={grid.itemSize} />
+                        </motion.div>
                      ))}
                </div>
             ))}

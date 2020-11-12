@@ -23,14 +23,24 @@ type ConsumerInfoPayload = {
    consumerId: string;
 };
 
+type ConsumerScorePayload = ConsumerInfoPayload & {
+   consumerId: string;
+   score: number;
+};
+
 export class WebRtcConnection {
    private consumers = new Map<string, Consumer>();
+   private consumerScores = new Map<string, number>();
 
    constructor(private connection: HubConnection) {
       this.device = new Device();
 
       connection.on('newConsumer', this.onNewConsumer.bind(this));
       connection.on('consumerClosed', this.onConsumerClosed.bind(this));
+      connection.on('consumerScore', this.onConsumerScore.bind(this));
+
+      connection.on('consumerPaused', this.onConsumerPaused.bind(this));
+      connection.on('consumerResumed', this.onConsumerResumed.bind(this));
    }
 
    public eventEmitter = new EventEmitter();
@@ -75,12 +85,38 @@ export class WebRtcConnection {
       }
    }
 
-   private async onConsumerClosed({ consumerId }: ConsumerInfoPayload) {
+   private onConsumerClosed({ consumerId }: ConsumerInfoPayload) {
       const consumer = this.consumers.get(consumerId);
       if (consumer) {
          consumer.close();
          this.consumers.delete(consumerId);
+         this.consumerScores.delete(consumerId);
+         this.eventEmitter.emit('onConsumerUpdated', { consumerId });
       }
+   }
+
+   private onConsumerPaused({ consumerId }: ConsumerInfoPayload) {
+      console.log('paused');
+
+      const consumer = this.consumers.get(consumerId);
+      if (consumer) {
+         consumer.pause();
+         this.consumerScores.delete(consumerId);
+         this.eventEmitter.emit('onConsumerUpdated', { consumerId });
+      }
+   }
+
+   private onConsumerResumed({ consumerId }: ConsumerInfoPayload) {
+      const consumer = this.consumers.get(consumerId);
+      if (consumer) {
+         consumer.resume();
+         this.eventEmitter.emit('onConsumerUpdated', { consumerId });
+      }
+   }
+
+   private onConsumerScore({ consumerId, score }: ConsumerScorePayload) {
+      this.consumerScores.set(consumerId, score);
+      this.eventEmitter.emit('onConsumerScoreUpdated', { consumerId });
    }
 
    public device: Device;

@@ -170,12 +170,14 @@ namespace PaderConference.Infrastructure.Hubs
                 return;
             }
 
+            // important for participants list, else the disconnected participant will still be in the list
+            await ConferenceManager.RemoveParticipant(participant);
+
             // Todo: close conference if it was the last participant and some time passed
             foreach (var service in ConferenceServices)
                 await (await service.GetService(conferenceId)).OnClientDisconnected(participant);
 
             _connectionMapping.Remove(Context.ConnectionId);
-            await ConferenceManager.RemoveParticipant(participant);
         }
 
         public Task OpenConference()

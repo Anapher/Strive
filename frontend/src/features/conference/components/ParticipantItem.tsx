@@ -1,4 +1,14 @@
-import { Box, ButtonBase, ClickAwayListener, Grow, makeStyles, Paper, Popper, Typography } from '@material-ui/core';
+import {
+   Box,
+   ButtonBase,
+   ClickAwayListener,
+   Grow,
+   makeStyles,
+   Paper,
+   Popper,
+   Typography,
+   useTheme,
+} from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { motion, useMotionValue, useTransform } from 'framer-motion';
 import hark from 'hark';
@@ -39,12 +49,13 @@ export default function ParticipantItem({ participant }: Props) {
 
    const dispatch = useDispatch();
 
-   const consumer = useConsumer(participant?.participantId, 'audio');
+   const consumer = useConsumer(participant?.participantId, 'mic');
    const audioElem = useRef<HTMLAudioElement>(null);
    const audioVol = useMotionValue(0);
    const audioVolBackground = useTransform(audioVol, (value) => `rgba(41, 128, 185, ${value})`);
    const [muted, setMuted] = useState(false);
    const [volume, setVolume] = useState(0.75);
+   const theme = useTheme();
 
    useEffect(() => {
       if (consumer && audioElem.current) {
@@ -70,6 +81,8 @@ export default function ParticipantItem({ participant }: Props) {
          audioElem.current
             .play()
             .catch((error) => dispatch(showMessage({ message: error.toString(), variant: 'error' })));
+
+         console.log('play');
 
          return () => {
             analyser.stop();
@@ -115,7 +128,7 @@ export default function ParticipantItem({ participant }: Props) {
                {participant ? participant?.displayName : <Skeleton />}
             </Typography>
             <IconHide hidden={!producers?.mic}>
-               <AnimatedMicIcon activated={producers?.mic?.paused} />
+               <AnimatedMicIcon activated={!producers?.mic?.paused} disabledColor={theme.palette.error.main} />
             </IconHide>
          </ButtonBase>
          <audio ref={audioElem} autoPlay playsInline muted={muted} controls={false} />

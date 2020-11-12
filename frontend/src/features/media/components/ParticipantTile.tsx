@@ -1,45 +1,122 @@
-import { makeStyles } from '@material-ui/core';
-import { motion } from 'framer-motion';
-import React from 'react';
+import { fade, makeStyles, Typography, useTheme } from '@material-ui/core';
+import clsx from 'classnames';
+import { AnimateSharedLayout, motion } from 'framer-motion';
+import React, { useEffect, useRef } from 'react';
+import { useSelector } from 'react-redux';
+import AnimatedMicIcon from 'src/assets/animated-icons/AnimatedMicIcon';
+import IconHide from 'src/components/IconHide';
+import { ParticipantDto } from 'src/features/conference/types';
+import { RootState } from 'src/store';
+import useConsumer from 'src/store/webrtc/hooks/useConsumer';
+import { Size } from 'src/types';
+import { getParticipantProducers } from '../selectors';
 
 const useStyles = makeStyles((theme) => ({
-   content: {
-      borderRadius: 8,
+   root: {
+      width: '100%',
+      height: '100%',
+      borderRadius: theme.shape.borderRadius,
       backgroundColor: theme.palette.background.paper,
-      borderWidth: 1,
       boxShadow: theme.shadows[6],
+      position: 'relative',
    },
-   border: {
+   video: {
       position: 'absolute',
+      top: 0,
+      bottom: 0,
+      left: 0,
+      right: 0,
+      width: '100%',
+      height: '100%',
+      borderRadius: theme.shape.borderRadius,
+      objectFit: 'cover',
+   },
+   infoBox: {
+      position: 'absolute',
+
+      display: 'flex',
+      alignItems: 'center',
+      flexDirection: 'row',
+
+      backgroundColor: fade(theme.palette.background.paper, 0.5),
+
+      padding: theme.spacing(0, 1),
+
+      left: 0,
+      bottom: theme.spacing(1),
+   },
+   displayName: {
+      marginLeft: theme.spacing(1),
+   },
+   centerText: {
       top: 0,
       left: 0,
       right: 0,
       bottom: 0,
-      borderRadius: 8,
-      borderWidth: 2,
-      border: 'solid red',
+      width: '100%',
+      height: '100%',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
    },
 }));
 
 type Props = {
    className?: string;
+   participant: ParticipantDto;
+   size: Size;
 };
 
-export default function ParticipantTile({ className }: Props) {
+export default function ParticipantTile({ className, participant }: Props) {
    const classes = useStyles();
+   const consumer = useConsumer(participant.participantId, 'webcam');
+   const videoRef = useRef<HTMLVideoElement | null>(null);
+   const producers = useSelector((state: RootState) => getParticipantProducers(state, participant?.participantId));
+   const isWebcamActive = consumer?.paused === false;
+
+   useEffect(() => {
+      if (consumer?.track) {
+         const stream = new MediaStream();
+         stream.addTrack(consumer.track);
+
+         if (videoRef.current) {
+            videoRef.current.srcObject = stream;
+         }
+      }
+   }, [consumer]);
+
+   const theme = useTheme();
+
+   console.log('isWebcamActive', isWebcamActive);
 
    return (
-      <motion.div whileHover={{ scale: 1.05, zIndex: 500 }} className={className}>
-         <motion.div className={classes.content}></motion.div>
-         {/* <motion.div
-            className={classes.border}
-            animate={{ scale: [1, 1.05, 1], opacity: [1, 0, 0] }}
-            transition={{
-               duration: 4,
-               ease: 'easeInOut',
-               loop: Infinity,
-            }}
-         ></motion.div> */}
+      <motion.div whileHover={{ scale: 1.05, zIndex: 500 }} className={clsx(classes.root, className)}>
+         <video ref={videoRef} className={classes.video} hidden={!isWebcamActive} autoPlay />
+         <AnimateSharedLayout>
+            {isWebcamActive ? (
+               <motion.div className={classes.infoBox}>
+                  <AnimatedMicIcon
+                     activated={producers?.mic?.paused === false}
+                     disabledColor={theme.palette.error.main}
+                  />
+                  <Typography
+                     component={motion.h4}
+                     layoutId="name"
+                     variant="h4"
+                     className={classes.displayName}
+                     style={{ fontSize: 24 }}
+                  >
+                     {participant.displayName}
+                  </Typography>
+               </motion.div>
+            ) : (
+               <div className={classes.centerText}>
+                  <Typography component={motion.h4} layoutId="name" variant="h4">
+                     {participant.displayName}
+                  </Typography>
+               </div>
+            )}
+         </AnimateSharedLayout>
       </motion.div>
    );
 }

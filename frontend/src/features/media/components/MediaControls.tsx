@@ -20,6 +20,9 @@ import useDeviceManagement from '../useDeviceManagement';
 import useWatchSelectedDevice from '../useWatchDevice';
 import MediaFab from './MediaFab';
 import clsx from 'classnames';
+import { useWebcam } from 'src/store/webrtc/hooks/useWebcam';
+import AnimatedMicIcon from 'src/assets/animated-icons/AnimatedMicIcon';
+import AnimatedCamIcon from 'src/assets/animated-icons/AnimatedCamIcon';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -58,6 +61,12 @@ export default function MediaControls({ className }: Props) {
    const micController = useDeviceManagement('mic', localMic, audioDevice);
    useWatchSelectedDevice('mic');
 
+   const webcamDevice = useSelector((state: RootState) => state.settings.obj.webcam.device);
+
+   const localWebcam = useWebcam();
+   const webcamController = useDeviceManagement('webcam', localWebcam, webcamDevice);
+   useWatchSelectedDevice('webcam');
+
    const canShareScreen = usePermission(MEDIA_CAN_SHARE_SCREEN);
    const canShareAudio = usePermission(MEDIA_CAN_SHARE_AUDIO);
    const canShareWebcam = usePermission(MEDIA_CAN_SHARE_WEBCAM);
@@ -86,16 +95,18 @@ export default function MediaControls({ className }: Props) {
                </Fab>
             )}
             {canShareWebcam && (
-               <Fab color="primary" aria-label="share webcam" className={classes.fab}>
-                  <VideocamOffIcon />
-               </Fab>
+               <MediaFab
+                  aria-label="share webcam"
+                  className={classes.fab}
+                  Icon={AnimatedCamIcon}
+                  control={webcamController}
+               />
             )}
             {canShareAudio && (
                <MediaFab
                   aria-label="share microphone"
                   className={classes.fab}
-                  IconEnable={MicIcon}
-                  IconDisable={MicOffIcon}
+                  Icon={AnimatedMicIcon}
                   control={micController}
                />
             )}
