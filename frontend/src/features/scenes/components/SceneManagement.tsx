@@ -1,9 +1,7 @@
-import React, { useRef, useState } from 'react';
 import {
    Button,
    ClickAwayListener,
    Grow,
-   IconButton,
    List,
    ListItem,
    ListItemIcon,
@@ -15,13 +13,22 @@ import {
    Paper,
    Popper,
    Radio,
+   SvgIconProps,
    Typography,
+   useTheme,
 } from '@material-ui/core';
+import AppsIcon from '@material-ui/icons/Apps';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import DesktopWindowsIcon from '@material-ui/icons/DesktopWindows';
-import FileIcon from '@material-ui/icons/InsertDriveFile';
-import StarIcon from '@material-ui/icons/Star';
 import GroupWorkIcon from '@material-ui/icons/GroupWork';
+import StarIcon from '@material-ui/icons/Star';
+import React, { useRef, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { ParticipantDto } from 'src/features/conference/types';
+import { RootState } from 'src/store';
+import { setAppliedScene } from '../scenesSlice';
+import { selectAvailableScenesViewModels, selectServerProvidedScene } from '../selectors';
+import { Scene } from '../types';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -32,12 +39,48 @@ const useStyles = makeStyles((theme) => ({
    },
 }));
 
+const getSceneTitle = (scene: Scene, participants: ParticipantDto[] | null) => {
+   switch (scene.type) {
+      case 'automatic':
+         return 'Automatic';
+      case 'grid':
+         return 'Grid';
+      case 'screenshare':
+         return `Screen of ${participants?.find((x) => x.participantId === scene.participantId)?.displayName}`;
+   }
+};
+
+const getSceneIcon = (scene: Scene, color?: string) => {
+   const props: SvgIconProps = { style: { color } };
+
+   switch (scene.type) {
+      case 'grid':
+         return <AppsIcon {...props} />;
+      case 'screenshare':
+         return <DesktopWindowsIcon {...props} />;
+      case 'automatic':
+         return <StarIcon {...props} />;
+   }
+};
+
 export default function SceneManagement() {
    const classes = useStyles();
    const [actionPopper, setActionPopper] = useState(false);
    const actionButton = useRef<HTMLButtonElement>(null);
    const handleClose = () => setActionPopper(false);
    const handleOpen = () => setActionPopper(true);
+
+   const participants = useSelector((state: RootState) => state.conference.participants);
+   const availableScenes = useSelector(selectAvailableScenesViewModels);
+   const theme = useTheme();
+   const serverScene = useSelector(selectServerProvidedScene);
+   const dispatch = useDispatch();
+
+   const handleChangeScene = (checked: boolean, scene: Scene) => {
+      if (checked) {
+         dispatch(setAppliedScene(scene));
+      }
+   };
 
    const options = ['Breakout Rooms', 'Upload PDF', 'Poll'];
 
@@ -49,42 +92,30 @@ export default function SceneManagement() {
                   Scenes
                </Typography>
             </li>
-            <ListItem button style={{ paddingLeft: 16, paddingRight: 8 }}>
-               <ListItemIcon style={{ minWidth: 32 }}>
-                  <StarIcon />
-               </ListItemIcon>
-               <ListItemText primary="Automatic" />
-               <ListItemSecondaryAction>
-                  <Radio edge="end" />
-               </ListItemSecondaryAction>
-            </ListItem>
-            <ListItem button style={{ paddingLeft: 16, paddingRight: 8 }}>
-               <ListItemIcon style={{ minWidth: 32 }}>
-                  <DesktopWindowsIcon />
-               </ListItemIcon>
-               <ListItemText primary="Your Screen" />
-               <ListItemSecondaryAction>
-                  <Radio edge="end" />
-               </ListItemSecondaryAction>
-            </ListItem>
-            <ListItem button style={{ paddingLeft: 16, paddingRight: 8 }}>
-               <ListItemIcon style={{ minWidth: 32 }}>
-                  <DesktopWindowsIcon />
-               </ListItemIcon>
-               <ListItemText primary="Joseph's Screen" />
-               <ListItemSecondaryAction>
-                  <Radio edge="end" />
-               </ListItemSecondaryAction>
-            </ListItem>
-            <ListItem button style={{ paddingLeft: 16, paddingRight: 8 }}>
-               <ListItemIcon style={{ minWidth: 32 }}>
-                  <FileIcon />
-               </ListItemIcon>
-               <ListItemText primary="Slides.pdf" />
-               <ListItemSecondaryAction>
-                  <Radio edge="end" />
-               </ListItemSecondaryAction>
-            </ListItem>
+            {availableScenes.map(({ id, scene, isApplied, isCurrent }) => (
+               <ListItem button style={{ paddingRight: 8, paddingLeft: 0 }} key={id}>
+                  <div
+                     style={{
+                        backgroundColor: isCurrent ? theme.palette.primary.main : undefined,
+                        width: 4,
+                        alignSelf: 'stretch',
+                        marginRight: 12,
+                     }}
+                  />
+                  <ListItemIcon style={{ minWidth: 32 }}>
+                     {getSceneIcon(scene, isCurrent ? theme.palette.primary.light : undefined)}
+                  </ListItemIcon>
+                  <ListItemText primary={getSceneTitle(scene, participants)} />
+                  <ListItemSecondaryAction>
+                     <Radio
+                        edge="end"
+                        checked={isApplied}
+                        onChange={(_, checked) => handleChangeScene(checked, scene)}
+                     />
+                  </ListItemSecondaryAction>
+               </ListItem>
+            ))}
+
             <li style={{ paddingLeft: 16, marginTop: 16 }}>
                <Typography variant="subtitle2" color="textSecondary">
                   Active

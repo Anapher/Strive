@@ -11,6 +11,7 @@ import rooms from '../features/rooms/roomsSlice';
 import notifier from '../features/notifier/notifierSlice';
 import settings from '../features/settings/settingsSlice';
 import equipment from '../features/equipment/equipmentSlice';
+import scenes from '../features/scenes/scenesSlice';
 
 const rootReducer = combineReducers({
    auth,
@@ -24,6 +25,7 @@ const rootReducer = combineReducers({
    notifier,
    settings,
    equipment,
+   scenes,
 });
 
 export default rootReducer;

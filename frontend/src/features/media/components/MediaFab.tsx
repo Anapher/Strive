@@ -8,11 +8,17 @@ import { UseMediaState } from 'src/store/webrtc/hooks/useMedia';
 type Props = {
    className?: string;
    control: UseMediaState;
+   pauseOnToggle?: boolean;
 
    Icon: React.ComponentType<AnimatedIconProps>;
 } & Omit<React.ComponentProps<typeof Fab>, 'children'>;
 
-export default function MediaFab({ Icon, control: { enable, pause, resume, enabled, paused }, ...fabProps }: Props) {
+export default function MediaFab({
+   Icon,
+   pauseOnToggle,
+   control: { enable, disable, pause, resume, enabled, paused },
+   ...fabProps
+}: Props) {
    const dispatch = useDispatch();
    const theme = useTheme();
 
@@ -28,7 +34,11 @@ export default function MediaFab({ Icon, control: { enable, pause, resume, enabl
          if (paused) {
             resume();
          } else {
-            pause();
+            if (pauseOnToggle) {
+               pause();
+            } else {
+               disable();
+            }
          }
       }
    };
@@ -36,7 +46,7 @@ export default function MediaFab({ Icon, control: { enable, pause, resume, enabl
    return (
       <Fab color={enabled ? 'primary' : 'default'} onClick={handleClick} {...fabProps}>
          <Icon
-            activated={!paused}
+            activated={paused}
             color={enabled ? theme.palette.primary.contrastText : theme.palette.background.default}
             width={24}
             height={24}

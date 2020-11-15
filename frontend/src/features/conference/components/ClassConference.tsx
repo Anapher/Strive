@@ -3,7 +3,7 @@ import React, { useRef, useState } from 'react';
 import ChatBar from 'src/features/chat/components/ChatBar';
 import ConferenceAppBar from 'src/features/conference/components/ConferenceAppBar';
 import PinnableSidebar from './PinnableSidebar';
-import SceneView from './SceneView';
+import SceneView from '../../scenes/components/SceneView';
 
 const useStyles = makeStyles((theme) => ({
    root: {

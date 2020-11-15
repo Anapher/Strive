@@ -4,12 +4,11 @@ import { AnimateSharedLayout, motion } from 'framer-motion';
 import React, { useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import AnimatedMicIcon from 'src/assets/animated-icons/AnimatedMicIcon';
-import IconHide from 'src/components/IconHide';
 import { ParticipantDto } from 'src/features/conference/types';
+import { selectParticipantProducers } from 'src/features/media/selectors';
 import { RootState } from 'src/store';
 import useConsumer from 'src/store/webrtc/hooks/useConsumer';
 import { Size } from 'src/types';
-import { getParticipantProducers } from '../selectors';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -71,7 +70,7 @@ export default function ParticipantTile({ className, participant }: Props) {
    const classes = useStyles();
    const consumer = useConsumer(participant.participantId, 'webcam');
    const videoRef = useRef<HTMLVideoElement | null>(null);
-   const producers = useSelector((state: RootState) => getParticipantProducers(state, participant?.participantId));
+   const producers = useSelector((state: RootState) => selectParticipantProducers(state, participant?.participantId));
    const isWebcamActive = consumer?.paused === false;
 
    useEffect(() => {

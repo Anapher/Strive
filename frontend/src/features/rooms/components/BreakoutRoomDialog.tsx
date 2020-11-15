@@ -15,7 +15,7 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from 'src/store';
-import { selectRooms } from '../selectors';
+import { selectRoomViewModels } from '../selectors';
 import * as coreHub from 'src/core-hub';
 
 const NATO_ALPHA = [
@@ -69,7 +69,7 @@ export default function BreakoutRoomDialog({ open, onClose }: Props) {
    const dispatch = useDispatch();
 
    const participants = useSelector((state: RootState) => state.conference.participants);
-   const rooms = useSelector(selectRooms) ?? [];
+   const rooms = useSelector(selectRoomViewModels) ?? [];
 
    const hasBreakoutRooms = rooms.length > 1;
    const openedBreakoutRoomsLen = Math.max(rooms.length - 1, 0);

@@ -21,10 +21,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import * as coreHub from 'src/core-hub';
 import { selectAccessToken } from 'src/features/auth/selectors';
 import ParticipantItem from 'src/features/conference/components/ParticipantItem';
-import SceneManagement from 'src/features/conference/components/SceneManagement';
+import SceneManagement from 'src/features/scenes/components/SceneManagement';
 import usePermission, { ROOMS_CAN_CREATE_REMOVE } from 'src/hooks/usePermission';
 import { RootState } from 'src/store';
-import { selectRooms } from '../selectors';
+import { selectRoomViewModels } from '../selectors';
 import RoomHeader from './RoomHeader';
 import RoomManagement from './RoomManagement';
 
@@ -63,7 +63,7 @@ type Props = {
 export default function RoomsList({ pinned, onTogglePinned }: Props) {
    const classes = useStyles();
 
-   const rooms = useSelector(selectRooms);
+   const rooms = useSelector(selectRoomViewModels);
    const participants = useSelector((state: RootState) => state.conference.participants);
    const accessInfo = useSelector(selectAccessToken);
 

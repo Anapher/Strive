@@ -2,13 +2,17 @@ import { Action, configureStore, ThunkAction } from '@reduxjs/toolkit';
 import createMiddleware from './signal/create-middleware';
 import rootReducer from './root-reducer';
 import { loadState, persistState } from './storage';
+import createSagaMiddleware from 'redux-saga';
+import rootSaga from './root-saga';
 
 const { middleware: signalrMiddleware } = createMiddleware({
    signalUrl: '/signalr',
 });
 
+const sagaMiddleware = createSagaMiddleware();
+
 // configure middlewares
-const middlewares = [signalrMiddleware];
+const middlewares = [signalrMiddleware, sagaMiddleware];
 
 // rehydrate state on app start
 const initialState = loadState({});
@@ -21,6 +25,9 @@ const store = configureStore({
 });
 // const store = createStore(rootReducer, initialState, enhancer);
 persistState(store, persistInLocalStorage, persistInSessionStorage);
+
+// run redux saga
+sagaMiddleware.run(rootSaga);
 
 // export store singleton instance
 export default store;

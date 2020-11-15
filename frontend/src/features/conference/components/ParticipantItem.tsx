@@ -17,7 +17,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import AnimatedMicIcon from 'src/assets/animated-icons/AnimatedMicIcon';
 import IconHide from 'src/components/IconHide';
 import { Roles } from 'src/consts';
-import { getParticipantProducers } from 'src/features/media/selectors';
+import { selectParticipantProducers } from 'src/features/media/selectors';
 import { showMessage } from 'src/features/notifier/actions';
 import { RootState } from 'src/store';
 import useConsumer from 'src/store/webrtc/hooks/useConsumer';
@@ -45,7 +45,7 @@ type Props = {
 
 export default function ParticipantItem({ participant }: Props) {
    const classes = useStyles();
-   const producers = useSelector((state: RootState) => getParticipantProducers(state, participant?.participantId));
+   const producers = useSelector((state: RootState) => selectParticipantProducers(state, participant?.participantId));
 
    const dispatch = useDispatch();
 

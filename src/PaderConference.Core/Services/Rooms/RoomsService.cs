@@ -16,7 +16,7 @@ using PaderConference.Core.Services.Synchronization;
 
 namespace PaderConference.Core.Services.Rooms
 {
-    public class RoomsService : ConferenceService
+    public class RoomsService : ConferenceService, IRoomManagement
     {
         private const string DefaultRoomId = "default";
         private readonly string _conferenceId;
@@ -42,6 +42,9 @@ namespace PaderConference.Core.Services.Rooms
 
             permissionsService.RegisterLayerProvider(FetchRoomPermissions);
         }
+
+        public event EventHandler<IReadOnlyList<Room>>? RoomsCreated;
+        public event EventHandler<IReadOnlyList<string>>? RoomsRemoved;
 
         public override async ValueTask OnClientDisconnected(Participant participant)
         {
@@ -95,13 +98,17 @@ namespace PaderConference.Core.Services.Rooms
                     return;
                 }
 
+                var rooms = new List<Room>();
                 foreach (var createRoomMessage in message.Payload)
                 {
                     var id = Guid.NewGuid().ToString("N");
-                    await _roomRepo.CreateRoom(_conferenceId, new Room(id, createRoomMessage.DisplayName, true));
+                    var room = new Room(id, createRoomMessage.DisplayName, true);
+                    await _roomRepo.CreateRoom(_conferenceId, room);
+                    rooms.Add(room);
                 }
 
                 await UpdateSynchronizedRooms();
+                RoomsCreated?.Invoke(this, rooms);
             }
         }
 
@@ -133,6 +140,7 @@ namespace PaderConference.Core.Services.Rooms
                 }
 
                 await UpdateSynchronizedRooms();
+                RoomsRemoved?.Invoke(this, message.Payload);
             }
         }
 
@@ -141,9 +149,11 @@ namespace PaderConference.Core.Services.Rooms
             await _roomRepo.DeleteAll(_conferenceId);
             await _roomRepo.DeleteParticipantToRoomMap(_conferenceId);
 
-            await _roomRepo.CreateRoom(_conferenceId, new Room(DefaultRoomId, _options.DefaultRoomName, true));
+            var defaultRoom = new Room(DefaultRoomId, _options.DefaultRoomName, true);
+            await _roomRepo.CreateRoom(_conferenceId, defaultRoom);
 
             await UpdateSynchronizedRooms();
+            RoomsCreated?.Invoke(this, new[] {defaultRoom});
         }
 
         private async Task UpdateSynchronizedRooms()
@@ -217,5 +227,7 @@ namespace PaderConference.Core.Services.Rooms
 
             return new PermissionLayer(10, roomPermissions).Yield();
         }
+
+        public ConferenceRooms State => _synchronizedRooms.Current;
     }
 }

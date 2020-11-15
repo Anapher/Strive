@@ -13,11 +13,7 @@ const initialState: RoomsState = {
 const roomsSlice = createSlice({
    name: 'rooms',
    initialState,
-   reducers: {
-      test(state) {
-         state.synchronized = null;
-      },
-   },
+   reducers: {},
    extraReducers: {
       ...createSynchronizeObjectReducer({ name: 'rooms', stateName: 'synchronized' }),
    },

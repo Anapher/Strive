@@ -2,12 +2,13 @@ import { ProducerInfo } from './types';
 import { createSelector } from '@reduxjs/toolkit';
 import { RootState } from 'src/store';
 import { ProducerSource } from 'src/store/webrtc/types';
-import { selectAccessToken } from '../auth/selectors';
+import { ParticipantDto } from '../conference/types';
 
 const getId = (_: unknown, id: string | undefined) => id;
-const getStreams = (state: RootState) => state.media.streams;
+const selectStreams = (state: RootState) => state.media.streams;
+const selectParticipants = (state: RootState) => state.conference.participants;
 
-export const getParticipantProducers = createSelector(getStreams, getId, (streams, participantId) => {
+export const selectParticipantProducers = createSelector(selectStreams, getId, (streams, participantId) => {
    if (!streams) return undefined;
    if (!participantId) return undefined;
 
@@ -29,21 +30,21 @@ export const getParticipantProducers = createSelector(getStreams, getId, (stream
    return result;
 });
 
-// const getSource = (_: unknown, source: ProducerSource) => source;
+export const selectScreenSharingParticipants = createSelector(
+   selectStreams,
+   selectParticipants,
+   (streams, participants) => {
+      if (!streams) return undefined;
 
-// const defaultMediaStatus: MediaStatus = { enabled: false, paused: false };
-
-// export const selectDeviceState = createSelector(getStreams, selectAccessToken, getSource, (streams, token, source) => {
-//    if (!streams) return defaultMediaStatus;
-//    if (!token) return defaultMediaStatus;
-
-//    const participantStreams = streams[token.nameid];
-//    if (!participantStreams) return defaultMediaStatus;
-
-//    const producer = Object.entries(participantStreams.producers).find((x) => x[1].selected && x[1].kind === source);
-//    if (!producer) return defaultMediaStatus;
-//    return { enabled: true, paused: producer[1].paused };
-// });
+      return Object.entries(streams)
+         .filter(
+            ([, pstreams]) =>
+               pstreams && Object.values(pstreams.producers).find((x) => x.kind === 'screen' && !x.paused),
+         )
+         .map(([participantId]) => participants?.find((x) => x.participantId === participantId))
+         .filter((x) => !!x) as ParticipantDto[];
+   },
+);
 
 export type ProducerViewModel = ProducerInfo & {
    id: string;

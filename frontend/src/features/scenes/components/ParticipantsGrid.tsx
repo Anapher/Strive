@@ -2,12 +2,12 @@ import { makeStyles } from '@material-ui/core';
 import clsx from 'classnames';
 import { motion } from 'framer-motion';
 import _ from 'lodash';
-import React, { useState } from 'react';
+import React from 'react';
 import { useSelector } from 'react-redux';
-import { GridScene } from 'src/features/conference/types';
 import { RootState } from 'src/store';
 import { Size } from 'src/types';
 import { generateGrid } from '../calculations';
+import { GridScene } from '../types';
 import ParticipantTile from './ParticipantTile';
 
 const useStyles = makeStyles(() => ({

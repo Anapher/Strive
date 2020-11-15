@@ -21,6 +21,7 @@ namespace PaderConference.Core.Services.Permissions
             PermissionsList.Media.CanShareScreen.Configure(true),
             PermissionsList.Media.CanShareWebcam.Configure(true),
             PermissionsList.Rooms.CanCreateAndRemove.Configure(true),
+            PermissionsList.Scenes.CanSetScene.Configure(true),
         }.ToImmutableDictionary();
 
         public ImmutableDictionary<string, JsonElement> Room { get; set; } = new[]

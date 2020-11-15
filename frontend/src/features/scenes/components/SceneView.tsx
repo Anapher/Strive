@@ -1,12 +1,14 @@
-import { makeStyles, Typography } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core';
 import { AnimateSharedLayout } from 'framer-motion';
 import React from 'react';
+import { useSelector } from 'react-redux';
 import MediaControls from 'src/features/media/components/MediaControls';
-import ParticipantsGrid from 'src/features/media/components/ParticipantsGrid';
-import ScreenShare from 'src/features/media/components/ScreenShare';
+import ParticipantsGrid from './ParticipantsGrid';
+import ScreenShare from './ScreenShare';
 import useThrottledResizeObserver from 'src/hooks/useThrottledResizeObserver';
 import { Size } from 'src/types';
-import { Scene } from '../types';
+import { selectCurrentScene } from '../selectors';
+import { ViewableScene } from '../types';
 
 const useStyles = makeStyles({
    root: {
@@ -37,12 +39,12 @@ export default function SceneView() {
    if (dimensions && dimensions.width !== undefined && dimensions.height !== undefined)
       fixedDimensions = { width: dimensions.width - 32, height: dimensions.height - 32 };
 
-   const scene: Scene = { type: 'grid' };
+   const currentScene = useSelector(selectCurrentScene);
 
    return (
       <div className={classes.root} ref={contentRef}>
          <AnimateSharedLayout>
-            <SceneSelector className={classes.currentScene} dimensions={fixedDimensions} scene={scene} />
+            <SceneSelector className={classes.currentScene} dimensions={fixedDimensions} scene={currentScene} />
          </AnimateSharedLayout>
          <MediaControls className={classes.mediaControls} />
       </div>
@@ -50,7 +52,7 @@ export default function SceneView() {
 }
 
 type SceneSelectorProps = {
-   scene: Scene;
+   scene: ViewableScene;
    className?: string;
    dimensions?: Size;
 };
@@ -63,9 +65,5 @@ function SceneSelector({ scene, className, dimensions }: SceneSelectorProps) {
          return <ParticipantsGrid className={className} dimensions={dimensions} options={scene} />;
       case 'screenshare':
          return <ScreenShare className={className} dimensions={dimensions} options={scene} />;
-      default:
-         break;
    }
-
-   return <div />;
 }

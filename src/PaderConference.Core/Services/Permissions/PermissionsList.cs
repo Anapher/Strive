@@ -46,5 +46,11 @@
             public static readonly PermissionDescriptor<bool> CanSwitchRoom =
                 new PermissionDescriptor<bool>("rooms.canSwitchRoom");
         }
+
+        public static class Scenes
+        {
+            public static readonly PermissionDescriptor<bool> CanSetScene =
+                new PermissionDescriptor<bool>("scenes.canSetScene");
+        }
     }
 }

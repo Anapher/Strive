@@ -4,7 +4,7 @@ import clsx from 'classnames';
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { send } from 'src/store/signal/actions';
-import { selectRooms } from '../selectors';
+import { selectRoomViewModels } from '../selectors';
 import BreakoutRoomDialog from './BreakoutRoomDialog';
 import * as coreHub from 'src/core-hub';
 
@@ -24,7 +24,7 @@ type Props = {
 export default function RoomManagement({ className }: Props) {
    const classes = useStyles();
    const [breakoutRoomDialogOpen, setBreakoutRoomDialogOpen] = useState(false);
-   const rooms = useSelector(selectRooms);
+   const rooms = useSelector(selectRoomViewModels);
    const dispatch = useDispatch();
 
    const handleCloseBreakoutRooms = () => {

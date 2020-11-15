@@ -1,12 +1,13 @@
 import { Dialog, DialogContent, DialogTitle, Fab, makeStyles, Tooltip } from '@material-ui/core';
 import BugReportIcon from '@material-ui/icons/BugReport';
 import DesktopAccessDisabledIcon from '@material-ui/icons/DesktopAccessDisabled';
-import MicIcon from '@material-ui/icons/Mic';
-import MicOffIcon from '@material-ui/icons/MicOff';
-import PanToolIcon from '@material-ui/icons/PanTool';
-import VideocamOffIcon from '@material-ui/icons/VideocamOff';
+import clsx from 'classnames';
+import { HumanHandsup } from 'mdi-material-ui';
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
+import AnimatedCamIcon from 'src/assets/animated-icons/AnimatedCamIcon';
+import AnimatedMicIcon from 'src/assets/animated-icons/AnimatedMicIcon';
+import AnimatedScreenIcon from 'src/assets/animated-icons/AnimatedScreenIcon';
 import Debug from 'src/features/conference/components/Troubleshooting';
 import usePermission, {
    CONFERENCE_CAN_RAISE_HAND,
@@ -16,13 +17,11 @@ import usePermission, {
 } from 'src/hooks/usePermission';
 import { RootState } from 'src/store';
 import useMicrophone from 'src/store/webrtc/hooks/useMicrophone';
+import { useScreen } from 'src/store/webrtc/hooks/useScreen';
+import { useWebcam } from 'src/store/webrtc/hooks/useWebcam';
 import useDeviceManagement from '../useDeviceManagement';
 import useWatchSelectedDevice from '../useWatchDevice';
 import MediaFab from './MediaFab';
-import clsx from 'classnames';
-import { useWebcam } from 'src/store/webrtc/hooks/useWebcam';
-import AnimatedMicIcon from 'src/assets/animated-icons/AnimatedMicIcon';
-import AnimatedCamIcon from 'src/assets/animated-icons/AnimatedCamIcon';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -55,17 +54,21 @@ export default function MediaControls({ className }: Props) {
    const classes = useStyles();
 
    const gain = useSelector((state: RootState) => state.settings.obj.mic.audioGain);
+
    const localMic = useMicrophone(gain);
    const audioDevice = useSelector((state: RootState) => state.settings.obj.mic.device);
-
    const micController = useDeviceManagement('mic', localMic, audioDevice);
    useWatchSelectedDevice('mic');
 
    const webcamDevice = useSelector((state: RootState) => state.settings.obj.webcam.device);
-
    const localWebcam = useWebcam();
    const webcamController = useDeviceManagement('webcam', localWebcam, webcamDevice);
    useWatchSelectedDevice('webcam');
+
+   const screenDevice = useSelector((state: RootState) => state.settings.obj.screen.device);
+   const localScreen = useScreen();
+   const screenController = useDeviceManagement('screen', localScreen, screenDevice);
+   useWatchSelectedDevice('screen');
 
    const canShareScreen = usePermission(MEDIA_CAN_SHARE_SCREEN);
    const canShareAudio = usePermission(MEDIA_CAN_SHARE_AUDIO);
@@ -83,16 +86,19 @@ export default function MediaControls({ className }: Props) {
             {canRaiseHand && (
                <Tooltip title="Raise Hand" aria-label="raise hand">
                   <Fab color="secondary" className={classes.fab}>
-                     <PanToolIcon />
+                     <HumanHandsup />
                   </Fab>
                </Tooltip>
             )}
          </div>
          <div style={{ display: 'flex', flexDirection: 'row' }}>
             {canShareScreen && (
-               <Fab color="primary" aria-label="share screen" className={classes.fab}>
-                  <DesktopAccessDisabledIcon />
-               </Fab>
+               <MediaFab
+                  aria-label="share screen"
+                  className={classes.fab}
+                  Icon={AnimatedScreenIcon}
+                  control={screenController}
+               />
             )}
             {canShareWebcam && (
                <MediaFab
@@ -108,6 +114,7 @@ export default function MediaControls({ className }: Props) {
                   className={classes.fab}
                   Icon={AnimatedMicIcon}
                   control={micController}
+                  pauseOnToggle
                />
             )}
          </div>

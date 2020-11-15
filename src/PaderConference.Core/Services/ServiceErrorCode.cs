@@ -32,5 +32,10 @@ namespace PaderConference.Core.Services
 
         // Equipment
         Equipment_NotFound = 1000400,
+
+        // Scenes
+        Scenes_PermissionDenied_Change = 1000500,
+        Scenes_RoomNotFound = 1000501,
+        Scenes_SceneMustNotBeNull = 1000502,
     }
 }
