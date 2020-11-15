@@ -1,10 +1,11 @@
 import { fade, makeStyles, Typography, useTheme } from '@material-ui/core';
 import clsx from 'classnames';
-import { AnimateSharedLayout, motion } from 'framer-motion';
+import { AnimateSharedLayout, motion, MotionValue, useTransform } from 'framer-motion';
 import React, { useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import AnimatedMicIcon from 'src/assets/animated-icons/AnimatedMicIcon';
 import { ParticipantDto } from 'src/features/conference/types';
+import { useParticipantAudio } from 'src/features/media/components/ParticipantMicManager';
 import { selectParticipantProducers } from 'src/features/media/selectors';
 import { RootState } from 'src/store';
 import useConsumer from 'src/store/webrtc/hooks/useConsumer';
@@ -32,15 +33,11 @@ const useStyles = makeStyles((theme) => ({
    },
    infoBox: {
       position: 'absolute',
-
       display: 'flex',
       alignItems: 'center',
       flexDirection: 'row',
-
       backgroundColor: fade(theme.palette.background.paper, 0.5),
-
       padding: theme.spacing(0, 1),
-
       left: 0,
       bottom: theme.spacing(1),
    },
@@ -58,6 +55,18 @@ const useStyles = makeStyles((theme) => ({
       alignItems: 'center',
       justifyContent: 'center',
    },
+   volumeBorder: {
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      position: 'absolute',
+      backgroundColor: 'transparent',
+      borderRadius: theme.shape.borderRadius,
+      borderStyle: 'solid',
+      borderColor: theme.palette.primary.main,
+      borderWidth: 0,
+   },
 }));
 
 type Props = {
@@ -73,6 +82,8 @@ export default function ParticipantTile({ className, participant }: Props) {
    const producers = useSelector((state: RootState) => selectParticipantProducers(state, participant?.participantId));
    const isWebcamActive = consumer?.paused === false;
 
+   const audioInfo = useParticipantAudio(participant.participantId);
+
    useEffect(() => {
       if (consumer?.track) {
          const stream = new MediaStream();
@@ -86,11 +97,12 @@ export default function ParticipantTile({ className, participant }: Props) {
 
    const theme = useTheme();
 
-   console.log('isWebcamActive', isWebcamActive);
+   const asd = useTransform(audioInfo?.audioLevel ?? new MotionValue(0), [0, 1], [0, 10]);
 
    return (
       <motion.div whileHover={{ scale: 1.05, zIndex: 500 }} className={clsx(classes.root, className)}>
          <video ref={videoRef} className={classes.video} hidden={!isWebcamActive} autoPlay />
+         <motion.div style={{ borderWidth: asd }} className={classes.volumeBorder} />
          <AnimateSharedLayout>
             {isWebcamActive ? (
                <motion.div className={classes.infoBox}>

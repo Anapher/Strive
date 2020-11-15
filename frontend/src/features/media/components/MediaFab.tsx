@@ -46,7 +46,7 @@ export default function MediaFab({
    return (
       <Fab color={enabled ? 'primary' : 'default'} onClick={handleClick} {...fabProps}>
          <Icon
-            activated={!paused}
+            activated={enabled && !paused}
             color={enabled ? theme.palette.primary.contrastText : theme.palette.background.default}
             width={24}
             height={24}

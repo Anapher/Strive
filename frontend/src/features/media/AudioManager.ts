@@ -14,7 +14,7 @@ export default class AudioManager extends EventEmitter {
       onSpeakingStopped: () => void,
       volume: number,
       muted: boolean,
-      speakingThreshold = 4,
+      speakingThreshold = 2,
    ) {
       elem.volume = volume;
       elem.muted = muted;

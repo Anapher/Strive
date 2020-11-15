@@ -86,7 +86,7 @@ export default function ParticipantMicManager({ children }: Props) {
                onUnregistered={handleOnRegister(x, false)}
                onSpeaking={handleOnSpeaking(x, true)}
                onSpeakingStopped={handleOnSpeaking(x, false)}
-               speakingThreshold={4}
+               speakingThreshold={2}
             />
          ))}
          {children}
