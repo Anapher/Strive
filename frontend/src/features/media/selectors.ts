@@ -3,10 +3,12 @@ import { createSelector } from '@reduxjs/toolkit';
 import { RootState } from 'src/store';
 import { ProducerSource } from 'src/store/webrtc/types';
 import { ParticipantDto } from '../conference/types';
+import { selectParticipants } from '../conference/selectors';
 
 const getId = (_: unknown, id: string | undefined) => id;
 const selectStreams = (state: RootState) => state.media.streams;
-const selectParticipants = (state: RootState) => state.conference.participants;
+
+export const selectParticipantAudio = (state: RootState) => state.media.participantAudio;
 
 export const selectParticipantProducers = createSelector(selectStreams, getId, (streams, participantId) => {
    if (!streams) return undefined;
@@ -28,6 +30,12 @@ export const selectParticipantProducers = createSelector(selectStreams, getId, (
    }
 
    return result;
+});
+
+export const selectParticipantAudioInfo = createSelector(selectParticipantAudio, getId, (audios, participantId) => {
+   if (!participantId) return undefined;
+
+   return audios[participantId];
 });
 
 export const selectScreenSharingParticipants = createSelector(

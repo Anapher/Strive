@@ -11,16 +11,15 @@ import {
 } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { motion, useMotionValue, useTransform } from 'framer-motion';
-import hark from 'hark';
-import React, { useEffect, useRef, useState } from 'react';
+import _ from 'lodash';
+import React, { useCallback, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import AnimatedMicIcon from 'src/assets/animated-icons/AnimatedMicIcon';
 import IconHide from 'src/components/IconHide';
 import { Roles } from 'src/consts';
-import { selectParticipantProducers } from 'src/features/media/selectors';
-import { showMessage } from 'src/features/notifier/actions';
+import { patchParticipantAudio } from 'src/features/media/mediaSlice';
+import { selectParticipantAudioInfo, selectParticipantProducers } from 'src/features/media/selectors';
 import { RootState } from 'src/store';
-import useConsumer from 'src/store/webrtc/hooks/useConsumer';
 import { ParticipantDto } from '../types';
 import ParticipantItemPopper from './ParticipantItemPopper';
 
@@ -48,57 +47,23 @@ export default function ParticipantItem({ participant }: Props) {
    const producers = useSelector((state: RootState) => selectParticipantProducers(state, participant?.participantId));
 
    const dispatch = useDispatch();
-
-   const consumer = useConsumer(participant?.participantId, 'mic');
-   const audioElem = useRef<HTMLAudioElement>(null);
    const audioVol = useMotionValue(0);
    const audioVolBackground = useTransform(audioVol, (value) => `rgba(41, 128, 185, ${value})`);
-   const [muted, setMuted] = useState(false);
-   const [volume, setVolume] = useState(0.75);
+   const audioInfo = useSelector((state: RootState) => selectParticipantAudioInfo(state, participant?.participantId));
+
    const theme = useTheme();
 
-   useEffect(() => {
-      if (consumer && audioElem.current) {
-         const stream = new MediaStream();
-         stream.addTrack(consumer.track);
-
-         const analyser = hark(stream, { play: false });
-         analyser.on('volume_change', (dBs) => {
-            // The exact formula to convert from dBs (-100..0) to linear (0..1) is:
-            //   Math.pow(10, dBs / 20)
-            // However it does not produce a visually useful output, so let exagerate
-            // it a bit. Also, let convert it from 0..1 to 0..10 and avoid value 1 to
-            // minimize component renderings.
-            let audioVolume = Math.round(Math.pow(10, dBs / 85) * 10);
-
-            if (audioVolume === 1) audioVolume = 0;
-
-            audioVol.set(audioVolume / 10);
-         });
-
-         audioElem.current.srcObject = stream;
-         audioElem.current.volume = volume;
-         audioElem.current
-            .play()
-            .catch((error) => dispatch(showMessage({ message: error.toString(), variant: 'error' })));
-
-         console.log('play');
-
-         return () => {
-            analyser.stop();
-         };
-      }
-   }, [consumer, audioElem.current]);
-
-   const handleChangeMuted = (mute: boolean) => {
-      setMuted(mute);
+   const handleChangeMuted = (muted: boolean) => {
+      if (participant) dispatch(patchParticipantAudio({ participantId: participant.participantId, data: { muted } }));
    };
 
-   const handleChangeVolume = (volume: number) => {
-      setVolume(volume);
-
-      if (audioElem.current) audioElem.current.volume = volume;
-   };
+   const handleChangeVolume = useCallback(
+      _.throttle((volume: number) => {
+         if (participant)
+            dispatch(patchParticipantAudio({ participantId: participant.participantId, data: { volume } }));
+      }, 200),
+      [participant],
+   );
 
    const [popperOpen, setPopperOpen] = useState(false);
    const buttonRef = useRef<HTMLButtonElement>(null);
@@ -131,7 +96,6 @@ export default function ParticipantItem({ participant }: Props) {
                <AnimatedMicIcon activated={!producers?.mic?.paused} disabledColor={theme.palette.error.main} />
             </IconHide>
          </ButtonBase>
-         <audio ref={audioElem} autoPlay playsInline muted={muted} controls={false} />
          {participant && (
             <Popper open={popperOpen} anchorEl={buttonRef.current} transition placement="right-start">
                {({ TransitionProps }) => (
@@ -142,9 +106,9 @@ export default function ParticipantItem({ participant }: Props) {
                               <ParticipantItemPopper
                                  participant={participant}
                                  audioLevel={audioVol}
-                                 muted={muted}
+                                 muted={audioInfo?.muted ?? false}
                                  onChangeMuted={handleChangeMuted}
-                                 volume={volume}
+                                 volume={audioInfo?.volume ?? 0}
                                  onChangeVolume={handleChangeVolume}
                               />
                            </Box>

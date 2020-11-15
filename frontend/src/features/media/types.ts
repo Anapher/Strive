@@ -1,3 +1,4 @@
+import { MotionValue } from 'framer-motion';
 import { UseMediaStateInfo } from 'src/store/webrtc/hooks/useMedia';
 import { ProducerSource } from 'src/store/webrtc/types';
 import { InputDeviceDto } from '../settings/types';
@@ -28,4 +29,17 @@ export type ConnectedEquipmentDto = {
    devices?: InputDeviceDto[];
 
    status?: { [key in ProducerSource]: UseMediaStateInfo };
+};
+
+export type ParticipantAudioInfo = {
+   volume: number;
+   muted: boolean;
+   registered: boolean;
+   speaking: boolean;
+};
+
+export type ParticipantAudioElement = {
+   elem: HTMLAudioElement;
+   stream: MediaStream;
+   audioLevel: MotionValue<number>;
 };

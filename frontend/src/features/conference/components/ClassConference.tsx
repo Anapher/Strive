@@ -4,6 +4,7 @@ import ChatBar from 'src/features/chat/components/ChatBar';
 import ConferenceAppBar from 'src/features/conference/components/ConferenceAppBar';
 import PinnableSidebar from './PinnableSidebar';
 import SceneView from '../../scenes/components/SceneView';
+import ParticipantMicManager from 'src/features/media/components/ParticipantMicManager';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -37,21 +38,23 @@ export default function ClassConference() {
    const handleGetHamburger = () => hamburgerRef.current;
 
    return (
-      <div className={classes.root}>
-         <ConferenceAppBar hamburgerRef={hamburgerRef} />
-         <div className={classes.conferenceMain}>
-            <PinnableSidebar
-               pinned={roomsPinned}
-               onTogglePinned={() => setRoomsPinned((x) => !x)}
-               getHamburger={handleGetHamburger}
-            />
-            <div className={classes.scene}>
-               <SceneView />
-            </div>
-            <div className={classes.chat}>
-               <ChatBar />
+      <ParticipantMicManager>
+         <div className={classes.root}>
+            <ConferenceAppBar hamburgerRef={hamburgerRef} />
+            <div className={classes.conferenceMain}>
+               <PinnableSidebar
+                  pinned={roomsPinned}
+                  onTogglePinned={() => setRoomsPinned((x) => !x)}
+                  getHamburger={handleGetHamburger}
+               />
+               <div className={classes.scene}>
+                  <SceneView />
+               </div>
+               <div className={classes.chat}>
+                  <ChatBar />
+               </div>
             </div>
          </div>
-      </div>
+      </ParticipantMicManager>
    );
 }

@@ -1,23 +1,40 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { onEventOccurred } from 'src/store/signal/actions';
 import { createSynchronizeObjectReducer } from 'src/store/signal/synchronized-object';
-import { ConferenceParticipantStreamInfo, ConnectedEquipmentDto } from './types';
+import { ConferenceParticipantStreamInfo, ConnectedEquipmentDto, ParticipantAudioInfo } from './types';
 import { events } from 'src/core-hub';
+import { ParticipantPayloadAction } from 'src/types';
 
 export type MediaState = {
    streams: ConferenceParticipantStreamInfo | null;
    equipment: ConnectedEquipmentDto[] | null;
+   participantAudio: { [id: string]: ParticipantAudioInfo | undefined };
 };
 
 const initialState: MediaState = {
    streams: null,
    equipment: null,
+   participantAudio: {},
 };
 
 const mediaSlice = createSlice({
    name: 'media',
    initialState,
-   reducers: {},
+   reducers: {
+      setParticipantAudio(state, { payload: { data, participantId } }: ParticipantPayloadAction<ParticipantAudioInfo>) {
+         state.participantAudio[participantId] = data;
+      },
+      removeParticipantAudio(state, { payload }: PayloadAction<string>) {
+         delete state.participantAudio[payload];
+      },
+      patchParticipantAudio(
+         state,
+         { payload: { data, participantId } }: ParticipantPayloadAction<Partial<ParticipantAudioInfo>>,
+      ) {
+         const info = state.participantAudio[participantId];
+         if (info) state.participantAudio[participantId] = { ...info, ...data };
+      },
+   },
    extraReducers: {
       ...createSynchronizeObjectReducer([{ name: 'mediaStreams', stateName: 'streams' }]),
       [onEventOccurred(events.onEquipmentUpdated).type]: (
@@ -28,5 +45,7 @@ const mediaSlice = createSlice({
       },
    },
 });
+
+export const { setParticipantAudio, removeParticipantAudio, patchParticipantAudio } = mediaSlice.actions;
 
 export default mediaSlice.reducer;

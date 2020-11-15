@@ -4,17 +4,30 @@ import { RootState } from 'src/store';
 import _ from 'lodash';
 import { selectAccessToken } from '../auth/selectors';
 
-export const selectRooms = (state: RootState) => state.rooms;
+export const selectRooms = (state: RootState) => state.rooms.synchronized;
 
 export const selectParticipantRoom = createSelector(selectRooms, selectAccessToken, (rooms, token) => {
    if (!token) return undefined;
-   return rooms.synchronized?.participants[token.nameid];
+   return rooms?.participants[token.nameid];
 });
 
-export const selectRoomViewModels = createSelector(selectRooms, (state) => {
-   if (!state.synchronized) return undefined;
+export const selectParticipantsOfCurrentRoom = createSelector(
+   selectParticipantRoom,
+   selectRooms,
+   selectAccessToken,
+   (room, rooms, token) => {
+      if (!rooms) return [];
 
-   const { defaultRoomId, participants, rooms } = state.synchronized;
+      return Object.entries(rooms.participants)
+         .filter(([participantId, roomId]) => roomId === room && participantId !== token?.nameid)
+         .map(([participantId]) => participantId);
+   },
+);
+
+export const selectRoomViewModels = createSelector(selectRooms, (state) => {
+   if (!state) return undefined;
+
+   const { defaultRoomId, participants, rooms } = state;
 
    return _.sortBy(
       rooms.map<RoomViewModel>((room) => ({
