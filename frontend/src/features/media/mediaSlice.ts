@@ -9,9 +9,11 @@ export type MediaState = {
    streams: ConferenceParticipantStreamInfo | null;
    equipment: ConnectedEquipmentDto[] | null;
    participantAudio: { [id: string]: ParticipantAudioInfo | undefined };
+   userInteractionMade: boolean;
 };
 
 const initialState: MediaState = {
+   userInteractionMade: false,
    streams: null,
    equipment: null,
    participantAudio: {},
@@ -34,6 +36,9 @@ const mediaSlice = createSlice({
          const info = state.participantAudio[participantId];
          if (info) state.participantAudio[participantId] = { ...info, ...data };
       },
+      userInteractionMade(state) {
+         state.userInteractionMade = true;
+      },
    },
    extraReducers: {
       ...createSynchronizeObjectReducer([{ name: 'mediaStreams', stateName: 'streams' }]),
@@ -46,6 +51,11 @@ const mediaSlice = createSlice({
    },
 });
 
-export const { setParticipantAudio, removeParticipantAudio, patchParticipantAudio } = mediaSlice.actions;
+export const {
+   setParticipantAudio,
+   removeParticipantAudio,
+   patchParticipantAudio,
+   userInteractionMade,
+} = mediaSlice.actions;
 
 export default mediaSlice.reducer;

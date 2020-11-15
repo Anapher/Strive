@@ -7,6 +7,7 @@ import * as coreHub from 'src/core-hub';
 import ClassConference from 'src/features/conference/components/ClassConference';
 import ConferenceConnecting from 'src/features/conference/components/ConferenceConnecting';
 import ConferenceNotOpen from 'src/features/conference/components/ConferenceNotOpen';
+import RequestUserInteractionView from 'src/features/conference/components/RequestUserInteractionView';
 import SettingsDialog from 'src/features/settings/components/SettingsDialog';
 import { fetchDevices } from 'src/features/settings/thunks';
 import { RootState } from 'src/store';
@@ -35,6 +36,7 @@ function ConferenceRoute({
    const accessToken = useSelector((state: RootState) => state.auth.token?.accessToken);
    const conferenceState = useSelector((state: RootState) => state.conference.conferenceState);
    const { isConnected, isReconnecting } = useSelector((state: RootState) => state.signalr);
+   const userInteractionMade = useSelector((state: RootState) => state.media.userInteractionMade);
    const webRtc = useRef(new WebRtcManager()).current;
 
    const dispatch = useDispatch();
@@ -72,6 +74,10 @@ function ConferenceRoute({
 
    if (!conferenceState.isOpen) {
       return <ConferenceNotOpen conferenceInfo={conferenceState} />;
+   }
+
+   if (!userInteractionMade) {
+      return <RequestUserInteractionView />;
    }
 
    switch (conferenceState.conferenceType) {

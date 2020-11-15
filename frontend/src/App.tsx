@@ -7,6 +7,7 @@ import { SnackbarProvider } from 'notistack';
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
+import UserInteractionListener from './features/media/components/UserInteractionListener';
 import Notifier from './features/notifier/components/Notifier';
 import AnonymousRoutes from './routes/anonymous';
 import AuthenticatedRoutes from './routes/authenticated';
@@ -36,6 +37,7 @@ function App() {
          <SnackbarProvider maxSnack={4}>
             <ThemeProvider theme={theme}>
                <Notifier />
+               <UserInteractionListener />
                <CssBaseline />
                <BrowserRouter>{isAuthenticated ? <AuthenticatedRoutes /> : <AnonymousRoutes />}</BrowserRouter>
             </ThemeProvider>
