@@ -17,6 +17,7 @@ const useStyles = makeStyles((theme) => ({
       display: 'flex',
       flexDirection: 'row',
       position: 'relative',
+      minHeight: 0,
    },
    scene: {
       flex: 1,

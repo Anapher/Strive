@@ -13,10 +13,12 @@ const useStyles = makeStyles((theme) => ({
       display: 'flex',
       flexDirection: 'column',
       height: '100%',
+      overflowY: 'hidden',
    },
    chat: {
       backgroundColor: theme.palette.type === 'dark' ? '#303030' : 'red',
       flex: 1,
+      minHeight: 0,
    },
 }));
 

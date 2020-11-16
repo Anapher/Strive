@@ -31,7 +31,7 @@ export default function ChatMessage({ message, participants }: Props) {
    const classes = useStyles();
 
    return (
-      <div className={classes.root}>
+      <li className={classes.root}>
          <div className={classes.metaData}>
             <Typography
                variant="caption"
@@ -56,6 +56,6 @@ export default function ChatMessage({ message, participants }: Props) {
          <Typography variant="body1" style={{ fontSize: 14 }}>
             {message ? message.message : <Skeleton />}
          </Typography>
-      </div>
+      </li>
    );
 }
