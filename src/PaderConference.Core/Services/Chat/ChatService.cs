@@ -164,7 +164,7 @@ namespace PaderConference.Core.Services.Chat
             try
             {
                 chatMessage = new ChatMessage(_messageIdCounter++, message.Participant.ParticipantId,
-                    messageDto.Message, filter, messageDto.Mode, DateTimeOffset.UtcNow);
+                    messageDto.Message.Trim(), filter, messageDto.Mode, DateTimeOffset.UtcNow);
 
                 _messages.Enqueue(chatMessage);
 

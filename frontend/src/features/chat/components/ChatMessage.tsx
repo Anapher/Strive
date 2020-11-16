@@ -5,6 +5,7 @@ import React from 'react';
 import { DateTime } from 'luxon';
 import { ParticipantDto } from 'src/features/conference/types';
 import emojiRegex from 'emoji-regex/RGI_Emoji';
+import clsx from 'classnames';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -20,6 +21,14 @@ const useStyles = makeStyles((theme) => ({
       display: 'flex',
       flexDirection: 'row',
       justifyContent: 'space-between',
+   },
+   messageText: {
+      whiteSpace: 'pre-wrap',
+      wordBreak: 'break-all',
+      fontSize: 14,
+   },
+   emojiText: {
+      fontSize: 20,
    },
 }));
 
@@ -57,7 +66,7 @@ export default function ChatMessage({ message, participants }: Props) {
                )}
             </Typography>
          </div>
-         <Typography variant="body1" style={{ fontSize: isEmoji ? 20 : 14 }}>
+         <Typography variant="body1" className={clsx(classes.messageText, isEmoji && classes.emojiText)}>
             {message ? message.message : <Skeleton />}
          </Typography>
       </li>

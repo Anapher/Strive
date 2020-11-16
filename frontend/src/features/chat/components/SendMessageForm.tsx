@@ -1,8 +1,8 @@
 import { Box, ClickAwayListener, Grow, IconButton, Paper, Popper, TextField, Typography } from '@material-ui/core';
-import React, { useRef, useState } from 'react';
-import SendIcon from '@material-ui/icons/Send';
-import { useForm } from 'react-hook-form';
 import EmojiEmotionsIcon from '@material-ui/icons/EmojiEmotions';
+import SendIcon from '@material-ui/icons/Send';
+import React, { useRef, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import EmojisPopper from './EmojisPopper';
 
 type Props = {
@@ -20,12 +20,19 @@ export default function SendMessageForm({ onSendMessage }: Props) {
    const handleCloseEmojis = () => setEmojisPopperOpen(false);
    const handleOpenEmojis = () => setEmojisPopperOpen(true);
 
-   const inputRef = useRef<any | null>(null);
+   const inputRef = useRef<HTMLInputElement | null>(null);
 
    const handleInsertEmoji = (s: string) => {
       setValue('message', message + s);
       handleCloseEmojis();
       inputRef.current?.focus();
+   };
+
+   const handleTextFieldKeyPress = (event: React.KeyboardEvent<HTMLDivElement>) => {
+      if (event.key === 'Enter' && !event.shiftKey) {
+         (event.target as any).form.dispatchEvent(new Event('submit', { cancelable: true }));
+         event.preventDefault(); // Prevents the addition of a new line in the text field (not needed in a lot of cases)
+      }
    };
 
    return (
@@ -37,9 +44,12 @@ export default function SendMessageForm({ onSendMessage }: Props) {
          })}
       >
          <TextField
+            multiline
+            rowsMax={3}
             placeholder="Type your message..."
             autoComplete="off"
             fullWidth
+            onKeyPress={handleTextFieldKeyPress}
             inputRef={(ref) => {
                register(ref);
                inputRef.current = ref;
