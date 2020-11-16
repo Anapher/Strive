@@ -4,6 +4,7 @@ import { ChatMessageDto } from 'MyModels';
 import React from 'react';
 import { DateTime } from 'luxon';
 import { ParticipantDto } from 'src/features/conference/types';
+import emojiRegex from 'emoji-regex/RGI_Emoji';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -22,6 +23,8 @@ const useStyles = makeStyles((theme) => ({
    },
 }));
 
+const onlyEmojisRegex = new RegExp('^(' + emojiRegex().toString().replace(/\/g$/, '') + '|\\s)+$');
+
 type Props = {
    message?: ChatMessageDto;
    participants?: ParticipantDto[] | null;
@@ -29,6 +32,7 @@ type Props = {
 
 export default function ChatMessage({ message, participants }: Props) {
    const classes = useStyles();
+   const isEmoji = message && message.message.length <= 8 && onlyEmojisRegex.test(message.message);
 
    return (
       <li className={classes.root}>
@@ -53,7 +57,7 @@ export default function ChatMessage({ message, participants }: Props) {
                )}
             </Typography>
          </div>
-         <Typography variant="body1" style={{ fontSize: 14 }}>
+         <Typography variant="body1" style={{ fontSize: isEmoji ? 20 : 14 }}>
             {message ? message.message : <Skeleton />}
          </Typography>
       </li>
