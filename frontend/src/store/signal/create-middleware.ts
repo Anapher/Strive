@@ -80,7 +80,7 @@ export default (options: Options): SignalRResult => {
       },
       [actions.send.type]: (_, { payload: { payload, name } }) => {
          if (connection) {
-            connection.send(name, ...(payload ? [payload] : []));
+            connection.send(name, ...(payload !== null && payload !== undefined ? [payload] : []));
          }
       },
       [actions.invoke.type]: ({ dispatch }, { payload: { payload, name } }) => {
