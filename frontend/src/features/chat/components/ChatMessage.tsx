@@ -1,11 +1,11 @@
 import { makeStyles, Typography } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
-import { ChatMessageDto } from 'MyModels';
 import React from 'react';
 import { DateTime } from 'luxon';
 import { ParticipantDto } from 'src/features/conference/types';
 import emojiRegex from 'emoji-regex/RGI_Emoji';
 import clsx from 'classnames';
+import { ChatMessageDto } from '../types';
 
 const useStyles = makeStyles((theme) => ({
    root: {

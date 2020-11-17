@@ -11,7 +11,6 @@ export default function useBottomScrollTrigger(props: UseScrollTriggerOptions) {
          if (target) {
             // Get vertical scroll
             store.current = target.scrollHeight - target.clientHeight - target.scrollTop;
-            console.log(store.current);
          }
 
          if (!disableHysteresis && previous !== undefined) {

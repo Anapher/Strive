@@ -1,5 +1,5 @@
 import { Badge, Fab, List, makeStyles, useScrollTrigger, Zoom } from '@material-ui/core';
-import { ChatMessageDto } from 'MyModels';
+import { ChatMessageDto } from '../types';
 import React, { useEffect, useRef, useState } from 'react';
 import { ParticipantDto } from 'src/features/conference/types';
 import ChatMessage from './ChatMessage';

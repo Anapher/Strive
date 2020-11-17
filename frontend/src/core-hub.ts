@@ -20,6 +20,7 @@ export const _requestChat = 'RequestChat';
 export const requestChat = () => invoke(_requestChat);
 
 export const sendChatMessage = (dto: SendChatMessageDto) => send('SendChatMessage', dto);
+export const setUserTyping = (typing: boolean) => send('SetUserIsTyping', typing);
 
 export const _getEquipmentToken = 'GetEquipmentToken';
 export const getEquipmentToken = () => invoke(_getEquipmentToken);

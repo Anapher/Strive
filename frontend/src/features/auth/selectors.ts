@@ -6,3 +6,5 @@ export const selectAccessToken = createSelector(
    (state: RootState) => state.auth.token?.accessToken,
    (token) => (token ? parseJwt(token) : undefined),
 );
+
+export const selectMyParticipantId = (state: RootState) => selectAccessToken(state)?.nameid;

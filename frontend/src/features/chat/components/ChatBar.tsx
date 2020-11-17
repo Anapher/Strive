@@ -1,12 +1,15 @@
 import { Box, Divider, IconButton, makeStyles, Paper, Typography } from '@material-ui/core';
-import React, { useEffect } from 'react';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
-import * as actions from '../actions';
-import { RootState } from 'src/store';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import * as coreHub from 'src/core-hub';
+import { selectMyParticipantId } from 'src/features/auth/selectors';
+import { RootState } from 'src/store';
+import * as actions from '../actions';
+import { selectParticipantsTyping } from '../selectors';
 import ChatMessageList from './ChatMessageList';
 import SendMessageForm from './SendMessageForm';
-import * as coreHub from 'src/core-hub';
+import UsersTyping from './UsersTyping';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -37,6 +40,8 @@ export default function ChatBar() {
    }, [connected]);
 
    const handleSendMessage = (message: string) => dispatch(coreHub.sendChatMessage({ message }));
+   const participantsTyping = useSelector(selectParticipantsTyping);
+   const participantId = useSelector(selectMyParticipantId);
 
    return (
       <Paper className={classes.root} elevation={4}>
@@ -51,7 +56,11 @@ export default function ChatBar() {
             <ChatMessageList chat={chat} participants={participants} />
          </div>
          <Box m={1}>
-            <SendMessageForm onSendMessage={handleSendMessage} />
+            <UsersTyping participantsTyping={participantsTyping?.filter((x) => x !== participantId)} />
+            <SendMessageForm
+               onSendMessage={handleSendMessage}
+               isTyping={!!participantsTyping && !!participantId && participantsTyping.includes(participantId)}
+            />
          </Box>
       </Paper>
    );

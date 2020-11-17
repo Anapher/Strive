@@ -216,6 +216,11 @@ namespace PaderConference.Infrastructure.Hubs
             return InvokeService<ChatService, IReadOnlyList<ChatMessageDto>>(service => service.RequestAllMessages);
         }
 
+        public Task SetUserIsTyping(bool isTyping)
+        {
+            return InvokeService<ChatService, bool>(isTyping, service => service.SetUserIsTyping);
+        }
+
         public Task<JsonElement?> RequestRouterCapabilities()
         {
             return InvokeService<MediaService, JsonElement?>(service => service.GetRouterCapabilities);

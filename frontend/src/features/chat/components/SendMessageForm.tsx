@@ -1,18 +1,23 @@
 import { Box, ClickAwayListener, Grow, IconButton, Paper, Popper, TextField, Typography } from '@material-ui/core';
 import EmojiEmotionsIcon from '@material-ui/icons/EmojiEmotions';
 import SendIcon from '@material-ui/icons/Send';
-import React, { useRef, useState } from 'react';
+import _ from 'lodash';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useDispatch } from 'react-redux';
+import { setUserTyping } from 'src/core-hub';
 import EmojisPopper from './EmojisPopper';
 
 type Props = {
    onSendMessage: (msg: string) => void;
+   isTyping: boolean;
 };
 
-export default function SendMessageForm({ onSendMessage }: Props) {
+export default function SendMessageForm({ onSendMessage, isTyping }: Props) {
    const { register, handleSubmit, reset, setValue, watch } = useForm({ mode: 'onChange' });
 
    const message = watch('message');
+   const dispatch = useDispatch();
 
    const [emojisPopperOpen, setEmojisPopperOpen] = useState(false);
    const emojisButtonRef = useRef(null);
@@ -28,6 +33,13 @@ export default function SendMessageForm({ onSendMessage }: Props) {
       inputRef.current?.focus();
    };
 
+   const handleKeyPressNotEmpty = useCallback(
+      _.throttle(() => {
+         if (inputRef.current && inputRef.current.value) dispatch(setUserTyping(true));
+      }, 10000),
+      [dispatch, inputRef.current, isTyping],
+   );
+
    const handleTextFieldKeyPress = (event: React.KeyboardEvent<HTMLDivElement>) => {
       if (event.key === 'Enter' && !event.shiftKey) {
          (event.target as any).form.dispatchEvent(new Event('submit', { cancelable: true }));
@@ -35,12 +47,26 @@ export default function SendMessageForm({ onSendMessage }: Props) {
       }
    };
 
+   const handleTextFieldKeyUp = (event: React.KeyboardEvent<HTMLDivElement>) => {
+      const newValue = (event.target as any).value;
+      if (newValue) {
+         handleKeyPressNotEmpty();
+      } else {
+         if (isTyping) {
+            dispatch(setUserTyping(false));
+         }
+      }
+   };
+
    return (
       <form
          noValidate
          onSubmit={handleSubmit(({ message }) => {
-            onSendMessage(message);
-            reset();
+            if (message) {
+               onSendMessage(message);
+               reset();
+               dispatch(setUserTyping(false));
+            }
          })}
       >
          <TextField
@@ -50,6 +76,7 @@ export default function SendMessageForm({ onSendMessage }: Props) {
             autoComplete="off"
             fullWidth
             onKeyPress={handleTextFieldKeyPress}
+            onKeyUp={handleTextFieldKeyUp}
             inputRef={(ref) => {
                register(ref);
                inputRef.current = ref;
