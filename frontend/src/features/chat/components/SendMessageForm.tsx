@@ -1,20 +1,49 @@
-import { Box, ClickAwayListener, Grow, IconButton, Paper, Popper, TextField, Typography } from '@material-ui/core';
+import {
+   Box,
+   ClickAwayListener,
+   Grow,
+   IconButton,
+   ListSubheader,
+   MenuItem,
+   Paper,
+   Popper,
+   Select,
+   TextField,
+} from '@material-ui/core';
 import EmojiEmotionsIcon from '@material-ui/icons/EmojiEmotions';
 import SendIcon from '@material-ui/icons/Send';
 import _ from 'lodash';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { useDispatch } from 'react-redux';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { useDispatch, useSelector } from 'react-redux';
+import CompactInput from 'src/components/CompactInput';
 import { setUserTyping } from 'src/core-hub';
+import { SendChatMessageDto, SendingMode } from 'src/core-hub.types';
+import { selectOtherParticipants } from 'src/features/conference/selectors';
+import usePermission, {
+   CHAT_CAN_SEND_ANONYMOUS_MESSAGE,
+   CHAT_CAN_SEND_PRIVATE_CHAT_MESSAGE,
+} from 'src/hooks/usePermission';
 import EmojisPopper from './EmojisPopper';
 
 type Props = {
-   onSendMessage: (msg: string) => void;
+   onSendMessage: (msg: SendChatMessageDto) => void;
    isTyping: boolean;
 };
 
+type SendMessageForm = {
+   message: string;
+   sendTo?: string;
+};
+
 export default function SendMessageForm({ onSendMessage, isTyping }: Props) {
-   const { register, handleSubmit, reset, setValue, watch } = useForm({ mode: 'onChange' });
+   const { register, handleSubmit, setValue, watch, control } = useForm<SendMessageForm>({
+      mode: 'onChange',
+      defaultValues: { sendTo: 'all' },
+   });
+
+   const canSendPrivateMsg = usePermission(CHAT_CAN_SEND_PRIVATE_CHAT_MESSAGE);
+   const canSendAnonymousMsg = usePermission(CHAT_CAN_SEND_ANONYMOUS_MESSAGE);
 
    const message = watch('message');
    const dispatch = useDispatch();
@@ -58,13 +87,23 @@ export default function SendMessageForm({ onSendMessage, isTyping }: Props) {
       }
    };
 
+   const participants = useSelector(selectOtherParticipants);
+   const sortedParticipants = useMemo(() => _.sortBy(participants, (x) => x.displayName), [participants]);
+
    return (
       <form
          noValidate
-         onSubmit={handleSubmit(({ message }) => {
+         onSubmit={handleSubmit(({ message, sendTo }) => {
             if (message) {
-               onSendMessage(message);
-               reset();
+               console.log(sendTo);
+
+               let mode: SendingMode | undefined;
+               if (sendTo?.startsWith('to:')) {
+                  mode = { type: 'privately', to: { participantId: sendTo.substring(3) } };
+               } else if (sendTo === 'anonymous') mode = { type: 'anonymously' };
+
+               onSendMessage({ message, mode });
+               setValue('message', '');
                dispatch(setUserTyping(false));
             }
          })}
@@ -84,8 +123,29 @@ export default function SendMessageForm({ onSendMessage, isTyping }: Props) {
             name="message"
          />
          <Box display="flex" flexDirection="row" justifyContent="space-between" alignItems="center">
-            <Typography>Vincent</Typography>
-            <Box display="flex">
+            <Controller
+               name="sendTo"
+               defaultValue="all"
+               control={control}
+               as={
+                  <Select style={{ flex: 1 }} variant="outlined" input={<CompactInput />} fullWidth>
+                     <MenuItem value="all">Send to all</MenuItem>
+                     {canSendAnonymousMsg && <MenuItem value="anonymous">Send to all anonymously</MenuItem>}
+                     {canSendPrivateMsg &&
+                        participants &&
+                        participants.length > 0 &&
+                        [<ListSubheader key="separator">Send privately to</ListSubheader>].concat(
+                           sortedParticipants.map(({ participantId, displayName }) => (
+                              <MenuItem key={participantId} value={`to:${participantId}`}>
+                                 {displayName}
+                              </MenuItem>
+                           )),
+                        )}
+                  </Select>
+               }
+            />
+
+            <Box display="flex" ml={1}>
                <IconButton aria-label="emojis" ref={emojisButtonRef} onClick={handleOpenEmojis}>
                   <EmojiEmotionsIcon fontSize="small" />
                </IconButton>

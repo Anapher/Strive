@@ -9,11 +9,10 @@ namespace PaderConference.Core.Services.Chat.Filters
         {
             if (mode is SendPrivately sendPrivately)
             {
-                if (sendPrivately.ToParticipant == null)
-                    throw new ArgumentException(
-                        $"{nameof(SendPrivately)}.{nameof(SendPrivately.ToParticipant)} must not be null");
+                if (sendPrivately.To?.ParticipantId == null)
+                    throw new ArgumentException($"{nameof(SendPrivately)}.{nameof(SendPrivately.To)} must not be null");
 
-                return new IncludeFilter(new[] {sendPrivately.ToParticipant}, senderParticipantId);
+                return new IncludeFilter(new[] {sendPrivately.To.ParticipantId}, senderParticipantId);
             }
 
             return new AtAllFilter();

@@ -12,6 +12,10 @@ export const MEDIA_CAN_SHARE_AUDIO = newPerm<boolean>('media.canShareAudio');
 export const MEDIA_CAN_SHARE_SCREEN = newPerm<boolean>('media.canShareScreen');
 export const MEDIA_CAN_SHARE_WEBCAM = newPerm<boolean>('media.canShareWebcam');
 
+export const CHAT_CAN_SEND_CHAT_MESSAGE = newPerm<boolean>('chat.canSendMessage');
+export const CHAT_CAN_SEND_PRIVATE_CHAT_MESSAGE = newPerm<boolean>('chat.canSendPrivateMessage');
+export const CHAT_CAN_SEND_ANONYMOUS_MESSAGE = newPerm<boolean>('chat.canSendAnonymousMessage');
+
 export default function usePermission<T>(perm: Permission<T>): T | undefined {
    const permissions = useSelector((state: RootState) => state.conference.myPermissions);
    if (!permissions) return undefined;

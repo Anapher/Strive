@@ -139,12 +139,12 @@ export default function TroubleshootConnection({ expanded, onChange }: Props) {
             aria-controls="troubleshoot-connection-content"
             id="troubleshoot-connection-header"
          >
-            <Typography className={classes.heading}>Connection</Typography>
+            <Typography className={classes.heading}>WebRTC Connection</Typography>
             <Chip
                size="small"
                className={clsx(classes.statusChip, { [classes.statusChipOk]: status?.type === 'ok' })}
                label={status?.message}
-            ></Chip>
+            />
          </AccordionSummary>
          <AccordionDetails>
             <div className={classes.table}>

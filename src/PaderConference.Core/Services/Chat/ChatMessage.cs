@@ -6,11 +6,11 @@ namespace PaderConference.Core.Services.Chat
 {
     public class ChatMessage
     {
-        public ChatMessage(int messageId, string participantId, string message, IMessageFilter filter,
-            SendingMode? mode, DateTimeOffset timestamp)
+        public ChatMessage(int messageId, ParticipantRef from, string message, IMessageFilter filter, SendingMode? mode,
+            DateTimeOffset timestamp)
         {
             MessageId = messageId;
-            ParticipantId = participantId;
+            From = from;
             Message = message;
             Filter = filter;
             Mode = mode;
@@ -19,7 +19,7 @@ namespace PaderConference.Core.Services.Chat
 
         public int MessageId { get; set; }
 
-        public string ParticipantId { get; }
+        public ParticipantRef From { get; }
 
         public string Message { get; }
 

@@ -20,7 +20,7 @@ export const selectParticipantsOfCurrentRoom = createSelector(
 
       return Object.entries(rooms.participants)
          .filter(([participantId, roomId]) => roomId === room && participantId !== token?.nameid)
-         .map(([participantId]) => participantId);
+         .map<string>(([participantId]) => participantId);
    },
 );
 

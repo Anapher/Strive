@@ -1,11 +1,12 @@
 import { makeStyles, Typography } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { DateTime } from 'luxon';
 import { ParticipantDto } from 'src/features/conference/types';
 import emojiRegex from 'emoji-regex/RGI_Emoji';
 import clsx from 'classnames';
 import { ChatMessageDto } from '../types';
+import { hashCode, numberToColor } from '../color-utils';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -30,6 +31,29 @@ const useStyles = makeStyles((theme) => ({
    emojiText: {
       fontSize: 20,
    },
+   senderText: {
+      flex: 1,
+      overflowX: 'hidden',
+      textOverflow: 'ellipsis',
+      marginRight: theme.spacing(1),
+   },
+   senderTextAnonymous: {
+      color: theme.palette.text.secondary,
+   },
+   senderTextPrivate: {
+      color: theme.palette.primary.main,
+   },
+   privateBadge: {
+      backgroundColor: theme.palette.primary.main,
+      color: theme.palette.primary.contrastText,
+      padding: '2px 4px',
+      borderRadius: theme.shape.borderRadius,
+      marginRight: 8,
+   },
+   disconnectedText: {
+      color: theme.palette.text.secondary,
+      marginLeft: theme.spacing(1),
+   },
 }));
 
 const onlyEmojisRegex = new RegExp('^(' + emojiRegex().toString().replace(/\/g$/, '') + '|\\s)+$');
@@ -37,26 +61,44 @@ const onlyEmojisRegex = new RegExp('^(' + emojiRegex().toString().replace(/\/g$/
 type Props = {
    message?: ChatMessageDto;
    participants?: ParticipantDto[] | null;
+   participantId?: string;
+   participantColors: { [id: string]: string };
 };
 
-export default function ChatMessage({ message, participants }: Props) {
+export default function ChatMessage({ message, participants, participantId, participantColors }: Props) {
    const classes = useStyles();
    const isEmoji = message && message.message.length <= 8 && onlyEmojisRegex.test(message.message);
+   const sender = message?.from && participants?.find((x) => x.participantId === message.from?.participantId);
+
+   const isAnonymous = message && !message.from;
+   const isDisconnected = message?.from && !sender;
+   const isFromMe = message?.from?.participantId === participantId;
+
+   const participantColor = useMemo(
+      () =>
+         message?.from &&
+         (participantColors[message.from.participantId] ?? numberToColor(hashCode(message.from.participantId))), // numberToColor for participants that just disconnected
+      [message?.from?.participantId],
+   );
 
    return (
-      <li className={classes.root}>
+      <li className={classes.root} style={{ opacity: isDisconnected ? 0.8 : undefined }}>
          <div className={classes.metaData}>
             <Typography
                variant="caption"
-               color="textSecondary"
-               style={{ color: '#3498db', flex: 1, overflowX: 'hidden', textOverflow: 'ellipsis', marginRight: 8 }}
+               style={{ color: participantColor }}
+               className={clsx(classes.senderText, {
+                  [classes.senderTextAnonymous]: isAnonymous,
+                  [classes.senderTextPrivate]: message?.mode?.type === 'privately',
+               })}
             >
-               {message ? (
-                  participants?.find((x) => x.participantId === message.participantId)?.displayName ??
-                  message.participantId
-               ) : (
-                  <Skeleton />
+               {message?.mode?.type === 'privately' && (
+                  <span className={classes.privateBadge}>
+                     Private{isFromMe && ` -> ${message.mode.to.displayName}`}
+                  </span>
                )}
+               {renderSender(message, sender, isAnonymous)}
+               {isDisconnected && <span className={classes.disconnectedText}>(Disconnected)</span>}
             </Typography>
             <Typography variant="caption" color="textSecondary">
                {message ? (
@@ -71,4 +113,16 @@ export default function ChatMessage({ message, participants }: Props) {
          </Typography>
       </li>
    );
+}
+
+function renderSender(message?: ChatMessageDto, sender?: ParticipantDto, isAnonymous?: boolean) {
+   if (message?.from) {
+      return sender?.displayName ?? message.from.displayName ?? message.from.participantId;
+   }
+
+   if (isAnonymous) {
+      return 'Anonymous';
+   }
+
+   return <Skeleton />;
 }

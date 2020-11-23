@@ -21,6 +21,6 @@
     {
         public override string Type { get; } = "privately";
 
-        public string? ToParticipant { get; set; }
+        public ParticipantRef? To { get; set; }
     }
 }

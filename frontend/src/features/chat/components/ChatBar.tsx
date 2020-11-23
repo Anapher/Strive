@@ -1,11 +1,13 @@
 import { Box, Divider, IconButton, makeStyles, Paper, Typography } from '@material-ui/core';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import * as coreHub from 'src/core-hub';
+import { SendChatMessageDto } from 'src/core-hub.types';
 import { selectMyParticipantId } from 'src/features/auth/selectors';
 import { RootState } from 'src/store';
 import * as actions from '../actions';
+import { hashCode, numberToColor } from '../color-utils';
 import { selectParticipantsTyping } from '../selectors';
 import ChatMessageList from './ChatMessageList';
 import SendMessageForm from './SendMessageForm';
@@ -39,9 +41,17 @@ export default function ChatBar() {
       }
    }, [connected]);
 
-   const handleSendMessage = (message: string) => dispatch(coreHub.sendChatMessage({ message }));
+   const handleSendMessage = (dto: SendChatMessageDto) => dispatch(coreHub.sendChatMessage(dto));
    const participantsTyping = useSelector(selectParticipantsTyping);
    const participantId = useSelector(selectMyParticipantId);
+
+   const participantColors = useMemo(
+      () =>
+         Object.fromEntries(
+            participants?.map((x) => [x.participantId, numberToColor(hashCode(x.participantId))]) ?? [],
+         ),
+      [participants],
+   );
 
    return (
       <Paper className={classes.root} elevation={4}>
@@ -53,10 +63,18 @@ export default function ChatBar() {
          </Box>
          <Divider orientation="horizontal" />
          <div className={classes.chat}>
-            <ChatMessageList chat={chat} participants={participants} />
+            <ChatMessageList
+               chat={chat}
+               participants={participants}
+               participantId={participantId}
+               participantColors={participantColors}
+            />
          </div>
          <Box m={1}>
-            <UsersTyping participantsTyping={participantsTyping?.filter((x) => x !== participantId)} />
+            <UsersTyping
+               participantsTyping={participantsTyping?.filter((x) => x !== participantId)}
+               participantColors={participantColors}
+            />
             <SendMessageForm
                onSendMessage={handleSendMessage}
                isTyping={!!participantsTyping && !!participantId && participantsTyping.includes(participantId)}

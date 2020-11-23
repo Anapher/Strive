@@ -9,6 +9,8 @@ namespace PaderConference.Core.Services.Permissions
         public ImmutableDictionary<string, JsonElement> Conference { get; set; } = new[]
         {
             PermissionsList.Chat.CanSendChatMessage.Configure(true),
+            PermissionsList.Chat.CanSendAnonymousMessage.Configure(true),
+            PermissionsList.Chat.CanSendPrivateChatMessage.Configure(true),
             PermissionsList.Rooms.CanSwitchRoom.Configure(true),
             PermissionsList.Conference.CanRaiseHand.Configure(true),
         }.ToImmutableDictionary();

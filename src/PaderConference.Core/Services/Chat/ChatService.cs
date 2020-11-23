@@ -35,6 +35,7 @@ namespace PaderConference.Core.Services.Chat
         private readonly IPermissionsService _permissionsService;
         private readonly IConnectionMapping _connectionMapping;
         private readonly ISignalMessenger _signalMessenger;
+        private readonly IConferenceManager _conferenceManager;
         private readonly Timer _refreshUsersTypingTimer;
         private readonly object _refreshUsersTypingTimerLock = new object();
         private readonly ISynchronizedObject<ChatSynchronizedObject> _synchronizedObject;
@@ -43,13 +44,15 @@ namespace PaderConference.Core.Services.Chat
 
         public ChatService(string conferenceId, IMapper mapper, IPermissionsService permissionsService,
             ISynchronizationManager synchronizationManager, IConnectionMapping connectionMapping,
-            ISignalMessenger signalMessenger, IOptions<ChatOptions> options, ILogger<ChatService> logger)
+            ISignalMessenger signalMessenger, IConferenceManager conferenceManager, IOptions<ChatOptions> options,
+            ILogger<ChatService> logger)
         {
             _conferenceId = conferenceId;
             _mapper = mapper;
             _permissionsService = permissionsService;
             _connectionMapping = connectionMapping;
             _signalMessenger = signalMessenger;
+            _conferenceManager = conferenceManager;
             _options = options.Value;
             _logger = logger;
 
@@ -137,9 +140,8 @@ namespace PaderConference.Core.Services.Chat
                 }
                 else if (messageDto.Mode is SendPrivately sendPrivately)
                 {
-                    // ReSharper disable once SimplifyLinqExpressionUseAll
-                    if (sendPrivately.ToParticipant == null ||
-                        !_connectionMapping.ConnectionsR.ContainsKey(sendPrivately.ToParticipant))
+                    if (sendPrivately.To?.ParticipantId == null || !_conferenceManager.TryGetParticipant(_conferenceId,
+                        sendPrivately.To.ParticipantId, out var participant))
                     {
                         await message.ResponseError(ChatError.InvalidParticipant);
                         return;
@@ -150,6 +152,8 @@ namespace PaderConference.Core.Services.Chat
                         await message.ResponseError(ChatError.PermissionToSendPrivateMessageDenied);
                         return;
                     }
+
+                    sendPrivately.To.DisplayName = participant.DisplayName;
                 }
                 else
                 {
@@ -163,7 +167,7 @@ namespace PaderConference.Core.Services.Chat
             _messagesLock.AcquireWriterLock(Timeout.Infinite);
             try
             {
-                chatMessage = new ChatMessage(_messageIdCounter++, message.Participant.ParticipantId,
+                chatMessage = new ChatMessage(_messageIdCounter++, ParticipantRef.FromParticipant(message.Participant),
                     messageDto.Message.Trim(), filter, messageDto.Mode, DateTimeOffset.UtcNow);
 
                 _messages.Enqueue(chatMessage);

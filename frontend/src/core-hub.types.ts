@@ -3,12 +3,23 @@ import { ProducerSource } from './store/webrtc/types';
 
 export type SendChatMessageDto = {
    message: string;
-   filter?: ChatMessageFilter;
+   mode?: SendingMode;
 };
 
-export type ChatMessageFilter = {
-   include?: string[];
-   exclude?: string[];
+export type SendingMode = SendAnonymously | SendPrivately;
+
+export type SendAnonymously = {
+   type: 'anonymously';
+};
+
+export type SendPrivately = {
+   type: 'privately';
+   to: ParticipantRef;
+};
+
+export type ParticipantRef = {
+   participantId: string;
+   displayName?: string;
 };
 
 export type CreateRoomDto = {

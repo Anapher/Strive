@@ -1,8 +1,10 @@
-import { Badge, Fab, makeStyles, Zoom } from '@material-ui/core';
+import { Badge, Fab, List, makeStyles, Zoom } from '@material-ui/core';
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
+import _ from 'lodash';
 import React, { useEffect, useRef, useState } from 'react';
 import { Virtuoso, VirtuosoMethods } from 'react-virtuoso';
 import { ParticipantDto } from 'src/features/conference/types';
+import useBottomScrollTrigger from 'src/hooks/useBottomScrollTrigger';
 import { getScrollbarWidth } from 'src/utils/browser-info';
 import { ChatMessageDto } from '../types';
 import ChatMessage from './ChatMessage';
@@ -15,6 +17,8 @@ const useStyles = makeStyles({
    list: {
       overflowY: 'scroll',
       height: '100%',
+      display: 'flex',
+      flexDirection: 'column-reverse',
    },
    scrollDownFab: {
       position: 'absolute',
@@ -25,14 +29,29 @@ const useStyles = makeStyles({
 type Props = {
    chat: ChatMessageDto[] | null;
    participants: ParticipantDto[] | null;
+   participantId?: string;
+   participantColors: { [id: string]: string };
 };
 
-export default function ChatMessageList({ chat, participants }: Props) {
+export default function ChatMessageList({ chat, participants, participantId, participantColors }: Props) {
    const classes = useStyles();
 
+   const listRef = useRef<HTMLOListElement>(null);
+   const bottomAnchor = useRef<HTMLDivElement>(null);
+
    const [missedMessages, setMissedMessages] = useState(0);
-   const [atBottom, setAtBottom] = useState(true);
-   const virtuoso = useRef<VirtuosoMethods>(null);
+
+   const atBottom = useBottomScrollTrigger({
+      target: listRef.current ?? undefined,
+      disableHysteresis: true,
+      threshold: 25,
+   });
+
+   console.log(atBottom);
+
+   useEffect(() => {
+      if (atBottom) setMissedMessages(0);
+   }, [atBottom]);
 
    useEffect(() => {
       if (!atBottom) {
@@ -40,30 +59,37 @@ export default function ChatMessageList({ chat, participants }: Props) {
       }
    }, [chat]);
 
-   useEffect(() => {
-      if (atBottom) setMissedMessages(0);
-   }, [atBottom]);
-
-   const handleScrollToBottom = () => {
-      if (chat) virtuoso.current?.scrollToIndex({ index: chat.length - 1, align: 'end', behavior: 'smooth' });
-   };
-
-   const generateItem = (index: number) => {
-      return <ChatMessage participants={participants} message={chat === null ? undefined : chat[index]} />;
+   const handleScrollToBottom = (behavior: 'auto' | 'smooth' = 'smooth') => {
+      if (bottomAnchor.current) {
+         bottomAnchor.current.scrollIntoView({ behavior, block: 'center' });
+      }
    };
 
    return (
       <div className={classes.root}>
-         <Virtuoso
-            ref={virtuoso}
-            className={classes.list}
-            totalCount={chat?.length ?? 3}
-            item={generateItem}
-            followOutput={true}
-            atBottomStateChange={(val) => {
-               setAtBottom(val);
-            }}
-         />
+         <List className={classes.list} ref={listRef}>
+            <div ref={bottomAnchor} />
+            {chat == null ? (
+               <>
+                  <ChatMessage participantColors={participantColors} />
+                  <ChatMessage participantColors={participantColors} />
+                  <ChatMessage participantColors={participantColors} />
+               </>
+            ) : (
+               _([...chat])
+                  .reverse()
+                  .map((x) => (
+                     <ChatMessage
+                        key={x.messageId}
+                        participantColors={participantColors}
+                        participants={participants}
+                        message={x}
+                        participantId={participantId}
+                     />
+                  ))
+                  .value()
+            )}
+         </List>
          <Zoom in={!atBottom}>
             <Fab
                color="primary"

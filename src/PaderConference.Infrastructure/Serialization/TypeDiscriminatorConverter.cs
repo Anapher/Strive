@@ -29,13 +29,13 @@ namespace PaderConference.Infrastructure.Serialization
                     throw new JsonException("Couldn't find type.");
 
                 var jsonObject = jsonDocument.RootElement.GetRawText();
-                return (T) JsonSerializer.Deserialize(jsonObject, type);
+                return (T) JsonSerializer.Deserialize(jsonObject, type, options);
             }
         }
 
         public override void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options)
         {
-            JsonSerializer.Serialize(writer, value, options);
+            JsonSerializer.Serialize(writer, (object) value, options);
         }
     }
 }

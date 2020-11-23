@@ -7,12 +7,12 @@ namespace PaderConference.Core.Services.Chat.Dto
     {
         public int MessageId { get; set; }
 
-        public string? ParticipantId { get; set; }
+        public ParticipantRef? From { get; set; }
 
         public string Message { get; set; }
 
-        public DateTimeOffset Timestamp { get; set; }
+        public SendingMode? Mode { get; set; }
 
-        public bool IsPrivate { get; set; }
+        public DateTimeOffset Timestamp { get; set; }
     }
 }

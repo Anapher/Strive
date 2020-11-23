@@ -6,6 +6,8 @@ using AutoMapper;
 using Microsoft.Extensions.Options;
 using Moq;
 using PaderConference.Core.Extensions;
+using PaderConference.Core.Interfaces.Services;
+using PaderConference.Core.Services;
 using PaderConference.Core.Services.Chat;
 using PaderConference.Core.Services.Chat.Dto;
 using PaderConference.Core.Services.Permissions;
@@ -23,6 +25,7 @@ namespace PaderConference.Core.Tests.Services.Chat
         private readonly ChatOptions _options = new ChatOptions();
         private readonly ConnectionMapping _connectionMapping = new ConnectionMapping();
         private readonly MockSynchronizationManager _synchronizationManager = new MockSynchronizationManager();
+        private readonly Mock<IConferenceManager> _conferenceManager = new Mock<IConferenceManager>();
 
         private MockPermissionsService _permissionsService = new MockPermissionsService(
             new Dictionary<string, IReadOnlyDictionary<string, JsonElement>>
@@ -43,7 +46,8 @@ namespace PaderConference.Core.Tests.Services.Chat
             var mapper = new Mapper(new MapperConfiguration(config => config.AddProfile<MapperProfile>()));
 
             return new ChatService(ConferenceId, mapper, _permissionsService, _synchronizationManager,
-                _connectionMapping, _signalMessenger.Object, new OptionsWrapper<ChatOptions>(_options), Logger);
+                _connectionMapping, _signalMessenger.Object, _conferenceManager.Object,
+                new OptionsWrapper<ChatOptions>(_options), Logger);
         }
 
         private ChatSynchronizedObject GetSyncObj()
@@ -86,8 +90,8 @@ namespace PaderConference.Core.Tests.Services.Chat
                 {
                     var dto = Assert.IsType<ChatMessageDto>(obj);
                     Assert.Equal("Hello world", dto.Message);
-                    Assert.Equal(TestParticipants.Default.ParticipantId, dto.ParticipantId);
-                    Assert.False(dto.IsPrivate);
+                    Assert.Equal(TestParticipants.Default.ParticipantId, dto.From?.ParticipantId);
+                    Assert.Null(dto.Mode);
                 });
 
             // act
@@ -155,13 +159,13 @@ namespace PaderConference.Core.Tests.Services.Chat
             // assert
             _signalMessenger.Verify(
                 x => x.SendToConferenceAsync(ConferenceId, CoreHubMessages.Response.ChatMessage,
-                    It.Is<ChatMessageDto>(x => x.ParticipantId == null)), Times.Once);
+                    It.Is<ChatMessageDto>(x => x.From == null)), Times.Once);
             _signalMessenger.VerifyNoOtherCalls();
 
             var requestChatMessage = TestServiceMessage.Create(TestParticipants.Default, "connectionId").Object;
             var messages = await service.RequestAllMessages(requestChatMessage);
             var existingMessage = Assert.Single(messages);
-            Assert.Null(existingMessage.ParticipantId);
+            Assert.Null(existingMessage.From);
         }
 
         [Fact]
@@ -312,8 +316,13 @@ namespace PaderConference.Core.Tests.Services.Chat
             // arrange
             var service = Create();
             var message = TestServiceMessage.Create(
-                new SendChatMessageDto {Message = "Hello", Mode = new SendPrivately {ToParticipant = "test"}},
-                TestParticipants.Default, "connectionId");
+                new SendChatMessageDto
+                {
+                    Message = "Hello", Mode = new SendPrivately {To = new ParticipantRef("test", null)},
+                }, TestParticipants.Default, "connectionId");
+
+            var foo = TestParticipants.Default2;
+            _conferenceManager.Setup(x => x.TryGetParticipant(It.IsAny<string>(), "test", out foo)).Returns(true);
 
             // act
             await service.SendMessage(message.Object);
@@ -345,13 +354,20 @@ namespace PaderConference.Core.Tests.Services.Chat
                 });
             _connectionMapping.Add("conn1", TestParticipants.Default, false);
             _connectionMapping.Add("conn2", TestParticipants.Default2, false);
+            var foo = TestParticipants.Default2;
+            _conferenceManager.Setup(x =>
+                    x.TryGetParticipant(It.IsAny<string>(), TestParticipants.Default2.ParticipantId, out foo))
+                .Returns(true);
 
             var service = Create();
             var message = TestServiceMessage.Create(
                 new SendChatMessageDto
                 {
                     Message = "Hello",
-                    Mode = new SendPrivately {ToParticipant = TestParticipants.Default2.ParticipantId},
+                    Mode = new SendPrivately
+                    {
+                        To = new ParticipantRef(TestParticipants.Default2.ParticipantId, null),
+                    },
                 }, TestParticipants.Default, "conn1");
 
             // act
@@ -362,10 +378,10 @@ namespace PaderConference.Core.Tests.Services.Chat
 
             _signalMessenger.Verify(
                 x => x.SendToConnectionAsync("conn1", CoreHubMessages.Response.ChatMessage,
-                    It.Is<ChatMessageDto>(x => x.IsPrivate)), Times.Once);
+                    It.Is<ChatMessageDto>(x => x.Mode is SendPrivately)), Times.Once);
             _signalMessenger.Verify(
                 x => x.SendToConnectionAsync("conn2", CoreHubMessages.Response.ChatMessage,
-                    It.Is<ChatMessageDto>(x => x.IsPrivate)), Times.Once);
+                    It.Is<ChatMessageDto>(x => x.Mode is SendPrivately)), Times.Once);
             _signalMessenger.VerifyNoOtherCalls();
 
             var requestChatMessage = TestServiceMessage.Create(TestParticipants.Default2, "conn1").Object;
@@ -374,7 +390,12 @@ namespace PaderConference.Core.Tests.Services.Chat
 
             requestChatMessage = TestServiceMessage.Create(TestParticipants.Default, "conn1").Object;
             messages = await service.RequestAllMessages(requestChatMessage);
-            Assert.Single(messages);
+
+            var msg = Assert.Single(messages);
+            var participantRef = Assert.IsType<SendPrivately>(msg.Mode).To;
+            Assert.NotNull(participantRef);
+            Assert.Equal(TestParticipants.Default2.ParticipantId, participantRef.ParticipantId);
+            Assert.Equal(TestParticipants.Default2.DisplayName, participantRef.DisplayName);
         }
 
         #endregion

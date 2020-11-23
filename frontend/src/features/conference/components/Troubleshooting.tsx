@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import TroubleshootConnection from './TroubleshootConnection';
+import TroubleshootHearingOthers from './TroubleshootHearingOthers';
 import TroubleshootSpeakers from './TroubleshootSpeakers';
 
 export default function Troubleshooting() {
@@ -14,6 +15,7 @@ export default function Troubleshooting() {
       <div>
          <TroubleshootConnection expanded={expanded === 'connection'} onChange={handleChangeExpanded('connection')} />
          <TroubleshootSpeakers expanded={expanded === 'speakers'} onChange={handleChangeExpanded('speakers')} />
+         <TroubleshootHearingOthers expanded={expanded === 'hearing'} onChange={handleChangeExpanded('hearing')} />
       </div>
    );
 }
