@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using PaderConference.Core.Services.Rooms.Messages;
 
 namespace PaderConference.Core.Services.Rooms
 {
@@ -19,5 +21,25 @@ namespace PaderConference.Core.Services.Rooms
         ///     Triggered when rooms are removed. The string refers to the room id
         /// </summary>
         event EventHandler<IReadOnlyList<string>>? RoomsRemoved;
+
+        /// <summary>
+        ///     Create new rooms
+        /// </summary>
+        /// <param name="rooms">The rooms to created</param>
+        /// <returns>Return info about the created rooms</returns>
+        Task<IReadOnlyList<Room>> CreateRooms(IReadOnlyList<CreateRoomMessage> rooms);
+
+        /// <summary>
+        ///     Remove the given rooms
+        /// </summary>
+        /// <param name="roomIds">The ids of the rooms that should be removed</param>
+        Task RemoveRooms(IReadOnlyList<string> roomIds);
+
+        /// <summary>
+        ///     Set the room of a participant
+        /// </summary>
+        /// <param name="participantId">The participant id</param>
+        /// <param name="roomId">The room id of the room the participant should be moved to</param>
+        Task SetRoom(string participantId, string roomId);
     }
 }

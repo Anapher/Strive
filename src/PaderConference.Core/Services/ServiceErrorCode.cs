@@ -37,5 +37,12 @@ namespace PaderConference.Core.Services
         Scenes_PermissionDenied_Change = 1000500,
         Scenes_RoomNotFound = 1000501,
         Scenes_SceneMustNotBeNull = 1000502,
+
+        // Breakout Rooms
+        BreakoutRoom_AlreadyOpen = 1000600,
+        BreakoutRoom_CannotAssign = 1000601,
+        BreakoutRoom_NotOpen = 1000602,
+        BreakoutRoom_AssigningParticipantsFailed = 1000603,
+        BreakoutRoom_AmountMustBePositiveNumber = 1000604,
     }
 }

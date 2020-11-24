@@ -5,6 +5,7 @@ using System.Security.Claims;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using PaderConference.Core.Domain;
@@ -12,6 +13,8 @@ using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Dto;
 using PaderConference.Core.Interfaces.Services;
 using PaderConference.Core.Services;
+using PaderConference.Core.Services.BreakoutRoom;
+using PaderConference.Core.Services.BreakoutRoom.Dto;
 using PaderConference.Core.Services.Chat;
 using PaderConference.Core.Services.Chat.Dto;
 using PaderConference.Core.Services.ConferenceControl;
@@ -199,6 +202,22 @@ namespace PaderConference.Infrastructure.Hubs
         public Task RemoveRooms(IReadOnlyList<string> dto)
         {
             return InvokeService<RoomsService, IReadOnlyList<string>>(dto, service => service.RemoveRooms);
+        }
+
+        public Task OpenBreakoutRooms(OpenBreakoutRoomsDto dto)
+        {
+            return InvokeService<BreakoutRoomService, OpenBreakoutRoomsDto>(dto, service => service.OpenBreakoutRooms);
+        }
+
+        public Task CloseBreakoutRooms()
+        {
+            return InvokeService<BreakoutRoomService>(service => service.CloseBreakoutRooms);
+        }
+
+        public Task ChangeBreakoutRooms(JsonPatchDocument<BreakoutRoomsOptions> dto)
+        {
+            return InvokeService<BreakoutRoomService, JsonPatchDocument<BreakoutRoomsOptions>>(dto,
+                service => service.ChangeBreakoutRooms);
         }
 
         public Task SwitchRoom(SwitchRoomMessage dto)

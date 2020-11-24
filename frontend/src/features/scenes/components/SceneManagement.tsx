@@ -29,6 +29,7 @@ import { RootState } from 'src/store';
 import { setAppliedScene } from '../scenesSlice';
 import { selectAvailableScenesViewModels, selectServerProvidedScene } from '../selectors';
 import { Scene } from '../types';
+import OpenBreakoutRoomsDialog from './OpenBreakoutRoomsDialog';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -82,7 +83,7 @@ export default function SceneManagement() {
       }
    };
 
-   const options = ['Breakout Rooms', 'Upload PDF', 'Poll'];
+   const [openBreakoutRooms, setOpenBreakoutRooms] = useState(false);
 
    return (
       <div>
@@ -144,19 +145,17 @@ export default function SceneManagement() {
                   <Paper>
                      <ClickAwayListener onClickAway={handleClose}>
                         <MenuList id="action list">
-                           <MenuItem>
+                           <MenuItem onClick={() => setOpenBreakoutRooms(true)}>
                               <GroupWorkIcon fontSize="small" style={{ marginRight: 16 }} />
                               Breakout Rooms
                            </MenuItem>
-                           {options.map((option, index) => (
-                              <MenuItem key={option}>{option}</MenuItem>
-                           ))}
                         </MenuList>
                      </ClickAwayListener>
                   </Paper>
                </Grow>
             )}
          </Popper>
+         <OpenBreakoutRoomsDialog open={openBreakoutRooms} onClose={() => setOpenBreakoutRooms(false)} />
       </div>
    );
 }

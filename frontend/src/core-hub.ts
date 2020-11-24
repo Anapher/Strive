@@ -1,4 +1,12 @@
-import { SendChatMessageDto, CreateRoomDto, SwitchRoomDto, EquipmentCommand, EquipmentStatus } from './core-hub.types';
+import { Operation } from 'fast-json-patch';
+import {
+   SendChatMessageDto,
+   CreateRoomDto,
+   SwitchRoomDto,
+   EquipmentCommand,
+   EquipmentStatus,
+   OpenBreakoutRoomsDto,
+} from './core-hub.types';
 import { RegisterEquipmentRequestDto } from './features/equipment/types';
 import { connectSignal, invoke, send } from './store/signal/actions';
 import { IRestError } from './utils/error-result';
@@ -15,6 +23,11 @@ export const closeConference = () => send('CloseConference');
 export const createRooms = (rooms: CreateRoomDto[]) => send('CreateRooms', rooms);
 export const removeRooms = (roomIds: string[]) => send('RemoveRooms', roomIds);
 export const switchRoom = (dto: SwitchRoomDto) => send('SwitchRoom', dto);
+
+export const openBreakoutRooms = (dto: OpenBreakoutRoomsDto) => send('OpenBreakoutRooms', dto);
+export const closeBreakoutRooms = () => send('CloseBreakoutRooms');
+export const changeBreakoutRooms = (dto: Operation[] /** for BreakoutRoomsOptions */) =>
+   send('ChangeBreakoutRooms', dto);
 
 export const _requestChat = 'RequestChat';
 export const requestChat = () => invoke(_requestChat);

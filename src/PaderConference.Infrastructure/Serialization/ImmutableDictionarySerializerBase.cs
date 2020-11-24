@@ -143,7 +143,7 @@ namespace PaderConference.Infrastructure.Serialization
 
         // public methods
         /// <inheritdoc />
-        public bool TryGetMemberSerializationInfo(string memberName, out BsonSerializationInfo serializationInfo)
+        public bool TryGetMemberSerializationInfo(string memberName, out BsonSerializationInfo? serializationInfo)
         {
             if (DictionaryRepresentation != DictionaryRepresentation.Document)
             {

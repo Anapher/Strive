@@ -2,7 +2,6 @@ import { Badge, Fab, List, makeStyles, Zoom } from '@material-ui/core';
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import _ from 'lodash';
 import React, { useEffect, useRef, useState } from 'react';
-import { Virtuoso, VirtuosoMethods } from 'react-virtuoso';
 import { ParticipantDto } from 'src/features/conference/types';
 import useBottomScrollTrigger from 'src/hooks/useBottomScrollTrigger';
 import { getScrollbarWidth } from 'src/utils/browser-info';

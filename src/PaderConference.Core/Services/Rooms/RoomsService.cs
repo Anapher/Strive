@@ -98,18 +98,28 @@ namespace PaderConference.Core.Services.Rooms
                     return;
                 }
 
-                var rooms = new List<Room>();
-                foreach (var createRoomMessage in message.Payload)
-                {
-                    var id = Guid.NewGuid().ToString("N");
-                    var room = new Room(id, createRoomMessage.DisplayName, true);
-                    await _roomRepo.CreateRoom(_conferenceId, room);
-                    rooms.Add(room);
-                }
-
-                await UpdateSynchronizedRooms();
-                RoomsCreated?.Invoke(this, rooms);
+                await CreateRooms(message.Payload);
             }
+        }
+
+        public async Task<IReadOnlyList<Room>> CreateRooms(IReadOnlyList<CreateRoomMessage> rooms)
+        {
+            using var _ = _logger.BeginMethodScope();
+            _logger.LogDebug("Create {count} room(s)", rooms.Count);
+
+            var result = new List<Room>();
+            foreach (var createRoomMessage in rooms)
+            {
+                var id = Guid.NewGuid().ToString("N");
+                var room = new Room(id, createRoomMessage.DisplayName, true);
+                await _roomRepo.CreateRoom(_conferenceId, room);
+                result.Add(room);
+            }
+
+            await UpdateSynchronizedRooms();
+            RoomsCreated?.Invoke(this, result);
+
+            return result;
         }
 
         public async ValueTask RemoveRooms(IServiceMessage<IReadOnlyList<string>> message)
@@ -122,26 +132,30 @@ namespace PaderConference.Core.Services.Rooms
                 {
                     _logger.LogDebug("Permissions denied.");
                     await message.ResponseError(RoomsError.PermissionToRemoveRoomDenied);
-                    return;
                 }
 
-                using (await _roomLock.WriterLockAsync())
-                {
-                    var defaultRoomId = await GetDefaultRoomId();
-                    if (message.Payload.Contains(defaultRoomId))
-                        throw new InvalidOperationException("Cannot delete default room.");
-
-                    var participantToRooms = await _roomRepo.GetParticipantRooms(_conferenceId);
-                    foreach (var (participantId, roomId) in participantToRooms)
-                        if (message.Payload.Contains(roomId))
-                            await SetRoom(participantId, defaultRoomId);
-
-                    await _roomRepo.DeleteRooms(_conferenceId, message.Payload);
-                }
-
-                await UpdateSynchronizedRooms();
-                RoomsRemoved?.Invoke(this, message.Payload);
+                await RemoveRooms(message.Payload);
             }
+        }
+
+        public async Task RemoveRooms(IReadOnlyList<string> roomIds)
+        {
+            using (await _roomLock.WriterLockAsync())
+            {
+                var defaultRoomId = await GetDefaultRoomId();
+                if (roomIds.Contains(defaultRoomId))
+                    throw new InvalidOperationException("Cannot delete default room.");
+
+                var participantToRooms = await _roomRepo.GetParticipantRooms(_conferenceId);
+                foreach (var (participantId, roomId) in participantToRooms)
+                    if (roomIds.Contains(roomId))
+                        await SetRoom(participantId, defaultRoomId);
+
+                await _roomRepo.DeleteRooms(_conferenceId, roomIds);
+            }
+
+            await UpdateSynchronizedRooms();
+            RoomsRemoved?.Invoke(this, roomIds);
         }
 
         public override async ValueTask InitializeAsync()
@@ -174,35 +188,35 @@ namespace PaderConference.Core.Services.Rooms
             return await _roomRepo.Get(_conferenceId, roomId);
         }
 
-        private async Task SetRoom(string participantId, string roomId)
+        public async Task SetRoom(string participantId, string roomId)
         {
-            using (_logger.BeginScope("SetRoom()"))
-            using (_logger.BeginScope(new Dictionary<string, object>
-                {{"participantId", participantId}, {"roomId", roomId}}))
+            using var _ = _logger.BeginMethodScope(new Dictionary<string, object>
             {
-                using (await _roomLock.ReaderLockAsync())
+                {"participantId", participantId}, {"roomId", roomId},
+            });
+
+            using (await _roomLock.ReaderLockAsync())
+            {
+                var roomInfo = await GetRoomInfo(roomId);
+                if (roomInfo == null)
                 {
-                    var roomInfo = await GetRoomInfo(roomId);
-                    if (roomInfo == null)
-                    {
-                        _logger.LogDebug("The room is null");
-                        throw new InvalidOperationException("The room does not exist.");
-                    }
-
-                    _logger.LogDebug("Room info received: {@room}", roomInfo);
-
-                    if (!roomInfo.IsEnabled)
-                    {
-                        _logger.LogDebug("The room is disabled");
-                        throw new InvalidOperationException("The room is disabled");
-                    }
-
-                    _logger.LogDebug("Update room in redis");
-                    await _roomRepo.SetParticipantRoom(_conferenceId, participantId, roomId);
+                    _logger.LogDebug("The room is null");
+                    throw new InvalidOperationException("The room does not exist.");
                 }
 
-                await UpdateSynchronizedRooms();
+                _logger.LogDebug("Room info received: {@room}", roomInfo);
+
+                if (!roomInfo.IsEnabled)
+                {
+                    _logger.LogDebug("The room is disabled");
+                    throw new InvalidOperationException("The room is disabled");
+                }
+
+                _logger.LogDebug("Update room in redis");
+                await _roomRepo.SetParticipantRoom(_conferenceId, participantId, roomId);
             }
+
+            await UpdateSynchronizedRooms();
         }
 
         private async Task<IReadOnlyDictionary<string, JsonElement>?> GetRoomPermissions(string roomId)
