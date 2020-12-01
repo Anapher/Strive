@@ -103,31 +103,26 @@ export default function ParticipantTile({ className, participant }: Props) {
       <motion.div whileHover={{ scale: 1.05, zIndex: 500 }} className={clsx(classes.root, className)}>
          <video ref={videoRef} className={classes.video} hidden={!isWebcamActive} autoPlay />
          <motion.div style={{ borderWidth: asd }} className={classes.volumeBorder} />
-         <AnimateSharedLayout>
-            {isWebcamActive ? (
-               <motion.div className={classes.infoBox}>
-                  <AnimatedMicIcon
-                     activated={producers?.mic?.paused === false}
-                     disabledColor={theme.palette.error.main}
-                  />
-                  <Typography
-                     component={motion.h4}
-                     layoutId="name"
-                     variant="h4"
-                     className={classes.displayName}
-                     style={{ fontSize: 24 }}
-                  >
-                     {participant.displayName}
-                  </Typography>
-               </motion.div>
-            ) : (
-               <div className={classes.centerText}>
-                  <Typography component={motion.h4} layoutId="name" variant="h4">
-                     {participant.displayName}
-                  </Typography>
-               </div>
-            )}
-         </AnimateSharedLayout>
+         {isWebcamActive ? (
+            <motion.div className={classes.infoBox}>
+               <AnimatedMicIcon activated={producers?.mic?.paused === false} disabledColor={theme.palette.error.main} />
+               <Typography
+                  component={motion.h4}
+                  layoutId={`name-${participant.participantId}`}
+                  variant="h4"
+                  className={classes.displayName}
+                  style={{ fontSize: 24 }}
+               >
+                  {participant.displayName}
+               </Typography>
+            </motion.div>
+         ) : (
+            <div className={classes.centerText}>
+               <Typography component={motion.h4} layoutId={`name-${participant.participantId}`} variant="h4">
+                  {participant.displayName}
+               </Typography>
+            </div>
+         )}
       </motion.div>
    );
 }
