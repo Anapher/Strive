@@ -3,17 +3,8 @@ import { events } from 'src/core-hub';
 import { connectSignal, onConnected, onConnectionError, onEventOccurred } from 'src/store/signal/actions';
 import { createSynchronizeObjectReducer } from 'src/store/signal/synchronized-object';
 import { IRestError } from 'src/utils/error-result';
-import { ConferenceType, Permissions } from '../create-conference/types';
-import { ParticipantDto } from './types';
-
-export type ConferenceInfo = {
-   conferenceState: 'active' | 'inactive';
-   scheduledDate?: string;
-   isOpen: boolean;
-   conferenceType?: ConferenceType;
-   permissions: Permissions;
-   moderators: string[];
-};
+import { Permissions } from '../create-conference/types';
+import { ConferenceInfo, ParticipantDto } from './types';
 
 export type ConferenceState = {
    conferenceId: string | null;

@@ -139,6 +139,8 @@ namespace PaderConference
                         {new SendAnonymously().Type, typeof(SendAnonymously)},
                         {new SendPrivately().Type, typeof(SendPrivately)},
                     }));
+                options.PayloadSerializerOptions.Converters.Add(new TimeSpanConverter());
+                options.PayloadSerializerOptions.Converters.Add(new JsonPatchDocumentConverterFactory());
             });
 
             services.AddMvc()

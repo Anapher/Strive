@@ -194,61 +194,62 @@ namespace PaderConference.Core.Services.BreakoutRoom
 
         private async Task ApplyState(ActiveBreakoutRoomState? state)
         {
-            using (await _breakoutLock.LockAsync())
+            // IMPORTANT: Lock must be acquired!
+
+            // cancel
+            _currentAutoCloseTokenSource?.Cancel();
+            _currentAutoCloseTokenSource?.Dispose();
+            _currentAutoCloseTokenSource = null;
+
+            if (state == null)
             {
-                // cancel
-                _currentAutoCloseTokenSource?.Cancel();
-                _currentAutoCloseTokenSource?.Dispose();
-                _currentAutoCloseTokenSource = null;
-
-                if (state == null)
+                await _roomManagement.RemoveRooms(_currentBreakoutRooms.Keys.ToList());
+            }
+            else
+            {
+                // adjust rooms
+                if (state.Amount > _currentBreakoutRooms.Count)
                 {
-                    await _roomManagement.RemoveRooms(_currentBreakoutRooms.Keys.ToList());
+                    var createdRooms = await CreateMissingRooms(state.Amount - _currentBreakoutRooms.Count,
+                        _namingStrategy);
+
+                    foreach (var createdRoom in createdRooms)
+                        _currentBreakoutRooms.TryAdd(createdRoom.RoomId, createdRoom);
                 }
-                else
+                else if (state.Amount < _currentBreakoutRooms.Count)
                 {
-                    // adjust rooms
-                    if (state.Amount > _currentBreakoutRooms.Count)
-                    {
-                        var createdRooms = await CreateMissingRooms(state.Amount - _currentBreakoutRooms.Count,
-                            _namingStrategy);
+                    await RemoveRooms(_currentBreakoutRooms.Count - state.Amount, _namingStrategy);
+                }
 
-                        foreach (var createdRoom in createdRooms)
-                            _currentBreakoutRooms.TryAdd(createdRoom.RoomId, createdRoom);
-                    }
-                    else if (state.Amount < _currentBreakoutRooms.Count)
+                // adjust timer
+                if (state.Deadline != null)
+                {
+                    var wait = state.Deadline.Value - DateTimeOffset.UtcNow;
+                    if (wait < TimeSpan.Zero)
                     {
-                        await RemoveRooms(_currentBreakoutRooms.Count - state.Amount, _namingStrategy);
+                        await ApplyState(null);
+                        return;
                     }
 
-                    // adjust timer
-                    if (state.Deadline != null)
+                    _currentAutoCloseTokenSource = new CancellationTokenSource();
+                    Task.Delay(wait, _currentAutoCloseTokenSource.Token).ContinueWith(async task =>
                     {
-                        var wait = state.Deadline.Value - DateTimeOffset.UtcNow;
-                        if (wait < TimeSpan.Zero)
+                        if (task.IsCanceled) return;
+
+                        _logger.LogInformation("Breakout room timer ran out, close all breakout rooms");
+                        try
                         {
                             await ApplyState(null);
-                            return;
                         }
-
-                        _currentAutoCloseTokenSource = new CancellationTokenSource();
-                        Task.Delay(wait, _currentAutoCloseTokenSource.Token).ContinueWith(async task =>
+                        catch (Exception e)
                         {
-                            _logger.LogInformation("Breakout room timer ran out, close all breakout rooms");
-                            try
-                            {
-                                await ApplyState(null);
-                            }
-                            catch (Exception e)
-                            {
-                                _logger.LogError(e, "Error closing all breakout rooms after timer ran out.");
-                            }
-                        }).Forget();
-                    }
+                            _logger.LogError(e, "Error closing all breakout rooms after timer ran out.");
+                        }
+                    }).Forget();
                 }
-
-                await _synchronizedObject.Update(new BreakoutRoomSyncObject(state));
             }
+
+            await _synchronizedObject.Update(new BreakoutRoomSyncObject(state));
         }
 
         private async Task<IReadOnlyList<Room>> CreateMissingRooms(int amount, IRoomNamingStrategy namingStrategy)

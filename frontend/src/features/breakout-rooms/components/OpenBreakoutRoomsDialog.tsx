@@ -8,12 +8,14 @@ import {
    DialogTitle,
    TextField,
 } from '@material-ui/core';
+import { Duration } from 'luxon';
 import React from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 import * as coreHub from 'src/core-hub';
 import { OpenBreakoutRoomsDto } from 'src/core-hub.types';
 import { RootState } from 'src/store';
+import { setCreationDialogOpen } from '../breakoutRoomsSlice';
 import OpenBreakoutRoomsAssignments from './OpenBreakoutRoomsAssignments';
 
 const validateNumberInteger = (val: unknown) => {
@@ -23,19 +25,18 @@ const validateNumberInteger = (val: unknown) => {
    return 'The amount must be an integer.';
 };
 
-type Props = {
-   open: boolean;
-   onClose: () => void;
-};
-
-export default function OpenBreakoutRoomsDialog({ open, onClose }: Props) {
+export default function OpenBreakoutRoomsDialog() {
    const dispatch = useDispatch();
    const participants = useSelector((state: RootState) => state.conference.participants);
+   const open = useSelector((state: RootState) => state.breakoutRooms.creationDialogOpen);
+
+   const handleClose = () => dispatch(setCreationDialogOpen(false));
 
    const { register, errors, formState, handleSubmit, watch, control } = useForm<OpenBreakoutRoomsDto>({
       defaultValues: {
          amount: participants != undefined ? Math.ceil(participants.length / 3) : 4,
          description: '',
+         duration: '15',
          assignedRooms: [],
       },
       mode: 'onChange',
@@ -44,18 +45,41 @@ export default function OpenBreakoutRoomsDialog({ open, onClose }: Props) {
    const amount = watch('amount');
 
    const handleApplyForm = (dto: OpenBreakoutRoomsDto) => {
-      dispatch(coreHub.openBreakoutRooms(dto));
-      onClose();
+      const action = coreHub.openBreakoutRooms({
+         ...dto,
+         amount: Number(dto.amount),
+         duration: dto.duration ? Duration.fromObject({ minutes: Number(dto.duration) }).toString() : undefined,
+      });
+
+      dispatch(action);
+      handleClose();
    };
 
+   // participants = [
+   //    ...participants,
+   //    ...Array.from({ length: 15 }).map((_, i) => ({
+   //       participantId: 'test-' + i,
+   //       displayName: 'random ' + i,
+   //       role: 'mod',
+   //    })),
+   // ];
+
    return (
-      <Dialog open={open} onClose={onClose} aria-labelledby="form-dialog-title" fullWidth maxWidth="md" scroll="paper">
+      <Dialog
+         open={open}
+         onClose={handleClose}
+         aria-labelledby="form-dialog-title"
+         fullWidth
+         maxWidth="md"
+         scroll="paper"
+      >
          <form onSubmit={handleSubmit(handleApplyForm)}>
             <DialogTitle id="form-dialog-title">Create breakout rooms</DialogTitle>
             <DialogContent>
                <DialogContentText>
                   Create breakout rooms to let participants work together in smaller groups. Here you can define the
-                  amount of rooms to create. After creation the participants can join them on their own.
+                  amount of rooms to create. You can assign a duration for the breakout phase, it will be displayed to
+                  all participants. After creation the participants can join them on their own.
                </DialogContentText>
                <Box mt={4}>
                   <Box display="flex">
@@ -74,6 +98,20 @@ export default function OpenBreakoutRoomsDialog({ open, onClose }: Props) {
                         error={!!errors.amount}
                         style={{ maxWidth: 80 }}
                         helperText={errors.amount?.message}
+                        fullWidth
+                     />
+                     <TextField
+                        label="Duration in minutes"
+                        inputRef={register({
+                           min: { value: 1, message: 'Must at least give one minute.' },
+                           validate: validateNumberInteger,
+                        })}
+                        inputProps={{ min: 1, step: 1 }}
+                        name="duration"
+                        type="number"
+                        error={!!errors.duration}
+                        style={{ maxWidth: 160, marginLeft: 16 }}
+                        helperText={errors.duration?.message}
                         fullWidth
                      />
                      <TextField
@@ -98,11 +136,11 @@ export default function OpenBreakoutRoomsDialog({ open, onClose }: Props) {
                            onChange={(data) => onChange(data)}
                         />
                      )}
-                  ></Controller>
+                  />
                </Box>
             </DialogContent>
             <DialogActions>
-               <Button color="primary" onClick={onClose}>
+               <Button color="primary" onClick={handleClose}>
                   Cancel
                </Button>
                <Button color="primary" disabled={!formState.isValid} type="submit">

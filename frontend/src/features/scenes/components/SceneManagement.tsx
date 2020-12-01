@@ -8,7 +8,6 @@ import {
    ListItemSecondaryAction,
    ListItemText,
    makeStyles,
-   MenuItem,
    MenuList,
    Paper,
    Popper,
@@ -20,7 +19,6 @@ import {
 import AppsIcon from '@material-ui/icons/Apps';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import DesktopWindowsIcon from '@material-ui/icons/DesktopWindows';
-import GroupWorkIcon from '@material-ui/icons/GroupWork';
 import StarIcon from '@material-ui/icons/Star';
 import React, { useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -29,7 +27,8 @@ import { RootState } from 'src/store';
 import { setAppliedScene } from '../scenesSlice';
 import { selectAvailableScenesViewModels, selectServerProvidedScene } from '../selectors';
 import { Scene } from '../types';
-import OpenBreakoutRoomsDialog from './OpenBreakoutRoomsDialog';
+import { BreakoutRoomAction, BreakoutRoomActive } from 'src/features/breakout-rooms/components/BreakoutRoomActions';
+import OpenBreakoutRoomsDialog from 'src/features/breakout-rooms/components/OpenBreakoutRoomsDialog';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -83,8 +82,6 @@ export default function SceneManagement() {
       }
    };
 
-   const [openBreakoutRooms, setOpenBreakoutRooms] = useState(false);
-
    return (
       <div>
          <List dense disablePadding>
@@ -122,19 +119,14 @@ export default function SceneManagement() {
                   Active
                </Typography>
             </li>
-            <ListItem button style={{ paddingLeft: 16, paddingRight: 8 }}>
-               <ListItemIcon style={{ minWidth: 32 }}>
-                  <GroupWorkIcon />
-               </ListItemIcon>
-               <ListItemText primary="Breakout Rooms" />
-            </ListItem>
+            <BreakoutRoomActive />
          </List>
          <Paper elevation={4} className={classes.root}>
             <Button variant="contained" color="primary" size="small" fullWidth ref={actionButton} onClick={handleOpen}>
                Actions <ArrowDropDownIcon />
             </Button>
          </Paper>
-         <Popper open={actionPopper} anchorEl={actionButton.current} role={undefined} transition disablePortal>
+         <Popper open={actionPopper} anchorEl={actionButton.current} role={undefined} transition>
             {({ TransitionProps }) => (
                <Grow
                   {...TransitionProps}
@@ -145,17 +137,14 @@ export default function SceneManagement() {
                   <Paper>
                      <ClickAwayListener onClickAway={handleClose}>
                         <MenuList id="action list">
-                           <MenuItem onClick={() => setOpenBreakoutRooms(true)}>
-                              <GroupWorkIcon fontSize="small" style={{ marginRight: 16 }} />
-                              Breakout Rooms
-                           </MenuItem>
+                           <BreakoutRoomAction onClose={handleClose} />
                         </MenuList>
                      </ClickAwayListener>
                   </Paper>
                </Grow>
             )}
          </Popper>
-         <OpenBreakoutRoomsDialog open={openBreakoutRooms} onClose={() => setOpenBreakoutRooms(false)} />
+         <OpenBreakoutRoomsDialog />
       </div>
    );
 }

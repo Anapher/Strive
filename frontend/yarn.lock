@@ -9811,10 +9811,10 @@ react-beautiful-dnd@^13.0.0:
     redux "^4.0.4"
     use-memo-one "^1.1.1"
 
-react-countdown@^2.3.0:
-  version "2.3.0"
-  resolved "https://registry.yarnpkg.com/react-countdown/-/react-countdown-2.3.0.tgz#fb07ab3d834f123961a3521298b281cf6328b9b3"
-  integrity sha512-uiwEIBPbGKyT/bOLv/RI1Q8FtmlefUREKeJMtJ91IKBWfTOinfPFZcxCXVHBazr3+i/DvOMk6A323Fv+ysZLKw==
+react-countdown@^2.3.1:
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/react-countdown/-/react-countdown-2.3.1.tgz#6914538705075c74ac8f97fd8c31b29eadf44cbd"
+  integrity sha512-h66prF+Wwj3Ru4tDeqvXsW8iqaCyC54pjwTAlUUmUQ11EUqIO34xV4pO4q8MGT6917ep47ntKmBW99ZVN1ozdQ==
   dependencies:
     prop-types "^15.7.2"
 

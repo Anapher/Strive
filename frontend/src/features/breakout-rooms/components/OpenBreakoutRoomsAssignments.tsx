@@ -16,6 +16,9 @@ import { ParticipantDto } from 'src/features/conference/types';
 import React, { useEffect } from 'react';
 import clsx from 'classnames';
 import PersonIcon from '@material-ui/icons/Person';
+import { selectMyParticipantId } from 'src/features/auth/selectors';
+import { useSelector } from 'react-redux';
+import _ from 'lodash';
 
 const useStyles = makeStyles((theme) => ({
    roomListDragOver: {
@@ -65,6 +68,7 @@ const droppableIdToRoom = (s: string) => (s === 'defaultRoom' ? undefined : Numb
 
 export default function OpenBreakoutRoomsAssignments({ data, participants, createdRooms, onChange }: Props) {
    const unassignedParticipants = participants.filter((x) => !data.find((y) => y.includes(x.participantId)));
+   const myParticipantId = useSelector(selectMyParticipantId);
 
    useEffect(() => {
       if (data.length > createdRooms) {
@@ -111,11 +115,28 @@ export default function OpenBreakoutRoomsAssignments({ data, participants, creat
    const theme = useTheme();
    const isLg = useMediaQuery(theme.breakpoints.up('lg'));
 
+   const handleRandomlyAssignParticipants = () => {
+      const pool = _(participants)
+         .filter((x) => x.participantId !== myParticipantId)
+         .map((x) => x.participantId)
+         .shuffle()
+         .value();
+      const participantsPerRoom = Math.ceil(pool.length / createdRooms);
+      const data = Array.from({ length: createdRooms }).map((_, i) =>
+         pool.slice(i * participantsPerRoom, (i + 1) * participantsPerRoom),
+      );
+
+      onChange(data);
+   };
+
+   const selectParticipants = (ids: string[]) =>
+      (ids?.map((x) => participants.find((y) => y.participantId === x)).filter((x) => !!x) as ParticipantDto[]) ?? [];
+
    return (
       <div>
          <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
             <Typography variant="h6">Assign participants to rooms</Typography>
-            <Button size="small" variant="contained">
+            <Button size="small" variant="contained" color="secondary" onClick={handleRandomlyAssignParticipants}>
                Randomly assign rooms
             </Button>
          </Box>
@@ -139,11 +160,7 @@ export default function OpenBreakoutRoomsAssignments({ data, participants, creat
                                     key={i}
                                     id={formatDroppableId(i)}
                                     title={`Room #${i + 1}`}
-                                    participants={
-                                       data[i]
-                                          ?.map((x) => participants.find((y) => y.participantId === x)!)
-                                          .filter((x) => !!x) ?? []
-                                    }
+                                    participants={selectParticipants(data[i])}
                                  />
                               ),
                         )}
@@ -156,11 +173,7 @@ export default function OpenBreakoutRoomsAssignments({ data, participants, creat
                                     key={i}
                                     id={formatDroppableId(i)}
                                     title={`Room #${i + 1}`}
-                                    participants={
-                                       data[i]
-                                          ?.map((x) => participants.find((y) => y.participantId === x)!)
-                                          .filter((x) => !!x) ?? []
-                                    }
+                                    participants={selectParticipants(data[i])}
                                  />
                               ),
                         )}
@@ -174,11 +187,7 @@ export default function OpenBreakoutRoomsAssignments({ data, participants, creat
                            key={i}
                            id={formatDroppableId(i)}
                            title={`Room #${i + 1}`}
-                           participants={
-                              data[i]
-                                 ?.map((x) => participants.find((y) => y.participantId === x)!)
-                                 .filter((x) => !!x) ?? []
-                           }
+                           participants={selectParticipants(data[i])}
                         />
                      ))}
                   </Grid>

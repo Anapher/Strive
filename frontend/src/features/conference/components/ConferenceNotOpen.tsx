@@ -15,8 +15,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { selectAccessToken } from 'src/features/auth/selectors';
 import usePermission, { CONFERENCE_CAN_OPEN_AND_CLOSE } from 'src/hooks/usePermission';
 import { RootState } from 'src/store';
-import { ConferenceInfo } from '../conferenceSlice';
 import * as coreHub from 'src/core-hub';
+import { ConferenceInfo } from '../types';
 
 const useStyles = makeStyles((theme) => ({
    root: {

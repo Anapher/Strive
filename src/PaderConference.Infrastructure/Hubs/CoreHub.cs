@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Xml;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.SignalR;
@@ -109,7 +110,7 @@ namespace PaderConference.Infrastructure.Hubs
                                 try
                                 {
                                     participant = await ConferenceManager.Participate(conferenceId, participantId, role,
-                                        httpContext.User.Identity.Name);
+                                        httpContext.User.Identity?.Name);
                                 }
                                 catch (ConferenceNotFoundException)
                                 {
@@ -216,6 +217,9 @@ namespace PaderConference.Infrastructure.Hubs
 
         public Task ChangeBreakoutRooms(JsonPatchDocument<BreakoutRoomsOptions> dto)
         {
+            var timespanPatchOp = dto.Operations.FirstOrDefault(x => x.path == "/duration");
+            if (timespanPatchOp != null)
+                timespanPatchOp.value = XmlConvert.ToTimeSpan((string) timespanPatchOp.value);
             return InvokeService<BreakoutRoomService, JsonPatchDocument<BreakoutRoomsOptions>>(dto,
                 service => service.ChangeBreakoutRooms);
         }

@@ -12,6 +12,7 @@ import notifier from '../features/notifier/notifierSlice';
 import settings from '../features/settings/settingsSlice';
 import equipment from '../features/equipment/equipmentSlice';
 import scenes from '../features/scenes/scenesSlice';
+import breakoutRooms from '../features/breakout-rooms/breakoutRoomsSlice';
 
 const rootReducer = combineReducers({
    auth,
@@ -26,6 +27,7 @@ const rootReducer = combineReducers({
    settings,
    equipment,
    scenes,
+   breakoutRooms,
 });
 
 export default rootReducer;
