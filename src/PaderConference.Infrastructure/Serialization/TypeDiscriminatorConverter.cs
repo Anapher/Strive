@@ -16,7 +16,7 @@ namespace PaderConference.Infrastructure.Serialization
             _typeDiscriminatorPropName = typeDiscriminatorPropName;
         }
 
-        public override T Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        public override T? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             if (reader.TokenType != JsonTokenType.StartObject) throw new JsonException();
 
@@ -25,11 +25,12 @@ namespace PaderConference.Infrastructure.Serialization
                 if (!jsonDocument.RootElement.TryGetProperty(_typeDiscriminatorPropName, out var typeProperty))
                     throw new JsonException();
 
-                if (!_typeMap.TryGetValue(typeProperty.GetString(), out var type))
+                var typeName = typeProperty.GetString();
+                if (typeName == null || !_typeMap.TryGetValue(typeName, out var type))
                     throw new JsonException("Couldn't find type.");
 
                 var jsonObject = jsonDocument.RootElement.GetRawText();
-                return (T) JsonSerializer.Deserialize(jsonObject, type, options);
+                return (T?) JsonSerializer.Deserialize(jsonObject, type, options);
             }
         }
 

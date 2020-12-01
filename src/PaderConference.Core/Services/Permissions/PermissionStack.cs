@@ -49,7 +49,11 @@ namespace PaderConference.Core.Services.Permissions
                         case PermissionType.Decimal:
                             return (T) (object) value.GetDouble();
                         case PermissionType.Text:
-                            return (T) (object) value.GetString();
+                            var val = value.GetString();
+                            if (val == null)
+                                throw new NullReferenceException("The permission descriptor has a null value.");
+
+                            return (T) (object) val;
                         default:
                             throw new ArgumentOutOfRangeException();
                     }

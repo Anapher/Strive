@@ -29,7 +29,7 @@ namespace PaderConference.Extensions
         /// <inheritdoc />
         public T Deserialize<T>(byte[] serializedObject)
         {
-            return JsonSerializer.Deserialize<T>(serializedObject, Options);
+            return JsonSerializer.Deserialize<T>(serializedObject, Options)!;
         }
 
         /// <inheritdoc />

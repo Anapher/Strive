@@ -1,4 +1,6 @@
-﻿namespace PaderConference.Core.Services.Equipment.Dto
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace PaderConference.Core.Services.Equipment.Dto
 {
     public class EquipmentAuthResponse
     {
@@ -13,7 +15,9 @@
             ParticipantId = participantId;
         }
 
+        [MemberNotNullWhen(true, nameof(ParticipantId))]
         public bool Success { get; }
+
         public string? ParticipantId { get; }
     }
 }
