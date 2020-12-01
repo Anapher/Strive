@@ -49,10 +49,16 @@ export default function DeviceSelector({ devices, defaultName, className, select
       }
    };
 
+   const defaultDevice = devices[0]?.devices[0]?.device;
+
    return (
       <FormControl className={clsx(className, classes.control)}>
          <InputLabel htmlFor={selectId}>{label}</InputLabel>
-         <Select id={selectId} value={selectedDevice ? getId(selectedDevice) : ''} onChange={handleChange}>
+         <Select
+            id={selectId}
+            value={selectedDevice ? getId(selectedDevice) : defaultDevice ? getId(defaultDevice) : ''}
+            onChange={handleChange}
+         >
             {devices
                .find((x) => x.type === 'local')
                ?.devices.map((x, i) => (
