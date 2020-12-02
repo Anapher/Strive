@@ -36,14 +36,17 @@ const useStyles = makeStyles((theme) => ({
       display: 'flex',
       alignItems: 'center',
       flexDirection: 'row',
-      backgroundColor: fade(theme.palette.background.paper, 0.5),
-      padding: theme.spacing(0, 1),
       left: theme.spacing(1),
       bottom: theme.spacing(1),
+
+      backgroundColor: fade(theme.palette.background.paper, 0.5),
+      padding: theme.spacing(0, 1),
       borderRadius: theme.shape.borderRadius,
    },
-   displayName: {
-      marginLeft: theme.spacing(1),
+   micIconWithoutWebcam: {
+      position: 'absolute',
+      left: theme.spacing(2),
+      bottom: theme.spacing(2),
    },
    centerText: {
       top: 0,
@@ -106,20 +109,30 @@ export default function ParticipantTile({ className, participant, size, disableL
       <motion.div whileHover={{ scale: 1.05, zIndex: 500 }} className={clsx(classes.root, className)}>
          <video ref={videoRef} className={classes.video} hidden={!isWebcamActive} autoPlay />
          <motion.div style={{ borderWidth: audioBorder }} className={classes.volumeBorder} />
-         {isWebcamActive ? (
+
+         {!isWebcamActive && (
+            <AnimatedMicIcon
+               activated={producers?.mic?.paused === false}
+               disabledColor={theme.palette.error.main}
+               className={classes.micIconWithoutWebcam}
+            />
+         )}
+
+         {isWebcamActive && (
             <motion.div className={classes.infoBox}>
                <AnimatedMicIcon activated={producers?.mic?.paused === false} disabledColor={theme.palette.error.main} />
                <Typography
                   component={motion.h4}
                   layoutId={disableLayoutAnimation ? undefined : `name-${participant.participantId}`}
                   variant="h4"
-                  className={classes.displayName}
-                  style={{ fontSize }}
+                  style={{ fontSize, marginLeft: 8 }}
                >
                   {participant.displayName}
                </Typography>
             </motion.div>
-         ) : (
+         )}
+
+         {!isWebcamActive && (
             <div className={classes.centerText}>
                <Typography
                   component={motion.span}
