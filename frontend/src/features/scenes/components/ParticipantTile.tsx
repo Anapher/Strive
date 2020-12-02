@@ -1,6 +1,6 @@
 import { fade, makeStyles, Typography, useTheme } from '@material-ui/core';
 import clsx from 'classnames';
-import { AnimateSharedLayout, motion, MotionValue, useTransform } from 'framer-motion';
+import { motion, MotionValue, useTransform } from 'framer-motion';
 import React, { useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import AnimatedMicIcon from 'src/assets/animated-icons/AnimatedMicIcon';
@@ -38,8 +38,9 @@ const useStyles = makeStyles((theme) => ({
       flexDirection: 'row',
       backgroundColor: fade(theme.palette.background.paper, 0.5),
       padding: theme.spacing(0, 1),
-      left: 0,
+      left: theme.spacing(1),
       bottom: theme.spacing(1),
+      borderRadius: theme.shape.borderRadius,
    },
    displayName: {
       marginLeft: theme.spacing(1),
@@ -73,9 +74,10 @@ type Props = {
    className?: string;
    participant: ParticipantDto;
    size: Size;
+   disableLayoutAnimation?: boolean;
 };
 
-export default function ParticipantTile({ className, participant }: Props) {
+export default function ParticipantTile({ className, participant, size, disableLayoutAnimation }: Props) {
    const classes = useStyles();
    const consumer = useConsumer(participant.participantId, 'webcam');
    const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -96,29 +98,35 @@ export default function ParticipantTile({ className, participant }: Props) {
    }, [consumer]);
 
    const theme = useTheme();
+   const audioBorder = useTransform(audioInfo?.audioLevel ?? new MotionValue(0), [0, 1], [0, 10]);
 
-   const asd = useTransform(audioInfo?.audioLevel ?? new MotionValue(0), [0, 1], [0, 10]);
+   const fontSize = size.width < 400 ? 16 : 24;
 
    return (
       <motion.div whileHover={{ scale: 1.05, zIndex: 500 }} className={clsx(classes.root, className)}>
          <video ref={videoRef} className={classes.video} hidden={!isWebcamActive} autoPlay />
-         <motion.div style={{ borderWidth: asd }} className={classes.volumeBorder} />
+         <motion.div style={{ borderWidth: audioBorder }} className={classes.volumeBorder} />
          {isWebcamActive ? (
             <motion.div className={classes.infoBox}>
                <AnimatedMicIcon activated={producers?.mic?.paused === false} disabledColor={theme.palette.error.main} />
                <Typography
                   component={motion.h4}
-                  layoutId={`name-${participant.participantId}`}
+                  layoutId={disableLayoutAnimation ? undefined : `name-${participant.participantId}`}
                   variant="h4"
                   className={classes.displayName}
-                  style={{ fontSize: 24 }}
+                  style={{ fontSize }}
                >
                   {participant.displayName}
                </Typography>
             </motion.div>
          ) : (
             <div className={classes.centerText}>
-               <Typography component={motion.h4} layoutId={`name-${participant.participantId}`} variant="h4">
+               <Typography
+                  component={motion.span}
+                  layoutId={disableLayoutAnimation ? undefined : `name-${participant.participantId}`}
+                  variant="h4"
+                  style={{ fontSize }}
+               >
                   {participant.displayName}
                </Typography>
             </div>

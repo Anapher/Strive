@@ -54,6 +54,10 @@ export const selectScreenSharingParticipants = createSelector(
    },
 );
 
+export const selectSpeakingParticipants = createSelector(selectParticipantAudio, (audios) => {
+   return Object.entries(audios).filter(([, info]) => info?.speaking);
+});
+
 export type ProducerViewModel = ProducerInfo & {
    id: string;
 };

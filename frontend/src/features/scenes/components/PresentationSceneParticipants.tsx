@@ -2,6 +2,9 @@ import { makeStyles } from '@material-ui/core';
 import React from 'react';
 import clsx from 'classnames';
 import { motion } from 'framer-motion';
+import { useSelector } from 'react-redux';
+import { selectSceneOverlayParticipants } from '../selectors';
+import ParticipantTile from './ParticipantTile';
 
 const useStyles = makeStyles({
    rootBottom: {
@@ -30,21 +33,22 @@ type Props = {
 
 export default function PresentationSceneParticipants({ location, tileWidth, tileHeight }: Props) {
    const classes = useStyles();
+   const sceneParticipants = useSelector(selectSceneOverlayParticipants);
+   const participants = [...sceneParticipants];
+
+   const tileSize = { width: tileWidth, height: tileHeight };
 
    return (
       <div className={clsx({ [classes.rootBottom]: location === 'bottom', [classes.rootRight]: location === 'right' })}>
-         {Array.from({ length: 4 }).map((_, i) => (
+         {participants.map((x) => (
             <motion.div
-               layout
-               layoutId={'p-' + i}
-               key={i}
-               style={{
-                  width: tileWidth,
-                  height: tileHeight,
-                  backgroundColor: 'red',
-                  margin: 4,
-               }}
-            />
+               initial={{ scale: 0 }}
+               animate={{ scale: 1 }}
+               key={x.participantId}
+               style={{ ...tileSize, marginLeft: 0 }}
+            >
+               <ParticipantTile participant={x} size={tileSize} disableLayoutAnimation />
+            </motion.div>
          ))}
       </div>
    );

@@ -40,8 +40,8 @@ export default function PresentationScene({
    dimensions,
    render,
    showParticipants = true,
-   participantTileWidth = 16 * 14,
-   participantTileHeight = 9 * 14,
+   participantTileWidth = 16 * 18,
+   participantTileHeight = 9 * 18,
    maxOverlayFactor = 0.33,
 }: Props) {
    const classes = useStyles();

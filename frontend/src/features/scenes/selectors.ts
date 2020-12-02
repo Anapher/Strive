@@ -1,5 +1,6 @@
 import { createSelector } from '@reduxjs/toolkit';
 import { RootState } from 'src/store';
+import { selectParticipants } from '../conference/selectors';
 import { selectScreenSharingParticipants } from '../media/selectors';
 import { selectParticipantRoom } from '../rooms/selectors';
 import { Scene, SceneViewModel } from './types';
@@ -37,6 +38,18 @@ export const selectAvailableScenesViewModels = createSelector(
 
          return { scene, id, isApplied: id === appliedSceneId, isCurrent: id === currentSceneId };
       });
+   },
+);
+
+export const selectSceneOverlayParticipants = createSelector(
+   selectCurrentScene,
+   selectParticipants,
+   (scene, participants) => {
+      if (scene.type === 'screenshare') {
+         return participants?.filter((x) => x.participantId === scene.participantId) ?? [];
+      }
+
+      return [];
    },
 );
 
