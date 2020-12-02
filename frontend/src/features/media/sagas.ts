@@ -1,6 +1,7 @@
 import { put, select } from 'redux-saga/effects';
 import { takeEverySynchronizedObjectChange } from 'src/store/saga-utils';
-import { selectOtherParticipants } from '../conference/selectors';
+import { selectMyParticipantId } from '../auth/selectors';
+import { selectParticipants } from '../conference/selectors';
 import { ParticipantDto } from '../conference/types';
 import { removeParticipantAudio, setParticipantAudio } from './mediaSlice';
 import { selectParticipantAudio } from './selectors';
@@ -17,14 +18,17 @@ export const DEFAULT_PARTICIPANT_AUDIO: ParticipantAudioInfo = {
  * synchronize participants list with audio info
  */
 function* updateParticipants() {
-   const participants: ParticipantDto[] | null = yield select(selectOtherParticipants);
+   const participants: ParticipantDto[] | null = yield select(selectParticipants);
    const audioInfo: { [id: string]: ParticipantAudioInfo } = yield select(selectParticipantAudio);
+   const myId: string = yield select(selectMyParticipantId);
 
    if (!participants) return;
 
    // add missing participants
    for (const { participantId } of participants.filter((x) => !audioInfo[x.participantId])) {
-      yield put(setParticipantAudio({ participantId, data: DEFAULT_PARTICIPANT_AUDIO }));
+      yield put(
+         setParticipantAudio({ participantId, data: { ...DEFAULT_PARTICIPANT_AUDIO, muted: participantId === myId } }),
+      );
    }
 
    // remove participants

@@ -2,7 +2,7 @@ import { RoomViewModel } from './types';
 import { createSelector } from '@reduxjs/toolkit';
 import { RootState } from 'src/store';
 import _ from 'lodash';
-import { selectAccessToken } from '../auth/selectors';
+import { selectAccessToken, selectMyParticipantId } from '../auth/selectors';
 
 export const selectRooms = (state: RootState) => state.rooms.synchronized;
 
@@ -11,16 +11,19 @@ export const selectParticipantRoom = createSelector(selectRooms, selectAccessTok
    return rooms?.participants[token.nameid];
 });
 
-export const selectParticipantsOfCurrentRoom = createSelector(
-   selectParticipantRoom,
-   selectRooms,
-   selectAccessToken,
-   (room, rooms, token) => {
-      if (!rooms) return [];
+export const selectParticipantsOfCurrentRoom = createSelector(selectParticipantRoom, selectRooms, (room, rooms) => {
+   if (!rooms) return [];
 
-      return Object.entries(rooms.participants)
-         .filter(([participantId, roomId]) => roomId === room && participantId !== token?.nameid)
-         .map<string>(([participantId]) => participantId);
+   return Object.entries(rooms.participants)
+      .filter(([, roomId]) => roomId === room)
+      .map<string>(([participantId]) => participantId);
+});
+
+export const selectParticipantsOfCurrentRoomWithoutMe = createSelector(
+   selectParticipantsOfCurrentRoom,
+   selectMyParticipantId,
+   (participants, participantId) => {
+      return participants.filter((x) => x !== participantId);
    },
 );
 
