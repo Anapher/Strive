@@ -56,13 +56,15 @@ export default class AudioManager extends EventEmitter {
       elem.srcObject = stream;
       elem.play();
 
-      this.audioElems.set(participantId, { audioLevel, elem, stream });
+      this.audioElems.set(participantId, { audioLevel, elem, stream, hark: analyser });
       this.emit('update', { participantId });
    }
 
    unregister(participantId: string) {
-      if (this.audioElems.has(participantId)) {
+      const audioElem = this.audioElems.get(participantId);
+      if (audioElem) {
          this.audioElems.delete(participantId);
+         audioElem.hark.stop();
          this.emit('update', { participantId });
       }
    }

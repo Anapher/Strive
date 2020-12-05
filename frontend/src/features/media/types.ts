@@ -1,4 +1,5 @@
 import { MotionValue } from 'framer-motion';
+import { Harker } from 'hark';
 import { UseMediaStateInfo } from 'src/store/webrtc/hooks/useMedia';
 import { ProducerSource } from 'src/store/webrtc/types';
 import { InputDeviceDto } from '../settings/types';
@@ -42,4 +43,5 @@ export type ParticipantAudioElement = {
    elem: HTMLAudioElement;
    stream: MediaStream;
    audioLevel: MotionValue<number>;
+   hark: Harker;
 };

@@ -1,16 +1,25 @@
 import { Redis } from 'ioredis';
 import { Router } from 'mediasoup/lib/types';
+import { LoopbackManager } from './loopback-manager';
 import * as redisKeys from './pader-conference/redis-keys';
-import { Participant } from './participant';
+import { Participant, ProducerSource } from './participant';
 import Room from './room';
 import { ISignalWrapper } from './signal-wrapper';
 
+const DEFAULT_ROOM_SOURCES: ProducerSource[] = ['mic', 'webcam', 'screen'];
+
+/**
+ * The room manager opens and closes media rooms and moves participant to the correct room
+ */
 export class RoomManager {
    private participantToRoomKey: string;
 
    constructor(conferenceId: string, private signal: ISignalWrapper, private router: Router, private redis: Redis) {
       this.participantToRoomKey = redisKeys.participantToRoom(conferenceId);
+      this.loopbackManager = new LoopbackManager(signal, router, redis);
    }
+
+   private loopbackManager: LoopbackManager;
 
    /** roomId -> Room */
    private roomMap: Map<string, Room> = new Map();
@@ -19,13 +28,16 @@ export class RoomManager {
    private participantToRoom = new Map<string, string>();
 
    public async updateParticipant(participant: Participant): Promise<void> {
+      // loopback is independent from from the room
+      this.loopbackManager.updateParticipant(participant);
+
       const roomId = await this.getParticipantRoom(participant.participantId);
       if (!roomId) return;
 
       // get the room or create a new one
       let room = this.roomMap.get(roomId);
       if (!room) {
-         room = new Room(roomId, this.signal, this.router, this.redis);
+         room = new Room(roomId, this.signal, this.router, this.redis, DEFAULT_ROOM_SOURCES);
          this.roomMap.set(roomId, room);
       }
 

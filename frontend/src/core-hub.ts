@@ -43,6 +43,8 @@ export const sendEquipmentCommand = (dto: EquipmentCommand) => send('SendEquipme
 export const equipmentErrorOccurred = (dto: IRestError) => send('EquipmentErrorOccurred', dto);
 export const equipmentUpdateStatus = (dto: EquipmentStatus) => send('EquipmentUpdateStatus', dto);
 
+export const changeStream = 'ChangeStream';
+
 export const events = {
    onConnectionError: 'OnConnectionError',
 

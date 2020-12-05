@@ -6,8 +6,10 @@ export default class Connection {
       public sctpCapabilities: SctpCapabilities,
       /** the connection id (from SignalR) */
       public connectionId: string,
+
       /** participant id */
       public participantId: string,
+
       /**  true if the client is joined so he can receive and produce media, false if it is still creating transports and currently joining */
       public joined: boolean = false,
    ) {}

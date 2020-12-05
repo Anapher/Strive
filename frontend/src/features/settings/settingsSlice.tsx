@@ -1,11 +1,11 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { _getEquipmentToken } from 'src/core-hub';
 import { onInvokeReturn } from 'src/store/signal/actions';
-import { ProducerSource } from 'src/store/webrtc/types';
+import { ProducerDevice } from 'src/store/webrtc/types';
 import { fetchDevices } from './thunks';
 import { AnyInputDevice, InputDeviceDto } from './types';
 
-type PaderConferenceSettings = {
+export type PaderConferenceSettings = {
    mic: {
       device?: AnyInputDevice;
       audioGain: number;
@@ -53,7 +53,7 @@ const settingsSlice = createSlice({
       },
       setCurrentDevice(
          state,
-         { payload: { source, device } }: PayloadAction<{ source: ProducerSource; device: AnyInputDevice | undefined }>,
+         { payload: { source, device } }: PayloadAction<{ source: ProducerDevice; device: AnyInputDevice | undefined }>,
       ) {
          state.obj[source].device = device;
       },

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import useMedia, { UseMediaState } from './useMedia';
 
-export default function useMicrophone(gain?: number): UseMediaState {
+export default function useMicrophone(gain?: number, loopback = false): UseMediaState {
    const audioGainNode = useRef<GainNode | null>(null);
 
    useEffect(() => {
@@ -28,5 +28,5 @@ export default function useMicrophone(gain?: number): UseMediaState {
       return audioDestination.stream.getAudioTracks()[0];
    };
 
-   return useMedia('mic', getMic);
+   return useMedia(loopback ? 'loopback-mic' : 'mic', getMic);
 }

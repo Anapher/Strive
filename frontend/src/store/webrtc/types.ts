@@ -4,4 +4,11 @@ export type ChangeStreamDto = {
    action: 'pause' | 'resume' | 'close';
 };
 
-export type ProducerSource = 'mic' | 'webcam' | 'screen';
+export type ProducerDevice = 'mic' | 'webcam' | 'screen';
+export type ProducerSource = ProducerDevice | 'loopback-mic' | 'loopback-webcam' | 'loopback-screen';
+
+export const ProducerDevices: ProducerDevice[] = ['mic', 'webcam', 'screen'];
+
+export function isProducerDevice(source: ProducerSource): source is ProducerDevice {
+   return ProducerDevices.includes(source as any);
+}

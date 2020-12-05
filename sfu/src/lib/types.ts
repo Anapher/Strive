@@ -87,6 +87,7 @@ export type SendToConnectionDto<T> = {
 export type ConsumerInfo = {
    paused: boolean;
    participantId: string;
+   loopback?: boolean;
 };
 
 export type ProducerInfo = {

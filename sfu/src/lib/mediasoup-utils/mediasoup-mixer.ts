@@ -17,6 +17,11 @@ export class MediasoupMixer {
    private producers = new Map<string, ProducerInfo>();
    private receivers = new Map<string, Connection>();
 
+   /**
+    * Initialize a new MediasoupMixer
+    * @param router the router the mixer should depend on
+    * @param signal the signal wrapper for communication
+    */
    constructor(private router: Router, private signal: ISignalWrapper) {}
 
    /**
@@ -48,7 +53,8 @@ export class MediasoupMixer {
                if (consumer.producerId === producerId) {
                   consumer.close();
                   receiver.consumers.delete(consumer.id);
-                  // todo: notify consumer about close?
+
+                  this.signal.sendToConnection(receiver.connectionId, 'consumerClosed', { consumerId: consumer.id });
                   break;
                }
             }
@@ -84,7 +90,8 @@ export class MediasoupMixer {
             if (this.producers.has(consumer.producerId)) {
                consumer.close();
                receiver.consumers.delete(consumer.id);
-               // todo: notify consumer about close?
+
+               this.signal.sendToConnection(receiver.connectionId, 'consumerClosed', { consumerId: consumer.id });
                break;
             }
          }

@@ -1,7 +1,7 @@
-import { fade, makeStyles, Typography, useTheme } from '@material-ui/core';
+import { fade, IconButton, makeStyles, Typography, useTheme } from '@material-ui/core';
 import clsx from 'classnames';
 import { motion, MotionValue, useTransform } from 'framer-motion';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import AnimatedMicIcon from 'src/assets/animated-icons/AnimatedMicIcon';
 import { ParticipantDto } from 'src/features/conference/types';
@@ -10,15 +10,17 @@ import { selectParticipantProducers } from 'src/features/media/selectors';
 import { RootState } from 'src/store';
 import useConsumer from 'src/store/webrtc/hooks/useConsumer';
 import { Size } from 'src/types';
+import MoreVertIcon from '@material-ui/icons/MoreVert';
+import ParticipantContextMenuPopper from 'src/features/conference/components/ParticipantContextMenuPopper';
 
 const useStyles = makeStyles((theme) => ({
    root: {
+      position: 'relative',
       width: '100%',
       height: '100%',
       borderRadius: theme.shape.borderRadius,
       backgroundColor: theme.palette.background.paper,
       boxShadow: theme.shadows[6],
-      position: 'relative',
    },
    video: {
       position: 'absolute',
@@ -49,27 +51,31 @@ const useStyles = makeStyles((theme) => ({
       bottom: theme.spacing(2),
    },
    centerText: {
+      position: 'absolute',
       top: 0,
       left: 0,
       right: 0,
       bottom: 0,
-      width: '100%',
-      height: '100%',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
    },
    volumeBorder: {
+      position: 'absolute',
       top: 0,
       left: 0,
       right: 0,
       bottom: 0,
-      position: 'absolute',
       backgroundColor: 'transparent',
       borderRadius: theme.shape.borderRadius,
       borderStyle: 'solid',
       borderColor: theme.palette.primary.main,
       borderWidth: 0,
+   },
+   moreButton: {
+      position: 'absolute',
+      right: theme.spacing(1),
+      top: theme.spacing(1),
    },
 }));
 
@@ -103,20 +109,29 @@ export default function ParticipantTile({ className, participant, size, disableL
    const theme = useTheme();
    const audioBorder = useTransform(audioInfo?.audioLevel ?? new MotionValue(0), [0, 1], [0, 10]);
 
-   const fontSize = size.width < 400 ? 16 : 24;
+   const isSmall = size.width < 400;
+   const fontSize = isSmall ? 16 : 26;
+
+   const [isMouseOver, setIsMouseOver] = useState(false);
+   const [contextMenuOpen, setContextMenuOpen] = useState(false);
+   const moreIconRef = useRef(null);
+
+   const handleOpenContextMenu = () => {
+      setContextMenuOpen(true);
+   };
+
+   const handleCloseContextMenu = () => {
+      setContextMenuOpen(false);
+   };
 
    return (
-      <motion.div whileHover={{ scale: 1.05, zIndex: 500 }} className={clsx(classes.root, className)}>
+      <motion.div
+         onMouseEnter={() => setIsMouseOver(true)}
+         onMouseLeave={() => setIsMouseOver(false)}
+         className={clsx(classes.root, className)}
+      >
          <video ref={videoRef} className={classes.video} hidden={!isWebcamActive} autoPlay />
          <motion.div style={{ borderWidth: audioBorder }} className={classes.volumeBorder} />
-
-         {!isWebcamActive && (
-            <AnimatedMicIcon
-               activated={producers?.mic?.paused === false}
-               disabledColor={theme.palette.error.main}
-               className={classes.micIconWithoutWebcam}
-            />
-         )}
 
          {isWebcamActive && (
             <motion.div className={classes.infoBox}>
@@ -133,17 +148,42 @@ export default function ParticipantTile({ className, participant, size, disableL
          )}
 
          {!isWebcamActive && (
-            <div className={classes.centerText}>
-               <Typography
-                  component={motion.span}
-                  layoutId={disableLayoutAnimation ? undefined : `name-${participant.participantId}`}
-                  variant="h4"
-                  style={{ fontSize }}
-               >
-                  {participant.displayName}
-               </Typography>
-            </div>
+            <>
+               <AnimatedMicIcon
+                  activated={producers?.mic?.paused === false}
+                  disabledColor={theme.palette.error.main}
+                  className={classes.micIconWithoutWebcam}
+               />
+               <div className={classes.centerText}>
+                  <Typography
+                     component={motion.span}
+                     layoutId={disableLayoutAnimation ? undefined : `name-${participant.participantId}`}
+                     variant="h4"
+                     style={{ fontSize }}
+                  >
+                     {participant.displayName}
+                  </Typography>
+               </div>
+            </>
          )}
+
+         <motion.div className={classes.moreButton} animate={{ opacity: isMouseOver ? 1 : 0 }}>
+            <IconButton
+               ref={moreIconRef}
+               aria-label="options"
+               size={isSmall ? 'small' : 'medium'}
+               onClick={handleOpenContextMenu}
+            >
+               <MoreVertIcon />
+            </IconButton>
+         </motion.div>
+
+         <ParticipantContextMenuPopper
+            open={contextMenuOpen}
+            onClose={handleCloseContextMenu}
+            participant={participant}
+            anchorEl={moreIconRef.current}
+         />
       </motion.div>
    );
 }

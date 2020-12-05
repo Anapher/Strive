@@ -13,7 +13,7 @@ namespace PaderConference.Infrastructure.Conferencing
         public ConcurrentDictionary<string, ConcurrentDictionary<string, Participant>> ConferenceParticipants { get; } =
             new ConcurrentDictionary<string, ConcurrentDictionary<string, Participant>>();
 
-        public ICollection<Participant>? GetParticipants(string conferenceId)
+        public ICollection<Participant> GetParticipants(string conferenceId)
         {
             if (ConferenceParticipants.TryGetValue(conferenceId, out var participants))
                 return participants.Values;

@@ -9,12 +9,12 @@ import { Participant, ProducerSource, producerSources } from './participant';
 import { ISignalWrapper } from './signal-wrapper';
 
 type ProducerPermission = {
-   permission: Permission<boolean>;
+   permission?: Permission<boolean>;
    source: ProducerSource;
 };
 
 type ParticipantStatus = {
-   activeProducers: { [key in ProducerSource]: Producer | undefined };
+   activeProducers: { [key in ProducerSource]?: Producer | undefined };
    receivingConns: Connection[];
 };
 
@@ -22,6 +22,11 @@ const producerPermissions: ProducerPermission[] = [
    { permission: MEDIA_CAN_SHARE_AUDIO, source: 'mic' },
    { permission: MEDIA_CAN_SHARE_SCREEN, source: 'screen' },
    { permission: MEDIA_CAN_SHARE_WEBCAM, source: 'webcam' },
+
+   /** no permissions required to loopback device */
+   { permission: undefined, source: 'loopback-mic' },
+   { permission: undefined, source: 'loopback-webcam' },
+   { permission: undefined, source: 'loopback-screen' },
 ];
 
 const logger = new Logger('Room');
@@ -30,7 +35,13 @@ const logger = new Logger('Room');
 export default class Room {
    private mixer: MediasoupMixer;
 
-   constructor(public id: string, signal: ISignalWrapper, router: Router, private redis: Redis) {
+   constructor(
+      public id: string,
+      signal: ISignalWrapper,
+      router: Router,
+      private redis: Redis,
+      private producerSources: ProducerSource[],
+   ) {
       this.mixer = new MediasoupMixer(router, signal);
    }
 
@@ -45,11 +56,7 @@ export default class Room {
       logger.info('join() | participantId: %s | roomId: %s', participant.participantId, this.id);
 
       const status: ParticipantStatus = {
-         activeProducers: {
-            mic: undefined,
-            screen: undefined,
-            webcam: undefined,
-         },
+         activeProducers: {},
          receivingConns: [],
       };
 
@@ -81,17 +88,21 @@ export default class Room {
          const permissions = new ParticipantPermissions(participant.participantId, this.redis);
 
          for (const { permission, source } of producerPermissions) {
+            if (!this.producerSources.includes(source)) continue;
+
             const activeProducer = status.activeProducers[source];
             const currentProducer = participant.producers[source];
 
             let newActiveProducer: Producer | undefined;
             if (currentProducer) {
-               if (permissions.get(permission)) {
+               if (!permission || permissions.get(permission)) {
                   newActiveProducer = currentProducer;
                } else {
                   newActiveProducer = undefined;
                }
             }
+
+            if (!this.producerSources.includes(source)) continue;
 
             if (activeProducer && newActiveProducer?.id !== activeProducer.id) {
                // if a producer was active and changed

@@ -1,6 +1,5 @@
 import { Dialog, DialogContent, DialogTitle, Fab, makeStyles, Tooltip } from '@material-ui/core';
 import BugReportIcon from '@material-ui/icons/BugReport';
-import DesktopAccessDisabledIcon from '@material-ui/icons/DesktopAccessDisabled';
 import clsx from 'classnames';
 import { HumanHandsup } from 'mdi-material-ui';
 import React, { useState } from 'react';
@@ -20,7 +19,6 @@ import useMicrophone from 'src/store/webrtc/hooks/useMicrophone';
 import { useScreen } from 'src/store/webrtc/hooks/useScreen';
 import { useWebcam } from 'src/store/webrtc/hooks/useWebcam';
 import useDeviceManagement from '../useDeviceManagement';
-import useWatchSelectedDevice from '../useWatchDevice';
 import MediaFab from './MediaFab';
 
 const useStyles = makeStyles((theme) => ({
@@ -58,17 +56,14 @@ export default function MediaControls({ className }: Props) {
    const localMic = useMicrophone(gain);
    const audioDevice = useSelector((state: RootState) => state.settings.obj.mic.device);
    const micController = useDeviceManagement('mic', localMic, audioDevice);
-   useWatchSelectedDevice('mic');
 
    const webcamDevice = useSelector((state: RootState) => state.settings.obj.webcam.device);
    const localWebcam = useWebcam();
    const webcamController = useDeviceManagement('webcam', localWebcam, webcamDevice);
-   useWatchSelectedDevice('webcam');
 
    const screenDevice = useSelector((state: RootState) => state.settings.obj.screen.device);
    const localScreen = useScreen();
    const screenController = useDeviceManagement('screen', localScreen, screenDevice);
-   useWatchSelectedDevice('screen');
 
    const canShareScreen = usePermission(MEDIA_CAN_SHARE_SCREEN);
    const canShareAudio = usePermission(MEDIA_CAN_SHARE_AUDIO);

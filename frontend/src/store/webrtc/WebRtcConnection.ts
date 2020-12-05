@@ -3,6 +3,7 @@ import { EventEmitter } from 'events';
 import { Device } from 'mediasoup-client';
 import { Consumer, MediaKind, RtpParameters, Transport, TransportOptions } from 'mediasoup-client/lib/types';
 import { ChangeStreamDto } from './types';
+import * as coreHub from 'src/core-hub';
 
 const PC_PROPRIETARY_CONSTRAINTS = {
    optional: [{ googDscp: true }],
@@ -86,6 +87,8 @@ export class WebRtcConnection {
    }
 
    private onConsumerClosed({ consumerId }: ConsumerInfoPayload) {
+      console.log('on consumer closed');
+
       const consumer = this.consumers.get(consumerId);
       if (consumer) {
          consumer.close();
@@ -185,6 +188,6 @@ export class WebRtcConnection {
    }
 
    public async changeStream(dto: ChangeStreamDto): Promise<void> {
-      await this.connection.invoke('ChangeStream', dto);
+      await this.connection.invoke(coreHub.changeStream, dto);
    }
 }

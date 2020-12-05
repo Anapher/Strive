@@ -57,7 +57,7 @@ export default function ConferenceAppBar({ hamburgerRef }: Props) {
 
    return (
       <AppBar position="static">
-         <Toolbar>
+         <Toolbar variant="dense">
             <IconButton
                ref={hamburgerRef}
                edge="start"

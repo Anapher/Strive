@@ -130,7 +130,7 @@ namespace PaderConference
             services.AddSignalR().AddJsonProtocol(options =>
             {
                 options.PayloadSerializerOptions.Converters.Add(
-                    new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
+                    new JsonStringEnumMemberConverter(JsonNamingPolicy.CamelCase));
 
                 // i know that this is quite bad, but until System.Text.Json doesn't support adding properties to serialization, we must do it like that...
                 options.PayloadSerializerOptions.Converters.Add(new TypeDiscriminatorConverter<SendingMode>(

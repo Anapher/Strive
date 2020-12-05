@@ -105,6 +105,26 @@ export class Conference {
       }
    }
 
+   // public async setLoopback({ meta: { participantId }, payload: enable }: ConnectionMessage<boolean>): Promise<void> {
+   //    const participant = this.participants.get(participantId);
+   //    if (participant) {
+   //       logger.debug('setLoopback(%s) | participantId: %s', enable, participantId);
+
+   //       if (enable) {
+   //          await this.loopbackManager.enableLoopback(participant);
+   //       } else {
+   //          await this.loopbackManager.disableLoopback(participant);
+   //       }
+
+   //       // update streams
+   //       await this.streamInfoRepo.updateStreams(this.participants.values());
+   //    }
+   // }
+
+   /**
+    * Change a producer/consumer of the participant. The parameter provides information about the type (consumer|producer),
+    * id and action (pause|resume|close)
+    */
    public async changeStream({ payload: { id, type, action }, meta }: ChangeStreamRequest): Promise<void> {
       const connection = this.connections.get(meta.connectionId);
 
@@ -125,7 +145,16 @@ export class Conference {
                if (type === 'consumer') {
                   connection.consumers.delete(id);
                } else {
-                  connection.producers.delete(id);
+                  const producer = connection.producers.get(id);
+                  if (producer) {
+                     connection.producers.delete(id);
+
+                     const participant = this.participants.get(connection.participantId);
+                     if (participant) {
+                        this.removeProducer(producer, participant);
+                        await this.roomManager.updateParticipant(participant);
+                     }
+                  }
                }
             } else if (action === 'resume') {
                await stream.resume();
@@ -137,6 +166,9 @@ export class Conference {
       }
    }
 
+   /**
+    * Create a new producer in an existing transport
+    */
    public async transportProduce({
       payload: { transportId, appData, kind, ...producerOptions },
       meta,
@@ -183,6 +215,9 @@ export class Conference {
       return { id: producer.id };
    }
 
+   /**
+    * Connect the transport after initialization
+    */
    public async connectTransport({ payload, meta }: ConnectTransportRequest): Promise<void> {
       const connection = this.connections.get(meta.connectionId);
       if (!connection) throw new Error('Connection was not found');
@@ -195,6 +230,9 @@ export class Conference {
       await transport.connect(payload);
    }
 
+   /**
+    * Initialize a new transport
+    */
    public async createTransport({
       payload: { sctpCapabilities, forceTcp, producing, consuming },
       meta,
@@ -254,6 +292,10 @@ export class Conference {
       if (source === 'mic' && kind === 'audio') return true;
       if (source === 'screen' && kind === 'video') return true;
       if (source === 'webcam' && kind === 'video') return true;
+
+      if (source === 'loopback-mic' && kind === 'audio') return true;
+      if (source === 'loopback-webcam' && kind === 'video') return true;
+      if (source === 'loopback-screen' && kind === 'video') return true;
 
       return false;
    }

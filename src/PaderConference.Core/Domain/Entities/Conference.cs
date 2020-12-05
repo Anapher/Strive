@@ -100,6 +100,6 @@ namespace PaderConference.Core.Domain.Entities
     public enum ConferenceState
     {
         Active,
-        Inactive
+        Inactive,
     }
 }

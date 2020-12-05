@@ -27,7 +27,6 @@ using PaderConference.Core.Services.Media.Communication;
 using PaderConference.Core.Services.Rooms;
 using PaderConference.Core.Services.Rooms.Messages;
 using PaderConference.Core.Signaling;
-using PaderConference.Infrastructure.Conferencing;
 using PaderConference.Infrastructure.Extensions;
 
 namespace PaderConference.Infrastructure.Hubs
@@ -246,64 +245,73 @@ namespace PaderConference.Infrastructure.Hubs
 
         public Task<JsonElement?> RequestRouterCapabilities()
         {
-            return InvokeService<MediaService, JsonElement?>(service => service.GetRouterCapabilities);
+            return InvokeService<MediaService, JsonElement?>(service => service.GetRouterCapabilities,
+                new MethodOptions {ConferenceCanBeClosed = true});
         }
 
         public Task InitializeConnection(JsonElement element)
         {
             return InvokeService<MediaService, JsonElement, JsonElement?>(element,
-                service => service.Redirect<JsonElement>(RedisChannels.Media.Request.InitializeConnection));
+                service => service.Redirect<JsonElement>(RedisChannels.Media.Request.InitializeConnection),
+                new MethodOptions {ConferenceCanBeClosed = true});
         }
 
         public Task<JsonElement?> CreateWebRtcTransport(JsonElement element)
         {
             return InvokeService<MediaService, JsonElement, JsonElement?>(element,
-                service => service.Redirect<JsonElement>(RedisChannels.Media.Request.CreateTransport));
+                service => service.Redirect<JsonElement>(RedisChannels.Media.Request.CreateTransport),
+                new MethodOptions {ConferenceCanBeClosed = true});
         }
 
         public Task<JsonElement?> ConnectWebRtcTransport(JsonElement element)
         {
             return InvokeService<MediaService, JsonElement, JsonElement?>(element,
-                service => service.Redirect<JsonElement>(RedisChannels.Media.Request.ConnectTransport));
+                service => service.Redirect<JsonElement>(RedisChannels.Media.Request.ConnectTransport),
+                new MethodOptions {ConferenceCanBeClosed = true});
         }
 
         public Task<JsonElement?> ProduceWebRtcTransport(JsonElement element)
         {
             return InvokeService<MediaService, JsonElement, JsonElement?>(element,
-                service => service.Redirect<JsonElement>(RedisChannels.Media.Request.TransportProduce));
+                service => service.Redirect<JsonElement>(RedisChannels.Media.Request.TransportProduce),
+                new MethodOptions {ConferenceCanBeClosed = true});
         }
 
         public Task ChangeStream(ChangeStreamDto dto)
         {
             return InvokeService<MediaService, ChangeStreamDto, JsonElement?>(dto,
-                service => service.Redirect<ChangeStreamDto>(RedisChannels.Media.Request.ChangeStream));
+                service => service.Redirect<ChangeStreamDto>(RedisChannels.Media.Request.ChangeStream),
+                new MethodOptions {ConferenceCanBeClosed = true});
         }
 
         public Task<string> GetEquipmentToken()
         {
-            return InvokeService<EquipmentService, string>(service => service.GetEquipmentToken);
+            return InvokeService<EquipmentService, string>(service => service.GetEquipmentToken,
+                new MethodOptions {ConferenceCanBeClosed = true});
         }
 
         public Task RegisterEquipment(RegisterEquipmentRequestDto dto)
         {
             return InvokeService<EquipmentService, RegisterEquipmentRequestDto>(dto,
-                service => service.RegisterEquipment);
+                service => service.RegisterEquipment, new MethodOptions {ConferenceCanBeClosed = true});
         }
 
         public Task SendEquipmentCommand(EquipmentCommand dto)
         {
-            return InvokeService<EquipmentService, EquipmentCommand>(dto, service => service.SendEquipmentCommand);
+            return InvokeService<EquipmentService, EquipmentCommand>(dto, service => service.SendEquipmentCommand,
+                new MethodOptions {ConferenceCanBeClosed = true});
         }
 
         public Task EquipmentErrorOccurred(Error dto)
         {
-            return InvokeService<EquipmentService, Error>(dto, service => service.EquipmentErrorOccurred);
+            return InvokeService<EquipmentService, Error>(dto, service => service.EquipmentErrorOccurred,
+                new MethodOptions {ConferenceCanBeClosed = true});
         }
 
         public Task EquipmentUpdateStatus(Dictionary<string, UseMediaStateInfo> dto)
         {
             return InvokeService<EquipmentService, Dictionary<string, UseMediaStateInfo>>(dto,
-                service => service.EquipmentUpdateStatus);
+                service => service.EquipmentUpdateStatus, new MethodOptions {ConferenceCanBeClosed = true});
         }
     }
 }

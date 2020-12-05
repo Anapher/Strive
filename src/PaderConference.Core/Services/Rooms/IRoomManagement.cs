@@ -40,6 +40,7 @@ namespace PaderConference.Core.Services.Rooms
         /// </summary>
         /// <param name="participantId">The participant id</param>
         /// <param name="roomId">The room id of the room the participant should be moved to</param>
+        /// <exception cref="InvalidOperationException">Thrown if the room does not exist or is disabled</exception>
         Task SetRoom(string participantId, string roomId);
     }
 }

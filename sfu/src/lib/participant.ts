@@ -10,6 +10,9 @@ export class Participant {
       mic: undefined,
       webcam: undefined,
       screen: undefined,
+      ['loopback-mic']: undefined,
+      ['loopback-webcam']: undefined,
+      ['loopback-screen']: undefined,
    };
 
    public getReceiveConnection(): Connection | undefined {
@@ -23,6 +26,13 @@ export class Participant {
    }
 }
 
-export type ProducerSource = 'mic' | 'webcam' | 'screen';
+export type ProducerSource = 'mic' | 'webcam' | 'screen' | 'loopback-mic' | 'loopback-webcam' | 'loopback-screen';
 
-export const producerSources: ProducerSource[] = ['mic', 'webcam', 'screen'];
+export const producerSources: ProducerSource[] = [
+   'mic',
+   'webcam',
+   'screen',
+   'loopback-mic',
+   'loopback-webcam',
+   'loopback-screen',
+];

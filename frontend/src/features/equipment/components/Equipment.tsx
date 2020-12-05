@@ -29,8 +29,16 @@ export default function Equipment() {
    }, [availableEquipment]);
 
    const mic = useMicrophone();
+   const loopbackMic = useMicrophone(undefined, true);
 
-   const controllers: { [src in ProducerSource]: UseMediaState } = { mic, screen: mic, webcam: mic };
+   const controllers: { [src in ProducerSource]: UseMediaState } = {
+      mic,
+      screen: mic,
+      webcam: mic,
+      ['loopback-mic']: loopbackMic,
+      ['loopback-webcam']: loopbackMic,
+      ['loopback-screen']: loopbackMic,
+   };
 
    useEffect(() => {
       // execute current command if changed

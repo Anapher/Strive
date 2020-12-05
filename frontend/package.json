@@ -81,6 +81,7 @@
       ]
    },
    "devDependencies": {
+      "@types/dom-mediacapture-record": "^1.0.7",
       "@types/hark": "^1.2.1",
       "@types/qrcode.react": "^1.0.1",
       "@types/react-beautiful-dnd": "^13.0.0",

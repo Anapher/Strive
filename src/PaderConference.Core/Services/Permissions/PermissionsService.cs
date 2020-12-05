@@ -265,7 +265,7 @@ namespace PaderConference.Core.Services.Permissions
             if (source == null && target == null) return true;
             if (source == null || target == null) return false;
 
-            return source.EqualItems(target.ToDictionary(x => x.Key, x => x.Value.ToString()));
+            return source.EqualItems(target.ToDictionary(x => x.Key, x => x.Value.ToString()!));
         }
 
         private static IImmutableDictionary<string, JsonElement>? ParseDictionary(

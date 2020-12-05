@@ -34,7 +34,7 @@ namespace PaderConference.Infrastructure.Redis.Repos
             return _database.HashGetAllAsync<Room>(RedisKeys.Rooms.RoomList(conferenceId));
         }
 
-        public Task<Room> Get(string conferenceId, string roomId)
+        public Task<Room?> Get(string conferenceId, string roomId)
         {
             return _database.HashGetAsync<Room>(RedisKeys.Rooms.RoomList(conferenceId), roomId);
         }
@@ -59,7 +59,7 @@ namespace PaderConference.Infrastructure.Redis.Repos
             return _database.HashGetAsync<string>(RedisKeys.Rooms.ParticipantsToRoom(conferenceId), participantId);
         }
 
-        public Task DeleteParticipantToRoomMap(string conferenceId)
+        public Task DeleteParticipantMapping(string conferenceId)
         {
             return _database.RemoveAsync(RedisKeys.Rooms.ParticipantsToRoom(conferenceId));
         }

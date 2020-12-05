@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Interfaces.Gateways.Repositories;
 using PaderConference.Core.Interfaces.Services;
+using PaderConference.Core.Services;
 using StackExchange.Redis.Extensions.Core.Abstractions;
 
 namespace PaderConference.Infrastructure.Conferencing
@@ -37,7 +38,7 @@ namespace PaderConference.Infrastructure.Conferencing
                 if (conference == null)
                 {
                     _logger.LogDebug("Conference was not found in database");
-                    throw new InvalidOperationException($"The conference {conferenceId} was not found in database.");
+                    throw new ConferenceNotFoundException(conferenceId);
                 }
 
                 if (await _database.HashSetAsync(RedisKeys.OpenConferences, conferenceId, conference))
@@ -65,7 +66,7 @@ namespace PaderConference.Infrastructure.Conferencing
             return await _database.HashExistsAsync(RedisKeys.OpenConferences, conferenceId);
         }
 
-        public ICollection<Participant>? GetParticipants(string conferenceId)
+        public ICollection<Participant> GetParticipants(string conferenceId)
         {
             return _participantsMap.GetParticipants(conferenceId);
         }

@@ -1,5 +1,5 @@
 import { Producer, ProducerOptions } from 'mediasoup-client/lib/types';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ProducerSource } from '../types';
 import useWebRtc from './useWebRtc';
 
@@ -114,6 +114,13 @@ export default function useMedia(
       await producer.replaceTrack({ track });
       setStreamInfo(streamInfo && { ...streamInfo, deviceId: track.getSettings().deviceId });
    };
+
+   // disable device on component unmount
+   useEffect(() => {
+      return () => {
+         disable();
+      };
+   }, []);
 
    return { enable, disable, enabled, pause, resume, paused, switchDevice, connected: !!connection, streamInfo };
 }

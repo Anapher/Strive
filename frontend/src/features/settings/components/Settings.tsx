@@ -20,6 +20,7 @@ function TabPanel(props: TabPanelProps) {
          hidden={value !== index}
          id={`settings-tabpanel-${index}`}
          aria-labelledby={`settings-tab-${index}`}
+         style={{ overflowY: 'scroll' }}
          {...other}
       >
          {value === index && children}

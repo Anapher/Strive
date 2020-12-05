@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace PaderConference.Infrastructure.Conferencing
+namespace PaderConference.Core.Services
 {
     public class ConferenceNotFoundException : Exception
     {

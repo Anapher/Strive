@@ -1,9 +1,9 @@
-import { ProducerInfo } from './types';
 import { createSelector } from '@reduxjs/toolkit';
 import { RootState } from 'src/store';
-import { ProducerSource } from 'src/store/webrtc/types';
-import { ParticipantDto } from '../conference/types';
+import { isProducerDevice, ProducerDevice } from 'src/store/webrtc/types';
 import { selectParticipants } from '../conference/selectors';
+import { ParticipantDto } from '../conference/types';
+import { ProducerInfo } from './types';
 
 const getId = (_: unknown, id: string | undefined) => id;
 const selectStreams = (state: RootState) => state.media.streams;
@@ -17,14 +17,10 @@ export const selectParticipantProducers = createSelector(selectStreams, getId, (
    const participantStreams = streams[participantId];
    if (!participantStreams) return undefined;
 
-   const result: ParticipantProducerViewModels = {
-      mic: undefined,
-      webcam: undefined,
-      screen: undefined,
-   };
+   const result: ParticipantProducerViewModels = {};
 
    for (const [id, producer] of Object.entries(participantStreams.producers)) {
-      if (producer.selected && producer?.kind) {
+      if (producer.selected && producer?.kind && isProducerDevice(producer.kind)) {
          result[producer.kind] = { ...producer, id };
       }
    }
@@ -62,4 +58,4 @@ export type ProducerViewModel = ProducerInfo & {
    id: string;
 };
 
-export type ParticipantProducerViewModels = { [key in ProducerSource]: ProducerViewModel | undefined };
+export type ParticipantProducerViewModels = { [key in ProducerDevice]?: ProducerViewModel };

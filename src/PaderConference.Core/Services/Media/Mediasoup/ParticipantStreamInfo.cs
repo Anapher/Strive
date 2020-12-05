@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace PaderConference.Core.Services.Media.Mediasoup
 {
@@ -30,5 +31,13 @@ namespace PaderConference.Core.Services.Media.Mediasoup
         Mic,
         Webcam,
         Screen,
+
+        [EnumMember(Value = "loopback-mic")] LoopbackMic,
+
+        [EnumMember(Value = "loopback-webcam")]
+        LoopbackWebcam,
+
+        [EnumMember(Value = "loopback-screen")]
+        LoopbackScreen,
     }
 }

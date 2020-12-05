@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from 'src/store';
 import { selectAvailableInputDevices } from '../selectors';
 import { setAudioGain, setCurrentDevice } from '../settingsSlice';
+import AudioSettingsTest from './AudioSettingsTest';
 import DeviceSelector from './DeviceSelector';
 
 const useStyles = makeStyles((theme) => ({
@@ -60,6 +61,9 @@ export default function AudioSettings() {
                   valueLabelFormat={(val) => `${Math.round((val - 1) * 100)}%`}
                />
             </div>
+         </Box>
+         <Box mt={4}>
+            <AudioSettingsTest />
          </Box>
       </div>
    );

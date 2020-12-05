@@ -22,7 +22,7 @@ namespace PaderConference.Extensions
                 WriteIndented = false,
                 Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                Converters = {new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)},
+                Converters = {new JsonStringEnumMemberConverter(JsonNamingPolicy.CamelCase)},
             };
         }
 
