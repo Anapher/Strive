@@ -1,4 +1,4 @@
-import { Fab, useTheme } from '@material-ui/core';
+import { Fab, Tooltip, useTheme } from '@material-ui/core';
 import React from 'react';
 import { useDispatch } from 'react-redux';
 import { AnimatedIconProps } from 'src/assets/animated-icons/AnimatedIconBase';
@@ -9,6 +9,7 @@ type Props = {
    className?: string;
    control: UseMediaState;
    pauseOnToggle?: boolean;
+   title: string;
 
    Icon: React.ComponentType<AnimatedIconProps>;
 } & Omit<React.ComponentProps<typeof Fab>, 'children'>;
@@ -17,6 +18,7 @@ export default function MediaFab({
    Icon,
    pauseOnToggle,
    control: { enable, disable, pause, resume, enabled, paused },
+   title,
    ...fabProps
 }: Props) {
    const dispatch = useDispatch();
@@ -44,13 +46,15 @@ export default function MediaFab({
    };
 
    return (
-      <Fab color={enabled ? 'primary' : 'default'} onClick={handleClick} {...fabProps}>
-         <Icon
-            activated={enabled && !paused}
-            color={enabled ? theme.palette.primary.contrastText : theme.palette.background.default}
-            width={24}
-            height={24}
-         />
-      </Fab>
+      <Tooltip title={`${title} is ${enabled ? 'enabled' : 'disabled'}`} aria-label={`share ${title}`}>
+         <Fab color={enabled ? 'primary' : 'default'} onClick={handleClick} {...fabProps}>
+            <Icon
+               activated={enabled && !paused}
+               color={enabled ? theme.palette.primary.contrastText : theme.palette.background.default}
+               width={24}
+               height={24}
+            />
+         </Fab>
+      </Tooltip>
    );
 }

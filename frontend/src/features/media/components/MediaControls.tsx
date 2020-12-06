@@ -88,24 +88,14 @@ export default function MediaControls({ className }: Props) {
          </div>
          <div style={{ display: 'flex', flexDirection: 'row' }}>
             {canShareScreen && (
-               <MediaFab
-                  aria-label="share screen"
-                  className={classes.fab}
-                  Icon={AnimatedScreenIcon}
-                  control={screenController}
-               />
+               <MediaFab title="Screen" className={classes.fab} Icon={AnimatedScreenIcon} control={screenController} />
             )}
             {canShareWebcam && (
-               <MediaFab
-                  aria-label="share webcam"
-                  className={classes.fab}
-                  Icon={AnimatedCamIcon}
-                  control={webcamController}
-               />
+               <MediaFab title="Webcam" className={classes.fab} Icon={AnimatedCamIcon} control={webcamController} />
             )}
             {canShareAudio && (
                <MediaFab
-                  aria-label="share microphone"
+                  title="Microphone"
                   className={classes.fab}
                   Icon={AnimatedMicIcon}
                   control={micController}
