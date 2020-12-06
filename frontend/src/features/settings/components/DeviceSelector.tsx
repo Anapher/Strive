@@ -1,8 +1,10 @@
-import { FormControl, InputLabel, ListSubheader, makeStyles, MenuItem, Select } from '@material-ui/core';
+import { Box, Button, FormControl, InputLabel, ListSubheader, makeStyles, MenuItem, Select } from '@material-ui/core';
 import clsx from 'classnames';
 import _, { Collection } from 'lodash';
 import React from 'react';
+import { useDispatch } from 'react-redux';
 import { DeviceGroup, EquipmentDeviceGroup } from '../selectors';
+import { fetchDevices } from '../thunks';
 import { AnyInputDevice } from '../types';
 
 const useStyles = makeStyles({
@@ -28,6 +30,7 @@ const getId = (device: AnyInputDevice) =>
 export default function DeviceSelector({ devices, defaultName, className, selectedDevice, onChange, label }: Props) {
    const selectId = defaultName.toLowerCase() + '-select';
    const classes = useStyles();
+   const dispatch = useDispatch();
 
    const handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
       const value = event.target.value as string;
@@ -49,35 +52,44 @@ export default function DeviceSelector({ devices, defaultName, className, select
       }
    };
 
+   const handleRefresh = () => {
+      dispatch(fetchDevices());
+   };
+
    const defaultDevice = devices[0]?.devices[0]?.device;
 
    return (
-      <FormControl className={clsx(className, classes.control)}>
-         <InputLabel htmlFor={selectId}>{label}</InputLabel>
-         <Select
-            id={selectId}
-            value={selectedDevice ? getId(selectedDevice) : defaultDevice ? getId(defaultDevice) : ''}
-            onChange={handleChange}
-         >
-            {devices
-               .find((x) => x.type === 'local')
-               ?.devices.map((x, i) => (
-                  <MenuItem key={getId(x.device)} value={getId(x.device)}>
-                     {x.label || `${defaultName} #${i}`}
-                  </MenuItem>
-               ))}
-            {devices
-               .filter((x) => x.type !== 'local')
-               .map((x) => x as EquipmentDeviceGroup)
-               .map((x, i) => [
-                  <ListSubheader key={x.equipmentId}>{x.equipmentName || 'Unnamed device'}</ListSubheader>,
-                  x.devices.map((x) => (
+      <Box display="flex" alignItems="flex-end">
+         <FormControl className={clsx(className, classes.control)}>
+            <InputLabel htmlFor={selectId}>{label}</InputLabel>
+            <Select
+               id={selectId}
+               value={selectedDevice ? getId(selectedDevice) : defaultDevice ? getId(defaultDevice) : ''}
+               onChange={handleChange}
+            >
+               {devices
+                  .find((x) => x.type === 'local')
+                  ?.devices.map((x, i) => (
                      <MenuItem key={getId(x.device)} value={getId(x.device)}>
                         {x.label || `${defaultName} #${i}`}
                      </MenuItem>
-                  )),
-               ])}
-         </Select>
-      </FormControl>
+                  ))}
+               {devices
+                  .filter((x) => x.type !== 'local')
+                  .map((x) => x as EquipmentDeviceGroup)
+                  .map((x, i) => [
+                     <ListSubheader key={x.equipmentId}>{x.equipmentName || 'Unnamed device'}</ListSubheader>,
+                     x.devices.map((x) => (
+                        <MenuItem key={getId(x.device)} value={getId(x.device)}>
+                           {x.label || `${defaultName} #${i}`}
+                        </MenuItem>
+                     )),
+                  ])}
+            </Select>
+         </FormControl>
+         <Box ml={1} onClick={handleRefresh}>
+            <Button>Refresh</Button>
+         </Box>
+      </Box>
    );
 }

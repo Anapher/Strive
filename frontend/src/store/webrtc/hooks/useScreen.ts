@@ -21,7 +21,7 @@ const SCREEN_VIDEO_SIMULCAST_ENCODINGS: RtpEncodingParameters[] = [
    },
 ];
 
-export function useScreen(): UseScreenState {
+export default function useScreen(): UseScreenState {
    const [stream, setStream] = useState<MediaStream | null>(null);
 
    const getScreen = async () => {

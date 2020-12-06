@@ -13,7 +13,7 @@ const CAM_VIDEO_SIMULCAST_ENCODINGS: RtpEncodingParameters[] = [
    { rid: 'h', maxBitrate: 680000, scaleResolutionDownBy: 1 /** scalabilityMode: 'S1T1' (default) */ },
 ];
 
-export function useWebcam(): UseWebcam {
+export default function useWebcam(loopback = false): UseWebcam {
    const [stream, setStream] = useState<MediaStream | null>(null);
 
    const getCam = async (deviceId?: string) => {
@@ -26,6 +26,8 @@ export function useWebcam(): UseWebcam {
       return stream.getVideoTracks()[0];
    };
 
-   const result = useMedia('webcam', getCam, { encodings: CAM_VIDEO_SIMULCAST_ENCODINGS });
+   const result = useMedia(loopback ? 'loopback-webcam' : 'webcam', getCam, {
+      encodings: CAM_VIDEO_SIMULCAST_ENCODINGS,
+   });
    return { ...result, stream };
 }

@@ -16,8 +16,8 @@ import usePermission, {
 } from 'src/hooks/usePermission';
 import { RootState } from 'src/store';
 import useMicrophone from 'src/store/webrtc/hooks/useMicrophone';
-import { useScreen } from 'src/store/webrtc/hooks/useScreen';
-import { useWebcam } from 'src/store/webrtc/hooks/useWebcam';
+import useScreen from 'src/store/webrtc/hooks/useScreen';
+import useWebcam from 'src/store/webrtc/hooks/useWebcam';
 import useDeviceManagement from '../useDeviceManagement';
 import MediaFab from './MediaFab';
 

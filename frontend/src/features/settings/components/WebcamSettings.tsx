@@ -1,10 +1,11 @@
-import { makeStyles } from '@material-ui/core';
+import { Box, makeStyles } from '@material-ui/core';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from 'src/store';
 import { selectAvailableInputDevices } from '../selectors';
 import { setCurrentDevice } from '../settingsSlice';
 import DeviceSelector from './DeviceSelector';
+import WebcamSettingsTest from './WebcamSettingsTest';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -31,6 +32,9 @@ export default function WebcamSettings() {
             selectedDevice={selectedDevice}
             onChange={(device) => dispatch(setCurrentDevice({ device, source: 'webcam' }))}
          />
+         <Box mt={4}>
+            <WebcamSettingsTest />
+         </Box>
       </div>
    );
 }
