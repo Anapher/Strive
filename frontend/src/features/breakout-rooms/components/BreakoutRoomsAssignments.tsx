@@ -66,7 +66,7 @@ const copyRemoveAt = (list: string[], i: number) => {
 const formatDroppableId = (i: number) => `room-${i}`;
 const droppableIdToRoom = (s: string) => (s === 'defaultRoom' ? undefined : Number(s.substr(5)));
 
-export default function OpenBreakoutRoomsAssignments({ data, participants, createdRooms, onChange }: Props) {
+export default function BreakoutRoomsAssignments({ data, participants, createdRooms, onChange }: Props) {
    const unassignedParticipants = participants.filter((x) => !data.find((y) => y.includes(x.participantId)));
    const myParticipantId = useSelector(selectMyParticipantId);
 

@@ -28,7 +28,7 @@ import { setAppliedScene } from '../scenesSlice';
 import { selectAvailableScenesViewModels, selectServerProvidedScene } from '../selectors';
 import { Scene } from '../types';
 import { BreakoutRoomAction, BreakoutRoomActive } from 'src/features/breakout-rooms/components/BreakoutRoomActions';
-import OpenBreakoutRoomsDialog from 'src/features/breakout-rooms/components/OpenBreakoutRoomsDialog';
+import OpenBreakoutRoomsDialog from 'src/features/breakout-rooms/components/BreakoutRoomsDialog';
 
 const useStyles = makeStyles((theme) => ({
    root: {

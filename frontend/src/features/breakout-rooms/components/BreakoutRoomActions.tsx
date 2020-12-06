@@ -113,6 +113,10 @@ function BreakoutRoomPopper() {
       dispatch(closeBreakoutRooms());
    };
 
+   const handleUpdateBreakoutRooms = () => {
+      dispatch(setCreationDialogOpen(true));
+   };
+
    return (
       <div>
          <Box display="flex" justifyContent="space-between" alignItems="center">
@@ -122,18 +126,23 @@ function BreakoutRoomPopper() {
             </Button>
          </Box>
          {deadline && (
-            <Box mt={1}>
+            <Box mt={2}>
                <Typography gutterBottom>
                   Deadline at {deadline.toLocaleString(DateTime.TIME_24_SIMPLE)} (
                   <Countdown date={deadline.toJSDate()} renderer={renderer} />)
                </Typography>
-               <ButtonGroup variant="contained" color="primary" aria-label="add time button group" size="small">
+               <ButtonGroup variant="contained" aria-label="add time button group" size="small">
                   <Button onClick={handleAddMinutes(1)}>+1 min</Button>
                   <Button onClick={handleAddMinutes(5)}>+5 min</Button>
                   <Button onClick={handleAddMinutes(10)}>+10 min</Button>
                </ButtonGroup>
             </Box>
          )}
+         <Box mt={2}>
+            <Button variant="contained" color="primary" onClick={handleUpdateBreakoutRooms}>
+               Change breakout rooms...
+            </Button>
+         </Box>
       </div>
    );
 }

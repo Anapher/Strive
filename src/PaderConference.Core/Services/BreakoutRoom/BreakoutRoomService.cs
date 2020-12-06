@@ -169,9 +169,15 @@ namespace PaderConference.Core.Services.BreakoutRoom
                     return;
                 }
 
+                // a placeholder to detect if the duration has changed
+                // as the duration cannot be negative values, this is safe to use
+                var unchangedPlaceholder = TimeSpan.FromDays(-3.14);
+
                 var newOptions = new BreakoutRoomsOptions
                 {
-                    Amount = current.Active.Amount, Description = current.Active.Description,
+                    Amount = current.Active.Amount,
+                    Description = current.Active.Description,
+                    Duration = unchangedPlaceholder,
                 };
 
                 message.Payload.ApplyTo(newOptions);
@@ -183,9 +189,18 @@ namespace PaderConference.Core.Services.BreakoutRoom
                     await message.ResponseError(BreakoutRoomError.AmountMustBePositiveNumber);
                 }
 
-                var deadline = newOptions.Duration == null
-                    ? current.Active.Deadline
-                    : DateTimeOffset.UtcNow.Add(newOptions.Duration.Value);
+                DateTimeOffset? deadline = null;
+
+                // the duration has not changed
+                if (newOptions.Duration == unchangedPlaceholder)
+                {
+                    deadline = current.Active.Deadline;
+                }
+                else
+                {
+                    if (newOptions.Duration != null)
+                        deadline = DateTimeOffset.UtcNow.Add(newOptions.Duration.Value);
+                }
 
                 var state = new ActiveBreakoutRoomState(newOptions.Amount, deadline, newOptions.Description);
                 await ApplyState(state);

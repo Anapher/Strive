@@ -217,7 +217,7 @@ namespace PaderConference.Infrastructure.Hubs
         public Task ChangeBreakoutRooms(JsonPatchDocument<BreakoutRoomsOptions> dto)
         {
             var timespanPatchOp = dto.Operations.FirstOrDefault(x => x.path == "/duration");
-            if (timespanPatchOp != null)
+            if (timespanPatchOp?.value != null)
                 timespanPatchOp.value = XmlConvert.ToTimeSpan((string) timespanPatchOp.value);
             return InvokeService<BreakoutRoomService, JsonPatchDocument<BreakoutRoomsOptions>>(dto,
                 service => service.ChangeBreakoutRooms);
