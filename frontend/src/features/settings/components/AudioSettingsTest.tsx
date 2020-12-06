@@ -1,5 +1,5 @@
 import { Box, Button, makeStyles, Typography } from '@material-ui/core';
-import { motion, useMotionTemplate, useMotionValue, useTransform } from 'framer-motion';
+import { motion, useMotionTemplate, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import hark from 'hark';
 import React, { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -93,7 +93,8 @@ export default function AudioSettingsTest() {
    }, [consumer]);
 
    const transform = useTransform(audioLevel, [0, 1], [0, 2]);
-   const audioColor = useMotionTemplate`rgba(39, 174, 96, ${transform})`;
+   const currentAudioLevel = useSpring(transform);
+   const audioColor = useMotionTemplate`rgba(39, 174, 96, ${currentAudioLevel})`;
 
    const [recordingState, setRecordingState] = useState<boolean | 'playing'>(false);
    const playbackAudioElem = useRef<HTMLAudioElement>(null);
@@ -133,6 +134,9 @@ export default function AudioSettingsTest() {
          <Typography gutterBottom>
             We will loopback your current audio input and show the results here. This way, you can check what other
             participants actually receive and you also get a taste of the actual delay.
+         </Typography>
+         <Typography variant="subtitle2" gutterBottom>
+            Your microphone input level:
          </Typography>
          <div className={classes.audioBarContainer}>
             <motion.div className={classes.audioBar} style={{ backgroundColor: audioColor }} />
