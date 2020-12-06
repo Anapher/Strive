@@ -105,22 +105,6 @@ export class Conference {
       }
    }
 
-   // public async setLoopback({ meta: { participantId }, payload: enable }: ConnectionMessage<boolean>): Promise<void> {
-   //    const participant = this.participants.get(participantId);
-   //    if (participant) {
-   //       logger.debug('setLoopback(%s) | participantId: %s', enable, participantId);
-
-   //       if (enable) {
-   //          await this.loopbackManager.enableLoopback(participant);
-   //       } else {
-   //          await this.loopbackManager.disableLoopback(participant);
-   //       }
-
-   //       // update streams
-   //       await this.streamInfoRepo.updateStreams(this.participants.values());
-   //    }
-   // }
-
    /**
     * Change a producer/consumer of the participant. The parameter provides information about the type (consumer|producer),
     * id and action (pause|resume|close)

@@ -4,10 +4,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RouteComponentProps } from 'react-router-dom';
 import FullscreenError from 'src/components/FullscreenError';
 import * as coreHub from 'src/core-hub';
-import ClassConference from 'src/features/conference/components/ClassConference';
+import ConferenceIndex from 'src/features/conference/components';
 import ConferenceConnecting from 'src/features/conference/components/ConferenceConnecting';
-import ConferenceNotOpen from 'src/features/conference/components/ConferenceNotOpen';
-import RequestUserInteractionView from 'src/features/conference/components/RequestUserInteractionView';
 import SettingsDialog from 'src/features/settings/components/SettingsDialog';
 import { fetchDevices } from 'src/features/settings/thunks';
 import { RootState } from 'src/store';
@@ -36,7 +34,6 @@ function ConferenceRoute({
    const accessToken = useSelector((state: RootState) => state.auth.token?.accessToken);
    const conferenceState = useSelector((state: RootState) => state.conference.conferenceState);
    const { isConnected, isReconnecting } = useSelector((state: RootState) => state.signalr);
-   const userInteractionMade = useSelector((state: RootState) => state.media.userInteractionMade);
    const webRtc = useRef(new WebRtcManager()).current;
 
    const dispatch = useDispatch();
@@ -55,7 +52,7 @@ function ConferenceRoute({
    }, [id, close, dispatch, accessToken]);
 
    useEffect(() => {
-      if (isConnected && conferenceState?.isOpen) {
+      if (isConnected && conferenceState) {
          webRtc.initialize({ sendMedia: true, receiveMedia: true });
       }
    }, [webRtc, isConnected, conferenceState]);
@@ -72,23 +69,12 @@ function ConferenceRoute({
       return <ConferenceConnecting isReconnecting={isReconnecting} />;
    }
 
-   if (!conferenceState.isOpen) {
-      return <ConferenceNotOpen conferenceInfo={conferenceState} />;
-   }
-
-   if (!userInteractionMade) {
-      return <RequestUserInteractionView />;
-   }
-
-   switch (conferenceState.conferenceType) {
-      default:
-         return (
-            <WebRtcContext.Provider value={webRtc}>
-               <ClassConference />
-               <SettingsDialog />
-            </WebRtcContext.Provider>
-         );
-   }
+   return (
+      <WebRtcContext.Provider value={webRtc}>
+         <ConferenceIndex conference={conferenceState} />
+         <SettingsDialog />
+      </WebRtcContext.Provider>
+   );
 }
 
 export default ConferenceRoute;

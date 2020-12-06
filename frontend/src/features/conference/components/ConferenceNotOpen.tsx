@@ -17,6 +17,7 @@ import usePermission, { CONFERENCE_CAN_OPEN_AND_CLOSE } from 'src/hooks/usePermi
 import { RootState } from 'src/store';
 import * as coreHub from 'src/core-hub';
 import { ConferenceInfo } from '../types';
+import { openSettings } from 'src/features/settings/settingsSlice';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -94,11 +95,13 @@ export default function ConferenceNotOpen({ conferenceInfo }: Props) {
    const handleOpenConference = () => dispatch(coreHub.openConference());
    const canOpen = usePermission(CONFERENCE_CAN_OPEN_AND_CLOSE);
 
+   const handleOpenSettings = () => dispatch(openSettings());
+
    return (
       <div className={classes.root}>
          <Box display="flex" flexDirection="row" position="absolute" right={32} top={32}>
             <Button style={{ marginRight: 8 }}>Device check</Button>
-            {isUserModerator && <Button>Settings</Button>}
+            <Button onClick={handleOpenSettings}>Settings</Button>
          </Box>
          <Box display="flex" flexDirection="row" position="absolute" left={32} bottom={32}>
             <FormControlLabel control={<Checkbox checked={true} />} label="Play a sound when the conference opens" />
