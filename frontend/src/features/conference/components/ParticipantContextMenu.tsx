@@ -18,6 +18,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from 'src/store';
 import { patchParticipantAudio } from 'src/features/media/mediaSlice';
 import _ from 'lodash';
+import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import DesktopWindowsIcon from '@material-ui/icons/DesktopWindows';
+import VideocamIcon from '@material-ui/icons/Videocam';
+import MicIcon from '@material-ui/icons/Mic';
 
 const useStyles = makeStyles((theme) => ({
    infoMenuItem: {
@@ -78,7 +82,20 @@ export default function ParticipantContextMenu({ participant }: Props) {
             <Typography variant="inherit">Mute</Typography>
          </MenuItem>
          <MenuItem>Show info for nerds</MenuItem>
-         <MenuItem>Logout</MenuItem>
+         <Typography variant="subtitle1" gutterBottom>
+            Temporary Permissions
+         </Typography>
+         <ToggleButtonGroup aria-label="temporary permissions" size="small">
+            <ToggleButton value="webcam" aria-label="allow webcam">
+               <VideocamIcon />
+            </ToggleButton>
+            <ToggleButton value="screen" aria-label="allow screen sharing">
+               <DesktopWindowsIcon />
+            </ToggleButton>
+            <ToggleButton value="mic" aria-label="allow microphone">
+               <MicIcon />
+            </ToggleButton>
+         </ToggleButtonGroup>
       </>
    );
 }

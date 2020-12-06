@@ -46,7 +46,7 @@ export default function MediaFab({
    };
 
    return (
-      <Tooltip title={`${title} is ${enabled ? 'enabled' : 'disabled'}`} aria-label={`share ${title}`}>
+      <Tooltip title={`${title} is ${enabled && !paused ? 'active' : 'disabled'}`} aria-label={`share ${title}`}>
          <Fab color={enabled ? 'primary' : 'default'} onClick={handleClick} {...fabProps}>
             <Icon
                activated={enabled && !paused}

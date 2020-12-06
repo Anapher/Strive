@@ -17,8 +17,6 @@ export default function useWebcam(loopback = false): UseWebcam {
    const [stream, setStream] = useState<MediaStream | null>(null);
 
    const getCam = async (deviceId?: string) => {
-      console.log('get cam', deviceId);
-
       const constraints: MediaStreamConstraints = { video: { width: { ideal: 640 }, frameRate: 25, deviceId } };
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
       setStream(stream);
