@@ -53,7 +53,7 @@ export default function useDeviceManagement(
    local: UseMediaState,
    device?: AnyInputDevice,
 ): UseMediaState {
-   const previousDevice = useRef(device);
+   const previousDevice = useRef<AnyInputDevice | undefined>();
    const dispatch = useDispatch();
    const equipment = useSelector((state: RootState) => state.media.equipment);
 
@@ -62,6 +62,7 @@ export default function useDeviceManagement(
 
       const deviceType = device?.type || 'local'; // undefined device is default device locally
 
+      // disable previous device
       if (previousDevice.current?.type !== deviceType) {
          if (previousDevice.current) {
             // disable previous device
@@ -92,6 +93,8 @@ export default function useDeviceManagement(
       } else {
          local.switchDevice(device?.deviceId);
       }
+
+      previousDevice.current = device;
    }, [device]);
 
    const controller = wrapControl(source, device, local, equipment, dispatch);
