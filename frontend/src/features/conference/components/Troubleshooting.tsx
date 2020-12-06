@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import TroubleshootConnection from './TroubleshootConnection';
 import TroubleshootHearingOthers from './TroubleshootHearingOthers';
-import TroubleshootMicrophone from './TroubleshootMicrophone';
 import TroubleshootSpeakers from './TroubleshootSpeakers';
 
 export default function Troubleshooting() {
@@ -17,7 +16,6 @@ export default function Troubleshooting() {
          <TroubleshootConnection expanded={expanded === 'connection'} onChange={handleChangeExpanded('connection')} />
          <TroubleshootSpeakers expanded={expanded === 'speakers'} onChange={handleChangeExpanded('speakers')} />
          <TroubleshootHearingOthers expanded={expanded === 'hearing'} onChange={handleChangeExpanded('hearing')} />
-         <TroubleshootMicrophone expanded={expanded === 'mic'} onChange={handleChangeExpanded('mic')} />
       </div>
    );
 }
