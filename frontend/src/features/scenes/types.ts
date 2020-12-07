@@ -28,3 +28,14 @@ export type SceneViewModel = {
    isCurrent: boolean;
    id: string;
 };
+
+export type ActiveSceneMenuItemProps = {
+   onClose: () => void;
+};
+
+export type ActiveSceneInfo = {
+   useIsActive: () => boolean;
+   ActiveMenuItem: React.ComponentType;
+   OpenMenuItem: React.ComponentType<ActiveSceneMenuItemProps>;
+   AlwaysRender?: React.ComponentType;
+};

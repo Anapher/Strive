@@ -6,7 +6,7 @@ import { setCreationDialogOpen } from '../breakoutRoomsSlice';
 import CreateBreakoutRoomsDialog from './CreateBreakoutRoomsDialog';
 import UpdateBreakoutRoomsDialog from './UpdateBreakoutRoomsDialog';
 
-export default function OpenBreakoutRoomsDialog() {
+export default function BreakoutRoomsDialog() {
    const dispatch = useDispatch();
    const open = useSelector((state: RootState) => state.breakoutRooms.creationDialogOpen);
    const active = useSelector((state: RootState) => state.breakoutRooms.synchronized?.active);

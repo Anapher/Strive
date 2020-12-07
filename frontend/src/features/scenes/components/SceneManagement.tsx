@@ -26,9 +26,9 @@ import { ParticipantDto } from 'src/features/conference/types';
 import { RootState } from 'src/store';
 import { setAppliedScene } from '../scenesSlice';
 import { selectAvailableScenesViewModels, selectServerProvidedScene } from '../selectors';
-import { Scene } from '../types';
-import { BreakoutRoomAction, BreakoutRoomActive } from 'src/features/breakout-rooms/components/BreakoutRoomActions';
-import OpenBreakoutRoomsDialog from 'src/features/breakout-rooms/components/BreakoutRoomsDialog';
+import { ActiveSceneInfo, Scene } from '../types';
+import breakoutRooms from 'src/features/breakout-rooms/active-scene';
+import _ from 'lodash';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -63,6 +63,8 @@ const getSceneIcon = (scene: Scene, color?: string) => {
    }
 };
 
+const activeScenes: ActiveSceneInfo[] = [breakoutRooms];
+
 export default function SceneManagement() {
    const classes = useStyles();
    const [actionPopper, setActionPopper] = useState(false);
@@ -81,6 +83,8 @@ export default function SceneManagement() {
          dispatch(setAppliedScene(scene));
       }
    };
+
+   const activeState = activeScenes.map<[ActiveSceneInfo, boolean]>((x) => [x, x.useIsActive()]);
 
    return (
       <div>
@@ -113,13 +117,20 @@ export default function SceneManagement() {
                   </ListItemSecondaryAction>
                </ListItem>
             ))}
-
-            <li style={{ paddingLeft: 16, marginTop: 16 }}>
-               <Typography variant="subtitle2" color="textSecondary">
-                  Active
-               </Typography>
-            </li>
-            <BreakoutRoomActive />
+            {_.some(activeState, ([, active]) => active) && (
+               <>
+                  <li style={{ paddingLeft: 16, marginTop: 16 }}>
+                     <Typography variant="subtitle2" color="textSecondary">
+                        Active
+                     </Typography>
+                  </li>
+                  {activeState
+                     .filter(([, active]) => active)
+                     .map(([{ ActiveMenuItem }], i) => (
+                        <ActiveMenuItem key={i} />
+                     ))}
+               </>
+            )}
          </List>
          <Paper elevation={4} className={classes.root}>
             <Button variant="contained" color="primary" size="small" fullWidth ref={actionButton} onClick={handleOpen}>
@@ -137,14 +148,16 @@ export default function SceneManagement() {
                   <Paper>
                      <ClickAwayListener onClickAway={handleClose}>
                         <MenuList id="action list">
-                           <BreakoutRoomAction onClose={handleClose} />
+                           {activeScenes.map(({ OpenMenuItem }, i) => (
+                              <OpenMenuItem key={i} onClose={handleClose} />
+                           ))}
                         </MenuList>
                      </ClickAwayListener>
                   </Paper>
                </Grow>
             )}
          </Popper>
-         <OpenBreakoutRoomsDialog />
+         {activeScenes.map(({ AlwaysRender }, i) => AlwaysRender && <AlwaysRender key={i} />)}
       </div>
    );
 }

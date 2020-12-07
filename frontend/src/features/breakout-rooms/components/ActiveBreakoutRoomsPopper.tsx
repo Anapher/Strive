@@ -1,91 +1,11 @@
-import {
-   Box,
-   Button,
-   ButtonGroup,
-   ClickAwayListener,
-   Grow,
-   ListItem,
-   ListItemIcon,
-   ListItemText,
-   MenuItem,
-   Paper,
-   Popper,
-   Typography,
-} from '@material-ui/core';
-import GroupWorkIcon from '@material-ui/icons/GroupWork';
+import { Box, Button, ButtonGroup, Typography } from '@material-ui/core';
 import { DateTime } from 'luxon';
-import React, { useRef, useState } from 'react';
+import React from 'react';
 import Countdown, { CountdownRenderProps } from 'react-countdown';
 import { useDispatch, useSelector } from 'react-redux';
 import { changeBreakoutRooms, closeBreakoutRooms } from 'src/core-hub';
 import { setCreationDialogOpen } from '../breakoutRoomsSlice';
-import { selectBreakoutRoomState, selectIsBreakoutRoomsOpen } from '../selectors';
-
-type Props = {
-   onClose: () => void;
-};
-
-export function BreakoutRoomAction({ onClose }: Props) {
-   const dispatch = useDispatch();
-
-   const handleOpen = () => {
-      dispatch(setCreationDialogOpen(true));
-      onClose();
-   };
-
-   const isOpen = useSelector(selectIsBreakoutRoomsOpen);
-
-   return (
-      <MenuItem onClick={handleOpen} disabled={isOpen}>
-         <GroupWorkIcon fontSize="small" style={{ marginRight: 16 }} />
-         Breakout Rooms
-      </MenuItem>
-   );
-}
-
-export function BreakoutRoomActive() {
-   const isOpen = useSelector(selectIsBreakoutRoomsOpen);
-
-   return <>{isOpen && <BreakoutRoomActiveItem />}</>;
-}
-
-function BreakoutRoomActiveItem() {
-   const [optionsOpen, setOptionsOpen] = useState(false);
-   const listItemRef = useRef(null);
-
-   const handleOpen = () => setOptionsOpen(true);
-   const handleClose = () => setOptionsOpen(false);
-
-   return (
-      <>
-         <ListItem
-            button
-            style={{ paddingLeft: 16, paddingRight: 8 }}
-            ref={listItemRef}
-            onClick={handleOpen}
-            selected={optionsOpen}
-         >
-            <ListItemIcon style={{ minWidth: 32 }}>
-               <GroupWorkIcon />
-            </ListItemIcon>
-            <ListItemText primary="Breakout Rooms" />
-         </ListItem>
-         <Popper open={optionsOpen} anchorEl={listItemRef.current} transition placement="right-end">
-            {({ TransitionProps }) => (
-               <Grow {...TransitionProps} style={{ transformOrigin: 'left bottom' }}>
-                  <Paper style={{ width: 400 }}>
-                     <ClickAwayListener onClickAway={handleClose}>
-                        <Box p={2}>
-                           <BreakoutRoomPopper />
-                        </Box>
-                     </ClickAwayListener>
-                  </Paper>
-               </Grow>
-            )}
-         </Popper>
-      </>
-   );
-}
+import { selectBreakoutRoomState } from '../selectors';
 
 const renderer = ({ hours, formatted }: CountdownRenderProps) => {
    let result = '';
@@ -95,7 +15,7 @@ const renderer = ({ hours, formatted }: CountdownRenderProps) => {
    return <span>{result}</span>;
 };
 
-function BreakoutRoomPopper() {
+export default function ActiveBreakoutRoomsPopper() {
    const state = useSelector(selectBreakoutRoomState);
    const dispatch = useDispatch();
 
