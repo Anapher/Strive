@@ -43,14 +43,12 @@ namespace PaderConference.Core.Services.BreakoutRoom
         public override ValueTask InitializeAsync()
         {
             _roomManagement.RoomsRemoved += RoomManagementOnRoomsRemoved;
-
             return new ValueTask();
         }
 
         public override ValueTask DisposeAsync()
         {
             _roomManagement.RoomsRemoved -= RoomManagementOnRoomsRemoved;
-
             return new ValueTask();
         }
 

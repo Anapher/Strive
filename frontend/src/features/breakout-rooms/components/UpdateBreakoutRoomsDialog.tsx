@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@material-ui/core';
+import { Box, Button, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@material-ui/core';
 import { compare } from 'fast-json-patch';
 import { DateTime, Duration } from 'luxon';
 import React, { useRef } from 'react';
@@ -10,12 +10,11 @@ import { ActiveBreakoutRoomState } from '../types';
 import BreakoutRoomsForm from './BreakoutRoomsForm';
 
 type Props = {
-   open: boolean;
    onClose: () => void;
    active: ActiveBreakoutRoomState;
 };
 
-function UpdateBreakoutRoomsDialogContent({ active, onClose }: Props) {
+export default function UpdateBreakoutRoomsDialog({ active, onClose }: Props) {
    const dispatch = useDispatch();
 
    // the duration changes every second, so remmeber the initial duration to create a meaningful diff
@@ -72,15 +71,5 @@ function UpdateBreakoutRoomsDialogContent({ active, onClose }: Props) {
             </Button>
          </DialogActions>
       </form>
-   );
-}
-
-export default function UpdateBreakoutRoomsDialog(props: Props) {
-   const { open, onClose } = props;
-
-   return (
-      <Dialog open={open} onClose={onClose} aria-labelledby="form-dialog-title" fullWidth maxWidth="md" scroll="paper">
-         <UpdateBreakoutRoomsDialogContent {...props} />
-      </Dialog>
    );
 }

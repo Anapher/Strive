@@ -9,11 +9,10 @@ import * as coreHub from 'src/core-hub';
 import { Duration } from 'luxon';
 
 type Props = {
-   open: boolean;
    onClose: () => void;
 };
 
-export default function CreateBreakoutRoomsDialog({ open, onClose }: Props) {
+export default function CreateBreakoutRoomsDialog({ onClose }: Props) {
    const dispatch = useDispatch();
 
    const participants = useSelector((state: RootState) => state.conference.participants);
@@ -50,28 +49,26 @@ export default function CreateBreakoutRoomsDialog({ open, onClose }: Props) {
    };
 
    return (
-      <Dialog open={open} onClose={onClose} aria-labelledby="form-dialog-title" fullWidth maxWidth="md" scroll="paper">
-         <form onSubmit={handleSubmit(handleApplyForm)}>
-            <DialogTitle id="form-dialog-title">Create breakout rooms</DialogTitle>
-            <DialogContent>
-               <DialogContentText>
-                  Let participants work together in smaller groups. Here you can define the amount of rooms to create.
-                  You can assign a duration for the breakout phase, it will be displayed to all participants. After
-                  creation the participants can join them on their own.
-               </DialogContentText>
-               <Box mt={4}>
-                  <BreakoutRoomsForm form={form} participants={participants} />
-               </Box>
-            </DialogContent>
-            <DialogActions>
-               <Button color="primary" onClick={onClose}>
-                  Cancel
-               </Button>
-               <Button color="primary" disabled={!formState.isValid} type="submit">
-                  Open Breakout Rooms
-               </Button>
-            </DialogActions>
-         </form>
-      </Dialog>
+      <form onSubmit={handleSubmit(handleApplyForm)}>
+         <DialogTitle id="form-dialog-title">Create breakout rooms</DialogTitle>
+         <DialogContent>
+            <DialogContentText>
+               Let participants work together in smaller groups. Here you can define the amount of rooms to create. You
+               can assign a duration for the breakout phase, it will be displayed to all participants. After creation
+               the participants can join them on their own.
+            </DialogContentText>
+            <Box mt={4}>
+               <BreakoutRoomsForm form={form} participants={participants} />
+            </Box>
+         </DialogContent>
+         <DialogActions>
+            <Button color="primary" onClick={onClose}>
+               Cancel
+            </Button>
+            <Button color="primary" disabled={!formState.isValid} type="submit">
+               Open Breakout Rooms
+            </Button>
+         </DialogActions>
+      </form>
    );
 }
