@@ -13,4 +13,8 @@ export default class ConferenceManager {
 
       return conference;
    }
+
+   hasConference(id: string): boolean {
+      return this.conferences.has(id);
+   }
 }

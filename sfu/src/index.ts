@@ -55,6 +55,8 @@ function initializeExistingConferences() {
 }
 
 async function initializeConference(conferenceInfo: ConferenceInfo): Promise<void> {
+   if (conferenceManager.hasConference(conferenceInfo.id)) return;
+
    const worker = getMediasoupWorker();
    const conference = await conferenceFactory(conferenceInfo, worker, redis);
    conferenceManager.createConference(conference);
