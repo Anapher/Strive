@@ -79,7 +79,7 @@ export default function MediaControls({ className }: Props) {
       <div className={clsx(classes.root, className)}>
          <div className={classes.leftActions}>
             {canRaiseHand && (
-               <Tooltip title="Raise Hand" aria-label="raise hand">
+               <Tooltip title="Raise Hand" aria-label="raise hand" arrow>
                   <Fab color="secondary" className={classes.fab}>
                      <HumanHandsup />
                   </Fab>
@@ -104,7 +104,7 @@ export default function MediaControls({ className }: Props) {
             )}
          </div>
          <div className={classes.rightActions}>
-            <Tooltip title="Troubleshooting" aria-label="troubleshooting">
+            <Tooltip title="Troubleshooting" aria-label="troubleshooting" arrow>
                <Fab color="default" className={classes.fab} onClick={handleOpenDebugDialog}>
                   <BugReportIcon />
                </Fab>
