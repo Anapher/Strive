@@ -1,27 +1,17 @@
-import {
-   Divider,
-   Grid,
-   ListItemIcon,
-   makeStyles,
-   Menu,
-   MenuItem,
-   MenuList,
-   Slider,
-   Typography,
-} from '@material-ui/core';
-import React, { useCallback } from 'react';
-import { ParticipantDto } from '../types';
-import VolumeUpIcon from '@material-ui/icons/VolumeUp';
-import VolumeMuteIcon from '@material-ui/icons/VolumeMute';
-import { selectParticipantAudioInfo } from 'src/features/media/selectors';
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from 'src/store';
-import { patchParticipantAudio } from 'src/features/media/mediaSlice';
-import _ from 'lodash';
-import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import { Divider, Grid, ListItemIcon, makeStyles, MenuItem, Slider, Typography } from '@material-ui/core';
 import DesktopWindowsIcon from '@material-ui/icons/DesktopWindows';
-import VideocamIcon from '@material-ui/icons/Videocam';
 import MicIcon from '@material-ui/icons/Mic';
+import VideocamIcon from '@material-ui/icons/Videocam';
+import VolumeMuteIcon from '@material-ui/icons/VolumeMute';
+import VolumeUpIcon from '@material-ui/icons/VolumeUp';
+import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import _ from 'lodash';
+import React, { useCallback } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { patchParticipantAudio } from 'src/features/media/mediaSlice';
+import { selectParticipantAudioInfo } from 'src/features/media/selectors';
+import { RootState } from 'src/store';
+import { ParticipantDto } from '../types';
 
 const useStyles = makeStyles((theme) => ({
    infoMenuItem: {
@@ -33,14 +23,14 @@ type Props = {
    participant: ParticipantDto;
 };
 
-export default function ParticipantContextMenu({ participant }: Props) {
+const ParticipantContextMenu = React.forwardRef<HTMLElement, Props>(({ participant }, ref) => {
    const audioInfo = useSelector((state: RootState) => selectParticipantAudioInfo(state, participant.participantId));
    const dispatch = useDispatch();
    const classes = useStyles();
 
-   const handleChangeMuted = (muted: boolean) => {
-      dispatch(patchParticipantAudio({ participantId: participant.participantId, data: { muted } }));
-   };
+   // const handleChangeMuted = (muted: boolean) => {
+   //    dispatch(patchParticipantAudio({ participantId: participant.participantId, data: { muted } }));
+   // };
 
    const handleChangeVolume = useCallback(
       _.throttle((volume: number) => {
@@ -98,4 +88,8 @@ export default function ParticipantContextMenu({ participant }: Props) {
          </ToggleButtonGroup>
       </>
    );
-}
+});
+
+ParticipantContextMenu.displayName = 'ParticipantContextMenu';
+
+export default ParticipantContextMenu;
