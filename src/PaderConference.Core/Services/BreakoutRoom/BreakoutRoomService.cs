@@ -290,8 +290,7 @@ namespace PaderConference.Core.Services.BreakoutRoom
             var state = _roomManagement.State;
 
             // order rooms by least participants, then by their naming index (desc)
-            var removeRooms = _currentBreakoutRooms
-                .OrderBy(x => state.Participants.ContainsKey(x.Key) ? state.Participants[x.Key].Length : 0)
+            var removeRooms = _currentBreakoutRooms.OrderBy(x => state.Participants.Count(p => p.Value == x.Key))
                 .ThenByDescending(x => namingStrategy.ParseIndex(x.Value.DisplayName)).Take(amount).Select(x => x.Key)
                 .ToList();
 

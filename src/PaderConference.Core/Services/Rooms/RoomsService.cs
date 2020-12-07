@@ -26,6 +26,8 @@ namespace PaderConference.Core.Services.Rooms
         private readonly RoomOptions _options;
         private readonly IPermissionsService _permissionsService;
         private readonly IConferenceManager _conferenceManager;
+
+        // lock to synchronize deletion and changing of rooms
         private readonly AsyncReaderWriterLock _roomLock = new AsyncReaderWriterLock();
         private readonly ISynchronizedObject<ConferenceRooms> _synchronizedRooms;
         private readonly AsyncLock _autoParticipantLock = new AsyncLock();
@@ -232,8 +234,10 @@ namespace PaderConference.Core.Services.Rooms
 
                 var participantToRooms = await _roomRepo.GetParticipantRooms(_conferenceId);
                 foreach (var (participantId, roomId) in participantToRooms)
+                {
                     if (roomIds.Contains(roomId))
-                        await SetRoom(participantId, defaultRoomId);
+                        await SetRoomInternal(participantId, defaultRoomId);
+                }
 
                 await _roomRepo.DeleteRooms(_conferenceId, roomIds);
             }
@@ -286,33 +290,38 @@ namespace PaderConference.Core.Services.Rooms
 
         public async Task SetRoom(string participantId, string roomId)
         {
+            using (await _roomLock.ReaderLockAsync())
+            {
+                await SetRoomInternal(participantId, roomId);
+            }
+
+            await UpdateSynchronizedRooms();
+        }
+
+        private async Task SetRoomInternal(string participantId, string roomId)
+        {
             using var _ = _logger.BeginMethodScope(new Dictionary<string, object>
             {
                 {"participantId", participantId}, {"roomId", roomId},
             });
 
-            using (await _roomLock.ReaderLockAsync())
+            var roomInfo = await GetRoomInfo(roomId);
+            if (roomInfo == null)
             {
-                var roomInfo = await GetRoomInfo(roomId);
-                if (roomInfo == null)
-                {
-                    _logger.LogDebug("The room is null");
-                    throw new InvalidOperationException("The room does not exist.");
-                }
-
-                _logger.LogDebug("Room info received: {@room}", roomInfo);
-
-                if (!roomInfo.IsEnabled)
-                {
-                    _logger.LogDebug("The room is disabled");
-                    throw new InvalidOperationException("The room is disabled");
-                }
-
-                _logger.LogDebug("Update room in redis");
-                await _roomRepo.SetParticipantRoom(_conferenceId, participantId, roomId);
+                _logger.LogDebug("The room is null");
+                throw new InvalidOperationException("The room does not exist.");
             }
 
-            await UpdateSynchronizedRooms();
+            _logger.LogDebug("Room info received: {@room}", roomInfo);
+
+            if (!roomInfo.IsEnabled)
+            {
+                _logger.LogDebug("The room is disabled");
+                throw new InvalidOperationException("The room is disabled");
+            }
+
+            _logger.LogDebug("Update room in redis");
+            await _roomRepo.SetParticipantRoom(_conferenceId, participantId, roomId);
         }
 
         private async Task<IReadOnlyDictionary<string, JsonElement>?> GetRoomPermissions(string roomId)
