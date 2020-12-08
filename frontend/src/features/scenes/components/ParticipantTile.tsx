@@ -112,7 +112,6 @@ export default function ParticipantTile({ className, participant, size, disableL
    const isSmall = size.width < 400;
    const fontSize = isSmall ? 16 : 26;
 
-   const [isMouseOver, setIsMouseOver] = useState(false);
    const [contextMenuOpen, setContextMenuOpen] = useState(false);
    const moreIconRef = useRef(null);
 
@@ -124,66 +123,68 @@ export default function ParticipantTile({ className, participant, size, disableL
       setContextMenuOpen(false);
    };
 
+   const isMouseOver = true;
+
    return (
-      <motion.div
-         onMouseEnter={() => setIsMouseOver(true)}
-         onMouseLeave={() => setIsMouseOver(false)}
-         className={clsx(classes.root, className)}
-      >
-         <video ref={videoRef} className={classes.video} hidden={!isWebcamActive} autoPlay />
-         <motion.div style={{ borderWidth: audioBorder }} className={classes.volumeBorder} />
+      <>
+         <motion.div className={clsx(classes.root, className)}>
+            <video ref={videoRef} className={classes.video} hidden={!isWebcamActive} autoPlay />
+            <motion.div style={{ borderWidth: audioBorder }} className={classes.volumeBorder} />
 
-         {isWebcamActive && (
-            <motion.div className={classes.infoBox}>
-               <AnimatedMicIcon activated={producers?.mic?.paused === false} disabledColor={theme.palette.error.main} />
-               <Typography
-                  component={motion.h4}
-                  layoutId={disableLayoutAnimation ? undefined : `name-${participant.participantId}`}
-                  variant="h4"
-                  style={{ fontSize, marginLeft: 8 }}
-               >
-                  {participant.displayName}
-               </Typography>
-            </motion.div>
-         )}
-
-         {!isWebcamActive && (
-            <>
-               <AnimatedMicIcon
-                  activated={producers?.mic?.paused === false}
-                  disabledColor={theme.palette.error.main}
-                  className={classes.micIconWithoutWebcam}
-               />
-               <div className={classes.centerText}>
+            {isWebcamActive && (
+               <motion.div className={classes.infoBox}>
+                  <AnimatedMicIcon
+                     activated={producers?.mic?.paused === false}
+                     disabledColor={theme.palette.error.main}
+                  />
                   <Typography
-                     component={motion.span}
+                     component={motion.h4}
                      layoutId={disableLayoutAnimation ? undefined : `name-${participant.participantId}`}
                      variant="h4"
-                     style={{ fontSize }}
+                     style={{ fontSize, marginLeft: 8 }}
                   >
                      {participant.displayName}
                   </Typography>
-               </div>
-            </>
-         )}
+               </motion.div>
+            )}
 
-         <motion.div className={classes.moreButton} animate={{ opacity: isMouseOver ? 1 : 0 }}>
-            <IconButton
-               ref={moreIconRef}
-               aria-label="options"
-               size={isSmall ? 'small' : 'medium'}
-               onClick={handleOpenContextMenu}
-            >
-               <MoreVertIcon />
-            </IconButton>
+            {!isWebcamActive && (
+               <>
+                  <AnimatedMicIcon
+                     activated={producers?.mic?.paused === false}
+                     disabledColor={theme.palette.error.main}
+                     className={classes.micIconWithoutWebcam}
+                  />
+                  <div className={classes.centerText}>
+                     <Typography
+                        component={motion.span}
+                        layoutId={disableLayoutAnimation ? undefined : `name-${participant.participantId}`}
+                        variant="h4"
+                        style={{ fontSize }}
+                     >
+                        {participant.displayName}
+                     </Typography>
+                  </div>
+               </>
+            )}
+
+            <motion.div className={classes.moreButton} animate={{ opacity: isMouseOver ? 1 : 0 }}>
+               <IconButton
+                  ref={moreIconRef}
+                  aria-label="options"
+                  size={isSmall ? 'small' : 'medium'}
+                  onClick={handleOpenContextMenu}
+               >
+                  <MoreVertIcon />
+               </IconButton>
+            </motion.div>
          </motion.div>
-
          <ParticipantContextMenuPopper
             open={contextMenuOpen}
             onClose={handleCloseContextMenu}
             participant={participant}
             anchorEl={moreIconRef.current}
          />
-      </motion.div>
+      </>
    );
 }
