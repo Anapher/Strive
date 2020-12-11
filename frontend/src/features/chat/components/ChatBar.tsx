@@ -15,13 +15,13 @@ import UsersTyping from './UsersTyping';
 
 const useStyles = makeStyles((theme) => ({
    root: {
+      height: '100%',
       display: 'flex',
       flexDirection: 'column',
-      height: '100%',
       overflowY: 'hidden',
    },
    chat: {
-      backgroundColor: theme.palette.type === 'dark' ? '#303030' : 'red',
+      backgroundColor: theme.palette.type === 'dark' ? 'rgb(32, 32, 34)' : 'red',
       flex: 1,
       minHeight: 0,
    },

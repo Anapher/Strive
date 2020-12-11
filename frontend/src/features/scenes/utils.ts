@@ -43,7 +43,7 @@ export function applyPatch(update: ActiveParticipantsChanged, applied: ActivePar
       Object.entries({
          ...applied,
          ...update.updatedParticipants,
-         ...Object.fromEntries(update.newParticipants.map((x) => [x, {}])),
+         ...Object.fromEntries(update.newParticipants.map((x) => [x, { orderNumber: -1 }])),
       }).filter(([participantId]) => !update.removedParticipants.includes(participantId)),
    );
 }

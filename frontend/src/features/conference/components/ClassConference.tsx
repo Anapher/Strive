@@ -1,12 +1,12 @@
-import { makeStyles } from '@material-ui/core';
-import React, { useRef, useState } from 'react';
+import { Box, makeStyles } from '@material-ui/core';
+import React, { useState } from 'react';
 import ChatBar from 'src/features/chat/components/ChatBar';
 import ConferenceAppBar from 'src/features/conference/components/ConferenceAppBar';
-import PinnableSidebar from './PinnableSidebar';
-import SceneView from '../../scenes/components/SceneView';
 import ParticipantMicManager from 'src/features/media/components/ParticipantMicManager';
+import SceneView from '../../scenes/components/SceneView';
+import PinnableSidebar from './PinnableSidebar';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
    root: {
       height: '100%',
       display: 'flex',
@@ -27,6 +27,7 @@ const useStyles = makeStyles((theme) => ({
    chat: {
       flex: 1,
       maxWidth: 360,
+      flexDirection: 'column',
    },
 }));
 
@@ -44,7 +45,10 @@ export default function ClassConference() {
                   <SceneView />
                </div>
                <div className={classes.chat}>
-                  <ChatBar />
+                  <Box height="50%">
+                     <ChatBar />
+                  </Box>
+                  <div style={{ height: '50%', backgroundColor: 'red' }}></div>
                </div>
             </div>
          </div>

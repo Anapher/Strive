@@ -38,8 +38,11 @@ const scenesSlice = createSlice({
       setCurrentScene(state, { payload }: PayloadAction<ViewableScene>) {
          state.currentScene = payload;
       },
-      addActiveParticipant(state, { payload }: PayloadAction<string>) {
-         state.activeParticipants[payload] = {};
+      addActiveParticipant(
+         state,
+         { payload: { participantId, orderNumber } }: PayloadAction<{ participantId: string; orderNumber: number }>,
+      ) {
+         state.activeParticipants[participantId] = { orderNumber };
       },
       updateActiveParticipantDeleted(
          state,
@@ -47,7 +50,7 @@ const scenesSlice = createSlice({
             payload: { participantId, deletedOn },
          }: PayloadAction<{ participantId: string; deletedOn: string | undefined }>,
       ) {
-         state.activeParticipants[participantId] = { deletedOn };
+         state.activeParticipants[participantId] = { ...state.activeParticipants[participantId], deletedOn };
       },
       removeActiveParticipant(state, { payload }: PayloadAction<string>) {
          delete state.activeParticipants[payload];

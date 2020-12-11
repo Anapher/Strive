@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { DateTime } from 'luxon';
-import { call, cancel, delay, fork, put, select, take, takeEvery } from 'redux-saga/effects';
+import { cancel, delay, fork, put, select, take, takeEvery } from 'redux-saga/effects';
 import { takeEverySynchronizedObjectChange } from 'src/store/saga-utils';
 import { ParticipantDto } from '../conference/types';
 import { patchParticipantAudio, removeParticipantAudio, setParticipantAudio } from '../media/mediaSlice';
@@ -65,6 +65,8 @@ function* updateAutomaticScene() {
    }
 }
 
+let orderNumberCounter = 1;
+
 function* updateActiveParticipants(): any {
    const participantAudio: { [id: string]: ParticipantAudioInfo | undefined } = yield select(selectParticipantAudio);
    const currentScene: ViewableScene = yield select(selectCurrentScene);
@@ -81,8 +83,8 @@ function* updateActiveParticipants(): any {
    const update = generateActiveParticipantsPatch(activeParticipants, currentActiveParticipants);
 
    // immediately
-   for (const newParticipantId of update.newParticipants) {
-      yield put(addActiveParticipant(newParticipantId));
+   for (const participantId of update.newParticipants) {
+      yield put(addActiveParticipant({ participantId, orderNumber: orderNumberCounter++ }));
    }
 
    for (const participantId in update.updatedParticipants) {
