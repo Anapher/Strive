@@ -23,8 +23,8 @@ const theme = createMuiTheme({
          main: pink[500],
       },
       background: {
-         default: '#242424',
-         paper: '#383838',
+         default: 'rgb(20, 20, 22)',
+         paper: '#303030',
       },
    },
 });

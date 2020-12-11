@@ -27,27 +27,19 @@ const useStyles = makeStyles((theme) => ({
    chat: {
       flex: 1,
       maxWidth: 360,
-      padding: theme.spacing(1, 1, 1, 0),
    },
 }));
 
 export default function ClassConference() {
    const classes = useStyles();
    const [roomsPinned, setRoomsPinned] = useState(true);
-   const hamburgerRef = useRef<HTMLButtonElement>(null);
-
-   const handleGetHamburger = () => hamburgerRef.current;
 
    return (
       <ParticipantMicManager>
          <div className={classes.root}>
-            <ConferenceAppBar hamburgerRef={hamburgerRef} />
+            <ConferenceAppBar />
             <div className={classes.conferenceMain}>
-               <PinnableSidebar
-                  pinned={roomsPinned}
-                  onTogglePinned={() => setRoomsPinned((x) => !x)}
-                  getHamburger={handleGetHamburger}
-               />
+               <PinnableSidebar pinned={roomsPinned} onTogglePinned={() => setRoomsPinned((x) => !x)} />
                <div className={classes.scene}>
                   <SceneView />
                </div>

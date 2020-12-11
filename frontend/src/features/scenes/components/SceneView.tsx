@@ -18,10 +18,10 @@ const useStyles = makeStyles({
    },
    currentScene: {
       position: 'absolute',
-      left: 16,
-      top: 16,
-      bottom: 16,
-      right: 16,
+      left: 0,
+      top: 0,
+      bottom: 0,
+      right: 0,
    },
    mediaControls: {
       position: 'absolute',
@@ -37,7 +37,7 @@ export default function SceneView() {
 
    let fixedDimensions: Size | undefined;
    if (dimensions && dimensions.width !== undefined && dimensions.height !== undefined)
-      fixedDimensions = { width: dimensions.width - 32, height: dimensions.height - 32 };
+      fixedDimensions = { width: dimensions.width, height: dimensions.height };
 
    const currentScene = useSelector(selectCurrentScene);
 

@@ -11,6 +11,8 @@ export const selectAppliedScene = (state: RootState) => state.scenes.appliedScen
 export const selectScenes = (state: RootState) => state.scenes.synchronized;
 export const selectCurrentScene = (state: RootState) => state.scenes.currentScene;
 
+export const selectActiveParticipants = (state: RootState) => state.scenes.activeParticipants;
+
 export const selectServerProvidedScene = createSelector(selectParticipantRoom, selectScenes, (room, scenes) => {
    if (!room) return undefined;
    if (!scenes) return undefined;

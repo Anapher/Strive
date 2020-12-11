@@ -1,4 +1,4 @@
-import { put, select, takeEvery } from 'redux-saga/effects';
+import { put, select } from 'redux-saga/effects';
 import { takeEverySynchronizedObjectChange } from 'src/store/saga-utils';
 import { selectMyParticipantId } from '../auth/selectors';
 import { selectParticipants } from '../conference/selectors';

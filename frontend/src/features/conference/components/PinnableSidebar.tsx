@@ -1,11 +1,12 @@
-import { ClickAwayListener, Drawer, fade, makeStyles, Paper } from '@material-ui/core';
-import { useAnimation } from 'framer-motion';
-import React, { useRef } from 'react';
+import { ClickAwayListener, fade, IconButton, makeStyles, Paper } from '@material-ui/core';
+import clsx from 'classnames';
+import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import RoomsList from 'src/features/rooms/components/RoomsList';
 import { RootState } from 'src/store';
 import { setParticipantsOpen } from '../conferenceSlice';
-import clsx from 'classnames';
+import ArrowBackIcon from '@material-ui/icons/ArrowBack';
+import { motion } from 'framer-motion';
 
 const drawerWidth = 200;
 
@@ -18,6 +19,7 @@ const useStyles = makeStyles((theme) => ({
       backgroundColor: fade(theme.palette.background.paper, 0.5),
       borderTopLeftRadius: 0,
       borderBottomLeftRadius: 0,
+      height: '100%',
    },
    drawerOpen: {
       width: drawerWidth,
@@ -37,53 +39,72 @@ const useStyles = makeStyles((theme) => ({
          width: 0,
       },
    },
-   verticalButton: {
-      marginTop: theme.spacing(2),
-      top: 16,
-      left: 0,
+   listRoot: {
+      position: 'relative',
+      height: '100%',
+   },
+   backArrowButton: {
       position: 'absolute',
-      transform: 'translate(-32px)',
-      zIndex: 1000,
+      top: 8,
+      right: -34,
+      zIndex: theme.zIndex.drawer,
    },
 }));
 
 type Props = {
    pinned: boolean;
    onTogglePinned: () => void;
-   getHamburger: () => HTMLButtonElement | null;
 };
 
-export default function PinnableSidebar({ pinned, onTogglePinned, getHamburger }: Props) {
+const arrowVariants = {
+   open: { rotateY: 0, translateX: 0 },
+   closed: { rotateY: 180, translateX: -3 },
+};
+
+export default function PinnableSidebar({ pinned, onTogglePinned }: Props) {
    const classes = useStyles();
 
    const dispatch = useDispatch();
    const open = useSelector((state: RootState) => state.conference.participantsOpen);
    const setOpen = (visible: boolean) => dispatch(setParticipantsOpen(visible));
 
-   const handleClickAway = (event: React.MouseEvent<Document, MouseEvent>) => {
+   const handleClickAway = () => {
       if (pinned) return;
-
-      const button = getHamburger();
-      if (button?.contains(event.target as HTMLElement)) {
-         return;
-      }
 
       if (!pinned) {
          setOpen(false);
       }
    };
 
+   const handleToggle = () => setOpen(!open);
+
    return (
       <ClickAwayListener onClickAway={handleClickAway}>
-         <Paper
-            className={clsx(classes.drawer, {
-               [classes.drawerOpen]: open,
-               [classes.drawerClose]: !open,
-            })}
-            elevation={1}
-         >
-            <RoomsList pinned={pinned} onTogglePinned={onTogglePinned} />
-         </Paper>
+         <div className={classes.listRoot}>
+            <Paper
+               className={clsx(classes.drawer, {
+                  [classes.drawerOpen]: open,
+                  [classes.drawerClose]: !open,
+               })}
+               elevation={1}
+            >
+               <RoomsList pinned={pinned} onTogglePinned={onTogglePinned} />
+            </Paper>
+            <IconButton
+               aria-label="toggle room list"
+               className={classes.backArrowButton}
+               size="small"
+               onClick={handleToggle}
+            >
+               <ArrowBackIcon
+                  component={motion.svg}
+                  variants={arrowVariants}
+                  animate={open ? 'open' : 'closed'}
+                  style={{ transformOrigin: 'center', ...({ originX: 0.5, originY: 0.5 } as any) }}
+                  fontSize="small"
+               />
+            </IconButton>
+         </div>
       </ClickAwayListener>
    );
 }

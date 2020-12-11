@@ -29,6 +29,7 @@ export default function ScreenShare({ className, dimensions, options: { particip
    return (
       <PresentationScene
          className={className}
+         showParticipants={false}
          dimensions={dimensions}
          contentRatio={videoSize}
          maxContentWidth={videoSize.width}

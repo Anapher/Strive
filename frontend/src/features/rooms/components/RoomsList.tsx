@@ -1,4 +1,4 @@
-import { Divider, IconButton, makeStyles, Typography } from '@material-ui/core';
+import { Divider, IconButton, makeStyles, Tooltip, Typography } from '@material-ui/core';
 import { Pin, PinOff } from 'mdi-material-ui';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -56,9 +56,11 @@ export default function RoomsList({ pinned, onTogglePinned }: Props) {
       <div className={classes.root}>
          <div className={classes.header}>
             <Typography variant="subtitle2">Participants</Typography>
-            <IconButton size="small" onClick={onTogglePinned}>
-               {pinned ? <Pin fontSize="small" /> : <PinOff fontSize="small" />}
-            </IconButton>
+            <Tooltip title={pinned ? 'Auto hide sidebar' : 'Pin sidebar'}>
+               <IconButton size="small" onClick={onTogglePinned}>
+                  {pinned ? <Pin fontSize="small" /> : <PinOff fontSize="small" />}
+               </IconButton>
+            </Tooltip>
          </div>
          <div className={classes.rooms}>
             {rooms?.map((x) => (

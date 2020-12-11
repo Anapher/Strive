@@ -39,3 +39,5 @@ export type ActiveSceneInfo = {
    OpenMenuItem: React.ComponentType<ActiveSceneMenuItemProps>;
    AlwaysRender?: React.ComponentType;
 };
+
+export type ActiveParticipants = { [participantId: string]: { deletedOn?: string } };
