@@ -67,7 +67,7 @@ export default function ClassConference() {
    return (
       <ParticipantMicManager>
          <div className={classes.root}>
-            <ConferenceAppBar />
+            <ConferenceAppBar chatWidth={chatWidth} />
             <div className={classes.conferenceMain} ref={contentRef}>
                <PinnableSidebar pinned={roomsPinned} onTogglePinned={() => setRoomsPinned((x) => !x)} />
                <div className={classes.scene}>

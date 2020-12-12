@@ -1,6 +1,7 @@
 import {
    AppBar,
    Box,
+   Chip,
    createStyles,
    IconButton,
    makeStyles,
@@ -19,6 +20,7 @@ import { signOut } from 'src/features/auth/authSlice';
 import { selectAccessToken } from 'src/features/auth/selectors';
 import { openSettings } from 'src/features/settings/settingsSlice';
 import usePermission, { CONFERENCE_CAN_OPEN_AND_CLOSE } from 'src/hooks/usePermission';
+import { selectParticipants } from '../selectors';
 
 const useStyles = makeStyles((theme) =>
    createStyles({
@@ -36,10 +38,18 @@ const useStyles = makeStyles((theme) =>
       toolbar: {
          backgroundColor: 'rgb(35, 35, 37)',
       },
+      chip: {
+         backgroundColor: 'rgb(55, 55, 57)',
+         padding: theme.spacing(0, 1),
+      },
    }),
 );
 
-export default function ConferenceAppBar() {
+type Props = {
+   chatWidth: number;
+};
+
+export default function ConferenceAppBar({ chatWidth }: Props) {
    const classes = useStyles();
    const dispatch = useDispatch();
    const handleSignOut = () => dispatch(signOut());
@@ -56,27 +66,45 @@ export default function ConferenceAppBar() {
 
    const moreIconButtonRef = useRef<HTMLButtonElement>(null);
 
+   const participants = useSelector(selectParticipants);
+
    return (
       <AppBar position="static">
          <Toolbar variant="dense" className={classes.toolbar}>
             <Box flex={1}>
                <Typography variant="h6">PaderConference</Typography>
             </Box>
-            {token && (
-               <Box mr={2}>
-                  <Typography variant="caption">
-                     Signed in as <b>{token.unique_name}</b>
-                  </Typography>
-               </Box>
-            )}
-            <Tooltip title="Open Settings" aria-label="open settings">
-               <IconButton aria-label="settings" color="inherit" onClick={handleOpenSettings}>
-                  <SettingsIcon />
+            <Box>
+               {participants && (
+                  <Chip
+                     className={classes.chip}
+                     label={`Connected participants: ${participants.length}`}
+                     size="small"
+                  />
+               )}
+            </Box>
+            <Box
+               width={chatWidth - 24 /** padding toolbar */}
+               display="flex"
+               alignItems="center"
+               justifyContent="flex-end"
+            >
+               {token && (
+                  <Box mr={2}>
+                     <Typography variant="caption">
+                        Signed in as <b>{token.unique_name}</b>
+                     </Typography>
+                  </Box>
+               )}
+               <Tooltip title="Open Settings" aria-label="open settings">
+                  <IconButton aria-label="settings" color="inherit" onClick={handleOpenSettings}>
+                     <SettingsIcon />
+                  </IconButton>
+               </Tooltip>
+               <IconButton aria-label="more" color="inherit" onClick={handleOpenMenu} ref={moreIconButtonRef}>
+                  <MoreVertIcon />
                </IconButton>
-            </Tooltip>
-            <IconButton aria-label="more" color="inherit" onClick={handleOpenMenu} ref={moreIconButtonRef}>
-               <MoreVertIcon />
-            </IconButton>
+            </Box>
 
             <Menu open={isMenuOpen} onClose={handleCloseMenu} anchorEl={moreIconButtonRef.current}>
                {canCloseConference && <MenuItem onClick={handleCloseConference}>Close Conference</MenuItem>}

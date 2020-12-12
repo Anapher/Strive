@@ -23,6 +23,9 @@ const useStyles = makeStyles((theme) => ({
    },
    drawerOpen: {
       width: drawerWidth,
+      borderColor: theme.palette.divider,
+      borderWidth: '0px 1px 0px 0px',
+      borderStyle: 'solid',
       // transition: theme.transitions.create('width', {
       //    easing: theme.transitions.easing.sharp,
       //    duration: theme.transitions.duration.enteringScreen,
@@ -35,9 +38,6 @@ const useStyles = makeStyles((theme) => ({
       // }),
       overflowX: 'hidden',
       width: 0,
-      [theme.breakpoints.up('sm')]: {
-         width: 0,
-      },
    },
    listRoot: {
       position: 'relative',
