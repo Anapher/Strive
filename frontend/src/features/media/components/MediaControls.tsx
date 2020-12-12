@@ -1,6 +1,7 @@
 import { Dialog, DialogContent, DialogTitle, Fab, makeStyles, Tooltip } from '@material-ui/core';
 import BugReportIcon from '@material-ui/icons/BugReport';
 import clsx from 'classnames';
+import { motion } from 'framer-motion';
 import { HumanHandsup } from 'mdi-material-ui';
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -25,6 +26,9 @@ const useStyles = makeStyles((theme) => ({
    root: {
       display: 'flex',
       flexDirection: 'row',
+      backgroundImage: 'linear-gradient(to bottom, rgba(6, 6, 7, 0), rgba(6, 6, 7, 0.7), rgba(6, 6, 7, 1))',
+      paddingBottom: 16,
+      padding: theme.spacing(0, 2, 1),
    },
    leftActions: {
       flex: 1,
@@ -46,9 +50,27 @@ const useStyles = makeStyles((theme) => ({
 
 type Props = {
    className?: string;
+   show: boolean;
 };
 
-export default function MediaControls({ className }: Props) {
+const variants = {
+   visible: {
+      opacity: 1,
+      transition: {
+         staggerChildren: 0.1,
+      },
+   },
+   hidden: {
+      opacity: 0,
+   },
+};
+
+const item = {
+   visible: { opacity: 1, scale: 1 },
+   hidden: { opacity: 0, scale: 0 },
+};
+
+export default function MediaControls({ className, show }: Props) {
    const classes = useStyles();
 
    const gain = useSelector((state: RootState) => state.settings.obj.mic.audioGain);
@@ -76,11 +98,16 @@ export default function MediaControls({ className }: Props) {
    const handleOpenDebugDialog = () => setDebugDialogOpen(true);
 
    return (
-      <div className={clsx(classes.root, className)}>
+      <motion.div
+         className={clsx(classes.root, className)}
+         initial="hidden"
+         animate={show ? 'visible' : 'hidden'}
+         variants={variants}
+      >
          <div className={classes.leftActions}>
             {canRaiseHand && (
                <Tooltip title="Raise Hand" aria-label="raise hand" arrow>
-                  <Fab color="secondary" className={classes.fab}>
+                  <Fab color="secondary" className={classes.fab} component={motion.button} variants={item}>
                      <HumanHandsup />
                   </Fab>
                </Tooltip>
@@ -88,10 +115,24 @@ export default function MediaControls({ className }: Props) {
          </div>
          <div style={{ display: 'flex', flexDirection: 'row' }}>
             {canShareScreen && (
-               <MediaFab title="Screen" className={classes.fab} Icon={AnimatedScreenIcon} control={screenController} />
+               <MediaFab
+                  title="Screen"
+                  className={classes.fab}
+                  Icon={AnimatedScreenIcon}
+                  control={screenController}
+                  component={motion.button}
+                  variants={item}
+               />
             )}
             {canShareWebcam && (
-               <MediaFab title="Webcam" className={classes.fab} Icon={AnimatedCamIcon} control={webcamController} />
+               <MediaFab
+                  title="Webcam"
+                  className={classes.fab}
+                  Icon={AnimatedCamIcon}
+                  control={webcamController}
+                  component={motion.button}
+                  variants={item}
+               />
             )}
             {canShareAudio && (
                <MediaFab
@@ -100,12 +141,20 @@ export default function MediaControls({ className }: Props) {
                   Icon={AnimatedMicIcon}
                   control={micController}
                   pauseOnToggle
+                  component={motion.button}
+                  variants={item}
                />
             )}
          </div>
          <div className={classes.rightActions}>
             <Tooltip title="Troubleshooting" aria-label="troubleshooting" arrow>
-               <Fab color="default" className={classes.fab} onClick={handleOpenDebugDialog}>
+               <Fab
+                  color="default"
+                  className={classes.fab}
+                  onClick={handleOpenDebugDialog}
+                  component={motion.button}
+                  variants={item}
+               >
                   <BugReportIcon />
                </Fab>
             </Tooltip>
@@ -116,6 +165,6 @@ export default function MediaControls({ className }: Props) {
                <Debug />
             </DialogContent>
          </Dialog>
-      </div>
+      </motion.div>
    );
 }

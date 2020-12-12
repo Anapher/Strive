@@ -38,8 +38,6 @@ export default function ActiveParticipantsGridSizer({ width, show }: Props) {
       setHeight(newHeight);
    }, [width, activeParticipants]);
 
-   console.log('height', height);
-
    return (
       <motion.div
          animate={{

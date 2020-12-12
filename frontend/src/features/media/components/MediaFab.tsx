@@ -12,6 +12,7 @@ type Props = {
    title: string;
 
    Icon: React.ComponentType<AnimatedIconProps>;
+   [x: string]: any;
 } & Omit<React.ComponentProps<typeof Fab>, 'children'>;
 
 export default function MediaFab({

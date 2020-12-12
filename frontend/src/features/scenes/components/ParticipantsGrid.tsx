@@ -34,14 +34,21 @@ type Props = {
    dimensions: Size;
    options: GridScene;
    setShowWebcamUnderChat: (show: boolean) => void;
+   setAutoHideControls: (autoHide: boolean) => void;
 };
 
-export default function ParticipantsGrid({ dimensions, className, setShowWebcamUnderChat }: Props) {
+export default function ParticipantsGrid({
+   dimensions,
+   className,
+   setShowWebcamUnderChat,
+   setAutoHideControls,
+}: Props) {
    const participants = useSelector((state: RootState) => state.conference.participants);
    const classes = useStyles();
 
    useEffect(() => {
       setShowWebcamUnderChat(false);
+      setAutoHideControls(false);
    }, []);
 
    if (!participants) return <div className={className} />;

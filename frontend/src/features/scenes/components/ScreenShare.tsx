@@ -9,6 +9,7 @@ type Props = {
    dimensions: Size;
    options: ScreenShareScene;
    setShowWebcamUnderChat: (show: boolean) => void;
+   setAutoHideControls: (autoHide: boolean) => void;
 };
 
 export default function ScreenShare({
@@ -16,6 +17,7 @@ export default function ScreenShare({
    dimensions,
    options: { participantId },
    setShowWebcamUnderChat,
+   setAutoHideControls,
 }: Props) {
    const videoSize: Size = { width: 1920, height: 1080 };
 
@@ -23,6 +25,10 @@ export default function ScreenShare({
    const consumer = useConsumer(participantId, 'screen');
 
    const [showParticipantOverlay, setShowParticipantOverlay] = useState(false);
+
+   useEffect(() => {
+      setAutoHideControls(true);
+   }, [setAutoHideControls]);
 
    useEffect(() => {
       if (consumer && videoRef.current) {
