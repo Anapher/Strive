@@ -31,7 +31,11 @@ const useStyles = makeStyles({
    },
 });
 
-export default function SceneView() {
+type Props = {
+   setShowWebcamUnderChat: (show: boolean) => void;
+};
+
+export default function SceneView({ setShowWebcamUnderChat }: Props) {
    const classes = useStyles();
    const [contentRef, dimensions] = useThrottledResizeObserver(100);
 
@@ -44,7 +48,12 @@ export default function SceneView() {
    return (
       <div className={classes.root} ref={contentRef}>
          <AnimateSharedLayout>
-            <SceneSelector className={classes.currentScene} dimensions={fixedDimensions} scene={currentScene} />
+            <SceneSelector
+               className={classes.currentScene}
+               dimensions={fixedDimensions}
+               scene={currentScene}
+               setShowWebcamUnderChat={setShowWebcamUnderChat}
+            />
          </AnimateSharedLayout>
          <MediaControls className={classes.mediaControls} />
       </div>
@@ -55,15 +64,30 @@ type SceneSelectorProps = {
    scene: ViewableScene;
    className?: string;
    dimensions?: Size;
+   setShowWebcamUnderChat: (show: boolean) => void;
 };
 
-function SceneSelector({ scene, className, dimensions }: SceneSelectorProps) {
+function SceneSelector({ scene, className, dimensions, setShowWebcamUnderChat }: SceneSelectorProps) {
    if (!dimensions) return <div />;
 
    switch (scene.type) {
       case 'grid':
-         return <ParticipantsGrid className={className} dimensions={dimensions} options={scene} />;
+         return (
+            <ParticipantsGrid
+               className={className}
+               dimensions={dimensions}
+               options={scene}
+               setShowWebcamUnderChat={setShowWebcamUnderChat}
+            />
+         );
       case 'screenshare':
-         return <ScreenShare className={className} dimensions={dimensions} options={scene} />;
+         return (
+            <ScreenShare
+               className={className}
+               dimensions={dimensions}
+               options={scene}
+               setShowWebcamUnderChat={setShowWebcamUnderChat}
+            />
+         );
    }
 }

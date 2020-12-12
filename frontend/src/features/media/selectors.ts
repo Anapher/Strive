@@ -6,7 +6,7 @@ import { ParticipantDto } from '../conference/types';
 import { ProducerInfo } from './types';
 
 const getId = (_: unknown, id: string | undefined) => id;
-const selectStreams = (state: RootState) => state.media.streams;
+export const selectStreams = (state: RootState) => state.media.streams;
 
 export const selectParticipantAudio = (state: RootState) => state.media.participantAudio;
 
@@ -46,7 +46,7 @@ export const selectScreenSharingParticipants = createSelector(
                pstreams && Object.values(pstreams.producers).find((x) => x.kind === 'screen' && !x.paused),
          )
          .map(([participantId]) => participants?.find((x) => x.participantId === participantId))
-         .filter((x) => !!x) as ParticipantDto[];
+         .filter((x): x is ParticipantDto => !!x);
    },
 );
 

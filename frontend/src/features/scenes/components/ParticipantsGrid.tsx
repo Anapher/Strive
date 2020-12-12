@@ -2,7 +2,7 @@ import { makeStyles } from '@material-ui/core';
 import clsx from 'classnames';
 import { motion } from 'framer-motion';
 import _ from 'lodash';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from 'src/store';
 import { Size } from 'src/types';
@@ -33,11 +33,16 @@ type Props = {
    className?: string;
    dimensions: Size;
    options: GridScene;
+   setShowWebcamUnderChat: (show: boolean) => void;
 };
 
-export default function ParticipantsGrid({ dimensions, className }: Props) {
+export default function ParticipantsGrid({ dimensions, className, setShowWebcamUnderChat }: Props) {
    const participants = useSelector((state: RootState) => state.conference.participants);
    const classes = useStyles();
+
+   useEffect(() => {
+      setShowWebcamUnderChat(false);
+   }, []);
 
    if (!participants) return <div className={className} />;
 

@@ -1,26 +1,37 @@
-import { Chip } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core';
+import clsx from 'classnames';
 import React from 'react';
 import { useSelector } from 'react-redux';
-import AnimatedMicIcon from 'src/assets/animated-icons/AnimatedMicIcon';
 import { selectParticipants } from 'src/features/conference/selectors';
 import { selectParticipantAudio } from 'src/features/media/selectors';
+import ParticipantInfoChip from './ParticipantInfoChip';
+
+const useStyles = makeStyles(() => ({
+   root: {
+      display: 'flex',
+      justifyContent: 'flex-end',
+      width: '100%',
+   },
+}));
 
 type Props = {
    participantIds: string[];
+   className?: string;
 };
 
-export default function ParticipantChips({ participantIds }: Props) {
+export default function ParticipantChips({ participantIds, className }: Props) {
    const participants = useSelector(selectParticipants);
    const audioInfo = useSelector(selectParticipantAudio);
+   const classes = useStyles();
 
    return (
-      <div>
+      <div className={clsx(className, classes.root)}>
          {participantIds.map((participantId) => (
-            <Chip
+            <ParticipantInfoChip
+               participantId={participantId}
                key={participantId}
-               label={participants?.find((x) => x.participantId === participantId)?.displayName ?? participantId}
-               variant="outlined"
-               icon={<AnimatedMicIcon activated={audioInfo[participantId]?.speaking === true} />}
+               audioInfo={audioInfo[participantId]}
+               participantDto={participants?.find((x) => x.participantId === participantId)}
             />
          ))}
       </div>

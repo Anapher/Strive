@@ -40,12 +40,14 @@ export type ActiveSceneInfo = {
    AlwaysRender?: React.ComponentType;
 };
 
-export type ActiveParticipants = {
-   [participantId: string]: {
-      /** if the participant is not currently active, this property contains the exact timestamp the participant went inactive */
-      deletedOn?: string;
+export type ActiveParticipantData = {
+   /** if the participant is not currently active, this property contains the exact timestamp the participant went inactive */
+   deletedOn?: string;
 
-      /** a number that determines the order of this participant */
-      orderNumber: number;
-   };
+   /** a number that determines the order of this participant */
+   orderNumber: number;
+};
+
+export type ActiveParticipants = {
+   [participantId: string]: ActiveParticipantData;
 };

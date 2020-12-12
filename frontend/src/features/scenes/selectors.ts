@@ -1,7 +1,8 @@
 import { createSelector } from '@reduxjs/toolkit';
+import _ from 'lodash';
 import { RootState } from 'src/store';
 import { selectParticipants } from '../conference/selectors';
-import { selectScreenSharingParticipants } from '../media/selectors';
+import { selectScreenSharingParticipants, selectStreams } from '../media/selectors';
 import { selectParticipantRoom } from '../rooms/selectors';
 import { Scene, SceneViewModel } from './types';
 
@@ -12,6 +13,24 @@ export const selectScenes = (state: RootState) => state.scenes.synchronized;
 export const selectCurrentScene = (state: RootState) => state.scenes.currentScene;
 
 export const selectActiveParticipants = (state: RootState) => state.scenes.activeParticipants;
+
+export const selectActiveParticipantsWithWebcam = createSelector(
+   selectActiveParticipants,
+   selectStreams,
+   (participants, streams) => {
+      if (!streams) return [];
+
+      return _(Object.entries(participants))
+         .filter(
+            ([participantId]) =>
+               !!streams[participantId] &&
+               !!Object.values(streams[participantId]!.producers).find((x) => x.kind === 'webcam' && !x.paused),
+         )
+         .orderBy(([, info]) => info.orderNumber, 'asc')
+         .map(([participantId]) => participantId)
+         .value();
+   },
+);
 
 export const selectServerProvidedScene = createSelector(selectParticipantRoom, selectScenes, (room, scenes) => {
    if (!room) return undefined;

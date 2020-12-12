@@ -1,5 +1,4 @@
-import { Box, Divider, IconButton, makeStyles, Paper, Typography } from '@material-ui/core';
-import MoreVertIcon from '@material-ui/icons/MoreVert';
+import { Box, Divider, makeStyles, Paper, Typography } from '@material-ui/core';
 import React, { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import * as coreHub from 'src/core-hub';
@@ -15,10 +14,12 @@ import UsersTyping from './UsersTyping';
 
 const useStyles = makeStyles((theme) => ({
    root: {
-      height: '100%',
+      flex: 1,
       display: 'flex',
       flexDirection: 'column',
       overflowY: 'hidden',
+      borderTopRightRadius: 0,
+      borderBottomRightRadius: 0,
    },
    chat: {
       backgroundColor: theme.palette.type === 'dark' ? 'rgb(32, 32, 34)' : 'red',
@@ -57,9 +58,6 @@ export default function ChatBar() {
       <Paper className={classes.root} elevation={4}>
          <Box display="flex" flexDirection="row" m={1} ml={2} justifyContent="space-between" alignItems="center">
             <Typography variant="h6">Chat</Typography>
-            <IconButton aria-label="options">
-               <MoreVertIcon fontSize="small" />
-            </IconButton>
          </Box>
          <Divider orientation="horizontal" />
          <div className={classes.chat}>

@@ -1,7 +1,10 @@
 import { makeStyles } from '@material-ui/core';
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import { Size } from 'src/types';
 import { expandToBox, maxWidth } from '../calculations';
+import { selectActiveParticipants } from '../selectors';
+import ParticipantChips from './ParticipantChips';
 import PresentationSceneParticipants from './PresentationSceneParticipants';
 
 const useStyles = makeStyles(() => ({
@@ -13,6 +16,11 @@ const useStyles = makeStyles(() => ({
       alignItems: 'center',
       justifyContent: 'flex-start',
       flexDirection: 'column',
+   },
+   chips: {
+      marginTop: 8,
+      marginBottom: 8,
+      paddingRight: 16,
    },
 }));
 
@@ -31,6 +39,8 @@ type Props = {
    maxOverlayFactor?: number;
 
    render: (size: Size) => React.ReactNode;
+
+   canShowParticipantsWithoutResize: (canShow: boolean) => void;
 };
 
 export default function PresentationScene({
@@ -43,8 +53,11 @@ export default function PresentationScene({
    participantTileWidth = 16 * 18,
    participantTileHeight = 9 * 18,
    maxOverlayFactor = 0.33,
+   canShowParticipantsWithoutResize,
 }: Props) {
    const classes = useStyles();
+
+   dimensions = { ...dimensions, height: dimensions.height - 40 };
 
    // measure
    let computedSize = expandToBox(contentRatio, dimensions);
@@ -52,45 +65,50 @@ export default function PresentationScene({
 
    let participantsPlace: 'bottom' | 'right' | undefined;
 
-   if (showParticipants) {
-      // compute the vertical/horizontal margin if we would use the full size content
-      const marginBottom = dimensions.height - computedSize.height;
-      const marginRight = dimensions.width - computedSize.width;
+   // compute the vertical/horizontal margin if we would use the full size content
+   const marginBottom = dimensions.height - computedSize.height;
+   const marginRight = dimensions.width - computedSize.width;
 
-      const neededPlaceBottom = participantTileHeight * (1 - maxOverlayFactor);
-      const neededPlaceRight = participantTileWidth * (1 - maxOverlayFactor);
+   const neededPlaceBottom = participantTileHeight * (1 - maxOverlayFactor);
+   const neededPlaceRight = participantTileWidth * (1 - maxOverlayFactor);
 
-      const missingPlaceBottom = Math.max(0, neededPlaceBottom - marginBottom);
-      const missingPlaceRight = Math.max(0, neededPlaceRight - marginRight);
+   const missingPlaceBottom = Math.max(0, neededPlaceBottom - marginBottom);
+   const missingPlaceRight = Math.max(0, neededPlaceRight - marginRight);
 
-      let newDimensions: Size | undefined;
-      if (missingPlaceRight > missingPlaceBottom) {
-         participantsPlace = 'bottom';
+   let newDimensions: Size | undefined;
+   if (missingPlaceRight > missingPlaceBottom) {
+      participantsPlace = 'bottom';
 
-         if (missingPlaceBottom > 0) {
-            newDimensions = { width: computedSize.width, height: computedSize.height - missingPlaceBottom };
-         }
-      } else {
-         participantsPlace = 'right';
-         if (missingPlaceRight > 0) {
-            newDimensions = { width: computedSize.width - missingPlaceRight, height: computedSize.height };
-         }
+      if (missingPlaceBottom > 0) {
+         newDimensions = { width: computedSize.width, height: computedSize.height - missingPlaceBottom };
       }
-
-      // arrange
-      if (newDimensions) {
-         computedSize = expandToBox(contentRatio, newDimensions);
-         if (maxContentWidth) computedSize = maxWidth(computedSize, maxContentWidth);
+   } else {
+      participantsPlace = 'right';
+      if (missingPlaceRight > 0) {
+         newDimensions = { width: computedSize.width - missingPlaceRight, height: computedSize.height };
       }
    }
+
+   useEffect(() => {
+      canShowParticipantsWithoutResize(newDimensions === undefined);
+   }, [newDimensions === undefined]);
+
+   // arrange
+   if (newDimensions && showParticipants) {
+      computedSize = expandToBox(contentRatio, newDimensions);
+      if (maxContentWidth) computedSize = maxWidth(computedSize, maxContentWidth);
+   }
+
+   const activeParticipants = useSelector(selectActiveParticipants);
 
    return (
       <div className={className}>
          <div className={classes.container}>
+            <ParticipantChips className={classes.chips} participantIds={Object.keys(activeParticipants)} />
             {render(computedSize)}
             {showParticipants && (
                <PresentationSceneParticipants
-                  location={participantsPlace!}
+                  location={participantsPlace}
                   tileHeight={participantTileHeight}
                   tileWidth={participantTileWidth}
                />

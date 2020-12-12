@@ -130,7 +130,7 @@ export default function BreakoutRoomsAssignments({ data, participants, createdRo
    };
 
    const selectParticipants = (ids: string[]) =>
-      (ids?.map((x) => participants.find((y) => y.participantId === x)).filter((x) => !!x) as ParticipantDto[]) ?? [];
+      ids?.map((x) => participants.find((y) => y.participantId === x)).filter((x): x is ParticipantDto => !!x) ?? [];
 
    return (
       <div>

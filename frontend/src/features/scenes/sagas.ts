@@ -19,7 +19,7 @@ import {
    selectCurrentScene,
    selectServerProvidedScene,
 } from './selectors';
-import { ActiveParticipants, RoomSceneState, Scene, ViewableScene } from './types';
+import { ActiveParticipantData, ActiveParticipants, RoomSceneState, Scene, ViewableScene } from './types';
 import { applyPatch, generateActiveParticipantsPatch } from './utils';
 
 function* updateScene() {
@@ -102,8 +102,8 @@ function* updateActiveParticipants(): any {
 
    const newActiveParticipants = applyPatch(update, activeParticipants);
    const updateRequiredTime = _(Object.values(newActiveParticipants))
-      .filter((x) => !!x.deletedOn)
-      .map((x) => DateTime.fromISO(x.deletedOn!))
+      .filter((x): x is Required<ActiveParticipantData> => !!x.deletedOn)
+      .map((x) => DateTime.fromISO(x.deletedOn))
       .orderBy((x) => x, 'asc')
       .first();
 
