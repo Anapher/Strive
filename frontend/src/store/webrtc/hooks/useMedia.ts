@@ -40,6 +40,14 @@ export default function useMedia(
 
    const connection = useWebRtc();
 
+   useEffect(() => {
+      // reset everything on connection state changed. This is especially important if WebRTC had to reconnect, as all field will be invalid
+      setEnabled(false);
+      setPaused(false);
+      setStreamInfo(undefined);
+      appliedDeviceId.current = undefined;
+   }, [connection]);
+
    const disable = async () => {
       if (!connection) return;
       if (!producerRef.current) return;

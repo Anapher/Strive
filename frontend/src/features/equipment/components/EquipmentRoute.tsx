@@ -28,12 +28,11 @@ export default function EquipmentRoute({
       params: { id },
    },
 }: Props) {
-   const conferenceState = useSelector((state: RootState) => state.conference.conferenceState);
    const connectionError = useSelector((state: RootState) => state.conference.connectionError);
    const { isConnected, isReconnecting } = useSelector((state: RootState) => state.signalr);
 
    const dispatch = useDispatch();
-   const webRtc = useRef(new WebRtcManager()).current;
+   const webRtc = useRef(new WebRtcManager({ sendMedia: true, receiveMedia: false })).current;
 
    let token: string | null = null;
 
@@ -52,10 +51,8 @@ export default function EquipmentRoute({
    }, [id, close, token]);
 
    useEffect(() => {
-      if (isConnected) {
-         webRtc.initialize({ sendMedia: true, receiveMedia: false });
-      }
-   }, [webRtc, isConnected, conferenceState]);
+      webRtc.beginConnecting();
+   }, [webRtc]);
 
    const [hasPermissions, setHasPermissions] = useState(false);
 

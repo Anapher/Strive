@@ -4,6 +4,7 @@ import { Device } from 'mediasoup-client';
 import { Consumer, MediaKind, RtpParameters, Transport, TransportOptions } from 'mediasoup-client/lib/types';
 import { ChangeStreamDto } from './types';
 import * as coreHub from 'src/core-hub';
+import { HubSubscription, subscribeEvent, unsubscribeAll } from 'src/utils/signalr-utils';
 
 const PC_PROPRIETARY_CONSTRAINTS = {
    optional: [{ googDscp: true }],
@@ -30,21 +31,33 @@ type ConsumerScorePayload = ConsumerInfoPayload & {
 };
 
 export class WebRtcConnection {
+   /** all current consumers */
    private consumers = new Map<string, Consumer>();
+
+   /** the latest received score for all consumers */
    private consumerScores = new Map<string, number>();
+
+   /** SignalR methods that were subscribed. Must be memorized for unsubscription in close() */
+   private signalrSubscription = new Array<HubSubscription>();
 
    constructor(private connection: HubConnection) {
       this.device = new Device();
 
-      connection.on('newConsumer', this.onNewConsumer.bind(this));
-      connection.on('consumerClosed', this.onConsumerClosed.bind(this));
-      connection.on('consumerScore', this.onConsumerScore.bind(this));
+      this.signalrSubscription.push(
+         subscribeEvent(connection, 'newConsumer', this.onNewConsumer.bind(this)),
+         subscribeEvent(connection, 'consumerClosed', this.onConsumerClosed.bind(this)),
+         subscribeEvent(connection, 'consumerScore', this.onConsumerScore.bind(this)),
 
-      connection.on('consumerPaused', this.onConsumerPaused.bind(this));
-      connection.on('consumerResumed', this.onConsumerResumed.bind(this));
+         subscribeEvent(connection, 'consumerPaused', this.onConsumerPaused.bind(this)),
+         subscribeEvent(connection, 'consumerResumed', this.onConsumerResumed.bind(this)),
+      );
    }
 
    public eventEmitter = new EventEmitter();
+
+   public device: Device;
+   public sendTransport: Transport | null = null;
+   public receiveTransport: Transport | null = null;
 
    public canProduceVideo() {
       return this.device.canProduce('video');
@@ -58,10 +71,25 @@ export class WebRtcConnection {
       return this.consumers.values();
    }
 
-   private async onNewConsumer({ id, producerId, kind, rtpParameters, appData, participantId }: OnNewConsumerPayload) {
-      console.log('on new consumer');
+   public close(): void {
+      this.sendTransport?.close();
+      this.receiveTransport?.close();
 
-      if (!this.receiveTransport) return;
+      for (const consumer of this.consumers.values()) {
+         consumer.close();
+      }
+
+      this.consumers.clear();
+      this.eventEmitter.emit('onConsumersChanged');
+
+      unsubscribeAll(this.connection, this.signalrSubscription);
+   }
+
+   private async onNewConsumer({ id, producerId, kind, rtpParameters, appData, participantId }: OnNewConsumerPayload) {
+      if (!this.receiveTransport) {
+         console.warn('received new consumer, but receive transport is not initialized');
+         return;
+      }
 
       try {
          const consumer = await this.receiveTransport.consume({
@@ -71,8 +99,6 @@ export class WebRtcConnection {
             producerId,
             appData: { ...appData, participantId },
          });
-
-         console.log('consumer received');
 
          this.consumers.set(consumer.id, consumer);
 
@@ -87,8 +113,6 @@ export class WebRtcConnection {
    }
 
    private onConsumerClosed({ consumerId }: ConsumerInfoPayload) {
-      console.log('on consumer closed');
-
       const consumer = this.consumers.get(consumerId);
       if (consumer) {
          consumer.close();
@@ -99,8 +123,6 @@ export class WebRtcConnection {
    }
 
    private onConsumerPaused({ consumerId }: ConsumerInfoPayload) {
-      console.log('paused');
-
       const consumer = this.consumers.get(consumerId);
       if (consumer) {
          consumer.pause();
@@ -121,10 +143,6 @@ export class WebRtcConnection {
       this.consumerScores.set(consumerId, score);
       this.eventEmitter.emit('onConsumerScoreUpdated', { consumerId });
    }
-
-   public device: Device;
-   public sendTransport: Transport | null = null;
-   public receiveTransport: Transport | null = null;
 
    public async createSendTransport(): Promise<Transport> {
       const request = {
@@ -161,8 +179,6 @@ export class WebRtcConnection {
             errback(error);
          }
       });
-
-      transport.on('connectionstatechange', (state) => console.log('connection state ', state));
 
       this.sendTransport = transport;
       return transport;

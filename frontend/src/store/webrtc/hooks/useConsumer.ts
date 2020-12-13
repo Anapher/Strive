@@ -48,6 +48,8 @@ export default function useConsumer(participantId: string | undefined, kind: Pro
             connection.eventEmitter.removeListener('onConsumersChanged', listener);
             connection.eventEmitter.removeListener('onConsumerUpdated', updateListener);
          };
+      } else {
+         setConsumer(null);
       }
    }, [connection, participantId, kind]);
 

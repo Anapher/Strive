@@ -20,6 +20,7 @@ import { signOut } from 'src/features/auth/authSlice';
 import { selectAccessToken } from 'src/features/auth/selectors';
 import { openSettings } from 'src/features/settings/settingsSlice';
 import usePermission, { CONFERENCE_CAN_OPEN_AND_CLOSE } from 'src/hooks/usePermission';
+import useWebRtcStatus from 'src/store/webrtc/hooks/useWebRtcStatus';
 import { selectParticipants } from '../selectors';
 
 const useStyles = makeStyles((theme) =>
@@ -41,6 +42,10 @@ const useStyles = makeStyles((theme) =>
       chip: {
          backgroundColor: 'rgb(55, 55, 57)',
          padding: theme.spacing(0, 1),
+      },
+      errorChip: {
+         backgroundColor: theme.palette.error.main,
+         color: theme.palette.error.contrastText,
       },
    }),
 );
@@ -68,6 +73,8 @@ export default function ConferenceAppBar({ chatWidth }: Props) {
 
    const participants = useSelector(selectParticipants);
 
+   const webRtcStatus = useWebRtcStatus();
+
    return (
       <AppBar position="static">
          <Toolbar variant="dense" className={classes.toolbar}>
@@ -75,6 +82,16 @@ export default function ConferenceAppBar({ chatWidth }: Props) {
                <Typography variant="h6">PaderConference</Typography>
             </Box>
             <Box>
+               {webRtcStatus !== 'connected' && (
+                  <Chip
+                     className={classes.errorChip}
+                     style={{ marginRight: 8 }}
+                     label={
+                        webRtcStatus === 'connecting' ? 'Reconnecting to WebRTC server...' : 'WebRTC not initialized'
+                     }
+                     size="small"
+                  />
+               )}
                {participants && (
                   <Chip
                      className={classes.chip}

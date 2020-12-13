@@ -34,7 +34,7 @@ function ConferenceRoute({
    const accessToken = useSelector((state: RootState) => state.auth.token?.accessToken);
    const conferenceState = useSelector((state: RootState) => state.conference.conferenceState);
    const { isConnected, isReconnecting } = useSelector((state: RootState) => state.signalr);
-   const webRtc = useRef(new WebRtcManager()).current;
+   const webRtc = useRef(new WebRtcManager({ sendMedia: true, receiveMedia: true })).current;
 
    const dispatch = useDispatch();
 
@@ -52,10 +52,8 @@ function ConferenceRoute({
    }, [id, close, dispatch, accessToken]);
 
    useEffect(() => {
-      if (isConnected && conferenceState) {
-         webRtc.initialize({ sendMedia: true, receiveMedia: true });
-      }
-   }, [webRtc, isConnected, conferenceState]);
+      webRtc.beginConnecting();
+   }, [webRtc]);
 
    if (error) {
       return (
