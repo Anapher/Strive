@@ -33,7 +33,7 @@ namespace PaderConference.Core.Tests.Services
             throw new NotSupportedException();
         }
 
-        public ValueTask UpdatePermissions(IEnumerable<Participant> participants)
+        public ValueTask RefreshPermissions(IEnumerable<Participant> participants)
         {
             throw new NotSupportedException();
         }

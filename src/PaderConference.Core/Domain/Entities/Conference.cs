@@ -12,10 +12,6 @@ namespace PaderConference.Core.Domain.Entities
         {
             ConferenceId = conferenceId;
             Moderators = moderators;
-
-            Permissions = ImmutableDictionary<string, string>.Empty;
-            ModeratorPermissions = ImmutableDictionary<string, string>.Empty;
-            DefaultRoomPermissions = ImmutableDictionary<string, string>.Empty;
         }
 
 #pragma warning disable 8618

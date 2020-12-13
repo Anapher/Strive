@@ -344,7 +344,7 @@ namespace PaderConference.Core.Services.Rooms
             if (roomPermissions == null)
                 return Enumerable.Empty<PermissionLayer>();
 
-            return new PermissionLayer(10, roomPermissions).Yield();
+            return new PermissionLayer(PermissionLayer.PERMISSION_LAYER_BREAKOUTROOM, roomPermissions).Yield();
         }
 
         public ConferenceRooms State => _synchronizedRooms.Current;

@@ -4,8 +4,15 @@ using PaderConference.Core.Extensions;
 
 namespace PaderConference.Core.Services.Permissions
 {
+    /// <summary>
+    ///     Configuration options that define default permissions
+    /// </summary>
     public class DefaultPermissionOptions
     {
+        /// <summary>
+        ///     Default conference permissions, so this is the foundation of permissions for every participant in the
+        ///     conference
+        /// </summary>
         public ImmutableDictionary<string, JsonElement> Conference { get; set; } = new[]
         {
             PermissionsList.Chat.CanSendChatMessage.Configure(true),
@@ -15,6 +22,9 @@ namespace PaderConference.Core.Services.Permissions
             PermissionsList.Conference.CanRaiseHand.Configure(true),
         }.ToImmutableDictionary();
 
+        /// <summary>
+        ///     Moderator permissions
+        /// </summary>
         public ImmutableDictionary<string, JsonElement> Moderator { get; set; } = new[]
         {
             PermissionsList.Conference.CanOpenAndClose.Configure(true),
@@ -26,7 +36,10 @@ namespace PaderConference.Core.Services.Permissions
             PermissionsList.Scenes.CanSetScene.Configure(true),
         }.ToImmutableDictionary();
 
-        public ImmutableDictionary<string, JsonElement> Room { get; set; } = new[]
+        /// <summary>
+        ///     Permissions participants in breakout rooms have
+        /// </summary>
+        public ImmutableDictionary<string, JsonElement> BreakoutRoom { get; set; } = new[]
         {
             PermissionsList.Media.CanShareAudio.Configure(true),
             PermissionsList.Media.CanShareScreen.Configure(true),

@@ -4,6 +4,9 @@ using System.Linq;
 
 namespace PaderConference.Core.Services.Permissions
 {
+    /// <summary>
+    ///     A description for a permission value
+    /// </summary>
     public class PermissionDescriptor
     {
         protected static readonly IReadOnlyDictionary<PermissionType, Type> TypeMap =
@@ -18,16 +21,22 @@ namespace PaderConference.Core.Services.Permissions
         protected static readonly IReadOnlyDictionary<Type, PermissionType> TypeMapReverse =
             TypeMap.ToDictionary(x => x.Value, x => x.Key);
 
+        /// <summary>
+        ///     Initialize a new instance of <see cref="PermissionDescriptor" />
+        /// </summary>
+        /// <param name="key">The key of the permission</param>
+        /// <param name="type">The type of the value of the permission</param>
+        /// <param name="defaultValue">The default value of the permission</param>
         public PermissionDescriptor(string key, PermissionType type, object? defaultValue = null)
         {
             Key = key;
             Type = type;
 
-
             if (defaultValue != null)
             {
                 if (defaultValue.GetType() != TypeMap[type])
                     throw new ArgumentException("Invalid type for default value");
+
                 DefaultValue = defaultValue;
             }
             else
@@ -52,10 +61,20 @@ namespace PaderConference.Core.Services.Permissions
             }
         }
 
+        /// <summary>
+        ///     The key of the permission
+        /// </summary>
         public string Key { get; }
 
-        public object DefaultValue { get; }
-
+        /// <summary>
+        ///     The type of the value of the permission
+        /// </summary>
         public PermissionType Type { get; }
+
+        /// <summary>
+        ///     The default value of the permission
+        /// </summary>
+
+        public object DefaultValue { get; }
     }
 }
