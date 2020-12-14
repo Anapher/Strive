@@ -125,7 +125,7 @@ namespace PaderConference.Core.Tests.Services.Permissions
 
         // moderators before, moderators after, participants after, mod permissions updated, conference permissions updated, expected participants updated
         public static readonly TheoryData<string[], string[], string[], bool, bool, string[]> TestConferenceUpdatedData
-            = new TheoryData<string[], string[], string[], bool, bool, string[]>
+            = new()
             {
                 // no participants, no changes
                 {

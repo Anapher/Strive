@@ -7,27 +7,27 @@ namespace PaderConference.Core.Services
     {
         public virtual ValueTask DisposeAsync()
         {
-            return new ValueTask();
+            return new();
         }
 
         public virtual ValueTask InitializeParticipant(Participant participant)
         {
-            return new ValueTask();
+            return new();
         }
 
         public virtual ValueTask OnClientDisconnected(Participant participant)
         {
-            return new ValueTask();
+            return new();
         }
 
         public virtual ValueTask OnClientConnected(Participant participant)
         {
-            return new ValueTask();
+            return new();
         }
 
         public virtual ValueTask InitializeAsync()
         {
-            return new ValueTask();
+            return new();
         }
     }
 }

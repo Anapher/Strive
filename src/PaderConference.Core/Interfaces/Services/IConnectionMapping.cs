@@ -6,8 +6,14 @@ namespace PaderConference.Core.Interfaces.Services
 {
     public interface IConnectionMapping
     {
+        /// <summary>
+        ///     Map connection ids to participant
+        /// </summary>
         ConcurrentDictionary<string, Participant> Connections { get; }
 
+        /// <summary>
+        ///     Map participant ids to connections
+        /// </summary>
         ConcurrentDictionary<string, IParticipantConnections> ConnectionsR { get; }
 
         bool Add(string connectionId, Participant participant, bool equipment = false);

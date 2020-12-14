@@ -13,7 +13,7 @@ namespace PaderConference.Infrastructure.Sockets
 
         public string MainConnectionId { get; }
 
-        public readonly ConcurrentDictionary<string, byte> Equipment = new ConcurrentDictionary<string, byte>();
+        public readonly ConcurrentDictionary<string, byte> Equipment = new();
 
         IEnumerable<string> IParticipantConnections.Equipment => Equipment.Keys;
     }

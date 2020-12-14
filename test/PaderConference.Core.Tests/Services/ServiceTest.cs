@@ -10,7 +10,7 @@ namespace PaderConference.Core.Tests.Services
     {
         protected ILogger<T> Logger;
 
-        public ServiceTest(ITestOutputHelper output)
+        protected ServiceTest(ITestOutputHelper output)
         {
             var logger = new LoggerConfiguration().MinimumLevel.Verbose().WriteTo.TestOutput(output).CreateLogger();
 

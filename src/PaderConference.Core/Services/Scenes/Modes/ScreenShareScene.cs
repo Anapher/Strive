@@ -1,4 +1,4 @@
-﻿namespace PaderConference.Core.Services.Scenes
+﻿namespace PaderConference.Core.Services.Scenes.Modes
 {
     public class ScreenShareScene : ConferenceScene
     {

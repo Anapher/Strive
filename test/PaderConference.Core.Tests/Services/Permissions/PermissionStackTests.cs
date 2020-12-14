@@ -10,8 +10,8 @@ namespace PaderConference.Core.Tests.Services.Permissions
 {
     public class PermissionStackTests
     {
-        private readonly PermissionDescriptor<bool> _testDescriptor1 = new PermissionDescriptor<bool>("test");
-        private readonly PermissionDescriptor<int> _testDescriptor2 = new PermissionDescriptor<int>("test2");
+        private readonly PermissionDescriptor<bool> _testDescriptor1 = new("test");
+        private readonly PermissionDescriptor<int> _testDescriptor2 = new("test2");
 
         [Fact]
         public async Task TestRespectOrder()

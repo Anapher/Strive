@@ -4,6 +4,6 @@ namespace PaderConference.Core.Errors
     {
         ValidationError,
         Authentication,
-        ServiceError
+        ServiceError,
     }
 }

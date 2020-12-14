@@ -74,7 +74,6 @@ namespace PaderConference.Core.Services.Permissions
         /// <summary>
         ///     The default value of the permission
         /// </summary>
-
         public object DefaultValue { get; }
     }
 }
