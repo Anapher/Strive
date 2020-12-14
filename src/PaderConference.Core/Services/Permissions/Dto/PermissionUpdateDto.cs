@@ -1,18 +1,9 @@
 ﻿namespace PaderConference.Core.Services.Permissions.Dto
 {
-    public class PermissionUpdateDto
+    public record PermissionUpdateDto
     {
-        public PermissionUpdateDto(string? conferenceId, string? roomId, string? participantId)
-        {
-            ConferenceId = conferenceId;
-            RoomId = roomId;
-            ParticipantId = participantId;
-        }
-
-        public string? ConferenceId { get; }
-
-        public string? RoomId { get; }
-
-        public string? ParticipantId { get; }
+        public string? ConferenceId { get; init; }
+        public string? RoomId { get; init; }
+        public string? ParticipantId { get; init; }
     }
 }

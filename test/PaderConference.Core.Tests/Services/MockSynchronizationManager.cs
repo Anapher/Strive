@@ -8,7 +8,7 @@ namespace PaderConference.Core.Tests.Services
     {
         public readonly Dictionary<string, ISynchronizedObject> Objects = new Dictionary<string, ISynchronizedObject>();
 
-        public ISynchronizedObject<T> Register<T>(string name, T initialValue) where T : notnull
+        public ISynchronizedObject<T> Register<T>(string name, T initialValue, ParticipantGroup group) where T : notnull
         {
             var result = new MockSynchronizationObject<T>(initialValue);
             Objects[name] = result;

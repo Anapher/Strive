@@ -1,21 +1,39 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace PaderConference.Core.Services.Synchronization
 {
-    public class SynchronizedObject<T> : ISynchronizedObject<T> where T : notnull
-    {
-        private readonly Func<T, T, ValueTask> _applyNewValue;
+    public delegate ValueTask ApplyNewValueDelegate<T>(SynchronizedObject<T> sender, T oldValue, T newValue)
+        where T : notnull;
 
-        public SynchronizedObject(T initialValue, Func<T, T, ValueTask> applyNewValue)
+    public abstract class SynchronizedObjectBase : ISynchronizedObject
+    {
+        public abstract string Name { get; }
+
+        public abstract ParticipantGroup ParticipantGroup { get; }
+
+        public abstract object GetCurrent();
+    }
+
+    public class SynchronizedObject<T> : SynchronizedObjectBase, ISynchronizedObject<T> where T : notnull
+    {
+        private readonly ApplyNewValueDelegate<T> _applyNewValue;
+
+        public SynchronizedObject(string name, T initialValue, ParticipantGroup participantGroup,
+            ApplyNewValueDelegate<T> applyNewValue)
         {
-            _applyNewValue = applyNewValue;
+            Name = name;
             Current = initialValue;
+            ParticipantGroup = participantGroup;
+            _applyNewValue = applyNewValue;
         }
+
+        public override string Name { get; }
+
+        public override ParticipantGroup ParticipantGroup { get; }
 
         public T Current { get; private set; }
 
-        public object GetCurrent()
+        public override object GetCurrent()
         {
             return Current;
         }
@@ -25,7 +43,7 @@ namespace PaderConference.Core.Services.Synchronization
             var oldValue = Current;
 
             Current = newValue;
-            return _applyNewValue(oldValue, newValue);
+            return _applyNewValue(this, oldValue, newValue);
         }
     }
 }

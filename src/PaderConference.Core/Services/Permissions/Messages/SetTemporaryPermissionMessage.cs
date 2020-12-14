@@ -2,19 +2,17 @@
 
 namespace PaderConference.Core.Services.Permissions.Messages
 {
-    public class SetTemporaryPermissionMessage
+    public record SetTemporaryPermissionMessage
     {
-        public SetTemporaryPermissionMessage(string participantId, string permissionKey, JsonElement? value)
+        public string? ParticipantId { get; init; }
+        public string? PermissionKey { get; init; }
+        public JsonElement? Value { get; init; }
+
+        public void Deconstruct(out string? participantId, out string? permissionKey, out JsonElement? value)
         {
-            ParticipantId = participantId;
-            PermissionKey = permissionKey;
-            Value = value;
+            participantId = ParticipantId;
+            permissionKey = PermissionKey;
+            value = Value;
         }
-
-        public string ParticipantId { get; }
-
-        public string PermissionKey { get; }
-
-        public JsonElement? Value { get; }
     }
 }
