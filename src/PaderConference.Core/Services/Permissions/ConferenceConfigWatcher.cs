@@ -14,37 +14,22 @@ namespace PaderConference.Core.Services.Permissions
     /// <summary>
     ///     Provide and synchronize values from the database
     /// </summary>
-    public class DatabasePermissionValues : IAsyncDisposable
+    public class ConferenceConfigWatcher : ModeratorWatcher
     {
+        private readonly string _conferenceId;
         private readonly IConferenceRepo _conferenceRepo;
         private readonly IConferenceManager _conferenceManager;
-        private readonly string _conferenceId;
         private readonly Func<IEnumerable<Participant>, ValueTask> _refreshParticipants;
-        private Func<Task>? _unsubscribeConferenceUpdated;
 
-        public DatabasePermissionValues(IConferenceRepo conferenceRepo, IConferenceManager conferenceManager,
-            string conferenceId, Func<IEnumerable<Participant>, ValueTask> refreshParticipants)
+        public ConferenceConfigWatcher(string conferenceId, IConferenceRepo conferenceRepo,
+            IConferenceManager conferenceManager, Func<IEnumerable<Participant>, ValueTask> refreshParticipants) : base(
+            conferenceId, conferenceRepo)
         {
+            _conferenceId = conferenceId;
             _conferenceRepo = conferenceRepo;
             _conferenceManager = conferenceManager;
-            _conferenceId = conferenceId;
             _refreshParticipants = refreshParticipants;
         }
-
-        public async ValueTask DisposeAsync()
-        {
-            var unsubscribe = _unsubscribeConferenceUpdated;
-            if (unsubscribe != null)
-            {
-                await unsubscribe();
-                _unsubscribeConferenceUpdated = null;
-            }
-        }
-
-        /// <summary>
-        ///     A list of the participant ids of all moderators of this conference
-        /// </summary>
-        public IImmutableList<string> Moderators { get; private set; } = ImmutableList<string>.Empty;
 
         /// <summary>
         ///     The current conference permissions
@@ -57,51 +42,52 @@ namespace PaderConference.Core.Services.Permissions
         public IImmutableDictionary<string, JsonElement>? ModeratorPermissions { get; private set; }
 
         /// <summary>
-        ///     Initialize all properties in this class and subscribe to database events. Please note that
-        ///     <see cref="DisposeAsync" /> must be called when this method has executed
+        ///     Trigger an update, fetch conference from repository and update this object
         /// </summary>
-        public async Task InitializeAsync()
+        public async Task TriggerUpdate()
         {
             var conference = await _conferenceRepo.FindById(_conferenceId);
-            if (conference == null)
-                throw new InvalidOperationException("The conference could not be found in database.");
-
-            Moderators = conference.Moderators;
-            ConferencePermissions = ParseDictionary(conference.Permissions);
-            ModeratorPermissions = ParseDictionary(conference.ModeratorPermissions);
-
-            _unsubscribeConferenceUpdated =
-                await _conferenceRepo.SubscribeConferenceUpdated(_conferenceId, OnConferenceUpdated);
+            if (conference != null)
+                await OnConferenceUpdated(conference);
         }
 
-        public async Task OnConferenceUpdated(Conference arg)
+        protected override async ValueTask InitializeAsync(Conference conference)
         {
+            await base.InitializeAsync(conference);
+
+            ConferencePermissions = ParseDictionary(conference.Permissions);
+            ModeratorPermissions = ParseDictionary(conference.ModeratorPermissions);
+        }
+
+        protected override async Task OnConferenceUpdated(Conference conference)
+        {
+            var oldModerators = Moderators;
+            await base.OnConferenceUpdated(conference);
+
             var participants = _conferenceManager.GetParticipants(_conferenceId);
             var updatedParticipants = new HashSet<Participant>();
 
             // add all users that got their moderator state changed
-            var updatedModerators = arg.Moderators.Except(Moderators).Concat(Moderators.Except(arg.Moderators))
-                .Distinct();
+            var updatedModerators = conference.Moderators.Except(oldModerators)
+                .Concat(oldModerators.Except(conference.Moderators)).Distinct();
             updatedParticipants.UnionWith(updatedModerators
                 .Select(x => participants.FirstOrDefault(p => p.ParticipantId == x)).WhereNotNull());
 
-            if (!ComparePermissions(arg.ModeratorPermissions, ModeratorPermissions))
+            if (!ComparePermissions(conference.ModeratorPermissions, ModeratorPermissions))
             {
-                ModeratorPermissions = ParseDictionary(arg.ModeratorPermissions);
-                updatedParticipants.UnionWith(arg.Moderators
+                ModeratorPermissions = ParseDictionary(conference.ModeratorPermissions);
+                updatedParticipants.UnionWith(conference.Moderators
                     .Select(x => participants.FirstOrDefault(p => p.ParticipantId == x))
                     .WhereNotNull()); // add all current moderators
             }
 
-            if (!ComparePermissions(arg.Permissions, ConferencePermissions))
+            if (!ComparePermissions(conference.Permissions, ConferencePermissions))
             {
-                ConferencePermissions = ParseDictionary(arg.Permissions);
+                ConferencePermissions = ParseDictionary(conference.Permissions);
 
                 // add all participants of the conference
                 updatedParticipants.UnionWith(participants);
             }
-
-            Moderators = arg.Moderators;
 
             if (updatedParticipants.Any())
                 await _refreshParticipants(updatedParticipants);

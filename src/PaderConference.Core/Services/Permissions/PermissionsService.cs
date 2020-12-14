@@ -40,7 +40,7 @@ namespace PaderConference.Core.Services.Permissions
         private readonly IConnectionMapping _connectionMapping;
         private readonly IConferenceManager _conferenceManager;
 
-        private readonly DatabasePermissionValues _databasePermissionValues;
+        private readonly ConferenceConfigWatcher _conferenceConfigWatcher;
 
         private IImmutableDictionary<string, IImmutableDictionary<string, JsonElement>> _temporaryPermissions =
             ImmutableDictionary<string, IImmutableDictionary<string, JsonElement>>.Empty;
@@ -64,21 +64,21 @@ namespace PaderConference.Core.Services.Permissions
 
             _optionsDisposable = defaultPermissions.OnChange(OnDefaultPermissionChanged);
 
-            _databasePermissionValues =
-                new DatabasePermissionValues(conferenceRepo, conferenceManager, conferenceId, RefreshPermissions);
+            _conferenceConfigWatcher =
+                new ConferenceConfigWatcher(conferenceId, conferenceRepo, conferenceManager, RefreshPermissions);
 
             RegisterLayerProvider(FetchPermissions);
         }
 
         public override async ValueTask InitializeAsync()
         {
-            await _databasePermissionValues.InitializeAsync();
+            await _conferenceConfigWatcher.InitializeAsync();
         }
 
         public override async ValueTask DisposeAsync()
         {
             _optionsDisposable.Dispose();
-            await _databasePermissionValues.DisposeAsync();
+            await _conferenceConfigWatcher.DisposeAsync();
         }
 
         public override ValueTask InitializeParticipant(Participant participant)
@@ -215,20 +215,19 @@ namespace PaderConference.Core.Services.Permissions
         {
             var result = new List<PermissionLayer>
             {
-                new PermissionLayer(PermissionLayer.PERMISSION_LAYER_CONFERENCE_DEFAULT,
-                    _defaultPermissions.Conference),
-                new PermissionLayer(PermissionLayer.PERMISSION_LAYER_CONFERENCE,
-                    _databasePermissionValues.ConferencePermissions ??
+                new(PermissionLayer.PERMISSION_LAYER_CONFERENCE_DEFAULT, _defaultPermissions.Conference),
+                new(PermissionLayer.PERMISSION_LAYER_CONFERENCE,
+                    _conferenceConfigWatcher.ConferencePermissions ??
                     ImmutableDictionary<string, JsonElement>.Empty),
             };
 
-            if (_databasePermissionValues.Moderators.Contains(participant.ParticipantId))
+            if (_conferenceConfigWatcher.Moderators.Contains(participant.ParticipantId))
                 result.AddRange(new[]
                 {
                     new PermissionLayer(PermissionLayer.PERMISSION_LAYER_MODERATOR_DEFAULT,
                         _defaultPermissions.Moderator),
                     new PermissionLayer(PermissionLayer.PERMISSION_LAYER_MODERATOR,
-                        _databasePermissionValues.ModeratorPermissions ??
+                        _conferenceConfigWatcher.ModeratorPermissions ??
                         ImmutableDictionary<string, JsonElement>.Empty),
                 });
 
@@ -243,9 +242,7 @@ namespace PaderConference.Core.Services.Permissions
             _logger.LogInformation("Default permissions updated. Update conference permissions.");
             _defaultPermissions = obj;
 
-            var conference = await _conferenceRepo.FindById(_conferenceId);
-            if (conference != null)
-                await _databasePermissionValues.OnConferenceUpdated(conference);
+            await _conferenceConfigWatcher.TriggerUpdate();
         }
     }
 }

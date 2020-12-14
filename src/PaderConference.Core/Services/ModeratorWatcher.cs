@@ -42,12 +42,12 @@ namespace PaderConference.Core.Services
             if (conference == null)
                 throw new InvalidOperationException("The conference could not be found in database.");
 
-            await Initialize(conference);
+            await InitializeAsync(conference);
             _unsubscribeConferenceUpdated =
                 await _conferenceRepo.SubscribeConferenceUpdated(_conferenceId, OnConferenceUpdated);
         }
 
-        protected virtual ValueTask Initialize(Conference conference)
+        protected virtual ValueTask InitializeAsync(Conference conference)
         {
             Moderators = conference.Moderators;
             return new ValueTask();
@@ -63,15 +63,15 @@ namespace PaderConference.Core.Services
             }
         }
 
-        protected virtual Task OnConferenceUpdated(Conference arg)
+        protected virtual Task OnConferenceUpdated(Conference conference)
         {
-            var added = arg.Moderators.Except(Moderators).ToImmutableArray();
-            var removed = Moderators.Except(arg.Moderators).ToImmutableArray();
+            var added = conference.Moderators.Except(Moderators).ToImmutableArray();
+            var removed = Moderators.Except(conference.Moderators).ToImmutableArray();
 
-            Moderators = arg.Moderators;
+            Moderators = conference.Moderators;
 
             if (added.Any() || removed.Any())
-                ModeratorsUpdated?.Invoke(this, new ModeratorUpdateInfo(arg.Moderators, added, removed));
+                ModeratorsUpdated?.Invoke(this, new ModeratorUpdateInfo(conference.Moderators, added, removed));
 
             return Task.CompletedTask;
         }

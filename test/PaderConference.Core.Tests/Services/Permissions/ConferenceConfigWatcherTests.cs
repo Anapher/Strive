@@ -12,7 +12,7 @@ using Xunit;
 
 namespace PaderConference.Core.Tests.Services.Permissions
 {
-    public class DatabasePermissionValuesTests
+    public class ConferenceConfigWatcherTests
     {
         [Fact]
         public async Task TestInitializeConferenceNotFound()
@@ -26,8 +26,8 @@ namespace PaderConference.Core.Tests.Services.Permissions
 
             var refreshParticipants = new Mock<Func<IEnumerable<Participant>, ValueTask>>();
 
-            var databasePermissionValues = new DatabasePermissionValues(conferenceRepo.Object, conferenceManager.Object,
-                conferenceId, refreshParticipants.Object);
+            var databasePermissionValues = new ConferenceConfigWatcher(conferenceId, conferenceRepo.Object,
+                conferenceManager.Object, refreshParticipants.Object);
 
             // act
             await Assert.ThrowsAnyAsync<Exception>(async () => await databasePermissionValues.InitializeAsync());
@@ -50,8 +50,8 @@ namespace PaderConference.Core.Tests.Services.Permissions
 
             var refreshParticipants = new Mock<Func<IEnumerable<Participant>, ValueTask>>();
 
-            var databasePermissionValues = new DatabasePermissionValues(conferenceRepo.Object, conferenceManager.Object,
-                conferenceId, refreshParticipants.Object);
+            var databasePermissionValues = new ConferenceConfigWatcher(conferenceId, conferenceRepo.Object,
+                conferenceManager.Object, refreshParticipants.Object);
 
             // act
             await databasePermissionValues.InitializeAsync();
@@ -81,8 +81,8 @@ namespace PaderConference.Core.Tests.Services.Permissions
 
             var refreshParticipants = new Mock<Func<IEnumerable<Participant>, ValueTask>>();
 
-            var databasePermissionValues = new DatabasePermissionValues(conferenceRepo.Object, conferenceManager.Object,
-                conferenceId, refreshParticipants.Object);
+            var databasePermissionValues = new ConferenceConfigWatcher(conferenceId, conferenceRepo.Object,
+                conferenceManager.Object, refreshParticipants.Object);
 
             // act
             await databasePermissionValues.InitializeAsync();
@@ -110,8 +110,8 @@ namespace PaderConference.Core.Tests.Services.Permissions
 
             var refreshParticipants = new Mock<Func<IEnumerable<Participant>, ValueTask>>();
 
-            var databasePermissionValues = new DatabasePermissionValues(conferenceRepo.Object, conferenceManager.Object,
-                conferenceId, refreshParticipants.Object);
+            var databasePermissionValues = new ConferenceConfigWatcher(conferenceId, conferenceRepo.Object,
+                conferenceManager.Object, refreshParticipants.Object);
 
             // act
             await databasePermissionValues.InitializeAsync();
@@ -198,8 +198,8 @@ namespace PaderConference.Core.Tests.Services.Permissions
             refreshParticipants.Setup(x => x(It.IsAny<IEnumerable<Participant>>())).Callback(
                 (IEnumerable<Participant> result) => { refreshedParticipants = result; });
 
-            var databasePermissionValues = new DatabasePermissionValues(conferenceRepo.Object, conferenceManager.Object,
-                conferenceId, refreshParticipants.Object);
+            var databasePermissionValues = new ConferenceConfigWatcher(conferenceId, conferenceRepo.Object,
+                conferenceManager.Object, refreshParticipants.Object);
 
             // act
             await databasePermissionValues.InitializeAsync();
