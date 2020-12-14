@@ -1,0 +1,26 @@
+name: Test ASP.NET Core server
+on:
+  push:
+    paths:
+      - "src/**"
+      - "test/**"
+      - "**.sln"
+  pull_request:
+    paths:
+      - "src/**"
+      - "test/**"
+      - "**.sln"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 5.0.x
+      - name: Install dependencies
+        run: dotnet restore
+      - name: Test
+        run: dotnet test --no-restore --verbosity normal
