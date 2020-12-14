@@ -2,13 +2,8 @@
 
 namespace PaderConference.Core.Services.Chat
 {
-    public class ChatSynchronizedObject
+    public record ChatSynchronizedObject
     {
-        public ChatSynchronizedObject(IImmutableList<string> participantsTyping)
-        {
-            ParticipantsTyping = participantsTyping;
-        }
-
-        public IImmutableList<string> ParticipantsTyping { get; }
+        public IImmutableList<string> ParticipantsTyping { get; init; } = ImmutableList<string>.Empty;
     }
 }

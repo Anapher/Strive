@@ -9,13 +9,10 @@ namespace PaderConference.Core.Services.Equipment
 {
     public class ParticipantEquipment
     {
-        private readonly Dictionary<string, EquipmentConnection> _connectionIdToEquipment =
-            new Dictionary<string, EquipmentConnection>();
+        private readonly Dictionary<string, EquipmentConnection> _connectionIdToEquipment = new();
+        private readonly Dictionary<Guid, EquipmentConnection> _equipmentIdToEquipment = new();
 
-        private readonly Dictionary<Guid, EquipmentConnection> _equipmentIdToEquipment =
-            new Dictionary<Guid, EquipmentConnection>();
-
-        private readonly object _lock = new object();
+        private readonly object _lock = new();
 
         public ValueTask OnEquipmentConnected(string connectionId)
         {

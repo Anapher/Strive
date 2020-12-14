@@ -36,7 +36,7 @@ namespace PaderConference.Core.Services.ConferenceControl
             _permissionsService = permissionsService;
             _logger = logger;
             _synchronizedObject = synchronizationManager.Register("conferenceState",
-                new SynchronizedConferenceInfo(conference, null, false));
+                new SynchronizedConferenceInfo(conference));
         }
 
         public override async ValueTask InitializeAsync()
@@ -109,7 +109,8 @@ namespace PaderConference.Core.Services.ConferenceControl
             var scheduledDate = await _conferenceScheduler.GetNextOccurrence(arg.ConferenceId);
             var open = await _conferenceManager.GetIsConferenceOpen(arg.ConferenceId);
 
-            await _synchronizedObject.Update(new SynchronizedConferenceInfo(arg, scheduledDate, open));
+            await _synchronizedObject.Update(
+                new SynchronizedConferenceInfo(arg) {ScheduledDate = scheduledDate, IsOpen = open});
         }
     }
 }

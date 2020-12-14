@@ -2,19 +2,21 @@
 
 namespace PaderConference.Core.Services.BreakoutRoom
 {
-    public class ActiveBreakoutRoomState
+    public record ActiveBreakoutRoomState
     {
-        public ActiveBreakoutRoomState(int amount, DateTimeOffset? deadline, string? description)
-        {
-            Amount = amount;
-            Deadline = deadline;
-            Description = description;
-        }
+        /// <summary>
+        ///     The current amount of breakout rooms that are open
+        /// </summary>
+        public int Amount { get; init; }
 
-        public int Amount { get; }
+        /// <summary>
+        ///     The deadline for work in breakout rooms
+        /// </summary>
+        public DateTimeOffset? Deadline { get; init; }
 
-        public DateTimeOffset? Deadline { get; }
-
-        public string? Description { get; }
+        /// <summary>
+        ///     The current description (task)
+        /// </summary>
+        public string? Description { get; init; }
     }
 }

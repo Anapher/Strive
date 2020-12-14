@@ -26,8 +26,7 @@ namespace PaderConference.Core.Services.BreakoutRoom
         private readonly AsyncLock _breakoutLock = new AsyncLock();
         private CancellationTokenSource? _currentAutoCloseTokenSource;
 
-        private readonly ConcurrentDictionary<string, Room> _currentBreakoutRooms =
-            new ConcurrentDictionary<string, Room>();
+        private readonly ConcurrentDictionary<string, Room> _currentBreakoutRooms = new();
 
         private readonly IRoomNamingStrategy _namingStrategy = new NatoRoomNamingStrategy();
 
@@ -37,7 +36,7 @@ namespace PaderConference.Core.Services.BreakoutRoom
             _permissionsService = permissionsService;
             _roomManagement = roomManagement;
             _logger = logger;
-            _synchronizedObject = synchronizationManager.Register("breakoutRooms", new BreakoutRoomSyncObject(null));
+            _synchronizedObject = synchronizationManager.Register("breakoutRooms", new BreakoutRoomSyncObject());
         }
 
         public override ValueTask InitializeAsync()
@@ -97,7 +96,10 @@ namespace PaderConference.Core.Services.BreakoutRoom
                     ? (DateTimeOffset?) null
                     : DateTimeOffset.UtcNow.Add(message.Payload.Duration.Value);
 
-                var state = new ActiveBreakoutRoomState(message.Payload.Amount, deadline, message.Payload.Description);
+                var state = new ActiveBreakoutRoomState
+                {
+                    Amount = message.Payload.Amount, Deadline = deadline, Description = message.Payload.Description,
+                };
                 await ApplyState(state);
 
                 if (message.Payload.AssignedRooms?.Length > 0)
@@ -200,7 +202,10 @@ namespace PaderConference.Core.Services.BreakoutRoom
                         deadline = DateTimeOffset.UtcNow.Add(newOptions.Duration.Value);
                 }
 
-                var state = new ActiveBreakoutRoomState(newOptions.Amount, deadline, newOptions.Description);
+                var state = new ActiveBreakoutRoomState
+                {
+                    Amount = newOptions.Amount, Deadline = deadline, Description = newOptions.Description,
+                };
                 await ApplyState(state);
             }
         }
@@ -262,7 +267,7 @@ namespace PaderConference.Core.Services.BreakoutRoom
                 }
             }
 
-            await _synchronizedObject.Update(new BreakoutRoomSyncObject(state));
+            await _synchronizedObject.Update(new BreakoutRoomSyncObject {Active = state});
         }
 
         private async Task<IReadOnlyList<Room>> CreateMissingRooms(int amount, IRoomNamingStrategy namingStrategy)

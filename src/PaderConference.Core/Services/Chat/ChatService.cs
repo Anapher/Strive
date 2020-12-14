@@ -56,8 +56,7 @@ namespace PaderConference.Core.Services.Chat
             _options = options.Value;
             _logger = logger;
 
-            _synchronizedObject =
-                synchronizationManager.Register("chatInfo", new ChatSynchronizedObject(ImmutableList<string>.Empty));
+            _synchronizedObject = synchronizationManager.Register("chatInfo", new ChatSynchronizedObject());
             _refreshUsersTypingTimer = new Timer();
             _refreshUsersTypingTimer.Elapsed += OnRefreshUsersTyping;
             _refreshUsersTypingTimer.Interval = _options.CancelParticipantIsTypingInterval * 1000;
@@ -222,7 +221,8 @@ namespace PaderConference.Core.Services.Chat
             if (!usersCurrentlyTyping.SequenceEqual(_synchronizedObject.Current.ParticipantsTyping))
             {
                 _logger.LogDebug("Users currently typing changed, update synchronized object");
-                await _synchronizedObject.Update(new ChatSynchronizedObject(usersCurrentlyTyping));
+                await _synchronizedObject.Update(
+                    new ChatSynchronizedObject {ParticipantsTyping = usersCurrentlyTyping});
             }
 
             lock (_refreshUsersTypingTimerLock)

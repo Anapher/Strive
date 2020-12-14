@@ -2,20 +2,12 @@
 
 namespace PaderConference.Core.Services.Rooms
 {
-    public class ConferenceRooms
+    public record ConferenceRooms
     {
-        public ConferenceRooms(IImmutableList<Room> rooms, string defaultRoomId,
-            IImmutableDictionary<string, string> participants)
-        {
-            Rooms = rooms;
-            DefaultRoomId = defaultRoomId;
-            Participants = participants;
-        }
+        public IImmutableList<Room> Rooms { get; init; } = ImmutableList<Room>.Empty;
+        public string DefaultRoomId { get; init; } = RoomOptions.DEFAULT_ROOM_ID;
 
-        public IImmutableList<Room> Rooms { get; }
-
-        public string DefaultRoomId { get; }
-
-        public IImmutableDictionary<string, string> Participants { get; }
+        public IImmutableDictionary<string, string> Participants { get; init; } =
+            ImmutableDictionary<string, string>.Empty;
     }
 }

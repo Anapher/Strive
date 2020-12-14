@@ -1,12 +1,7 @@
 ﻿namespace PaderConference.Core.Services.BreakoutRoom
 {
-    public class BreakoutRoomSyncObject
+    public record BreakoutRoomSyncObject
     {
-        public BreakoutRoomSyncObject(ActiveBreakoutRoomState? active)
-        {
-            Active = active;
-        }
-
-        public ActiveBreakoutRoomState? Active { get; }
+        public ActiveBreakoutRoomState? Active { get; init; }
     }
 }

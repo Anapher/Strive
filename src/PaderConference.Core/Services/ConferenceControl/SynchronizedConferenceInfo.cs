@@ -4,22 +4,20 @@ using PaderConference.Core.Domain.Entities;
 
 namespace PaderConference.Core.Services.ConferenceControl
 {
-    public class SynchronizedConferenceInfo
+    public record SynchronizedConferenceInfo
     {
-        public SynchronizedConferenceInfo(Conference conference, DateTimeOffset? scheduledDate, bool isOpen)
+        public SynchronizedConferenceInfo(Conference conference)
         {
             ConferenceState = conference.State;
-            ScheduledDate = scheduledDate;
-            IsOpen = isOpen;
             ConferenceType = conference.ConferenceType;
             Moderators = conference.Moderators;
         }
 
         public ConferenceState ConferenceState { get; }
 
-        public DateTimeOffset? ScheduledDate { get; }
+        public DateTimeOffset? ScheduledDate { get; init; }
 
-        public bool IsOpen { get; }
+        public bool IsOpen { get; init; }
 
         public string? ConferenceType { get; }
 

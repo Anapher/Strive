@@ -1,9 +1,8 @@
 ﻿namespace PaderConference.Core.Services.Scenes
 {
-    public class RoomSceneState
+    public record RoomSceneState
     {
-        public bool IsControlled { get; set; }
-
-        public ConferenceScene? Scene { get; set; }
+        public bool IsControlled { get; init; }
+        public ConferenceScene? Scene { get; init; }
     }
 }

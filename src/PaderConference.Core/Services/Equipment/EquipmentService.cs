@@ -19,12 +19,11 @@ namespace PaderConference.Core.Services.Equipment
         private readonly ISignalMessenger _messenger;
         private readonly IConnectionMapping _connectionMapping;
         private readonly ILogger<EquipmentService> _logger;
-        private readonly ReaderWriterLock _tokenGeneratorLock = new ReaderWriterLock();
-        private readonly Dictionary<string, string> _participantToToken = new Dictionary<string, string>();
-        private readonly Dictionary<string, string> _tokenToParticipant = new Dictionary<string, string>();
+        private readonly ReaderWriterLock _tokenGeneratorLock = new();
+        private readonly Dictionary<string, string> _participantToToken = new();
+        private readonly Dictionary<string, string> _tokenToParticipant = new();
 
-        private readonly ConcurrentDictionary<string, ParticipantEquipment> _participantEquipment =
-            new ConcurrentDictionary<string, ParticipantEquipment>();
+        private readonly ConcurrentDictionary<string, ParticipantEquipment> _participantEquipment = new();
 
         public EquipmentService(ITokenFactory tokenFactory, ISignalMessenger messenger,
             IConnectionMapping connectionMapping, ILogger<EquipmentService> logger)

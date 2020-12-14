@@ -41,9 +41,6 @@ namespace PaderConference.Core.Services.ParticipantsList
         private ValueTask UpdateParticipantsList()
         {
             var participants = _conferenceManager.GetParticipants(_conferenceId);
-            if (participants == null)
-                return new ValueTask();
-
             return _synchronizedParticipants.Update(participants.Select(_mapper.Map<ParticipantDto>).ToImmutableList());
         }
     }

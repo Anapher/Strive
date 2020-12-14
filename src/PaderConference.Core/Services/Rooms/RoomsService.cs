@@ -19,7 +19,6 @@ namespace PaderConference.Core.Services.Rooms
 {
     public class RoomsService : ConferenceService, IRoomManagement
     {
-        private const string DefaultRoomId = "default";
         private readonly string _conferenceId;
         private readonly IRoomRepo _roomRepo;
         private readonly ILogger<RoomsService> _logger;
@@ -48,9 +47,7 @@ namespace PaderConference.Core.Services.Rooms
             _options = options.Value;
             _logger = logger;
 
-            _synchronizedRooms = synchronizationManager.Register("rooms",
-                new ConferenceRooms(ImmutableList<Room>.Empty, DefaultRoomId,
-                    ImmutableDictionary<string, string>.Empty));
+            _synchronizedRooms = synchronizationManager.Register("rooms", new ConferenceRooms());
 
             permissionsService.RegisterLayerProvider(FetchRoomPermissions);
         }
@@ -96,7 +93,7 @@ namespace PaderConference.Core.Services.Rooms
             }
 
             // the default room must always exist
-            var defaultRoom = new Room(DefaultRoomId, _options.DefaultRoomName, true);
+            var defaultRoom = new Room(RoomOptions.DEFAULT_ROOM_ID, _options.DefaultRoomName, true);
             await _roomRepo.CreateRoom(_conferenceId, defaultRoom);
 
             await UpdateSynchronizedRooms();
@@ -276,11 +273,14 @@ namespace PaderConference.Core.Services.Rooms
         {
             var participantToRooms = await _roomRepo.GetParticipantRooms(_conferenceId);
             var defaultRoomId = await GetDefaultRoomId();
-
             var roomInfos = (await _roomRepo.GetAll(_conferenceId)).Values.OrderBy(x => x.RoomId).ToImmutableList();
 
-            var data = new ConferenceRooms(roomInfos, defaultRoomId, participantToRooms.ToImmutableDictionary());
-            await _synchronizedRooms.Update(data);
+            await _synchronizedRooms.Update(new ConferenceRooms
+            {
+                Rooms = roomInfos,
+                DefaultRoomId = defaultRoomId,
+                Participants = participantToRooms.ToImmutableDictionary(),
+            });
         }
 
         private async Task<Room?> GetRoomInfo(string roomId)
@@ -331,7 +331,7 @@ namespace PaderConference.Core.Services.Rooms
 
         private async Task<string> GetDefaultRoomId()
         {
-            return await _roomRepo.GetDefaultRoomId(_conferenceId) ?? DefaultRoomId;
+            return await _roomRepo.GetDefaultRoomId(_conferenceId) ?? RoomOptions.DEFAULT_ROOM_ID;
         }
 
         private async ValueTask<IEnumerable<PermissionLayer>> FetchRoomPermissions(Participant participant)

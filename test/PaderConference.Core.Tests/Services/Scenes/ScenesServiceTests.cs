@@ -25,9 +25,8 @@ namespace PaderConference.Core.Tests.Services.Scenes
                 {TestParticipants.Default.ParticipantId, new Dictionary<string, JsonElement>()},
             });
 
-        private readonly ScenesOptions _scenesOptions = new ScenesOptions();
+        private readonly ScenesOptions _scenesOptions;
         private readonly MockSynchronizationManager _synchronizationManager = new MockSynchronizationManager();
-        private readonly Mock<ISignalMessenger> _signalMessenger = new Mock<ISignalMessenger>();
 
         private readonly Mock<IRoomManagement> _roomManagementMock = new Mock<IRoomManagement>();
 
@@ -69,8 +68,7 @@ namespace PaderConference.Core.Tests.Services.Scenes
         public async Task TestInitializeExistingRoomsNoneExist()
         {
             // arrange
-            _roomManagementMock.SetupGet(x => x.State).Returns(new ConferenceRooms(ImmutableList<Room>.Empty, "456",
-                ImmutableDictionary<string, string>.Empty));
+            _roomManagementMock.SetupGet(x => x.State).Returns(new ConferenceRooms());
 
             var service = Create();
 
@@ -86,9 +84,10 @@ namespace PaderConference.Core.Tests.Services.Scenes
         public async Task TestInitializeExistingRooms()
         {
             // arrange
-            _roomManagementMock.SetupGet(x => x.State).Returns(new ConferenceRooms(
-                new[] {new Room("456", "master", true)}.ToImmutableList(), "456",
-                ImmutableDictionary<string, string>.Empty));
+            _roomManagementMock.SetupGet(x => x.State).Returns(new ConferenceRooms
+            {
+                Rooms = new[] {new Room("456", "master", true)}.ToImmutableList(),
+            });
 
             var service = Create();
 
@@ -108,20 +107,19 @@ namespace PaderConference.Core.Tests.Services.Scenes
             _scenesOptions.DefaultRoomState = new RoomSceneState {IsControlled = false, Scene = new GridScene()};
 
             var service = Create();
-            _roomManagementMock.SetupGet(x => x.State).Returns(new ConferenceRooms(ImmutableList<Room>.Empty, "123",
-                ImmutableDictionary<string, string>.Empty));
+            _roomManagementMock.SetupGet(x => x.State).Returns(new ConferenceRooms());
 
             // act
 
             await service.InitializeAsync();
             _roomManagementMock.Raise(x => x.RoomsCreated += null, _roomManagementMock.Object,
-                new List<Room> {new Room("123", "master", true)});
+                new List<Room> {new(RoomOptions.DEFAULT_ROOM_ID, "master", true)});
 
             // assert
             var result = GetCurrentState();
             var scene = Assert.Single(result);
 
-            Assert.Equal("123", scene.Key);
+            Assert.Equal(RoomOptions.DEFAULT_ROOM_ID, scene.Key);
             Assert.Equal(_scenesOptions.DefaultRoomState.IsControlled, scene.Value.IsControlled);
             Assert.Equal(_scenesOptions.DefaultRoomState.Scene?.Type, scene.Value.Scene?.Type);
         }
@@ -134,8 +132,7 @@ namespace PaderConference.Core.Tests.Services.Scenes
             _scenesOptions.DefaultRoomState = new RoomSceneState {IsControlled = false, Scene = new GridScene()};
 
             var service = Create();
-            _roomManagementMock.SetupGet(x => x.State).Returns(new ConferenceRooms(ImmutableList<Room>.Empty, "123",
-                ImmutableDictionary<string, string>.Empty));
+            _roomManagementMock.SetupGet(x => x.State).Returns(new ConferenceRooms());
 
             // act
 
@@ -157,9 +154,10 @@ namespace PaderConference.Core.Tests.Services.Scenes
         {
             // arrange
             var service = Create();
-            _roomManagementMock.SetupGet(x => x.State).Returns(new ConferenceRooms(
-                new[] {new Room("456", "master", true)}.ToImmutableList(), "456",
-                ImmutableDictionary<string, string>.Empty));
+            _roomManagementMock.SetupGet(x => x.State).Returns(new ConferenceRooms
+            {
+                Rooms = new[] {new Room("456", "master", true)}.ToImmutableList(),
+            });
 
             // act
             await service.InitializeAsync();
@@ -176,9 +174,10 @@ namespace PaderConference.Core.Tests.Services.Scenes
         {
             // arrange
             var service = Create();
-            _roomManagementMock.SetupGet(x => x.State).Returns(new ConferenceRooms(
-                new[] {new Room("456", "master", true)}.ToImmutableList(), "456",
-                ImmutableDictionary<string, string>.Empty));
+            _roomManagementMock.SetupGet(x => x.State).Returns(new ConferenceRooms
+            {
+                Rooms = new[] {new Room("456", "master", true)}.ToImmutableList(),
+            });
 
             var messageMock = TestServiceMessage.Create(
                 new ChangeSceneDto
@@ -206,8 +205,7 @@ namespace PaderConference.Core.Tests.Services.Scenes
             EnableSetScenePermissions();
 
             var service = Create();
-            _roomManagementMock.SetupGet(x => x.State).Returns(new ConferenceRooms(ImmutableList<Room>.Empty, "456",
-                ImmutableDictionary<string, string>.Empty));
+            _roomManagementMock.SetupGet(x => x.State).Returns(new ConferenceRooms());
 
             var messageMock = TestServiceMessage.Create(new ChangeSceneDto {RoomId = "123", Scene = null},
                 TestParticipants.Default, "123");
@@ -231,9 +229,10 @@ namespace PaderConference.Core.Tests.Services.Scenes
             EnableSetScenePermissions();
 
             var service = Create();
-            _roomManagementMock.SetupGet(x => x.State).Returns(new ConferenceRooms(
-                new[] {new Room("456", "master", true)}.ToImmutableList(), "456",
-                ImmutableDictionary<string, string>.Empty));
+            _roomManagementMock.SetupGet(x => x.State).Returns(new ConferenceRooms
+            {
+                Rooms = new[] {new Room("456", "master", true)}.ToImmutableList(),
+            });
 
             var messageMock = TestServiceMessage.Create(
                 new ChangeSceneDto
