@@ -11,6 +11,10 @@ namespace PaderConference.Core.Services.Permissions
             new ServiceError("Permission denied to give temporary permission.",
                 ServiceErrorCode.Permissions_DeniedGiveTemporaryPermission);
 
+        public static Error PermissionDeniedFetchParticipantsPermissions =>
+            new ServiceError("Permission denied when trying to fetch the permissions of another participant.",
+                ServiceErrorCode.Permissions_DeniedGiveTemporaryPermission);
+
         public static Error InvalidPermissionValueType =>
             new ServiceError("The type of the value does not match the permission definition.",
                 ServiceErrorCode.Permissions_InvalidPermissionValueType);

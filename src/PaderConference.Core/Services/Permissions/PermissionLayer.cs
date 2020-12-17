@@ -8,18 +8,10 @@ namespace PaderConference.Core.Services.Permissions
     /// </summary>
     public class PermissionLayer
     {
-        // some permission orders
-        public const int PERMISSION_LAYER_CONFERENCE_DEFAULT = 10;
-        public const int PERMISSION_LAYER_CONFERENCE = 11;
-        public const int PERMISSION_LAYER_BREAKOUTROOM_DEFAULT = 20;
-        public const int PERMISSION_LAYER_BREAKOUTROOM = 21;
-        public const int PERMISSION_LAYER_MODERATOR_DEFAULT = 30;
-        public const int PERMISSION_LAYER_MODERATOR = 31;
-        public const int PERMISSION_LAYER_TEMPORARY = 100;
-
-        public PermissionLayer(int order, IReadOnlyDictionary<string, JsonElement> permissions)
+        public PermissionLayer(int order, string name, IReadOnlyDictionary<string, JsonElement> permissions)
         {
             Order = order;
+            Name = name;
             Permissions = permissions;
         }
 
@@ -28,6 +20,11 @@ namespace PaderConference.Core.Services.Permissions
         ///     importance of this layer, so a higher order will mean that it may override more other layers
         /// </summary>
         public int Order { get; }
+
+        /// <summary>
+        ///     The name of this permission layer. Please note that this is for displaying purposes only and serves no actual use.
+        /// </summary>
+        public string Name { get; }
 
         /// <summary>
         ///     The permissions defined in this layer

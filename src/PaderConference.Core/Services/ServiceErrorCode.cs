@@ -29,6 +29,7 @@ namespace PaderConference.Core.Services
         Permissions_DeniedGiveTemporaryPermission = 1000301,
         Permissions_InvalidPermissionValueType = 1000302,
         Permissions_ParticipantNotFound = 1000303,
+        Permissions_DeniedFetchingParticipantsPermissions = 1000304,
 
         // Equipment
         Equipment_NotFound = 1000400,

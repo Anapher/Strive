@@ -75,9 +75,8 @@ namespace PaderConference.Core.Services.Scenes
                 if (!_synchronizedObject.Current.ContainsKey(message.Payload.RoomId ?? string.Empty))
                     await message.ResponseError(SceneError.RoomNotFound);
                 else
-                    await _synchronizedObject.Update(
-                        _synchronizedObject.Current.SetItem(message.Payload.RoomId ?? string.Empty,
-                            message.Payload.Scene));
+                    await _synchronizedObject.Update(current => current.SetItem(message.Payload.RoomId ?? string.Empty,
+                        message.Payload.Scene));
             }
         }
 
@@ -88,7 +87,7 @@ namespace PaderConference.Core.Services.Scenes
             _logger.LogDebug("Remove rooms {@rooms}, update synchronized object", e);
             using (await _roomManagementLock.LockAsync())
             {
-                await _synchronizedObject.Update(_synchronizedObject.Current.RemoveRange(e));
+                await _synchronizedObject.Update(current => current.RemoveRange(e));
             }
         }
 
@@ -99,8 +98,9 @@ namespace PaderConference.Core.Services.Scenes
             _logger.LogDebug("Create {x} room(s), update synchronized object", e.Count);
             using (await _roomManagementLock.LockAsync())
             {
-                await _synchronizedObject.Update(_synchronizedObject.Current.AddRange(e.Select(x =>
-                    new KeyValuePair<string, RoomSceneState>(x.RoomId, CreateDefaultState(x)))));
+                await _synchronizedObject.Update(current =>
+                    current.AddRange(e.Select(x =>
+                        new KeyValuePair<string, RoomSceneState>(x.RoomId, CreateDefaultState(x)))));
             }
         }
 

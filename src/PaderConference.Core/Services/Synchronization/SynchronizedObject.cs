@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 namespace PaderConference.Core.Services.Synchronization
 {
@@ -17,6 +18,7 @@ namespace PaderConference.Core.Services.Synchronization
     public class SynchronizedObject<T> : SynchronizedObjectBase, ISynchronizedObject<T> where T : notnull
     {
         private readonly ApplyNewValueDelegate<T> _applyNewValue;
+        private readonly object _updateLock = new();
 
         public SynchronizedObject(string name, T initialValue, ParticipantGroup participantGroup,
             ApplyNewValueDelegate<T> applyNewValue)
@@ -40,10 +42,33 @@ namespace PaderConference.Core.Services.Synchronization
 
         public ValueTask Update(T newValue)
         {
-            var oldValue = Current;
+            T oldState;
+
+            lock (_updateLock)
+            {
+                oldState = Current;
+                Current = newValue;
+            }
 
             Current = newValue;
-            return _applyNewValue(this, oldValue, newValue);
+            return _applyNewValue(this, oldState, newValue);
+        }
+
+        public async ValueTask<T> Update(Func<T, T> updateStateFn)
+        {
+            T oldState;
+            T newState;
+
+            lock (_updateLock)
+            {
+                oldState = Current;
+                newState = updateStateFn(oldState);
+
+                Current = newState;
+            }
+
+            await _applyNewValue(this, oldState, newState);
+            return newState;
         }
     }
 }

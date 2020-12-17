@@ -7,13 +7,13 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Nito.AsyncEx;
 using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Errors;
 using PaderConference.Core.Extensions;
 using PaderConference.Core.Interfaces.Gateways.Repositories;
 using PaderConference.Core.Interfaces.Services;
 using PaderConference.Core.Services.Permissions.Messages;
+using PaderConference.Core.Services.Synchronization;
 using PaderConference.Core.Signaling;
 
 namespace PaderConference.Core.Services.Permissions
@@ -29,7 +29,6 @@ namespace PaderConference.Core.Services.Permissions
     public class PermissionsService : ConferenceService, IPermissionsService
     {
         private readonly string _conferenceId;
-        private readonly IConferenceRepo _conferenceRepo;
         private readonly IPermissionsRepo _permissionsRepo;
         private DefaultPermissionOptions _defaultPermissions;
 
@@ -41,20 +40,18 @@ namespace PaderConference.Core.Services.Permissions
         private readonly IConferenceManager _conferenceManager;
 
         private readonly ConferenceConfigWatcher _conferenceConfigWatcher;
-
-        private IImmutableDictionary<string, IImmutableDictionary<string, JsonElement>> _temporaryPermissions =
-            ImmutableDictionary<string, IImmutableDictionary<string, JsonElement>>.Empty;
-
-        private readonly AsyncReaderWriterLock _permissionLock = new();
-
         private readonly IDisposable _optionsDisposable;
+
+        // Participant Id -> (permission key -> permission value)
+        private readonly ISynchronizedObject<IImmutableDictionary<string, IImmutableDictionary<string, JsonElement>>>
+            _tempPermissions;
 
         public PermissionsService(string conferenceId, IConferenceRepo conferenceRepo, IPermissionsRepo permissionsRepo,
             ISignalMessenger clients, IConnectionMapping connectionMapping, IConferenceManager conferenceManager,
+            ISynchronizationManager synchronizationManager,
             IOptionsMonitor<DefaultPermissionOptions> defaultPermissions, ILogger<PermissionsService> logger)
         {
             _conferenceId = conferenceId;
-            _conferenceRepo = conferenceRepo;
             _permissionsRepo = permissionsRepo;
             _clients = clients;
             _connectionMapping = connectionMapping;
@@ -66,6 +63,12 @@ namespace PaderConference.Core.Services.Permissions
 
             _conferenceConfigWatcher =
                 new ConferenceConfigWatcher(conferenceId, conferenceRepo, conferenceManager, RefreshPermissions);
+
+            _tempPermissions =
+                synchronizationManager
+                    .Register<IImmutableDictionary<string, IImmutableDictionary<string, JsonElement>>>(
+                        "tempPermissions", ImmutableDictionary<string, IImmutableDictionary<string, JsonElement>>.Empty,
+                        ParticipantGroup.Moderators);
 
             RegisterLayerProvider(FetchPermissions);
         }
@@ -91,79 +94,97 @@ namespace PaderConference.Core.Services.Permissions
             _fetchPermissionsDelegates.Add(fetchPermissions);
         }
 
-        public async ValueTask SetTemporaryPermission(IServiceMessage<SetTemporaryPermissionMessage> message)
+        public async ValueTask<ISuccessOrError> SetTemporaryPermission(
+            IServiceMessage<SetTemporaryPermissionMessage> message)
         {
             using var _ = _logger.BeginMethodScope();
             var (targetParticipantId, permissionKey, value) = message.Payload;
 
             if (targetParticipantId == null)
-            {
-                await message.ResponseError(new FieldValidationError(nameof(message.Payload.ParticipantId),
+                return SuccessOrError.Failed(new FieldValidationError(nameof(message.Payload.ParticipantId),
                     "You must provide a participant id."));
-                return;
-            }
 
             if (permissionKey == null)
-            {
-                await message.ResponseError(new FieldValidationError(nameof(message.Payload.PermissionKey),
+                return SuccessOrError.Failed(new FieldValidationError(nameof(message.Payload.PermissionKey),
                     "You must provide a permission key."));
-                return;
-            }
 
             var permissions = await GetPermissions(message.Participant);
-            if (!await permissions.GetPermission(PermissionsList.Conference.CanGiveTemporaryPermission))
-            {
-                await message.ResponseError(PermissionsError.PermissionDeniedGiveTemporaryPermission);
-                return;
-            }
+            if (!await permissions.GetPermission(PermissionsList.Permissions.CanGiveTemporaryPermission))
+                return SuccessOrError.Failed(PermissionsError.PermissionDeniedGiveTemporaryPermission);
 
             _logger.LogDebug("Set temporary permission \"{permissionKey}\" of participant {participantId} to {value}",
                 permissionKey, targetParticipantId, value);
 
             if (!PermissionsListUtil.All.TryGetValue(permissionKey, out var descriptor))
-            {
-                await message.ResponseError(PermissionsError.PermissionKeyNotFound);
-                return;
-            }
+                return SuccessOrError.Failed(PermissionsError.PermissionKeyNotFound);
 
             var participant = _conferenceManager.GetParticipants(_conferenceId)
                 .FirstOrDefault(x => x.ParticipantId == targetParticipantId);
-            if (participant == null)
-            {
-                await message.ResponseError(PermissionsError.ParticipantNotFound);
-                return;
-            }
+            if (participant == null) return SuccessOrError.Failed(PermissionsError.ParticipantNotFound);
 
             if (value != null)
             {
                 if (!descriptor.ValidateValue(value.Value))
-                {
-                    await message.ResponseError(PermissionsError.InvalidPermissionValueType);
-                    return;
-                }
+                    return SuccessOrError.Failed(PermissionsError.InvalidPermissionValueType);
 
-                using (await _permissionLock.WriterLockAsync())
+                await _tempPermissions.Update(current =>
                 {
-                    if (!_temporaryPermissions.TryGetValue(targetParticipantId, out var newPermissions))
+                    if (!current.TryGetValue(targetParticipantId, out var newPermissions))
                         newPermissions = ImmutableDictionary<string, JsonElement>.Empty;
 
                     newPermissions = newPermissions.SetItem(descriptor.Key, value.Value);
-                    _temporaryPermissions = _temporaryPermissions.SetItem(targetParticipantId, newPermissions);
-                }
+                    return current.SetItem(targetParticipantId, newPermissions);
+                });
             }
             else
             {
-                using (await _permissionLock.WriterLockAsync())
+                if (!_tempPermissions.Current.TryGetValue(targetParticipantId, out var _))
+                    return SuccessOrError.Succeeded;
+
+                await _tempPermissions.Update(current =>
                 {
-                    if (!_temporaryPermissions.TryGetValue(targetParticipantId, out var newPermissions))
-                        return;
+                    if (!current.TryGetValue(targetParticipantId, out var newPermissions))
+                        return current;
 
                     newPermissions = newPermissions.Remove(descriptor.Key);
-                    _temporaryPermissions = _temporaryPermissions.SetItem(targetParticipantId, newPermissions);
-                }
+                    return current.SetItem(targetParticipantId, newPermissions);
+                });
             }
 
             await RefreshPermissions(new[] {participant});
+            return SuccessOrError.Succeeded;
+        }
+
+        public async ValueTask<ISuccessOrError<IEnumerable<PermissionLayer>>> FetchPermissions(
+            IServiceMessage<string?> message)
+        {
+            using var _ = _logger.BeginMethodScope();
+            var participantId = message.Payload;
+
+            if (participantId == null)
+                return SuccessOrError<IEnumerable<PermissionLayer>>.Failed(
+                    new FieldValidationError(nameof(participantId), "You must provide a participant id."));
+
+            Participant participant;
+
+            // you may always fetch your own permissions
+            if (participantId != message.Participant.ParticipantId)
+            {
+                var myPermissions = await GetPermissions(message.Participant);
+                if (!await myPermissions.GetPermission(PermissionsList.Permissions.CanSeeAnyParticipantsPermissions))
+                    return SuccessOrError<IEnumerable<PermissionLayer>>.Failed(PermissionsError
+                        .PermissionDeniedGiveTemporaryPermission);
+
+                if (!_conferenceManager.TryGetParticipant(_conferenceId, participantId, out participant!))
+                    return SuccessOrError<IEnumerable<PermissionLayer>>.Failed(PermissionsError.ParticipantNotFound);
+            }
+            else
+            {
+                participant = message.Participant;
+            }
+
+            var permissions = await FetchPermissions(participant);
+            return SuccessOrError<IEnumerable<PermissionLayer>>.Succeeded(permissions);
         }
 
         public ValueTask<IPermissionStack> GetPermissions(Participant participant)
@@ -215,24 +236,21 @@ namespace PaderConference.Core.Services.Permissions
         {
             var result = new List<PermissionLayer>
             {
-                new(PermissionLayer.PERMISSION_LAYER_CONFERENCE_DEFAULT, _defaultPermissions.Conference),
-                new(PermissionLayer.PERMISSION_LAYER_CONFERENCE,
-                    _conferenceConfigWatcher.ConferencePermissions ??
-                    ImmutableDictionary<string, JsonElement>.Empty),
+                CommonPermissionLayers.ConferenceDefault(_defaultPermissions.Conference),
+                CommonPermissionLayers.Conference(_conferenceConfigWatcher.ConferencePermissions ??
+                                                  ImmutableDictionary<string, JsonElement>.Empty),
             };
 
             if (_conferenceConfigWatcher.Moderators.Contains(participant.ParticipantId))
                 result.AddRange(new[]
                 {
-                    new PermissionLayer(PermissionLayer.PERMISSION_LAYER_MODERATOR_DEFAULT,
-                        _defaultPermissions.Moderator),
-                    new PermissionLayer(PermissionLayer.PERMISSION_LAYER_MODERATOR,
-                        _conferenceConfigWatcher.ModeratorPermissions ??
-                        ImmutableDictionary<string, JsonElement>.Empty),
+                    CommonPermissionLayers.ModeratorDefault(_defaultPermissions.Moderator),
+                    CommonPermissionLayers.Moderator(_conferenceConfigWatcher.ModeratorPermissions ??
+                                                     ImmutableDictionary<string, JsonElement>.Empty),
                 });
 
-            if (_temporaryPermissions.TryGetValue(participant.ParticipantId, out var temporaryPermissions))
-                result.Add(new PermissionLayer(PermissionLayer.PERMISSION_LAYER_TEMPORARY, temporaryPermissions));
+            if (_tempPermissions.Current.TryGetValue(participant.ParticipantId, out var temporaryPermissions))
+                result.Add(CommonPermissionLayers.Temporary(temporaryPermissions));
 
             return new ValueTask<IEnumerable<PermissionLayer>>(result);
         }

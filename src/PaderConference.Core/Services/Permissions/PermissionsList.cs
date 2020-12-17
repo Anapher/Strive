@@ -7,11 +7,17 @@
             public static readonly PermissionDescriptor<bool> CanOpenAndClose =
                 new PermissionDescriptor<bool>("conference.canOpenAndClose");
 
-            public static readonly PermissionDescriptor<bool> CanGiveTemporaryPermission =
-                new PermissionDescriptor<bool>("conference.canGiveTemporaryPermission");
+            public static readonly PermissionDescriptor<bool> CanRaiseHand = new("conference.canRaiseHand");
+        }
 
-            public static readonly PermissionDescriptor<bool> CanRaiseHand =
-                new PermissionDescriptor<bool>("conference.canRaiseHand");
+        public static class Permissions
+        {
+            public static readonly PermissionDescriptor<bool> CanGiveTemporaryPermission =
+                new("permissions.canGiveTemporaryPermission");
+
+
+            public static readonly PermissionDescriptor<bool> CanSeeAnyParticipantsPermissions =
+                new("permissions.canSeeAnyParticipantsPermissions");
         }
 
         public static class Chat
