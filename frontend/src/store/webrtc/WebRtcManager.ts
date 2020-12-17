@@ -80,8 +80,6 @@ export class WebRtcManager extends EventEmitter {
       const rtpResult = await signalr.invoke<SuccessOrError<RtpCapabilities>>('RequestRouterCapabilities');
       if (!rtpResult?.success) throw new Error('Router capabilities could not be retrived from server.');
 
-      console.log(rtpResult);
-
       await device.load({ routerRtpCapabilities: rtpResult.response });
 
       const result = await signalr.invoke<SuccessOrError<void>>('InitializeConnection', {

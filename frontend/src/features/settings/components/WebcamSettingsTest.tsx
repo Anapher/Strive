@@ -37,7 +37,6 @@ export default function WebcamSettingsTest() {
 
    const localCam = useWebcam(true);
    const camDevice = useSelector((state: RootState) => state.settings.obj.webcam.device);
-   console.log('camdevice', camDevice);
 
    const camController = useDeviceManagement('loopback-webcam', localCam, camDevice);
 
@@ -50,8 +49,6 @@ export default function WebcamSettingsTest() {
 
    useEffect(() => {
       if (consumer && videoElem.current) {
-         console.log('start video');
-
          const stream = new MediaStream();
          stream.addTrack(consumer.track);
 

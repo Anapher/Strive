@@ -46,8 +46,6 @@ export default function ChatMessageList({ chat, participants, participantId, par
       threshold: 25,
    });
 
-   console.log(atBottom);
-
    useEffect(() => {
       if (atBottom) setMissedMessages(0);
    }, [atBottom]);
