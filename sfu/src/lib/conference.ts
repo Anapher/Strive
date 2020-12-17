@@ -3,6 +3,7 @@ import _ from 'lodash';
 import { Router } from 'mediasoup/lib/Router';
 import { Consumer, MediaKind, Producer, RtpCapabilities, WebRtcTransportOptions } from 'mediasoup/lib/types';
 import config from '../config';
+import { SuccessOrError } from './communication-types';
 import Connection from './connection';
 import Logger from './logger';
 import { StreamInfoRepo } from './pader-conference/steam-info-repo';
@@ -18,6 +19,7 @@ import {
    TransportProduceRequest,
    TransportProduceResponse,
 } from './types';
+import * as errors from './errors';
 
 const logger = new Logger('Conference');
 
@@ -66,88 +68,100 @@ export class Conference {
       await this.streamInfoRepo.updateStreams(this.participants.values());
    }
 
-   public async removeConnection(connectionId: string): Promise<void> {
+   public async removeConnection(connectionId: string): Promise<SuccessOrError<void>> {
       const connection = this.connections.get(connectionId);
-      if (connection) {
-         this.connections.delete(connection.connectionId);
+      if (!connection) return { success: false, error: errors.connectionNotFound(connectionId) };
 
-         // if that was the last connection of this participant, remove participant
-         const participant = this.participants.get(connection.participantId);
-         if (participant) {
-            // remove connection from participant
-            _.remove(participant.connections, (x) => x.connectionId === connection.connectionId);
+      this.connections.delete(connection.connectionId);
 
-            for (const [, producer] of connection.producers) {
-               producer.close();
-               this.removeProducer(producer, participant);
-            }
-            await this.roomManager.updateParticipant(participant);
-
-            if (participant.connections.length === 0) {
-               // remove participant
-               this.participants.delete(participant.participantId);
-               await this.roomManager.removeParticipant(participant);
-            }
-         }
-
-         // update streams
-         await this.streamInfoRepo.updateStreams(this.participants.values());
-      }
-   }
-
-   public async roomSwitched({ meta: { participantId } }: ConnectionMessage<any>): Promise<void> {
-      const participant = this.participants.get(participantId);
+      // if that was the last connection of this participant, remove participant
+      const participant = this.participants.get(connection.participantId);
       if (participant) {
+         // remove connection from participant
+         _.remove(participant.connections, (x) => x.connectionId === connection.connectionId);
+
+         for (const [, producer] of connection.producers) {
+            producer.close();
+            this.removeProducer(producer, participant);
+         }
          await this.roomManager.updateParticipant(participant);
 
-         // update streams
-         await this.streamInfoRepo.updateStreams(this.participants.values());
+         if (participant.connections.length === 0) {
+            // remove participant
+            this.participants.delete(participant.participantId);
+            await this.roomManager.removeParticipant(participant);
+         }
       }
+
+      // update streams
+      await this.streamInfoRepo.updateStreams(this.participants.values());
+
+      return { success: true };
+   }
+
+   public async roomSwitched({ meta: { participantId } }: ConnectionMessage<any>): Promise<SuccessOrError<void>> {
+      const participant = this.participants.get(participantId);
+      if (!participant) return { success: false, error: errors.participantNotFound(participantId) };
+
+      await this.roomManager.updateParticipant(participant);
+
+      // update streams
+      await this.streamInfoRepo.updateStreams(this.participants.values());
+
+      return { success: true };
    }
 
    /**
     * Change a producer/consumer of the participant. The parameter provides information about the type (consumer|producer),
     * id and action (pause|resume|close)
     */
-   public async changeStream({ payload: { id, type, action }, meta }: ChangeStreamRequest): Promise<void> {
+   public async changeStream({
+      payload: { id, type, action },
+      meta,
+   }: ChangeStreamRequest): Promise<SuccessOrError<void>> {
       const connection = this.connections.get(meta.connectionId);
-
-      if (connection) {
-         let stream: Producer | Consumer | undefined;
-         if (type === 'consumer') {
-            stream = connection.consumers.get(id);
-         } else if (type === 'producer') {
-            stream = connection.producers.get(id);
-         }
-
-         if (stream) {
-            if (action === 'pause') {
-               await stream.pause();
-            } else if (action === 'close') {
-               stream.close();
-
-               if (type === 'consumer') {
-                  connection.consumers.delete(id);
-               } else {
-                  const producer = connection.producers.get(id);
-                  if (producer) {
-                     connection.producers.delete(id);
-
-                     const participant = this.participants.get(connection.participantId);
-                     if (participant) {
-                        this.removeProducer(producer, participant);
-                        await this.roomManager.updateParticipant(participant);
-                     }
-                  }
-               }
-            } else if (action === 'resume') {
-               await stream.resume();
-            }
-
-            // update streams
-            await this.streamInfoRepo.updateStreams(this.participants.values());
-         }
+      if (!connection) {
+         return { success: false, error: errors.connectionNotFound(meta.connectionId) };
       }
+
+      let stream: Producer | Consumer | undefined;
+      if (type === 'consumer') {
+         stream = connection.consumers.get(id);
+      } else if (type === 'producer') {
+         stream = connection.producers.get(id);
+      }
+
+      if (!stream) {
+         return { success: false, error: errors.streamNotFound(type, id) };
+      }
+
+      if (action === 'pause') {
+         await stream.pause();
+      } else if (action === 'close') {
+         stream.close();
+
+         if (type === 'consumer') {
+            connection.consumers.delete(id);
+         } else {
+            const producer = connection.producers.get(id);
+            if (producer) {
+               connection.producers.delete(id);
+
+               const participant = this.participants.get(connection.participantId);
+               if (participant) {
+                  this.removeProducer(producer, participant);
+                  await this.roomManager.updateParticipant(participant);
+               }
+            }
+         }
+      } else if (action === 'resume') {
+         await stream.resume();
+      }
+
+      // update streams
+      await this.streamInfoRepo.updateStreams(this.participants.values());
+
+      return { success: true };
    }
 
    /**
@@ -156,19 +170,19 @@ export class Conference {
    public async transportProduce({
       payload: { transportId, appData, kind, ...producerOptions },
       meta,
-   }: TransportProduceRequest): Promise<TransportProduceResponse> {
+   }: TransportProduceRequest): Promise<SuccessOrError<TransportProduceResponse>> {
       const connection = this.connections.get(meta.connectionId);
-      if (!connection) throw new Error('Connection was not found');
+      if (!connection) return { success: false, error: errors.connectionNotFound(meta.connectionId) };
 
       const participant = this.participants.get(connection.participantId);
-      if (!participant) throw new Error('Participant was not found');
+      if (!participant) return { success: false, error: errors.participantNotFound(connection.participantId) };
 
       const transport = connection.transport.get(transportId);
-      if (!transport) throw new Error(`transport with id "${transportId}" not found`);
+      if (!transport) return { success: false, error: errors.transportNotFound(transportId) };
 
       const source: ProducerSource = appData.source;
       if (!this.verifyProducerSource(kind, source))
-         throw new Error(`Cannot create a producer with source ${source} and kind ${kind}!`);
+         return { success: false, error: errors.invalidProducerKind(source, kind) };
 
       appData = { ...appData, participantId: participant.participantId };
 
@@ -196,22 +210,23 @@ export class Conference {
       // update streams
       await this.streamInfoRepo.updateStreams(this.participants.values());
 
-      return { id: producer.id };
+      return { success: true, response: { id: producer.id } };
    }
 
    /**
     * Connect the transport after initialization
     */
-   public async connectTransport({ payload, meta }: ConnectTransportRequest): Promise<void> {
+   public async connectTransport({ payload, meta }: ConnectTransportRequest): Promise<SuccessOrError<void>> {
       const connection = this.connections.get(meta.connectionId);
-      if (!connection) throw new Error('Connection was not found');
+      if (!connection) return { success: false, error: errors.connectionNotFound(meta.connectionId) };
 
       const transport = connection.transport.get(payload.transportId);
-      if (!transport) throw new Error(`transport with id "${payload.transportId}" not found`);
+      if (!transport) return { success: false, error: errors.transportNotFound(payload.transportId) };
 
       logger.debug('connectTransport() | participantId: %s', connection.participantId);
 
       await transport.connect(payload);
+      return { success: true };
    }
 
    /**
@@ -220,12 +235,12 @@ export class Conference {
    public async createTransport({
       payload: { sctpCapabilities, forceTcp, producing, consuming },
       meta,
-   }: CreateTransportRequest): Promise<CreateTransportResponse> {
+   }: CreateTransportRequest): Promise<SuccessOrError<CreateTransportResponse>> {
       const connection = this.connections.get(meta.connectionId);
-      if (!connection) throw new Error('Connection was not found');
+      if (!connection) return { success: false, error: errors.connectionNotFound(meta.connectionId) };
 
       const participant = this.participants.get(connection.participantId);
-      if (!participant) throw new Error(`participant with id "${connection.participantId}" not found`);
+      if (!participant) return { success: false, error: errors.participantNotFound(connection.participantId) };
 
       logger.debug('createTransport() | participantId: %s', connection.participantId);
 
@@ -256,11 +271,14 @@ export class Conference {
       await this.roomManager.updateParticipant(participant);
 
       return {
-         id: transport.id,
-         iceParameters: transport.iceParameters,
-         iceCandidates: transport.iceCandidates,
-         dtlsParameters: transport.dtlsParameters,
-         sctpParameters: transport.sctpParameters,
+         success: true,
+         response: {
+            id: transport.id,
+            iceParameters: transport.iceParameters,
+            iceCandidates: transport.iceCandidates,
+            dtlsParameters: transport.dtlsParameters,
+            sctpParameters: transport.sctpParameters,
+         },
       };
    }
 

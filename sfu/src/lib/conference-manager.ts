@@ -7,11 +7,8 @@ export default class ConferenceManager {
       this.conferences.set(conference.conferenceId, conference);
    }
 
-   getConference(id: string): Conference {
-      const conference = this.conferences.get(id);
-      if (!conference) throw new Error('Conference not registered');
-
-      return conference;
+   getConference(id: string): Conference | undefined {
+      return this.conferences.get(id);
    }
 
    hasConference(id: string): boolean {

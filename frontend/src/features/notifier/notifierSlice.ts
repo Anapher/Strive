@@ -1,8 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { ShowMessageData } from './types';
 import { showMessage } from './actions';
-import { onEventOccurred } from 'src/store/signal/actions';
-import { DomainError } from 'src/types';
+import { ShowMessageData } from './types';
 
 export type SnackNotification = ShowMessageData & {
    key: any;
@@ -33,13 +31,6 @@ const notifierSlice = createSlice({
    extraReducers: {
       [showMessage.type]: (state, action: PayloadAction<SnackNotification>) => {
          state.notifications.push(action.payload);
-      },
-      [onEventOccurred('OnError').type]: (state, { payload }: PayloadAction<DomainError>) => {
-         state.notifications.push({
-            key: new Date().getTime() + Math.random(), // i know, not a great solution
-            message: payload.message,
-            variant: 'error',
-         });
       },
    },
 });

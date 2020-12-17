@@ -5,6 +5,7 @@ import { Consumer, MediaKind, RtpParameters, Transport, TransportOptions } from 
 import { ChangeStreamDto } from './types';
 import * as coreHub from 'src/core-hub';
 import { HubSubscription, subscribeEvent, unsubscribeAll } from 'src/utils/signalr-utils';
+import { SuccessOrError } from 'src/communication-types';
 
 const PC_PROPRIETARY_CONSTRAINTS = {
    optional: [{ googDscp: true }],
@@ -150,31 +151,46 @@ export class WebRtcConnection {
          producing: true,
          consuming: false,
       };
-      const transportOptions = await this.connection.invoke<TransportOptions>('CreateWebRtcTransport', request);
+      const transportOptions = await this.connection.invoke<SuccessOrError<TransportOptions>>(
+         'CreateWebRtcTransport',
+         request,
+      );
+      if (!transportOptions.success) {
+         console.error('Error creating send transport: ', transportOptions.error);
+         throw new Error('Error creating send transport.');
+      }
 
       const transport = this.device.createSendTransport({
-         ...transportOptions,
+         ...transportOptions.response,
          iceServers: [],
          proprietaryConstraints: PC_PROPRIETARY_CONSTRAINTS,
       });
 
       transport.on('connect', async ({ dtlsParameters }, callback, errback) =>
          this.connection
-            .invoke('ConnectWebRtcTransport', { transportId: transport.id, dtlsParameters })
-            .then(callback)
+            .invoke<SuccessOrError<any>>('ConnectWebRtcTransport', { transportId: transport.id, dtlsParameters })
+            .then((response) => {
+               console.log('connect response', response);
+               if (response.success) callback();
+               else errback();
+            })
             .catch(errback),
       );
 
       transport.on('produce', async ({ kind, rtpParameters, appData }, callback, errback) => {
          try {
-            const { id } = await this.connection.invoke('ProduceWebRtcTransport', {
+            const result = await this.connection.invoke<SuccessOrError<any>>('ProduceWebRtcTransport', {
                transportId: transport.id,
                kind,
                rtpParameters,
                appData,
             });
 
-            callback({ id });
+            if (result.success) {
+               callback({ id: result.response.id });
+            } else {
+               errback(result.error);
+            }
          } catch (error) {
             errback(error);
          }
@@ -185,17 +201,25 @@ export class WebRtcConnection {
    }
 
    public async createReceiveTransport(): Promise<Transport> {
-      const transportOptions = await this.connection.invoke<TransportOptions>('CreateWebRtcTransport', {
+      const transportOptions = await this.connection.invoke<SuccessOrError<TransportOptions>>('CreateWebRtcTransport', {
          producing: false,
          consuming: true,
       });
 
-      const transport = this.device.createRecvTransport(transportOptions);
+      if (!transportOptions.success) {
+         console.error('Error creating receive transport: ', transportOptions.error);
+         throw new Error('Error creating receive transport.');
+      }
+
+      const transport = this.device.createRecvTransport(transportOptions.response);
 
       transport.on('connect', ({ dtlsParameters }, callback, errback) => {
          this.connection
-            .invoke('ConnectWebRtcTransport', { transportId: transport.id, dtlsParameters })
-            .then(callback)
+            .invoke<SuccessOrError<any>>('ConnectWebRtcTransport', { transportId: transport.id, dtlsParameters })
+            .then((response) => {
+               if (response.success) callback(response.response);
+               else errback(response.error);
+            })
             .catch(errback);
       });
 
@@ -204,6 +228,9 @@ export class WebRtcConnection {
    }
 
    public async changeStream(dto: ChangeStreamDto): Promise<void> {
-      await this.connection.invoke(coreHub.changeStream, dto);
+      const result = await this.connection.invoke<SuccessOrError<void>>(coreHub.changeStream, dto);
+      if (!result.success) {
+         throw new Error(result.error.message);
+      }
    }
 }

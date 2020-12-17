@@ -4,6 +4,7 @@ import * as actions from './actions';
 import * as coreHub from 'src/core-hub';
 import { createSynchronizeObjectReducer } from 'src/store/signal/synchronized-object';
 import { ChatMessageDto, ChatSynchronizedObject } from './types';
+import { SuccessOrError } from 'src/communication-types';
 
 export type ChatState = Readonly<{
    chat: ChatMessageDto[] | null;
@@ -24,8 +25,11 @@ const chatSlice = createSlice({
       },
    },
    extraReducers: {
-      [onInvokeReturn(coreHub._requestChat).type]: (state, action: PayloadAction<ChatMessageDto[]>) => {
-         state.chat = action.payload;
+      [onInvokeReturn(coreHub._requestChat).type]: (
+         state,
+         { payload }: PayloadAction<SuccessOrError<ChatMessageDto[]>>,
+      ) => {
+         if (payload.success) state.chat = payload.response;
       },
       [actions.onChatMessage.type]: (state, action: PayloadAction<ChatMessageDto>) => {
          state.chat?.push(action.payload);

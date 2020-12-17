@@ -22,7 +22,7 @@ namespace PaderConference.Core.Interfaces.Gateways.Repositories
 
         Task NotifyClientDisconnected(ConnectionMessageMetadata meta);
 
-        Task<JsonElement?> SendMessage<TRequest>(ConferenceDependentKey key, string conferenceId,
+        Task<SuccessOrError<JsonElement?>> SendMessage<TRequest>(ConferenceDependentKey key, string conferenceId,
             ConnectionMessage<TRequest> message);
     }
 }

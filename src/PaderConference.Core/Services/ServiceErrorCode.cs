@@ -4,8 +4,15 @@ namespace PaderConference.Core.Services
 {
     public enum ServiceErrorCode
     {
+        // 0-1000 reserved for UI
+
+        // 1001- 2000 reserved for SFU
+
         // Common
-        ParticipantNotFound = 100,
+        ParticipantNotFound = 10000,
+        AccessDenied = 10001,
+        InternalError = 10002,
+
 
         // Conference
         Conference_NotFound = 1000000,

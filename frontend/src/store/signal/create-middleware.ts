@@ -2,6 +2,7 @@ import { HubConnection, HubConnectionBuilder, LogLevel } from '@microsoft/signal
 import { PayloadAction } from '@reduxjs/toolkit';
 import { Middleware, MiddlewareAPI } from 'redux';
 import { events } from 'src/core-hub';
+import { signalrError } from 'src/ui-errors';
 import { ErrorCodes } from 'src/utils/errors';
 import * as actions from './actions';
 import appHubConn from './app-hub-connection';
@@ -78,18 +79,13 @@ export default (options: Options): SignalRResult => {
             connection.on(name, (args) => dispatch(actions.onEventOccurred(name)(args)));
          }
       },
-      [actions.send.type]: (_, { payload: { payload, name } }) => {
-         if (connection) {
-            connection.send(name, ...(payload !== null && payload !== undefined ? [payload] : []));
-         }
-      },
       [actions.invoke.type]: ({ dispatch }, { payload: { payload, name } }) => {
          if (connection) {
             connection.invoke(name, ...(payload ? [payload] : [])).then(
                (returnVal) => {
                   dispatch(actions.onInvokeReturn(name)(returnVal));
                },
-               (error) => dispatch(actions.onInvokeFailed(name)(error)),
+               (error) => dispatch(actions.onInvokeReturn(name)({ success: false, error: signalrError(error) })),
             );
          }
       },

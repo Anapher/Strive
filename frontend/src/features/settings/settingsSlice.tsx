@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { SuccessOrError } from 'src/communication-types';
 import { _getEquipmentToken } from 'src/core-hub';
 import { onInvokeReturn } from 'src/store/signal/actions';
 import { ProducerDevice } from 'src/store/webrtc/types';
@@ -59,8 +60,8 @@ const settingsSlice = createSlice({
       },
    },
    extraReducers: {
-      [onInvokeReturn(_getEquipmentToken).type]: (state, action: PayloadAction<string>) => {
-         state.equipmentToken = action.payload;
+      [onInvokeReturn(_getEquipmentToken).type]: (state, action: PayloadAction<SuccessOrError<string>>) => {
+         if (action.payload.success) state.equipmentToken = action.payload.response;
       },
       [fetchDevices.fulfilled.type]: (state, { payload }: PayloadAction<InputDeviceDto[]>) => {
          state.availableDevices = payload;

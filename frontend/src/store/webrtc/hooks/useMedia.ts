@@ -75,6 +75,8 @@ export default function useMedia(
       const producer = await connection.sendTransport.produce({ ...(options ?? {}), track, appData: { source } });
       producerRef.current = producer;
 
+      console.log(producer);
+
       producer.on('transportclose', () => {
          producerRef.current = null;
          setEnabled(false);

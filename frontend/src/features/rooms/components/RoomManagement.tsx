@@ -3,7 +3,6 @@ import CloseIcon from '@material-ui/icons/Close';
 import clsx from 'classnames';
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { send } from 'src/store/signal/actions';
 import { selectRoomViewModels } from '../selectors';
 import BreakoutRoomDialog from './BreakoutRoomDialog';
 import * as coreHub from 'src/core-hub';

@@ -1,4 +1,5 @@
 import { ActionCreatorWithPayload, createAction } from '@reduxjs/toolkit';
+import { SuccessOrError } from 'src/communication-types';
 import { IRestError } from 'src/utils/error-result';
 
 export const DEFAULT_PREFIX = 'SIGNALR';
@@ -15,10 +16,6 @@ export const connectSignal = createAction(
 
 export const subscribeEvent = createAction(`${DEFAULT_PREFIX}::SUBSCRIBE_EVENT`, (name: string) => ({
    payload: { name },
-}));
-
-export const send = createAction(`${DEFAULT_PREFIX}::SEND`, (name: string, payload?: any) => ({
-   payload: { name, payload },
 }));
 
 export const invoke = createAction(`${DEFAULT_PREFIX}::INVOKE`, (name: string, payload?: any) => ({
@@ -61,14 +58,8 @@ export function onEventOccurred<T>(eventName: string): ActionCreatorWithPayload<
    }));
 }
 
-export function onInvokeReturn<T>(methodName: string): ActionCreatorWithPayload<T, string> {
-   return createAction(`${DEFAULT_PREFIX}::ONINVOKE_${methodName}`, (payload: T) => ({
-      payload,
-   }));
-}
-
-export function onInvokeFailed<T>(methodName: string): ActionCreatorWithPayload<T, string> {
-   return createAction(`${DEFAULT_PREFIX}::ONINVOKE_FAILED_${methodName}`, (payload: T) => ({
+export function onInvokeReturn<T>(methodName: string): ActionCreatorWithPayload<SuccessOrError<T>, string> {
+   return createAction(`${DEFAULT_PREFIX}::ONINVOKE_${methodName}`, (payload: SuccessOrError<T>) => ({
       payload,
    }));
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using PaderConference.Core.Extensions;
+using PaderConference.Core.Services;
 using StackExchange.Redis;
 using StackExchange.Redis.Extensions.Core.Abstractions;
 
@@ -8,24 +9,21 @@ namespace PaderConference.Infrastructure.Redis
 {
     public static class SynchronousMessages
     {
-        public static async Task<TResult> InvokeAsync<TResult, T>(this IRedisDatabase database, string channel,
-            T message)
+        public static async Task<SuccessOrError<TResult>> InvokeAsync<TResult, T>(this IRedisDatabase database,
+            string channel, T message)
         {
             var messageId = Guid.NewGuid().ToString("N");
             var responseChannel = new RedisChannel($"RESPONSE::{messageId}", RedisChannel.PatternMode.Literal);
 
-            var completionSource = new TaskCompletionSource<TResult>();
+            var completionSource = new TaskCompletionSource<SuccessOrError<TResult>>();
 
-            Task OnProcessResponse(CallbackResponse<TResult> arg)
+            Task OnProcessResponse(SuccessOrError<TResult> arg)
             {
-                if (arg.Error)
-                    completionSource.SetException(new RedisResponseException(arg.ErrorMessage));
-                else
-                    completionSource.SetResult(arg.Payload);
+                completionSource.SetResult(arg);
                 return Task.CompletedTask;
             }
 
-            await database.SubscribeAsync<CallbackResponse<TResult>>(responseChannel, OnProcessResponse);
+            await database.SubscribeAsync<SuccessOrError<TResult>>(responseChannel, OnProcessResponse);
 
             try
             {
@@ -34,7 +32,7 @@ namespace PaderConference.Infrastructure.Redis
             }
             finally
             {
-                await database.UnsubscribeAsync<CallbackResponse<TResult>>(responseChannel, OnProcessResponse);
+                await database.UnsubscribeAsync<SuccessOrError<TResult>>(responseChannel, OnProcessResponse);
             }
         }
 
@@ -56,15 +54,4 @@ namespace PaderConference.Infrastructure.Redis
 
         public string CallbackChannel { get; }
     }
-
-#pragma warning disable 8618
-    public class CallbackResponse<T>
-    {
-        public T Payload { get; set; }
-
-        public bool Error { get; set; }
-
-        public string? ErrorMessage { get; set; }
-    }
-#pragma warning restore 8618
 }

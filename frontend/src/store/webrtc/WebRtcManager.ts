@@ -1,5 +1,6 @@
 import { EventEmitter } from 'events';
 import { RtpCapabilities } from 'mediasoup-client/lib/types';
+import { SuccessOrError } from 'src/communication-types';
 import { sleep } from 'src/utils/promise-utils';
 import appHubConn from '../signal/app-hub-connection';
 import { WebRtcConnection } from './WebRtcConnection';
@@ -76,17 +77,21 @@ export class WebRtcManager extends EventEmitter {
       const connection = new WebRtcConnection(signalr);
       const device = connection.device;
 
-      const routerRtpCapabilities = await signalr.invoke<RtpCapabilities>('RequestRouterCapabilities');
-      if (!routerRtpCapabilities) throw new Error('Router capabilities could not be retrived from server.');
+      const rtpResult = await signalr.invoke<SuccessOrError<RtpCapabilities>>('RequestRouterCapabilities');
+      if (!rtpResult?.success) throw new Error('Router capabilities could not be retrived from server.');
 
-      await device.load({ routerRtpCapabilities });
+      console.log(rtpResult);
 
-      const result = await signalr.invoke('InitializeConnection', {
+      await device.load({ routerRtpCapabilities: rtpResult.response });
+
+      const result = await signalr.invoke<SuccessOrError<void>>('InitializeConnection', {
          sctpCapabilities: device.sctpCapabilities,
          rtpCapabilities: device.rtpCapabilities,
       });
 
-      if (result) throw new Error('Initialize connection failed, empty result.');
+      if (!result.success) {
+         throw new Error('Initialize connection failed, empty result.');
+      }
 
       const canProduceAudio = device.canProduce('audio');
       const canProduceVideo = device.canProduce('video');

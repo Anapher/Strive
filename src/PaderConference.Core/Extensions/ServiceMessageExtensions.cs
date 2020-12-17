@@ -1,8 +1,5 @@
 ﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using PaderConference.Core.Dto;
 using PaderConference.Core.Services;
-using PaderConference.Core.Signaling;
 
 namespace PaderConference.Core.Extensions
 {
@@ -15,11 +12,6 @@ namespace PaderConference.Core.Extensions
                 {"connectionId", serviceMessage.ConnectionId},
                 {"participantId", serviceMessage.Participant.ParticipantId},
             };
-        }
-
-        public static async Task ResponseError(this IServiceMessage serviceMessage, Error error)
-        {
-            await serviceMessage.SendToCallerAsync(CoreHubMessages.Response.OnError, error);
         }
     }
 }

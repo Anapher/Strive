@@ -69,7 +69,7 @@ namespace PaderConference.Infrastructure.Redis.Repos
                 new ConnectionMessage<object?>(null, meta));
         }
 
-        public Task<JsonElement?> SendMessage<TRequest>(ConferenceDependentKey key, string conferenceId,
+        public Task<SuccessOrError<JsonElement?>> SendMessage<TRequest>(ConferenceDependentKey key, string conferenceId,
             ConnectionMessage<TRequest> message)
         {
             return _database.InvokeAsync<JsonElement?, ConnectionMessage<TRequest>>(key.GetName(conferenceId), message);

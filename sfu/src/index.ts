@@ -2,11 +2,11 @@ import Redis from 'ioredis';
 import * as mediasoup from 'mediasoup';
 import { Worker } from 'mediasoup/lib/types';
 import config from './config';
+import { SuccessOrError } from './lib/communication-types';
 import conferenceFactory from './lib/conference-factory';
 import ConferenceManager from './lib/conference-manager';
+import * as errors from './lib/errors';
 import Logger from './lib/logger';
-import { RedisMessageProcessor } from './lib/redis-message-processor';
-import { CallbackMessage, CallbackResponse, ConferenceInfo } from './lib/types';
 import {
    ChannelName,
    channels,
@@ -15,6 +15,8 @@ import {
    rtpCapabilitiesKey,
 } from './lib/pader-conference/redis-channels';
 import { newConferences, openConferences } from './lib/pader-conference/redis-keys';
+import { RedisMessageProcessor } from './lib/redis-message-processor';
+import { CallbackMessage, ConferenceInfo } from './lib/types';
 
 const logger = new Logger();
 
@@ -70,17 +72,19 @@ async function initializeConference(conferenceInfo: ConferenceInfo): Promise<voi
    subRedis.subscribe(onClientDisconnected.getName(conferenceInfo.id));
 }
 
-const onNewConferenceCreated = async () => {
+const onNewConferenceCreated: () => Promise<SuccessOrError<void>> = async () => {
    const conferenceStr = await redis.lpop(newConferences);
    if (conferenceStr) {
       const conferenceInfo: ConferenceInfo = JSON.parse(conferenceStr);
       initializeConference(conferenceInfo);
    }
+
+   return { success: true };
 };
 
 type MappedMessage = {
    channel: ChannelName | string;
-   handler: (request: any) => any | Promise<any>;
+   handler: (request: any) => Promise<SuccessOrError<any>> | SuccessOrError<any>;
 };
 
 const messagesMap: MappedMessage[] = [
@@ -123,17 +127,23 @@ async function subscribeRedis() {
          const methodResponse = mappedMessage.handler(param);
          const result = await Promise.resolve(methodResponse);
 
+         if (!result.success) {
+            logger.warn('Channel %s executed unsuccessful: %s', channel, result.error);
+         }
+
          if (callbackChannel) {
             // return response
-            const response: CallbackResponse<any> = { payload: result };
-            redis.publish(callbackChannel, JSON.stringify(response));
+            redis.publish(callbackChannel, JSON.stringify(result));
          }
       } catch (error) {
          logger.error('Error occurred when executing channel %s: %s', channel, error.toString());
 
          if (callbackChannel) {
             // return error
-            const response: CallbackResponse<undefined> = { error: true, errorMesage: error.toString() };
+            const response: SuccessOrError<void> = {
+               success: false,
+               error: errors.internalError(`Error executing message from channel ${channel}: ${error}`),
+            };
             redis.publish(callbackChannel, JSON.stringify(response));
          }
       }

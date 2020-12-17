@@ -7,6 +7,7 @@ import {
    SctpCapabilities,
    SctpParameters,
 } from 'mediasoup/lib/types';
+import { SuccessOrError } from './communication-types';
 import { ProducerSource } from './participant';
 
 export type ConferenceInfo = {
@@ -24,11 +25,7 @@ export type CallbackMessage<TPayload> = {
    payload: TPayload;
 };
 
-export type CallbackResponse<TPayload> = {
-   error?: boolean;
-   errorMesage?: boolean;
-   payload?: TPayload;
-};
+export type CallbackResponse<TPayload> = SuccessOrError<TPayload>;
 
 export type ConnectionMessage<TPayload> = {
    meta: ConnectionMessageMetadata;
