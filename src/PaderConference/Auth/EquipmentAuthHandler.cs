@@ -49,7 +49,7 @@ namespace PaderConference.Auth
 
             var claims = new[]
             {
-                new Claim(ClaimTypes.NameIdentifier, result.ParticipantId),
+                new Claim(ClaimTypes.NameIdentifier, result.Response),
                 new Claim(ClaimTypes.Role, PrincipalRoles.Equipment),
             };
 

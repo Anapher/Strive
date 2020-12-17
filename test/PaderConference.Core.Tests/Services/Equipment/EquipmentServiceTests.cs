@@ -56,13 +56,12 @@ namespace PaderConference.Core.Tests.Services.Equipment
             var message = TestServiceMessage.Create(TestParticipants.Default, ConnectionId).Object;
 
             // act
-            var token = await service.GetEquipmentToken(message);
-            var response = await service.AuthenticateEquipment(token);
+            var token = AssertSuccess(await service.GetEquipmentToken(message));
+            var participantId = AssertSuccess(await service.AuthenticateEquipment(token));
 
             // assert
             Assert.Equal(TestToken, token);
-            Assert.True(response.Success);
-            Assert.Equal(TestParticipants.Default.ParticipantId, response.ParticipantId);
+            Assert.Equal(TestParticipants.Default.ParticipantId, participantId);
         }
 
         [Fact]
@@ -81,9 +80,8 @@ namespace PaderConference.Core.Tests.Services.Equipment
                 });
 
             // act
-            var token = await service.GetEquipmentToken(getTokenMessage);
-            var authResponse = await service.AuthenticateEquipment(token);
-            Assert.True(authResponse.Success);
+            var token = AssertSuccess(await service.GetEquipmentToken(getTokenMessage));
+            AssertSuccess(await service.AuthenticateEquipment(token));
 
             await service.OnEquipmentConnected(TestParticipants.Default, EqConnectionId);
 
@@ -203,10 +201,10 @@ namespace PaderConference.Core.Tests.Services.Equipment
                 }, TestParticipants.Default, ConnectionId);
 
             // act
-            await service.SendEquipmentCommand(message.Object);
+            var result = await service.SendEquipmentCommand(message.Object);
 
             // assert
-            message.Verify(x => x.SendToCallerAsync(CoreHubMessages.Response.OnError, It.IsAny<object>()), Times.Once);
+            AssertFailed(result);
         }
 
         [Fact]

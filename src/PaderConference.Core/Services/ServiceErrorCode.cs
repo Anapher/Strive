@@ -4,11 +4,16 @@ namespace PaderConference.Core.Services
 {
     public enum ServiceErrorCode
     {
+        // Common
+        ParticipantNotFound = 100,
+
         // Conference
         Conference_NotFound = 1000000,
         Conference_UnexpectedError,
         Conference_NotOpen,
         Conference_PermissionDeniedToOpenOrClose,
+        Conference_ParticipantNotRegistered,
+        Conference_InternalServiceError,
 
         // Chat
         Chat_EmptyMessage = 1000100,
@@ -28,7 +33,6 @@ namespace PaderConference.Core.Services
         Permissions_PermissionKeyNotFound = 1000300,
         Permissions_DeniedGiveTemporaryPermission = 1000301,
         Permissions_InvalidPermissionValueType = 1000302,
-        Permissions_ParticipantNotFound = 1000303,
         Permissions_DeniedFetchingParticipantsPermissions = 1000304,
 
         // Equipment

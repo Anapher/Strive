@@ -1,4 +1,6 @@
-﻿using System;
+﻿#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -75,7 +77,7 @@ namespace PaderConference.Core.Services.Chat
             await UpdateUsersTyping();
         }
 
-        public async ValueTask SetUserIsTyping(IServiceMessage<bool> message)
+        public async ValueTask<SuccessOrError> SetUserIsTyping(IServiceMessage<bool> message)
         {
             using var _ = _logger.BeginMethodScope(message.GetScopeData());
 
@@ -94,7 +96,7 @@ namespace PaderConference.Core.Services.Chat
                     if (!_currentlyTyping.Remove(message.Participant.ParticipantId))
                     {
                         _logger.LogDebug("Participant did not exist in currentlyTyping, return");
-                        return;
+                        return SuccessOrError.Succeeded;
                     }
 
                     _logger.LogDebug("Removed participant from currently typing.");
@@ -102,29 +104,21 @@ namespace PaderConference.Core.Services.Chat
             }
 
             await UpdateUsersTyping();
+            return SuccessOrError.Succeeded;
         }
 
-        public async ValueTask SendMessage(IServiceMessage<SendChatMessageDto> message)
+        public async ValueTask<SuccessOrError> SendMessage(IServiceMessage<SendChatMessageDto> message)
         {
-            using var _ = _logger.BeginMethodScope(message.GetScopeData());
+            using var _ = _logger.BeginMethodScope();
 
             _logger.LogDebug("Message: {@message}", message.Payload);
             var messageDto = message.Payload;
 
-            if (string.IsNullOrWhiteSpace(messageDto.Message))
-            {
-                _logger.LogDebug("Message is empty, return error");
-                await message.ResponseError(ChatError.EmptyMessageNotAllowed);
-                return;
-            }
+            if (string.IsNullOrWhiteSpace(messageDto.Message)) return ChatError.EmptyMessageNotAllowed;
 
             var permissions = await _permissionsService.GetPermissions(message.Participant);
             if (!await permissions.GetPermission(PermissionsList.Chat.CanSendChatMessage))
-            {
-                _logger.LogDebug("Permissions to send chat message denied");
-                await message.ResponseError(ChatError.PermissionToSendMessageDenied);
-                return;
-            }
+                return ChatError.PermissionToSendMessageDenied;
 
             // here would be the point to implement e. g. language filter
 
@@ -132,32 +126,23 @@ namespace PaderConference.Core.Services.Chat
                 if (messageDto.Mode is SendAnonymously)
                 {
                     if (!await permissions.GetPermission(PermissionsList.Chat.CanSendAnonymousMessage))
-                    {
-                        await message.ResponseError(ChatError.PermissionToSendAnonymousMessageDenied);
-                        return;
-                    }
+                        return ChatError.PermissionToSendAnonymousMessageDenied;
                 }
                 else if (messageDto.Mode is SendPrivately sendPrivately)
                 {
                     if (sendPrivately.To?.ParticipantId == null || !_conferenceManager.TryGetParticipant(_conferenceId,
                         sendPrivately.To.ParticipantId, out var participant))
-                    {
-                        await message.ResponseError(ChatError.InvalidParticipant);
-                        return;
-                    }
+                        return ChatError.InvalidParticipant;
 
                     if (!await permissions.GetPermission(PermissionsList.Chat.CanSendPrivateChatMessage))
-                    {
-                        await message.ResponseError(ChatError.PermissionToSendPrivateMessageDenied);
-                        return;
-                    }
+                        return ChatError.PermissionToSendPrivateMessageDenied;
 
                     sendPrivately.To.DisplayName = participant.DisplayName;
                 }
                 else
                 {
                     _logger.LogDebug("Invalid chat message mode: {@mode}", messageDto.Mode);
-                    await message.ResponseError(ChatError.InvalidMode);
+                    return ChatError.InvalidMode;
                 }
 
             var filter = FilterFactory.CreateFilter(messageDto.Mode, message.Participant.ParticipantId);
@@ -183,9 +168,11 @@ namespace PaderConference.Core.Services.Chat
             var dto = _mapper.Map<ChatMessageDto>(chatMessage);
             await chatMessage.Filter.SendAsync(_signalMessenger, _connectionMapping, _conferenceId,
                 CoreHubMessages.Response.ChatMessage, dto);
+
+            return SuccessOrError.Succeeded;
         }
 
-        public ValueTask<IReadOnlyList<ChatMessageDto>> RequestAllMessages(IServiceMessage message)
+        public async ValueTask<SuccessOrError<IReadOnlyList<ChatMessageDto>>> FetchMyMessages(IServiceMessage message)
         {
             List<ChatMessage> messages;
 
@@ -200,7 +187,7 @@ namespace PaderConference.Core.Services.Chat
                 _messagesLock.ReleaseReaderLock();
             }
 
-            return messages.Select(_mapper.Map<ChatMessageDto>).ToList().ToValueTask<IReadOnlyList<ChatMessageDto>>();
+            return messages.Select(_mapper.Map<ChatMessageDto>).ToList();
         }
 
         private async ValueTask UpdateUsersTyping()

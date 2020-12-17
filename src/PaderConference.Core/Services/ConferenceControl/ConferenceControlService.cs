@@ -80,28 +80,24 @@ namespace PaderConference.Core.Services.ConferenceControl
             _conferenceManager.ConferenceClosed -= ConferenceManagerOnConferenceClosed;
         }
 
-        public async ValueTask OpenConference(IServiceMessage message)
+        public async ValueTask<SuccessOrError> OpenConference(IServiceMessage message)
         {
             var permissions = await _permissionsService.GetPermissions(message.Participant);
             if (!await permissions.GetPermission(PermissionsList.Conference.CanOpenAndClose))
-            {
-                await message.ResponseError(ConferenceError.PermissionDeniedToOpenOrClose);
-                return;
-            }
+                return ConferenceError.PermissionDeniedToOpenOrClose;
 
             await _conferenceManager.OpenConference(_conferenceId);
+            return SuccessOrError.Succeeded;
         }
 
-        public async ValueTask CloseConference(IServiceMessage message)
+        public async ValueTask<SuccessOrError> CloseConference(IServiceMessage message)
         {
             var permissions = await _permissionsService.GetPermissions(message.Participant);
             if (!await permissions.GetPermission(PermissionsList.Conference.CanOpenAndClose))
-            {
-                await message.ResponseError(ConferenceError.PermissionDeniedToOpenOrClose);
-                return;
-            }
+                return ConferenceError.PermissionDeniedToOpenOrClose;
 
             await _conferenceManager.CloseConference(_conferenceId);
+            return SuccessOrError.Succeeded;
         }
 
         private async Task OnConferenceUpdated(Conference arg)

@@ -120,7 +120,7 @@ namespace PaderConference.Core.Services.Permissions
 
             var participant = _conferenceManager.GetParticipants(_conferenceId)
                 .FirstOrDefault(x => x.ParticipantId == targetParticipantId);
-            if (participant == null) return SuccessOrError.Failed(PermissionsError.ParticipantNotFound);
+            if (participant == null) return SuccessOrError.Failed(CommonError.ParticipantNotFound);
 
             if (value != null)
             {
@@ -155,7 +155,7 @@ namespace PaderConference.Core.Services.Permissions
             return SuccessOrError.Succeeded;
         }
 
-        public async ValueTask<ISuccessOrError<IEnumerable<PermissionLayer>>> FetchPermissions(
+        public async ValueTask<SuccessOrError<IEnumerable<PermissionLayer>>> FetchPermissions(
             IServiceMessage<string?> message)
         {
             using var _ = _logger.BeginMethodScope();
@@ -176,7 +176,7 @@ namespace PaderConference.Core.Services.Permissions
                         .PermissionDeniedGiveTemporaryPermission);
 
                 if (!_conferenceManager.TryGetParticipant(_conferenceId, participantId, out participant!))
-                    return SuccessOrError<IEnumerable<PermissionLayer>>.Failed(PermissionsError.ParticipantNotFound);
+                    return SuccessOrError<IEnumerable<PermissionLayer>>.Failed(CommonError.ParticipantNotFound);
             }
             else
             {

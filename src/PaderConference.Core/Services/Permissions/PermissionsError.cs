@@ -18,9 +18,5 @@ namespace PaderConference.Core.Services.Permissions
         public static Error InvalidPermissionValueType =>
             new ServiceError("The type of the value does not match the permission definition.",
                 ServiceErrorCode.Permissions_InvalidPermissionValueType);
-
-        public static Error ParticipantNotFound =>
-            new ServiceError("The participant was not found in this conference.",
-                ServiceErrorCode.Permissions_ParticipantNotFound);
     }
 }

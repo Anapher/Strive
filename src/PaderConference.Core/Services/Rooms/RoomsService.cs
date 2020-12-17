@@ -143,46 +143,37 @@ namespace PaderConference.Core.Services.Rooms
             }
         }
 
-        public async ValueTask SwitchRoom(IServiceMessage<SwitchRoomMessage> message)
+        public async ValueTask<SuccessOrError> SwitchRoom(IServiceMessage<SwitchRoomMessage> message)
         {
-            using (_logger.BeginScope("SwitchRoom()"))
-            using (_logger.BeginScope(message.GetScopeData()))
-            {
-                var permissions = await _permissionsService.GetPermissions(message.Participant);
-                if (!await permissions.GetPermission(PermissionsList.Rooms.CanSwitchRoom))
-                {
-                    _logger.LogDebug("Permissions to switch room denied.");
-                    await message.ResponseError(RoomsError.PermissionToSwitchRoomDenied);
-                    return;
-                }
+            using var _ = _logger.BeginMethodScope();
 
-                try
-                {
-                    await SetRoom(message.Participant.ParticipantId, message.Payload.RoomId);
-                }
-                catch (Exception e)
-                {
-                    _logger.LogDebug(e, "Switching the room failed");
-                    await message.ResponseError(RoomsError.SwitchRoomFailed);
-                }
+            var permissions = await _permissionsService.GetPermissions(message.Participant);
+            if (!await permissions.GetPermission(PermissionsList.Rooms.CanSwitchRoom))
+                return RoomsError.PermissionToSwitchRoomDenied;
+
+            try
+            {
+                await SetRoom(message.Participant.ParticipantId, message.Payload.RoomId);
             }
+            catch (Exception e)
+            {
+                _logger.LogDebug(e, "Switching the room failed");
+                return RoomsError.SwitchRoomFailed;
+            }
+
+            return SuccessOrError.Succeeded;
         }
 
-        public async ValueTask CreateRooms(IServiceMessage<IReadOnlyList<CreateRoomMessage>> message)
+        public async ValueTask<SuccessOrError> CreateRooms(IServiceMessage<IReadOnlyList<CreateRoomMessage>> message)
         {
-            using (_logger.BeginScope("CreateRooms()"))
-            using (_logger.BeginScope(message.GetScopeData()))
-            {
-                var permissions = await _permissionsService.GetPermissions(message.Participant);
-                if (!await permissions.GetPermission(PermissionsList.Rooms.CanCreateAndRemove))
-                {
-                    _logger.LogDebug("Permissions denied.");
-                    await message.ResponseError(RoomsError.PermissionToCreateRoomDenied);
-                    return;
-                }
+            using var _ = _logger.BeginMethodScope();
 
-                await CreateRooms(message.Payload);
-            }
+            var permissions = await _permissionsService.GetPermissions(message.Participant);
+            if (!await permissions.GetPermission(PermissionsList.Rooms.CanCreateAndRemove))
+                return RoomsError.PermissionToCreateRoomDenied;
+
+            await CreateRooms(message.Payload);
+            return SuccessOrError.Succeeded;
         }
 
         public async Task<IReadOnlyList<Room>> CreateRooms(IReadOnlyList<CreateRoomMessage> rooms)
@@ -205,20 +196,16 @@ namespace PaderConference.Core.Services.Rooms
             return result;
         }
 
-        public async ValueTask RemoveRooms(IServiceMessage<IReadOnlyList<string>> message)
+        public async ValueTask<SuccessOrError> RemoveRooms(IServiceMessage<IReadOnlyList<string>> message)
         {
-            using (_logger.BeginScope("CreateRooms()"))
-            using (_logger.BeginScope(message.GetScopeData()))
-            {
-                var permissions = await _permissionsService.GetPermissions(message.Participant);
-                if (!await permissions.GetPermission(PermissionsList.Rooms.CanCreateAndRemove))
-                {
-                    _logger.LogDebug("Permissions denied.");
-                    await message.ResponseError(RoomsError.PermissionToRemoveRoomDenied);
-                }
+            using var _ = _logger.BeginMethodScope();
 
-                await RemoveRooms(message.Payload);
-            }
+            var permissions = await _permissionsService.GetPermissions(message.Participant);
+            if (!await permissions.GetPermission(PermissionsList.Rooms.CanCreateAndRemove))
+                return RoomsError.PermissionToRemoveRoomDenied;
+
+            await RemoveRooms(message.Payload);
+            return SuccessOrError.Succeeded;
         }
 
         public async Task RemoveRooms(IReadOnlyList<string> roomIds)

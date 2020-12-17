@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using PaderConference.Core.Domain;
 using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Dto;
+using PaderConference.Core.Extensions;
 using PaderConference.Core.Interfaces.Services;
 using PaderConference.Core.Services;
 using PaderConference.Core.Services.BreakoutRoom;
@@ -47,7 +48,7 @@ namespace PaderConference.Infrastructure.Hubs
 
         public override async Task OnConnectedAsync()
         {
-            using (_logger.BeginScope($"{nameof(OnConnectedAsync)}()"))
+            using (_logger.BeginMethodScope())
             using (_logger.BeginScope(new Dictionary<string, object> {{"connectionId", Context.ConnectionId}}))
             {
                 var httpContext = Context.GetHttpContext();
@@ -66,7 +67,10 @@ namespace PaderConference.Infrastructure.Hubs
 
                         // initialize all services before submitting events
                         var services = ConferenceServices.Select(x => x.GetService(conferenceId)).ToList();
-                        foreach (var valueTask in services) await valueTask;
+                        foreach (var valueTask in services)
+                        {
+                            await valueTask;
+                        }
 
                         switch (role)
                         {
@@ -141,12 +145,17 @@ namespace PaderConference.Infrastructure.Hubs
                                 }
 
                                 foreach (var service in services)
+                                {
                                     await service.Result.OnClientConnected(participant);
+                                }
 
                                 await Groups.AddToGroupAsync(Context.ConnectionId, conferenceId);
 
                                 foreach (var service in services)
+                                {
                                     await service.Result.InitializeParticipant(participant);
+                                }
+
                                 break;
                             }
                         }
@@ -183,132 +192,134 @@ namespace PaderConference.Infrastructure.Hubs
             _connectionMapping.Remove(Context.ConnectionId);
         }
 
-        public Task OpenConference()
+        public Task<SuccessOrError> OpenConference()
         {
             return InvokeService<ConferenceControlService>(service => service.OpenConference,
                 new MethodOptions {ConferenceCanBeClosed = true});
         }
 
-        public Task CloseConference()
+        public Task<SuccessOrError> CloseConference()
         {
             return InvokeService<ConferenceControlService>(service => service.CloseConference);
         }
 
-        public Task CreateRooms(IReadOnlyList<CreateRoomMessage> dto)
+        public Task<SuccessOrError> CreateRooms(IReadOnlyList<CreateRoomMessage> dto)
         {
             return InvokeService<RoomsService, IReadOnlyList<CreateRoomMessage>>(dto, service => service.CreateRooms);
         }
 
-        public Task RemoveRooms(IReadOnlyList<string> dto)
+        public Task<SuccessOrError> RemoveRooms(IReadOnlyList<string> dto)
         {
             return InvokeService<RoomsService, IReadOnlyList<string>>(dto, service => service.RemoveRooms);
         }
 
-        public Task OpenBreakoutRooms(OpenBreakoutRoomsDto dto)
+        public Task<SuccessOrError> OpenBreakoutRooms(OpenBreakoutRoomsDto dto)
         {
             return InvokeService<BreakoutRoomService, OpenBreakoutRoomsDto>(dto, service => service.OpenBreakoutRooms);
         }
 
-        public Task CloseBreakoutRooms()
+        public Task<SuccessOrError> CloseBreakoutRooms()
         {
             return InvokeService<BreakoutRoomService>(service => service.CloseBreakoutRooms);
         }
 
-        public Task ChangeBreakoutRooms(JsonPatchDocument<BreakoutRoomsOptions> dto)
+        public Task<SuccessOrError> ChangeBreakoutRooms(JsonPatchDocument<BreakoutRoomsOptions> dto)
         {
+            // convert timestamp value from string to actual timestamp
             var timespanPatchOp = dto.Operations.FirstOrDefault(x => x.path == "/duration");
             if (timespanPatchOp?.value != null)
                 timespanPatchOp.value = XmlConvert.ToTimeSpan((string) timespanPatchOp.value);
+
             return InvokeService<BreakoutRoomService, JsonPatchDocument<BreakoutRoomsOptions>>(dto,
                 service => service.ChangeBreakoutRooms);
         }
 
-        public Task SwitchRoom(SwitchRoomMessage dto)
+        public Task<SuccessOrError> SwitchRoom(SwitchRoomMessage dto)
         {
             return InvokeService<RoomsService, SwitchRoomMessage>(dto, service => service.SwitchRoom);
         }
 
-        public Task SendChatMessage(SendChatMessageDto dto)
+        public Task<SuccessOrError> SendChatMessage(SendChatMessageDto dto)
         {
             return InvokeService<ChatService, SendChatMessageDto>(dto, service => service.SendMessage);
         }
 
-        public Task<IReadOnlyList<ChatMessageDto>> RequestChat()
+        public Task<SuccessOrError<IReadOnlyList<ChatMessageDto>>> RequestChat()
         {
-            return InvokeService<ChatService, IReadOnlyList<ChatMessageDto>>(service => service.RequestAllMessages);
+            return InvokeService<ChatService, IReadOnlyList<ChatMessageDto>>(service => service.FetchMyMessages);
         }
 
-        public Task SetUserIsTyping(bool isTyping)
+        public Task<SuccessOrError> SetUserIsTyping(bool isTyping)
         {
             return InvokeService<ChatService, bool>(isTyping, service => service.SetUserIsTyping);
         }
 
-        public Task<JsonElement?> RequestRouterCapabilities()
+        public Task<SuccessOrError<JsonElement?>> RequestRouterCapabilities()
         {
             return InvokeService<MediaService, JsonElement?>(service => service.GetRouterCapabilities,
                 new MethodOptions {ConferenceCanBeClosed = true});
         }
 
-        public Task InitializeConnection(JsonElement element)
+        public Task<SuccessOrError<JsonElement?>> InitializeConnection(JsonElement element)
         {
             return InvokeService<MediaService, JsonElement, JsonElement?>(element,
                 service => service.Redirect<JsonElement>(RedisChannels.Media.Request.InitializeConnection),
                 new MethodOptions {ConferenceCanBeClosed = true});
         }
 
-        public Task<JsonElement?> CreateWebRtcTransport(JsonElement element)
+        public Task<SuccessOrError<JsonElement?>> CreateWebRtcTransport(JsonElement element)
         {
             return InvokeService<MediaService, JsonElement, JsonElement?>(element,
                 service => service.Redirect<JsonElement>(RedisChannels.Media.Request.CreateTransport),
                 new MethodOptions {ConferenceCanBeClosed = true});
         }
 
-        public Task<JsonElement?> ConnectWebRtcTransport(JsonElement element)
+        public Task<SuccessOrError<JsonElement?>> ConnectWebRtcTransport(JsonElement element)
         {
             return InvokeService<MediaService, JsonElement, JsonElement?>(element,
                 service => service.Redirect<JsonElement>(RedisChannels.Media.Request.ConnectTransport),
                 new MethodOptions {ConferenceCanBeClosed = true});
         }
 
-        public Task<JsonElement?> ProduceWebRtcTransport(JsonElement element)
+        public Task<SuccessOrError<JsonElement?>> ProduceWebRtcTransport(JsonElement element)
         {
             return InvokeService<MediaService, JsonElement, JsonElement?>(element,
                 service => service.Redirect<JsonElement>(RedisChannels.Media.Request.TransportProduce),
                 new MethodOptions {ConferenceCanBeClosed = true});
         }
 
-        public Task ChangeStream(ChangeStreamDto dto)
+        public Task<SuccessOrError<JsonElement?>> ChangeStream(ChangeStreamDto dto)
         {
             return InvokeService<MediaService, ChangeStreamDto, JsonElement?>(dto,
                 service => service.Redirect<ChangeStreamDto>(RedisChannels.Media.Request.ChangeStream),
                 new MethodOptions {ConferenceCanBeClosed = true});
         }
 
-        public Task<string> GetEquipmentToken()
+        public Task<SuccessOrError<string>> GetEquipmentToken()
         {
             return InvokeService<EquipmentService, string>(service => service.GetEquipmentToken,
                 new MethodOptions {ConferenceCanBeClosed = true});
         }
 
-        public Task RegisterEquipment(RegisterEquipmentRequestDto dto)
+        public Task<SuccessOrError> RegisterEquipment(RegisterEquipmentRequestDto dto)
         {
             return InvokeService<EquipmentService, RegisterEquipmentRequestDto>(dto,
                 service => service.RegisterEquipment, new MethodOptions {ConferenceCanBeClosed = true});
         }
 
-        public Task SendEquipmentCommand(EquipmentCommand dto)
+        public Task<SuccessOrError> SendEquipmentCommand(EquipmentCommand dto)
         {
             return InvokeService<EquipmentService, EquipmentCommand>(dto, service => service.SendEquipmentCommand,
                 new MethodOptions {ConferenceCanBeClosed = true});
         }
 
-        public Task EquipmentErrorOccurred(Error dto)
+        public Task<SuccessOrError> EquipmentErrorOccurred(Error dto)
         {
             return InvokeService<EquipmentService, Error>(dto, service => service.EquipmentErrorOccurred,
                 new MethodOptions {ConferenceCanBeClosed = true});
         }
 
-        public Task EquipmentUpdateStatus(Dictionary<string, UseMediaStateInfo> dto)
+        public Task<SuccessOrError> EquipmentUpdateStatus(Dictionary<string, UseMediaStateInfo> dto)
         {
             return InvokeService<EquipmentService, Dictionary<string, UseMediaStateInfo>>(dto,
                 service => service.EquipmentUpdateStatus, new MethodOptions {ConferenceCanBeClosed = true});

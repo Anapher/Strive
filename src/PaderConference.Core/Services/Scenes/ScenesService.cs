@@ -54,30 +54,25 @@ namespace PaderConference.Core.Services.Scenes
             return base.DisposeAsync();
         }
 
-        public async ValueTask SetScene(IServiceMessage<ChangeSceneDto> message)
+        public async ValueTask<SuccessOrError> SetScene(IServiceMessage<ChangeSceneDto> message)
         {
-            if (message.Payload.Scene == null)
-            {
-                await message.ResponseError(SceneError.SceneMustNotBeNull);
-                return;
-            }
+            if (message.Payload.Scene == null) return SceneError.SceneMustNotBeNull;
 
             var permissions = await _permissionsService.GetPermissions(message.Participant);
 
             if (!await permissions.GetPermission(PermissionsList.Scenes.CanSetScene))
-            {
-                await message.ResponseError(SceneError.PermissionDeniedToChangeScene);
-                return;
-            }
+                return SceneError.PermissionDeniedToChangeScene;
 
             using (await _roomManagementLock.LockAsync())
             {
                 if (!_synchronizedObject.Current.ContainsKey(message.Payload.RoomId ?? string.Empty))
-                    await message.ResponseError(SceneError.RoomNotFound);
-                else
-                    await _synchronizedObject.Update(current => current.SetItem(message.Payload.RoomId ?? string.Empty,
-                        message.Payload.Scene));
+                    return SceneError.RoomNotFound;
+
+                await _synchronizedObject.Update(current => current.SetItem(message.Payload.RoomId ?? string.Empty,
+                    message.Payload.Scene));
             }
+
+            return SuccessOrError.Succeeded;
         }
 
         private async void OnRoomsRemoved(object? sender, IReadOnlyList<string> e)

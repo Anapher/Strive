@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using PaderConference.Core.Services.Synchronization;
 
@@ -35,6 +36,14 @@ namespace PaderConference.Core.Tests.Services
         {
             Current = newValue;
             return new ValueTask();
+        }
+
+        public ValueTask<T> Update(Func<T, T> updateStateFn)
+        {
+            var newValue = updateStateFn(Current);
+            Current = newValue;
+
+            return new ValueTask<T>(newValue);
         }
     }
 }

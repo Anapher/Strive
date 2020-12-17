@@ -65,14 +65,14 @@ namespace PaderConference.Core.Tests.Services.Chat
             var message = TestServiceMessage.Create(new SendChatMessageDto(), TestParticipants.Default, "connectionId");
 
             // act
-            await service.SendMessage(message.Object);
+            AssertFailed(await service.SendMessage(message.Object));
 
             // assert
-            message.Verify(x => x.SendToCallerAsync(CoreHubMessages.Response.OnError, It.IsAny<object>()), Times.Once);
-            message.Verify(x => x.SendToCallerAsync(It.IsAny<string>(), It.IsAny<object>()), Times.Once);
+            message.Verify(x => x.SendToCallerAsync(It.IsAny<string>(), It.IsAny<object>()), Times.Never);
 
             var requestChatMessage = TestServiceMessage.Create(TestParticipants.Default, "connectionId").Object;
-            var messages = await service.RequestAllMessages(requestChatMessage);
+
+            var messages = AssertSuccess(await service.FetchMyMessages(requestChatMessage));
             Assert.Empty(messages);
         }
 
@@ -95,7 +95,7 @@ namespace PaderConference.Core.Tests.Services.Chat
                 });
 
             // act
-            await service.SendMessage(message.Object);
+            AssertSuccess(await service.SendMessage(message.Object));
 
             // assert
             _signalMessenger.Verify(
@@ -104,8 +104,9 @@ namespace PaderConference.Core.Tests.Services.Chat
             _signalMessenger.VerifyNoOtherCalls();
 
             var requestChatMessage = TestServiceMessage.Create(TestParticipants.Default, "connectionId").Object;
-            var messages = await service.RequestAllMessages(requestChatMessage);
-            Assert.Equal("Hello world", Assert.Single(messages).Message);
+
+            var result = AssertSuccess(await service.FetchMyMessages(requestChatMessage));
+            Assert.Equal("Hello world", Assert.Single(result).Message);
         }
 
         [Fact]
@@ -120,14 +121,13 @@ namespace PaderConference.Core.Tests.Services.Chat
                 TestParticipants.Default, "connectionId");
 
             // act
-            await service.SendMessage(message.Object);
+            AssertFailed(await service.SendMessage(message.Object));
 
             // assert
-            message.Verify(x => x.SendToCallerAsync(CoreHubMessages.Response.OnError, It.IsAny<object>()), Times.Once);
-            message.Verify(x => x.SendToCallerAsync(It.IsAny<string>(), It.IsAny<object>()), Times.Once);
+            message.Verify(x => x.SendToCallerAsync(It.IsAny<string>(), It.IsAny<object>()), Times.Never);
 
             var requestChatMessage = TestServiceMessage.Create(TestParticipants.Default, "connectionId").Object;
-            var messages = await service.RequestAllMessages(requestChatMessage);
+            var messages = AssertSuccess(await service.FetchMyMessages(requestChatMessage));
             Assert.Empty(messages);
         }
 
@@ -154,7 +154,7 @@ namespace PaderConference.Core.Tests.Services.Chat
                 TestParticipants.Default, "connectionId");
 
             // act
-            await service.SendMessage(message.Object);
+            AssertSuccess(await service.SendMessage(message.Object));
 
             // assert
             _signalMessenger.Verify(
@@ -163,7 +163,8 @@ namespace PaderConference.Core.Tests.Services.Chat
             _signalMessenger.VerifyNoOtherCalls();
 
             var requestChatMessage = TestServiceMessage.Create(TestParticipants.Default, "connectionId").Object;
-            var messages = await service.RequestAllMessages(requestChatMessage);
+            var messages = AssertSuccess(await service.FetchMyMessages(requestChatMessage));
+
             var existingMessage = Assert.Single(messages);
             Assert.Null(existingMessage.From);
         }
@@ -178,15 +179,14 @@ namespace PaderConference.Core.Tests.Services.Chat
                 TestParticipants.Default, "connectionId");
 
             // act
-            await service.SendMessage(message.Object);
+            AssertFailed(await service.SendMessage(message.Object));
 
             // assert
             _signalMessenger.VerifyNoOtherCalls();
-            message.Verify(x => x.SendToCallerAsync(CoreHubMessages.Response.OnError, It.IsAny<object>()), Times.Once);
-            message.Verify(x => x.SendToCallerAsync(It.IsAny<string>(), It.IsAny<object>()), Times.Once);
+            message.Verify(x => x.SendToCallerAsync(It.IsAny<string>(), It.IsAny<object>()), Times.Never);
 
             var requestChatMessage = TestServiceMessage.Create(TestParticipants.Default, "connectionId").Object;
-            var messages = await service.RequestAllMessages(requestChatMessage);
+            var messages = AssertSuccess(await service.FetchMyMessages(requestChatMessage));
             Assert.Empty(messages);
         }
 
@@ -202,7 +202,7 @@ namespace PaderConference.Core.Tests.Services.Chat
             var message = TestServiceMessage.Create(true, TestParticipants.Default, "connectionId");
 
             // act
-            await service.SetUserIsTyping(message.Object);
+            AssertSuccess(await service.SetUserIsTyping(message.Object));
 
             // assert
             var syncedObj = GetSyncObj();
@@ -218,7 +218,7 @@ namespace PaderConference.Core.Tests.Services.Chat
             var message = TestServiceMessage.Create(false, TestParticipants.Default, "connectionId");
 
             // act
-            await service.SetUserIsTyping(message.Object);
+            AssertSuccess(await service.SetUserIsTyping(message.Object));
 
             // assert
             var syncedObj = GetSyncObj();
@@ -234,10 +234,10 @@ namespace PaderConference.Core.Tests.Services.Chat
             var message2 = TestServiceMessage.Create(false, TestParticipants.Default, "connectionId");
 
             // act
-            await service.SetUserIsTyping(message.Object);
+            AssertSuccess(await service.SetUserIsTyping(message.Object));
             Assert.Single(GetSyncObj().ParticipantsTyping);
 
-            await service.SetUserIsTyping(message2.Object);
+            AssertSuccess(await service.SetUserIsTyping(message2.Object));
 
             // assert
             Assert.Empty(GetSyncObj().ParticipantsTyping);
@@ -251,7 +251,7 @@ namespace PaderConference.Core.Tests.Services.Chat
             var message = TestServiceMessage.Create(true, TestParticipants.Default, "connectionId");
 
             // act
-            await service.SetUserIsTyping(message.Object);
+            AssertSuccess(await service.SetUserIsTyping(message.Object));
             Assert.Single(GetSyncObj().ParticipantsTyping);
 
             await service.OnClientDisconnected(TestParticipants.Default);
@@ -271,7 +271,7 @@ namespace PaderConference.Core.Tests.Services.Chat
             var message = TestServiceMessage.Create(true, TestParticipants.Default, "connectionId");
 
             // act
-            await service.SetUserIsTyping(message.Object);
+            AssertSuccess(await service.SetUserIsTyping(message.Object));
             Assert.Single(GetSyncObj().ParticipantsTyping);
 
             await Task.Delay(400);
@@ -291,11 +291,11 @@ namespace PaderConference.Core.Tests.Services.Chat
             var message = TestServiceMessage.Create(true, TestParticipants.Default, "connectionId");
 
             // act
-            await service.SetUserIsTyping(message.Object);
+            AssertSuccess(await service.SetUserIsTyping(message.Object));
             Assert.Single(GetSyncObj().ParticipantsTyping);
 
             await Task.Delay(150);
-            await service.SetUserIsTyping(message.Object);
+            AssertSuccess(await service.SetUserIsTyping(message.Object));
 
             await Task.Delay(150);
             Assert.Single(GetSyncObj().ParticipantsTyping);
@@ -325,14 +325,13 @@ namespace PaderConference.Core.Tests.Services.Chat
             _conferenceManager.Setup(x => x.TryGetParticipant(It.IsAny<string>(), "test", out foo)).Returns(true);
 
             // act
-            await service.SendMessage(message.Object);
+            AssertFailed(await service.SendMessage(message.Object));
 
             // assert
-            message.Verify(x => x.SendToCallerAsync(CoreHubMessages.Response.OnError, It.IsAny<object>()), Times.Once);
-            message.Verify(x => x.SendToCallerAsync(It.IsAny<string>(), It.IsAny<object>()), Times.Once);
+            message.Verify(x => x.SendToCallerAsync(It.IsAny<string>(), It.IsAny<object>()), Times.Never);
 
             var requestChatMessage = TestServiceMessage.Create(TestParticipants.Default, "connectionId").Object;
-            var messages = await service.RequestAllMessages(requestChatMessage);
+            var messages = AssertSuccess(await service.FetchMyMessages(requestChatMessage));
             Assert.Empty(messages);
         }
 
@@ -371,7 +370,7 @@ namespace PaderConference.Core.Tests.Services.Chat
                 }, TestParticipants.Default, "conn1");
 
             // act
-            await service.SendMessage(message.Object);
+            AssertSuccess(await service.SendMessage(message.Object));
 
             // assert
             message.Verify(x => x.SendToCallerAsync(It.IsAny<string>(), It.IsAny<object>()), Times.Never);
@@ -385,11 +384,11 @@ namespace PaderConference.Core.Tests.Services.Chat
             _signalMessenger.VerifyNoOtherCalls();
 
             var requestChatMessage = TestServiceMessage.Create(TestParticipants.Default2, "conn1").Object;
-            var messages = await service.RequestAllMessages(requestChatMessage);
+            var messages = AssertSuccess(await service.FetchMyMessages(requestChatMessage));
             Assert.Single(messages);
 
             requestChatMessage = TestServiceMessage.Create(TestParticipants.Default, "conn1").Object;
-            messages = await service.RequestAllMessages(requestChatMessage);
+            messages = AssertSuccess(await service.FetchMyMessages(requestChatMessage));
 
             var msg = Assert.Single(messages);
             var participantRef = Assert.IsType<SendPrivately>(msg.Mode).To;

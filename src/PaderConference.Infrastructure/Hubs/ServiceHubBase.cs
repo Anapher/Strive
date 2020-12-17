@@ -30,70 +30,131 @@ namespace PaderConference.Infrastructure.Hubs
             return ConferenceServices.OfType<IConferenceServiceManager<T>>().First().GetService(conferenceId);
         }
 
-        protected async Task<bool> AssertConference(IServiceMessage message, MethodOptions options)
+        protected async Task<SuccessOrError> AssertConference(IServiceMessage message, MethodOptions options)
         {
-            if (options.ConferenceCanBeClosed) return true;
+            if (options.ConferenceCanBeClosed) return SuccessOrError.Succeeded;
 
             var conferenceId = ConferenceManager.GetConferenceOfParticipant(message.Participant);
-
             if (!await ConferenceManager.GetIsConferenceOpen(conferenceId))
-            {
-                await message.ResponseError(ConferenceError.NotOpen);
-                return false;
-            }
+                return ConferenceError.NotOpen;
 
-            return true;
+            return SuccessOrError.Succeeded;
         }
 
-        protected async Task InvokeService<TService, T>(T dto,
-            Func<TService, Func<IServiceMessage<T>, ValueTask>> action, MethodOptions options = default)
+        private async Task<SuccessOrError> WrapServiceCall<TInput>(Func<TInput, ValueTask<SuccessOrError>> func,
+            TInput param) where TInput : IServiceMessage
+        {
+            using var _ = Logger.BeginScope(param.GetScopeData());
+
+            try
+            {
+                var result = await func(param);
+                if (!result.Success)
+                    Logger.LogWarning("Executing {func} failed with error: {@error}", func, result.Error);
+
+                return result;
+            }
+            catch (Exception e)
+            {
+                Logger.LogError(e, "An error occurred on executing {func} with param {@param}", func, param);
+                return ConferenceError.InternalServiceError;
+            }
+        }
+
+        private async Task<SuccessOrError<TReturn>> WrapServiceCall<TReturn, TInput>(
+            Func<TInput, ValueTask<SuccessOrError<TReturn>>> func, TInput param) where TInput : IServiceMessage
+        {
+            using var _ = Logger.BeginScope(param.GetScopeData());
+
+            try
+            {
+                var result = await func(param);
+                if (!result.Success)
+                    Logger.LogWarning("Executing {func} failed with error: {@error}", func, result.Error);
+
+                return result;
+            }
+            catch (Exception e)
+            {
+                Logger.LogError(e, "An error occurred on executing {func} with param {@param}", func, param);
+                return ConferenceError.InternalServiceError;
+            }
+        }
+
+        protected async Task<SuccessOrError> InvokeService<TService, T>(T dto,
+            Func<TService, Func<IServiceMessage<T>, ValueTask<SuccessOrError>>> action, MethodOptions options = default)
             where TService : IConferenceService
         {
-            if (GetMessage(dto, out var message) && await AssertConference(message, options))
-            {
-                var service = await GetConferenceService<TService>(message.Participant);
-                var method = action(service);
-                await method(message);
-            }
+            if (!AssertParticipant(out var participant))
+                return SuccessOrError.Failed(ConferenceError.ParticipantNotRegistered);
+
+            var message = CreateMessage(dto, participant);
+
+            var result = await AssertConference(message, options);
+            if (!result.Success)
+                return result;
+
+            var service = await GetConferenceService<TService>(message.Participant);
+            var method = action(service);
+
+            return await WrapServiceCall(method, message);
         }
 
-        protected async Task InvokeService<TService>(Func<TService, Func<IServiceMessage, ValueTask>> action,
+        protected async Task<SuccessOrError> InvokeService<TService>(
+            Func<TService, Func<IServiceMessage, ValueTask<SuccessOrError>>> action, MethodOptions options = default)
+            where TService : IConferenceService
+        {
+            if (!AssertParticipant(out var participant))
+                return SuccessOrError.Failed(ConferenceError.ParticipantNotRegistered);
+
+            var message = CreateMessage(participant);
+
+            var result = await AssertConference(message, options);
+            if (!result.Success)
+                return result;
+
+            var service = await GetConferenceService<TService>(message.Participant);
+            var method = action(service);
+
+            return await WrapServiceCall(method, message);
+        }
+
+        protected async Task<SuccessOrError<TResult>> InvokeService<TService, T, TResult>(T dto,
+            Func<TService, Func<IServiceMessage<T>, ValueTask<SuccessOrError<TResult>>>> action,
             MethodOptions options = default) where TService : IConferenceService
         {
-            if (GetMessage(out var message) && await AssertConference(message, options))
-            {
-                var service = await GetConferenceService<TService>(message.Participant);
-                var method = action(service);
-                await method(message);
-            }
+            if (!AssertParticipant(out var participant))
+                return SuccessOrError<TResult>.Failed(ConferenceError.ParticipantNotRegistered);
+
+            var message = CreateMessage(dto, participant);
+
+            var result = await AssertConference(message, options);
+            if (!result.Success)
+                return result.Error;
+
+            var service = await GetConferenceService<TService>(message.Participant);
+            var method = action(service);
+
+            return await WrapServiceCall(method, message);
         }
 
-        protected async Task<TResult> InvokeService<TService, T, TResult>(T dto,
-            Func<TService, Func<IServiceMessage<T>, ValueTask<TResult>>> action, MethodOptions options = default)
-            where TService : IConferenceService
+        protected async Task<SuccessOrError<TResult>> InvokeService<TService, TResult>(
+            Func<TService, Func<IServiceMessage, ValueTask<SuccessOrError<TResult>>>> action,
+            MethodOptions options = default) where TService : IConferenceService
         {
-            if (GetMessage(dto, out var message) && await AssertConference(message, options))
-            {
-                var service = await GetConferenceService<TService>(message.Participant);
-                var method = action(service);
-                return await method(message);
-            }
+            if (!AssertParticipant(out var participant))
+                return SuccessOrError<TResult>.Failed(ConferenceError.ParticipantNotRegistered);
 
-            return default!;
-        }
+            var message = CreateMessage(participant);
 
-        protected async Task<TResult> InvokeService<TService, TResult>(
-            Func<TService, Func<IServiceMessage, ValueTask<TResult>>> action, MethodOptions options = default)
-            where TService : IConferenceService
-        {
-            if (GetMessage(out var message) && await AssertConference(message, options))
-            {
-                var service = await GetConferenceService<TService>(message.Participant);
-                var method = action(service);
-                return await method(message);
-            }
+            var result = await AssertConference(message, options);
+            if (!result.Success)
+                return result.Error;
 
-            return default!;
+            var service = await GetConferenceService<TService>(message.Participant);
+            var method = action(service);
+
+            return await WrapServiceCall(method, message);
         }
     }
 }

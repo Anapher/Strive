@@ -187,15 +187,12 @@ namespace PaderConference.Core.Tests.Services.Scenes
 
             // act
             await service.InitializeAsync();
-            await service.SetScene(messageMock.Object);
+            AssertFailed(await service.SetScene(messageMock.Object));
 
             // assert
             var result = GetCurrentState();
             var scene = Assert.Single(result);
             Assert.True(scene.Value.IsControlled);
-
-            messageMock.Verify(x => x.SendToCallerAsync(CoreHubMessages.Response.OnError, It.IsAny<object>()),
-                Times.Once);
         }
 
         [Fact]
@@ -212,14 +209,11 @@ namespace PaderConference.Core.Tests.Services.Scenes
 
             // act
             await service.InitializeAsync();
-            await service.SetScene(messageMock.Object);
+            AssertFailed(await service.SetScene(messageMock.Object));
 
             // assert
             var result = GetCurrentState();
             Assert.Empty(result);
-
-            messageMock.Verify(x => x.SendToCallerAsync(CoreHubMessages.Response.OnError, It.IsAny<object>()),
-                Times.Once);
         }
 
         [Fact]

@@ -36,7 +36,7 @@ namespace PaderConference.Core.Services.Equipment
 
         // TODO: on participant disconnect, disconnect equipment
 
-        public ValueTask<EquipmentAuthResponse> AuthenticateEquipment(string token)
+        public async ValueTask<SuccessOrError<string>> AuthenticateEquipment(string token)
         {
             using var _ = _logger.BeginMethodScope();
 
@@ -47,25 +47,30 @@ namespace PaderConference.Core.Services.Equipment
                 if (_tokenToParticipant.TryGetValue(token, out var participantId))
                 {
                     _logger.LogInformation("Authentication succeeded, participantId: {id}", participantId);
-                    return new EquipmentAuthResponse(participantId).ToValueTask();
+                    return participantId;
                 }
 
                 _logger.LogDebug("Authentication failed");
-                return new EquipmentAuthResponse().ToValueTask();
+                return CommonError.ParticipantNotFound;
             }
         }
 
-        public ValueTask<string> GetEquipmentToken(IServiceMessage message)
+        public ValueTask<SuccessOrError<string>> GetEquipmentToken(IServiceMessage message)
         {
             using var _ = _logger.BeginMethodScope(message.GetScopeData());
 
+            return InternalGetEquipmentToken(message).ToValueTask();
+        }
+
+        private SuccessOrError<string> InternalGetEquipmentToken(IServiceMessage message)
+        {
             // check if the participant already has an equipment token
             lock (_tokenGeneratorLock)
             {
                 if (_participantToToken.TryGetValue(message.Participant.ParticipantId, out var token))
                 {
                     _logger.LogDebug("Participant already has a token, return {token}", token);
-                    return token.ToValueTask();
+                    return token;
                 }
             }
 
@@ -79,7 +84,7 @@ namespace PaderConference.Core.Services.Equipment
                 if (_participantToToken.TryGetValue(message.Participant.ParticipantId, out var token))
                 {
                     _logger.LogDebug("Race condition, discard generated token and return existing one.");
-                    return token.ToValueTask();
+                    return token;
                 }
 
                 if (_tokenToParticipant.ContainsKey(newToken))
@@ -87,7 +92,9 @@ namespace PaderConference.Core.Services.Equipment
                     _logger.LogError(
                         "Generated a token that already exists. Generated token: {token}, _tokenToParticipant: {@tokenToParticipant}",
                         token, _tokenToParticipant);
-                    return GetEquipmentToken(message); // when our random would be broken (or we are a little unlucky)
+                    return
+                        InternalGetEquipmentToken(
+                            message); // when our random would be broken (or we are a little unlucky)
                 }
 
                 _logger.LogDebug("Remember new token and return");
@@ -95,20 +102,22 @@ namespace PaderConference.Core.Services.Equipment
                 _participantToToken[message.Participant.ParticipantId] = newToken;
                 _tokenToParticipant[newToken] = message.Participant.ParticipantId;
 
-                return newToken.ToValueTask();
+                return newToken;
             }
         }
 
-        public async ValueTask RegisterEquipment(IServiceMessage<RegisterEquipmentRequestDto> message)
+        public async ValueTask<SuccessOrError> RegisterEquipment(IServiceMessage<RegisterEquipmentRequestDto> message)
         {
             if (_participantEquipment.TryGetValue(message.Participant.ParticipantId, out var equipment))
             {
                 await equipment.RegisterEquipment(message.ConnectionId, message.Payload);
                 await UpdateParticipantEquipment(message.Participant, equipment);
             }
+
+            return SuccessOrError.Succeeded;
         }
 
-        public async ValueTask SendEquipmentCommand(IServiceMessage<EquipmentCommand> message)
+        public async ValueTask<SuccessOrError> SendEquipmentCommand(IServiceMessage<EquipmentCommand> message)
         {
             using var _ = _logger.BeginMethodScope(message.GetScopeData());
 
@@ -117,11 +126,10 @@ namespace PaderConference.Core.Services.Equipment
                 var connection = equipment.GetConnection(message.Payload.EquipmentId);
                 if (connection == null)
                 {
-                    await message.ResponseError(EquipmentError.NotFound);
                     _logger.LogWarning(
                         "Sending command to equipment failed, equipment {eqId} was not found for participant {pid}",
                         message.Payload.EquipmentId, message.Participant.ParticipantId);
-                    return;
+                    return EquipmentError.NotFound;
                 }
 
                 _logger.LogInformation("Send equipment command to {connId}, command: {@cmd}", connection.ConnectionId,
@@ -134,9 +142,11 @@ namespace PaderConference.Core.Services.Equipment
             {
                 _logger.LogWarning("Participant {pid} was not found.", message.Participant.ParticipantId);
             }
+
+            return SuccessOrError.Succeeded;
         }
 
-        public async ValueTask EquipmentErrorOccurred(IServiceMessage<Error> message)
+        public async ValueTask<SuccessOrError> EquipmentErrorOccurred(IServiceMessage<Error> message)
         {
             using var _ = _logger.BeginMethodScope(message.GetScopeData());
 
@@ -147,9 +157,12 @@ namespace PaderConference.Core.Services.Equipment
                     message.Payload);
             else
                 _logger.LogWarning("The participant was not found.");
+
+            return SuccessOrError.Succeeded;
         }
 
-        public async ValueTask EquipmentUpdateStatus(IServiceMessage<Dictionary<string, UseMediaStateInfo>> message)
+        public async ValueTask<SuccessOrError> EquipmentUpdateStatus(
+            IServiceMessage<Dictionary<string, UseMediaStateInfo>> message)
         {
             using var _ = _logger.BeginMethodScope(message.GetScopeData());
 
@@ -164,6 +177,8 @@ namespace PaderConference.Core.Services.Equipment
             {
                 _logger.LogWarning("The participant was not found.");
             }
+
+            return SuccessOrError.Succeeded;
         }
 
         public async ValueTask OnEquipmentConnected(Participant participant, string connectionId)

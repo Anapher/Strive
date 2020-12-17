@@ -93,10 +93,10 @@ namespace PaderConference.Core.Services.Media
                 message.Participant.ParticipantId);
         }
 
-        public Func<IServiceMessage<TRequest>, ValueTask<JsonElement?>> Redirect<TRequest>(
+        public Func<IServiceMessage<TRequest>, ValueTask<SuccessOrError<JsonElement?>>> Redirect<TRequest>(
             ConferenceDependentKey dependentKey)
         {
-            async ValueTask<JsonElement?> Invoke(IServiceMessage<TRequest> message)
+            async ValueTask<SuccessOrError<JsonElement?>> Invoke(IServiceMessage<TRequest> message)
             {
                 var meta = GetMeta(message);
                 var request = new ConnectionMessage<TRequest>(message.Payload, meta);
@@ -107,7 +107,7 @@ namespace PaderConference.Core.Services.Media
             return Invoke;
         }
 
-        public async ValueTask<JsonElement?> GetRouterCapabilities(IServiceMessage _)
+        public async ValueTask<SuccessOrError<JsonElement?>> GetRouterCapabilities(IServiceMessage _)
         {
             return await _repo.GetRtpCapabilities(_conferenceId);
         }
