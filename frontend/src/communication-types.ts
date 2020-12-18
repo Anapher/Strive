@@ -1,4 +1,4 @@
-export type ErrorType = 'serviceError' | 'ui';
+export type ErrorType = 'serviceError' | 'requestError' | 'internalError' | 'ui';
 
 export type DomainError = {
    type: ErrorType;
@@ -12,9 +12,15 @@ export type SuccessOrErrorSucceeded<T> = {
    success: true;
 };
 
+export type SuccessOrErrorSucceededWithoutResult = {
+   success: true;
+};
+
 export type SuccessOrErrorFailed = {
    error: DomainError;
    success: false;
 };
 
-export type SuccessOrError<T> = SuccessOrErrorSucceeded<T> | SuccessOrErrorFailed;
+export type SuccessOrError<T = never> =
+   | ([T] extends [never] ? SuccessOrErrorSucceededWithoutResult : SuccessOrErrorSucceeded<T>)
+   | SuccessOrErrorFailed;

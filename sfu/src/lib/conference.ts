@@ -68,7 +68,7 @@ export class Conference {
       await this.streamInfoRepo.updateStreams(this.participants.values());
    }
 
-   public async removeConnection(connectionId: string): Promise<SuccessOrError<void>> {
+   public async removeConnection(connectionId: string): Promise<SuccessOrError> {
       const connection = this.connections.get(connectionId);
       if (!connection) return { success: false, error: errors.connectionNotFound(connectionId) };
 
@@ -99,7 +99,7 @@ export class Conference {
       return { success: true };
    }
 
-   public async roomSwitched({ meta: { participantId } }: ConnectionMessage<any>): Promise<SuccessOrError<void>> {
+   public async roomSwitched({ meta: { participantId } }: ConnectionMessage<any>): Promise<SuccessOrError> {
       const participant = this.participants.get(participantId);
       if (!participant) return { success: false, error: errors.participantNotFound(participantId) };
 
@@ -115,10 +115,7 @@ export class Conference {
     * Change a producer/consumer of the participant. The parameter provides information about the type (consumer|producer),
     * id and action (pause|resume|close)
     */
-   public async changeStream({
-      payload: { id, type, action },
-      meta,
-   }: ChangeStreamRequest): Promise<SuccessOrError<void>> {
+   public async changeStream({ payload: { id, type, action }, meta }: ChangeStreamRequest): Promise<SuccessOrError> {
       const connection = this.connections.get(meta.connectionId);
       if (!connection) {
          return { success: false, error: errors.connectionNotFound(meta.connectionId) };
@@ -216,7 +213,7 @@ export class Conference {
    /**
     * Connect the transport after initialization
     */
-   public async connectTransport({ payload, meta }: ConnectTransportRequest): Promise<SuccessOrError<void>> {
+   public async connectTransport({ payload, meta }: ConnectTransportRequest): Promise<SuccessOrError> {
       const connection = this.connections.get(meta.connectionId);
       if (!connection) return { success: false, error: errors.connectionNotFound(meta.connectionId) };
 

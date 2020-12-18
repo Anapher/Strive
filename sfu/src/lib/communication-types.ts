@@ -21,7 +21,6 @@ export type SuccessOrErrorFailed = {
    success: false;
 };
 
-export type SuccessOrError<T> =
-   | SuccessOrErrorSucceeded<T>
-   | SuccessOrErrorSucceededWithoutResult
+export type SuccessOrError<T = never> =
+   | ([T] extends [never] ? SuccessOrErrorSucceededWithoutResult : SuccessOrErrorSucceeded<T>)
    | SuccessOrErrorFailed;

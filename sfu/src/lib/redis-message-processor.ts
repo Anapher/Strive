@@ -19,7 +19,7 @@ const logger = new Logger('RedisMessageProcessor');
 export class RedisMessageProcessor {
    constructor(private conferenceManager: ConferenceManager) {}
 
-   public initializeConnection(request: InitializeConnectionRequest): SuccessOrError<void> {
+   public initializeConnection(request: InitializeConnectionRequest): SuccessOrError {
       const conference = this.conferenceManager.getConference(request.meta.conferenceId);
       if (!conference) return { success: false, error: errors.conferenceNotFound(request.meta.conferenceId) };
 
@@ -43,7 +43,7 @@ export class RedisMessageProcessor {
       return await conference.createTransport(request);
    }
 
-   public async connectTransport(request: ConnectTransportRequest): Promise<SuccessOrError<void>> {
+   public async connectTransport(request: ConnectTransportRequest): Promise<SuccessOrError> {
       const conference = this.conferenceManager.getConference(request.meta.conferenceId);
       if (!conference) return { success: false, error: errors.conferenceNotFound(request.meta.conferenceId) };
 
@@ -57,21 +57,21 @@ export class RedisMessageProcessor {
       return await conference.transportProduce(request);
    }
 
-   public async roomSwitched(request: ConnectionMessage<any>): Promise<SuccessOrError<void>> {
+   public async roomSwitched(request: ConnectionMessage<any>): Promise<SuccessOrError> {
       const conference = this.conferenceManager.getConference(request.meta.conferenceId);
       if (!conference) return { success: false, error: errors.conferenceNotFound(request.meta.conferenceId) };
 
       return await conference.roomSwitched(request);
    }
 
-   public async changeStream(request: ChangeStreamRequest): Promise<SuccessOrError<void>> {
+   public async changeStream(request: ChangeStreamRequest): Promise<SuccessOrError> {
       const conference = this.conferenceManager.getConference(request.meta.conferenceId);
       if (!conference) return { success: false, error: errors.conferenceNotFound(request.meta.conferenceId) };
 
       return await conference.changeStream(request);
    }
 
-   public async clientDisconnected(request: ConnectionMessage<undefined>): Promise<SuccessOrError<void>> {
+   public async clientDisconnected(request: ConnectionMessage<undefined>): Promise<SuccessOrError> {
       const conference = this.conferenceManager.getConference(request.meta.conferenceId);
       if (!conference) return { success: false, error: errors.conferenceNotFound(request.meta.conferenceId) };
 

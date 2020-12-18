@@ -72,7 +72,7 @@ async function initializeConference(conferenceInfo: ConferenceInfo): Promise<voi
    subRedis.subscribe(onClientDisconnected.getName(conferenceInfo.id));
 }
 
-const onNewConferenceCreated: () => Promise<SuccessOrError<void>> = async () => {
+const onNewConferenceCreated: () => Promise<SuccessOrError> = async () => {
    const conferenceStr = await redis.lpop(newConferences);
    if (conferenceStr) {
       const conferenceInfo: ConferenceInfo = JSON.parse(conferenceStr);
@@ -84,7 +84,7 @@ const onNewConferenceCreated: () => Promise<SuccessOrError<void>> = async () => 
 
 type MappedMessage = {
    channel: ChannelName | string;
-   handler: (request: any) => Promise<SuccessOrError<any>> | SuccessOrError<any>;
+   handler: (request: any) => Promise<SuccessOrError> | SuccessOrError;
 };
 
 const messagesMap: MappedMessage[] = [
@@ -140,7 +140,7 @@ async function subscribeRedis() {
 
          if (callbackChannel) {
             // return error
-            const response: SuccessOrError<void> = {
+            const response: SuccessOrError = {
                success: false,
                error: errors.internalError(`Error executing message from channel ${channel}: ${error}`),
             };

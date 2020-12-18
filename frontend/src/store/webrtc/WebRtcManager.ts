@@ -82,7 +82,7 @@ export class WebRtcManager extends EventEmitter {
 
       await device.load({ routerRtpCapabilities: rtpResult.response });
 
-      const result = await signalr.invoke<SuccessOrError<void>>('InitializeConnection', {
+      const result = await signalr.invoke<SuccessOrError>('InitializeConnection', {
          sctpCapabilities: device.sctpCapabilities,
          rtpCapabilities: device.rtpCapabilities,
       });
