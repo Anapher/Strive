@@ -22,5 +22,6 @@ module.exports = {
       // disable the rule for all files
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       'react/prop-types': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
    },
 };
