@@ -14,6 +14,15 @@ namespace PaderConference.Core.Services
 
     public class SuccessOrError : ISuccessOrError
     {
+        public SuccessOrError()
+        {
+        }
+
+        public SuccessOrError(Error error)
+        {
+            Error = error;
+        }
+
         [MemberNotNullWhen(false, nameof(Error))]
         public bool Success => Error == null;
 
