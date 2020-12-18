@@ -1,7 +1,8 @@
-import { Badge, Fab, List, makeStyles, Zoom } from '@material-ui/core';
+import { Badge, Box, Button, Fab, List, makeStyles, Typography, Zoom } from '@material-ui/core';
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import _ from 'lodash';
 import React, { useEffect, useRef, useState } from 'react';
+import { DomainError } from 'src/communication-types';
 import { ParticipantDto } from 'src/features/conference/types';
 import useBottomScrollTrigger from 'src/hooks/useBottomScrollTrigger';
 import { getScrollbarWidth } from 'src/utils/browser-info';
@@ -30,9 +31,18 @@ type Props = {
    participants: ParticipantDto[] | null;
    participantId?: string;
    participantColors: { [id: string]: string };
+   error: DomainError | null;
+   onRetry: () => void;
 };
 
-export default function ChatMessageList({ chat, participants, participantId, participantColors }: Props) {
+export default function ChatMessageList({
+   chat,
+   participants,
+   participantId,
+   participantColors,
+   error,
+   onRetry,
+}: Props) {
    const classes = useStyles();
 
    const listRef = useRef<HTMLOListElement>(null);
@@ -67,11 +77,19 @@ export default function ChatMessageList({ chat, participants, participantId, par
          <List className={classes.list} ref={listRef}>
             <div ref={bottomAnchor} />
             {chat == null ? (
-               <>
-                  <ChatMessage participantColors={participantColors} />
-                  <ChatMessage participantColors={participantColors} />
-                  <ChatMessage participantColors={participantColors} />
-               </>
+               error ? (
+                  <Box m={2} display="flex" flexDirection="column" alignItems="center">
+                     <Typography
+                        color="error"
+                        gutterBottom
+                     >{`An error occurred when trying to fetch the chat: ${error.message}`}</Typography>
+                     <Button onClick={onRetry} variant="contained">
+                        Retry
+                     </Button>
+                  </Box>
+               ) : (
+                  Array.from({ length: 8 }).map((_, i) => <ChatMessage key={i} participantColors={participantColors} />)
+               )
             ) : (
                _([...chat])
                   .reverse()

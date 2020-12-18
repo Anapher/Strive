@@ -18,9 +18,12 @@ export const subscribeEvent = createAction(`${DEFAULT_PREFIX}::SUBSCRIBE_EVENT`,
    payload: { name },
 }));
 
-export const invoke = createAction(`${DEFAULT_PREFIX}::INVOKE`, (name: string, payload?: any) => ({
-   payload: { name, payload },
-}));
+export const invokePrefix = `${DEFAULT_PREFIX}::INVOKE_`;
+
+export const invoke = (name: string) =>
+   createAction(invokePrefix + name, (payload?: any) => ({
+      payload: { name, payload },
+   }));
 
 export const close = createAction(`${DEFAULT_PREFIX}::CLOSE`);
 
@@ -59,7 +62,7 @@ export function onEventOccurred<T>(eventName: string): ActionCreatorWithPayload<
 }
 
 export function onInvokeReturn<T>(methodName: string): ActionCreatorWithPayload<SuccessOrError<T>, string> {
-   return createAction(`${DEFAULT_PREFIX}::ONINVOKE_${methodName}`, (payload: SuccessOrError<T>) => ({
+   return createAction(`${DEFAULT_PREFIX}::RETURN_${methodName}`, (payload: SuccessOrError<T>) => ({
       payload,
    }));
 }

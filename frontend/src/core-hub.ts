@@ -18,8 +18,8 @@ export const joinConference = (conferenceId: string, defaultEvents: string[], ac
 export const joinConferenceAsEquipment = (conferenceId: string, defaultEvents: string[], token: string) =>
    connectSignal({ conferenceId, token }, defaultEvents, { conferenceId });
 
-export const openConference = () => invoke('OpenConference');
-export const closeConference = () => invoke('CloseConference');
+export const openConference = createHubFn('OpenConference');
+export const closeConference = createHubFn('CloseConference');
 
 export const createRooms = createHubFn<CreateRoomDto[]>('CreateRooms');
 export const removeRooms = createHubFn<string[]>('RemoveRooms');
@@ -45,10 +45,11 @@ export const changeStream = createHubFn<ChangeStreamDto>('ChangeStream');
 
 export function createHubFn<TArg = void>(name: string) {
    const actionCreator = function (arg: TArg) {
-      return invoke(name, arg);
+      return invoke(name)(arg);
    };
 
    actionCreator.hubName = name;
+   actionCreator.action = invoke(name).type;
    actionCreator.returnAction = onInvokeReturn(name).type;
    return actionCreator;
 }

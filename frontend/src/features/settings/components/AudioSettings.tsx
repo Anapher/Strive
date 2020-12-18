@@ -6,6 +6,8 @@ import { selectAvailableInputDevices } from '../selectors';
 import { setAudioGain, setCurrentDevice } from '../reducer';
 import AudioSettingsTest from './AudioSettingsTest';
 import DeviceSelector from './DeviceSelector';
+import useWebRtcStatus from 'src/store/webrtc/hooks/useWebRtcStatus';
+import { Alert } from '@material-ui/lab';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -35,6 +37,7 @@ export default function AudioSettings() {
    };
 
    const audioDevices = useSelector((state: RootState) => selectAvailableInputDevices(state, 'mic'));
+   const webrtcState = useWebRtcStatus();
 
    return (
       <div className={classes.root}>
@@ -63,7 +66,14 @@ export default function AudioSettings() {
             </div>
          </Box>
          <Box mt={4}>
-            <AudioSettingsTest />
+            {webrtcState === 'connected' ? (
+               <AudioSettingsTest />
+            ) : (
+               <Alert severity="error">
+                  WebRTC not connected, so you cannot test your audio device. Please refresh the page or contact the
+                  server administrator.
+               </Alert>
+            )}
          </Box>
       </div>
    );

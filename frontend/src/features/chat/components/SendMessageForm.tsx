@@ -95,8 +95,6 @@ export default function SendMessageForm({ onSendMessage, isTyping }: Props) {
          noValidate
          onSubmit={handleSubmit(({ message, sendTo }) => {
             if (message) {
-               console.log(sendTo);
-
                let mode: SendingMode | undefined;
                if (sendTo?.startsWith('to:')) {
                   mode = { type: 'privately', to: { participantId: sendTo.substring(3) } };

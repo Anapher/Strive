@@ -4,10 +4,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import * as coreHub from 'src/core-hub';
 import { SendChatMessageDto } from 'src/core-hub.types';
 import { selectMyParticipantId } from 'src/features/auth/selectors';
+import { selectParticipants } from 'src/features/conference/selectors';
 import { RootState } from 'src/store';
 import * as actions from '../actions';
 import { hashCode, numberToColor } from '../color-utils';
-import { selectParticipantsTyping } from '../selectors';
+import { selectFetchChatError, selectMessages, selectParticipantsTyping } from '../selectors';
 import ChatMessageList from './ChatMessageList';
 import SendMessageForm from './SendMessageForm';
 import UsersTyping from './UsersTyping';
@@ -33,15 +34,19 @@ const useStyles = makeStyles((theme) => ({
 
 export default function ChatBar() {
    const classes = useStyles();
-   const { chat } = useSelector((state: RootState) => state.chat);
-   const participants = useSelector((state: RootState) => state.conference.participants);
+   const messages = useSelector(selectMessages);
+   const participants = useSelector(selectParticipants);
    const connected = useSelector((state: RootState) => state.signalr.isConnected);
+   const fetchChatError = useSelector(selectFetchChatError);
+
    const dispatch = useDispatch();
+
+   const handleFetchChat = () => dispatch(coreHub.requestChat());
 
    useEffect(() => {
       if (connected) {
          dispatch(actions.subscribeChatMessages());
-         dispatch(coreHub.requestChat());
+         handleFetchChat();
       }
    }, [connected]);
 
@@ -65,10 +70,12 @@ export default function ChatBar() {
          <Divider orientation="horizontal" />
          <div className={classes.chat}>
             <ChatMessageList
-               chat={chat}
+               chat={messages}
                participants={participants}
                participantId={participantId}
                participantColors={participantColors}
+               error={fetchChatError}
+               onRetry={handleFetchChat}
             />
          </div>
          <Box m={1}>

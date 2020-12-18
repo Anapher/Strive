@@ -79,16 +79,6 @@ export default (options: Options): SignalRResult => {
             connection.on(name, (args) => dispatch(actions.onEventOccurred(name)(args)));
          }
       },
-      [actions.invoke.type]: ({ dispatch }, { payload: { payload, name } }) => {
-         if (connection) {
-            connection.invoke(name, ...(payload ? [payload] : [])).then(
-               (returnVal) => {
-                  dispatch(actions.onInvokeReturn(name)(returnVal));
-               },
-               (error) => dispatch(actions.onInvokeReturn(name)({ success: false, error: signalrError(error) })),
-            );
-         }
-      },
       [actions.close.type]: async () => {
          if (connection) {
             await connection.stop();
@@ -98,21 +88,30 @@ export default (options: Options): SignalRResult => {
       },
    };
 
+   const invokeMethodHandler = ({ dispatch }: MiddlewareAPI, { payload: { payload, name } }: any) => {
+      if (connection) {
+         connection.invoke(name, ...(payload ? [payload] : [])).then(
+            (returnVal) => {
+               dispatch(actions.onInvokeReturn(name)(returnVal));
+            },
+            (error) => dispatch(actions.onInvokeReturn(name)({ success: false, error: signalrError(error) })),
+         );
+      }
+   };
+
    // Middleware function.
    const middleware: Middleware = (store: MiddlewareAPI) => (next) => (action: PayloadAction) => {
       const { type } = action;
 
-      // Check if action type matches prefix
-      if (type) {
-         const handler = handlers[type];
-
-         if (handler) {
-            try {
-               handler(store, action);
-            } catch (err) {
-               console.error(err);
-            }
+      try {
+         if (type.startsWith(actions.invokePrefix)) {
+            invokeMethodHandler(store, action);
+         } else {
+            const handler = handlers[type];
+            if (handler) handler(store, action);
          }
+      } catch (err) {
+         console.error(err);
       }
 
       return next(action);
