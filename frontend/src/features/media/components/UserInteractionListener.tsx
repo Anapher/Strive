@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { userInteractionMade } from '../mediaSlice';
+import { userInteractionMade } from '../reducer';
 
 export default function UserInteractionListener() {
    const dispatch = useDispatch();

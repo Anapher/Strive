@@ -17,7 +17,7 @@ import usePermission, { CONFERENCE_CAN_OPEN_AND_CLOSE } from 'src/hooks/usePermi
 import { RootState } from 'src/store';
 import * as coreHub from 'src/core-hub';
 import { ConferenceInfo } from '../types';
-import { openSettings } from 'src/features/settings/settingsSlice';
+import { openSettings } from 'src/features/settings/reducer';
 
 const useStyles = makeStyles((theme) => ({
    root: {

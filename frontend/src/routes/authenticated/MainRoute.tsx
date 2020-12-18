@@ -1,7 +1,7 @@
 import { Button, makeStyles, Typography } from '@material-ui/core';
 import React from 'react';
 import { useDispatch } from 'react-redux';
-import { signOut } from 'src/features/auth/authSlice';
+import { signOut } from 'src/features/auth/reducer';
 import ConferenceControls from 'src/features/create-conference/components/ConferenceControls';
 
 const useStyles = makeStyles((theme) => ({

@@ -4,7 +4,7 @@ import React from 'react';
 import Countdown, { CountdownRenderProps } from 'react-countdown';
 import { useDispatch, useSelector } from 'react-redux';
 import { changeBreakoutRooms, closeBreakoutRooms } from 'src/core-hub';
-import { setCreationDialogOpen } from '../breakoutRoomsSlice';
+import { setCreationDialogOpen } from '../reducer';
 import { selectBreakoutRoomState } from '../selectors';
 
 const renderer = ({ hours, formatted }: CountdownRenderProps) => {

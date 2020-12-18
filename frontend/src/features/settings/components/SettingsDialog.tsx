@@ -2,7 +2,7 @@ import { Dialog, DialogTitle } from '@material-ui/core';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from 'src/store';
-import { closeSettings } from '../settingsSlice';
+import { closeSettings } from '../reducer';
 import Settings from './Settings';
 
 export default function SettingsDialog() {

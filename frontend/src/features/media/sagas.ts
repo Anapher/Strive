@@ -3,7 +3,7 @@ import { takeEverySynchronizedObjectChange } from 'src/store/saga-utils';
 import { selectMyParticipantId } from '../auth/selectors';
 import { selectParticipants } from '../conference/selectors';
 import { ParticipantDto } from '../conference/types';
-import { removeParticipantAudio, setParticipantAudio } from './mediaSlice';
+import { removeParticipantAudio, setParticipantAudio } from './reducer';
 import { selectParticipantAudio } from './selectors';
 import { ParticipantAudioInfo } from './types';
 

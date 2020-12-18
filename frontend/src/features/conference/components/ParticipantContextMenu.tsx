@@ -8,7 +8,7 @@ import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import _ from 'lodash';
 import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { patchParticipantAudio } from 'src/features/media/mediaSlice';
+import { patchParticipantAudio } from 'src/features/media/reducer';
 import { selectParticipantAudioInfo } from 'src/features/media/selectors';
 import { RootState } from 'src/store';
 import { ParticipantDto } from '../types';

@@ -3,7 +3,7 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from 'src/store';
 import { selectAvailableInputDevices } from '../selectors';
-import { setAudioGain, setCurrentDevice } from '../settingsSlice';
+import { setAudioGain, setCurrentDevice } from '../reducer';
 import AudioSettingsTest from './AudioSettingsTest';
 import DeviceSelector from './DeviceSelector';
 

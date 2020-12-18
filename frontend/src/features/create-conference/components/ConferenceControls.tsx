@@ -3,7 +3,7 @@ import AddIcon from '@material-ui/icons/Add';
 import NavigationIcon from '@material-ui/icons/Navigation';
 import React from 'react';
 import { useDispatch } from 'react-redux';
-import { openCreateDialog } from '../createConferenceSlice';
+import { openCreateDialog } from '../reducer';
 import CreateConferenceDialog from './CreateConferenceDialog';
 
 const useStyles = makeStyles((theme) => ({

@@ -3,7 +3,7 @@ import { DateTime } from 'luxon';
 import { cancel, delay, fork, put, select, take, takeEvery } from 'redux-saga/effects';
 import { takeEverySynchronizedObjectChange } from 'src/store/saga-utils';
 import { ParticipantDto } from '../conference/types';
-import { patchParticipantAudio, removeParticipantAudio, setParticipantAudio } from '../media/mediaSlice';
+import { patchParticipantAudio, removeParticipantAudio, setParticipantAudio } from '../media/reducer';
 import { selectParticipantAudio, selectScreenSharingParticipants } from '../media/selectors';
 import { ParticipantAudioInfo } from '../media/types';
 import {
@@ -12,7 +12,7 @@ import {
    setAppliedScene,
    setCurrentScene,
    updateActiveParticipantDeleted,
-} from './scenesSlice';
+} from './reducer';
 import {
    selectActiveParticipants,
    selectAppliedScene,

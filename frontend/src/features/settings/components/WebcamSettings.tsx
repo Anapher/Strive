@@ -3,7 +3,7 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from 'src/store';
 import { selectAvailableInputDevices } from '../selectors';
-import { setCurrentDevice } from '../settingsSlice';
+import { setCurrentDevice } from '../reducer';
 import DeviceSelector from './DeviceSelector';
 import WebcamSettingsTest from './WebcamSettingsTest';
 

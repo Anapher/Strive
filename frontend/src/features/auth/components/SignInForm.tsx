@@ -4,7 +4,7 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from 'src/store';
-import { signInAsync } from '../signInReducer';
+import { signInAsync } from '../sign-in-reducer';
 
 export default function SignInForm() {
    const dispatch = useDispatch();

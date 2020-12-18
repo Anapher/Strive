@@ -2,7 +2,7 @@ import { Dialog } from '@material-ui/core';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from 'src/store';
-import { setCreationDialogOpen } from '../breakoutRoomsSlice';
+import { setCreationDialogOpen } from '../reducer';
 import CreateBreakoutRoomsDialog from './CreateBreakoutRoomsDialog';
 import UpdateBreakoutRoomsDialog from './UpdateBreakoutRoomsDialog';
 

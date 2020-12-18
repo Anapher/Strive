@@ -16,7 +16,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { selectAccessToken } from 'src/features/auth/selectors';
 import { RootState } from 'src/store';
 import to from 'src/utils/to';
-import { closeCreateDialog, createConferenceAsync } from '../createConferenceSlice';
+import { closeCreateDialog, createConferenceAsync } from '../reducer';
 import { CreateConferenceFormState, mapFormToDto } from '../form';
 import CreateConferenceForm from './CreateConferenceForm';
 

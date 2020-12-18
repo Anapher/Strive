@@ -4,7 +4,7 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from 'src/store';
-import { signInGuestAsync } from '../signInReducer';
+import { signInGuestAsync } from '../sign-in-reducer';
 
 const useStyles = makeStyles((theme) => ({
    paper: {

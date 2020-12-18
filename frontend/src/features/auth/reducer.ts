@@ -2,7 +2,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { AccessInfo, SignInResponse } from 'MyModels';
 import * as authServices from 'src/services/api/auth';
 import { AppThunk } from 'src/store';
-import { signInAsync, signInGuestAsync } from './signInReducer';
+import { signInAsync, signInGuestAsync } from './sign-in-reducer';
 
 export type AuthState = {
    isAuthenticated: boolean;

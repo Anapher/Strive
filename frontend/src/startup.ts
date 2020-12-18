@@ -4,7 +4,7 @@ import Axios, { AxiosError } from 'axios';
 import _ from 'lodash';
 import { AccessInfo } from 'MyModels';
 import { Store } from 'redux';
-import { refreshToken } from './features/auth/authSlice';
+import { refreshToken } from './features/auth/reducer';
 import { RootState } from './store';
 
 export default function configure(store: Store) {

@@ -6,7 +6,7 @@ import { onEventOccurred } from 'src/store/signal/actions';
 import { ProducerDevices } from 'src/store/webrtc/types';
 import { ConnectedEquipmentDto } from '../media/types';
 import { showMessage } from '../notifier/actions';
-import { PaderConferenceSettings, setCurrentDevice } from './settingsSlice';
+import { PaderConferenceSettings, setCurrentDevice } from './reducer';
 import { fetchDevices } from './thunks';
 import { InputDeviceDto } from './types';
 

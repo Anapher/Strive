@@ -3,7 +3,7 @@ import GroupWorkIcon from '@material-ui/icons/GroupWork';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { ActiveSceneMenuItemProps } from 'src/features/scenes/types';
-import { setCreationDialogOpen } from '../breakoutRoomsSlice';
+import { setCreationDialogOpen } from '../reducer';
 import { selectIsBreakoutRoomsOpen } from '../selectors';
 
 export function OpenBreakoutRoomsItem({ onClose }: ActiveSceneMenuItemProps) {

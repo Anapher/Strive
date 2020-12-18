@@ -4,7 +4,7 @@ import { selectParticipantsOfCurrentRoom } from 'src/features/rooms/selectors';
 import { RootState } from 'src/store';
 import useConsumer from 'src/store/webrtc/hooks/useConsumer';
 import AudioManager from '../AudioManager';
-import { patchParticipantAudio } from '../mediaSlice';
+import { patchParticipantAudio } from '../reducer';
 import { DEFAULT_PARTICIPANT_AUDIO } from '../sagas';
 import { ParticipantAudioElement } from '../types';
 

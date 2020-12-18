@@ -24,7 +24,7 @@ import React, { useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { ParticipantDto } from 'src/features/conference/types';
 import { RootState } from 'src/store';
-import { setAppliedScene } from '../scenesSlice';
+import { setAppliedScene } from '../reducer';
 import { selectAvailableScenesViewModels, selectServerProvidedScene } from '../selectors';
 import { ActiveSceneInfo, Scene } from '../types';
 import breakoutRooms from 'src/features/breakout-rooms/active-scene';

@@ -2,7 +2,7 @@ import { useSnackbar } from 'notistack';
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from 'src/store';
-import { removeMessage } from '../notifierSlice';
+import { removeMessage } from '../reducer';
 
 export default function Notifier() {
    const dispatch = useDispatch();

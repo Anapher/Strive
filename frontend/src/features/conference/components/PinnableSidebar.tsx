@@ -4,7 +4,7 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import RoomsList from 'src/features/rooms/components/RoomsList';
 import { RootState } from 'src/store';
-import { setParticipantsOpen } from '../conferenceSlice';
+import { setParticipantsOpen } from '../reducer';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import { motion } from 'framer-motion';
 
