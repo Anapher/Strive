@@ -1,7 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { SuccessOrError } from 'src/communication-types';
+import { DomainError, SuccessOrError } from 'src/communication-types';
 import { getEquipmentToken } from 'src/core-hub';
-import { onInvokeReturn } from 'src/store/signal/actions';
 import { ProducerDevice } from 'src/store/webrtc/types';
 import { fetchDevices } from './thunks';
 import { AnyInputDevice, InputDeviceDto } from './types';
@@ -23,6 +22,7 @@ type SettingsState = {
    open: boolean;
    obj: PaderConferenceSettings;
    equipmentToken: string | null;
+   equipmentTokenError: DomainError | null;
    availableDevices: InputDeviceDto[] | null;
 };
 
@@ -36,6 +36,7 @@ const initialState: SettingsState = {
       screen: {},
    },
    equipmentToken: null,
+   equipmentTokenError: null,
    availableDevices: null,
 };
 
@@ -61,7 +62,14 @@ const settingsSlice = createSlice({
    },
    extraReducers: {
       [getEquipmentToken.returnAction]: (state, action: PayloadAction<SuccessOrError<string>>) => {
-         if (action.payload.success) state.equipmentToken = action.payload.response;
+         if (action.payload.success) {
+            state.equipmentToken = action.payload.response;
+         } else {
+            state.equipmentTokenError = action.payload.error;
+         }
+      },
+      [getEquipmentToken.action]: (state) => {
+         state.equipmentTokenError = null;
       },
       [fetchDevices.fulfilled.type]: (state, { payload }: PayloadAction<InputDeviceDto[]>) => {
          state.availableDevices = payload;

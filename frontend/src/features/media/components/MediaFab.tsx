@@ -26,23 +26,27 @@ export default function MediaFab({
    const theme = useTheme();
 
    const handleClick = async () => {
-      if (!enabled) {
-         try {
-            await enable();
-         } catch (error) {
-            const { message } = error as DOMException;
-            dispatch(showMessage({ message, variant: 'error' }));
-         }
-      } else {
-         if (paused) {
-            resume();
+      try {
+         if (!enabled) {
+            try {
+               await enable();
+            } catch (error) {
+               const { message } = error as DOMException;
+               dispatch(showMessage({ message, variant: 'error' }));
+            }
          } else {
-            if (pauseOnToggle) {
-               pause();
+            if (paused) {
+               resume();
             } else {
-               disable();
+               if (pauseOnToggle) {
+                  pause();
+               } else {
+                  disable();
+               }
             }
          }
+      } catch (error) {
+         dispatch(showMessage({ message: error.message ?? error.toString(), variant: 'error' }));
       }
    };
 

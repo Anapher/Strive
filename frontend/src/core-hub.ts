@@ -30,7 +30,6 @@ export const closeBreakoutRooms = createHubFn('CloseBreakoutRooms');
 export const changeBreakoutRooms = createHubFn<Operation[] /** for BreakoutRoomsOptions */>('ChangeBreakoutRooms');
 
 export const requestChat = createHubFn('RequestChat');
-
 export const sendChatMessage = createHubFn<SendChatMessageDto>('SendChatMessage');
 export const setUserTyping = createHubFn<boolean>('SetUserIsTyping');
 
