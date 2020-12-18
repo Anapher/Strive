@@ -1,10 +1,9 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { onInvokeReturn } from 'src/store/signal/actions';
-import * as actions from './actions';
+import { SuccessOrError } from 'src/communication-types';
 import * as coreHub from 'src/core-hub';
 import { createSynchronizeObjectReducer } from 'src/store/signal/synchronized-object';
+import * as actions from './actions';
 import { ChatMessageDto, ChatSynchronizedObject } from './types';
-import { SuccessOrError } from 'src/communication-types';
 
 export type ChatState = Readonly<{
    chat: ChatMessageDto[] | null;
@@ -25,10 +24,7 @@ const chatSlice = createSlice({
       },
    },
    extraReducers: {
-      [onInvokeReturn(coreHub._requestChat).type]: (
-         state,
-         { payload }: PayloadAction<SuccessOrError<ChatMessageDto[]>>,
-      ) => {
+      [coreHub.requestChat.returnAction]: (state, { payload }: PayloadAction<SuccessOrError<ChatMessageDto[]>>) => {
          if (payload.success) state.chat = payload.response;
       },
       [actions.onChatMessage.type]: (state, action: PayloadAction<ChatMessageDto>) => {

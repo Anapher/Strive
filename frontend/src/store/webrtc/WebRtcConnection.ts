@@ -228,7 +228,7 @@ export class WebRtcConnection {
    }
 
    public async changeStream(dto: ChangeStreamDto): Promise<void> {
-      const result = await this.connection.invoke<SuccessOrError<void>>(coreHub.changeStream, dto);
+      const result = await this.connection.invoke<SuccessOrError<void>>(coreHub.changeStream.hubName, dto);
       if (!result.success) {
          throw new Error(result.error.message);
       }
