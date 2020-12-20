@@ -40,7 +40,7 @@ function CreateConferenceDialog() {
 
    const handleClose = () => dispatch(closeCreateDialog());
 
-   const user = useSelector(selectAccessToken)!;
+   const user = useSelector(selectAccessToken);
 
    const form = useForm<CreateConferenceFormState>({
       mode: 'onChange',
@@ -51,7 +51,7 @@ function CreateConferenceDialog() {
          schedule: false,
          scheduleCron: '0 0 15 ? * MON *',
          name: '',
-         moderators: [{ id: user.nameid, name: user.unique_name }],
+         moderators: user ? [{ id: user.nameid, name: user.unique_name }] : [],
       },
       shouldUnregister: false,
    });

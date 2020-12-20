@@ -21,11 +21,14 @@ export const selectActiveParticipantsWithWebcam = createSelector(
       if (!streams) return [];
 
       return _(Object.entries(participants))
-         .filter(
-            ([participantId]) =>
-               !!streams[participantId] &&
-               !!Object.values(streams[participantId]!.producers).find((x) => x.kind === 'webcam' && !x.paused),
-         )
+         .filter(([participantId]) => {
+            const participantStreams = streams[participantId];
+            if (!participantStreams) return false;
+
+            return (
+               Object.values(participantStreams.producers).find((x) => x.kind === 'webcam' && !x.paused) !== undefined
+            );
+         })
          .orderBy(([, info]) => info.orderNumber, 'asc')
          .map(([participantId]) => participantId)
          .value();

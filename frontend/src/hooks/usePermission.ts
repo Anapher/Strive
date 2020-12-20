@@ -23,6 +23,8 @@ export default function usePermission<T>(perm: Permission<T>): T | undefined {
    return permissions[perm.key] as any;
 }
 
+// the type parameter is used as metadata
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 type Permission<T> = {
    key: string;
 };

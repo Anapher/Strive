@@ -47,15 +47,13 @@ function* updateAutomaticScene() {
 
       if (participants.length > 0) {
          // order to make it deterministic
+         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
          const displayedScreenshare = _(participants)
             .orderBy((x) => x.participantId)
-            .first();
+            .first()!;
 
-         if (
-            currentScene.type !== 'screenshare' ||
-            currentScene.participantId !== displayedScreenshare!.participantId
-         ) {
-            yield put(setCurrentScene({ type: 'screenshare', participantId: displayedScreenshare!.participantId }));
+         if (currentScene.type !== 'screenshare' || currentScene.participantId !== displayedScreenshare.participantId) {
+            yield put(setCurrentScene({ type: 'screenshare', participantId: displayedScreenshare.participantId }));
          }
       } else {
          if (currentScene.type !== 'grid') {

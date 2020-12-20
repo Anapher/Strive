@@ -26,7 +26,7 @@ export default function TroubleshootHearingOthers({ expanded, onChange }: Props)
    const audio = useSelector(selectParticipantAudio);
 
    const audioOfRoom = Object.entries(audio).filter((x) => participants.includes(x[0]));
-   const mutedAudioInRoom = audioOfRoom.filter((x) => x[1]?.muted);
+   // const mutedAudioInRoom = audioOfRoom.filter((x) => x[1]?.muted);
 
    return (
       <TroubleshootAccordion

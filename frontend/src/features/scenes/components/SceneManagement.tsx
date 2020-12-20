@@ -76,6 +76,8 @@ export default function SceneManagement() {
    const availableScenes = useSelector(selectAvailableScenesViewModels);
    const theme = useTheme();
    const serverScene = useSelector(selectServerProvidedScene);
+   console.log('serverScene: ', serverScene);
+
    const dispatch = useDispatch();
 
    const handleChangeScene = (checked: boolean, scene: Scene) => {

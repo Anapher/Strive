@@ -31,13 +31,13 @@ type Props = {
    isTyping: boolean;
 };
 
-type SendMessageForm = {
+type SendMessageFormType = {
    message: string;
    sendTo?: string;
 };
 
 export default function SendMessageForm({ onSendMessage, isTyping }: Props) {
-   const { register, handleSubmit, setValue, watch, control } = useForm<SendMessageForm>({
+   const { register, handleSubmit, setValue, watch, control } = useForm<SendMessageFormType>({
       mode: 'onChange',
       defaultValues: { sendTo: 'all' },
    });

@@ -52,13 +52,13 @@ export function loadState(initialState: Partial<RootState>): Partial<RootState> 
 
    const stored = new Array<Partial<RootState>>();
    if (localStorageValue !== null) {
-      localStorageState = JSON.parse(localStorageValue);
-      stored.push(localStorageState!);
+      const localStorageState = JSON.parse(localStorageValue);
+      if (localStorageState) stored.push(localStorageState);
    }
 
    if (sessionStorageValue !== null) {
-      sessionStorageState = JSON.parse(sessionStorageValue);
-      stored.push(sessionStorageState!);
+      const sessionStorageState = JSON.parse(sessionStorageValue);
+      if (sessionStorageState) stored.push(sessionStorageState);
    }
 
    const state = _.merge({}, initialState, ...stored) as Partial<RootState>;

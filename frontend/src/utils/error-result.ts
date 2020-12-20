@@ -45,9 +45,9 @@ export function toString(error: IRequestErrorResponse): string {
    }
 
    if (response.type === 'ValidationError') {
-      return `The server responded with validation errors. Invalid fields: ${Object.keys(response.fields!).join(
-         ', ',
-      )}.`;
+      return response.fields
+         ? `The server responded with validation errors. Invalid fields: ${Object.keys(response.fields).join(', ')}.`
+         : 'Validation error';
    }
 
    return `${response.message} (code: ${response.code})`;

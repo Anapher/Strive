@@ -1,12 +1,12 @@
-import { Dialog, DialogContent, DialogTitle, DialogActions, Button, DialogContentText, Box } from '@material-ui/core';
+import { Box, Button, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@material-ui/core';
+import { Duration } from 'luxon';
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
+import * as coreHub from 'src/core-hub';
 import { OpenBreakoutRoomsDto } from 'src/core-hub.types';
 import { RootState } from 'src/store';
 import BreakoutRoomsForm from './BreakoutRoomsForm';
-import * as coreHub from 'src/core-hub';
-import { Duration } from 'luxon';
 
 type Props = {
    onClose: () => void;
