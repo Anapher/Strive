@@ -6,7 +6,7 @@ import { showMessage } from './actions';
 export function showErrorOn<P extends ActionPattern>(pattern: P) {
    return takeEvery(pattern, function* (action: PayloadAction<SuccessOrError>) {
       if (!action.payload.success) {
-         yield put(showMessage({ variant: 'error', message: action.payload.error.message }));
+         yield put(showMessage({ type: 'error', message: action.payload.error.message }));
       }
    });
 }

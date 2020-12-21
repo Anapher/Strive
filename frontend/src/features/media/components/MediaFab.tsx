@@ -2,7 +2,7 @@ import { Fab, Tooltip, useTheme } from '@material-ui/core';
 import React from 'react';
 import { useDispatch } from 'react-redux';
 import { AnimatedIconProps } from 'src/assets/animated-icons/AnimatedIconBase';
-import { showMessage } from 'src/features/notifier/actions';
+import { showMessage } from 'src/store/notifier/actions';
 import { UseMediaState } from 'src/store/webrtc/hooks/useMedia';
 
 type Props = {
@@ -32,7 +32,7 @@ export default function MediaFab({
                await enable();
             } catch (error) {
                const { message } = error as DOMException;
-               dispatch(showMessage({ message, variant: 'error' }));
+               dispatch(showMessage({ message, type: 'error' }));
             }
          } else {
             if (paused) {
@@ -46,7 +46,7 @@ export default function MediaFab({
             }
          }
       } catch (error) {
-         dispatch(showMessage({ message: error.message ?? error.toString(), variant: 'error' }));
+         dispatch(showMessage({ message: error.message ?? error.toString(), type: 'error' }));
       }
    };
 

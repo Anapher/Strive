@@ -8,7 +8,6 @@ import createConference from '../features/create-conference/reducer';
 import signalr from './signal/reducer';
 import media from '../features/media/reducer';
 import rooms from '../features/rooms/reducer';
-import notifier from '../features/notifier/reducer';
 import settings from '../features/settings/reducer';
 import equipment from '../features/equipment/reducer';
 import scenes from '../features/scenes/reducer';
@@ -23,7 +22,6 @@ const rootReducer = combineReducers({
    signalr,
    media,
    rooms,
-   notifier,
    settings,
    equipment,
    scenes,

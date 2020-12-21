@@ -1,9 +1,10 @@
-import { Action, configureStore, ThunkAction } from '@reduxjs/toolkit';
+import { Action, configureStore, Middleware, ThunkAction } from '@reduxjs/toolkit';
 import createMiddleware from './signal/create-middleware';
 import rootReducer from './root-reducer';
 import { loadState, persistState } from './storage';
 import createSagaMiddleware from 'redux-saga';
 import rootSaga from './root-saga';
+import notifierMiddleware from './notifier/create-middleware';
 
 const { middleware: signalrMiddleware } = createMiddleware({
    signalUrl: '/signalr',
@@ -12,7 +13,7 @@ const { middleware: signalrMiddleware } = createMiddleware({
 const sagaMiddleware = createSagaMiddleware();
 
 // configure middlewares
-const middlewares = [signalrMiddleware, sagaMiddleware];
+const middlewares: Middleware[] = [signalrMiddleware, sagaMiddleware, notifierMiddleware];
 
 // rehydrate state on app start
 const initialState = loadState({});
