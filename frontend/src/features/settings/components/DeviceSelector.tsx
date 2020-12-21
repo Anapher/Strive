@@ -3,6 +3,7 @@ import clsx from 'classnames';
 import _, { Collection } from 'lodash';
 import React from 'react';
 import { useDispatch } from 'react-redux';
+import { showMessage } from 'src/store/notifier/actions';
 import { DeviceGroup, EquipmentDeviceGroup } from '../selectors';
 import { fetchDevices } from '../thunks';
 import { AnyInputDevice } from '../types';
@@ -25,7 +26,7 @@ type Props = {
 };
 
 const getId = (device: AnyInputDevice) =>
-   device.type === 'local' ? device.deviceId : `${device.equipmentId}/${device.deviceId}`;
+   device.type === 'local' ? `local/${device.deviceId}` : `${device.equipmentId}/${device.deviceId}`;
 
 export default function DeviceSelector({ devices, defaultName, className, selectedDevice, onChange, label }: Props) {
    const selectId = defaultName.toLowerCase() + '-select';
@@ -37,22 +38,31 @@ export default function DeviceSelector({ devices, defaultName, className, select
       let deviceId: string | undefined;
       let possibleDevices: Collection<DeviceGroup> | undefined;
 
-      if (value.includes('/')) {
+      if (value.startsWith('local/')) {
+         possibleDevices = _(devices).filter((x) => x.type === 'local');
+         deviceId = value.split('/')[1];
+      } else {
          const split = value.split('/');
          possibleDevices = _(devices).filter((x) => x.type === 'equipment' && x.equipmentId === split[0]);
          deviceId = split[1];
-      } else {
-         possibleDevices = _(devices).filter((x) => x.type === 'local');
-         deviceId = value;
       }
 
       const viewModel = possibleDevices.flatMap((x) => x.devices).find((x) => x.device.deviceId === deviceId);
+
       if (viewModel) {
          onChange(viewModel.device);
       }
    };
 
    const handleRefresh = () => {
+      dispatch(
+         showMessage({
+            type: 'action',
+            message: 'Fetch devices...',
+            failedOn: { type: fetchDevices.rejected.type, message: 'Fetching devices failed' },
+            succeededOn: { type: fetchDevices.fulfilled.type, message: 'Devices updated' },
+         }),
+      );
       dispatch(fetchDevices());
    };
 
