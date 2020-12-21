@@ -7,7 +7,7 @@ import { setCurrentDevice } from '../reducer';
 import DeviceSelector from './DeviceSelector';
 import WebcamSettingsTest from './WebcamSettingsTest';
 import useWebRtcStatus from 'src/store/webrtc/hooks/useWebRtcStatus';
-import { Alert } from '@material-ui/lab';
+import ErrorWrapper from 'src/components/ErrorWrapper';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -36,14 +36,13 @@ export default function WebcamSettings() {
             onChange={(device) => dispatch(setCurrentDevice({ device, source: 'webcam' }))}
          />
          <Box mt={4}>
-            {webrtcState === 'connected' ? (
+            <ErrorWrapper
+               failed={webrtcState !== 'connected'}
+               error="WebRTC not connected, so you cannot test your audio device. Please refresh the page or contact the
+                  server administrator."
+            >
                <WebcamSettingsTest />
-            ) : (
-               <Alert severity="error">
-                  WebRTC not connected, so you cannot test your audio device. Please refresh the page or contact the
-                  server administrator.
-               </Alert>
-            )}
+            </ErrorWrapper>
          </Box>
       </div>
    );

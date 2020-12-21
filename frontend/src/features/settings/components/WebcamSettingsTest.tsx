@@ -1,6 +1,7 @@
 import { makeStyles, Typography } from '@material-ui/core';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
+import ErrorWrapper from 'src/components/ErrorWrapper';
 import { selectMyParticipantId } from 'src/features/auth/selectors';
 import useDeviceManagement from 'src/features/media/useDeviceManagement';
 import { RootState } from 'src/store';
@@ -39,10 +40,23 @@ export default function WebcamSettingsTest() {
    const camDevice = useSelector((state: RootState) => state.settings.obj.webcam.device);
 
    const camController = useDeviceManagement('loopback-webcam', localCam, camDevice);
+   const [error, setError] = useState<string | null>(null);
+
+   const handleEnableWebcam = async () => {
+      try {
+         await camController.enable();
+      } catch (error) {
+         if (error.toString().startsWith('NotAllowedError')) {
+            setError('Permission denied: Please allow the use of your webcam in your browser');
+         } else {
+            setError(error.toString());
+         }
+      }
+   };
 
    useEffect(() => {
       // cam mic is automatically disabled on component unmount
-      camController.enable();
+      handleEnableWebcam();
    }, []);
 
    const videoElem = useRef<HTMLVideoElement>(null);
@@ -62,13 +76,15 @@ export default function WebcamSettingsTest() {
          <Typography variant="h6" gutterBottom>
             Test
          </Typography>
-         <Typography gutterBottom>
-            We will loopback your current webcam input over the server and show the results here. This way, you can
-            check what other participants actually receive and you also get a taste of the actual delay.
-         </Typography>
-         <div className={classes.videoContainer}>
-            <video ref={videoElem} className={classes.video} />
-         </div>
+         <ErrorWrapper failed={!!error} error={error} onRetry={handleEnableWebcam}>
+            <Typography gutterBottom>
+               We will loopback your current webcam input over the server and show the results here. This way, you can
+               check what other participants actually receive and you also get a taste of the actual delay.
+            </Typography>
+            <div className={classes.videoContainer}>
+               <video ref={videoElem} className={classes.video} />
+            </div>
+         </ErrorWrapper>
       </div>
    );
 }

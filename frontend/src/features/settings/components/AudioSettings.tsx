@@ -1,13 +1,13 @@
 import { Box, makeStyles, Mark, Slider, Typography } from '@material-ui/core';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import ErrorWrapper from 'src/components/ErrorWrapper';
 import { RootState } from 'src/store';
-import { selectAvailableInputDevices } from '../selectors';
+import useWebRtcStatus from 'src/store/webrtc/hooks/useWebRtcStatus';
 import { setAudioGain, setCurrentDevice } from '../reducer';
+import { selectAvailableInputDevices } from '../selectors';
 import AudioSettingsTest from './AudioSettingsTest';
 import DeviceSelector from './DeviceSelector';
-import useWebRtcStatus from 'src/store/webrtc/hooks/useWebRtcStatus';
-import { Alert } from '@material-ui/lab';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -66,14 +66,13 @@ export default function AudioSettings() {
             </div>
          </Box>
          <Box mt={4}>
-            {webrtcState === 'connected' ? (
+            <ErrorWrapper
+               failed={webrtcState !== 'connected'}
+               error="WebRTC not connected, so you cannot test your audio device. Please refresh the page or contact the
+                  server administrator."
+            >
                <AudioSettingsTest />
-            ) : (
-               <Alert severity="error">
-                  WebRTC not connected, so you cannot test your audio device. Please refresh the page or contact the
-                  server administrator.
-               </Alert>
-            )}
+            </ErrorWrapper>
          </Box>
       </div>
    );

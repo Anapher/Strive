@@ -3,6 +3,7 @@ import { motion, useMotionTemplate, useMotionValue, useSpring, useTransform } fr
 import hark from 'hark';
 import React, { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
+import ErrorWrapper from 'src/components/ErrorWrapper';
 import { selectMyParticipantId } from 'src/features/auth/selectors';
 import useDeviceManagement from 'src/features/media/useDeviceManagement';
 import { RootState } from 'src/store';
@@ -39,9 +40,23 @@ export default function AudioSettingsTest() {
    const audioDevice = useSelector((state: RootState) => state.settings.obj.mic.device);
    const micController = useDeviceManagement('loopback-mic', localMic, audioDevice);
 
+   const [error, setError] = useState<string | null>(null);
+
+   const handleEnableMic = async () => {
+      try {
+         await micController.enable();
+      } catch (error) {
+         if (error.toString().startsWith('NotAllowedError')) {
+            setError('Permission denied: Please allow the use of your microphone in your browser');
+         } else {
+            setError(error.toString());
+         }
+      }
+   };
+
    useEffect(() => {
       // the mic is automatically disabled on component unmount
-      micController.enable();
+      handleEnableMic();
    }, []);
 
    const audioRef = useRef<HTMLAudioElement>(null);
@@ -125,40 +140,47 @@ export default function AudioSettingsTest() {
    };
 
    return (
-      <div>
-         <audio ref={audioRef} muted /> {/* required, else the analyser wont work */}
-         <audio ref={playbackAudioElem} onEnded={handlePlaybackEnded} />
-         <Typography variant="h6" gutterBottom>
-            Test
-         </Typography>
-         <Typography gutterBottom>
-            We will loopback your current audio input and show the results here. This way, you can check what other
-            participants actually receive and you also get a taste of the actual delay.
-         </Typography>
-         <Typography variant="subtitle2" gutterBottom>
-            Your microphone input level:
-         </Typography>
-         <div className={classes.audioBarContainer}>
-            <motion.div className={classes.audioBar} style={{ backgroundColor: audioColor }} />
-         </div>
-         <Box mt={3}>
-            <Typography gutterBottom>
-               Click the button below and say something. Click it again and we will replay what you just said.
+      <ErrorWrapper failed={!!error} error={error} onRetry={handleEnableMic}>
+         <div>
+            <audio ref={audioRef} muted /> {/* required, else the analyser wont work */}
+            <audio ref={playbackAudioElem} onEnded={handlePlaybackEnded} />
+            <Typography variant="h6" gutterBottom>
+               Test
             </Typography>
-            <Box display="flex" alignItems="flex-start">
-               <Button variant="contained" color="secondary" onClick={handleToggleRecordAudio} style={{ width: 200 }}>
-                  {recordingState === true
-                     ? 'Recording...'
-                     : recordingState === false
-                     ? 'Let me hear myself'
-                     : 'Playing back...'}
-               </Button>
-               <Box ml={2}>
-                  <Typography variant="caption">Something to say:</Typography>
-                  <Typography variant="subtitle2">{`"PaderConference is much better than other video conference services"`}</Typography>
+            <Typography gutterBottom>
+               We will loopback your current audio input and show the results here. This way, you can check what other
+               participants actually receive and you also get a taste of the actual delay.
+            </Typography>
+            <Typography variant="subtitle2" gutterBottom>
+               Your microphone input level:
+            </Typography>
+            <div className={classes.audioBarContainer}>
+               <motion.div className={classes.audioBar} style={{ backgroundColor: audioColor }} />
+            </div>
+            <Box mt={3}>
+               <Typography gutterBottom>
+                  Click the button below and say something. Click it again and we will replay what you just said.
+               </Typography>
+               <Box display="flex" alignItems="flex-start">
+                  <Button
+                     variant="contained"
+                     color="secondary"
+                     onClick={handleToggleRecordAudio}
+                     style={{ width: 200 }}
+                  >
+                     {recordingState === true
+                        ? 'Recording...'
+                        : recordingState === false
+                        ? 'Let me hear myself'
+                        : 'Playing back...'}
+                  </Button>
+                  <Box ml={2}>
+                     <Typography variant="caption">Something to say:</Typography>
+                     <Typography variant="subtitle2">{`"PaderConference is much better than other video conference services"`}</Typography>
+                  </Box>
                </Box>
             </Box>
-         </Box>
-      </div>
+         </div>
+      </ErrorWrapper>
    );
 }
