@@ -52,3 +52,18 @@ export type BreakoutRoomsOptions = {
    description?: string;
    amount: number;
 };
+
+export type PermissionValue = number | string | boolean;
+
+export type Permissions = { [key: string]: PermissionValue };
+
+export type PermissionLayer = {
+   order: number;
+   name: string;
+   permissions: Permissions;
+};
+
+export type ParticipantPermissionInfo = {
+   participantId: string;
+   layers: PermissionLayer[];
+};

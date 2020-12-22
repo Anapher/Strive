@@ -41,6 +41,7 @@ export const equipmentErrorOccurred = createHubFn<IRestError>('EquipmentErrorOcc
 export const equipmentUpdateStatus = createHubFn<EquipmentStatus>('EquipmentUpdateStatus');
 
 export const changeStream = createHubFn<ChangeStreamDto>('ChangeStream');
+export const fetchPermissions = createHubFn<string | null>('FetchPermissions');
 
 export function createHubFn<TArg = void>(name: string) {
    const actionCreator = function (arg: TArg) {

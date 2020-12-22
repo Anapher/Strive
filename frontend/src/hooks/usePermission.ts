@@ -1,5 +1,5 @@
 import { useSelector } from 'react-redux';
-import { PermissionValue } from 'src/features/create-conference/types';
+import { PermissionValue } from 'src/core-hub.types';
 import { RootState } from 'src/store';
 
 export const CONFERENCE_CAN_OPEN_AND_CLOSE = newPerm<boolean>('conference.canOpenAndClose');

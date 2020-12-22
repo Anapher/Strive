@@ -28,7 +28,6 @@ const useStyles = makeStyles((theme) =>
       root: {
          flexGrow: 1,
       },
-      menuButton: {},
       title: {
          padding: theme.spacing(1, 2),
          borderRadius: theme.shape.borderRadius,
@@ -70,10 +69,13 @@ export default function ConferenceAppBar({ chatWidth }: Props) {
    const handleCloseMenu = () => setIsMenuOpen(false);
 
    const moreIconButtonRef = useRef<HTMLButtonElement>(null);
-
    const participants = useSelector(selectParticipants);
-
    const webRtcStatus = useWebRtcStatus();
+
+   const handleShowPermissions = () => {
+      dispatch(coreHub.fetchPermissions(null));
+      handleCloseMenu();
+   };
 
    return (
       <AppBar position="static">
@@ -125,6 +127,7 @@ export default function ConferenceAppBar({ chatWidth }: Props) {
 
             <Menu open={isMenuOpen} onClose={handleCloseMenu} anchorEl={moreIconButtonRef.current}>
                {canCloseConference && <MenuItem onClick={handleCloseConference}>Close Conference</MenuItem>}
+               <MenuItem onClick={handleShowPermissions}>Show my permissions</MenuItem>
                <MenuItem onClick={handleSignOut}>Sign out</MenuItem>
             </Menu>
          </Toolbar>

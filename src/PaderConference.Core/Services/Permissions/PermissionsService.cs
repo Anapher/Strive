@@ -12,7 +12,7 @@ using PaderConference.Core.Errors;
 using PaderConference.Core.Extensions;
 using PaderConference.Core.Interfaces.Gateways.Repositories;
 using PaderConference.Core.Interfaces.Services;
-using PaderConference.Core.Services.Permissions.Messages;
+using PaderConference.Core.Services.Permissions.Dto;
 using PaderConference.Core.Services.Synchronization;
 using PaderConference.Core.Signaling;
 
@@ -95,7 +95,7 @@ namespace PaderConference.Core.Services.Permissions
         }
 
         public async ValueTask<ISuccessOrError> SetTemporaryPermission(
-            IServiceMessage<SetTemporaryPermissionMessage> message)
+            IServiceMessage<SetTemporaryPermissionDto> message)
         {
             using var _ = _logger.BeginMethodScope();
             var (targetParticipantId, permissionKey, value) = message.Payload;
@@ -155,15 +155,11 @@ namespace PaderConference.Core.Services.Permissions
             return SuccessOrError.Succeeded;
         }
 
-        public async ValueTask<SuccessOrError<IEnumerable<PermissionLayer>>> FetchPermissions(
+        public async ValueTask<SuccessOrError<ParticipantPermissionInfo>> FetchPermissions(
             IServiceMessage<string?> message)
         {
             using var _ = _logger.BeginMethodScope();
-            var participantId = message.Payload;
-
-            if (participantId == null)
-                return SuccessOrError<IEnumerable<PermissionLayer>>.Failed(
-                    new FieldValidationError(nameof(participantId), "You must provide a participant id."));
+            var participantId = message.Payload ?? message.Participant.ParticipantId;
 
             Participant participant;
 
@@ -172,11 +168,10 @@ namespace PaderConference.Core.Services.Permissions
             {
                 var myPermissions = await GetPermissions(message.Participant);
                 if (!await myPermissions.GetPermission(PermissionsList.Permissions.CanSeeAnyParticipantsPermissions))
-                    return SuccessOrError<IEnumerable<PermissionLayer>>.Failed(PermissionsError
-                        .PermissionDeniedGiveTemporaryPermission);
+                    return PermissionsError.PermissionDeniedGiveTemporaryPermission;
 
                 if (!_conferenceManager.TryGetParticipant(_conferenceId, participantId, out participant!))
-                    return SuccessOrError<IEnumerable<PermissionLayer>>.Failed(CommonError.ParticipantNotFound);
+                    return CommonError.ParticipantNotFound;
             }
             else
             {
@@ -184,7 +179,7 @@ namespace PaderConference.Core.Services.Permissions
             }
 
             var permissions = await FetchPermissions(participant);
-            return SuccessOrError<IEnumerable<PermissionLayer>>.Succeeded(permissions);
+            return new ParticipantPermissionInfo(participantId, permissions);
         }
 
         public ValueTask<IPermissionStack> GetPermissions(Participant participant)

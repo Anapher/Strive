@@ -10,3 +10,21 @@ export function showErrorOn<P extends ActionPattern>(pattern: P) {
       }
    });
 }
+
+type CoreHubAction = {
+   action: string;
+   returnAction: string;
+};
+
+export function showLoadingHubAction(hubAction: CoreHubAction, message: string) {
+   return takeEvery([hubAction.action, hubAction.returnAction], function* (action: PayloadAction<any>) {
+      if (action.type === hubAction.action) {
+         yield put(showMessage({ type: 'loading', message, dismissOn: { type: hubAction.returnAction } }));
+      } else {
+         const payload = action.payload as SuccessOrError;
+         if (!payload.success) {
+            yield put(showMessage({ type: 'error', message: payload.error.message }));
+         }
+      }
+   });
+}

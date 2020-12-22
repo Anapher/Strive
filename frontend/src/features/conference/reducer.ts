@@ -1,9 +1,10 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { events } from 'src/core-hub';
+import { SuccessOrError } from 'src/communication-types';
+import { events, fetchPermissions } from 'src/core-hub';
+import { ParticipantPermissionInfo, Permissions } from 'src/core-hub.types';
 import { connectSignal, onConnected, onConnectionError, onEventOccurred } from 'src/store/signal/actions';
 import { createSynchronizeObjectReducer } from 'src/store/signal/synchronized-object';
 import { IRestError } from 'src/utils/error-result';
-import { Permissions } from '../create-conference/types';
 import { ConferenceInfo, ParticipantDto } from './types';
 
 export type ConferenceState = {
@@ -13,6 +14,9 @@ export type ConferenceState = {
    conferenceState: ConferenceInfo | null;
    myPermissions: Permissions | null;
    participantsOpen: boolean;
+
+   permissionDialogData: ParticipantPermissionInfo | null;
+   permissionDialogOpen: boolean;
 };
 
 const initialState: ConferenceState = {
@@ -22,6 +26,8 @@ const initialState: ConferenceState = {
    conferenceState: null,
    myPermissions: null,
    participantsOpen: true,
+   permissionDialogData: null,
+   permissionDialogOpen: false,
 };
 
 const conferenceSlice = createSlice({
@@ -30,6 +36,9 @@ const conferenceSlice = createSlice({
    reducers: {
       setParticipantsOpen(state, { payload }: PayloadAction<boolean>) {
          state.participantsOpen = payload;
+      },
+      closePermissionDialog(state) {
+         state.permissionDialogOpen = false;
       },
    },
    extraReducers: {
@@ -47,10 +56,19 @@ const conferenceSlice = createSlice({
       [onEventOccurred(events.onPermissionsUpdated).type]: (state, action: PayloadAction<Permissions>) => {
          state.myPermissions = action.payload;
       },
+      [fetchPermissions.returnAction]: (
+         state,
+         { payload }: PayloadAction<SuccessOrError<ParticipantPermissionInfo>>,
+      ) => {
+         if (payload.success) {
+            state.permissionDialogData = payload.response;
+            state.permissionDialogOpen = true;
+         }
+      },
       ...createSynchronizeObjectReducer(['participants', 'conferenceState']),
    },
 });
 
-export const { setParticipantsOpen } = conferenceSlice.actions;
+export const { setParticipantsOpen, closePermissionDialog } = conferenceSlice.actions;
 
 export default conferenceSlice.reducer;

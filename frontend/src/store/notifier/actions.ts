@@ -5,7 +5,7 @@ export const showMessage = createAction<ShowMessageDto>('notifier/showMessage');
 export type ShowMessageDto = ShowMessageFireAndForget | ShowMessageInfo | ShowMessageAction;
 
 export type ShowMessageFireAndForget = {
-   type: 'success' | 'error';
+   type: 'success' | 'error' | 'loading';
    message: string;
 
    /** dismiss the notification if the action with the type is dispatched */

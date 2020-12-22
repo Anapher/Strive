@@ -14,12 +14,12 @@ type Props = Omit<React.ComponentProps<typeof Menu>, 'children'> & {
    participant: ParticipantDto;
 };
 
-export default function ParticipantContextMenuPopper({ participant, ...props }: Props) {
+export default function ParticipantContextMenuPopper({ participant, onClose, ...props }: Props) {
    const classes = useStyles();
 
    return (
-      <Menu {...props} MenuListProps={{ className: classes.menu }}>
-         <ParticipantContextMenu participant={participant} />
+      <Menu {...props} onClose={onClose} MenuListProps={{ className: classes.menu }}>
+         <ParticipantContextMenu participant={participant} onClose={onClose} />
       </Menu>
    );
 }

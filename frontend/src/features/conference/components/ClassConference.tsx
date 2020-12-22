@@ -8,6 +8,7 @@ import ActiveParticipantsGridSizer from 'src/features/scenes/components/ActivePa
 import useThrottledResizeObserver from 'src/hooks/useThrottledResizeObserver';
 import { Size } from 'src/types';
 import SceneView from '../../scenes/components/SceneView';
+import PermissionDialog from './PermissionDialog';
 import PinnableSidebar from './PinnableSidebar';
 
 const CHAT_MIN_WIDTH = 304;
@@ -78,6 +79,7 @@ export default function ClassConference() {
                   <ChatBar />
                </div>
             </div>
+            <PermissionDialog />
          </div>
       </ParticipantMicManager>
    );

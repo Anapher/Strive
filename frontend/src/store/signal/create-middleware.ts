@@ -90,7 +90,7 @@ export default (options: Options): SignalRResult => {
 
    const invokeMethodHandler = ({ dispatch }: MiddlewareAPI, { payload: { payload, name } }: any) => {
       if (connection) {
-         connection.invoke(name, ...(payload ? [payload] : [])).then(
+         connection.invoke(name, ...(payload !== undefined ? [payload] : [])).then(
             (returnVal) => {
                dispatch(actions.onInvokeReturn(name)(returnVal));
             },

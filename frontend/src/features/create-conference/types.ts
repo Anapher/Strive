@@ -1,8 +1,6 @@
+import { Permissions } from 'src/core-hub.types';
+
 export type ConferenceType = 'class' | 'presentation';
-
-export type PermissionValue = number | string | boolean;
-
-export type Permissions = { [key: string]: PermissionValue };
 
 export type CreateConferenceDto = {
    name?: string | null;

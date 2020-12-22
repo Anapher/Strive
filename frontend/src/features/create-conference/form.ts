@@ -1,4 +1,5 @@
-import { ConferenceType, CreateConferenceDto, Permissions } from './types';
+import { Permissions } from 'src/core-hub.types';
+import { ConferenceType, CreateConferenceDto } from './types';
 
 export type UserInfo = {
    name: string;

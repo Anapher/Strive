@@ -25,6 +25,8 @@ using PaderConference.Core.Services.Equipment.Data;
 using PaderConference.Core.Services.Equipment.Dto;
 using PaderConference.Core.Services.Media;
 using PaderConference.Core.Services.Media.Communication;
+using PaderConference.Core.Services.Permissions;
+using PaderConference.Core.Services.Permissions.Dto;
 using PaderConference.Core.Services.Rooms;
 using PaderConference.Core.Services.Rooms.Messages;
 using PaderConference.Core.Signaling;
@@ -201,6 +203,12 @@ namespace PaderConference.Infrastructure.Hubs
         public Task<SuccessOrError> CloseConference()
         {
             return InvokeService<ConferenceControlService>(service => service.CloseConference);
+        }
+
+        public Task<SuccessOrError<ParticipantPermissionInfo>> FetchPermissions(string? participantId)
+        {
+            return InvokeService<PermissionsService, string?, ParticipantPermissionInfo>(participantId,
+                service => service.FetchPermissions);
         }
 
         public Task<SuccessOrError> CreateRooms(IReadOnlyList<CreateRoomMessage> dto)

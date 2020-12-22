@@ -1,8 +1,8 @@
 ﻿using System.Text.Json;
 
-namespace PaderConference.Core.Services.Permissions.Messages
+namespace PaderConference.Core.Services.Permissions.Dto
 {
-    public record SetTemporaryPermissionMessage
+    public record SetTemporaryPermissionDto
     {
         public string? ParticipantId { get; init; }
         public string? PermissionKey { get; init; }

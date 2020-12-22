@@ -70,6 +70,9 @@ const middleware: Middleware = () => {
                case 'info':
                   toastId = toast(message, { icon: messageDto.icon });
                   break;
+               case 'loading':
+                  toastId = toast.loading(message);
+                  break;
                default:
                   console.error('Invalid toast message type', messageDto);
                   return;
