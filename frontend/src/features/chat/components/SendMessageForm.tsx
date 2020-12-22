@@ -13,8 +13,8 @@ import {
 import EmojiEmotionsIcon from '@material-ui/icons/EmojiEmotions';
 import SendIcon from '@material-ui/icons/Send';
 import _ from 'lodash';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 import CompactInput from 'src/components/CompactInput';
 import { setUserTyping } from 'src/core-hub';
@@ -24,6 +24,8 @@ import usePermission, {
    CHAT_CAN_SEND_ANONYMOUS_MESSAGE,
    CHAT_CAN_SEND_PRIVATE_CHAT_MESSAGE,
 } from 'src/hooks/usePermission';
+import { RootState } from 'src/store';
+import { setSendingMode } from '../reducer';
 import EmojisPopper from './EmojisPopper';
 
 type Props = {
@@ -33,14 +35,28 @@ type Props = {
 
 type SendMessageFormType = {
    message: string;
-   sendTo?: string;
+};
+
+const sendingModeToString = (s: SendingMode | null) => {
+   if (s === null) return 'all';
+   if (s.type === 'anonymously') return 'anonymously';
+   return `to:${s.to.participantId}`;
+};
+
+const stringToSendingMode: (s: string) => SendingMode | null = (s) => {
+   if (s?.startsWith('to:')) {
+      return { type: 'privately', to: { participantId: s.substring(3) } };
+   } else if (s === 'anonymously') return { type: 'anonymously' };
+
+   return null;
 };
 
 export default function SendMessageForm({ onSendMessage, isTyping }: Props) {
-   const { register, handleSubmit, setValue, watch, control } = useForm<SendMessageFormType>({
+   const { register, handleSubmit, setValue, watch } = useForm<SendMessageFormType>({
       mode: 'onChange',
-      defaultValues: { sendTo: 'all' },
    });
+
+   const sendTo = useSelector((state: RootState) => state.chat.sendingMode);
 
    const canSendPrivateMsg = usePermission(CHAT_CAN_SEND_PRIVATE_CHAT_MESSAGE);
    const canSendAnonymousMsg = usePermission(CHAT_CAN_SEND_ANONYMOUS_MESSAGE);
@@ -69,6 +85,17 @@ export default function SendMessageForm({ onSendMessage, isTyping }: Props) {
       [dispatch, inputRef.current, isTyping],
    );
 
+   useEffect(() => {
+      if (inputRef.current) {
+         inputRef.current.focus();
+      }
+
+      // display as not typing if the participant changed the sendTo to private or anonymous
+      if (isTyping && sendTo !== null) {
+         dispatch(setUserTyping(false));
+      }
+   }, [inputRef.current, sendTo]);
+
    const handleTextFieldKeyPress = (event: React.KeyboardEvent<HTMLDivElement>) => {
       if (event.key === 'Enter' && !event.shiftKey) {
          (event.target as any).form.dispatchEvent(new Event('submit', { cancelable: true }));
@@ -77,6 +104,8 @@ export default function SendMessageForm({ onSendMessage, isTyping }: Props) {
    };
 
    const handleTextFieldKeyUp = (event: React.KeyboardEvent<HTMLDivElement>) => {
+      if (sendTo !== null) return; // only show if the participant is typing if sent to all
+
       const newValue = (event.target as any).value;
       if (newValue) {
          handleKeyPressNotEmpty();
@@ -87,20 +116,21 @@ export default function SendMessageForm({ onSendMessage, isTyping }: Props) {
       }
    };
 
+   const handleChangeSendTo = (event: React.ChangeEvent<{ value: unknown }>) => {
+      if (event.target.value) {
+         dispatch(setSendingMode(stringToSendingMode(event.target.value as string)));
+      }
+   };
+
    const participants = useSelector(selectOtherParticipants);
    const sortedParticipants = useMemo(() => _.sortBy(participants, (x) => x.displayName), [participants]);
 
    return (
       <form
          noValidate
-         onSubmit={handleSubmit(({ message, sendTo }) => {
+         onSubmit={handleSubmit(({ message }) => {
             if (message) {
-               let mode: SendingMode | undefined;
-               if (sendTo?.startsWith('to:')) {
-                  mode = { type: 'privately', to: { participantId: sendTo.substring(3) } };
-               } else if (sendTo === 'anonymous') mode = { type: 'anonymously' };
-
-               onSendMessage({ message, mode });
+               onSendMessage({ message, mode: sendTo });
                setValue('message', '');
                dispatch(setUserTyping(false));
             }
@@ -121,27 +151,27 @@ export default function SendMessageForm({ onSendMessage, isTyping }: Props) {
             name="message"
          />
          <Box display="flex" flexDirection="row" justifyContent="space-between" alignItems="center">
-            <Controller
-               name="sendTo"
-               defaultValue="all"
-               control={control}
-               as={
-                  <Select style={{ flex: 1 }} variant="outlined" input={<CompactInput />} fullWidth>
-                     <MenuItem value="all">Send to all</MenuItem>
-                     {canSendAnonymousMsg && <MenuItem value="anonymous">Send to all anonymously</MenuItem>}
-                     {canSendPrivateMsg &&
-                        participants &&
-                        participants.length > 0 &&
-                        [<ListSubheader key="separator">Send privately to</ListSubheader>].concat(
-                           sortedParticipants.map(({ participantId, displayName }) => (
-                              <MenuItem key={participantId} value={`to:${participantId}`}>
-                                 {displayName}
-                              </MenuItem>
-                           )),
-                        )}
-                  </Select>
-               }
-            />
+            <Select
+               onChange={handleChangeSendTo}
+               style={{ flex: 1 }}
+               variant="outlined"
+               input={<CompactInput />}
+               fullWidth
+               value={sendingModeToString(sendTo)}
+            >
+               <MenuItem value="all">Send to all</MenuItem>
+               {canSendAnonymousMsg && <MenuItem value="anonymously">Send to all anonymously</MenuItem>}
+               {canSendPrivateMsg &&
+                  participants &&
+                  participants.length > 0 &&
+                  [<ListSubheader key="separator">Send privately to</ListSubheader>].concat(
+                     sortedParticipants.map(({ participantId, displayName }) => (
+                        <MenuItem key={participantId} value={`to:${participantId}`}>
+                           {displayName}
+                        </MenuItem>
+                     )),
+                  )}
+            </Select>
 
             <Box display="flex" ml={1}>
                <IconButton aria-label="emojis" ref={emojisButtonRef} onClick={handleOpenEmojis}>

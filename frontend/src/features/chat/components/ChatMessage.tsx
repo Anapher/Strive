@@ -93,9 +93,7 @@ export default function ChatMessage({ message, participants, participantId, part
                })}
             >
                {message?.mode?.type === 'privately' && (
-                  <span className={classes.privateBadge}>
-                     Private{isFromMe && ` -> ${message.mode.to.displayName}`}
-                  </span>
+                  <span className={classes.privateBadge}>Private{isFromMe && ` ➔ ${message.mode.to.displayName}`}</span>
                )}
                {renderSender(message, sender, isAnonymous)}
                {isDisconnected && <span className={classes.disconnectedText}>(Disconnected)</span>}

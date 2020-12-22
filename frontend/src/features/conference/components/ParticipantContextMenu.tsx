@@ -6,6 +6,7 @@ import _ from 'lodash';
 import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchPermissions } from 'src/core-hub';
+import { setSendingMode } from 'src/features/chat/reducer';
 import { patchParticipantAudio } from 'src/features/media/reducer';
 import { selectParticipantAudioInfo } from 'src/features/media/selectors';
 import usePermission, {
@@ -49,6 +50,16 @@ const ParticipantContextMenu = React.forwardRef<HTMLElement, Props>(({ participa
       onClose();
    };
 
+   const handleSendPrivateMessage = () => {
+      dispatch(
+         setSendingMode({
+            type: 'privately',
+            to: { participantId: participant.participantId, displayName: participant.displayName },
+         }),
+      );
+      onClose();
+   };
+
    const canSetTempPermission = usePermission(PERMISSIONS_CAN_GIVE_TEMPORARY_PERMISSION);
    const canSeePermissions = usePermission(PERMISSIONS_CAN_SEE_ANY_PARTICIPANTS_PERMISSIONS);
    const canSendPrivateMessage = usePermission(CHAT_CAN_SEND_PRIVATE_CHAT_MESSAGE);
@@ -79,7 +90,7 @@ const ParticipantContextMenu = React.forwardRef<HTMLElement, Props>(({ participa
          </div>
          <Divider />
          {canSendPrivateMessage && (
-            <MenuItem>
+            <MenuItem onClick={handleSendPrivateMessage}>
                <ListItemIcon style={{ minWidth: 32 }}>
                   <SendIcon fontSize="small" />
                </ListItemIcon>

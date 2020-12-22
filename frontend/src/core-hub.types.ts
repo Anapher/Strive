@@ -3,7 +3,7 @@ import { ProducerSource } from './store/webrtc/types';
 
 export type SendChatMessageDto = {
    message: string;
-   mode?: SendingMode;
+   mode: SendingMode | null;
 };
 
 export type SendingMode = SendAnonymously | SendPrivately;

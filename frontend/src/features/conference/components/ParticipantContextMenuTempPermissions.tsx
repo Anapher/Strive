@@ -32,7 +32,10 @@ export default function ParticipantContextMenuTempPermissions({ participantId }:
          showMessage({
             type: 'loading',
             message: 'Update permissions...',
-            dismissOn: { type: setTemporaryPermission.returnAction, successMessage: 'Permissions updated' },
+            dismissOn: {
+               type: setTemporaryPermission.returnAction,
+               successMessage: value ? 'Permission granted' : 'Permission revoked',
+            },
          }),
       );
       dispatch(setTemporaryPermission({ participantId, permissionKey: key, value }));

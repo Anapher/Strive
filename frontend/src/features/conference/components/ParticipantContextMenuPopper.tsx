@@ -5,7 +5,7 @@ import ParticipantContextMenu from './ParticipantContextMenu';
 
 const useStyles = makeStyles(() => ({
    menu: {
-      width: 240,
+      width: 260,
    },
 }));
 
