@@ -1,29 +1,21 @@
-import {
-   Box,
-   Divider,
-   Grid,
-   IconButton,
-   ListItemIcon,
-   makeStyles,
-   MenuItem,
-   Slider,
-   Typography,
-} from '@material-ui/core';
-import DesktopWindowsIcon from '@material-ui/icons/DesktopWindows';
-import MicIcon from '@material-ui/icons/Mic';
-import VideocamIcon from '@material-ui/icons/Videocam';
+import { Box, Divider, IconButton, ListItemIcon, makeStyles, MenuItem, Slider, Typography } from '@material-ui/core';
+import SendIcon from '@material-ui/icons/Send';
 import VolumeMuteIcon from '@material-ui/icons/VolumeMute';
 import VolumeUpIcon from '@material-ui/icons/VolumeUp';
-import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import _ from 'lodash';
 import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { fetchPermissions } from 'src/core-hub';
 import { patchParticipantAudio } from 'src/features/media/reducer';
 import { selectParticipantAudioInfo } from 'src/features/media/selectors';
+import usePermission, {
+   CHAT_CAN_SEND_PRIVATE_CHAT_MESSAGE,
+   PERMISSIONS_CAN_GIVE_TEMPORARY_PERMISSION,
+   PERMISSIONS_CAN_SEE_ANY_PARTICIPANTS_PERMISSIONS,
+} from 'src/hooks/usePermission';
 import { RootState } from 'src/store';
 import { ParticipantDto } from '../types';
-import SendIcon from '@material-ui/icons/Send';
-import { fetchPermissions } from 'src/core-hub';
+import ParticipantContextMenuTempPermissions from './ParticipantContextMenuTempPermissions';
 
 const useStyles = makeStyles((theme) => ({
    infoMenuItem: {
@@ -57,6 +49,10 @@ const ParticipantContextMenu = React.forwardRef<HTMLElement, Props>(({ participa
       onClose();
    };
 
+   const canSetTempPermission = usePermission(PERMISSIONS_CAN_GIVE_TEMPORARY_PERMISSION);
+   const canSeePermissions = usePermission(PERMISSIONS_CAN_SEE_ANY_PARTICIPANTS_PERMISSIONS);
+   const canSendPrivateMessage = usePermission(CHAT_CAN_SEND_PRIVATE_CHAT_MESSAGE);
+
    return (
       <>
          <div className={classes.infoMenuItem}>
@@ -82,39 +78,18 @@ const ParticipantContextMenu = React.forwardRef<HTMLElement, Props>(({ participa
             )}
          </div>
          <Divider />
-         <MenuItem>
-            <ListItemIcon style={{ minWidth: 32 }}>
-               <SendIcon fontSize="small" />
-            </ListItemIcon>
-            Send private message
-         </MenuItem>
+         {canSendPrivateMessage && (
+            <MenuItem>
+               <ListItemIcon style={{ minWidth: 32 }}>
+                  <SendIcon fontSize="small" />
+               </ListItemIcon>
+               Send private message
+            </MenuItem>
+         )}
          <MenuItem>Kick</MenuItem>
          <MenuItem>Pause microphone for all</MenuItem>
-         <div
-            style={{
-               display: 'flex',
-               justifyContent: 'space-between',
-               paddingLeft: 16,
-               paddingRight: 16,
-               paddingTop: 8,
-               paddingBottom: 8,
-               alignItems: 'center',
-            }}
-         >
-            <Typography variant="subtitle1">Permissions:</Typography>
-            <ToggleButtonGroup aria-label="temporary permissions" size="small">
-               <ToggleButton value="screen" aria-label="allow screen sharing">
-                  <DesktopWindowsIcon fontSize="small" />
-               </ToggleButton>
-               <ToggleButton value="webcam" aria-label="allow webcam">
-                  <VideocamIcon fontSize="small" />
-               </ToggleButton>
-               <ToggleButton value="mic" aria-label="allow microphone">
-                  <MicIcon fontSize="small" />
-               </ToggleButton>
-            </ToggleButtonGroup>
-         </div>
-         <MenuItem onClick={handleShowPermissions}>Show Permissions</MenuItem>
+         {canSetTempPermission && <ParticipantContextMenuTempPermissions participantId={participant.participantId} />}
+         {canSeePermissions && <MenuItem onClick={handleShowPermissions}>Show Permissions</MenuItem>}
       </>
    );
 });

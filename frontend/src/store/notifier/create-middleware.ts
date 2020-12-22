@@ -7,6 +7,7 @@ type ActiveToast = {
    toastId: string;
    actionType: string;
    dependingActionTypes?: string[];
+   successMessage?: string;
 
    updateHandler?: {
       success: boolean;
@@ -79,7 +80,11 @@ const middleware: Middleware = () => {
             }
 
             if (messageDto.dismissOn) {
-               addToastHandler({ toastId, actionType: messageDto.dismissOn.type });
+               addToastHandler({
+                  toastId,
+                  actionType: messageDto.dismissOn.type,
+                  successMessage: (messageDto.dismissOn as any).successMessage,
+               });
             }
          }
 
@@ -98,7 +103,17 @@ const middleware: Middleware = () => {
                   toast.error(handler.updateHandler.message, { id: handler.toastId });
                }
             } else {
-               toast.dismiss(handler.toastId);
+               if (handler.successMessage) {
+                  if (action.payload.success === true) {
+                     toast.success(handler.successMessage, { id: handler.toastId });
+                  } else if (action.payload.success === false) {
+                     toast.success(action.payload.error.message, { id: handler.toastId });
+                  } else {
+                     toast.dismiss(handler.toastId);
+                  }
+               } else {
+                  toast.dismiss(handler.toastId);
+               }
             }
 
             if (handler.dependingActionTypes)

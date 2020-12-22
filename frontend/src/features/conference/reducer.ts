@@ -5,7 +5,7 @@ import { ParticipantPermissionInfo, Permissions } from 'src/core-hub.types';
 import { connectSignal, onConnected, onConnectionError, onEventOccurred } from 'src/store/signal/actions';
 import { createSynchronizeObjectReducer } from 'src/store/signal/synchronized-object';
 import { IRestError } from 'src/utils/error-result';
-import { ConferenceInfo, ParticipantDto } from './types';
+import { ConferenceInfo, ParticipantDto, TemporaryPermissions } from './types';
 
 export type ConferenceState = {
    conferenceId: string | null;
@@ -14,6 +14,7 @@ export type ConferenceState = {
    conferenceState: ConferenceInfo | null;
    myPermissions: Permissions | null;
    participantsOpen: boolean;
+   tempPermissions: TemporaryPermissions | null;
 
    permissionDialogData: ParticipantPermissionInfo | null;
    permissionDialogOpen: boolean;
@@ -28,6 +29,7 @@ const initialState: ConferenceState = {
    participantsOpen: true,
    permissionDialogData: null,
    permissionDialogOpen: false,
+   tempPermissions: null,
 };
 
 const conferenceSlice = createSlice({
@@ -65,7 +67,7 @@ const conferenceSlice = createSlice({
             state.permissionDialogOpen = true;
          }
       },
-      ...createSynchronizeObjectReducer(['participants', 'conferenceState']),
+      ...createSynchronizeObjectReducer(['participants', 'conferenceState', 'tempPermissions']),
    },
 });
 

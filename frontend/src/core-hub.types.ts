@@ -67,3 +67,9 @@ export type ParticipantPermissionInfo = {
    participantId: string;
    layers: PermissionLayer[];
 };
+
+export type SetTemporaryPermissionDto = {
+   participantId: string;
+   permissionKey: string;
+   value?: PermissionValue;
+};

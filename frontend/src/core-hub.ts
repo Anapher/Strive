@@ -5,6 +5,7 @@ import {
    EquipmentStatus,
    OpenBreakoutRoomsDto,
    SendChatMessageDto,
+   SetTemporaryPermissionDto,
    SwitchRoomDto,
 } from './core-hub.types';
 import { RegisterEquipmentRequestDto } from './features/equipment/types';
@@ -42,6 +43,7 @@ export const equipmentUpdateStatus = createHubFn<EquipmentStatus>('EquipmentUpda
 
 export const changeStream = createHubFn<ChangeStreamDto>('ChangeStream');
 export const fetchPermissions = createHubFn<string | null>('FetchPermissions');
+export const setTemporaryPermission = createHubFn<SetTemporaryPermissionDto>('SetTemporaryPermission');
 
 export function createHubFn<TArg = void>(name: string) {
    const actionCreator = function (arg: TArg) {

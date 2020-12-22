@@ -2,14 +2,22 @@ import { createAction } from '@reduxjs/toolkit';
 
 export const showMessage = createAction<ShowMessageDto>('notifier/showMessage');
 
-export type ShowMessageDto = ShowMessageFireAndForget | ShowMessageInfo | ShowMessageAction;
+export type ShowMessageDto = ShowMessageFireAndForget | ShowLoadingMessage | ShowMessageInfo | ShowMessageAction;
 
 export type ShowMessageFireAndForget = {
-   type: 'success' | 'error' | 'loading';
+   type: 'success' | 'error';
    message: string;
 
    /** dismiss the notification if the action with the type is dispatched */
    dismissOn?: ActionEventHandler;
+};
+
+export type ShowLoadingMessage = {
+   type: 'loading';
+   message: string;
+
+   /** dismiss the notification if the action with the type is dispatched */
+   dismissOn: ActionEventHandler | ActionSuccessOrErrorHandler;
 };
 
 export type ShowMessageInfo = {
@@ -38,4 +46,8 @@ export type ActionEventHandler = {
 export type ActionEventUpdateHandler = ActionEventHandler & {
    /** the message that should be shown */
    message: string;
+};
+
+export type ActionSuccessOrErrorHandler = ActionEventHandler & {
+   successMessage: string;
 };

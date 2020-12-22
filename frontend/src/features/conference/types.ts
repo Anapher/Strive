@@ -1,3 +1,4 @@
+import { Permissions } from 'src/core-hub.types';
 import { ConferenceType } from '../create-conference/types';
 
 export type ParticipantDto = {
@@ -14,3 +15,5 @@ export type ConferenceInfo = {
    permissions: Permissions;
    moderators: string[];
 };
+
+export type TemporaryPermissions = { [participantId: string]: Permissions };

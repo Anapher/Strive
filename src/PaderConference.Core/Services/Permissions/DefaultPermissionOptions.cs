@@ -29,6 +29,7 @@ namespace PaderConference.Core.Services.Permissions
         {
             PermissionsList.Conference.CanOpenAndClose.Configure(true),
             PermissionsList.Permissions.CanGiveTemporaryPermission.Configure(true),
+            PermissionsList.Permissions.CanSeeAnyParticipantsPermissions.Configure(true),
             PermissionsList.Media.CanShareAudio.Configure(true),
             PermissionsList.Media.CanShareScreen.Configure(true),
             PermissionsList.Media.CanShareWebcam.Configure(true),

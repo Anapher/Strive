@@ -16,6 +16,11 @@ export const CHAT_CAN_SEND_CHAT_MESSAGE = newPerm<boolean>('chat.canSendMessage'
 export const CHAT_CAN_SEND_PRIVATE_CHAT_MESSAGE = newPerm<boolean>('chat.canSendPrivateMessage');
 export const CHAT_CAN_SEND_ANONYMOUS_MESSAGE = newPerm<boolean>('chat.canSendAnonymousMessage');
 
+export const PERMISSIONS_CAN_GIVE_TEMPORARY_PERMISSION = newPerm<boolean>('permissions.canGiveTemporaryPermission');
+export const PERMISSIONS_CAN_SEE_ANY_PARTICIPANTS_PERMISSIONS = newPerm<boolean>(
+   'permissions.canSeeAnyParticipantsPermissions',
+);
+
 export default function usePermission<T>(perm: Permission<T>): T | undefined {
    const permissions = useSelector((state: RootState) => state.conference.myPermissions);
    if (!permissions) return undefined;

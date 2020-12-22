@@ -10,3 +10,6 @@ export const selectParticipant = (state: RootState, participantId: string) =>
 export const selectOtherParticipants = createSelector(selectParticipants, selectAccessToken, (participants, token) => {
    return participants?.filter((x) => x.participantId !== token?.nameid);
 });
+
+export const selectParticipantTempPermissions = (state: RootState, participantId: string) =>
+   state.conference.tempPermissions?.[participantId];

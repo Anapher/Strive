@@ -94,38 +94,38 @@ namespace PaderConference.Core.Services.Permissions
             _fetchPermissionsDelegates.Add(fetchPermissions);
         }
 
-        public async ValueTask<ISuccessOrError> SetTemporaryPermission(
+        public async ValueTask<SuccessOrError> SetTemporaryPermission(
             IServiceMessage<SetTemporaryPermissionDto> message)
         {
             using var _ = _logger.BeginMethodScope();
             var (targetParticipantId, permissionKey, value) = message.Payload;
 
             if (targetParticipantId == null)
-                return SuccessOrError.Failed(new FieldValidationError(nameof(message.Payload.ParticipantId),
-                    "You must provide a participant id."));
+                return new FieldValidationError(nameof(message.Payload.ParticipantId),
+                    "You must provide a participant id.");
 
             if (permissionKey == null)
-                return SuccessOrError.Failed(new FieldValidationError(nameof(message.Payload.PermissionKey),
-                    "You must provide a permission key."));
+                return new FieldValidationError(nameof(message.Payload.PermissionKey),
+                    "You must provide a permission key.");
 
             var permissions = await GetPermissions(message.Participant);
             if (!await permissions.GetPermission(PermissionsList.Permissions.CanGiveTemporaryPermission))
-                return SuccessOrError.Failed(PermissionsError.PermissionDeniedGiveTemporaryPermission);
+                return PermissionsError.PermissionDeniedGiveTemporaryPermission;
 
             _logger.LogDebug("Set temporary permission \"{permissionKey}\" of participant {participantId} to {value}",
                 permissionKey, targetParticipantId, value);
 
             if (!PermissionsListUtil.All.TryGetValue(permissionKey, out var descriptor))
-                return SuccessOrError.Failed(PermissionsError.PermissionKeyNotFound);
+                return PermissionsError.PermissionKeyNotFound;
 
             var participant = _conferenceManager.GetParticipants(_conferenceId)
                 .FirstOrDefault(x => x.ParticipantId == targetParticipantId);
-            if (participant == null) return SuccessOrError.Failed(CommonError.ParticipantNotFound);
+            if (participant == null) return CommonError.ParticipantNotFound;
 
             if (value != null)
             {
                 if (!descriptor.ValidateValue(value.Value))
-                    return SuccessOrError.Failed(PermissionsError.InvalidPermissionValueType);
+                    return PermissionsError.InvalidPermissionValueType;
 
                 await _tempPermissions.Update(current =>
                 {

@@ -211,6 +211,12 @@ namespace PaderConference.Infrastructure.Hubs
                 service => service.FetchPermissions);
         }
 
+        public Task<SuccessOrError> SetTemporaryPermission(SetTemporaryPermissionDto dto)
+        {
+            return InvokeService<PermissionsService, SetTemporaryPermissionDto>(dto,
+                service => service.SetTemporaryPermission);
+        }
+
         public Task<SuccessOrError> CreateRooms(IReadOnlyList<CreateRoomMessage> dto)
         {
             return InvokeService<RoomsService, IReadOnlyList<CreateRoomMessage>>(dto, service => service.CreateRooms);

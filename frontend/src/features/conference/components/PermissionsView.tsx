@@ -36,8 +36,8 @@ export default function PermissionsView({ permissions: { layers } }: Props) {
                               title={`This property is overwritten in ${permission.overwrittenIn}`}
                            >
                               <TableRow style={{ opacity: 0.5 }}>
-                                 <TableCell style={{ paddingLeft: 16 }}>
-                                    <s>{permission.key}</s>
+                                 <TableCell>
+                                    <s style={{ marginLeft: 16 }}>{permission.key}</s>
                                  </TableCell>
                                  <TableCell>
                                     <Chip size="small" label={<s>{permission.value.toString()}</s>} />
