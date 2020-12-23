@@ -63,6 +63,17 @@ export type ChangeStreamRequest = ConnectionMessage<{
    action: 'pause' | 'resume' | 'close';
 }>;
 
+export type ChangeProducerSourceRequest = ConnectionMessage<{
+   source: ProducerSource;
+   action: 'pause' | 'resume' | 'close';
+}>;
+
+export type ProducerChangedEventArgs = {
+   source: ProducerSource;
+   action: 'pause' | 'resume' | 'close';
+   producerId: string;
+};
+
 export type CreateTransportResponse = {
    id: string;
    iceParameters: IceParameters;

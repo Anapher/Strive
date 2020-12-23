@@ -2,7 +2,7 @@ import { HubConnection } from '@microsoft/signalr';
 import { EventEmitter } from 'events';
 import { Device } from 'mediasoup-client';
 import { Consumer, MediaKind, RtpParameters, Transport, TransportOptions } from 'mediasoup-client/lib/types';
-import { ChangeStreamDto } from './types';
+import { ChangeStreamDto, ProducerSource } from './types';
 import * as coreHub from 'src/core-hub';
 import { HubSubscription, subscribeEvent, unsubscribeAll } from 'src/utils/signalr-utils';
 import { SuccessOrError } from 'src/communication-types';
@@ -31,6 +31,12 @@ type ConsumerScorePayload = ConsumerInfoPayload & {
    score: number;
 };
 
+export type ProducerChangedEventArgs = {
+   source: ProducerSource;
+   action: 'pause' | 'resume' | 'close';
+   producerId: string;
+};
+
 export class WebRtcConnection {
    /** all current consumers */
    private consumers = new Map<string, Consumer>();
@@ -51,6 +57,7 @@ export class WebRtcConnection {
 
          subscribeEvent(connection, 'consumerPaused', this.onConsumerPaused.bind(this)),
          subscribeEvent(connection, 'consumerResumed', this.onConsumerResumed.bind(this)),
+         subscribeEvent(connection, 'producerChanged', this.onProducerChanged.bind(this)),
       );
    }
 
@@ -138,6 +145,10 @@ export class WebRtcConnection {
          consumer.resume();
          this.eventEmitter.emit('onConsumerUpdated', { consumerId });
       }
+   }
+
+   private onProducerChanged(args: ProducerChangedEventArgs) {
+      this.eventEmitter.emit('onProducerChanged', args);
    }
 
    private onConsumerScore({ consumerId, score }: ConsumerScorePayload) {

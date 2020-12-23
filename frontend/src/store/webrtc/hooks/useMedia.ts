@@ -1,6 +1,7 @@
 import { Producer, ProducerOptions } from 'mediasoup-client/lib/types';
 import { useEffect, useRef, useState } from 'react';
 import { ProducerSource } from '../types';
+import { ProducerChangedEventArgs } from '../WebRtcConnection';
 import useWebRtc from './useWebRtc';
 
 export interface UseMediaControl {
@@ -40,15 +41,7 @@ export default function useMedia(
 
    const connection = useWebRtc();
 
-   useEffect(() => {
-      // reset everything on connection state changed. This is especially important if WebRTC had to reconnect, as all field will be invalid
-      setEnabled(false);
-      setPaused(false);
-      setStreamInfo(undefined);
-      appliedDeviceId.current = undefined;
-   }, [connection]);
-
-   const disable = async () => {
+   const disable = async (dontUpdateConnection?: boolean) => {
       if (!connection) return;
       if (!producerRef.current) return;
 
@@ -60,7 +53,9 @@ export default function useMedia(
       setEnabled(false);
       setStreamInfo(undefined);
 
-      await connection.changeStream({ id: producerId, type: 'producer', action: 'close' });
+      if (!dontUpdateConnection) {
+         await connection.changeStream({ id: producerId, type: 'producer', action: 'close' });
+      }
    };
 
    const enable = async () => {
@@ -89,14 +84,16 @@ export default function useMedia(
       setStreamInfo({ producerId: producer.id, deviceId: track.getSettings().deviceId });
    };
 
-   const pause = async () => {
+   const pause = async (dontUpdateConnection?: boolean) => {
       if (!connection) return;
 
       if (producerRef.current) {
          producerRef.current.pause();
          setPaused(true);
 
-         await connection.changeStream({ id: producerRef.current.id, type: 'producer', action: 'pause' });
+         if (!dontUpdateConnection) {
+            await connection.changeStream({ id: producerRef.current.id, type: 'producer', action: 'pause' });
+         }
       }
    };
 
@@ -122,6 +119,36 @@ export default function useMedia(
       await producer.replaceTrack({ track });
       setStreamInfo(streamInfo && { ...streamInfo, deviceId: track.getSettings().deviceId });
    };
+
+   useEffect(() => {
+      // reset everything on connection state changed. This is especially important if WebRTC had to reconnect, as all field will be invalid
+      setEnabled(false);
+      setPaused(false);
+      setStreamInfo(undefined);
+      appliedDeviceId.current = undefined;
+
+      if (connection) {
+         const producerChangedHandler = (args: ProducerChangedEventArgs) => {
+            if (args.producerId === producerRef.current?.id) {
+               switch (args.action) {
+                  case 'close':
+                     disable(true);
+                     break;
+                  case 'pause':
+                     pause(true);
+                     break;
+                  // dont implement resume by design as it may have malicious use cases
+               }
+            }
+         };
+
+         connection.eventEmitter.on('onProducerChanged', producerChangedHandler);
+
+         return () => {
+            connection.eventEmitter.off('onProducerChanged', producerChangedHandler);
+         };
+      }
+   }, [connection]);
 
    // disable device on component unmount
    useEffect(() => {

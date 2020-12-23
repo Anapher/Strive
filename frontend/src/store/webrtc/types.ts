@@ -4,6 +4,12 @@ export type ChangeStreamDto = {
    action: 'pause' | 'resume' | 'close';
 };
 
+export type ChangeProducerSourceDto = {
+   participantId: string;
+   source: ProducerSource;
+   action: 'pause' | 'resume' | 'close';
+};
+
 export type ProducerDevice = 'mic' | 'webcam' | 'screen';
 export type ProducerSource = ProducerDevice | 'loopback-mic' | 'loopback-webcam' | 'loopback-screen';
 

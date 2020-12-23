@@ -13,6 +13,7 @@ export const channels = {
       connectTransport: createChannelName('/req::connectTransport'),
       transportProduce: createChannelName('/req::transportProduce'),
       changeStream: createChannelName('/req::changeStream'),
+      changeProducerSource: createChannelName('/req::changeProducerSource'),
    },
 };
 

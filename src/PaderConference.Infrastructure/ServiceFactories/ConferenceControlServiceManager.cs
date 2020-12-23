@@ -7,6 +7,7 @@ using PaderConference.Core.Services;
 using PaderConference.Core.Services.ConferenceControl;
 using PaderConference.Core.Services.Permissions;
 using PaderConference.Core.Services.Synchronization;
+using PaderConference.Core.Signaling;
 using PaderConference.Infrastructure.ServiceFactories.Base;
 
 namespace PaderConference.Infrastructure.ServiceFactories
@@ -19,11 +20,14 @@ namespace PaderConference.Infrastructure.ServiceFactories
         private readonly ILogger<ConferenceControlService> _logger;
         private readonly IConferenceServiceManager<SynchronizationService> _synchronizationServiceManager;
         private readonly IConferenceServiceManager<PermissionsService> _permissionsServiceManager;
+        private readonly IConnectionMapping _connectionMapping;
+        private readonly ISignalMessenger _signalMessenger;
 
         public ConferenceControlServiceManager(IConferenceScheduler conferenceScheduler,
             IConferenceManager conferenceManager, IConferenceRepo conferenceRepo,
             IConferenceServiceManager<SynchronizationService> synchronizationServiceManager,
             IConferenceServiceManager<PermissionsService> permissionsServiceManager,
+            IConnectionMapping connectionMapping, ISignalMessenger signalMessenger,
             ILogger<ConferenceControlService> logger)
         {
             _conferenceScheduler = conferenceScheduler;
@@ -31,6 +35,8 @@ namespace PaderConference.Infrastructure.ServiceFactories
             _conferenceRepo = conferenceRepo;
             _synchronizationServiceManager = synchronizationServiceManager;
             _permissionsServiceManager = permissionsServiceManager;
+            _connectionMapping = connectionMapping;
+            _signalMessenger = signalMessenger;
             _logger = logger;
         }
 
@@ -43,7 +49,7 @@ namespace PaderConference.Infrastructure.ServiceFactories
             if (conference == null) throw new InvalidOperationException("Conference not found.");
 
             return new ConferenceControlService(conference, _conferenceScheduler, _conferenceManager, _conferenceRepo,
-                synchronizeService, permissionsService, _logger);
+                synchronizeService, permissionsService, _signalMessenger, _connectionMapping, _logger);
         }
     }
 }

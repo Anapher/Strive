@@ -92,6 +92,12 @@ namespace PaderConference.Infrastructure
                 ///     Change stream. Parameter is <see cref="ChangeStreamDto" />
                 /// </summary>
                 public static readonly ConferenceDependentKey ChangeStream = CreateChannelName("/req::changeStream");
+
+                /// <summary>
+                ///     Change producer source. Parameter is <see cref="ChangeProducerSourceRequest" />
+                /// </summary>
+                public static readonly ConferenceDependentKey ChangeProducerSource =
+                    CreateChannelName("/req::changeProducerSource");
             }
         }
 

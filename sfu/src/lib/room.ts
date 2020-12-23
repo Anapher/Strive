@@ -5,7 +5,7 @@ import Connection from './connection';
 import Logger from './logger';
 import { MediasoupMixer } from './mediasoup-utils/mediasoup-mixer';
 import { ParticipantPermissions } from './pader-conference/participant-permissions';
-import { Participant, ProducerSource, producerSources } from './participant';
+import { Participant, ProducerLink, ProducerSource, producerSources } from './participant';
 import { ISignalWrapper } from './signal-wrapper';
 
 type ProducerPermission = {
@@ -93,7 +93,7 @@ export default class Room {
             const activeProducer = status.activeProducers[source];
             const currentProducer = participant.producers[source];
 
-            let newActiveProducer: Producer | undefined;
+            let newActiveProducer: ProducerLink | undefined;
             if (currentProducer) {
                if (!permission || permissions.get(permission)) {
                   newActiveProducer = currentProducer;
@@ -104,15 +104,18 @@ export default class Room {
 
             if (!this.producerSources.includes(source)) continue;
 
-            if (activeProducer && newActiveProducer?.id !== activeProducer.id) {
+            if (activeProducer && newActiveProducer?.producer.id !== activeProducer.id) {
                // if a producer was active and changed
                this.mixer.removeProducer(activeProducer.id);
                status.activeProducers[source] = undefined;
             }
 
             if (newActiveProducer) {
-               await this.mixer.addProducer({ participantId: participant.participantId, producer: newActiveProducer });
-               status.activeProducers[source] = newActiveProducer;
+               await this.mixer.addProducer({
+                  participantId: participant.participantId,
+                  producer: newActiveProducer.producer,
+               });
+               status.activeProducers[source] = newActiveProducer.producer;
             }
          }
       }

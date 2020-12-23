@@ -1,4 +1,5 @@
 import { DomainError } from './communication-types';
+import { ProducerSource } from './participant';
 
 export const internalError: (info: string) => DomainError = (info) => ({
    code: 1001,
@@ -33,6 +34,12 @@ export const conferenceNotFound: (conferenceId: string) => DomainError = (id) =>
 export const streamNotFound: (type: string, streamId: string) => DomainError = (type, id) => ({
    code: 1006,
    message: `The ${type} with id ${id} was not found.`,
+   type: 'requestError',
+});
+
+export const producerSourceNotFound: (source: ProducerSource) => DomainError = (source) => ({
+   code: 1007,
+   message: `The producer source ${source} was not found.`,
    type: 'requestError',
 });
 

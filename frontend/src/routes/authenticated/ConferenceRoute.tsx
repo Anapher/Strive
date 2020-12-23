@@ -21,6 +21,7 @@ const defaultEvents: string[] = [
    'OnError',
    coreHub.events.onPermissionsUpdated,
    coreHub.events.onEquipmentUpdated,
+   coreHub.events.onRequestDisconnect,
 ];
 
 type Props = RouteComponentProps<ConferenceRouteParams>;

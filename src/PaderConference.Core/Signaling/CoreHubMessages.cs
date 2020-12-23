@@ -22,6 +22,8 @@
             public const string OnPermissionsUpdated = "OnPermissionsUpdated";
             public const string OnEquipmentUpdated = "OnEquipmentUpdated";
             public const string OnEquipmentCommand = "OnEquipmentCommand";
+
+            public const string OnRequestDisconnect = "OnRequestDisconnect";
         }
     }
 }

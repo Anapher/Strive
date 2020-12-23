@@ -47,7 +47,7 @@ export class StreamInfoRepo {
          }
 
          for (const [, producer] of connection.producers) {
-            const selected = selectedEntries.find(([, x]) => x?.id === producer.id);
+            const selected = selectedEntries.find(([, x]) => x?.producer.id === producer.id);
 
             info.producers[producer.id] = {
                paused: producer.paused,

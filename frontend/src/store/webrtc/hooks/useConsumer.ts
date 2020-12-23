@@ -37,7 +37,6 @@ export default function useConsumer(participantId: string | undefined, kind: Pro
                const consumer = findConsumer(connection.getConsumers());
                setConsumer(consumer);
                currentConsumer = consumer?.id;
-               console.log('update in useConsumer');
             }
          };
 

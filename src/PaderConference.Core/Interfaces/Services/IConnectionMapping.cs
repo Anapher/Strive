@@ -23,6 +23,9 @@ namespace PaderConference.Core.Interfaces.Services
 
     public interface IParticipantConnections
     {
+        /// <summary>
+        ///     The connection id of the primary connection of this participant (the GUI)
+        /// </summary>
         string MainConnectionId { get; }
 
         IEnumerable<string> Equipment { get; }

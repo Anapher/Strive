@@ -205,6 +205,11 @@ namespace PaderConference.Infrastructure.Hubs
             return InvokeService<ConferenceControlService>(service => service.CloseConference);
         }
 
+        public Task<SuccessOrError> KickParticipant(string message)
+        {
+            return InvokeService<ConferenceControlService, string>(message, service => service.KickParticipant);
+        }
+
         public Task<SuccessOrError<ParticipantPermissionInfo>> FetchPermissions(string? participantId)
         {
             return InvokeService<PermissionsService, string?, ParticipantPermissionInfo>(participantId,
@@ -307,6 +312,12 @@ namespace PaderConference.Infrastructure.Hubs
             return InvokeService<MediaService, ChangeStreamDto, JsonElement?>(dto,
                 service => service.Redirect<ChangeStreamDto>(RedisChannels.Media.Request.ChangeStream),
                 new MethodOptions {ConferenceCanBeClosed = true});
+        }
+
+        public Task<SuccessOrError<JsonElement?>> ChangeProducerSource(ChangeParticipantProducerSourceDto dto)
+        {
+            return InvokeService<MediaService, ChangeParticipantProducerSourceDto, JsonElement?>(dto,
+                service => service.RedirectChangeProducerSource(RedisChannels.Media.Request.ChangeProducerSource));
         }
 
         public Task<SuccessOrError<string>> GetEquipmentToken()

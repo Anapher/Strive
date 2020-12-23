@@ -5,22 +5,30 @@ import VolumeUpIcon from '@material-ui/icons/VolumeUp';
 import _ from 'lodash';
 import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchPermissions } from 'src/core-hub';
+import * as coreHub from 'src/core-hub';
 import { setSendingMode } from 'src/features/chat/reducer';
 import { patchParticipantAudio } from 'src/features/media/reducer';
 import { selectParticipantAudioInfo } from 'src/features/media/selectors';
 import usePermission, {
    CHAT_CAN_SEND_PRIVATE_CHAT_MESSAGE,
+   CONFERENCE_CAN_KICK_PARTICIPANT,
+   MEDIA_CAN_CHANGE_PARTICIPANTS_PRODUCER,
    PERMISSIONS_CAN_GIVE_TEMPORARY_PERMISSION,
    PERMISSIONS_CAN_SEE_ANY_PARTICIPANTS_PERMISSIONS,
 } from 'src/hooks/usePermission';
 import { RootState } from 'src/store';
 import { ParticipantDto } from '../types';
 import ParticipantContextMenuTempPermissions from './ParticipantContextMenuTempPermissions';
+import { AccountRemove } from 'mdi-material-ui';
+import MicOffRounded from '@material-ui/icons/MicOff';
+import { showMessage } from 'src/store/notifier/actions';
 
 const useStyles = makeStyles((theme) => ({
    infoMenuItem: {
       padding: theme.spacing(0, 1),
+   },
+   menuIcon: {
+      minWidth: 32,
    },
 }));
 
@@ -46,7 +54,7 @@ const ParticipantContextMenu = React.forwardRef<HTMLElement, Props>(({ participa
    );
 
    const handleShowPermissions = () => {
-      dispatch(fetchPermissions(participant.participantId));
+      dispatch(coreHub.fetchPermissions(participant.participantId));
       onClose();
    };
 
@@ -60,9 +68,43 @@ const ParticipantContextMenu = React.forwardRef<HTMLElement, Props>(({ participa
       onClose();
    };
 
+   const handleKickParticipant = () => {
+      dispatch(
+         showMessage({
+            type: 'loading',
+            message: `Kick ${participant.displayName}...`,
+            dismissOn: {
+               type: coreHub.kickParticipant.returnAction,
+               successMessage: `${participant.displayName} was removed from conference.`,
+            },
+         }),
+      );
+      dispatch(coreHub.kickParticipant(participant.participantId));
+      onClose();
+   };
+
+   const handleMuteParticipant = () => {
+      dispatch(
+         showMessage({
+            type: 'loading',
+            message: `Disable microphone of ${participant.displayName}`,
+            dismissOn: {
+               type: coreHub.changeProducerSource.returnAction,
+               successMessage: 'Microphone was disabled',
+            },
+         }),
+      );
+      dispatch(
+         coreHub.changeProducerSource({ participantId: participant.participantId, source: 'mic', action: 'close' }),
+      );
+      onClose();
+   };
+
    const canSetTempPermission = usePermission(PERMISSIONS_CAN_GIVE_TEMPORARY_PERMISSION);
    const canSeePermissions = usePermission(PERMISSIONS_CAN_SEE_ANY_PARTICIPANTS_PERMISSIONS);
    const canSendPrivateMessage = usePermission(CHAT_CAN_SEND_PRIVATE_CHAT_MESSAGE);
+   const canKick = usePermission(CONFERENCE_CAN_KICK_PARTICIPANT);
+   const canChangeParticipantProducers = usePermission(MEDIA_CAN_CHANGE_PARTICIPANTS_PRODUCER);
 
    return (
       <>
@@ -91,14 +133,28 @@ const ParticipantContextMenu = React.forwardRef<HTMLElement, Props>(({ participa
          <Divider />
          {canSendPrivateMessage && (
             <MenuItem onClick={handleSendPrivateMessage}>
-               <ListItemIcon style={{ minWidth: 32 }}>
+               <ListItemIcon className={classes.menuIcon}>
                   <SendIcon fontSize="small" />
                </ListItemIcon>
                Send private message
             </MenuItem>
          )}
-         <MenuItem>Kick</MenuItem>
-         <MenuItem>Pause microphone for all</MenuItem>
+         {canKick && (
+            <MenuItem onClick={handleKickParticipant}>
+               <ListItemIcon className={classes.menuIcon}>
+                  <AccountRemove fontSize="small" />
+               </ListItemIcon>
+               Kick
+            </MenuItem>
+         )}
+         {canChangeParticipantProducers && (
+            <MenuItem onClick={handleMuteParticipant}>
+               <ListItemIcon className={classes.menuIcon}>
+                  <MicOffRounded fontSize="small" />
+               </ListItemIcon>
+               Disable microphone for all
+            </MenuItem>
+         )}
          {canSetTempPermission && <ParticipantContextMenuTempPermissions participantId={participant.participantId} />}
          {canSeePermissions && <MenuItem onClick={handleShowPermissions}>Show Permissions</MenuItem>}
       </>

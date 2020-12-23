@@ -3,6 +3,7 @@ import ConferenceManager from './conference-manager';
 import Connection from './connection';
 import Logger from './logger';
 import {
+   ChangeProducerSourceRequest,
    ChangeStreamRequest,
    ConnectionMessage,
    ConnectTransportRequest,
@@ -69,6 +70,13 @@ export class RedisMessageProcessor {
       if (!conference) return { success: false, error: errors.conferenceNotFound(request.meta.conferenceId) };
 
       return await conference.changeStream(request);
+   }
+
+   public async changeProducerSource(request: ChangeProducerSourceRequest): Promise<SuccessOrError> {
+      const conference = this.conferenceManager.getConference(request.meta.conferenceId);
+      if (!conference) return { success: false, error: errors.conferenceNotFound(request.meta.conferenceId) };
+
+      return await conference.changeProducerSource(request);
    }
 
    public async clientDisconnected(request: ConnectionMessage<undefined>): Promise<SuccessOrError> {

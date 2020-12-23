@@ -93,6 +93,7 @@ const messagesMap: MappedMessage[] = [
    { channel: channels.request.connectTransport, handler: processor.connectTransport.bind(processor) },
    { channel: channels.request.transportProduce, handler: processor.transportProduce.bind(processor) },
    { channel: channels.request.changeStream, handler: processor.changeStream.bind(processor) },
+   { channel: channels.request.changeProducerSource, handler: processor.changeProducerSource.bind(processor) },
    { channel: onRoomSwitched, handler: processor.roomSwitched.bind(processor) },
    { channel: onClientDisconnected, handler: processor.clientDisconnected.bind(processor) },
    { channel: channels.newConferenceCreated, handler: onNewConferenceCreated },

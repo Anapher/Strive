@@ -11,11 +11,13 @@ import { Participant, ProducerSource } from './participant';
 import { RoomManager } from './room-manager';
 import { ISignalWrapper } from './signal-wrapper';
 import {
+   ChangeProducerSourceRequest,
    ChangeStreamRequest,
    ConnectionMessage,
    ConnectTransportRequest,
    CreateTransportRequest,
    CreateTransportResponse,
+   ProducerChangedEventArgs,
    TransportProduceRequest,
    TransportProduceResponse,
 } from './types';
@@ -162,6 +164,41 @@ export class Conference {
    }
 
    /**
+    * Change a specific selected producer source of the participant. This may specifically be used by moderators to disable
+    * the microphone on certain participants. They can not use changeStream directly as they don't know which connection a
+    * producer belongs to
+    */
+   public async changeProducerSource({ payload, meta }: ChangeProducerSourceRequest): Promise<SuccessOrError> {
+      const participant = this.participants.get(meta.participantId);
+      if (!participant) {
+         return { success: false, error: errors.participantNotFound(meta.participantId) };
+      }
+
+      const { source, action } = payload;
+
+      const producerLink = participant.producers[source];
+      if (!producerLink) {
+         return { success: false, error: errors.producerSourceNotFound(source) };
+      }
+
+      const result = await this.changeStream({
+         meta: {
+            conferenceId: meta.conferenceId,
+            connectionId: producerLink.connectionId,
+            participantId: meta.participantId,
+         },
+         payload: { action, id: producerLink.producer.id, type: 'producer' },
+      });
+
+      if (result.success) {
+         const args: ProducerChangedEventArgs = { ...payload, producerId: producerLink.producer.id };
+         await this.signal.sendToConnection(producerLink.connectionId, 'producerChanged', args);
+      }
+
+      return result;
+   }
+
+   /**
     * Create a new producer in an existing transport
     */
    public async transportProduce({
@@ -191,7 +228,7 @@ export class Conference {
       });
 
       if (participant.producers[source]) {
-         participant.producers[source]?.close();
+         participant.producers[source]?.producer.close();
          participant.producers[source] = undefined;
       }
 
@@ -200,7 +237,7 @@ export class Conference {
       });
 
       connection.producers.set(producer.id, producer);
-      participant.producers[source] = producer;
+      participant.producers[source] = { producer, connectionId: connection.connectionId };
 
       await this.roomManager.updateParticipant(participant);
 
@@ -281,7 +318,7 @@ export class Conference {
 
    private removeProducer(producer: Producer, participant: Participant): void {
       for (const [k, activeProducer] of Object.entries(participant.producers)) {
-         if (activeProducer?.id === producer.id) {
+         if (activeProducer?.producer.id === producer.id) {
             participant.producers[k as ProducerSource] = undefined;
          }
       }

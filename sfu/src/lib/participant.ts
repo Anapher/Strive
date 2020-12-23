@@ -6,14 +6,7 @@ export class Participant {
 
    public connections: Connection[] = [];
 
-   producers: { [key in ProducerSource]: Producer | undefined } = {
-      mic: undefined,
-      webcam: undefined,
-      screen: undefined,
-      ['loopback-mic']: undefined,
-      ['loopback-webcam']: undefined,
-      ['loopback-screen']: undefined,
-   };
+   producers: { [key in ProducerSource]?: ProducerLink } = {};
 
    public getReceiveConnection(): Connection | undefined {
       // find first consuming transport
@@ -26,13 +19,18 @@ export class Participant {
    }
 }
 
-export type ProducerSource = 'mic' | 'webcam' | 'screen' | 'loopback-mic' | 'loopback-webcam' | 'loopback-screen';
-
-export const producerSources: ProducerSource[] = [
+export const producerSources = [
    'mic',
    'webcam',
    'screen',
    'loopback-mic',
    'loopback-webcam',
    'loopback-screen',
-];
+] as const;
+
+export type ProducerSource = typeof producerSources[number];
+
+export type ProducerLink = {
+   connectionId: string;
+   producer: Producer;
+};

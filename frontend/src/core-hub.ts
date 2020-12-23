@@ -10,7 +10,7 @@ import {
 } from './core-hub.types';
 import { RegisterEquipmentRequestDto } from './features/equipment/types';
 import { connectSignal, invoke, onInvokeReturn } from './store/signal/actions';
-import { ChangeStreamDto } from './store/webrtc/types';
+import { ChangeProducerSourceDto, ChangeStreamDto } from './store/webrtc/types';
 import { IRestError } from './utils/error-result';
 
 export const joinConference = (conferenceId: string, defaultEvents: string[], accessToken: string) =>
@@ -21,6 +21,7 @@ export const joinConferenceAsEquipment = (conferenceId: string, defaultEvents: s
 
 export const openConference = createHubFn('OpenConference');
 export const closeConference = createHubFn('CloseConference');
+export const kickParticipant = createHubFn<string>('KickParticipant');
 
 export const createRooms = createHubFn<CreateRoomDto[]>('CreateRooms');
 export const removeRooms = createHubFn<string[]>('RemoveRooms');
@@ -42,6 +43,7 @@ export const equipmentErrorOccurred = createHubFn<IRestError>('EquipmentErrorOcc
 export const equipmentUpdateStatus = createHubFn<EquipmentStatus>('EquipmentUpdateStatus');
 
 export const changeStream = createHubFn<ChangeStreamDto>('ChangeStream');
+export const changeProducerSource = createHubFn<ChangeProducerSourceDto>('ChangeProducerSource');
 export const fetchPermissions = createHubFn<string | null>('FetchPermissions');
 export const setTemporaryPermission = createHubFn<SetTemporaryPermissionDto>('SetTemporaryPermission');
 
@@ -68,4 +70,5 @@ export const events = {
    onPermissionsUpdated: 'OnPermissionsUpdated',
    onEquipmentUpdated: 'OnEquipmentUpdated',
    onEquipmentCommand: 'OnEquipmentCommand',
+   onRequestDisconnect: 'OnRequestDisconnect',
 };

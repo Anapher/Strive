@@ -21,6 +21,8 @@ namespace PaderConference.Core.Services
         Conference_PermissionDeniedToOpenOrClose,
         Conference_ParticipantNotRegistered,
         Conference_InternalServiceError,
+        Conference_PermissionsDeniedToKickParticipant,
+        Conference_ParticipantConnectionNotFound,
 
         // Chat
         Chat_EmptyMessage = 1000100,
@@ -56,5 +58,8 @@ namespace PaderConference.Core.Services
         BreakoutRoom_NotOpen = 1000602,
         BreakoutRoom_AssigningParticipantsFailed = 1000603,
         BreakoutRoom_AmountMustBePositiveNumber = 1000604,
+
+        // Media
+        Media_PermissionToChangeOtherParticipantsProducersDenied = 1000700,
     }
 }

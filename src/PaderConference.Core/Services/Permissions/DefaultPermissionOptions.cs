@@ -28,11 +28,13 @@ namespace PaderConference.Core.Services.Permissions
         public ImmutableDictionary<string, JsonElement> Moderator { get; set; } = new[]
         {
             PermissionsList.Conference.CanOpenAndClose.Configure(true),
+            PermissionsList.Conference.CanKickParticipant.Configure(true),
             PermissionsList.Permissions.CanGiveTemporaryPermission.Configure(true),
             PermissionsList.Permissions.CanSeeAnyParticipantsPermissions.Configure(true),
             PermissionsList.Media.CanShareAudio.Configure(true),
             PermissionsList.Media.CanShareScreen.Configure(true),
             PermissionsList.Media.CanShareWebcam.Configure(true),
+            PermissionsList.Media.CanChangeOtherParticipantsProducers.Configure(true),
             PermissionsList.Rooms.CanCreateAndRemove.Configure(true),
             PermissionsList.Scenes.CanSetScene.Configure(true),
         }.ToImmutableDictionary();

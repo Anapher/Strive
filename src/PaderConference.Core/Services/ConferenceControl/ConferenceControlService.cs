@@ -8,6 +8,7 @@ using PaderConference.Core.Interfaces.Gateways.Repositories;
 using PaderConference.Core.Interfaces.Services;
 using PaderConference.Core.Services.Permissions;
 using PaderConference.Core.Services.Synchronization;
+using PaderConference.Core.Signaling;
 
 namespace PaderConference.Core.Services.ConferenceControl
 {
@@ -19,6 +20,8 @@ namespace PaderConference.Core.Services.ConferenceControl
         private readonly IConferenceScheduler _conferenceScheduler;
         private readonly ILogger<ConferenceControlService> _logger;
         private readonly IPermissionsService _permissionsService;
+        private readonly ISignalMessenger _messenger;
+        private readonly IConnectionMapping _connectionMapping;
         private readonly ISynchronizedObject<SynchronizedConferenceInfo> _synchronizedObject;
 
         private Func<Task>? _unsubscribeConferenceUpdated;
@@ -26,7 +29,7 @@ namespace PaderConference.Core.Services.ConferenceControl
         public ConferenceControlService(Conference conference, IConferenceScheduler conferenceScheduler,
             IConferenceManager conferenceManager, IConferenceRepo conferenceRepo,
             ISynchronizationManager synchronizationManager, IPermissionsService permissionsService,
-            ILogger<ConferenceControlService> logger)
+            ISignalMessenger messenger, IConnectionMapping connectionMapping, ILogger<ConferenceControlService> logger)
         {
             _conferenceId = conference.ConferenceId;
 
@@ -34,6 +37,8 @@ namespace PaderConference.Core.Services.ConferenceControl
             _conferenceManager = conferenceManager;
             _conferenceRepo = conferenceRepo;
             _permissionsService = permissionsService;
+            _messenger = messenger;
+            _connectionMapping = connectionMapping;
             _logger = logger;
             _synchronizedObject = synchronizationManager.Register("conferenceState",
                 new SynchronizedConferenceInfo(conference));
@@ -41,19 +46,17 @@ namespace PaderConference.Core.Services.ConferenceControl
 
         public override async ValueTask InitializeAsync()
         {
-            using (_logger.BeginScope("InitializeAsync()"))
-            using (_logger.BeginScope(new Dictionary<string, object> {{"conferenceId", _conferenceId}}))
-            {
-                var conference = await _conferenceRepo.FindById(_conferenceId);
-                if (conference != null) await OnConferenceUpdated(conference);
-                else _logger.LogError("The conference was not found in database.");
+            using var _ = _logger.BeginMethodScope(new Dictionary<string, object> {{"conferenceId", _conferenceId}});
 
-                _unsubscribeConferenceUpdated =
-                    await _conferenceRepo.SubscribeConferenceUpdated(_conferenceId, OnConferenceUpdated);
+            var conference = await _conferenceRepo.FindById(_conferenceId);
+            if (conference != null) await OnConferenceUpdated(conference);
+            else _logger.LogError("The conference was not found in database.");
 
-                _conferenceManager.ConferenceOpened += ConferenceManagerOnConferenceOpened;
-                _conferenceManager.ConferenceClosed += ConferenceManagerOnConferenceClosed;
-            }
+            _unsubscribeConferenceUpdated =
+                await _conferenceRepo.SubscribeConferenceUpdated(_conferenceId, OnConferenceUpdated);
+
+            _conferenceManager.ConferenceOpened += ConferenceManagerOnConferenceOpened;
+            _conferenceManager.ConferenceClosed += ConferenceManagerOnConferenceClosed;
         }
 
         private async void ConferenceManagerOnConferenceClosed(object? sender, string e)
@@ -97,6 +100,20 @@ namespace PaderConference.Core.Services.ConferenceControl
                 return ConferenceError.PermissionDeniedToOpenOrClose;
 
             await _conferenceManager.CloseConference(_conferenceId);
+            return SuccessOrError.Succeeded;
+        }
+
+        public async ValueTask<SuccessOrError> KickParticipant(IServiceMessage<string> message)
+        {
+            var permissions = await _permissionsService.GetPermissions(message.Participant);
+            if (!await permissions.GetPermission(PermissionsList.Conference.CanKickParticipant))
+                return ConferenceError.PermissionDeniedToKickParticipant;
+
+            if (!_connectionMapping.ConnectionsR.TryGetValue(message.Payload, out var connections))
+                return ConferenceError.ParticipantConnectionNotFound;
+
+            await _messenger.SendToConnectionAsync(connections.MainConnectionId,
+                CoreHubMessages.Response.OnRequestDisconnect, null);
             return SuccessOrError.Succeeded;
         }
 
