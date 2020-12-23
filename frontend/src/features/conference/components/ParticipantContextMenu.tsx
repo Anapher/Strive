@@ -1,9 +1,11 @@
 import { Box, Divider, IconButton, ListItemIcon, makeStyles, MenuItem, Slider, Typography } from '@material-ui/core';
+import MicOffRounded from '@material-ui/icons/MicOff';
 import SendIcon from '@material-ui/icons/Send';
-import VolumeMuteIcon from '@material-ui/icons/VolumeMute';
+import VolumeOffIcon from '@material-ui/icons/VolumeOff';
 import VolumeUpIcon from '@material-ui/icons/VolumeUp';
 import _ from 'lodash';
-import React, { useCallback } from 'react';
+import { AccountRemove } from 'mdi-material-ui';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import * as coreHub from 'src/core-hub';
 import { setSendingMode } from 'src/features/chat/reducer';
@@ -17,11 +19,9 @@ import usePermission, {
    PERMISSIONS_CAN_SEE_ANY_PARTICIPANTS_PERMISSIONS,
 } from 'src/hooks/usePermission';
 import { RootState } from 'src/store';
+import { showMessage } from 'src/store/notifier/actions';
 import { ParticipantDto } from '../types';
 import ParticipantContextMenuTempPermissions from './ParticipantContextMenuTempPermissions';
-import { AccountRemove } from 'mdi-material-ui';
-import MicOffRounded from '@material-ui/icons/MicOff';
-import { showMessage } from 'src/store/notifier/actions';
 
 const useStyles = makeStyles((theme) => ({
    infoMenuItem: {
@@ -42,16 +42,35 @@ const ParticipantContextMenu = React.forwardRef<HTMLElement, Props>(({ participa
    const dispatch = useDispatch();
    const classes = useStyles();
 
-   // const handleChangeMuted = (muted: boolean) => {
-   //    dispatch(patchParticipantAudio({ participantId: participant.participantId, data: { muted } }));
-   // };
+   const handleToggleMuted = () => {
+      dispatch(patchParticipantAudio({ participantId: participant.participantId, data: { muted: !audioInfo?.muted } }));
+   };
 
-   const handleChangeVolume = useCallback(
+   // hold volume as state because we update the global state in throttle mode which
+   // would result in a lagging slider if this would directly be used
+   const [displayedVolume, setDisplayedVolume] = useState(audioInfo?.volume ?? 0.75);
+
+   useEffect(() => {
+      if (audioInfo) {
+         setDisplayedVolume(audioInfo.volume);
+      }
+   }, [audioInfo?.volume]);
+
+   const handlePatchVolume = useCallback(
       _.throttle((volume: number) => {
          dispatch(patchParticipantAudio({ participantId: participant.participantId, data: { volume } }));
-      }, 200),
+      }, 500),
       [participant],
    );
+
+   const handleChangeVolume = (value: number) => {
+      if (audioInfo?.muted) {
+         handleToggleMuted();
+      }
+
+      setDisplayedVolume(value);
+      handlePatchVolume(value);
+   };
 
    const handleShowPermissions = () => {
       dispatch(coreHub.fetchPermissions(participant.participantId));
@@ -112,19 +131,18 @@ const ParticipantContextMenu = React.forwardRef<HTMLElement, Props>(({ participa
             <Typography>{participant.displayName}</Typography>
             {audioInfo && (
                <Box display="flex" alignItems="center" style={{ marginTop: 4, marginBottom: 4 }}>
-                  <IconButton size="small">
-                     {audioInfo.muted ? <VolumeMuteIcon fontSize="small" /> : <VolumeUpIcon fontSize="small" />}
+                  <IconButton size="small" onClick={handleToggleMuted}>
+                     {audioInfo.muted ? <VolumeOffIcon fontSize="small" /> : <VolumeUpIcon fontSize="small" />}
                   </IconButton>
                   <Slider
                      style={{ flex: 1, marginLeft: 8 }}
-                     value={audioInfo.muted ? 0 : Math.round(audioInfo.volume * 100)}
-                     onChange={(_event: unknown, newValue: number | number[]) =>
-                        handleChangeVolume((newValue as number) / 100)
-                     }
+                     value={audioInfo.muted ? 0 : Math.round(displayedVolume * 100)}
+                     onChange={(_event: unknown, newValue: number | number[]) => {
+                        handleChangeVolume((newValue as number) / 100);
+                     }}
                      valueLabelDisplay="auto"
                      max={100}
                      min={0}
-                     disabled={audioInfo.muted}
                      aria-label="Volume"
                   />
                </Box>
