@@ -8,7 +8,7 @@ namespace PaderConference.Core.Services.Rooms
             new ServiceError("Switching the room failed.", ServiceErrorCode.Rooms_SwitchRoomFailed);
 
         public static Error PermissionToSwitchRoomDenied =>
-            new ServiceError("Permissions to switch room denied.", ServiceErrorCode.Rooms_SwitchRoomFailed);
+            new ServiceError("Permissions to switch room denied.", ServiceErrorCode.Rooms_SwitchRoomDenied);
 
         public static Error PermissionToCreateRoomDenied =>
             new ServiceError("Permissions to create room denied.", ServiceErrorCode.Rooms_CreateDenied);

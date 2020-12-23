@@ -168,7 +168,7 @@ namespace PaderConference.Core.Services.Permissions
             {
                 var myPermissions = await GetPermissions(message.Participant);
                 if (!await myPermissions.GetPermission(PermissionsList.Permissions.CanSeeAnyParticipantsPermissions))
-                    return PermissionsError.PermissionDeniedGiveTemporaryPermission;
+                    return PermissionsError.PermissionDeniedFetchParticipantsPermissions;
 
                 if (!_conferenceManager.TryGetParticipant(_conferenceId, participantId, out participant!))
                     return CommonError.ParticipantNotFound;
