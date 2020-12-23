@@ -54,6 +54,13 @@ function ParticipantAudio({
       };
    }, [audioElem.current, consumer]);
 
+   useEffect(() => {
+      if (audioElem.current) {
+         audioElem.current.volume = audioOptions.volume;
+         audioElem.current.muted = audioOptions.muted;
+      }
+   }, [audioOptions.volume, audioOptions.muted, audioElem.current]);
+
    return <audio ref={audioElem} autoPlay playsInline controls={false} />;
 }
 
