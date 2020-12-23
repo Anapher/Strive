@@ -107,7 +107,7 @@ const middleware: Middleware = () => {
                   if (action.payload.success === true) {
                      toast.success(handler.successMessage, { id: handler.toastId });
                   } else if (action.payload.success === false) {
-                     toast.success(action.payload.error.message, { id: handler.toastId });
+                     toast.error(action.payload.error.message, { id: handler.toastId });
                   } else {
                      toast.dismiss(handler.toastId);
                   }
