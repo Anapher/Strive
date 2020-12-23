@@ -25,7 +25,7 @@ const useStyles = makeStyles((theme) => ({
    },
    messageText: {
       whiteSpace: 'pre-wrap',
-      wordBreak: 'break-all',
+      wordBreak: 'break-word',
       fontSize: 14,
    },
    emojiText: {
