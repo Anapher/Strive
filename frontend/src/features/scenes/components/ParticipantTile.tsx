@@ -12,6 +12,7 @@ import useConsumer from 'src/store/webrtc/hooks/useConsumer';
 import { Size } from 'src/types';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import ParticipantContextMenuPopper from 'src/features/conference/components/ParticipantContextMenuPopper';
+import { selectMyParticipantId } from 'src/features/auth/selectors';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -92,6 +93,9 @@ export default function ParticipantTile({ className, participant, size, disableL
    const videoRef = useRef<HTMLVideoElement | null>(null);
    const producers = useSelector((state: RootState) => selectParticipantProducers(state, participant?.participantId));
    const isWebcamActive = consumer?.paused === false;
+   const myParticipantId = useSelector(selectMyParticipantId);
+
+   const isMe = participant.participantId === myParticipantId;
 
    const audioInfo = useParticipantAudio(participant.participantId);
 
@@ -122,8 +126,6 @@ export default function ParticipantTile({ className, participant, size, disableL
    const handleCloseContextMenu = () => {
       setContextMenuOpen(false);
    };
-
-   const isMouseOver = true;
 
    return (
       <>
@@ -168,16 +170,18 @@ export default function ParticipantTile({ className, participant, size, disableL
                </>
             )}
 
-            <motion.div className={classes.moreButton} animate={{ opacity: isMouseOver ? 1 : 0 }}>
-               <IconButton
-                  ref={moreIconRef}
-                  aria-label="options"
-                  size={isSmall ? 'small' : 'medium'}
-                  onClick={handleOpenContextMenu}
-               >
-                  <MoreVertIcon />
-               </IconButton>
-            </motion.div>
+            {!isMe && (
+               <div className={classes.moreButton}>
+                  <IconButton
+                     ref={moreIconRef}
+                     aria-label="options"
+                     size={isSmall ? 'small' : 'medium'}
+                     onClick={handleOpenContextMenu}
+                  >
+                     <MoreVertIcon />
+                  </IconButton>
+               </div>
+            )}
          </motion.div>
          <ParticipantContextMenuPopper
             open={contextMenuOpen}

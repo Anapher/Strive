@@ -6,6 +6,7 @@ import { useSelector } from 'react-redux';
 import AnimatedMicIcon from 'src/assets/animated-icons/AnimatedMicIcon';
 import IconHide from 'src/components/IconHide';
 import { Roles } from 'src/consts';
+import { selectMyParticipantId } from 'src/features/auth/selectors';
 import { selectParticipantProducers } from 'src/features/media/selectors';
 import { RootState } from 'src/store';
 import { ParticipantDto } from '../types';
@@ -33,6 +34,7 @@ type Props = {
 export default function ParticipantItem({ participant }: Props) {
    const classes = useStyles();
    const producers = useSelector((state: RootState) => selectParticipantProducers(state, participant?.participantId));
+   const myParticipantId = useSelector(selectMyParticipantId);
 
    const audioVol = useMotionValue(0);
    const audioVolBackground = useTransform(audioVol, (value) => `rgba(41, 128, 185, ${value})`);
@@ -66,7 +68,7 @@ export default function ParticipantItem({ participant }: Props) {
                <AnimatedMicIcon activated={!producers?.mic?.paused} disabledColor={theme.palette.error.main} />
             </IconHide>
          </ButtonBase>
-         {participant && (
+         {participant && participant.participantId !== myParticipantId && (
             <ParticipantContextMenuPopper
                open={popperOpen}
                onClose={handleClose}
