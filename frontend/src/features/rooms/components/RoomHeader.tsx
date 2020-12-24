@@ -1,28 +1,29 @@
 import { ButtonBase, makeStyles, Typography } from '@material-ui/core';
-import StarIcon from '@material-ui/icons/Star';
+import { fade } from '@material-ui/core/styles';
 import clsx from 'classnames';
+import CompassIcon from 'mdi-material-ui/CompassRose';
+import PoundIcon from 'mdi-material-ui/Pound';
 import React from 'react';
 import { RoomViewModel } from '../types';
-import { fade } from '@material-ui/core/styles';
-import PeopleIcon from '@material-ui/icons/People';
+
 const useStyles = makeStyles((theme) => ({
    root: {
       borderRadius: theme.shape.borderRadius,
-      padding: theme.spacing(0, 2),
+      padding: theme.spacing(0, 1),
       paddingTop: 6,
       paddingBottom: 6,
       width: '100%',
       display: 'flex',
       flexDirection: 'row',
       justifyContent: 'flex-start',
-      transition: theme.transitions.create('background-color'),
+      // transition: theme.transitions.create('background-color'),
       '&:hover': {
          textDecoration: 'none',
          backgroundColor: fade(theme.palette.text.primary, 0.05),
       },
       '&$selected': {
          color: theme.palette.action.active,
-         backgroundColor: fade(theme.palette.action.active, 0.12),
+         backgroundColor: fade(theme.palette.action.active, 0.06),
          '&:hover': {
             backgroundColor: fade(theme.palette.action.active, 0.15),
          },
@@ -39,10 +40,11 @@ const useStyles = makeStyles((theme) => ({
    },
    icon: {
       marginRight: 8,
+      color: theme.palette.text.secondary,
    },
    starIcon: {
       marginRight: 8,
-      color: '#f1c40f',
+      color: theme.palette.primary.light,
    },
    nameContainer: {
       display: 'flex',
@@ -68,11 +70,13 @@ export default function RoomHeader({ room: { displayName, isDefaultRoom }, selec
       >
          <div className={classes.nameContainer}>
             {isDefaultRoom ? (
-               <StarIcon fontSize="small" className={classes.starIcon} />
+               <CompassIcon fontSize="small" className={classes.starIcon} />
             ) : (
-               <PeopleIcon fontSize="small" className={classes.icon} />
+               <PoundIcon fontSize="small" className={classes.icon} />
             )}
-            <Typography variant="subtitle2">{displayName}</Typography>
+            <Typography variant="subtitle2" color={selected ? 'textPrimary' : 'textSecondary'}>
+               {displayName}
+            </Typography>
          </div>
       </ButtonBase>
    );

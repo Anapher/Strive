@@ -1,4 +1,4 @@
-import { ButtonBase, makeStyles, Typography, useTheme } from '@material-ui/core';
+import { ButtonBase, fade, makeStyles, Typography, useTheme } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { motion, useMotionValue, useTransform } from 'framer-motion';
 import React, { useRef, useState } from 'react';
@@ -24,6 +24,10 @@ const useStyles = makeStyles((theme) => ({
       alignItems: 'center',
       borderRadius: theme.shape.borderRadius,
       width: '100%',
+      '&:hover': {
+         textDecoration: 'none',
+         backgroundColor: fade(theme.palette.text.primary, 0.05),
+      },
    },
 }));
 
@@ -35,9 +39,6 @@ export default function ParticipantItem({ participant }: Props) {
    const classes = useStyles();
    const producers = useSelector((state: RootState) => selectParticipantProducers(state, participant?.participantId));
    const myParticipantId = useSelector(selectMyParticipantId);
-
-   const audioVol = useMotionValue(0);
-   const audioVolBackground = useTransform(audioVol, (value) => `rgba(41, 128, 185, ${value})`);
 
    const theme = useTheme();
 
@@ -54,13 +55,7 @@ export default function ParticipantItem({ participant }: Props) {
 
    return (
       <div className={classes.root}>
-         <ButtonBase
-            onClick={handleToggle}
-            ref={buttonRef}
-            component={motion.button}
-            className={classes.button}
-            style={{ backgroundColor: audioVolBackground as any }}
-         >
+         <ButtonBase onClick={handleToggle} ref={buttonRef} component={motion.button} className={classes.button}>
             <Typography color={participant?.role === Roles.Moderator ? 'secondary' : undefined} variant="subtitle1">
                {participant ? participant?.displayName : <Skeleton />}
             </Typography>

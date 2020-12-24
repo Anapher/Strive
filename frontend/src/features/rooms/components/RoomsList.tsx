@@ -9,6 +9,7 @@ import SceneManagement from 'src/features/scenes/components/SceneManagement';
 import { RootState } from 'src/store';
 import { selectRoomViewModels } from '../selectors';
 import RoomHeader from './RoomHeader';
+import clsx from 'classnames';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -17,8 +18,14 @@ const useStyles = makeStyles((theme) => ({
       flexDirection: 'column',
    },
    room: {
-      margin: theme.spacing(1, 1),
       flex: 1,
+      margin: theme.spacing(0, 1),
+   },
+   roomWithParticipants: {
+      marginBottom: theme.spacing(1),
+   },
+   participants: {
+      marginLeft: theme.spacing(1),
    },
    rooms: {
       flex: 1,
@@ -64,16 +71,21 @@ export default function RoomsList({ pinned, onTogglePinned }: Props) {
          </div>
          <div className={classes.rooms}>
             {rooms?.map((x) => (
-               <div key={x.roomId} className={classes.room}>
+               <div
+                  key={x.roomId}
+                  className={clsx(classes.room, x.participants.length > 0 && classes.roomWithParticipants)}
+               >
                   <RoomHeader
                      className={classes.roomHeader}
                      room={x}
                      selected={accessInfo && x.participants.includes(accessInfo.nameid)}
                      onClick={() => handleSwitchRoom(x.roomId)}
                   />
-                  {x.participants.map((id) => (
-                     <ParticipantItem key={id} participant={participants?.find((x) => id === x.participantId)} />
-                  ))}
+                  <div className={classes.participants}>
+                     {x.participants.map((id) => (
+                        <ParticipantItem key={id} participant={participants?.find((x) => id === x.participantId)} />
+                     ))}
+                  </div>
                </div>
             ))}
          </div>
