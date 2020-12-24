@@ -4,6 +4,8 @@ import { motion } from 'framer-motion';
 import _ from 'lodash';
 import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
+import { ParticipantDto } from 'src/features/conference/types';
+import { selectParticipantsOfCurrentRoom } from 'src/features/rooms/selectors';
 import { RootState } from 'src/store';
 import { Size } from 'src/types';
 import { generateGrid } from '../calculations';
@@ -44,6 +46,10 @@ export default function ParticipantsGrid({
    setAutoHideControls,
 }: Props) {
    const participants = useSelector((state: RootState) => state.conference.participants);
+   const participantsOfRoom = useSelector(selectParticipantsOfCurrentRoom)
+      .map((id) => participants?.find((x) => x.participantId === id))
+      .filter((x): x is ParticipantDto => Boolean(x));
+
    const classes = useStyles();
 
    useEffect(() => {
@@ -51,17 +57,17 @@ export default function ParticipantsGrid({
       setAutoHideControls(false);
    }, []);
 
-   if (!participants) return <div className={className} />;
+   if (!participantsOfRoom) return <div className={className} />;
 
    const spacing = 8;
-   const grid = generateGrid(participants.length, 640, dimensions, spacing);
+   const grid = generateGrid(participantsOfRoom.length, 640, dimensions, spacing);
 
    return (
       <div className={clsx(className, classes.center)}>
          <div className={classes.tilesGrid} style={{ width: grid.containerWidth, height: grid.containerHeight }}>
             {Array.from({ length: grid.rows }).map((__, i) => (
                <div key={i.toString()} className={classes.tilesRow}>
-                  {_(participants)
+                  {_(participantsOfRoom)
                      .drop(i * grid.itemsPerRow)
                      .take(grid.itemsPerRow)
                      .value()

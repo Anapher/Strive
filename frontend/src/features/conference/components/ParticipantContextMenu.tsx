@@ -94,7 +94,7 @@ const ParticipantContextMenu = React.forwardRef<HTMLElement, Props>(({ participa
             message: `Kick ${participant.displayName}...`,
             dismissOn: {
                type: coreHub.kickParticipant.returnAction,
-               successMessage: `${participant.displayName} was removed from conference.`,
+               successMessage: `${participant.displayName} was removed from conference`,
             },
          }),
       );
