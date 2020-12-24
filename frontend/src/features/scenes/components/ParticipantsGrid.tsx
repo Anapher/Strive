@@ -57,7 +57,7 @@ export default function ParticipantsGrid({
       setAutoHideControls(false);
    }, []);
 
-   if (!participantsOfRoom) return <div className={className} />;
+   if (!participantsOfRoom || participantsOfRoom.length === 0) return <div className={className} />;
 
    const spacing = 8;
    const grid = generateGrid(participantsOfRoom.length, 640, dimensions, spacing);

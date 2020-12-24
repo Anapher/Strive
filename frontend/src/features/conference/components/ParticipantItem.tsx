@@ -1,6 +1,6 @@
 import { ButtonBase, fade, makeStyles, Typography, useTheme } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
-import { motion, useMotionValue, useTransform } from 'framer-motion';
+import { motion } from 'framer-motion';
 import React, { useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import AnimatedMicIcon from 'src/assets/animated-icons/AnimatedMicIcon';
