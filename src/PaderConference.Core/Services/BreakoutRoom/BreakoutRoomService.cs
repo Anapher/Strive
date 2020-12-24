@@ -145,6 +145,10 @@ namespace PaderConference.Core.Services.BreakoutRoom
             using var _ = _logger.BeginMethodScope();
             using (await _breakoutLock.LockAsync())
             {
+                var permissions = await _permissionsService.GetPermissions(message.Participant);
+                if (!await permissions.GetPermission(PermissionsList.Rooms.CanCreateAndRemove))
+                    return RoomsError.PermissionToCreateRoomDenied;
+
                 var current = _synchronizedObject.Current;
                 if (current.Active == null)
                 {
