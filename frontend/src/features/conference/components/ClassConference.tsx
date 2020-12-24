@@ -2,6 +2,7 @@ import { makeStyles } from '@material-ui/core';
 import React, { useEffect, useState } from 'react';
 import ChatBar from 'src/features/chat/components/ChatBar';
 import ConferenceAppBar from 'src/features/conference/components/ConferenceAppBar';
+import DiagnosticsWindow from 'src/features/diagnostics/components/DiagnosticsWindow';
 import ParticipantMicManager from 'src/features/media/components/ParticipantMicManager';
 import { expandToBox } from 'src/features/scenes/calculations';
 import ActiveParticipantsGridSizer from 'src/features/scenes/components/ActiveParticipantsGridSizer';
@@ -80,6 +81,7 @@ export default function ClassConference() {
                </div>
             </div>
             <PermissionDialog />
+            <DiagnosticsWindow />
          </div>
       </ParticipantMicManager>
    );

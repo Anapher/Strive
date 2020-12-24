@@ -12,6 +12,7 @@ import settings from '../features/settings/reducer';
 import equipment from '../features/equipment/reducer';
 import scenes from '../features/scenes/reducer';
 import breakoutRooms from '../features/breakout-rooms/reducer';
+import diagnostics from '../features/diagnostics/reducer';
 
 const rootReducer = combineReducers({
    auth,
@@ -26,6 +27,7 @@ const rootReducer = combineReducers({
    equipment,
    scenes,
    breakoutRooms,
+   diagnostics,
 });
 
 export default rootReducer;

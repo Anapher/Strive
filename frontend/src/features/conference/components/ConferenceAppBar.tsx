@@ -18,6 +18,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import * as coreHub from 'src/core-hub';
 import { signOut } from 'src/features/auth/reducer';
 import { selectAccessToken } from 'src/features/auth/selectors';
+import { setOpen } from 'src/features/diagnostics/reducer';
 import { openSettings } from 'src/features/settings/reducer';
 import usePermission, { CONFERENCE_CAN_OPEN_AND_CLOSE } from 'src/hooks/usePermission';
 import useWebRtcStatus from 'src/store/webrtc/hooks/useWebRtcStatus';
@@ -77,6 +78,11 @@ export default function ConferenceAppBar({ chatWidth }: Props) {
       handleCloseMenu();
    };
 
+   const handleShowDiagnostics = () => {
+      dispatch(setOpen(true));
+      handleCloseMenu();
+   };
+
    return (
       <AppBar position="static">
          <Toolbar variant="dense" className={classes.toolbar}>
@@ -128,6 +134,7 @@ export default function ConferenceAppBar({ chatWidth }: Props) {
             <Menu open={isMenuOpen} onClose={handleCloseMenu} anchorEl={moreIconButtonRef.current}>
                {canCloseConference && <MenuItem onClick={handleCloseConference}>Close Conference</MenuItem>}
                <MenuItem onClick={handleShowPermissions}>Show my permissions</MenuItem>
+               <MenuItem onClick={handleShowDiagnostics}>Diagnostics</MenuItem>
                <MenuItem onClick={handleSignOut}>Sign out</MenuItem>
             </Menu>
          </Toolbar>
