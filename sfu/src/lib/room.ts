@@ -121,13 +121,13 @@ export default class Room {
       }
    }
 
-   leave(participant: Participant): void {
+   async leave(participant: Participant): Promise<void> {
       logger.info('leave() | participantId: %s | roomId: %s', participant.participantId, this.id);
 
       const status = this.participantStatus.get(participant.participantId);
       if (status) {
          for (const receivingConn of status.receivingConns) {
-            this.mixer.removeReceiveTransport(receivingConn.connectionId);
+            await this.mixer.removeReceiveTransport(receivingConn.connectionId);
          }
 
          for (const source of producerSources) {

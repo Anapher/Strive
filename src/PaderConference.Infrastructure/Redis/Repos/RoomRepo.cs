@@ -77,7 +77,7 @@ namespace PaderConference.Infrastructure.Redis.Repos
         public async Task SetParticipantRoom(string conferenceId, string participantId, string roomId)
         {
             await _database.HashSetAsync(RedisKeys.Rooms.ParticipantsToRoom(conferenceId), participantId, roomId);
-            await _database.PublishAsync(RedisChannels.RoomSwitchedChannel(conferenceId),
+            await _database.PublishAsync(RedisChannels.RoomSwitchedChannel.GetName(conferenceId),
                 new ConnectionMessage<object?>(null, new ConnectionMessageMetadata(conferenceId, null, participantId)));
         }
     }

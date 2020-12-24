@@ -69,7 +69,10 @@ async function initializeConference(conferenceInfo: ConferenceInfo): Promise<voi
 
    // subscribe to all requests targeting this conference
    subRedis.psubscribe(`${conference.conferenceId}/req::*`);
+
+   // events
    subRedis.subscribe(onClientDisconnected.getName(conferenceInfo.id));
+   subRedis.subscribe(onRoomSwitched.getName(conferenceInfo.id));
 }
 
 const onNewConferenceCreated: () => Promise<SuccessOrError> = async () => {

@@ -81,7 +81,7 @@ export class MediasoupMixer {
     * remove a receive transport, close all consumers of this mixer
     * @param connectionId the connection
     */
-   public removeReceiveTransport(connectionId: string): void {
+   public async removeReceiveTransport(connectionId: string): Promise<void> {
       const receiver = this.receivers.get(connectionId);
       if (receiver) {
          this.receivers.delete(connectionId);
@@ -91,8 +91,7 @@ export class MediasoupMixer {
                consumer.close();
                receiver.consumers.delete(consumer.id);
 
-               this.signal.sendToConnection(receiver.connectionId, 'consumerClosed', { consumerId: consumer.id });
-               break;
+               await this.signal.sendToConnection(receiver.connectionId, 'consumerClosed', { consumerId: consumer.id });
             }
          }
       }

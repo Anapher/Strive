@@ -46,7 +46,7 @@ export class RoomManager {
          // room switch, remove from current room
          const currentRoom = this.roomMap.get(currentRoomId);
          if (currentRoom) {
-            currentRoom.leave(participant);
+            await currentRoom.leave(participant);
 
             if (currentRoom.participants.size === 0) {
                this.closeRoom(currentRoom);
@@ -57,6 +57,7 @@ export class RoomManager {
       if (roomId !== currentRoomId) {
          // join the new room
          await room.join(participant);
+         this.participantToRoom.set(participant.participantId, roomId);
       } else {
          // just update the participant in the room
          await room.updateParticipant(participant);
@@ -69,7 +70,8 @@ export class RoomManager {
 
       const room = this.roomMap.get(roomId);
       if (room) {
-         room.leave(participant);
+         await room.leave(participant);
+         this.participantToRoom.delete(participant.participantId);
 
          if (room.participants.size === 0) {
             this.closeRoom(room);

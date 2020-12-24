@@ -28,10 +28,7 @@ namespace PaderConference.Infrastructure
         /// <summary>
         ///     Invoked once a participant switched the room.
         /// </summary>
-        public static string RoomSwitchedChannel(string conferenceId)
-        {
-            return $"{conferenceId}::roomSwitched";
-        }
+        public static ConferenceDependentKey RoomSwitchedChannel = CreateChannelName("::roomSwitched");
 
         /// <summary>
         ///     Published once a client disconnected
