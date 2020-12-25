@@ -21,8 +21,11 @@ import { selectAccessToken } from 'src/features/auth/selectors';
 import { setOpen } from 'src/features/diagnostics/reducer';
 import { openSettings } from 'src/features/settings/reducer';
 import usePermission, { CONFERENCE_CAN_OPEN_AND_CLOSE } from 'src/hooks/usePermission';
+import { RootState } from 'src/store';
 import useWebRtcStatus from 'src/store/webrtc/hooks/useWebRtcStatus';
 import { selectParticipants } from '../selectors';
+import BreakoutRoomChips from './appbar/BreakoutRoomChip';
+import clsx from 'classnames';
 
 const useStyles = makeStyles((theme) =>
    createStyles({
@@ -43,6 +46,10 @@ const useStyles = makeStyles((theme) =>
          backgroundColor: 'rgb(55, 55, 57)',
          padding: theme.spacing(0, 1),
       },
+      breakoutRoomChip: {
+         marginRight: theme.spacing(1),
+         backgroundColor: theme.palette.primary.dark,
+      },
       errorChip: {
          backgroundColor: theme.palette.error.main,
          color: theme.palette.error.contrastText,
@@ -59,6 +66,8 @@ export default function ConferenceAppBar({ chatWidth }: Props) {
    const dispatch = useDispatch();
    const handleSignOut = () => dispatch(signOut());
 
+   const diagnosticsOpen = useSelector((state: RootState) => state.diagnostics.open);
+
    const canCloseConference = usePermission(CONFERENCE_CAN_OPEN_AND_CLOSE);
    const handleCloseConference = () => dispatch(coreHub.closeConference());
    const handleOpenSettings = () => dispatch(openSettings());
@@ -72,6 +81,8 @@ export default function ConferenceAppBar({ chatWidth }: Props) {
    const moreIconButtonRef = useRef<HTMLButtonElement>(null);
    const participants = useSelector(selectParticipants);
    const webRtcStatus = useWebRtcStatus();
+
+   const breakoutRoomState = useSelector((state: RootState) => state.breakoutRooms.synchronized?.active);
 
    const handleShowPermissions = () => {
       dispatch(coreHub.fetchPermissions(null));
@@ -90,6 +101,12 @@ export default function ConferenceAppBar({ chatWidth }: Props) {
                <Typography variant="h6">PaderConference</Typography>
             </Box>
             <Box>
+               {breakoutRoomState && (
+                  <BreakoutRoomChips
+                     className={clsx(classes.chip, classes.breakoutRoomChip)}
+                     state={breakoutRoomState}
+                  />
+               )}
                {webRtcStatus !== 'connected' && (
                   <Chip
                      className={classes.errorChip}
@@ -101,11 +118,7 @@ export default function ConferenceAppBar({ chatWidth }: Props) {
                   />
                )}
                {participants && (
-                  <Chip
-                     className={classes.chip}
-                     label={`Connected participants: ${participants.length}`}
-                     size="small"
-                  />
+                  <Chip className={classes.chip} label={`Participants: ${participants.length}`} size="small" />
                )}
             </Box>
             <Box
@@ -132,9 +145,11 @@ export default function ConferenceAppBar({ chatWidth }: Props) {
             </Box>
 
             <Menu open={isMenuOpen} onClose={handleCloseMenu} anchorEl={moreIconButtonRef.current}>
-               {canCloseConference && <MenuItem onClick={handleCloseConference}>Close Conference</MenuItem>}
                <MenuItem onClick={handleShowPermissions}>Show my permissions</MenuItem>
-               <MenuItem onClick={handleShowDiagnostics}>Diagnostics</MenuItem>
+               <MenuItem onClick={handleShowDiagnostics} disabled={diagnosticsOpen}>
+                  Diagnostics
+               </MenuItem>
+               {canCloseConference && <MenuItem onClick={handleCloseConference}>Close Conference</MenuItem>}
                <MenuItem onClick={handleSignOut}>Sign out</MenuItem>
             </Menu>
          </Toolbar>

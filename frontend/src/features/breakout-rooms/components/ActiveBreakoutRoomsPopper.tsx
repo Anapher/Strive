@@ -4,6 +4,7 @@ import React from 'react';
 import Countdown, { CountdownRenderProps } from 'react-countdown';
 import { useDispatch, useSelector } from 'react-redux';
 import { changeBreakoutRooms, closeBreakoutRooms } from 'src/core-hub';
+import usePermission, { ROOMS_CAN_CREATE_REMOVE } from 'src/hooks/usePermission';
 import { setCreationDialogOpen } from '../reducer';
 import { selectBreakoutRoomState } from '../selectors';
 
@@ -37,13 +38,17 @@ export default function ActiveBreakoutRoomsPopper() {
       dispatch(setCreationDialogOpen(true));
    };
 
+   const canModify = usePermission(ROOMS_CAN_CREATE_REMOVE);
+
    return (
       <div>
          <Box display="flex" justifyContent="space-between" alignItems="center">
             <Typography variant="h6">{state.amount} breakout rooms are open</Typography>
-            <Button color="secondary" variant="contained" size="small" onClick={handleCloseBreakoutRooms}>
-               Close
-            </Button>
+            {canModify && (
+               <Button color="secondary" variant="contained" size="small" onClick={handleCloseBreakoutRooms}>
+                  Close
+               </Button>
+            )}
          </Box>
          {deadline && (
             <Box mt={2}>
@@ -51,18 +56,22 @@ export default function ActiveBreakoutRoomsPopper() {
                   Deadline at {deadline.toLocaleString(DateTime.TIME_24_SIMPLE)} (
                   <Countdown date={deadline.toJSDate()} renderer={renderer} />)
                </Typography>
-               <ButtonGroup variant="contained" aria-label="add time button group" size="small">
-                  <Button onClick={handleAddMinutes(1)}>+1 min</Button>
-                  <Button onClick={handleAddMinutes(5)}>+5 min</Button>
-                  <Button onClick={handleAddMinutes(10)}>+10 min</Button>
-               </ButtonGroup>
+               {canModify && (
+                  <ButtonGroup variant="contained" aria-label="add time button group" size="small">
+                     <Button onClick={handleAddMinutes(1)}>+1 min</Button>
+                     <Button onClick={handleAddMinutes(5)}>+5 min</Button>
+                     <Button onClick={handleAddMinutes(10)}>+10 min</Button>
+                  </ButtonGroup>
+               )}
             </Box>
          )}
-         <Box mt={2}>
-            <Button variant="contained" color="primary" onClick={handleUpdateBreakoutRooms}>
-               Change breakout rooms...
-            </Button>
-         </Box>
+         {canModify && (
+            <Box mt={2}>
+               <Button variant="contained" color="primary" onClick={handleUpdateBreakoutRooms}>
+                  Change breakout rooms...
+               </Button>
+            </Box>
+         )}
       </div>
    );
 }

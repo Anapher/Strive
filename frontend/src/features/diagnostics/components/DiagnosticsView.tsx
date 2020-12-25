@@ -42,8 +42,10 @@ export default function DiagnosticsView() {
    }, [connection]);
 
    return (
-      <Box p={3} position="relative">
-         <Typography variant="h6">Diagnostics of PaderConference</Typography>
+      <div>
+         <Box pt={3} pl={3} pr={3}>
+            <Typography variant="h6">Diagnostics of PaderConference</Typography>
+         </Box>
          <Table>
             <TableHead>
                <TableRow>
@@ -120,6 +122,6 @@ export default function DiagnosticsView() {
                )}
             </TableBody>
          </Table>
-      </Box>
+      </div>
    );
 }

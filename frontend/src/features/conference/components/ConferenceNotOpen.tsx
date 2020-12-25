@@ -100,7 +100,6 @@ export default function ConferenceNotOpen({ conferenceInfo }: Props) {
    return (
       <div className={classes.root}>
          <Box display="flex" flexDirection="row" position="absolute" right={32} top={32}>
-            <Button style={{ marginRight: 8 }}>Device check</Button>
             <Button onClick={handleOpenSettings}>Settings</Button>
          </Box>
          <Box display="flex" flexDirection="row" position="absolute" left={32} bottom={32}>
