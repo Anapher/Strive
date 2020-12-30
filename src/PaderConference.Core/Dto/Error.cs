@@ -2,19 +2,41 @@ using System.Collections.Generic;
 
 namespace PaderConference.Core.Dto
 {
-    public class Error
+    /// <summary>
+    ///     Information about an error
+    /// </summary>
+    public record Error
     {
-        public Error(string type, string message, int code, IReadOnlyDictionary<string, string>? fields = null)
+        public Error(string type, string message, string code)
         {
             Type = type;
             Message = message;
             Code = code;
-            Fields = fields;
         }
 
+        /// <summary>
+        ///     The type of the error
+        /// </summary>
         public string Type { get; }
+
+        /// <summary>
+        ///     A short message describing the error
+        /// </summary>
         public string Message { get; }
-        public int Code { get; }
-        public IReadOnlyDictionary<string, string>? Fields { get; set; }
+
+        /// <summary>
+        ///     A unique code for the error
+        /// </summary>
+        public string Code { get; }
+
+        /// <summary>
+        ///     Fields that must be changed to fix this error
+        /// </summary>
+        public IReadOnlyDictionary<string, string>? Fields { get; init; }
+
+        public override string ToString()
+        {
+            return $"An error occurred! {Type}\r\nCode: {Code}\r\nMessage: {Message}";
+        }
     }
 }

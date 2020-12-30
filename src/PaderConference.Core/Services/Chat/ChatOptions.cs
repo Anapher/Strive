@@ -1,6 +1,6 @@
 ﻿namespace PaderConference.Core.Services.Chat
 {
-    public class ChatOptions
+    public record ChatOptions
     {
         /// <summary>
         ///     The maximum amount of messages that will be saved. If this amount is exceeded, for every new message the oldest
@@ -19,5 +19,10 @@
         ///     <see cref="CancelParticipantIsTypingAfter" />
         /// </summary>
         public double CancelParticipantIsTypingInterval { get; set; } = 5;
+
+        /// <summary>
+        ///     If true, synchronize the state of participants that are currently typing
+        /// </summary>
+        public bool ShowTyping { get; set; } = true;
     }
 }

@@ -1,5 +1,7 @@
-﻿using System.Collections.Immutable;
+﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Text.Json;
+using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Extensions;
 
 namespace PaderConference.Core.Services.Permissions
@@ -9,43 +11,46 @@ namespace PaderConference.Core.Services.Permissions
     /// </summary>
     public class DefaultPermissionOptions
     {
-        /// <summary>
-        ///     Default conference permissions, so this is the foundation of permissions for every participant in the
-        ///     conference
-        /// </summary>
-        public ImmutableDictionary<string, JsonElement> Conference { get; set; } = new[]
+        public Dictionary<PermissionType, IReadOnlyDictionary<string, JsonElement>> Default = new()
         {
-            PermissionsList.Chat.CanSendChatMessage.Configure(true),
-            PermissionsList.Chat.CanSendAnonymousMessage.Configure(true),
-            PermissionsList.Chat.CanSendPrivateChatMessage.Configure(true),
-            PermissionsList.Rooms.CanSwitchRoom.Configure(true),
-            PermissionsList.Conference.CanRaiseHand.Configure(true),
-        }.ToImmutableDictionary();
-
-        /// <summary>
-        ///     Moderator permissions
-        /// </summary>
-        public ImmutableDictionary<string, JsonElement> Moderator { get; set; } = new[]
-        {
-            PermissionsList.Conference.CanOpenAndClose.Configure(true),
-            PermissionsList.Conference.CanKickParticipant.Configure(true),
-            PermissionsList.Permissions.CanGiveTemporaryPermission.Configure(true),
-            PermissionsList.Permissions.CanSeeAnyParticipantsPermissions.Configure(true),
-            PermissionsList.Media.CanShareAudio.Configure(true),
-            PermissionsList.Media.CanShareScreen.Configure(true),
-            PermissionsList.Media.CanShareWebcam.Configure(true),
-            PermissionsList.Media.CanChangeOtherParticipantsProducers.Configure(true),
-            PermissionsList.Rooms.CanCreateAndRemove.Configure(true),
-            PermissionsList.Scenes.CanSetScene.Configure(true),
-        }.ToImmutableDictionary();
-
-        /// <summary>
-        ///     Permissions participants in breakout rooms have
-        /// </summary>
-        public ImmutableDictionary<string, JsonElement> BreakoutRoom { get; set; } = new[]
-        {
-            PermissionsList.Media.CanShareAudio.Configure(true),
-            PermissionsList.Media.CanShareScreen.Configure(true),
-        }.ToImmutableDictionary();
+            // Default conference permissions, so this is the foundation of permissions for every participant in the conference
+            {
+                PermissionType.Conference,
+                new[]
+                {
+                    PermissionsList.Chat.CanSendChatMessage.Configure(true),
+                    PermissionsList.Chat.CanSendAnonymousMessage.Configure(true),
+                    PermissionsList.Chat.CanSendPrivateChatMessage.Configure(true),
+                    PermissionsList.Rooms.CanSwitchRoom.Configure(true),
+                    PermissionsList.Conference.CanRaiseHand.Configure(true),
+                }.ToImmutableDictionary()
+            },
+            // Moderator permissions
+            {
+                PermissionType.Moderator,
+                new[]
+                {
+                    PermissionsList.Conference.CanOpenAndClose.Configure(true),
+                    PermissionsList.Conference.CanKickParticipant.Configure(true),
+                    PermissionsList.Permissions.CanGiveTemporaryPermission.Configure(true),
+                    PermissionsList.Permissions.CanSeeAnyParticipantsPermissions.Configure(true),
+                    PermissionsList.Media.CanShareAudio.Configure(true),
+                    PermissionsList.Media.CanShareScreen.Configure(true),
+                    PermissionsList.Media.CanShareWebcam.Configure(true),
+                    PermissionsList.Media.CanChangeOtherParticipantsProducers.Configure(true),
+                    PermissionsList.Rooms.CanCreateAndRemove.Configure(true),
+                    PermissionsList.Scenes.CanSetScene.Configure(true),
+                }.ToImmutableDictionary()
+            },
+            // Moderator permissions
+            {
+                PermissionType.BreakoutRoom,
+                new[]
+                {
+                    PermissionsList.Media.CanShareAudio.Configure(true),
+                    PermissionsList.Media.CanShareScreen.Configure(true),
+                }.ToImmutableDictionary()
+            },
+        };
     }
 }

@@ -1,28 +1,16 @@
 ﻿#pragma warning disable 8618
+// this file is validated so the nullable annotations are enforced
 
-using System;
-using System.Collections.Immutable;
+using System.Collections.Generic;
+using System.Text.Json;
+using PaderConference.Core.Domain.Entities;
 
 namespace PaderConference.Models.Request
 {
     public class CreateConferenceRequestDto
     {
-        public string? Name { get; set; }
+        public ConferenceConfiguration Configuration { get; set; }
 
-        public string ConferenceType { get; set; }
-
-        public IImmutableList<string> Moderators { get; set; }
-
-        public DateTimeOffset? StartTime { get; set; }
-
-        public DateTimeOffset? EndTime { get; set; }
-
-        public string? ScheduleCron { get; set; }
-
-        public IImmutableDictionary<string, string>? Permissions { get; set; }
-
-        public IImmutableDictionary<string, string>? DefaultRoomPermissions { get; set; }
-
-        public IImmutableDictionary<string, string>? ModeratorPermissions { get; set; }
+        public Dictionary<PermissionType, Dictionary<string, JsonElement>>? Permissions { get; set; }
     }
 }

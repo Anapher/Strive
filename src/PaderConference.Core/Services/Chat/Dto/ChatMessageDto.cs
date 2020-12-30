@@ -1,5 +1,6 @@
 ﻿#pragma warning disable 8618
 using System;
+using PaderConference.Core.Services.Chat.Requests;
 
 namespace PaderConference.Core.Services.Chat.Dto
 {

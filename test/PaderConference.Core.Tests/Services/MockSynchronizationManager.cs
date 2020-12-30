@@ -18,7 +18,7 @@ namespace PaderConference.Core.Tests.Services
         }
     }
 
-    public class MockSynchronizationObject<T> : ISynchronizedObject<T>
+    public class MockSynchronizationObject<T> : ISynchronizedObject<T> where T : notnull
     {
         public MockSynchronizationObject(T current)
         {

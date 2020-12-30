@@ -2,9 +2,10 @@ namespace PaderConference.Core.Errors
 {
     public enum ErrorType
     {
-        InternalError,
-        ValidationError,
-        Authentication,
-        ServiceError,
+        BadRequest,
+        Conflict,
+        InternalServerError,
+        Forbidden,
+        NotFound,
     }
 }

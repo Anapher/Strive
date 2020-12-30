@@ -2,7 +2,6 @@
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
-using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Interfaces.Gateways.Repositories;
 
 namespace PaderConference.Core.Services
@@ -12,14 +11,22 @@ namespace PaderConference.Core.Services
     /// </summary>
     public class ModeratorWatcher : IAsyncDisposable
     {
-        private readonly string _conferenceId;
-        private readonly IConferenceRepo _conferenceRepo;
-        private Func<Task>? _unsubscribeConferenceUpdated;
+        private readonly UseConferenceSelector<IImmutableList<string>> _selector;
 
         public ModeratorWatcher(string conferenceId, IConferenceRepo conferenceRepo)
         {
-            _conferenceId = conferenceId;
-            _conferenceRepo = conferenceRepo;
+            _selector = new UseConferenceSelector<IImmutableList<string>>(conferenceId, conferenceRepo,
+                conference => conference.Configuration.Moderators, ImmutableList<string>.Empty);
+            _selector.Updated += SelectorOnUpdated;
+        }
+
+        private void SelectorOnUpdated(object? sender, ObjectChangedEventArgs<IImmutableList<string>> e)
+        {
+            var added = e.NewValue.Except(e.OldValue).ToImmutableArray();
+            var removed = e.OldValue.Except(e.NewValue).ToImmutableArray();
+
+            if (added.Any() || removed.Any())
+                ModeratorsUpdated?.Invoke(this, new ModeratorUpdateInfo(e.NewValue, added, removed));
         }
 
         /// <summary>
@@ -30,50 +37,20 @@ namespace PaderConference.Core.Services
         /// <summary>
         ///     A list of the participant ids of all moderators of this conference
         /// </summary>
-        public IImmutableList<string> Moderators { get; private set; } = ImmutableList<string>.Empty;
+        public IImmutableList<string> Moderators => _selector.Value;
 
         /// <summary>
         ///     Initialize all properties in this class and subscribe to database events. Please note that
         ///     <see cref="DisposeAsync" /> must be called when this method has executed
         /// </summary>
-        public async Task InitializeAsync()
+        public Task InitializeAsync()
         {
-            var conference = await _conferenceRepo.FindById(_conferenceId);
-            if (conference == null)
-                throw new InvalidOperationException("The conference could not be found in database.");
-
-            await InitializeAsync(conference);
-            _unsubscribeConferenceUpdated =
-                await _conferenceRepo.SubscribeConferenceUpdated(_conferenceId, OnConferenceUpdated);
+            return _selector.InitializeAsync();
         }
 
-        protected virtual ValueTask InitializeAsync(Conference conference)
+        public ValueTask DisposeAsync()
         {
-            Moderators = conference.Moderators;
-            return new ValueTask();
-        }
-
-        public async ValueTask DisposeAsync()
-        {
-            var unsubscribe = _unsubscribeConferenceUpdated;
-            if (unsubscribe != null)
-            {
-                await unsubscribe();
-                _unsubscribeConferenceUpdated = null;
-            }
-        }
-
-        protected virtual Task OnConferenceUpdated(Conference conference)
-        {
-            var added = conference.Moderators.Except(Moderators).ToImmutableArray();
-            var removed = Moderators.Except(conference.Moderators).ToImmutableArray();
-
-            Moderators = conference.Moderators;
-
-            if (added.Any() || removed.Any())
-                ModeratorsUpdated?.Invoke(this, new ModeratorUpdateInfo(conference.Moderators, added, removed));
-
-            return Task.CompletedTask;
+            return _selector.DisposeAsync();
         }
     }
 }

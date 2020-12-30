@@ -8,12 +8,9 @@ namespace PaderConference.Core.Services.ConferenceControl
     {
         public SynchronizedConferenceInfo(Conference conference)
         {
-            ConferenceState = conference.State;
-            ConferenceType = conference.ConferenceType;
-            Moderators = conference.Moderators;
+            ConferenceType = conference.Configuration.ConferenceType;
+            Moderators = conference.Configuration.Moderators;
         }
-
-        public ConferenceState ConferenceState { get; }
 
         public DateTimeOffset? ScheduledDate { get; init; }
 

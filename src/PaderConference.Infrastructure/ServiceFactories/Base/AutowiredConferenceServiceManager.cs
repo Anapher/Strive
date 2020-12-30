@@ -1,44 +1,77 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Autofac;
 using Autofac.Core;
-using PaderConference.Core.Extensions;
+using PaderConference.Core.Domain.Entities;
+using PaderConference.Core.Interfaces.Gateways.Repositories;
 using PaderConference.Core.Services;
 
 namespace PaderConference.Infrastructure.ServiceFactories.Base
 {
     public class AutowiredConferenceServiceManager<TService> : ConferenceServiceManager<TService>
-        where TService : IConferenceService
+        where TService : ConferenceService
     {
         private readonly IComponentContext _context;
-        private readonly Lazy<IReadOnlyDictionary<Type, IConferenceServiceManager>> _typeToServiceManager;
 
         public AutowiredConferenceServiceManager(IComponentContext context)
         {
             _context = context;
-
-            _typeToServiceManager = new Lazy<IReadOnlyDictionary<Type, IConferenceServiceManager>>(
-                () => context.Resolve<IEnumerable<IConferenceServiceManager>>()
-                    .SelectMany(serviceManager =>
-                        serviceManager.ServiceType.GetInterfaces().Select(x => (x, serviceManager))).GroupBy(x => x.x)
-                    .ToDictionary(x => x.Key, x => x.First().serviceManager),
-                LazyThreadSafetyMode.ExecutionAndPublication);
         }
 
-        protected override ValueTask<TService> ServiceFactory(string conferenceId)
+        protected override async ValueTask<TService> ServiceFactory(string conferenceId)
         {
-            var serviceParam = new ResolvedParameter(
-                (param, context) => _typeToServiceManager.Value.ContainsKey(param.ParameterType), (param, context) =>
-                {
-                    var manager = _typeToServiceManager.Value[param.ParameterType];
-                    return manager.GetService(conferenceId).Result; // TODO: maybe execute this task async before?
-                });
+            var disposables = new List<IAsyncDisposable>();
 
-            return _context.Resolve<TService>(new NamedParameter("conferenceId", conferenceId), serviceParam)
-                .ToValueTask();
+            var parameters = await GetParameters(conferenceId, disposables).ToListAsync();
+            parameters.Add(new NamedParameter("conferenceId", conferenceId));
+
+            TService service;
+            try
+            {
+                service = _context.Resolve<TService>(parameters.ToArray());
+            }
+            catch (Exception)
+            {
+                foreach (var disposable in disposables)
+                {
+                    await disposable.DisposeAsync();
+                }
+
+                throw;
+            }
+
+            foreach (var disposable in disposables)
+            {
+                service.RegisterDisposable(disposable);
+            }
+
+            return service;
+        }
+
+        protected virtual IAsyncEnumerable<Parameter> GetParameters(string conferenceId,
+            IList<IAsyncDisposable> disposables)
+        {
+            return AsyncEnumerable.Empty<Parameter>();
+        }
+
+        protected async ValueTask<Parameter> ResolveServiceAsync<T>(string conferenceId) where T : IConferenceService
+        {
+            var serviceManager = _context.Resolve<IConferenceServiceManager<T>>();
+            var service = await serviceManager.GetService(conferenceId);
+            return new TypedParameter(typeof(T), service);
+        }
+
+        protected async ValueTask<Parameter> ResolveOptions<T>(string conferenceId, IList<IAsyncDisposable> disposables,
+            Func<Conference, T> selector) where T : class, new()
+        {
+            var conferenceRepo = _context.Resolve<IConferenceRepo>();
+            var options = new UseConferenceSelector<T>(conferenceId, conferenceRepo, selector, new T());
+            await options.InitializeAsync();
+            disposables.Add(options);
+
+            return new TypedParameter(typeof(T), options);
         }
     }
 }

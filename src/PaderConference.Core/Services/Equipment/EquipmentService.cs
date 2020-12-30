@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Dto;
 using PaderConference.Core.Extensions;
+using PaderConference.Core.Interfaces;
 using PaderConference.Core.Interfaces.Services;
 using PaderConference.Core.Services.Equipment.Data;
 using PaderConference.Core.Services.Equipment.Dto;
@@ -129,7 +130,7 @@ namespace PaderConference.Core.Services.Equipment
                     _logger.LogWarning(
                         "Sending command to equipment failed, equipment {eqId} was not found for participant {pid}",
                         message.Payload.EquipmentId, message.Participant.ParticipantId);
-                    return EquipmentError.NotFound;
+                    return EquipmentError.EquipmentNotFound;
                 }
 
                 _logger.LogInformation("Send equipment command to {connId}, command: {@cmd}", connection.ConnectionId,

@@ -6,9 +6,10 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Nito.AsyncEx;
 using PaderConference.Core.Extensions;
+using PaderConference.Core.Interfaces;
 using PaderConference.Core.Services.Permissions;
 using PaderConference.Core.Services.Rooms;
-using PaderConference.Core.Services.Scenes.Dto;
+using PaderConference.Core.Services.Scenes.Requests;
 using PaderConference.Core.Services.Synchronization;
 
 namespace PaderConference.Core.Services.Scenes
@@ -54,21 +55,18 @@ namespace PaderConference.Core.Services.Scenes
             return base.DisposeAsync();
         }
 
-        public async ValueTask<SuccessOrError> SetScene(IServiceMessage<ChangeSceneDto> message)
+        public async ValueTask<SuccessOrError> SetScene(IServiceMessage<ChangeSceneRequest> message)
         {
-            if (message.Payload.Scene == null) return SceneError.SceneMustNotBeNull;
-
             var permissions = await _permissionsService.GetPermissions(message.Participant);
-
             if (!await permissions.GetPermission(PermissionsList.Scenes.CanSetScene))
-                return SceneError.PermissionDeniedToChangeScene;
+                return CommonError.PermissionDenied(PermissionsList.Scenes.CanSetScene);
 
             using (await _roomManagementLock.LockAsync())
             {
-                if (!_synchronizedObject.Current.ContainsKey(message.Payload.RoomId ?? string.Empty))
+                if (!_synchronizedObject.Current.ContainsKey(message.Payload.RoomId))
                     return SceneError.RoomNotFound;
 
-                await _synchronizedObject.Update(current => current.SetItem(message.Payload.RoomId ?? string.Empty,
+                await _synchronizedObject.Update(current => current.SetItem(message.Payload.RoomId,
                     message.Payload.Scene));
             }
 

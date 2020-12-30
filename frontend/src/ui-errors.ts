@@ -1,9 +1,7 @@
 import { DomainError } from './communication-types';
 
-export const SIGNALR_ERROR = 0;
-
 export const signalrError: (error: any) => DomainError = (error) => ({
-   code: SIGNALR_ERROR,
+   code: 'UI/Signal_Error',
    message: `An error occurred on invoking signalr method: ${error}.`,
-   type: 'ui',
+   type: 'InternalServerError',
 });

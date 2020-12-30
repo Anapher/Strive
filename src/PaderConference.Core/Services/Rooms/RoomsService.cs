@@ -9,10 +9,11 @@ using Microsoft.Extensions.Options;
 using Nito.AsyncEx;
 using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Extensions;
+using PaderConference.Core.Interfaces;
 using PaderConference.Core.Interfaces.Gateways.Repositories;
 using PaderConference.Core.Interfaces.Services;
 using PaderConference.Core.Services.Permissions;
-using PaderConference.Core.Services.Rooms.Messages;
+using PaderConference.Core.Services.Rooms.Requests;
 using PaderConference.Core.Services.Synchronization;
 
 namespace PaderConference.Core.Services.Rooms
@@ -93,7 +94,7 @@ namespace PaderConference.Core.Services.Rooms
             }
 
             // the default room must always exist
-            var defaultRoom = new Room(RoomOptions.DEFAULT_ROOM_ID, _options.DefaultRoomName, true);
+            var defaultRoom = new Room(RoomOptions.DEFAULT_ROOM_ID, _options.DefaultRoomName);
             await _roomRepo.CreateRoom(_conferenceId, defaultRoom);
 
             await UpdateSynchronizedRooms();
@@ -143,25 +144,15 @@ namespace PaderConference.Core.Services.Rooms
             }
         }
 
-        public async ValueTask<SuccessOrError> SwitchRoom(IServiceMessage<SwitchRoomMessage> message)
+        public async ValueTask<SuccessOrError> SwitchRoom(IServiceMessage<SwitchRoomRequest> message)
         {
             using var _ = _logger.BeginMethodScope();
 
             var permissions = await _permissionsService.GetPermissions(message.Participant);
             if (!await permissions.GetPermission(PermissionsList.Rooms.CanSwitchRoom))
-                return RoomsError.PermissionToSwitchRoomDenied;
+                return CommonError.PermissionDenied(PermissionsList.Rooms.CanSwitchRoom);
 
-            try
-            {
-                await SetRoom(message.Participant.ParticipantId, message.Payload.RoomId);
-            }
-            catch (Exception e)
-            {
-                _logger.LogDebug(e, "Switching the room failed");
-                return RoomsError.SwitchRoomFailed;
-            }
-
-            return SuccessOrError.Succeeded;
+            return await SetRoom(message.Participant.ParticipantId, message.Payload.RoomId);
         }
 
         public async ValueTask<SuccessOrError> CreateRooms(IServiceMessage<IReadOnlyList<CreateRoomMessage>> message)
@@ -170,7 +161,7 @@ namespace PaderConference.Core.Services.Rooms
 
             var permissions = await _permissionsService.GetPermissions(message.Participant);
             if (!await permissions.GetPermission(PermissionsList.Rooms.CanCreateAndRemove))
-                return RoomsError.PermissionToCreateRoomDenied;
+                return CommonError.PermissionDenied(PermissionsList.Rooms.CanCreateAndRemove);
 
             await CreateRooms(message.Payload);
             return SuccessOrError.Succeeded;
@@ -185,7 +176,7 @@ namespace PaderConference.Core.Services.Rooms
             foreach (var createRoomMessage in rooms)
             {
                 var id = Guid.NewGuid().ToString("N");
-                var room = new Room(id, createRoomMessage.DisplayName, true);
+                var room = new Room(id, createRoomMessage.DisplayName);
                 await _roomRepo.CreateRoom(_conferenceId, room);
                 result.Add(room);
             }
@@ -202,7 +193,7 @@ namespace PaderConference.Core.Services.Rooms
 
             var permissions = await _permissionsService.GetPermissions(message.Participant);
             if (!await permissions.GetPermission(PermissionsList.Rooms.CanCreateAndRemove))
-                return RoomsError.PermissionToRemoveRoomDenied;
+                return CommonError.PermissionDenied(PermissionsList.Rooms.CanCreateAndRemove);
 
             await RemoveRooms(message.Payload);
             return SuccessOrError.Succeeded;
@@ -275,17 +266,19 @@ namespace PaderConference.Core.Services.Rooms
             return await _roomRepo.Get(_conferenceId, roomId);
         }
 
-        public async Task SetRoom(string participantId, string roomId)
+        public async Task<SuccessOrError> SetRoom(string participantId, string roomId)
         {
             using (await _roomLock.ReaderLockAsync())
             {
-                await SetRoomInternal(participantId, roomId);
+                var result = await SetRoomInternal(participantId, roomId);
+                if (!result.Success) return result;
             }
 
             await UpdateSynchronizedRooms();
+            return SuccessOrError.Succeeded;
         }
 
-        private async Task SetRoomInternal(string participantId, string roomId)
+        private async Task<SuccessOrError> SetRoomInternal(string participantId, string roomId)
         {
             using var _ = _logger.BeginMethodScope(new Dictionary<string, object>
             {
@@ -296,19 +289,15 @@ namespace PaderConference.Core.Services.Rooms
             if (roomInfo == null)
             {
                 _logger.LogDebug("The room is null");
-                throw new InvalidOperationException("The room does not exist.");
+                return RoomsError.RoomNotFound(roomId);
             }
 
             _logger.LogDebug("Room info received: {@room}", roomInfo);
 
-            if (!roomInfo.IsEnabled)
-            {
-                _logger.LogDebug("The room is disabled");
-                throw new InvalidOperationException("The room is disabled");
-            }
-
             _logger.LogDebug("Update room in redis");
             await _roomRepo.SetParticipantRoom(_conferenceId, participantId, roomId);
+
+            return SuccessOrError.Succeeded;
         }
 
         private async Task<IReadOnlyDictionary<string, JsonElement>?> GetRoomPermissions(string roomId)

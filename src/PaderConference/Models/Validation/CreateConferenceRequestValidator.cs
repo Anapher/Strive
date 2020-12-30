@@ -1,6 +1,4 @@
-﻿using System;
-using FluentValidation;
-using PaderConference.Extensions;
+﻿using FluentValidation;
 using PaderConference.Models.Request;
 
 namespace PaderConference.Models.Validation
@@ -9,21 +7,6 @@ namespace PaderConference.Models.Validation
     {
         public CreateConferenceRequestValidator()
         {
-            RuleFor(x => x.Moderators).NotEmpty();
-            RuleFor(x => x.ScheduleCron).Must(x =>
-            {
-                if (x == null) return true;
-                try
-                {
-                    CronYearParser.GetNextOccurrence(x, DateTimeOffset.UtcNow, TimeZoneInfo.Utc);
-                }
-                catch (Exception)
-                {
-                    return false;
-                }
-
-                return true;
-            });
         }
     }
 }

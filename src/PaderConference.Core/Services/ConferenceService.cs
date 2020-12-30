@@ -1,13 +1,17 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Threading.Tasks;
 using PaderConference.Core.Domain.Entities;
 
 namespace PaderConference.Core.Services
 {
     public abstract class ConferenceService : IConferenceService
     {
-        public virtual ValueTask DisposeAsync()
+        private readonly ConcurrentBag<IAsyncDisposable> _disposables = new();
+
+        public virtual async ValueTask DisposeAsync()
         {
-            return new();
+            while (_disposables.TryTake(out var disposable)) await disposable.DisposeAsync();
         }
 
         public virtual ValueTask InitializeParticipant(Participant participant)
@@ -28,6 +32,11 @@ namespace PaderConference.Core.Services
         public virtual ValueTask InitializeAsync()
         {
             return new();
+        }
+
+        public void RegisterDisposable(IAsyncDisposable disposable)
+        {
+            _disposables.Add(disposable);
         }
     }
 }

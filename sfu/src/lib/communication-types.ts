@@ -1,9 +1,9 @@
-export type ErrorType = 'serviceError' | 'requestError' | 'internalError';
+export type ErrorType = 'BadRequest' | 'Conflict' | 'InternalServerError' | 'Forbidden' | 'NotFound';
 
 export type DomainError = {
    type: ErrorType;
    message: string;
-   code: number;
+   code: string;
    fields?: { [key: string]: string };
 };
 

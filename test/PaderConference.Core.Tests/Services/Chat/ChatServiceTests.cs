@@ -10,6 +10,7 @@ using PaderConference.Core.Interfaces.Services;
 using PaderConference.Core.Services;
 using PaderConference.Core.Services.Chat;
 using PaderConference.Core.Services.Chat.Dto;
+using PaderConference.Core.Services.Chat.Requests;
 using PaderConference.Core.Services.Permissions;
 using PaderConference.Core.Signaling;
 using PaderConference.Infrastructure.Sockets;
@@ -62,7 +63,8 @@ namespace PaderConference.Core.Tests.Services.Chat
         {
             // arrange
             var service = Create();
-            var message = TestServiceMessage.Create(new SendChatMessageDto(), TestParticipants.Default, "connectionId");
+            var message =
+                TestServiceMessage.Create(new SendChatMessageRequest(), TestParticipants.Default, "connectionId");
 
             // act
             AssertFailed(await service.SendMessage(message.Object));
@@ -81,7 +83,7 @@ namespace PaderConference.Core.Tests.Services.Chat
         {
             // arrange
             var service = Create();
-            var message = TestServiceMessage.Create(new SendChatMessageDto {Message = "Hello world"},
+            var message = TestServiceMessage.Create(new SendChatMessageRequest {Message = "Hello world"},
                 TestParticipants.Default, "connectionId");
 
             _signalMessenger
@@ -117,7 +119,7 @@ namespace PaderConference.Core.Tests.Services.Chat
                 new MockPermissionsService(new Dictionary<string, IReadOnlyDictionary<string, JsonElement>>());
 
             var service = Create();
-            var message = TestServiceMessage.Create(new SendChatMessageDto {Message = "Hello world"},
+            var message = TestServiceMessage.Create(new SendChatMessageRequest {Message = "Hello world"},
                 TestParticipants.Default, "connectionId");
 
             // act
@@ -150,7 +152,7 @@ namespace PaderConference.Core.Tests.Services.Chat
 
             var service = Create();
             var message = TestServiceMessage.Create(
-                new SendChatMessageDto {Message = "Hello world", Mode = new SendAnonymously()},
+                new SendChatMessageRequest {Message = "Hello world", Mode = new SendAnonymously()},
                 TestParticipants.Default, "connectionId");
 
             // act
@@ -175,7 +177,7 @@ namespace PaderConference.Core.Tests.Services.Chat
             // arrange
             var service = Create();
             var message = TestServiceMessage.Create(
-                new SendChatMessageDto {Message = "Hello world", Mode = new SendAnonymously()},
+                new SendChatMessageRequest {Message = "Hello world", Mode = new SendAnonymously()},
                 TestParticipants.Default, "connectionId");
 
             // act
@@ -316,7 +318,7 @@ namespace PaderConference.Core.Tests.Services.Chat
             // arrange
             var service = Create();
             var message = TestServiceMessage.Create(
-                new SendChatMessageDto
+                new SendChatMessageRequest
                 {
                     Message = "Hello", Mode = new SendPrivately {To = new ParticipantRef("test", null)},
                 }, TestParticipants.Default, "connectionId");
@@ -360,7 +362,7 @@ namespace PaderConference.Core.Tests.Services.Chat
 
             var service = Create();
             var message = TestServiceMessage.Create(
-                new SendChatMessageDto
+                new SendChatMessageRequest
                 {
                     Message = "Hello",
                     Mode = new SendPrivately

@@ -1,46 +1,30 @@
 ﻿using System;
-using System.Linq;
 using System.Threading.Tasks;
 using HashidsNet;
 using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Dto.UseCaseRequests;
 using PaderConference.Core.Dto.UseCaseResponses;
-using PaderConference.Core.Errors;
 using PaderConference.Core.Interfaces;
 using PaderConference.Core.Interfaces.Gateways.Repositories;
-using PaderConference.Core.Interfaces.Services;
 using PaderConference.Core.Interfaces.UseCases;
 
 namespace PaderConference.Core.UseCases
 {
-    public class CreateConferenceUseCase : UseCaseStatus<CreateConferenceResponse>, ICreateConferenceUseCase
+    public class CreateConferenceUseCase : ICreateConferenceUseCase
     {
         private readonly IConferenceRepo _repo;
-        private readonly IConferenceScheduler _scheduler;
 
-        public CreateConferenceUseCase(IConferenceRepo repo, IConferenceScheduler scheduler)
+        public CreateConferenceUseCase(IConferenceRepo repo)
         {
             _repo = repo;
-            _scheduler = scheduler;
         }
 
-        public async ValueTask<CreateConferenceResponse?> Handle(CreateConferenceRequest message)
+        public async ValueTask<SuccessOrError<CreateConferenceResponse>> Handle(CreateConferenceRequest message)
         {
-            if (!message.Moderators.Any())
-                return ReturnError(
-                    new FieldValidationError(nameof(message.Moderators), "Organizers must not be empty."));
+            var data = message.Data;
 
             var id = GenerateId();
-            var conference = new Conference(id, message.Moderators)
-            {
-                Name = message.Name,
-                StartTime = message.StartTime,
-                ScheduleCron = message.ScheduleCron,
-                ConferenceType = message.ConferenceType,
-                Permissions = message.Permissions,
-                DefaultRoomPermissions = message.DefaultRoomPermissions,
-                ModeratorPermissions = message.ModeratorPermissions
-            };
+            var conference = new Conference(id) {Permissions = data.Permissions, Configuration = data.Configuration};
 
             try
             {
@@ -53,7 +37,6 @@ namespace PaderConference.Core.UseCases
                 throw;
             }
 
-            await _scheduler.ScheduleConference(conference, true);
             return new CreateConferenceResponse(id);
         }
 

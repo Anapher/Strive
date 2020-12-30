@@ -11,7 +11,7 @@ using PaderConference.Core.Interfaces.UseCases;
 
 namespace PaderConference.Core.UseCases
 {
-    public class ExchangeRefreshTokenUseCase : UseCaseStatus<ExchangeRefreshTokenResponse>, IExchangeRefreshTokenUseCase
+    public class ExchangeRefreshTokenUseCase : IExchangeRefreshTokenUseCase
     {
         private readonly IJwtFactory _jwtFactory;
         private readonly IJwtValidator _jwtValidator;
@@ -25,12 +25,12 @@ namespace PaderConference.Core.UseCases
             _tokenFactory = tokenFactory;
         }
 
-        public async ValueTask<ExchangeRefreshTokenResponse?> Handle(ExchangeRefreshTokenRequest message)
+        public async ValueTask<SuccessOrError<ExchangeRefreshTokenResponse>> Handle(ExchangeRefreshTokenRequest message)
         {
             var claimsPrincipal = _jwtValidator.GetPrincipalFromToken(message.AccessToken);
             if (claimsPrincipal == null)
                 // invalid token/signing key was passed and we can't extract user claims
-                return ReturnError(AuthenticationError.InvalidToken);
+                return AuthenticationError.InvalidToken;
 
             var name = claimsPrincipal.Claims.First(x => x.Type == ClaimTypes.Name).Value;
             var role = claimsPrincipal.Claims.First(x => x.Type == ClaimTypes.Role).Value;

@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using PaderConference.Core.Domain.Entities;
+using PaderConference.Core.Interfaces;
 using PaderConference.Core.Interfaces.Gateways.Repositories;
 using PaderConference.Core.Interfaces.Services;
 using PaderConference.Core.Services.Media.Communication;
@@ -97,7 +98,7 @@ namespace PaderConference.Core.Services.Media
             {
                 var permissions = await _permissionsService.GetPermissions(message.Participant);
                 if (!await permissions.GetPermission(PermissionsList.Media.CanChangeOtherParticipantsProducers))
-                    return MediaError.PermissionToChangeOtherParticipantsProducersDenied;
+                    return CommonError.PermissionDenied(PermissionsList.Media.CanChangeOtherParticipantsProducers);
 
                 var meta = GetMeta(message);
                 meta.ParticipantId = message.Payload.ParticipantId;

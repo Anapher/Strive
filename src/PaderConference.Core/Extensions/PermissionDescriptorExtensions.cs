@@ -18,13 +18,13 @@ namespace PaderConference.Core.Extensions
         {
             switch (permissionDescriptor.Type)
             {
-                case PermissionType.Boolean:
+                case PermissionValueType.Boolean:
                     return value.ValueKind == JsonValueKind.True || value.ValueKind == JsonValueKind.False;
-                case PermissionType.Integer:
+                case PermissionValueType.Integer:
                     return value.ValueKind == JsonValueKind.Number && value.GetDouble() % 1 < double.Epsilon;
-                case PermissionType.Decimal:
+                case PermissionValueType.Decimal:
                     return value.ValueKind == JsonValueKind.Number;
-                case PermissionType.Text:
+                case PermissionValueType.Text:
                     return value.ValueKind == JsonValueKind.String;
                 default:
                     throw new ArgumentOutOfRangeException();

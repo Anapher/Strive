@@ -9,7 +9,7 @@ using PaderConference.Core.Interfaces.UseCases;
 
 namespace PaderConference.Core.UseCases
 {
-    public class LoginUseCase : UseCaseStatus<LoginResponse>, ILoginUseCase
+    public class LoginUseCase : ILoginUseCase
     {
         private static readonly IReadOnlyDictionary<string, (string, int)> UserDb =
             new Dictionary<string, (string, int)>
@@ -28,12 +28,8 @@ namespace PaderConference.Core.UseCases
             _tokenFactory = tokenFactory;
         }
 
-        public async ValueTask<LoginResponse?> Handle(LoginRequest message)
+        public async ValueTask<SuccessOrError<LoginResponse>> Handle(LoginRequest message)
         {
-            if (string.IsNullOrEmpty(message.UserName))
-                return ReturnError(
-                    new FieldValidationError(nameof(message.UserName), "The username must not be empty."));
-
             string accessToken;
             if (message.IsGuestAuth)
             {
@@ -41,19 +37,19 @@ namespace PaderConference.Core.UseCases
             }
             else
             {
-                if (string.IsNullOrEmpty(message.Password))
-                    return ReturnError(
-                        new FieldValidationError(nameof(message.Password), "The password must not be empty."));
-
-                if (!UserDb.TryGetValue(message.UserName!, out var userData))
-                    return ReturnError(AuthenticationError.UserNotFound.SetField(nameof(message.UserName)));
+                if (!UserDb.TryGetValue(message.UserName, out var userData))
+                    return AuthenticationError.UserNotFound with
+                    {
+                        Fields = new Dictionary<string, string> {{nameof(message.UserName), "User not found"}},
+                    };
 
                 var (password, userId) = userData;
 
                 if (message.Password != password)
-                    return ReturnError(
-                        new AuthenticationError("The password is invalid.", ErrorCode.InvalidPassword).SetField(
-                            nameof(message.Password)));
+                    return AuthenticationError.InvalidPassword with
+                    {
+                        Fields = new Dictionary<string, string> {{nameof(message.UserName), "Invalid password."}},
+                    };
 
                 accessToken =
                     await _jwtFactory.GenerateModeratorToken(userId.ToString(), "Vincent@me.de", message.UserName);

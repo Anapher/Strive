@@ -1,7 +1,6 @@
 export type RoomInfo = {
    roomId: string;
    displayName: string;
-   isEnabled: boolean;
 };
 
 export type SynchronizedRooms = {

@@ -1,13 +1,11 @@
+using PaderConference.Core.Dto;
+
 namespace PaderConference.Core.Errors
 {
-    public class AuthenticationError : DomainError
+    public class AuthenticationError : ErrorsProvider<ErrorCode>
     {
-        public AuthenticationError(string message, ErrorCode code) : base(ErrorType.Authentication, message, code)
-        {
-        }
-
-        public static AuthenticationError UserNotFound => new AuthenticationError("The user was not found.", ErrorCode.UserNotFound);
-        public static AuthenticationError InvalidToken => new AuthenticationError("Invalid token.", ErrorCode.InvalidToken);
-
+        public static Error UserNotFound => BadRequest("The user was not found.", ErrorCode.UserNotFound);
+        public static Error InvalidPassword => BadRequest("The password is invalid.", ErrorCode.InvalidPassword);
+        public static Error InvalidToken => Conflict("Invalid token.", ErrorCode.InvalidToken);
     }
 }

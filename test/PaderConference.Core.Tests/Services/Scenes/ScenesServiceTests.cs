@@ -9,8 +9,8 @@ using PaderConference.Core.Extensions;
 using PaderConference.Core.Services.Permissions;
 using PaderConference.Core.Services.Rooms;
 using PaderConference.Core.Services.Scenes;
-using PaderConference.Core.Services.Scenes.Dto;
 using PaderConference.Core.Services.Scenes.Modes;
+using PaderConference.Core.Services.Scenes.Requests;
 using PaderConference.Core.Signaling;
 using Xunit;
 using Xunit.Abstractions;
@@ -86,7 +86,7 @@ namespace PaderConference.Core.Tests.Services.Scenes
             // arrange
             _roomManagementMock.SetupGet(x => x.State).Returns(new ConferenceRooms
             {
-                Rooms = new[] {new Room("456", "master", true)}.ToImmutableList(),
+                Rooms = new[] {new Room("456", "master")}.ToImmutableList(),
             });
 
             var service = Create();
@@ -113,7 +113,7 @@ namespace PaderConference.Core.Tests.Services.Scenes
 
             await service.InitializeAsync();
             _roomManagementMock.Raise(x => x.RoomsCreated += null, _roomManagementMock.Object,
-                new List<Room> {new(RoomOptions.DEFAULT_ROOM_ID, "master", true)});
+                new List<Room> {new(RoomOptions.DEFAULT_ROOM_ID, "master")});
 
             // assert
             var result = GetCurrentState();
@@ -138,7 +138,7 @@ namespace PaderConference.Core.Tests.Services.Scenes
 
             await service.InitializeAsync();
             _roomManagementMock.Raise(x => x.RoomsCreated += null, _roomManagementMock.Object,
-                new List<Room> {new Room("456", "master", true)});
+                new List<Room> {new("456", "master")});
 
             // assert
             var result = GetCurrentState();
@@ -156,7 +156,7 @@ namespace PaderConference.Core.Tests.Services.Scenes
             var service = Create();
             _roomManagementMock.SetupGet(x => x.State).Returns(new ConferenceRooms
             {
-                Rooms = new[] {new Room("456", "master", true)}.ToImmutableList(),
+                Rooms = new[] {new Room("456", "master")}.ToImmutableList(),
             });
 
             // act
@@ -176,14 +176,12 @@ namespace PaderConference.Core.Tests.Services.Scenes
             var service = Create();
             _roomManagementMock.SetupGet(x => x.State).Returns(new ConferenceRooms
             {
-                Rooms = new[] {new Room("456", "master", true)}.ToImmutableList(),
+                Rooms = new[] {new Room("456", "master")}.ToImmutableList(),
             });
 
             var messageMock = TestServiceMessage.Create(
-                new ChangeSceneDto
-                {
-                    RoomId = "456", Scene = new RoomSceneState {Scene = new AutomaticScene(), IsControlled = false},
-                }, TestParticipants.Default, "123");
+                new ChangeSceneRequest("456", new RoomSceneState {Scene = new AutomaticScene(), IsControlled = false}),
+                TestParticipants.Default, "123");
 
             // act
             await service.InitializeAsync();
@@ -204,7 +202,7 @@ namespace PaderConference.Core.Tests.Services.Scenes
             var service = Create();
             _roomManagementMock.SetupGet(x => x.State).Returns(new ConferenceRooms());
 
-            var messageMock = TestServiceMessage.Create(new ChangeSceneDto {RoomId = "123", Scene = null},
+            var messageMock = TestServiceMessage.Create(new ChangeSceneRequest("123", new RoomSceneState()),
                 TestParticipants.Default, "123");
 
             // act
@@ -225,14 +223,12 @@ namespace PaderConference.Core.Tests.Services.Scenes
             var service = Create();
             _roomManagementMock.SetupGet(x => x.State).Returns(new ConferenceRooms
             {
-                Rooms = new[] {new Room("456", "master", true)}.ToImmutableList(),
+                Rooms = new[] {new Room("456", "master")}.ToImmutableList(),
             });
 
             var messageMock = TestServiceMessage.Create(
-                new ChangeSceneDto
-                {
-                    RoomId = "456", Scene = new RoomSceneState {Scene = new AutomaticScene(), IsControlled = false},
-                }, TestParticipants.Default, "123");
+                new ChangeSceneRequest("456", new RoomSceneState {Scene = new AutomaticScene(), IsControlled = false}),
+                TestParticipants.Default, "123");
 
             // act
             await service.InitializeAsync();

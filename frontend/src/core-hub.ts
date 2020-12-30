@@ -3,6 +3,7 @@ import {
    CreateRoomDto,
    EquipmentCommand,
    EquipmentStatus,
+   KickParticipantRequest,
    OpenBreakoutRoomsDto,
    SendChatMessageDto,
    SetTemporaryPermissionDto,
@@ -21,7 +22,7 @@ export const joinConferenceAsEquipment = (conferenceId: string, defaultEvents: s
 
 export const openConference = createHubFn('OpenConference');
 export const closeConference = createHubFn('CloseConference');
-export const kickParticipant = createHubFn<string>('KickParticipant');
+export const kickParticipant = createHubFn<KickParticipantRequest>('KickParticipant');
 
 export const createRooms = createHubFn<CreateRoomDto[]>('CreateRooms');
 export const removeRooms = createHubFn<string[]>('RemoveRooms');

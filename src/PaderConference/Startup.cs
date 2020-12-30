@@ -26,7 +26,6 @@ using MongoDB.Bson.Serialization;
 using PaderConference.Auth;
 using PaderConference.Core;
 using PaderConference.Core.Errors;
-using PaderConference.Core.Interfaces.Services;
 using PaderConference.Core.Services.Chat.Dto;
 using PaderConference.Extensions;
 using PaderConference.Infrastructure;
@@ -143,16 +142,15 @@ namespace PaderConference
                 options.PayloadSerializerOptions.Converters.Add(new JsonPatchDocumentConverterFactory());
             });
 
-            services.AddMvc()
-                .ConfigureApiBehaviorOptions(options =>
-                {
-                    options.InvalidModelStateResponseFactory = context =>
-                        new BadRequestObjectResult(new FieldValidationError(
-                            context.ModelState.Where(x => x.Value.ValidationState == ModelValidationState.Invalid)
-                                .ToDictionary(x => x.Key, x => x.Value.Errors.First().ErrorMessage)));
-                })
-                .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Startup>())
-                .AddNewtonsoftJson();
+            services.AddMvc().ConfigureApiBehaviorOptions(options =>
+            {
+                options.InvalidModelStateResponseFactory = context =>
+                    new BadRequestObjectResult(new FieldValidationError(context.ModelState
+                        .Where(x => x.Value.ValidationState == ModelValidationState.Invalid)
+                        .ToDictionary(x => x.Key, x => x.Value.Errors.First().ErrorMessage)));
+            }).AddFluentValidation(fv =>
+                fv.RegisterValidatorsFromAssemblyContaining<Startup>()
+                    .RegisterValidatorsFromAssemblyContaining<CoreModule>()).AddNewtonsoftJson();
 
             services.AddAutoMapper(Assembly.GetExecutingAssembly(), typeof(CoreModule).Assembly);
 
@@ -181,11 +179,6 @@ namespace PaderConference
 
                 c.AddFluentValidationRules();
             });
-
-            // add conference scheduler
-            services.AddSingleton<IConferenceScheduler, ConferenceScheduler>();
-            services.AddHostedService(provider =>
-                (ConferenceScheduler) provider.GetRequiredService<IConferenceScheduler>());
 
             services.AddHostedService<ConferenceInitializer>();
 

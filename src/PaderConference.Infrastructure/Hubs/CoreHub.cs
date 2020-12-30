@@ -5,21 +5,28 @@ using System.Security.Claims;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Xml;
+using Autofac;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
+using PaderConference.Core;
 using PaderConference.Core.Domain;
 using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Dto;
 using PaderConference.Core.Extensions;
+using PaderConference.Core.Interfaces;
+using PaderConference.Core.Interfaces.Gateways.Repositories;
 using PaderConference.Core.Interfaces.Services;
 using PaderConference.Core.Services;
 using PaderConference.Core.Services.BreakoutRoom;
 using PaderConference.Core.Services.BreakoutRoom.Dto;
+using PaderConference.Core.Services.BreakoutRoom.Requests;
 using PaderConference.Core.Services.Chat;
 using PaderConference.Core.Services.Chat.Dto;
+using PaderConference.Core.Services.Chat.Requests;
 using PaderConference.Core.Services.ConferenceControl;
+using PaderConference.Core.Services.ConferenceControl.Requests;
 using PaderConference.Core.Services.Equipment;
 using PaderConference.Core.Services.Equipment.Data;
 using PaderConference.Core.Services.Equipment.Dto;
@@ -27,8 +34,9 @@ using PaderConference.Core.Services.Media;
 using PaderConference.Core.Services.Media.Communication;
 using PaderConference.Core.Services.Permissions;
 using PaderConference.Core.Services.Permissions.Dto;
+using PaderConference.Core.Services.Permissions.Requests;
 using PaderConference.Core.Services.Rooms;
-using PaderConference.Core.Services.Rooms.Messages;
+using PaderConference.Core.Services.Rooms.Requests;
 using PaderConference.Core.Signaling;
 using PaderConference.Infrastructure.Extensions;
 
@@ -38,14 +46,17 @@ namespace PaderConference.Infrastructure.Hubs
     public class CoreHub : ServiceHubBase
     {
         private readonly IConnectionMapping _connectionMapping;
+        private readonly IConferenceRepo _conferenceRepo;
         private readonly ILogger<CoreHub> _logger;
 
         public CoreHub(IConferenceManager conferenceManager, IConnectionMapping connectionMapping,
-            IEnumerable<IConferenceServiceManager> conferenceServices, ILogger<CoreHub> logger) : base(
-            connectionMapping, conferenceManager, conferenceServices, logger)
+            IEnumerable<IConferenceServiceManager> conferenceServices, IComponentContext componentContext,
+            IConferenceRepo conferenceRepo, ILogger<CoreHub> logger) : base(connectionMapping, conferenceManager,
+            conferenceServices, componentContext, logger)
         {
             _logger = logger;
             _connectionMapping = connectionMapping;
+            _conferenceRepo = conferenceRepo;
         }
 
         public override async Task OnConnectedAsync()
@@ -68,98 +79,118 @@ namespace PaderConference.Infrastructure.Hubs
                         _logger.LogDebug("Client tries to connect");
 
                         // initialize all services before submitting events
-                        var services = ConferenceServices.Select(x => x.GetService(conferenceId)).ToList();
-                        foreach (var valueTask in services)
+                        try
                         {
-                            await valueTask;
+                            var conference = await _conferenceRepo.FindById(conferenceId);
+                            if (conference == null)
+                            {
+                                _logger.LogDebug("Conference was not found");
+
+                                await Clients.Caller.SendAsync(CoreHubMessages.Response.OnConnectionError,
+                                    ConferenceError.ConferenceNotFound);
+                                Context.Abort();
+                                return;
+                            }
+
+                            var services = ConferenceServices.Select(x => x.GetService(conferenceId)).ToList();
+                            foreach (var valueTask in services)
+                            {
+                                await valueTask;
+                            }
+
+                            switch (role)
+                            {
+                                case PrincipalRoles.Equipment:
+                                {
+                                    if (!ConferenceManager.TryGetParticipant(conferenceId, participantId,
+                                        out var participant))
+                                    {
+                                        await Clients.Caller.SendAsync(CoreHubMessages.Response.OnConnectionError,
+                                            ConferenceError.UnexpectedError(
+                                                "Participant is not connected to this conference."));
+                                        Context.Abort();
+                                        return;
+                                    }
+
+                                    if (!_connectionMapping.Add(Context.ConnectionId, participant, true))
+                                    {
+                                        _logger.LogError(
+                                            "Participant {participantId} could not be added to connection mapping.",
+                                            participant.ParticipantId);
+                                        await Clients.Caller.SendAsync(CoreHubMessages.Response.OnConnectionError,
+                                            ConferenceError.UnexpectedError(
+                                                "Participant could not be added to connection mapping."));
+                                        Context.Abort();
+                                        return;
+                                    }
+
+                                    var equipmentService = await ConferenceServices
+                                        .OfType<IConferenceServiceManager<EquipmentService>>().First()
+                                        .GetService(conferenceId);
+
+                                    await equipmentService.OnEquipmentConnected(participant, Context.ConnectionId);
+                                    break;
+                                }
+                                case PrincipalRoles.Moderator:
+                                case PrincipalRoles.User:
+                                case PrincipalRoles.Guest:
+                                {
+                                    Participant participant;
+                                    try
+                                    {
+                                        participant = await ConferenceManager.Participate(conferenceId, participantId,
+                                            role, httpContext.User.Identity?.Name);
+                                    }
+                                    catch (ConferenceNotFoundException)
+                                    {
+                                        _logger.LogDebug("Abort connection");
+                                        await Clients.Caller.SendAsync(CoreHubMessages.Response.OnConnectionError,
+                                            ConferenceError.ConferenceNotFound);
+                                        Context.Abort();
+                                        return;
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        _logger.LogError(e, "Unexpected exception occurred.");
+                                        await Clients.Caller.SendAsync(CoreHubMessages.Response.OnConnectionError,
+                                            ConferenceError.UnexpectedError(e.Message));
+                                        Context.Abort();
+                                        return;
+                                    }
+
+                                    if (!_connectionMapping.Add(Context.ConnectionId, participant))
+                                    {
+                                        _logger.LogError(
+                                            "Participant {participantId} could not be added to connection mapping.",
+                                            participant.ParticipantId);
+                                        await Clients.Caller.SendAsync(CoreHubMessages.Response.OnConnectionError,
+                                            ConferenceError.UnexpectedError(
+                                                "Participant could not be added to connection mapping."));
+                                        Context.Abort();
+                                        return;
+                                    }
+
+                                    foreach (var service in services)
+                                    {
+                                        await service.Result.OnClientConnected(participant);
+                                    }
+
+                                    await Groups.AddToGroupAsync(Context.ConnectionId, conferenceId);
+
+                                    foreach (var service in services)
+                                    {
+                                        await service.Result.InitializeParticipant(participant);
+                                    }
+
+                                    break;
+                                }
+                            }
                         }
-
-                        switch (role)
+                        catch (Exception e)
                         {
-                            case PrincipalRoles.Equipment:
-                            {
-                                if (!ConferenceManager.TryGetParticipant(conferenceId, participantId,
-                                    out var participant))
-                                {
-                                    await Clients.Caller.SendAsync(CoreHubMessages.Response.OnConnectionError,
-                                        ConferenceError.UnexpectedError(
-                                            "Participant is not connected to this conference."));
-                                    Context.Abort();
-                                    return;
-                                }
-
-                                if (!_connectionMapping.Add(Context.ConnectionId, participant, true))
-                                {
-                                    _logger.LogError(
-                                        "Participant {participantId} could not be added to connection mapping.",
-                                        participant.ParticipantId);
-                                    await Clients.Caller.SendAsync(CoreHubMessages.Response.OnConnectionError,
-                                        ConferenceError.UnexpectedError(
-                                            "Participant could not be added to connection mapping."));
-                                    Context.Abort();
-                                    return;
-                                }
-
-                                var equipmentService = await ConferenceServices
-                                    .OfType<IConferenceServiceManager<EquipmentService>>().First()
-                                    .GetService(conferenceId);
-
-                                await equipmentService.OnEquipmentConnected(participant, Context.ConnectionId);
-                                break;
-                            }
-                            case PrincipalRoles.Moderator:
-                            case PrincipalRoles.User:
-                            case PrincipalRoles.Guest:
-                            {
-                                Participant participant;
-                                try
-                                {
-                                    participant = await ConferenceManager.Participate(conferenceId, participantId, role,
-                                        httpContext.User.Identity?.Name);
-                                }
-                                catch (ConferenceNotFoundException)
-                                {
-                                    _logger.LogDebug("Abort connection");
-                                    await Clients.Caller.SendAsync(CoreHubMessages.Response.OnConnectionError,
-                                        ConferenceError.NotFound);
-                                    Context.Abort();
-                                    return;
-                                }
-                                catch (Exception e)
-                                {
-                                    _logger.LogError(e, "Unexpected exception occurred.");
-                                    await Clients.Caller.SendAsync(CoreHubMessages.Response.OnConnectionError,
-                                        ConferenceError.UnexpectedError(e.Message));
-                                    Context.Abort();
-                                    return;
-                                }
-
-                                if (!_connectionMapping.Add(Context.ConnectionId, participant))
-                                {
-                                    _logger.LogError(
-                                        "Participant {participantId} could not be added to connection mapping.",
-                                        participant.ParticipantId);
-                                    await Clients.Caller.SendAsync(CoreHubMessages.Response.OnConnectionError,
-                                        ConferenceError.UnexpectedError(
-                                            "Participant could not be added to connection mapping."));
-                                    Context.Abort();
-                                    return;
-                                }
-
-                                foreach (var service in services)
-                                {
-                                    await service.Result.OnClientConnected(participant);
-                                }
-
-                                await Groups.AddToGroupAsync(Context.ConnectionId, conferenceId);
-
-                                foreach (var service in services)
-                                {
-                                    await service.Result.InitializeParticipant(participant);
-                                }
-
-                                break;
-                            }
+                            await Clients.Caller.SendAsync(CoreHubMessages.Response.OnConnectionError,
+                                ConferenceError.UnexpectedError("An unexpected error occurred"));
+                            Context.Abort();
                         }
                     }
                 }
@@ -205,9 +236,10 @@ namespace PaderConference.Infrastructure.Hubs
             return InvokeService<ConferenceControlService>(service => service.CloseConference);
         }
 
-        public Task<SuccessOrError> KickParticipant(string message)
+        public Task<SuccessOrError> KickParticipant(KickParticipantRequest message)
         {
-            return InvokeService<ConferenceControlService, string>(message, service => service.KickParticipant);
+            return InvokeService<ConferenceControlService, KickParticipantRequest>(message,
+                service => service.KickParticipant);
         }
 
         public Task<SuccessOrError<ParticipantPermissionInfo>> FetchPermissions(string? participantId)
@@ -216,9 +248,9 @@ namespace PaderConference.Infrastructure.Hubs
                 service => service.FetchPermissions);
         }
 
-        public Task<SuccessOrError> SetTemporaryPermission(SetTemporaryPermissionDto dto)
+        public Task<SuccessOrError> SetTemporaryPermission(SetTemporaryPermissionRequest dto)
         {
-            return InvokeService<PermissionsService, SetTemporaryPermissionDto>(dto,
+            return InvokeService<PermissionsService, SetTemporaryPermissionRequest>(dto,
                 service => service.SetTemporaryPermission);
         }
 
@@ -232,9 +264,10 @@ namespace PaderConference.Infrastructure.Hubs
             return InvokeService<RoomsService, IReadOnlyList<string>>(dto, service => service.RemoveRooms);
         }
 
-        public Task<SuccessOrError> OpenBreakoutRooms(OpenBreakoutRoomsDto dto)
+        public Task<SuccessOrError> OpenBreakoutRooms(OpenBreakoutRoomsRequest request)
         {
-            return InvokeService<BreakoutRoomService, OpenBreakoutRoomsDto>(dto, service => service.OpenBreakoutRooms);
+            return InvokeService<BreakoutRoomService, OpenBreakoutRoomsRequest>(request,
+                service => service.OpenBreakoutRooms);
         }
 
         public Task<SuccessOrError> CloseBreakoutRooms()
@@ -253,14 +286,14 @@ namespace PaderConference.Infrastructure.Hubs
                 service => service.ChangeBreakoutRooms);
         }
 
-        public Task<SuccessOrError> SwitchRoom(SwitchRoomMessage dto)
+        public Task<SuccessOrError> SwitchRoom(SwitchRoomRequest dto)
         {
-            return InvokeService<RoomsService, SwitchRoomMessage>(dto, service => service.SwitchRoom);
+            return InvokeService<RoomsService, SwitchRoomRequest>(dto, service => service.SwitchRoom);
         }
 
-        public Task<SuccessOrError> SendChatMessage(SendChatMessageDto dto)
+        public Task<SuccessOrError> SendChatMessage(SendChatMessageRequest dto)
         {
-            return InvokeService<ChatService, SendChatMessageDto>(dto, service => service.SendMessage);
+            return InvokeService<ChatService, SendChatMessageRequest>(dto, service => service.SendMessage);
         }
 
         public Task<SuccessOrError<IReadOnlyList<ChatMessageDto>>> RequestChat()

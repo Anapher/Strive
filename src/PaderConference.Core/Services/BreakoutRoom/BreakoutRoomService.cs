@@ -8,11 +8,14 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.Extensions.Logging;
 using Nito.AsyncEx;
 using PaderConference.Core.Extensions;
+using PaderConference.Core.Interfaces;
 using PaderConference.Core.Services.BreakoutRoom.Dto;
 using PaderConference.Core.Services.BreakoutRoom.Naming;
+using PaderConference.Core.Services.BreakoutRoom.Requests;
+using PaderConference.Core.Services.BreakoutRoom.Validation;
 using PaderConference.Core.Services.Permissions;
 using PaderConference.Core.Services.Rooms;
-using PaderConference.Core.Services.Rooms.Messages;
+using PaderConference.Core.Services.Rooms.Requests;
 using PaderConference.Core.Services.Synchronization;
 
 namespace PaderConference.Core.Services.BreakoutRoom
@@ -36,6 +39,7 @@ namespace PaderConference.Core.Services.BreakoutRoom
             _permissionsService = permissionsService;
             _roomManagement = roomManagement;
             _logger = logger;
+
             _synchronizedObject = synchronizationManager.Register("breakoutRooms", new BreakoutRoomSyncObject());
         }
 
@@ -45,10 +49,10 @@ namespace PaderConference.Core.Services.BreakoutRoom
             return new ValueTask();
         }
 
-        public override ValueTask DisposeAsync()
+        public override async ValueTask DisposeAsync()
         {
+            await base.DisposeAsync();
             _roomManagement.RoomsRemoved -= RoomManagementOnRoomsRemoved;
-            return new ValueTask();
         }
 
         private void RoomManagementOnRoomsRemoved(object? sender, IReadOnlyList<string> e)
@@ -56,32 +60,18 @@ namespace PaderConference.Core.Services.BreakoutRoom
             foreach (var roomId in e) _currentBreakoutRooms.TryRemove(roomId, out _);
         }
 
-        public async ValueTask<SuccessOrError> OpenBreakoutRooms(IServiceMessage<OpenBreakoutRoomsDto> message)
+        public async ValueTask<SuccessOrError> OpenBreakoutRooms(IServiceMessage<OpenBreakoutRoomsRequest> message)
         {
             using var _ = _logger.BeginMethodScope();
             using (await _breakoutLock.LockAsync())
             {
                 if (_synchronizedObject.Current.Active != null) return BreakoutRoomError.AlreadyOpen;
 
-                if (message.Payload.AssignedRooms?.Length > message.Payload.Amount)
-                {
-                    _logger.LogDebug("Cannot assign participants to {count} rooms if only {amount} groups are rooms.",
-                        message.Payload.AssignedRooms.Length, message.Payload.Amount);
-                    return BreakoutRoomError.CannotAssignParticipants;
-                }
-
-                if (message.Payload.Amount <= 0)
-                {
-                    _logger.LogDebug("Cannot create zero or less breakout rooms. Amount given: {amount}",
-                        message.Payload.Amount);
-                    return BreakoutRoomError.AmountMustBePositiveNumber;
-                }
-
                 var permissions = await _permissionsService.GetPermissions(message.Participant);
                 if (!await permissions.GetPermission(PermissionsList.Rooms.CanCreateAndRemove))
                 {
                     _logger.LogDebug("Permissions denied, cannot create or remove rooms.");
-                    return RoomsError.PermissionToCreateRoomDenied;
+                    return CommonError.PermissionDenied(PermissionsList.Rooms.CanCreateAndRemove);
                 }
 
                 var deadline = message.Payload.Duration == null
@@ -100,23 +90,23 @@ namespace PaderConference.Core.Services.BreakoutRoom
                         .OrderBy(x => _namingStrategy.ParseIndex(x.DisplayName)).ToList();
 
                     if (message.Payload.AssignedRooms.Length > sortedRooms.Count)
-                        return BreakoutRoomError.CannotAssignParticipants;
+                        return BreakoutRoomError.AssigningParticipantsFailed;
 
-                    try
+                    for (var i = 0; i < message.Payload.AssignedRooms.Length; i++)
                     {
-                        for (var i = 0; i < message.Payload.AssignedRooms.Length; i++)
-                        {
-                            var room = sortedRooms[i];
+                        var room = sortedRooms[i];
 
-                            foreach (var participantId in message.Payload.AssignedRooms[i])
-                                await _roomManagement.SetRoom(participantId, room.RoomId);
+                        foreach (var participantId in message.Payload.AssignedRooms[i])
+                        {
+                            var result = await _roomManagement.SetRoom(participantId, room.RoomId);
+                            if (!result.Success)
+                                _logger.LogWarning(
+                                    "Failed to assign participant {participantId} to room {roomId}: {error}",
+                                    participantId, room.RoomId, result.Error);
                         }
                     }
-                    catch (Exception e)
-                    {
-                        _logger.LogError(e, "An error occurred assigning participants to rooms.");
-                        return BreakoutRoomError.AssigningParticipantsFailed;
-                    }
+
+                    return SuccessOrError.Succeeded;
                 }
 
                 return SuccessOrError.Succeeded;
@@ -132,7 +122,7 @@ namespace PaderConference.Core.Services.BreakoutRoom
 
                 var permissions = await _permissionsService.GetPermissions(message.Participant);
                 if (!await permissions.GetPermission(PermissionsList.Rooms.CanCreateAndRemove))
-                    return RoomsError.PermissionToCreateRoomDenied;
+                    return CommonError.PermissionDenied(PermissionsList.Rooms.CanCreateAndRemove);
 
                 await ApplyState(null);
                 return SuccessOrError.Succeeded;
@@ -147,7 +137,7 @@ namespace PaderConference.Core.Services.BreakoutRoom
             {
                 var permissions = await _permissionsService.GetPermissions(message.Participant);
                 if (!await permissions.GetPermission(PermissionsList.Rooms.CanCreateAndRemove))
-                    return RoomsError.PermissionToCreateRoomDenied;
+                    return CommonError.PermissionDenied(PermissionsList.Rooms.CanCreateAndRemove);
 
                 var current = _synchronizedObject.Current;
                 if (current.Active == null)
@@ -169,12 +159,8 @@ namespace PaderConference.Core.Services.BreakoutRoom
 
                 message.Payload.ApplyTo(newOptions);
 
-                if (current.Active.Amount <= 0)
-                {
-                    _logger.LogDebug("Cannot create zero or less breakout rooms. Amount given: {amount}",
-                        current.Active);
-                    return BreakoutRoomError.AmountMustBePositiveNumber;
-                }
+                var result = new BreakoutRoomsOptionsValidator().Validate(newOptions);
+                if (!result.IsValid) return result.ToError();
 
                 DateTimeOffset? deadline = null;
 

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Moq;
 using PaderConference.Core.Domain.Entities;
@@ -45,7 +46,7 @@ namespace PaderConference.Core.Tests.Services.Permissions
             const string conferenceId = "test";
 
             var moderators = new List<string> {"test"};
-            var conference = new Conference(conferenceId, moderators.ToImmutableList());
+            var conference = CreateConference(conferenceId, moderators);
             conferenceRepo.Setup(x => x.FindById(conferenceId)).ReturnsAsync(conference);
 
             var refreshParticipants = new Mock<Func<IEnumerable<Participant>, ValueTask>>();
@@ -71,11 +72,11 @@ namespace PaderConference.Core.Tests.Services.Permissions
             const string conferenceId = "test";
 
             var moderators = new List<string> {"test"};
-            var conference = new Conference(conferenceId, moderators.ToImmutableList())
-            {
-                ModeratorPermissions = new Dictionary<string, string> {{"test1", "true"}}.ToImmutableDictionary(),
-                Permissions = new Dictionary<string, string> {{"test2", "32"}}.ToImmutableDictionary(),
-            };
+            var conference = CreateConference(conferenceId, moderators.ToImmutableList());
+            conference.Permissions[PermissionType.Conference] =
+                new Dictionary<string, JsonElement> {{"test2", JsonSerializer.Deserialize<JsonElement>("32")}};
+            conference.Permissions[PermissionType.Moderator] =
+                new Dictionary<string, JsonElement> {{"test1", JsonSerializer.Deserialize<JsonElement>("true")}};
 
             conferenceRepo.Setup(x => x.FindById(conferenceId)).ReturnsAsync(conference);
 
@@ -101,7 +102,7 @@ namespace PaderConference.Core.Tests.Services.Permissions
             var conferenceManager = new Mock<IConferenceManager>();
             const string conferenceId = "test";
 
-            var conference = new Conference(conferenceId, ImmutableList<string>.Empty);
+            var conference = new Conference(conferenceId);
             var unsubscribeCallback = new Mock<Func<Task>>();
 
             conferenceRepo.Setup(x => x.FindById(conferenceId)).ReturnsAsync(conference);
@@ -172,11 +173,11 @@ namespace PaderConference.Core.Tests.Services.Permissions
             var conferenceManager = new Mock<IConferenceManager>();
             const string conferenceId = "test";
 
-            var conference = new Conference(conferenceId, moderatorsBefore.ToImmutableList())
-            {
-                ModeratorPermissions = new Dictionary<string, string> {{"test1", "true"}}.ToImmutableDictionary(),
-                Permissions = new Dictionary<string, string> {{"test2", "32"}}.ToImmutableDictionary(),
-            };
+            var conference = CreateConference(conferenceId, moderatorsBefore.ToImmutableList());
+            conference.Permissions[PermissionType.Conference] =
+                new Dictionary<string, JsonElement> {{"test2", JsonSerializer.Deserialize<JsonElement>("32")}};
+            conference.Permissions[PermissionType.Moderator] =
+                new Dictionary<string, JsonElement> {{"test1", JsonSerializer.Deserialize<JsonElement>("true")}};
 
             Func<Conference, Task>? onUpdateHandler = null;
 
@@ -187,10 +188,14 @@ namespace PaderConference.Core.Tests.Services.Permissions
             conferenceManager.Setup(x => x.GetParticipants(conferenceId)).Returns(allParticipants
                 .Select(x => new Participant(x, null, "role", DateTimeOffset.MinValue)).ToList());
 
-            var updatedConference = new Conference(conferenceId, updatedModerators.ToImmutableList());
+            var updatedConference = CreateConference(conferenceId, updatedModerators.ToImmutableList());
 
-            if (!moderatorPermissionsUpdated) updatedConference.ModeratorPermissions = conference.ModeratorPermissions;
-            if (!conferencePermissionsUpdated) updatedConference.Permissions = conference.Permissions;
+            if (!moderatorPermissionsUpdated)
+                updatedConference.Permissions[PermissionType.Moderator] =
+                    conference.Permissions[PermissionType.Moderator];
+            if (!conferencePermissionsUpdated)
+                updatedConference.Permissions[PermissionType.Conference] =
+                    conference.Permissions[PermissionType.Conference];
 
             var refreshParticipants = new Mock<Func<IEnumerable<Participant>, ValueTask>>();
 
@@ -225,6 +230,14 @@ namespace PaderConference.Core.Tests.Services.Permissions
 
             if (moderatorPermissionsUpdated) Assert.Null(databasePermissionValues.ModeratorPermissions);
             if (conferencePermissionsUpdated) Assert.Null(databasePermissionValues.ConferencePermissions);
+        }
+
+        private static Conference CreateConference(string conferenceId, IEnumerable<string> moderators)
+        {
+            return new(conferenceId)
+            {
+                Configuration = new ConferenceConfiguration {Moderators = moderators.ToImmutableList()},
+            };
         }
     }
 }

@@ -9,16 +9,16 @@ namespace PaderConference.Core.Services.Permissions
     /// </summary>
     public class PermissionDescriptor
     {
-        protected static readonly IReadOnlyDictionary<PermissionType, Type> TypeMap =
-            new Dictionary<PermissionType, Type>
+        protected static readonly IReadOnlyDictionary<PermissionValueType, Type> TypeMap =
+            new Dictionary<PermissionValueType, Type>
             {
-                {PermissionType.Boolean, typeof(bool)},
-                {PermissionType.Integer, typeof(int)},
-                {PermissionType.Decimal, typeof(double)},
-                {PermissionType.Text, typeof(string)},
+                {PermissionValueType.Boolean, typeof(bool)},
+                {PermissionValueType.Integer, typeof(int)},
+                {PermissionValueType.Decimal, typeof(double)},
+                {PermissionValueType.Text, typeof(string)},
             };
 
-        protected static readonly IReadOnlyDictionary<Type, PermissionType> TypeMapReverse =
+        protected static readonly IReadOnlyDictionary<Type, PermissionValueType> TypeMapReverse =
             TypeMap.ToDictionary(x => x.Value, x => x.Key);
 
         /// <summary>
@@ -27,7 +27,7 @@ namespace PaderConference.Core.Services.Permissions
         /// <param name="key">The key of the permission</param>
         /// <param name="type">The type of the value of the permission</param>
         /// <param name="defaultValue">The default value of the permission</param>
-        public PermissionDescriptor(string key, PermissionType type, object? defaultValue = null)
+        public PermissionDescriptor(string key, PermissionValueType type, object? defaultValue = null)
         {
             Key = key;
             Type = type;
@@ -43,16 +43,16 @@ namespace PaderConference.Core.Services.Permissions
             {
                 switch (type)
                 {
-                    case PermissionType.Boolean:
+                    case PermissionValueType.Boolean:
                         DefaultValue = false;
                         break;
-                    case PermissionType.Integer:
+                    case PermissionValueType.Integer:
                         DefaultValue = 0;
                         break;
-                    case PermissionType.Decimal:
+                    case PermissionValueType.Decimal:
                         DefaultValue = 0.0;
                         break;
-                    case PermissionType.Text:
+                    case PermissionValueType.Text:
                         DefaultValue = "";
                         break;
                     default:
@@ -69,7 +69,7 @@ namespace PaderConference.Core.Services.Permissions
         /// <summary>
         ///     The type of the value of the permission
         /// </summary>
-        public PermissionType Type { get; }
+        public PermissionValueType Type { get; }
 
         /// <summary>
         ///     The default value of the permission

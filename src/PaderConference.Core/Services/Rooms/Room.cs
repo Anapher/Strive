@@ -4,11 +4,10 @@ namespace PaderConference.Core.Services.Rooms
 {
     public class Room
     {
-        public Room(string roomId, string displayName, bool isEnabled)
+        public Room(string roomId, string displayName)
         {
             RoomId = roomId;
             DisplayName = displayName;
-            IsEnabled = isEnabled;
         }
 
 #pragma warning disable 8618
@@ -20,7 +19,5 @@ namespace PaderConference.Core.Services.Rooms
         public string RoomId { get; set; }
 
         public string DisplayName { get; set; }
-
-        public bool IsEnabled { get; set; }
     }
 }

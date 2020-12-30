@@ -9,7 +9,7 @@ namespace PaderConference.Extensions
                 return value;
             }
 
-            return char.ToLowerInvariant(value[0]) + value.Substring(1);
+            return char.ToLowerInvariant(value[0]) + value[1..];
         }
     }
 }

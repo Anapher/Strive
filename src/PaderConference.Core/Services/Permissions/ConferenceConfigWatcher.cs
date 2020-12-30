@@ -14,19 +14,20 @@ namespace PaderConference.Core.Services.Permissions
     /// <summary>
     ///     Provide and synchronize values from the database
     /// </summary>
-    public class ConferenceConfigWatcher : ModeratorWatcher
+    public class ConferenceConfigWatcher : IAsyncDisposable
     {
         private readonly string _conferenceId;
-        private readonly IConferenceRepo _conferenceRepo;
         private readonly IConferenceManager _conferenceManager;
         private readonly Func<IEnumerable<Participant>, ValueTask> _refreshParticipants;
+        private readonly UseConferenceSelector<Conference> _conferenceSelector;
 
         public ConferenceConfigWatcher(string conferenceId, IConferenceRepo conferenceRepo,
-            IConferenceManager conferenceManager, Func<IEnumerable<Participant>, ValueTask> refreshParticipants) : base(
-            conferenceId, conferenceRepo)
+            IConferenceManager conferenceManager, Func<IEnumerable<Participant>, ValueTask> refreshParticipants)
         {
+            _conferenceSelector = new UseConferenceSelector<Conference>(conferenceId, conferenceRepo,
+                x => x, new Conference(conferenceId));
+
             _conferenceId = conferenceId;
-            _conferenceRepo = conferenceRepo;
             _conferenceManager = conferenceManager;
             _refreshParticipants = refreshParticipants;
         }
@@ -42,48 +43,52 @@ namespace PaderConference.Core.Services.Permissions
         public IImmutableDictionary<string, JsonElement>? ModeratorPermissions { get; private set; }
 
         /// <summary>
-        ///     Trigger an update, fetch conference from repository and update this object
+        ///     All current moderators
         /// </summary>
-        public async Task TriggerUpdate()
+        public IImmutableList<string> Moderators { get; private set; } = ImmutableList<string>.Empty;
+
+        public async ValueTask InitializeAsync()
         {
-            var conference = await _conferenceRepo.FindById(_conferenceId);
-            if (conference != null)
-                await OnConferenceUpdated(conference);
+            await _conferenceSelector.InitializeAsync();
+            _conferenceSelector.Updated += ConferenceSelectorOnUpdated;
+
+            ConferencePermissions = GetPermissions(_conferenceSelector.Value.Permissions, PermissionType.Conference);
+            ModeratorPermissions = GetPermissions(_conferenceSelector.Value.Permissions, PermissionType.Moderator);
+            Moderators = _conferenceSelector.Value.Configuration.Moderators;
         }
 
-        protected override async ValueTask InitializeAsync(Conference conference)
+        public ValueTask DisposeAsync()
         {
-            await base.InitializeAsync(conference);
-
-            ConferencePermissions = ParseDictionary(conference.Permissions);
-            ModeratorPermissions = ParseDictionary(conference.ModeratorPermissions);
+            return _conferenceSelector.DisposeAsync();
         }
 
-        protected override async Task OnConferenceUpdated(Conference conference)
+        private async void ConferenceSelectorOnUpdated(object? sender, ObjectChangedEventArgs<Conference> e)
         {
-            var oldModerators = Moderators;
-            await base.OnConferenceUpdated(conference);
+            Moderators = _conferenceSelector.Value.Configuration.Moderators;
 
             var participants = _conferenceManager.GetParticipants(_conferenceId);
             var updatedParticipants = new HashSet<Participant>();
 
             // add all users that got their moderator state changed
-            var updatedModerators = conference.Moderators.Except(oldModerators)
-                .Concat(oldModerators.Except(conference.Moderators)).Distinct();
+            var updatedModerators = e.NewValue.Configuration.Moderators.Except(e.OldValue.Configuration.Moderators)
+                .Concat(e.OldValue.Configuration.Moderators.Except(e.NewValue.Configuration.Moderators)).Distinct();
+
             updatedParticipants.UnionWith(updatedModerators
                 .Select(x => participants.FirstOrDefault(p => p.ParticipantId == x)).WhereNotNull());
 
-            if (!ComparePermissions(conference.ModeratorPermissions, ModeratorPermissions))
+            var moderatorPermissions = GetPermissions(e.NewValue.Permissions, PermissionType.Moderator);
+            if (!ComparePermissions(moderatorPermissions, ModeratorPermissions))
             {
-                ModeratorPermissions = ParseDictionary(conference.ModeratorPermissions);
-                updatedParticipants.UnionWith(conference.Moderators
+                ModeratorPermissions = moderatorPermissions;
+                updatedParticipants.UnionWith(e.NewValue.Configuration.Moderators
                     .Select(x => participants.FirstOrDefault(p => p.ParticipantId == x))
                     .WhereNotNull()); // add all current moderators
             }
 
-            if (!ComparePermissions(conference.Permissions, ConferencePermissions))
+            var conferencePermissions = GetPermissions(e.NewValue.Permissions, PermissionType.Conference);
+            if (!ComparePermissions(conferencePermissions, ConferencePermissions))
             {
-                ConferencePermissions = ParseDictionary(conference.Permissions);
+                ConferencePermissions = conferencePermissions;
 
                 // add all participants of the conference
                 updatedParticipants.UnionWith(participants);
@@ -94,29 +99,27 @@ namespace PaderConference.Core.Services.Permissions
         }
 
         /// <summary>
-        ///     Parse a dictionary, deserialize json values
-        /// </summary>
-        /// <param name="dictionary">The dictionary with serialized values as string</param>
-        /// <returns>Return the dictionary with the values deserialized</returns>
-        private static IImmutableDictionary<string, JsonElement>? ParseDictionary(
-            IReadOnlyDictionary<string, string>? dictionary)
-        {
-            return dictionary?.ToImmutableDictionary(x => x.Key, x => JsonSerializer.Deserialize<JsonElement>(x.Value));
-        }
-
-        /// <summary>
         ///     Utility method that compares two permission dictionaries
         /// </summary>
         /// <param name="source">The first dictionary</param>
         /// <param name="target">The second dictionary</param>
         /// <returns>Return true if the permission dictionaries are equal (equal keys and values), else return false</returns>
-        private static bool ComparePermissions(IReadOnlyDictionary<string, string>? source,
+        private static bool ComparePermissions(IReadOnlyDictionary<string, JsonElement>? source,
             IReadOnlyDictionary<string, JsonElement>? target)
         {
             if (source == null && target == null) return true;
             if (source == null || target == null) return false;
 
-            return source.EqualItems(target.ToDictionary(x => x.Key, x => JsonSerializer.Serialize(x.Value)));
+            return source.EqualItems(target);
+        }
+
+        private static IImmutableDictionary<string, JsonElement> GetPermissions(
+            Dictionary<PermissionType, Dictionary<string, JsonElement>> permissions, PermissionType type)
+        {
+            if (permissions.TryGetValue(type, out var result))
+                return result.ToImmutableDictionary();
+
+            return ImmutableDictionary<string, JsonElement>.Empty;
         }
     }
 }

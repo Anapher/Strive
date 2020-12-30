@@ -1,25 +1,20 @@
 ﻿using PaderConference.Core.Dto;
+using PaderConference.Core.Errors;
 
 namespace PaderConference.Core.Services.BreakoutRoom
 {
-    public static class BreakoutRoomError
+    public class BreakoutRoomError : ErrorsProvider<ServiceErrorCode>
     {
         public static Error AlreadyOpen =>
-            new ServiceError("Cannot open breakout rooms as they are already open. Please close them first.",
+            BadRequest("Cannot open breakout rooms as they are already open. Please close them first.",
                 ServiceErrorCode.BreakoutRoom_AlreadyOpen);
 
         public static Error NotOpen =>
-            new ServiceError("Breakout rooms are not open.", ServiceErrorCode.BreakoutRoom_NotOpen);
-
-        public static Error CannotAssignParticipants =>
-            new ServiceError("Cannot assign participants to rooms.", ServiceErrorCode.BreakoutRoom_CannotAssign);
+            new BadRequestError<ServiceErrorCode>("Breakout rooms are not open.",
+                ServiceErrorCode.BreakoutRoom_NotOpen);
 
         public static Error AssigningParticipantsFailed =>
-            new ServiceError("Assigning participants failed.",
+            InternalServerError("Assigning participants failed.",
                 ServiceErrorCode.BreakoutRoom_AssigningParticipantsFailed);
-
-        public static Error AmountMustBePositiveNumber =>
-            new ServiceError("Please submit an amount that is equal or greater than one.",
-                ServiceErrorCode.BreakoutRoom_AmountMustBePositiveNumber);
     }
 }

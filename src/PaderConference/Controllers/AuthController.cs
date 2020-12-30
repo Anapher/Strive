@@ -22,9 +22,9 @@ namespace PaderConference.Controllers
         {
             var result = await loginUseCase.Handle(new LoginRequest(request.UserName, request.Password,
                 HttpContext.Connection.RemoteIpAddress?.ToString()));
-            if (loginUseCase.HasError) return loginUseCase.ToActionResult();
+            if (!result.Success) return result.ToActionResult();
 
-            return new LoginResponseDto(result!.AccessToken, result.RefreshToken);
+            return new LoginResponseDto(result.Response.AccessToken, result.Response.RefreshToken);
         }
 
         // POST api/v1/auth/guest
@@ -35,9 +35,9 @@ namespace PaderConference.Controllers
         {
             var result = await loginUseCase.Handle(new LoginRequest(request.DisplayName, null,
                 HttpContext.Connection.RemoteIpAddress?.ToString(), true));
-            if (loginUseCase.HasError) return loginUseCase.ToActionResult();
+            if (!result.Success) return result.ToActionResult();
 
-            return new LoginResponseDto(result!.AccessToken, result.RefreshToken);
+            return new LoginResponseDto(result.Response.AccessToken, result.Response.RefreshToken);
         }
 
         // POST api/v1/auth/refreshtoken
@@ -49,9 +49,9 @@ namespace PaderConference.Controllers
         {
             var result = await useCase.Handle(new ExchangeRefreshTokenRequest(request.AccessToken, request.RefreshToken,
                 HttpContext.Connection.RemoteIpAddress?.ToString()));
-            if (useCase.HasError) return useCase.ToActionResult();
+            if (!result.Success) return result.ToActionResult();
 
-            return new ExchangeRefreshTokenResponseDto(result!.AccessToken, result.RefreshToken);
+            return new ExchangeRefreshTokenResponseDto(result.Response.AccessToken, result.Response.RefreshToken);
         }
     }
 }

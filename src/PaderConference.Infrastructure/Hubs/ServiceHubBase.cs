@@ -1,13 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
+using Autofac;
+using FluentValidation;
 using Microsoft.Extensions.Logging;
+using PaderConference.Core;
 using PaderConference.Core.Domain.Entities;
+using PaderConference.Core.Dto;
 using PaderConference.Core.Extensions;
+using PaderConference.Core.Interfaces;
 using PaderConference.Core.Interfaces.Services;
 using PaderConference.Core.Services;
-using PaderConference.Core.Services.ConferenceControl;
 
 namespace PaderConference.Infrastructure.Hubs
 {
@@ -15,12 +20,15 @@ namespace PaderConference.Infrastructure.Hubs
     {
         protected readonly IConferenceManager ConferenceManager;
         protected readonly IEnumerable<IConferenceServiceManager> ConferenceServices;
+        private readonly IComponentContext _componentContext;
 
         protected ServiceHubBase(IConnectionMapping connectionMapping, IConferenceManager conferenceManager,
-            IEnumerable<IConferenceServiceManager> conferenceServices, ILogger logger) : base(connectionMapping, logger)
+            IEnumerable<IConferenceServiceManager> conferenceServices, IComponentContext componentContext,
+            ILogger logger) : base(connectionMapping, logger)
         {
             ConferenceManager = conferenceManager;
             ConferenceServices = conferenceServices;
+            _componentContext = componentContext;
         }
 
         protected ValueTask<T> GetConferenceService<T>(Participant participant) where T : IConferenceService
@@ -36,7 +44,7 @@ namespace PaderConference.Infrastructure.Hubs
 
             var conferenceId = ConferenceManager.GetConferenceOfParticipant(message.Participant);
             if (!await ConferenceManager.GetIsConferenceOpen(conferenceId))
-                return ConferenceError.NotOpen;
+                return ConferenceError.ConferenceNotOpen;
 
             return SuccessOrError.Succeeded;
         }
@@ -57,7 +65,7 @@ namespace PaderConference.Infrastructure.Hubs
             catch (Exception e)
             {
                 Logger.LogError(e, "An error occurred on executing {func} with param {@param}", func, param);
-                return ConferenceError.InternalServiceError;
+                return CommonError.InternalServiceError("An error occurred on invoking service method.");
             }
         }
 
@@ -77,7 +85,7 @@ namespace PaderConference.Infrastructure.Hubs
             catch (Exception e)
             {
                 Logger.LogError(e, "An error occurred on executing {func} with param {@param}", func, param);
-                return ConferenceError.InternalServiceError;
+                return CommonError.InternalServiceError("An error occurred on invoking service method.");
             }
         }
 
@@ -87,6 +95,9 @@ namespace PaderConference.Infrastructure.Hubs
         {
             if (!AssertParticipant(out var participant))
                 return SuccessOrError.Failed(ConferenceError.ParticipantNotRegistered);
+
+            if (!ValidateDto(dto, out var validationError))
+                return validationError;
 
             var message = CreateMessage(dto, participant);
 
@@ -126,6 +137,9 @@ namespace PaderConference.Infrastructure.Hubs
             if (!AssertParticipant(out var participant))
                 return SuccessOrError<TResult>.Failed(ConferenceError.ParticipantNotRegistered);
 
+            if (!ValidateDto(dto, out var validationError))
+                return validationError;
+
             var message = CreateMessage(dto, participant);
 
             var result = await AssertConference(message, options);
@@ -155,6 +169,25 @@ namespace PaderConference.Infrastructure.Hubs
             var method = action(service);
 
             return await WrapServiceCall(method, message);
+        }
+
+        private bool ValidateDto<T>(T dto, [NotNullWhen(false)] out Error? error)
+        {
+            if (!_componentContext.TryResolve<IValidator<T>>(out var validator))
+            {
+                error = null;
+                return true;
+            }
+
+            var result = validator.Validate(dto);
+            if (result.IsValid)
+            {
+                error = null;
+                return true;
+            }
+
+            error = result.ToError();
+            return false;
         }
     }
 }

@@ -1,28 +1,31 @@
-using PaderConference.Core.Dto;
-using PaderConference.Core.Errors;
-using PaderConference.Core.Interfaces;
-using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Net;
+using Microsoft.AspNetCore.Mvc;
+using PaderConference.Core.Dto;
+using PaderConference.Core.Errors;
+using PaderConference.Core.Interfaces;
 
 namespace PaderConference.Extensions
 {
     public static class ResponseExtensions
     {
         private static IImmutableDictionary<string, int> ErrorStatusCodes { get; } =
-                new Dictionary<ErrorType, HttpStatusCode>
-                {
-                    {ErrorType.ValidationError, HttpStatusCode.BadRequest},
-                    {ErrorType.Authentication, HttpStatusCode.Unauthorized},
-                }.ToImmutableDictionary(x => x.Key.ToString(), x => (int)x.Value);
+            new Dictionary<ErrorType, HttpStatusCode>
+            {
+                {ErrorType.BadRequest, HttpStatusCode.BadRequest},
+                {ErrorType.Conflict, HttpStatusCode.Conflict},
+                {ErrorType.InternalServerError, HttpStatusCode.InternalServerError},
+                {ErrorType.Forbidden, HttpStatusCode.Forbidden},
+                {ErrorType.NotFound, HttpStatusCode.NotFound},
+            }.ToImmutableDictionary(x => x.Key.ToString(), x => (int) x.Value);
 
-        public static ActionResult ToActionResult(this IUseCaseErrors status)
+        public static ActionResult ToActionResult(this ISuccessOrError status)
         {
-            if (!status.HasError)
+            if (status.Success)
                 return new OkResult();
 
-            return ToActionResult(status.Error!);
+            return ToActionResult(status.Error);
         }
 
         public static ActionResult ToActionResult(this Error error)
@@ -30,9 +33,7 @@ namespace PaderConference.Extensions
             var httpCode = ErrorStatusCodes[error.Type];
 
             if (error.Fields?.Count > 0)
-            {
-                error = new Error(error.Type, error.Message, error.Code, ConvertDictionaryKeysToCamelCase(error.Fields)); // clone
-            }
+                error = error with {Fields = ConvertDictionaryKeysToCamelCase(error.Fields)};
 
             return new ObjectResult(error) { StatusCode = httpCode };
         }
@@ -40,9 +41,9 @@ namespace PaderConference.Extensions
         private static IReadOnlyDictionary<string, TValue> ConvertDictionaryKeysToCamelCase<TValue>(IReadOnlyDictionary<string, TValue> dictionary)
         {
             var newDic = new Dictionary<string, TValue>();
-            foreach (var item in dictionary)
+            foreach (var (key, value) in dictionary)
             {
-                newDic.Add(item.Key.ToCamelCase(), item.Value);
+                newDic.Add(key.ToCamelCase(), value);
             }
 
             return newDic;

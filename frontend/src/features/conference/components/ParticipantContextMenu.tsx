@@ -98,7 +98,7 @@ const ParticipantContextMenu = React.forwardRef<HTMLElement, Props>(({ participa
             },
          }),
       );
-      dispatch(coreHub.kickParticipant(participant.participantId));
+      dispatch(coreHub.kickParticipant({ participantId: participant.participantId }));
       onClose();
    };
 

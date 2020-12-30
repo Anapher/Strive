@@ -113,31 +113,12 @@ namespace PaderConference.Infrastructure.Conferencing
             return _participantsMap.ParticipantToConference[participant.ParticipantId];
         }
 
-        public async ValueTask SetConferenceState(string conferenceId, ConferenceState state)
-        {
-            await _conferenceRepo.SetConferenceState(conferenceId, state);
-
-            var conference = await _conferenceRepo.FindById(conferenceId);
-            if (conference == null)
-            {
-                _logger.LogDebug("The conference was not found.");
-                throw new ConferenceNotFoundException(conferenceId);
-            }
-
-            await UpdateConference(conference);
-        }
-
         public bool TryGetParticipant(string conferenceId, string participantId,
             [NotNullWhen(true)] out Participant? participant)
         {
             participant = null;
             return _participantsMap.ConferenceParticipants.TryGetValue(conferenceId, out var conferenceParticipants) &&
                    conferenceParticipants.TryGetValue(participantId, out participant);
-        }
-
-        private Task UpdateConference(Conference conference)
-        {
-            return _database.PublishAsync(RedisChannels.OnConferenceUpdated(conference.ConferenceId), conference);
         }
     }
 }

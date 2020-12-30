@@ -52,13 +52,13 @@ namespace PaderConference.Core.Services.Permissions
                 if (layer.TryGetValue(descriptor.Key, out var value))
                     switch (descriptor.Type)
                     {
-                        case PermissionType.Boolean:
+                        case PermissionValueType.Boolean:
                             return (T) (object) value.GetBoolean();
-                        case PermissionType.Integer:
+                        case PermissionValueType.Integer:
                             return (T) (object) value.GetInt32();
-                        case PermissionType.Decimal:
+                        case PermissionValueType.Decimal:
                             return (T) (object) value.GetDouble();
-                        case PermissionType.Text:
+                        case PermissionValueType.Text:
                             var val = value.GetString();
                             if (val == null)
                                 throw new NullReferenceException("The permission descriptor has a null value.");

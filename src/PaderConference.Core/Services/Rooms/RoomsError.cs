@@ -1,19 +1,13 @@
 ﻿using PaderConference.Core.Dto;
+using PaderConference.Core.Errors;
 
 namespace PaderConference.Core.Services.Rooms
 {
-    public static class RoomsError
+    public class RoomsError : ErrorsProvider<ServiceErrorCode>
     {
-        public static Error SwitchRoomFailed =>
-            new ServiceError("Switching the room failed.", ServiceErrorCode.Rooms_SwitchRoomFailed);
-
-        public static Error PermissionToSwitchRoomDenied =>
-            new ServiceError("Permissions to switch room denied.", ServiceErrorCode.Rooms_SwitchRoomDenied);
-
-        public static Error PermissionToCreateRoomDenied =>
-            new ServiceError("Permissions to create room denied.", ServiceErrorCode.Rooms_CreateDenied);
-
-        public static Error PermissionToRemoveRoomDenied =>
-            new ServiceError("Permissions to remove room denied.", ServiceErrorCode.Rooms_RemoveDenied);
+        public static Error RoomNotFound(string roomId)
+        {
+            return NotFound($"The room {roomId} was not found.", ServiceErrorCode.Rooms_NotFound);
+        }
     }
 }

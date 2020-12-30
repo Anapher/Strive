@@ -31,7 +31,7 @@ namespace PaderConference.Core.Tests.Services
         {
             // arrange
             var moderators = new List<string> {"test"};
-            var conference = new Conference(ConferenceId, moderators.ToImmutableList());
+            var conference = CreateConference(ConferenceId, moderators.ToImmutableList());
 
             var conferenceRepo = new Mock<IConferenceRepo>();
             conferenceRepo.Setup(x => x.FindById(ConferenceId)).ReturnsAsync(conference);
@@ -49,7 +49,7 @@ namespace PaderConference.Core.Tests.Services
         public async Task TestInitializeAndDispose()
         {
             // arrange
-            var conference = new Conference(ConferenceId, ImmutableList<string>.Empty);
+            var conference = CreateConference(ConferenceId, ImmutableList<string>.Empty);
 
             var unsubscribeCallback = new Mock<Func<Task>>();
 
@@ -73,7 +73,7 @@ namespace PaderConference.Core.Tests.Services
         {
             // arrange
             var existingMods = new[] {"test1"};
-            var conference = new Conference(ConferenceId, existingMods.ToImmutableList());
+            var conference = CreateConference(ConferenceId, existingMods.ToImmutableList());
 
             Func<Conference, Task>? onUpdateHandler = null;
 
@@ -98,7 +98,7 @@ namespace PaderConference.Core.Tests.Services
             // act
             await watcher.InitializeAsync();
 
-            await onUpdateHandler(new Conference(ConferenceId, newMods.ToImmutableList()));
+            await onUpdateHandler(CreateConference(ConferenceId, newMods.ToImmutableList()));
 
             // assert
             Assert.Equal(1, calls);
@@ -109,7 +109,7 @@ namespace PaderConference.Core.Tests.Services
         {
             // arrange
             var existingMods = new[] {"test1"};
-            var conference = new Conference(ConferenceId, existingMods.ToImmutableList());
+            var conference = CreateConference(ConferenceId, existingMods.ToImmutableList());
 
             Func<Conference, Task>? onUpdateHandler = null;
 
@@ -134,10 +134,18 @@ namespace PaderConference.Core.Tests.Services
             // act
             await watcher.InitializeAsync();
 
-            await onUpdateHandler(new Conference(ConferenceId, newMods.ToImmutableList()));
+            await onUpdateHandler(CreateConference(ConferenceId, newMods.ToImmutableList()));
 
             // assert
             Assert.Equal(1, calls);
+        }
+
+        private static Conference CreateConference(string conferenceId, IEnumerable<string> moderators)
+        {
+            return new(conferenceId)
+            {
+                Configuration = new ConferenceConfiguration {Moderators = moderators.ToImmutableList()},
+            };
         }
     }
 }

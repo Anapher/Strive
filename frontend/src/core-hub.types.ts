@@ -73,3 +73,7 @@ export type SetTemporaryPermissionDto = {
    permissionKey: string;
    value?: PermissionValue;
 };
+
+export type KickParticipantRequest = {
+   participantId: string;
+};

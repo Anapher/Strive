@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using PaderConference.Core.Services.Rooms.Messages;
+using PaderConference.Core.Interfaces;
+using PaderConference.Core.Services.Rooms.Requests;
 
 namespace PaderConference.Core.Services.Rooms
 {
@@ -41,6 +42,6 @@ namespace PaderConference.Core.Services.Rooms
         /// <param name="participantId">The participant id</param>
         /// <param name="roomId">The room id of the room the participant should be moved to</param>
         /// <exception cref="InvalidOperationException">Thrown if the room does not exist or is disabled</exception>
-        Task SetRoom(string participantId, string roomId);
+        Task<SuccessOrError> SetRoom(string participantId, string roomId);
     }
 }

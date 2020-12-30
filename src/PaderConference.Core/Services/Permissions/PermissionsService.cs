@@ -8,11 +8,12 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using PaderConference.Core.Domain.Entities;
-using PaderConference.Core.Errors;
 using PaderConference.Core.Extensions;
+using PaderConference.Core.Interfaces;
 using PaderConference.Core.Interfaces.Gateways.Repositories;
 using PaderConference.Core.Interfaces.Services;
 using PaderConference.Core.Services.Permissions.Dto;
+using PaderConference.Core.Services.Permissions.Requests;
 using PaderConference.Core.Services.Synchronization;
 using PaderConference.Core.Signaling;
 
@@ -95,28 +96,20 @@ namespace PaderConference.Core.Services.Permissions
         }
 
         public async ValueTask<SuccessOrError> SetTemporaryPermission(
-            IServiceMessage<SetTemporaryPermissionDto> message)
+            IServiceMessage<SetTemporaryPermissionRequest> message)
         {
             using var _ = _logger.BeginMethodScope();
             var (targetParticipantId, permissionKey, value) = message.Payload;
 
-            if (targetParticipantId == null)
-                return new FieldValidationError(nameof(message.Payload.ParticipantId),
-                    "You must provide a participant id.");
-
-            if (permissionKey == null)
-                return new FieldValidationError(nameof(message.Payload.PermissionKey),
-                    "You must provide a permission key.");
-
             var permissions = await GetPermissions(message.Participant);
             if (!await permissions.GetPermission(PermissionsList.Permissions.CanGiveTemporaryPermission))
-                return PermissionsError.PermissionDeniedGiveTemporaryPermission;
+                return CommonError.PermissionDenied(PermissionsList.Permissions.CanGiveTemporaryPermission);
 
             _logger.LogDebug("Set temporary permission \"{permissionKey}\" of participant {participantId} to {value}",
                 permissionKey, targetParticipantId, value);
 
             if (!PermissionsListUtil.All.TryGetValue(permissionKey, out var descriptor))
-                return PermissionsError.PermissionKeyNotFound;
+                return PermissionsError.PermissionKeyNotFound(permissionKey);
 
             var participant = _conferenceManager.GetParticipants(_conferenceId)
                 .FirstOrDefault(x => x.ParticipantId == targetParticipantId);
@@ -168,7 +161,7 @@ namespace PaderConference.Core.Services.Permissions
             {
                 var myPermissions = await GetPermissions(message.Participant);
                 if (!await myPermissions.GetPermission(PermissionsList.Permissions.CanSeeAnyParticipantsPermissions))
-                    return PermissionsError.PermissionDeniedFetchParticipantsPermissions;
+                    return CommonError.PermissionDenied(PermissionsList.Permissions.CanSeeAnyParticipantsPermissions);
 
                 if (!_conferenceManager.TryGetParticipant(_conferenceId, participantId, out participant!))
                     return CommonError.ParticipantNotFound;
@@ -231,7 +224,7 @@ namespace PaderConference.Core.Services.Permissions
         {
             var result = new List<PermissionLayer>
             {
-                CommonPermissionLayers.ConferenceDefault(_defaultPermissions.Conference),
+                CommonPermissionLayers.ConferenceDefault(_defaultPermissions.Default[PermissionType.Conference]),
                 CommonPermissionLayers.Conference(_conferenceConfigWatcher.ConferencePermissions ??
                                                   ImmutableDictionary<string, JsonElement>.Empty),
             };
@@ -239,7 +232,7 @@ namespace PaderConference.Core.Services.Permissions
             if (_conferenceConfigWatcher.Moderators.Contains(participant.ParticipantId))
                 result.AddRange(new[]
                 {
-                    CommonPermissionLayers.ModeratorDefault(_defaultPermissions.Moderator),
+                    CommonPermissionLayers.ModeratorDefault(_defaultPermissions.Default[PermissionType.Moderator]),
                     CommonPermissionLayers.Moderator(_conferenceConfigWatcher.ModeratorPermissions ??
                                                      ImmutableDictionary<string, JsonElement>.Empty),
                 });
@@ -252,10 +245,11 @@ namespace PaderConference.Core.Services.Permissions
 
         private async void OnDefaultPermissionChanged(DefaultPermissionOptions obj)
         {
-            _logger.LogInformation("Default permissions updated. Update conference permissions.");
+            _logger.LogInformation("Default permissions updated, refresh permissions of all participants.");
             _defaultPermissions = obj;
 
-            await _conferenceConfigWatcher.TriggerUpdate();
+            var allParticipants = _conferenceManager.GetParticipants(_conferenceId);
+            await RefreshPermissions(allParticipants);
         }
     }
 }

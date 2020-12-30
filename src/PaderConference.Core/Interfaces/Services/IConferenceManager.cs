@@ -77,14 +77,6 @@ namespace PaderConference.Core.Interfaces.Services
         string GetConferenceOfParticipant(Participant participant);
 
         /// <summary>
-        ///     Change the conference state
-        /// </summary>
-        /// <param name="conferenceId">The conference id</param>
-        /// <param name="state">The new conference state</param>
-        /// <returns></returns>
-        ValueTask SetConferenceState(string conferenceId, ConferenceState state);
-
-        /// <summary>
         ///     Try to get a participant from a conference. If the participant does not exist or is in a different conference,
         ///     return false.
         /// </summary>

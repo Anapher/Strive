@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.Extensions.Logging;
+using PaderConference.Core.Interfaces;
 using PaderConference.Core.Services;
 using Serilog;
 using Serilog.Extensions.Logging;
