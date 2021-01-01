@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using PaderConference.Core.Domain.Entities;
+using PaderConference.Core.Extensions;
 using PaderConference.Core.Interfaces.Gateways.Repositories;
 using PaderConference.Core.Interfaces.Services;
 using PaderConference.Core.Services;
@@ -31,8 +32,7 @@ namespace PaderConference.Infrastructure.Conferencing
 
         public async ValueTask<Conference> OpenConference(string conferenceId)
         {
-            using (_logger.BeginScope("StartConference()"))
-            using (_logger.BeginScope(new Dictionary<string, object> {{"conferenceId", conferenceId}}))
+            using (_logger.BeginMethodScope(new Dictionary<string, object> {{"conferenceId", conferenceId}}))
             {
                 var conference = await _conferenceRepo.FindById(conferenceId);
                 if (conference == null)

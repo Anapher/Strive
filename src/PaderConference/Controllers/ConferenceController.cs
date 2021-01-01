@@ -24,7 +24,6 @@ namespace PaderConference.Controllers
             [FromServices] ICreateConferenceUseCase useCase)
         {
             var result = await useCase.Handle(new CreateConferenceRequest(request));
-
             if (!result.Success) return result.ToActionResult();
 
             return new StartConferenceResponseDto(result.Response.ConferenceId);
