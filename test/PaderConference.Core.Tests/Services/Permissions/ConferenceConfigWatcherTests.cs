@@ -16,7 +16,7 @@ namespace PaderConference.Core.Tests.Services.Permissions
     public class ConferenceConfigWatcherTests
     {
         [Fact]
-        public async Task TestInitializeConferenceNotFound()
+        public async Task InitializeAsync_ConferenceDoesNotExist_ThrowException()
         {
             // arrange
             var conferenceRepo = new Mock<IConferenceRepo>();
@@ -38,7 +38,7 @@ namespace PaderConference.Core.Tests.Services.Permissions
         }
 
         [Fact]
-        public async Task TestInitializeWithMinimalData()
+        public async Task InitializeAsync_ValidConference_StateShouldBeAppliedToObjectProperties()
         {
             // arrange
             var conferenceRepo = new Mock<IConferenceRepo>();
@@ -64,7 +64,7 @@ namespace PaderConference.Core.Tests.Services.Permissions
         }
 
         [Fact]
-        public async Task TestInitialize()
+        public async Task InitializeAsync_HasPermissionsAndModerators_StateShouldBeAppliedToObjectProperties()
         {
             // arrange
             var conferenceRepo = new Mock<IConferenceRepo>();
@@ -72,7 +72,7 @@ namespace PaderConference.Core.Tests.Services.Permissions
             const string conferenceId = "test";
 
             var moderators = new List<string> {"test"};
-            var conference = CreateConference(conferenceId, moderators.ToImmutableList());
+            var conference = CreateConference(conferenceId, moderators);
             conference.Permissions[PermissionType.Conference] =
                 new Dictionary<string, JsonElement> {{"test2", JsonSerializer.Deserialize<JsonElement>("32")}};
             conference.Permissions[PermissionType.Moderator] =
@@ -95,7 +95,7 @@ namespace PaderConference.Core.Tests.Services.Permissions
         }
 
         [Fact]
-        public async Task TestInitializeAndDispose()
+        public async Task DisposeAsync_CalledAfterInitializeAsync_DisposeEventHandler()
         {
             // arrange
             var conferenceRepo = new Mock<IConferenceRepo>();
@@ -103,7 +103,7 @@ namespace PaderConference.Core.Tests.Services.Permissions
             const string conferenceId = "test";
 
             var conference = new Conference(conferenceId);
-            var unsubscribeCallback = new Mock<Func<Task>>();
+            var unsubscribeCallback = new Mock<IAsyncDisposable>();
 
             conferenceRepo.Setup(x => x.FindById(conferenceId)).ReturnsAsync(conference);
             conferenceRepo.Setup(x => x.SubscribeConferenceUpdated(conferenceId, It.IsAny<Func<Conference, Task>>()))
@@ -111,17 +111,17 @@ namespace PaderConference.Core.Tests.Services.Permissions
 
             var refreshParticipants = new Mock<Func<IEnumerable<Participant>, ValueTask>>();
 
-            var databasePermissionValues = new ConferenceConfigWatcher(conferenceId, conferenceRepo.Object,
-                conferenceManager.Object, refreshParticipants.Object);
+            var watcher = new ConferenceConfigWatcher(conferenceId, conferenceRepo.Object, conferenceManager.Object,
+                refreshParticipants.Object);
 
             // act
-            await databasePermissionValues.InitializeAsync();
-            await databasePermissionValues.DisposeAsync();
+            await watcher.InitializeAsync();
+            await watcher.DisposeAsync();
 
             // assert
             conferenceRepo.Verify(x => x.SubscribeConferenceUpdated(conferenceId, It.IsAny<Func<Conference, Task>>()),
                 Times.Once);
-            unsubscribeCallback.Verify(x => x(), Times.Once);
+            unsubscribeCallback.Verify(x => x.DisposeAsync(), Times.Once);
         }
 
         // moderators before, moderators after, participants after, mod permissions updated, conference permissions updated, expected participants updated
@@ -164,16 +164,18 @@ namespace PaderConference.Core.Tests.Services.Permissions
 
         [Theory]
         [MemberData(nameof(TestConferenceUpdatedData))]
-        public async Task TestConferenceUpdatedEvent(string[] moderatorsBefore, string[] updatedModerators,
-            string[] allParticipants, bool moderatorPermissionsUpdated, bool conferencePermissionsUpdated,
-            string[] expectedParticipantsRefreshed)
+        public async Task
+            InitializeAsync_SupplyDifferentUpdatesForModeratorsAndPermissions_ShouldApplyNewValuesToObjectStateAndFireEvent(
+                string[] moderatorsBefore, string[] updatedModerators, string[] allParticipants,
+                bool moderatorPermissionsUpdated, bool conferencePermissionsUpdated,
+                string[] expectedParticipantsRefreshed)
         {
             // arrange
             var conferenceRepo = new Mock<IConferenceRepo>();
             var conferenceManager = new Mock<IConferenceManager>();
             const string conferenceId = "test";
 
-            var conference = CreateConference(conferenceId, moderatorsBefore.ToImmutableList());
+            var conference = CreateConference(conferenceId, moderatorsBefore);
             conference.Permissions[PermissionType.Conference] =
                 new Dictionary<string, JsonElement> {{"test2", JsonSerializer.Deserialize<JsonElement>("32")}};
             conference.Permissions[PermissionType.Moderator] =
@@ -185,10 +187,11 @@ namespace PaderConference.Core.Tests.Services.Permissions
             conferenceRepo.Setup(x => x.SubscribeConferenceUpdated(conferenceId, It.IsAny<Func<Conference, Task>>()))
                 .Callback((string _, Func<Conference, Task> handler) => onUpdateHandler = handler);
 
-            conferenceManager.Setup(x => x.GetParticipants(conferenceId)).Returns(allParticipants
-                .Select(x => new Participant(x, null, "role", DateTimeOffset.MinValue)).ToList());
+            var conferenceParticipants = allParticipants
+                .Select(x => new Participant(x, null, "role", DateTimeOffset.MinValue)).ToList();
+            conferenceManager.Setup(x => x.GetParticipants(conferenceId)).Returns(conferenceParticipants);
 
-            var updatedConference = CreateConference(conferenceId, updatedModerators.ToImmutableList());
+            var updatedConference = CreateConference(conferenceId, updatedModerators);
 
             if (!moderatorPermissionsUpdated)
                 updatedConference.Permissions[PermissionType.Moderator] =
@@ -224,8 +227,7 @@ namespace PaderConference.Core.Tests.Services.Permissions
             else
             {
                 refreshParticipants.Verify(x => x(It.IsAny<IEnumerable<Participant>>()), Times.Once);
-                Assert.Equal(expectedParticipantsRefreshed,
-                    refreshedParticipants?.Select(x => x.ParticipantId).ToArray());
+                Assert.Equal(expectedParticipantsRefreshed, refreshedParticipants?.Select(x => x.ParticipantId));
             }
 
             if (moderatorPermissionsUpdated) Assert.Null(databasePermissionValues.ModeratorPermissions);

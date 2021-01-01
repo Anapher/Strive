@@ -6,7 +6,7 @@ namespace PaderConference.Core.Tests.Domain.Entities
     public class UserTests
     {
         [Fact]
-        public void HasValidRefreshToken_GivenValidToken_ShouldReturnTrue()
+        public void HasValidRefreshToken_ValidToken_ReturnTrue()
         {
             // arrange
             const string refreshToken = "1234";
@@ -20,7 +20,7 @@ namespace PaderConference.Core.Tests.Domain.Entities
         }
 
         [Fact]
-        public void HasValidRefreshToken_GivenExpiredToken_ShouldReturnFalse()
+        public void HasValidRefreshToken_ExpiredToken_ReturnFalse()
         {
             // arrange
             const string refreshToken = "1234";

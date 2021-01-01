@@ -24,8 +24,8 @@ namespace PaderConference.Core.Services.Permissions
         public ConferenceConfigWatcher(string conferenceId, IConferenceRepo conferenceRepo,
             IConferenceManager conferenceManager, Func<IEnumerable<Participant>, ValueTask> refreshParticipants)
         {
-            _conferenceSelector = new UseConferenceSelector<Conference>(conferenceId, conferenceRepo,
-                x => x, new Conference(conferenceId));
+            _conferenceSelector = new UseConferenceSelector<Conference>(conferenceId, conferenceRepo, x => x,
+                new Conference(conferenceId), ReferenceEqualityComparer.Instance);
 
             _conferenceId = conferenceId;
             _conferenceManager = conferenceManager;
@@ -113,13 +113,13 @@ namespace PaderConference.Core.Services.Permissions
             return source.EqualItems(target);
         }
 
-        private static IImmutableDictionary<string, JsonElement> GetPermissions(
+        private static IImmutableDictionary<string, JsonElement>? GetPermissions(
             Dictionary<PermissionType, Dictionary<string, JsonElement>> permissions, PermissionType type)
         {
             if (permissions.TryGetValue(type, out var result))
                 return result.ToImmutableDictionary();
 
-            return ImmutableDictionary<string, JsonElement>.Empty;
+            return null;
         }
     }
 }

@@ -51,7 +51,7 @@ namespace PaderConference.Core.Tests.Services
             // arrange
             var conference = CreateConference(ConferenceId, ImmutableList<string>.Empty);
 
-            var unsubscribeCallback = new Mock<Func<Task>>();
+            var unsubscribeCallback = new Mock<IAsyncDisposable>();
 
             var conferenceRepo = new Mock<IConferenceRepo>();
             conferenceRepo.Setup(x => x.FindById(ConferenceId)).ReturnsAsync(conference);
@@ -65,7 +65,7 @@ namespace PaderConference.Core.Tests.Services
             await watcher.DisposeAsync();
 
             // assert
-            unsubscribeCallback.Verify(x => x(), Times.Once);
+            unsubscribeCallback.Verify(x => x.DisposeAsync(), Times.Once);
         }
 
         [Fact]

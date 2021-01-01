@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Threading.Tasks;
 using Moq;
 using PaderConference.Core.Domain.Entities;
@@ -27,10 +28,15 @@ namespace PaderConference.Core.Tests.Services.Synchronization
 
         private readonly ConcurrentDictionary<string, IParticipantConnections> _connections = new();
 
+        private static Conference CreateConference(IEnumerable<string> moderators)
+        {
+            return new(ConferenceId) {Configuration = {Moderators = moderators.ToImmutableList()}};
+        }
+
         public SynchronizationServiceTests(ITestOutputHelper output) : base(output)
         {
             _conferenceRepo.Setup(x => x.FindById(ConferenceId))
-                .ReturnsAsync(new Conference(ConferenceId, ImmutableList<string>.Empty));
+                .ReturnsAsync(CreateConference(Enumerable.Empty<string>()));
 
             _connectionMapping.SetupGet(x => x.ConnectionsR).Returns(_connections);
         }
@@ -168,7 +174,7 @@ namespace PaderConference.Core.Tests.Services.Synchronization
             var mod = AddParticipant(modParticipantId, modConnId);
 
             _conferenceRepo.Setup(x => x.FindById(ConferenceId))
-                .ReturnsAsync(new Conference(ConferenceId, new[] {modParticipantId}.ToImmutableList()));
+                .ReturnsAsync(CreateConference(new[] {modParticipantId}));
 
             // act
             await service.InitializeAsync();
@@ -202,7 +208,7 @@ namespace PaderConference.Core.Tests.Services.Synchronization
             var mod = AddParticipant(modParticipantId, modConnId);
 
             _conferenceRepo.Setup(x => x.FindById(ConferenceId))
-                .ReturnsAsync(new Conference(ConferenceId, new[] {modParticipantId}.ToImmutableList()));
+                .ReturnsAsync(CreateConference(new[] {modParticipantId}));
 
             // act
             await service.InitializeAsync();
@@ -240,7 +246,7 @@ namespace PaderConference.Core.Tests.Services.Synchronization
             var mod = AddParticipant(modParticipantId, modConnId);
 
             _conferenceRepo.Setup(x => x.FindById(ConferenceId))
-                .ReturnsAsync(new Conference(ConferenceId, new[] {modParticipantId}.ToImmutableList()));
+                .ReturnsAsync(CreateConference(new[] {modParticipantId}));
 
             Func<Conference, Task>? onUpdateHandler = null;
 
@@ -258,8 +264,7 @@ namespace PaderConference.Core.Tests.Services.Synchronization
 
             _signalMessenger.Reset();
 
-            await onUpdateHandler.Invoke(new Conference(ConferenceId,
-                new[] {modParticipantId, plebParticipantId}.ToImmutableList()));
+            await onUpdateHandler.Invoke(CreateConference(new[] {modParticipantId, plebParticipantId}));
 
             // assert
             _signalMessenger.Verify(
@@ -283,7 +288,7 @@ namespace PaderConference.Core.Tests.Services.Synchronization
             var mod = AddParticipant(modParticipantId, modConnId);
 
             _conferenceRepo.Setup(x => x.FindById(ConferenceId))
-                .ReturnsAsync(new Conference(ConferenceId, new[] {modParticipantId}.ToImmutableList()));
+                .ReturnsAsync(CreateConference(new[] {modParticipantId}));
 
             Func<Conference, Task>? onUpdateHandler = null;
 
@@ -301,7 +306,7 @@ namespace PaderConference.Core.Tests.Services.Synchronization
 
             _signalMessenger.Reset();
 
-            await onUpdateHandler.Invoke(new Conference(ConferenceId, ImmutableList<string>.Empty));
+            await onUpdateHandler.Invoke(CreateConference(Enumerable.Empty<string>()));
 
             // assert
             _signalMessenger.Verify(

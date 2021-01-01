@@ -3,7 +3,6 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using AutoMapper;
-using Microsoft.Extensions.Options;
 using Moq;
 using PaderConference.Core.Extensions;
 using PaderConference.Core.Interfaces.Services;
@@ -48,7 +47,7 @@ namespace PaderConference.Core.Tests.Services.Chat
 
             return new ChatService(ConferenceId, mapper, _permissionsService, _synchronizationManager,
                 _connectionMapping, _signalMessenger.Object, _conferenceManager.Object,
-                new OptionsWrapper<ChatOptions>(_options), Logger);
+                new ConferenceOptionsWrapper<ChatOptions>(_options), Logger);
         }
 
         private ChatSynchronizedObject GetSyncObj()
@@ -59,31 +58,11 @@ namespace PaderConference.Core.Tests.Services.Chat
         #region Send Message
 
         [Fact]
-        public async Task TestSendEmptyMessage()
+        public async Task SendMessage_ValidMessage_SendToOtherParticipantsAndAvailableInMyMessages()
         {
             // arrange
             var service = Create();
-            var message =
-                TestServiceMessage.Create(new SendChatMessageRequest(), TestParticipants.Default, "connectionId");
-
-            // act
-            AssertFailed(await service.SendMessage(message.Object));
-
-            // assert
-            message.Verify(x => x.SendToCallerAsync(It.IsAny<string>(), It.IsAny<object>()), Times.Never);
-
-            var requestChatMessage = TestServiceMessage.Create(TestParticipants.Default, "connectionId").Object;
-
-            var messages = AssertSuccess(await service.FetchMyMessages(requestChatMessage));
-            Assert.Empty(messages);
-        }
-
-        [Fact]
-        public async Task TestSendMessage()
-        {
-            // arrange
-            var service = Create();
-            var message = TestServiceMessage.Create(new SendChatMessageRequest {Message = "Hello world"},
+            var message = TestServiceMessage.Create(new SendChatMessageRequest("Hello world", null),
                 TestParticipants.Default, "connectionId");
 
             _signalMessenger
@@ -112,14 +91,14 @@ namespace PaderConference.Core.Tests.Services.Chat
         }
 
         [Fact]
-        public async Task TestSendMessageNoPermissions()
+        public async Task SendMessage_NoPermissions_FailAndDontSend()
         {
             // arrange
             _permissionsService =
                 new MockPermissionsService(new Dictionary<string, IReadOnlyDictionary<string, JsonElement>>());
 
             var service = Create();
-            var message = TestServiceMessage.Create(new SendChatMessageRequest {Message = "Hello world"},
+            var message = TestServiceMessage.Create(new SendChatMessageRequest("Hello world", null),
                 TestParticipants.Default, "connectionId");
 
             // act
@@ -134,7 +113,7 @@ namespace PaderConference.Core.Tests.Services.Chat
         }
 
         [Fact]
-        public async Task TestSendMessageAnonymously()
+        public async Task SendMessage_ModeIsAnonymously_SendToOtherParticipantsAndSenderIsNull()
         {
             // arrange
             _permissionsService = new MockPermissionsService(
@@ -151,8 +130,7 @@ namespace PaderConference.Core.Tests.Services.Chat
                 });
 
             var service = Create();
-            var message = TestServiceMessage.Create(
-                new SendChatMessageRequest {Message = "Hello world", Mode = new SendAnonymously()},
+            var message = TestServiceMessage.Create(new SendChatMessageRequest("Hello world", new SendAnonymously()),
                 TestParticipants.Default, "connectionId");
 
             // act
@@ -172,12 +150,11 @@ namespace PaderConference.Core.Tests.Services.Chat
         }
 
         [Fact]
-        public async Task TestSendMessageAnonymouslyWithoutPermissions()
+        public async Task SendMessage_AnonymouslyWithoutPermissions_FailAndDontSend()
         {
             // arrange
             var service = Create();
-            var message = TestServiceMessage.Create(
-                new SendChatMessageRequest {Message = "Hello world", Mode = new SendAnonymously()},
+            var message = TestServiceMessage.Create(new SendChatMessageRequest("Hello world", new SendAnonymously()),
                 TestParticipants.Default, "connectionId");
 
             // act
@@ -197,7 +174,7 @@ namespace PaderConference.Core.Tests.Services.Chat
         #region User Typing
 
         [Fact]
-        public async Task TestSetUserTyping()
+        public async Task SetUserIsTyping_SetToTrue_SucceedAndSync()
         {
             // arrange
             var service = Create();
@@ -213,7 +190,7 @@ namespace PaderConference.Core.Tests.Services.Chat
         }
 
         [Fact]
-        public async Task TestSetUserNotTyping()
+        public async Task SetUserIsTyping_SetToFalse_SucceedAndSync()
         {
             // arrange
             var service = Create();
@@ -228,7 +205,7 @@ namespace PaderConference.Core.Tests.Services.Chat
         }
 
         [Fact]
-        public async Task TestSetUserTypingAndReset()
+        public async Task SetUserIsTyping_SetToTrueThenToFalse_UserIsNotTyping()
         {
             // arrange
             var service = Create();
@@ -246,7 +223,7 @@ namespace PaderConference.Core.Tests.Services.Chat
         }
 
         [Fact]
-        public async Task TestSetUserTypingDisconnected()
+        public async Task SetUserIsTyping_SetToTrueAndDisconnect_UserIsRemoved()
         {
             // arrange
             var service = Create();
@@ -263,7 +240,7 @@ namespace PaderConference.Core.Tests.Services.Chat
         }
 
         [Fact]
-        public async Task TestSetUserTypingAutoSliding()
+        public async Task SetUserIsTyping_SetToTrueAndWait_UserIsNotTyping()
         {
             // arrange
             _options.CancelParticipantIsTypingInterval = 0.05;
@@ -283,7 +260,8 @@ namespace PaderConference.Core.Tests.Services.Chat
         }
 
         [Fact]
-        public async Task TestSetUserTypingAutoSlidingRefresh()
+        public async Task
+            SetUserIsTyping_SetToTrueMultipleTimesAfterSomeDelay_UserContinuouslyIsTypingAndDelayIsRefreshed()
         {
             // arrange
             _options.CancelParticipantIsTypingInterval = 0.05;
@@ -313,15 +291,13 @@ namespace PaderConference.Core.Tests.Services.Chat
         #region Private Messages
 
         [Fact]
-        public async Task TestSendPrivateMessageWithoutPermissions()
+        public async Task SendMessage_PrivatelyWithoutPermissions_FailAndDontSend()
         {
             // arrange
             var service = Create();
             var message = TestServiceMessage.Create(
-                new SendChatMessageRequest
-                {
-                    Message = "Hello", Mode = new SendPrivately {To = new ParticipantRef("test", null)},
-                }, TestParticipants.Default, "connectionId");
+                new SendChatMessageRequest("Hello", new SendPrivately {To = new ParticipantRef("test", null)}),
+                TestParticipants.Default, "connectionId");
 
             var foo = TestParticipants.Default2;
             _conferenceManager.Setup(x => x.TryGetParticipant(It.IsAny<string>(), "test", out foo)).Returns(true);
@@ -338,7 +314,7 @@ namespace PaderConference.Core.Tests.Services.Chat
         }
 
         [Fact]
-        public async Task TestSendPrivateMessage()
+        public async Task SendMessage_Privately_SucceedAndSend()
         {
             // arrange
             _permissionsService = new MockPermissionsService(
@@ -362,14 +338,9 @@ namespace PaderConference.Core.Tests.Services.Chat
 
             var service = Create();
             var message = TestServiceMessage.Create(
-                new SendChatMessageRequest
-                {
-                    Message = "Hello",
-                    Mode = new SendPrivately
-                    {
-                        To = new ParticipantRef(TestParticipants.Default2.ParticipantId, null),
-                    },
-                }, TestParticipants.Default, "conn1");
+                new SendChatMessageRequest("Hello",
+                    new SendPrivately {To = new ParticipantRef(TestParticipants.Default2.ParticipantId, null)}),
+                TestParticipants.Default, "conn1");
 
             // act
             AssertSuccess(await service.SendMessage(message.Object));

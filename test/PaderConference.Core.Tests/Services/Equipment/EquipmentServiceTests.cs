@@ -172,8 +172,8 @@ namespace PaderConference.Core.Tests.Services.Equipment
             _signal.Reset();
 
             // arrange
-            var message = TestServiceMessage.Create(EquipmentError.NotFound, TestParticipants.Default, EqConnectionId)
-                .Object;
+            var message = TestServiceMessage
+                .Create(EquipmentError.EquipmentNotFound, TestParticipants.Default, EqConnectionId).Object;
 
             // act
             await service.EquipmentErrorOccurred(message);

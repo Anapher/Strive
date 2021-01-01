@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Interfaces.Gateways.Repositories;
@@ -15,6 +16,7 @@ namespace PaderConference.Core.Services
         private readonly string _conferenceId;
         private readonly IConferenceRepo _conferenceRepo;
         private readonly Func<Conference, T> _selectValue;
+        private readonly IEqualityComparer<T> _comparer;
         private IAsyncDisposable? _unsubscribeConferenceUpdated;
 
         /// <summary>
@@ -25,12 +27,17 @@ namespace PaderConference.Core.Services
         /// <param name="conferenceRepo">The repository of the conference</param>
         /// <param name="selectValue">A selector for the value</param>
         /// <param name="defaultValue">The initial value</param>
+        /// <param name="comparer">
+        ///     The comparer to compare the objects to determine if <see cref="Updated" /> should be fired. The
+        ///     default equality comparer is used if this value is null
+        /// </param>
         public UseConferenceSelector(string conferenceId, IConferenceRepo conferenceRepo,
-            Func<Conference, T> selectValue, T defaultValue)
+            Func<Conference, T> selectValue, T defaultValue, IEqualityComparer<T>? comparer = null)
         {
             _conferenceId = conferenceId;
             _conferenceRepo = conferenceRepo;
             _selectValue = selectValue;
+            _comparer = comparer ?? EqualityComparer<T>.Default;
             Value = defaultValue;
         }
 
@@ -75,7 +82,7 @@ namespace PaderConference.Core.Services
             var oldValue = Value;
             var newValue = _selectValue(conference);
 
-            if (!Equals(newValue, oldValue))
+            if (!_comparer.Equals(newValue, oldValue))
             {
                 Value = newValue;
 
