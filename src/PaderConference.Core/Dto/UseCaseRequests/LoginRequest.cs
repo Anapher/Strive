@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using PaderConference.Core.Dto.UseCaseResponses;
 using PaderConference.Core.Interfaces;
 
@@ -5,12 +6,19 @@ namespace PaderConference.Core.Dto.UseCaseRequests
 {
     public class LoginRequest : IUseCaseRequest<LoginResponse>
     {
-        public LoginRequest(string userName, string? password, string? remoteIpAddress, bool isGuestAuth = false)
+        public LoginRequest(string userName, string password, string? remoteIpAddress)
         {
             UserName = userName;
             Password = password;
             RemoteIpAddress = remoteIpAddress;
-            IsGuestAuth = isGuestAuth;
+            IsGuestAuth = false;
+        }
+
+        public LoginRequest(string userName, string? remoteIpAddress)
+        {
+            UserName = userName;
+            RemoteIpAddress = remoteIpAddress;
+            IsGuestAuth = true;
         }
 
         public string UserName { get; }
@@ -19,6 +27,7 @@ namespace PaderConference.Core.Dto.UseCaseRequests
 
         public string? RemoteIpAddress { get; }
 
+        [MemberNotNullWhen(false, nameof(Password))]
         public bool IsGuestAuth { get; }
     }
 }

@@ -30,6 +30,7 @@ using PaderConference.Core.Services.Chat.Dto;
 using PaderConference.Extensions;
 using PaderConference.Infrastructure;
 using PaderConference.Infrastructure.Auth;
+using PaderConference.Infrastructure.Auth.AuthService;
 using PaderConference.Infrastructure.Data;
 using PaderConference.Infrastructure.Hubs;
 using PaderConference.Infrastructure.Serialization;
@@ -56,6 +57,9 @@ namespace PaderConference
             // Register the ConfigurationBuilder instance of AuthSettings
             var authSettings = Configuration.GetSection(nameof(AuthSettings));
             services.Configure<AuthSettings>(authSettings);
+
+            var optionsAuthService = Configuration.GetSection("OptionsAuthService");
+            services.Configure<UserCredentialsOptions>(optionsAuthService);
 
             var signingKey =
                 new SymmetricSecurityKey(Encoding.ASCII.GetBytes(authSettings[nameof(AuthSettings.SecretKey)]));

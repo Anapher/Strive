@@ -3,6 +3,7 @@ using PaderConference.Core.Interfaces.Gateways.Repositories;
 using PaderConference.Core.Interfaces.Services;
 using PaderConference.Core.Services;
 using PaderConference.Infrastructure.Auth;
+using PaderConference.Infrastructure.Auth.AuthService;
 using PaderConference.Infrastructure.Conferencing;
 using PaderConference.Infrastructure.Data;
 using PaderConference.Infrastructure.Data.Repos;
@@ -38,6 +39,8 @@ namespace PaderConference.Infrastructure
                 .AsImplementedInterfaces().SingleInstance();
 
             builder.RegisterType<CachedConferenceRepo>().As<IConferenceRepo>().SingleInstance();
+
+            builder.RegisterType<OptionsAuthService>().AsImplementedInterfaces().SingleInstance();
         }
     }
 }

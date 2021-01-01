@@ -33,8 +33,8 @@ namespace PaderConference.Controllers
         public async Task<ActionResult<LoginResponseDto>> Login([FromBody] AuthGuestRequestDto request,
             [FromServices] ILoginUseCase loginUseCase)
         {
-            var result = await loginUseCase.Handle(new LoginRequest(request.DisplayName, null,
-                HttpContext.Connection.RemoteIpAddress?.ToString(), true));
+            var result = await loginUseCase.Handle(new LoginRequest(request.DisplayName,
+                HttpContext.Connection.RemoteIpAddress?.ToString()));
             if (!result.Success) return result.ToActionResult();
 
             return new LoginResponseDto(result.Response.AccessToken, result.Response.RefreshToken);

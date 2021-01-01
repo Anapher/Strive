@@ -11,21 +11,15 @@ namespace PaderConference.Core.UseCases
 {
     public class LoginUseCase : ILoginUseCase
     {
-        private static readonly IReadOnlyDictionary<string, (string, int)> UserDb =
-            new Dictionary<string, (string, int)>
-            {
-                {
-                    "Vincent", ("123", 1)
-                }
-            };
-
         private readonly IJwtFactory _jwtFactory;
         private readonly ITokenFactory _tokenFactory;
+        private readonly IAuthService _authService;
 
-        public LoginUseCase(IJwtFactory jwtFactory, ITokenFactory tokenFactory)
+        public LoginUseCase(IJwtFactory jwtFactory, ITokenFactory tokenFactory, IAuthService authService)
         {
             _jwtFactory = jwtFactory;
             _tokenFactory = tokenFactory;
+            _authService = authService;
         }
 
         public async ValueTask<SuccessOrError<LoginResponse>> Handle(LoginRequest message)
@@ -37,25 +31,23 @@ namespace PaderConference.Core.UseCases
             }
             else
             {
-                if (!UserDb.TryGetValue(message.UserName, out var userData))
+                var user = await _authService.FindUser(message.UserName);
+                if (user == null)
                     return AuthenticationError.UserNotFound with
                     {
                         Fields = new Dictionary<string, string> {{nameof(message.UserName), "User not found"}},
                     };
 
-                var (password, userId) = userData;
-
-                if (message.Password != password)
+                if (!await user.ValidatePassword(message.Password))
                     return AuthenticationError.InvalidPassword with
                     {
                         Fields = new Dictionary<string, string> {{nameof(message.UserName), "Invalid password."}},
                     };
 
-                accessToken =
-                    await _jwtFactory.GenerateModeratorToken(userId.ToString(), "Vincent@me.de", message.UserName);
+                accessToken = await _jwtFactory.GenerateModeratorToken(user.Id, message.UserName);
             }
 
-            //// generate refresh token
+            // generate refresh token
             var refreshToken = _tokenFactory.GenerateToken();
 
             return new LoginResponse(accessToken, refreshToken);

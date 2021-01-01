@@ -23,12 +23,12 @@ namespace PaderConference.Infrastructure.Auth
             ThrowIfInvalidOptions(_jwtOptions);
         }
 
-        public ValueTask<string> GenerateModeratorToken(string id, string email, string name)
+        public ValueTask<string> GenerateModeratorToken(string id, string name)
         {
             return GenerateEncodedToken(new[]
             {
                 new Claim(ClaimTypes.NameIdentifier, id), new Claim(ClaimTypes.Name, name),
-                new Claim(ClaimTypes.Role, PrincipalRoles.Moderator), new Claim(ClaimTypes.Email, email),
+                new Claim(ClaimTypes.Role, PrincipalRoles.Moderator),
             });
         }
 

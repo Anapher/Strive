@@ -46,7 +46,7 @@ namespace PaderConference.Core.UseCases
             }
             else
             {
-                var jwToken = await _jwtFactory.GenerateModeratorToken(id.Value, "test@test.de", name);
+                var jwToken = await _jwtFactory.GenerateModeratorToken(id.Value, name);
                 var refreshToken = _tokenFactory.GenerateToken();
 
                 return new ExchangeRefreshTokenResponse(jwToken, refreshToken);
