@@ -23,6 +23,7 @@ namespace PaderConference.Infrastructure
             builder.RegisterType<JwtHandler>().As<IJwtHandler>().SingleInstance();
             builder.RegisterType<TokenFactory>().As<ITokenFactory>().SingleInstance();
             builder.RegisterType<JwtValidator>().As<IJwtValidator>().SingleInstance();
+            builder.RegisterType<RefreshTokenFactory>().As<IRefreshTokenFactory>().SingleInstance();
 
             builder.RegisterType<ConferenceManager>().As<IConferenceManager>().SingleInstance();
             builder.RegisterType<ConnectionMapping>().As<IConnectionMapping>().SingleInstance();

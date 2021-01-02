@@ -3,19 +3,18 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using PaderConference.Infrastructure;
-using StackExchange.Redis.Extensions.Core.Abstractions;
+using PaderConference.Core.Interfaces.Gateways.Repositories;
 
 namespace PaderConference.Services
 {
     public class ConferenceInitializer : IHostedService
     {
         private readonly ILogger<ConferenceInitializer> _logger;
-        private readonly IRedisDatabase _redisDatabase;
+        private readonly IOpenConferenceRepo _repo;
 
-        public ConferenceInitializer(IRedisDatabase redisDatabase, ILogger<ConferenceInitializer> logger)
+        public ConferenceInitializer(IOpenConferenceRepo repo, ILogger<ConferenceInitializer> logger)
         {
-            _redisDatabase = redisDatabase;
+            _repo = repo;
             _logger = logger;
         }
 
@@ -25,8 +24,7 @@ namespace PaderConference.Services
             // as this program holds all participants etc., we couldn't possibly recover any conferences that existed before
             try
             {
-                await _redisDatabase.PublishAsync<object?>(RedisChannels.OnResetConferences, null);
-                await _redisDatabase.RemoveAsync(RedisKeys.OpenConferences);
+                await _repo.DeleteAll();
             }
             catch (Exception e)
             {

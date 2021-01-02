@@ -1,10 +1,10 @@
 using System;
-using PaderConference.Core.Interfaces.Services;
-using PaderConference.Infrastructure.Interfaces;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using PaderConference.Core.Interfaces.Services;
+using PaderConference.Infrastructure.Interfaces;
 
 namespace PaderConference.Infrastructure.Auth
 {
@@ -30,7 +30,7 @@ namespace PaderConference.Infrastructure.Auth
                 ValidateIssuer = false,
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.SecretKey)),
-                ValidateLifetime = false // we check expired tokens here
+                ValidateLifetime = false, // we check expired tokens here
             });
         }
     }

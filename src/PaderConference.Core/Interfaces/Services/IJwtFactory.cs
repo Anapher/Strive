@@ -6,6 +6,6 @@ namespace PaderConference.Core.Interfaces.Services
     {
         ValueTask<string> GenerateModeratorToken(string id, string name);
 
-        ValueTask<string> GenerateGuestToken(string name, string? id);
+        ValueTask<string> GenerateGuestToken(string name, string id);
     }
 }

@@ -8,21 +8,20 @@ using PaderConference.Core.Extensions;
 using PaderConference.Core.Interfaces.Gateways.Repositories;
 using PaderConference.Core.Interfaces.Services;
 using PaderConference.Core.Services;
-using StackExchange.Redis.Extensions.Core.Abstractions;
 
 namespace PaderConference.Infrastructure.Conferencing
 {
     public class ConferenceManager : IConferenceManager
     {
+        private readonly IOpenConferenceRepo _openConferenceRepo;
         private readonly IConferenceRepo _conferenceRepo;
-        private readonly IRedisDatabase _database;
         private readonly ILogger<ConferenceManager> _logger;
         private readonly ParticipantsMap _participantsMap = new ParticipantsMap();
 
-        public ConferenceManager(IRedisDatabase database, IConferenceRepo conferenceRepo,
+        public ConferenceManager(IOpenConferenceRepo openConferenceRepo, IConferenceRepo conferenceRepo,
             ILogger<ConferenceManager> logger)
         {
-            _database = database;
+            _openConferenceRepo = openConferenceRepo;
             _conferenceRepo = conferenceRepo;
             _logger = logger;
         }
@@ -41,7 +40,7 @@ namespace PaderConference.Infrastructure.Conferencing
                     throw new ConferenceNotFoundException(conferenceId);
                 }
 
-                if (await _database.HashSetAsync(RedisKeys.OpenConferences, conferenceId, conference))
+                if (await _openConferenceRepo.Create(conference))
                 {
                     _logger.LogDebug("Conference opened");
                     ConferenceOpened?.Invoke(this, conference);
@@ -57,13 +56,13 @@ namespace PaderConference.Infrastructure.Conferencing
 
         public async ValueTask CloseConference(string conferenceId)
         {
-            if (await _database.HashDeleteAsync(RedisKeys.OpenConferences, conferenceId))
+            if (await _openConferenceRepo.Delete(conferenceId))
                 ConferenceClosed?.Invoke(this, conferenceId);
         }
 
         public async ValueTask<bool> GetIsConferenceOpen(string conferenceId)
         {
-            return await _database.HashExistsAsync(RedisKeys.OpenConferences, conferenceId);
+            return await _openConferenceRepo.Exists(conferenceId);
         }
 
         public ICollection<Participant> GetParticipants(string conferenceId)

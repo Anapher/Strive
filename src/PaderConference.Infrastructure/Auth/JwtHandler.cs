@@ -32,7 +32,7 @@ namespace PaderConference.Infrastructure.Auth
                 var principal =
                     _jwtSecurityTokenHandler.ValidateToken(token, tokenValidationParameters, out var securityToken);
 
-                if (!(securityToken is JwtSecurityToken jwtSecurityToken) ||
+                if (securityToken is not JwtSecurityToken jwtSecurityToken ||
                     !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256,
                         StringComparison.InvariantCultureIgnoreCase))
                     throw new SecurityTokenException("Invalid token");

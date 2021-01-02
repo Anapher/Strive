@@ -6,6 +6,7 @@ using PaderConference.Core.Dto.UseCaseRequests;
 using PaderConference.Core.Dto.UseCaseResponses;
 using PaderConference.Core.Errors;
 using PaderConference.Core.Interfaces;
+using PaderConference.Core.Interfaces.Gateways.Repositories;
 using PaderConference.Core.Interfaces.Services;
 using PaderConference.Core.Interfaces.UseCases;
 
@@ -15,14 +16,18 @@ namespace PaderConference.Core.UseCases
     {
         private readonly IJwtFactory _jwtFactory;
         private readonly IJwtValidator _jwtValidator;
-        private readonly ITokenFactory _tokenFactory;
+        private readonly IRefreshTokenFactory _tokenFactory;
+        private readonly IRefreshTokenRepo _refreshTokenRepo;
+        private readonly IAuthService _authService;
 
         public ExchangeRefreshTokenUseCase(IJwtValidator jwtValidator, IJwtFactory jwtFactory,
-            ITokenFactory tokenFactory)
+            IRefreshTokenFactory tokenFactory, IRefreshTokenRepo refreshTokenRepo, IAuthService authService)
         {
             _jwtValidator = jwtValidator;
             _jwtFactory = jwtFactory;
             _tokenFactory = tokenFactory;
+            _refreshTokenRepo = refreshTokenRepo;
+            _authService = authService;
         }
 
         public async ValueTask<SuccessOrError<ExchangeRefreshTokenResponse>> Handle(ExchangeRefreshTokenRequest message)
@@ -34,23 +39,32 @@ namespace PaderConference.Core.UseCases
 
             var name = claimsPrincipal.Claims.First(x => x.Type == ClaimTypes.Name).Value;
             var role = claimsPrincipal.Claims.First(x => x.Type == ClaimTypes.Role).Value;
-            var id = claimsPrincipal.Claims.First(x => x.Type == ClaimTypes.NameIdentifier);
+            var id = claimsPrincipal.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value;
 
+            var token = await _refreshTokenRepo.TryPopRefreshToken(id, message.RefreshToken);
+            if (token == null)
+                return AuthenticationError.InvalidToken;
+
+            if (!token.Active)
+                return AuthenticationError.TokenExpired;
+
+            string accessToken;
             if (role == PrincipalRoles.Guest)
             {
-                // guest
-                var jwToken = await _jwtFactory.GenerateGuestToken(name, id.Value);
-                var refreshToken = _tokenFactory.GenerateToken();
-
-                return new ExchangeRefreshTokenResponse(jwToken, refreshToken);
+                accessToken = await _jwtFactory.GenerateGuestToken(name, id);
             }
             else
             {
-                var jwToken = await _jwtFactory.GenerateModeratorToken(id.Value, name);
-                var refreshToken = _tokenFactory.GenerateToken();
+                var user = await _authService.FindUser(name);
+                if (user == null) return AuthenticationError.UserNotFound;
 
-                return new ExchangeRefreshTokenResponse(jwToken, refreshToken);
+                accessToken = await _jwtFactory.GenerateModeratorToken(user.Id, name);
             }
+
+            var newToken = _tokenFactory.Create(id);
+            await _refreshTokenRepo.PushRefreshToken(newToken);
+
+            return new ExchangeRefreshTokenResponse(accessToken, newToken.Value);
         }
     }
 }

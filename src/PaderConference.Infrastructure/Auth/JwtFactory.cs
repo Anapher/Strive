@@ -32,12 +32,12 @@ namespace PaderConference.Infrastructure.Auth
             });
         }
 
-        public ValueTask<string> GenerateGuestToken(string name, string? id)
+        public ValueTask<string> GenerateGuestToken(string name, string id)
         {
             return GenerateEncodedToken(new[]
             {
-                new Claim(ClaimTypes.NameIdentifier, id ?? Guid.NewGuid().ToString("N")),
-                new Claim(ClaimTypes.Name, name), new Claim(ClaimTypes.Role, PrincipalRoles.Guest),
+                new Claim(ClaimTypes.NameIdentifier, id), new Claim(ClaimTypes.Name, name),
+                new Claim(ClaimTypes.Role, PrincipalRoles.Guest),
             });
         }
 

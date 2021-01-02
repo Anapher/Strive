@@ -6,5 +6,6 @@ namespace PaderConference.Core.Errors
         UserNotFound,
         InvalidPassword,
         InvalidToken,
+        TokenExpired,
     }
 }

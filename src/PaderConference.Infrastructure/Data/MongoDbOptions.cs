@@ -8,11 +8,9 @@ namespace PaderConference.Infrastructure.Data
 
         public string DatabaseName { get; set; } = "PaderConference";
 
-        public Dictionary<string, string> CollectionNames { get; set; } = new Dictionary<string, string>
+        public Dictionary<string, string> CollectionNames { get; set; } = new()
         {
-            {
-                "Conferences", "Conferences"
-            }
+            {"Conferences", "Conferences"}, {"RefreshToken", "RefreshToken"},
         };
     }
 }

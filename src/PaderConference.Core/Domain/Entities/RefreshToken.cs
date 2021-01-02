@@ -1,22 +1,22 @@
-using PaderConference.Core.Shared;
 using System;
 
 namespace PaderConference.Core.Domain.Entities
 {
-    public class RefreshToken : BaseEntity
+    public class RefreshToken
     {
-        public string? AppUserId { get; private set; }
-
-        public string Token { get; private set; }
-        public DateTimeOffset Expires { get; private set; }
-        public bool Active => DateTimeOffset.UtcNow <= Expires;
-        public string? RemoteIpAddress { get; private set; }
-
-        public RefreshToken(string token, DateTimeOffset expires, string? remoteIpAddress)
+        public RefreshToken(string userId, string token, DateTimeOffset expires)
         {
-            Token = token;
+            UserId = userId;
+            Value = token;
             Expires = expires;
-            RemoteIpAddress = remoteIpAddress;
         }
+
+        public string UserId { get; init; }
+
+        public string Value { get; init; }
+
+        public DateTimeOffset Expires { get; init; }
+
+        public bool Active => DateTimeOffset.UtcNow <= Expires;
     }
 }
