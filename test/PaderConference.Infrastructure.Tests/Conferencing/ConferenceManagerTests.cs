@@ -7,8 +7,6 @@ using PaderConference.Core.Services;
 using PaderConference.Infrastructure.Conferencing;
 using Serilog;
 using Serilog.Extensions.Logging;
-using StackExchange.Redis;
-using StackExchange.Redis.Extensions.Core.Abstractions;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -28,7 +26,7 @@ namespace PaderConference.Infrastructure.Tests.Conferencing
         public async Task OpenConference_ConferenceNotFound_ThrowException()
         {
             // arrange
-            var redis = new Mock<IRedisDatabase>();
+            var redis = new Mock<IOpenConferenceRepo>();
             var repo = new Mock<IConferenceRepo>();
 
             var conferenceManager = new ConferenceManager(redis.Object, repo.Object, _logger);
@@ -42,12 +40,11 @@ namespace PaderConference.Infrastructure.Tests.Conferencing
         public async Task OpenConference_OpenNewConference_SetInDatabaseAndFireEvent()
         {
             // arrange
-            var redis = new Mock<IRedisDatabase>();
+            var redis = new Mock<IOpenConferenceRepo>();
             var repo = new Mock<IConferenceRepo>();
 
             repo.Setup(x => x.FindById(It.IsAny<string>())).ReturnsAsync(new Conference("123"));
-            redis.Setup(x => x.HashSetAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Conference>(),
-                It.IsAny<bool>(), It.IsAny<CommandFlags>())).ReturnsAsync(true);
+            redis.Setup(x => x.Create(It.IsAny<Conference>())).ReturnsAsync(true);
 
             var conferenceManager = new ConferenceManager(redis.Object, repo.Object, _logger);
             var eventRaised = false;
@@ -65,7 +62,7 @@ namespace PaderConference.Infrastructure.Tests.Conferencing
         public async Task OpenConference_OpenActiveConference_DontFireEvent()
         {
             // arrange
-            var redis = new Mock<IRedisDatabase>();
+            var redis = new Mock<IOpenConferenceRepo>();
             var repo = new Mock<IConferenceRepo>();
 
             repo.Setup(x => x.FindById(It.IsAny<string>())).ReturnsAsync(new Conference("123"));
