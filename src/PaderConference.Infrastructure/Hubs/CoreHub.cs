@@ -2,13 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
-using System.Text.Json;
 using System.Threading.Tasks;
 using System.Xml;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
 using PaderConference.Core;
 using PaderConference.Core.Dto;
 using PaderConference.Core.Dto.UseCaseRequests;
@@ -201,47 +201,47 @@ namespace PaderConference.Infrastructure.Hubs
             return _invoker.InvokeService<ChatService, bool>(isTyping, service => service.SetUserIsTyping);
         }
 
-        public Task<SuccessOrError<JsonElement?>> RequestRouterCapabilities()
+        public Task<SuccessOrError<JObject?>> RequestRouterCapabilities()
         {
-            return _invoker.InvokeService<MediaService, JsonElement?>(service => service.GetRouterCapabilities,
+            return _invoker.InvokeService<MediaService, JObject?>(service => service.GetRouterCapabilities,
                 new MethodOptions {ConferenceCanBeClosed = true});
         }
 
-        public Task<SuccessOrError<JsonElement?>> InitializeConnection(JsonElement element)
+        public Task<SuccessOrError<JToken?>> InitializeConnection(JToken element)
         {
-            return _invoker.InvokeService<MediaService, JsonElement, JsonElement?>(element,
-                service => service.Redirect<JsonElement>(RedisChannels.Media.Request.InitializeConnection),
+            return _invoker.InvokeService<MediaService, JToken, JToken?>(element,
+                service => service.Redirect<JToken>(RedisChannels.Media.Request.InitializeConnection),
                 new MethodOptions {ConferenceCanBeClosed = true});
         }
 
-        public Task<SuccessOrError<JsonElement?>> CreateWebRtcTransport(JsonElement element)
+        public Task<SuccessOrError<JToken?>> CreateWebRtcTransport(JToken element)
         {
-            return _invoker.InvokeService<MediaService, JsonElement, JsonElement?>(element,
-                service => service.Redirect<JsonElement>(RedisChannels.Media.Request.CreateTransport),
+            return _invoker.InvokeService<MediaService, JToken, JToken?>(element,
+                service => service.Redirect<JToken>(RedisChannels.Media.Request.CreateTransport),
                 new MethodOptions {ConferenceCanBeClosed = true});
         }
 
-        public Task<SuccessOrError<JsonElement?>> ConnectWebRtcTransport(JsonElement element)
+        public Task<SuccessOrError<JToken?>> ConnectWebRtcTransport(JToken element)
         {
-            return _invoker.InvokeService<MediaService, JsonElement, JsonElement?>(element,
-                service => service.Redirect<JsonElement>(RedisChannels.Media.Request.ConnectTransport));
+            return _invoker.InvokeService<MediaService, JToken, JToken?>(element,
+                service => service.Redirect<JToken>(RedisChannels.Media.Request.ConnectTransport));
         }
 
-        public Task<SuccessOrError<JsonElement?>> ProduceWebRtcTransport(JsonElement element)
+        public Task<SuccessOrError<JToken?>> ProduceWebRtcTransport(JToken element)
         {
-            return _invoker.InvokeService<MediaService, JsonElement, JsonElement?>(element,
-                service => service.Redirect<JsonElement>(RedisChannels.Media.Request.TransportProduce));
+            return _invoker.InvokeService<MediaService, JToken, JToken?>(element,
+                service => service.Redirect<JToken>(RedisChannels.Media.Request.TransportProduce));
         }
 
-        public Task<SuccessOrError<JsonElement?>> ChangeStream(ChangeStreamDto dto)
+        public Task<SuccessOrError<JToken?>> ChangeStream(ChangeStreamDto dto)
         {
-            return _invoker.InvokeService<MediaService, ChangeStreamDto, JsonElement?>(dto,
+            return _invoker.InvokeService<MediaService, ChangeStreamDto, JToken?>(dto,
                 service => service.Redirect<ChangeStreamDto>(RedisChannels.Media.Request.ChangeStream));
         }
 
-        public Task<SuccessOrError<JsonElement?>> ChangeProducerSource(ChangeParticipantProducerSourceDto dto)
+        public Task<SuccessOrError<JToken?>> ChangeProducerSource(ChangeParticipantProducerSourceDto dto)
         {
-            return _invoker.InvokeService<MediaService, ChangeParticipantProducerSourceDto, JsonElement?>(dto,
+            return _invoker.InvokeService<MediaService, ChangeParticipantProducerSourceDto, JToken?>(dto,
                 service => service.RedirectChangeProducerSource(RedisChannels.Media.Request.ChangeProducerSource));
         }
 

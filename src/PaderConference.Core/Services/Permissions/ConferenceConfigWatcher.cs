@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Extensions;
 using PaderConference.Core.Interfaces.Gateways.Repositories;
@@ -35,12 +35,12 @@ namespace PaderConference.Core.Services.Permissions
         /// <summary>
         ///     The current conference permissions
         /// </summary>
-        public IImmutableDictionary<string, JsonElement>? ConferencePermissions { get; private set; }
+        public IImmutableDictionary<string, JValue>? ConferencePermissions { get; private set; }
 
         /// <summary>
         ///     The current moderator permissions
         /// </summary>
-        public IImmutableDictionary<string, JsonElement>? ModeratorPermissions { get; private set; }
+        public IImmutableDictionary<string, JValue>? ModeratorPermissions { get; private set; }
 
         /// <summary>
         ///     All current moderators
@@ -104,8 +104,8 @@ namespace PaderConference.Core.Services.Permissions
         /// <param name="source">The first dictionary</param>
         /// <param name="target">The second dictionary</param>
         /// <returns>Return true if the permission dictionaries are equal (equal keys and values), else return false</returns>
-        private static bool ComparePermissions(IReadOnlyDictionary<string, JsonElement>? source,
-            IReadOnlyDictionary<string, JsonElement>? target)
+        private static bool ComparePermissions(IReadOnlyDictionary<string, JValue>? source,
+            IReadOnlyDictionary<string, JValue>? target)
         {
             if (source == null && target == null) return true;
             if (source == null || target == null) return false;
@@ -113,8 +113,8 @@ namespace PaderConference.Core.Services.Permissions
             return source.EqualItems(target);
         }
 
-        private static IImmutableDictionary<string, JsonElement>? GetPermissions(
-            Dictionary<PermissionType, Dictionary<string, JsonElement>> permissions, PermissionType type)
+        private static IImmutableDictionary<string, JValue>? GetPermissions(
+            Dictionary<PermissionType, Dictionary<string, JValue>> permissions, PermissionType type)
         {
             if (permissions.TryGetValue(type, out var result))
                 return result.ToImmutableDictionary();

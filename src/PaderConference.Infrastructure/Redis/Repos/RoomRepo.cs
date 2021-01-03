@@ -1,8 +1,8 @@
 ﻿#pragma warning disable CS8619 // Nullability of reference types in value doesn't match target type.
 
 using System.Collections.Generic;
-using System.Text.Json;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 using PaderConference.Core.Interfaces.Gateways.Repositories;
 using PaderConference.Core.Services;
 using PaderConference.Core.Services.Rooms;
@@ -69,9 +69,9 @@ namespace PaderConference.Infrastructure.Redis.Repos
             return _database.GetAsync<string>(RedisKeys.Rooms.DefaultRoomId(conferenceId));
         }
 
-        public Task<Dictionary<string, JsonElement>> GetRoomPermissions(string conferenceId, string roomId)
+        public Task<Dictionary<string, JValue>> GetRoomPermissions(string conferenceId, string roomId)
         {
-            return _database.HashGetAllAsync<JsonElement>(RedisKeys.Rooms.RoomPermissions(conferenceId, roomId));
+            return _database.HashGetAllAsync<JValue>(RedisKeys.Rooms.RoomPermissions(conferenceId, roomId));
         }
 
         public async Task SetParticipantRoom(string conferenceId, string participantId, string roomId)

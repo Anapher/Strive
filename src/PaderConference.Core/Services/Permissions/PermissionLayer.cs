@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using System.Text.Json;
+using Newtonsoft.Json.Linq;
 
 namespace PaderConference.Core.Services.Permissions
 {
@@ -8,7 +8,7 @@ namespace PaderConference.Core.Services.Permissions
     /// </summary>
     public class PermissionLayer
     {
-        public PermissionLayer(int order, string name, IReadOnlyDictionary<string, JsonElement> permissions)
+        public PermissionLayer(int order, string name, IReadOnlyDictionary<string, JValue> permissions)
         {
             Order = order;
             Name = name;
@@ -29,6 +29,6 @@ namespace PaderConference.Core.Services.Permissions
         /// <summary>
         ///     The permissions defined in this layer
         /// </summary>
-        public IReadOnlyDictionary<string, JsonElement> Permissions { get; }
+        public IReadOnlyDictionary<string, JValue> Permissions { get; }
     }
 }

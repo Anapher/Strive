@@ -3,10 +3,10 @@ import { PayloadAction } from '@reduxjs/toolkit';
 import { Middleware, MiddlewareAPI } from 'redux';
 import { events } from 'src/core-hub';
 import { signalrError } from 'src/ui-errors';
-import { ErrorCodes } from 'src/utils/errors';
 import * as actions from './actions';
 import appHubConn from './app-hub-connection';
 import { Options } from './types';
+import * as errors from 'src/errors';
 
 type SignalRResult = {
    middleware: Middleware;
@@ -60,13 +60,7 @@ export default (options: Options): SignalRResult => {
 
                dispatch(actions.onConnected(appData));
             } catch (error) {
-               dispatch(
-                  actions.onConnectionError({
-                     code: ErrorCodes.SignalRConnectionFailed,
-                     message: error.toString(),
-                     type: 'SignalR',
-                  }),
-               );
+               dispatch(actions.onConnectionError(errors.signalRConnectionUnavailable(error.toString())));
 
                await connection.stop();
                connection = undefined;

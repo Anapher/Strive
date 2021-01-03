@@ -2,6 +2,8 @@
 {
     public class SendAnonymously : SendingMode
     {
-        public override string Type { get; } = "anonymously";
+        public const string TYPE = "anonymously";
+
+        public override string Type { get; } = TYPE;
     }
 }

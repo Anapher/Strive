@@ -10,14 +10,14 @@ import {
    TextField,
 } from '@material-ui/core';
 import { DateTime } from 'luxon';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectAccessToken } from 'src/features/auth/selectors';
 import { RootState } from 'src/store';
 import to from 'src/utils/to';
-import { closeCreateDialog, createConferenceAsync } from '../reducer';
-import { CreateConferenceFormState, mapFormToDto } from '../form';
+import { closeCreateDialog, createConferenceAsync, loadDefaultPermissionsAsync } from '../reducer';
+import { ConferenceData } from '../types';
 import CreateConferenceForm from './CreateConferenceForm';
 
 const useStyles = makeStyles((theme) => ({
@@ -31,28 +31,25 @@ function CreateConferenceDialog() {
    const classes = useStyles();
    const dispatch = useDispatch();
 
-   const { dialogOpen, createdConferenceId, isCreating } = useSelector((state: RootState) => state.createConference);
+   const { dialogOpen, createdConferenceId, isCreating, defaultPermissions } = useSelector(
+      (state: RootState) => state.createConference,
+   );
 
-   const handleCreate = (data: CreateConferenceFormState) => {
-      const dto = mapFormToDto(data);
-      dispatch(dispatch(createConferenceAsync(dto)));
+   useEffect(() => {
+      if (!defaultPermissions) dispatch(loadDefaultPermissionsAsync());
+   }, []);
+
+   const handleCreate = (data: ConferenceData) => {
+      // const dto = mapFormToDto(data);
+      // dispatch(dispatch(createConferenceAsync(dto)));
    };
 
    const handleClose = () => dispatch(closeCreateDialog());
 
    const user = useSelector(selectAccessToken);
 
-   const form = useForm<CreateConferenceFormState>({
+   const form = useForm<ConferenceData>({
       mode: 'onChange',
-      defaultValues: {
-         conferenceType: 'class',
-         enableStartTime: false,
-         startTime: DateTime.local().toISO(),
-         schedule: false,
-         scheduleCron: '0 0 15 ? * MON *',
-         name: '',
-         moderators: user ? [{ id: user.nameid, name: user.unique_name }] : [],
-      },
       shouldUnregister: false,
    });
 

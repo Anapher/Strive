@@ -1,31 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text.Json;
+using Newtonsoft.Json.Linq;
 using PaderConference.Core.Services.Permissions;
 
 namespace PaderConference.Core.Extensions
 {
     public static class PermissionDescriptorExtensions
     {
-        public static KeyValuePair<string, JsonElement> Configure<T>(this PermissionDescriptor<T> permissionDescriptor,
-            T value)
+        public static KeyValuePair<string, JValue> Configure<T>(this PermissionDescriptor<T> permissionDescriptor,
+            T value) where T : notnull
         {
-            return new KeyValuePair<string, JsonElement>(permissionDescriptor.Key,
-                JsonSerializer.Deserialize<JsonElement>(JsonSerializer.Serialize(value)));
+            return new(permissionDescriptor.Key, (JValue) JToken.FromObject(value));
         }
 
-        public static bool ValidateValue(this PermissionDescriptor permissionDescriptor, JsonElement value)
+        public static bool ValidateValue(this PermissionDescriptor permissionDescriptor, JValue value)
         {
             switch (permissionDescriptor.Type)
             {
                 case PermissionValueType.Boolean:
-                    return value.ValueKind == JsonValueKind.True || value.ValueKind == JsonValueKind.False;
+                    return value.Type == JTokenType.Boolean;
                 case PermissionValueType.Integer:
-                    return value.ValueKind == JsonValueKind.Number && value.GetDouble() % 1 < double.Epsilon;
+                    return value.Type == JTokenType.Integer;
                 case PermissionValueType.Decimal:
-                    return value.ValueKind == JsonValueKind.Number;
+                    return value.Type == JTokenType.Float;
                 case PermissionValueType.Text:
-                    return value.ValueKind == JsonValueKind.String;
+                    return value.Type == JTokenType.String;
                 default:
                     throw new ArgumentOutOfRangeException();
             }

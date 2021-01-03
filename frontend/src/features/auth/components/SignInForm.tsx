@@ -1,4 +1,13 @@
-import { Box, Button, Checkbox, FormControlLabel, Grid, LinearProgress, TextField } from '@material-ui/core';
+import {
+   Box,
+   Button,
+   Checkbox,
+   FormControlLabel,
+   Grid,
+   LinearProgress,
+   TextField,
+   Typography,
+} from '@material-ui/core';
 import { SignInRequest } from 'MyModels';
 import React from 'react';
 import { useForm } from 'react-hook-form';
@@ -16,6 +25,8 @@ export default function SignInForm() {
    const handleSignIn = (dto: SignInRequest) => {
       dispatch(signInAsync(dto));
    };
+
+   const error = useSelector((state: RootState) => state.signIn.error);
 
    return (
       <form noValidate onSubmit={handleSubmit(handleSignIn)}>
@@ -65,7 +76,7 @@ export default function SignInForm() {
                   </Box>
                )}
             </Grid>
-            {/* {status && <Typography color="error">{status}</Typography>} */}
+            {error && <Typography color="error">{error.message}</Typography>}
          </Grid>
       </form>
    );

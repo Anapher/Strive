@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Moq;
+using Newtonsoft.Json.Linq;
 using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Interfaces.Gateways.Repositories;
 using PaderConference.Core.Interfaces.Services;
@@ -74,9 +74,9 @@ namespace PaderConference.Core.Tests.Services.Permissions
             var moderators = new List<string> {"test"};
             var conference = CreateConference(conferenceId, moderators);
             conference.Permissions[PermissionType.Conference] =
-                new Dictionary<string, JsonElement> {{"test2", JsonSerializer.Deserialize<JsonElement>("32")}};
+                new Dictionary<string, JValue> {{"test2", (JValue) JToken.FromObject(32)}};
             conference.Permissions[PermissionType.Moderator] =
-                new Dictionary<string, JsonElement> {{"test1", JsonSerializer.Deserialize<JsonElement>("true")}};
+                new Dictionary<string, JValue> {{"test1", (JValue) JToken.FromObject(true)}};
 
             conferenceRepo.Setup(x => x.FindById(conferenceId)).ReturnsAsync(conference);
 
@@ -177,9 +177,9 @@ namespace PaderConference.Core.Tests.Services.Permissions
 
             var conference = CreateConference(conferenceId, moderatorsBefore);
             conference.Permissions[PermissionType.Conference] =
-                new Dictionary<string, JsonElement> {{"test2", JsonSerializer.Deserialize<JsonElement>("32")}};
+                new Dictionary<string, JValue> {{"test2", (JValue) JToken.FromObject(32)}};
             conference.Permissions[PermissionType.Moderator] =
-                new Dictionary<string, JsonElement> {{"test1", JsonSerializer.Deserialize<JsonElement>("true")}};
+                new Dictionary<string, JValue> {{"test1", (JValue) JToken.FromObject(true)}};
 
             Func<Conference, Task>? onUpdateHandler = null;
 

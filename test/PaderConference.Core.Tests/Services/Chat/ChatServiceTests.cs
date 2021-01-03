@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
 using AutoMapper;
 using Moq;
+using Newtonsoft.Json.Linq;
 using PaderConference.Core.Extensions;
 using PaderConference.Core.Interfaces.Services;
 using PaderConference.Core.Services;
@@ -27,8 +27,8 @@ namespace PaderConference.Core.Tests.Services.Chat
         private readonly MockSynchronizationManager _synchronizationManager = new MockSynchronizationManager();
         private readonly Mock<IConferenceManager> _conferenceManager = new Mock<IConferenceManager>();
 
-        private MockPermissionsService _permissionsService = new MockPermissionsService(
-            new Dictionary<string, IReadOnlyDictionary<string, JsonElement>>
+        private MockPermissionsService _permissionsService = new(
+            new Dictionary<string, IReadOnlyDictionary<string, JValue>>
             {
                 {
                     TestParticipants.Default.ParticipantId,
@@ -95,7 +95,7 @@ namespace PaderConference.Core.Tests.Services.Chat
         {
             // arrange
             _permissionsService =
-                new MockPermissionsService(new Dictionary<string, IReadOnlyDictionary<string, JsonElement>>());
+                new MockPermissionsService(new Dictionary<string, IReadOnlyDictionary<string, JValue>>());
 
             var service = Create();
             var message = TestServiceMessage.Create(new SendChatMessageRequest("Hello world", null),
@@ -116,18 +116,17 @@ namespace PaderConference.Core.Tests.Services.Chat
         public async Task SendMessage_ModeIsAnonymously_SendToOtherParticipantsAndSenderIsNull()
         {
             // arrange
-            _permissionsService = new MockPermissionsService(
-                new Dictionary<string, IReadOnlyDictionary<string, JsonElement>>
+            _permissionsService = new MockPermissionsService(new Dictionary<string, IReadOnlyDictionary<string, JValue>>
+            {
                 {
+                    TestParticipants.Default.ParticipantId,
+                    new[]
                     {
-                        TestParticipants.Default.ParticipantId,
-                        new[]
-                        {
-                            PermissionsList.Chat.CanSendChatMessage.Configure(true),
-                            PermissionsList.Chat.CanSendAnonymousMessage.Configure(true),
-                        }.ToDictionary(x => x.Key, x => x.Value)
-                    },
-                });
+                        PermissionsList.Chat.CanSendChatMessage.Configure(true),
+                        PermissionsList.Chat.CanSendAnonymousMessage.Configure(true),
+                    }.ToDictionary(x => x.Key, x => x.Value)
+                },
+            });
 
             var service = Create();
             var message = TestServiceMessage.Create(new SendChatMessageRequest("Hello world", new SendAnonymously()),
@@ -317,18 +316,17 @@ namespace PaderConference.Core.Tests.Services.Chat
         public async Task SendMessage_Privately_SucceedAndSend()
         {
             // arrange
-            _permissionsService = new MockPermissionsService(
-                new Dictionary<string, IReadOnlyDictionary<string, JsonElement>>
+            _permissionsService = new MockPermissionsService(new Dictionary<string, IReadOnlyDictionary<string, JValue>>
+            {
                 {
+                    TestParticipants.Default.ParticipantId,
+                    new[]
                     {
-                        TestParticipants.Default.ParticipantId,
-                        new[]
-                        {
-                            PermissionsList.Chat.CanSendChatMessage.Configure(true),
-                            PermissionsList.Chat.CanSendPrivateChatMessage.Configure(true),
-                        }.ToDictionary(x => x.Key, x => x.Value)
-                    },
-                });
+                        PermissionsList.Chat.CanSendChatMessage.Configure(true),
+                        PermissionsList.Chat.CanSendPrivateChatMessage.Configure(true),
+                    }.ToDictionary(x => x.Key, x => x.Value)
+                },
+            });
             _connectionMapping.Add("conn1", TestParticipants.Default, false);
             _connectionMapping.Add("conn2", TestParticipants.Default2, false);
             var foo = TestParticipants.Default2;

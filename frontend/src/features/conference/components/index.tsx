@@ -20,8 +20,5 @@ export default function index({ conference }: Props) {
       return <RequestUserInteractionView />;
    }
 
-   switch (conference.conferenceType) {
-      default:
-         return <ClassConference />;
-   }
+   return <ClassConference />;
 }

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
 using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Interfaces;
 using PaderConference.Core.Interfaces.Gateways.Repositories;
@@ -90,11 +90,10 @@ namespace PaderConference.Core.Services.Media
             }
         }
 
-        public Func<IServiceMessage<ChangeParticipantProducerSourceDto>, ValueTask<SuccessOrError<JsonElement?>>>
+        public Func<IServiceMessage<ChangeParticipantProducerSourceDto>, ValueTask<SuccessOrError<JToken?>>>
             RedirectChangeProducerSource(ConferenceDependentKey dependentKey)
         {
-            async ValueTask<SuccessOrError<JsonElement?>> Invoke(
-                IServiceMessage<ChangeParticipantProducerSourceDto> message)
+            async ValueTask<SuccessOrError<JToken?>> Invoke(IServiceMessage<ChangeParticipantProducerSourceDto> message)
             {
                 var permissions = await _permissionsService.GetPermissions(message.Participant);
                 if (!await permissions.GetPermission(PermissionsList.Media.CanChangeOtherParticipantsProducers))
@@ -122,10 +121,10 @@ namespace PaderConference.Core.Services.Media
                 message.Participant.ParticipantId);
         }
 
-        public Func<IServiceMessage<TRequest>, ValueTask<SuccessOrError<JsonElement?>>> Redirect<TRequest>(
+        public Func<IServiceMessage<TRequest>, ValueTask<SuccessOrError<JToken?>>> Redirect<TRequest>(
             ConferenceDependentKey dependentKey)
         {
-            async ValueTask<SuccessOrError<JsonElement?>> Invoke(IServiceMessage<TRequest> message)
+            async ValueTask<SuccessOrError<JToken?>> Invoke(IServiceMessage<TRequest> message)
             {
                 var meta = GetMeta(message);
                 var request = new ConnectionMessage<TRequest>(message.Payload, meta);
@@ -136,7 +135,7 @@ namespace PaderConference.Core.Services.Media
             return Invoke;
         }
 
-        public async ValueTask<SuccessOrError<JsonElement?>> GetRouterCapabilities(IServiceMessage _)
+        public async ValueTask<SuccessOrError<JObject?>> GetRouterCapabilities(IServiceMessage _)
         {
             return await _repo.GetRtpCapabilities(_conferenceId);
         }

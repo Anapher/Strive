@@ -1,6 +1,5 @@
 import { ActionCreatorWithPayload, createAction } from '@reduxjs/toolkit';
-import { SuccessOrError } from 'src/communication-types';
-import { IRestError } from 'src/utils/error-result';
+import { DomainError, SuccessOrError } from 'src/communication-types';
 
 export const DEFAULT_PREFIX = 'SIGNALR';
 
@@ -35,7 +34,7 @@ export const onConnected = createAction(`${DEFAULT_PREFIX}::ON_CONNECTED`, (appD
 
 export const onConnectionError = createAction(
    `${DEFAULT_PREFIX}::ON_CONNECTION_ERROR`,
-   (error?: IRestError, appData?: any) => ({
+   (error?: DomainError, appData?: any) => ({
       payload: { error, appData },
    }),
 );

@@ -2,7 +2,9 @@
 {
     public class SendPrivately : SendingMode
     {
-        public override string Type { get; } = "privately";
+        public const string TYPE = "privately";
+
+        public override string Type { get; } = TYPE;
 
         public ParticipantRef? To { get; set; }
     }

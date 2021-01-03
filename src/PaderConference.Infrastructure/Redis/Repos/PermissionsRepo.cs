@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
-using System.Text.Json;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 using PaderConference.Core.Interfaces.Gateways.Repositories;
 using StackExchange.Redis.Extensions.Core.Abstractions;
 
@@ -20,7 +20,7 @@ namespace PaderConference.Infrastructure.Redis.Repos
             return _database.HashGetAsync<T>(RedisKeys.ParticipantPermissions(participantId), key);
         }
 
-        public Task SetPermissions(string participantId, Dictionary<string, JsonElement> permissions)
+        public Task SetPermissions(string participantId, Dictionary<string, JValue> permissions)
         {
             return _database.HashSetAsync(RedisKeys.ParticipantPermissions(participantId), permissions);
         }

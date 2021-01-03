@@ -1,11 +1,12 @@
-﻿using System.Text.Json;
+﻿#pragma warning disable 8618
+using Newtonsoft.Json.Linq;
 
 namespace PaderConference.Core.Services.Media.Communication
 {
     public class InitializeConnectionRequest
     {
-        public JsonElement SctpCapabilities { get; set; }
+        public JObject SctpCapabilities { get; set; }
 
-        public JsonElement RtpCapabilities { get; set; }
+        public JObject RtpCapabilities { get; set; }
     }
 }

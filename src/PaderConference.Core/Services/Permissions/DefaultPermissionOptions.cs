@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Text.Json;
+using Newtonsoft.Json.Linq;
 using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Extensions;
 
@@ -11,7 +11,7 @@ namespace PaderConference.Core.Services.Permissions
     /// </summary>
     public class DefaultPermissionOptions
     {
-        public Dictionary<PermissionType, IReadOnlyDictionary<string, JsonElement>> Default = new()
+        public Dictionary<PermissionType, IReadOnlyDictionary<string, JValue>> Default = new()
         {
             // Default conference permissions, so this is the foundation of permissions for every participant in the conference
             {

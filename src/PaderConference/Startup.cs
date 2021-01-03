@@ -4,13 +4,12 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using AutoMapper;
 using FluentValidation.AspNetCore;
+using JsonSubTypes;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -23,6 +22,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using MongoDB.Bson.Serialization;
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Serialization;
 using PaderConference.Auth;
 using PaderConference.Core;
 using PaderConference.Core.Errors;
@@ -103,7 +104,7 @@ namespace PaderConference
                 ClockSkew = TimeSpan.Zero,
             };
 
-            services.AddAuthentication().AddJwtBearer(configureOptions =>
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(configureOptions =>
             {
                 configureOptions.ClaimsIssuer = jwtAppSettingOptions[nameof(JwtIssuerOptions.Issuer)];
                 configureOptions.TokenValidationParameters = tokenValidationParameters;
@@ -130,20 +131,14 @@ namespace PaderConference
                         EquipmentAuthExtensions.EquipmentAuthScheme).Build();
             });
 
-            services.AddSignalR().AddJsonProtocol(options =>
+            services.AddSignalR().AddNewtonsoftJsonProtocol(options =>
             {
-                options.PayloadSerializerOptions.Converters.Add(
-                    new JsonStringEnumMemberConverter(JsonNamingPolicy.CamelCase));
+                options.PayloadSerializerSettings.Converters.Add(
+                    new StringEnumConverter(new CamelCaseNamingStrategy()));
 
-                // i know that this is quite bad, but until System.Text.Json doesn't support adding properties to serialization, we must do it like that...
-                options.PayloadSerializerOptions.Converters.Add(new TypeDiscriminatorConverter<SendingMode>(
-                    new Dictionary<string, Type>(StringComparer.OrdinalIgnoreCase)
-                    {
-                        {new SendAnonymously().Type, typeof(SendAnonymously)},
-                        {new SendPrivately().Type, typeof(SendPrivately)},
-                    }));
-                options.PayloadSerializerOptions.Converters.Add(new TimeSpanConverter());
-                options.PayloadSerializerOptions.Converters.Add(new JsonPatchDocumentConverterFactory());
+                options.PayloadSerializerSettings.Converters.Add(JsonSubtypesConverterBuilder
+                    .Of<SendingMode>(nameof(SendingMode.Type)).RegisterSubtype<SendAnonymously>(SendAnonymously.TYPE)
+                    .RegisterSubtype<SendPrivately>(SendPrivately.TYPE).SerializeDiscriminatorProperty().Build());
             });
 
             services.AddMvc().ConfigureApiBehaviorOptions(options =>
@@ -159,7 +154,7 @@ namespace PaderConference
             services.AddAutoMapper(Assembly.GetExecutingAssembly(), typeof(CoreModule).Assembly);
 
             var redisConfig = Configuration.GetSection("Redis").Get<RedisConfiguration>() ?? new RedisConfiguration();
-            services.AddStackExchangeRedisExtensions<CamelCaseSystemTextJsonSerializer>(redisConfig);
+            services.AddStackExchangeRedisExtensions<CamelCaseNewtonSerializer>(redisConfig);
 
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration => { configuration.RootPath = "ClientApp/build"; });

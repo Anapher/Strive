@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
-using System.Text.Json;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 using PaderConference.Core.Services.Rooms;
 
 namespace PaderConference.Core.Interfaces.Gateways.Repositories
@@ -91,6 +91,6 @@ namespace PaderConference.Core.Interfaces.Gateways.Repositories
         /// <param name="conferenceId">The conference id</param>
         /// <param name="roomId">The room id</param>
         /// <returns>The permissions set for the specified room.</returns>
-        Task<Dictionary<string, JsonElement>> GetRoomPermissions(string conferenceId, string roomId);
+        Task<Dictionary<string, JValue>> GetRoomPermissions(string conferenceId, string roomId);
     }
 }

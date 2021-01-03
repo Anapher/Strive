@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
-using System.Text.Json;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 
 namespace PaderConference.Core.Interfaces.Gateways.Repositories
 {
@@ -8,7 +8,7 @@ namespace PaderConference.Core.Interfaces.Gateways.Repositories
     {
         Task<T> GetPermissionsValue<T>(string participantId, string key);
 
-        Task SetPermissions(string participantId, Dictionary<string, JsonElement> permissions);
+        Task SetPermissions(string participantId, Dictionary<string, JValue> permissions);
 
         Task PublishPermissionsUpdated(string[] participantIds);
     }

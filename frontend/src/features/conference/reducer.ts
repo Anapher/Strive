@@ -1,15 +1,14 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { SuccessOrError } from 'src/communication-types';
+import { DomainError, SuccessOrError } from 'src/communication-types';
 import { events, fetchPermissions } from 'src/core-hub';
 import { ParticipantPermissionInfo, Permissions } from 'src/core-hub.types';
 import { connectSignal, onConnected, onConnectionError, onEventOccurred } from 'src/store/signal/actions';
 import { createSynchronizeObjectReducer } from 'src/store/signal/synchronized-object';
-import { IRestError } from 'src/utils/error-result';
 import { ConferenceInfo, ParticipantDto, TemporaryPermissions } from './types';
 
 export type ConferenceState = {
    conferenceId: string | null;
-   connectionError: IRestError | null;
+   connectionError: DomainError | null;
    participants: ParticipantDto[] | null;
    conferenceState: ConferenceInfo | null;
    myPermissions: Permissions | null;

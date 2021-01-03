@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using Moq;
+using Newtonsoft.Json.Linq;
 using PaderConference.Core.Extensions;
 using PaderConference.Core.Services.Permissions;
 using PaderConference.Core.Services.Rooms;
@@ -19,10 +19,10 @@ namespace PaderConference.Core.Tests.Services.Scenes
 {
     public class ScenesServiceTests : ServiceTest<ScenesService>
     {
-        private MockPermissionsService _permissionsService = new MockPermissionsService(
-            new Dictionary<string, IReadOnlyDictionary<string, JsonElement>>
+        private MockPermissionsService _permissionsService = new(
+            new Dictionary<string, IReadOnlyDictionary<string, JValue>>
             {
-                {TestParticipants.Default.ParticipantId, new Dictionary<string, JsonElement>()},
+                {TestParticipants.Default.ParticipantId, new Dictionary<string, JValue>()},
             });
 
         private readonly ScenesOptions _scenesOptions;
@@ -53,15 +53,13 @@ namespace PaderConference.Core.Tests.Services.Scenes
 
         private void EnableSetScenePermissions()
         {
-            _permissionsService = new MockPermissionsService(
-                new Dictionary<string, IReadOnlyDictionary<string, JsonElement>>
+            _permissionsService = new MockPermissionsService(new Dictionary<string, IReadOnlyDictionary<string, JValue>>
+            {
                 {
-                    {
-                        TestParticipants.Default.ParticipantId,
-                        new[] {PermissionsList.Scenes.CanSetScene.Configure(true)}.ToDictionary(x => x.Key,
-                            x => x.Value)
-                    },
-                });
+                    TestParticipants.Default.ParticipantId,
+                    new[] {PermissionsList.Scenes.CanSetScene.Configure(true)}.ToDictionary(x => x.Key, x => x.Value)
+                },
+            });
         }
 
         [Fact]

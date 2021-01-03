@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using System.Text.Json;
+using Newtonsoft.Json.Linq;
 using PaderConference.Core.Domain.Entities;
 
 namespace PaderConference.Core.Dto.Services
@@ -11,7 +11,7 @@ namespace PaderConference.Core.Dto.Services
     {
         public ConferenceConfiguration Configuration { get; init; } = new();
 
-        public Dictionary<PermissionType, Dictionary<string, JsonElement>> Permissions { get; init; } = new();
+        public Dictionary<PermissionType, Dictionary<string, JValue>> Permissions { get; init; } = new();
 
         public static ConferenceData FromConference(Conference conference)
         {

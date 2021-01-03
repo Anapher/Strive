@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text.Json;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 using PaderConference.Core.Services;
 using PaderConference.Core.Services.Media.Communication;
 using PaderConference.Core.Services.Media.Mediasoup;
@@ -18,11 +18,11 @@ namespace PaderConference.Core.Interfaces.Gateways.Repositories
 
         Task<Dictionary<string, ParticipantStreamInfo>> GetStreams(string conferenceId);
 
-        Task<JsonElement?> GetRtpCapabilities(string conferenceId);
+        Task<JObject?> GetRtpCapabilities(string conferenceId);
 
         Task NotifyClientDisconnected(ConnectionMessageMetadata meta);
 
-        Task<SuccessOrError<JsonElement?>> SendMessage<TRequest>(ConferenceDependentKey key, string conferenceId,
+        Task<SuccessOrError<JToken?>> SendMessage<TRequest>(ConferenceDependentKey key, string conferenceId,
             ConnectionMessage<TRequest> message);
     }
 }

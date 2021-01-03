@@ -1,7 +1,7 @@
 ﻿// ReSharper disable AutoPropertyCanBeMadeGetOnly.Local
 
 using System.Collections.Generic;
-using System.Text.Json;
+using Newtonsoft.Json.Linq;
 
 namespace PaderConference.Core.Domain.Entities
 {
@@ -28,7 +28,7 @@ namespace PaderConference.Core.Domain.Entities
         /// <summary>
         ///     Conference permission
         /// </summary>
-        public Dictionary<PermissionType, Dictionary<string, JsonElement>> Permissions { get; set; } = new();
+        public Dictionary<PermissionType, Dictionary<string, JValue>> Permissions { get; set; } = new();
 
         public ConferenceConfiguration Configuration { get; set; } = new();
 

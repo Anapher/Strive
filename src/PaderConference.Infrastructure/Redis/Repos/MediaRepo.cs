@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text.Json;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 using PaderConference.Core.Interfaces;
 using PaderConference.Core.Interfaces.Gateways.Repositories;
 using PaderConference.Core.Services;
@@ -54,11 +54,11 @@ namespace PaderConference.Infrastructure.Redis.Repos
                 RedisKeys.Media.Streams.GetName(conferenceId));
         }
 
-        public async Task<JsonElement?> GetRtpCapabilities(string conferenceId)
+        public async Task<JObject?> GetRtpCapabilities(string conferenceId)
         {
-            var routerCapabilities = await _database.GetAsync<JsonElement>(
+            var routerCapabilities = await _database.GetAsync<JObject>(
                 RedisKeys.Media.RtpCapabilitiesKey.GetName(conferenceId));
-            if (routerCapabilities.ValueKind == JsonValueKind.Undefined)
+            if (routerCapabilities.Type == JTokenType.Undefined)
                 return null;
 
             return routerCapabilities;
@@ -70,10 +70,10 @@ namespace PaderConference.Infrastructure.Redis.Repos
                 new ConnectionMessage<object?>(null, meta));
         }
 
-        public Task<SuccessOrError<JsonElement?>> SendMessage<TRequest>(ConferenceDependentKey key, string conferenceId,
+        public Task<SuccessOrError<JToken?>> SendMessage<TRequest>(ConferenceDependentKey key, string conferenceId,
             ConnectionMessage<TRequest> message)
         {
-            return _database.InvokeAsync<JsonElement?, ConnectionMessage<TRequest>>(key.GetName(conferenceId), message);
+            return _database.InvokeAsync<JToken?, ConnectionMessage<TRequest>>(key.GetName(conferenceId), message);
         }
     }
 }

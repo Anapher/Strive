@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json.Linq;
 using Nito.AsyncEx;
 using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Extensions;
@@ -300,7 +300,7 @@ namespace PaderConference.Core.Services.Rooms
             return SuccessOrError.Succeeded;
         }
 
-        private async Task<IReadOnlyDictionary<string, JsonElement>?> GetRoomPermissions(string roomId)
+        private async Task<IReadOnlyDictionary<string, JValue>?> GetRoomPermissions(string roomId)
         {
             return await _roomRepo.GetRoomPermissions(_conferenceId, roomId);
         }

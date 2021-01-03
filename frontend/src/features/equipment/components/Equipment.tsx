@@ -10,6 +10,7 @@ import useMicrophone from 'src/store/webrtc/hooks/useMicrophone';
 import { ProducerSource } from 'src/store/webrtc/types';
 import { UseMediaState } from 'src/store/webrtc/hooks/useMedia';
 import { mapValues } from 'src/utils/obj-utils';
+import * as errors from 'src/errors';
 
 const deviceName = getDeviceName();
 
@@ -65,9 +66,7 @@ export default function Equipment() {
                      break;
                }
             } catch (error) {
-               dispatch(
-                  coreHub.equipmentErrorOccurred({ message: error.toString(), code: -1, type: 'EquipmentError' }),
-               );
+               dispatch(coreHub.equipmentErrorOccurred(errors.equipmentError(error.toString())));
             }
          };
 

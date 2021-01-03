@@ -1,4 +1,5 @@
 import { Operation } from 'fast-json-patch';
+import { DomainError } from './communication-types';
 import {
    CreateRoomDto,
    EquipmentCommand,
@@ -12,7 +13,6 @@ import {
 import { RegisterEquipmentRequestDto } from './features/equipment/types';
 import { connectSignal, invoke, onInvokeReturn } from './store/signal/actions';
 import { ChangeProducerSourceDto, ChangeStreamDto } from './store/webrtc/types';
-import { IRestError } from './utils/error-result';
 
 export const joinConference = (conferenceId: string, defaultEvents: string[], accessToken: string) =>
    connectSignal({ conferenceId, access_token: accessToken }, defaultEvents, { conferenceId });
@@ -40,7 +40,7 @@ export const getEquipmentToken = createHubFn('GetEquipmentToken');
 
 export const registerEquipment = createHubFn<RegisterEquipmentRequestDto>('RegisterEquipment');
 export const sendEquipmentCommand = createHubFn<EquipmentCommand>('SendEquipmentCommand');
-export const equipmentErrorOccurred = createHubFn<IRestError>('EquipmentErrorOccurred');
+export const equipmentErrorOccurred = createHubFn<DomainError>('EquipmentErrorOccurred');
 export const equipmentUpdateStatus = createHubFn<EquipmentStatus>('EquipmentUpdateStatus');
 
 export const changeStream = createHubFn<ChangeStreamDto>('ChangeStream');

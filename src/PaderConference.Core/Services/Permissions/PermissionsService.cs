@@ -3,10 +3,10 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json.Linq;
 using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Extensions;
 using PaderConference.Core.Interfaces;
@@ -44,7 +44,7 @@ namespace PaderConference.Core.Services.Permissions
         private readonly IDisposable _optionsDisposable;
 
         // Participant Id -> (permission key -> permission value)
-        private readonly ISynchronizedObject<IImmutableDictionary<string, IImmutableDictionary<string, JsonElement>>>
+        private readonly ISynchronizedObject<IImmutableDictionary<string, IImmutableDictionary<string, JValue>>>
             _tempPermissions;
 
         public PermissionsService(string conferenceId, IConferenceRepo conferenceRepo, IPermissionsRepo permissionsRepo,
@@ -66,10 +66,9 @@ namespace PaderConference.Core.Services.Permissions
                 new ConferenceConfigWatcher(conferenceId, conferenceRepo, conferenceManager, RefreshPermissions);
 
             _tempPermissions =
-                synchronizationManager
-                    .Register<IImmutableDictionary<string, IImmutableDictionary<string, JsonElement>>>(
-                        "tempPermissions", ImmutableDictionary<string, IImmutableDictionary<string, JsonElement>>.Empty,
-                        ParticipantGroup.Moderators);
+                synchronizationManager.Register<IImmutableDictionary<string, IImmutableDictionary<string, JValue>>>(
+                    "tempPermissions", ImmutableDictionary<string, IImmutableDictionary<string, JValue>>.Empty,
+                    ParticipantGroup.Moderators);
 
             RegisterLayerProvider(FetchPermissions);
         }
@@ -117,15 +116,15 @@ namespace PaderConference.Core.Services.Permissions
 
             if (value != null)
             {
-                if (!descriptor.ValidateValue(value.Value))
+                if (!descriptor.ValidateValue(value))
                     return PermissionsError.InvalidPermissionValueType;
 
                 await _tempPermissions.Update(current =>
                 {
                     if (!current.TryGetValue(targetParticipantId, out var newPermissions))
-                        newPermissions = ImmutableDictionary<string, JsonElement>.Empty;
+                        newPermissions = ImmutableDictionary<string, JValue>.Empty;
 
-                    newPermissions = newPermissions.SetItem(descriptor.Key, value.Value);
+                    newPermissions = newPermissions.SetItem(descriptor.Key, value);
                     return current.SetItem(targetParticipantId, newPermissions);
                 });
             }
@@ -183,7 +182,7 @@ namespace PaderConference.Core.Services.Permissions
 
         public async ValueTask RefreshPermissions(IEnumerable<Participant> participants)
         {
-            var newPermissions = new List<(Participant, Dictionary<string, JsonElement>)>();
+            var newPermissions = new List<(Participant, Dictionary<string, JValue>)>();
             foreach (var participant in participants)
             {
                 newPermissions.Add((participant, await BuildFlattenPermissions(participant)));
@@ -207,7 +206,7 @@ namespace PaderConference.Core.Services.Permissions
             }
         }
 
-        private async ValueTask<Dictionary<string, JsonElement>> BuildFlattenPermissions(Participant participant)
+        private async ValueTask<Dictionary<string, JValue>> BuildFlattenPermissions(Participant participant)
         {
             var layers = new List<PermissionLayer>();
             foreach (var fetchPermissionsDelegate in _fetchPermissionsDelegates)
@@ -226,7 +225,7 @@ namespace PaderConference.Core.Services.Permissions
             {
                 CommonPermissionLayers.ConferenceDefault(_defaultPermissions.Default[PermissionType.Conference]),
                 CommonPermissionLayers.Conference(_conferenceConfigWatcher.ConferencePermissions ??
-                                                  ImmutableDictionary<string, JsonElement>.Empty),
+                                                  ImmutableDictionary<string, JValue>.Empty),
             };
 
             if (_conferenceConfigWatcher.Moderators.Contains(participant.ParticipantId))
@@ -234,7 +233,7 @@ namespace PaderConference.Core.Services.Permissions
                 {
                     CommonPermissionLayers.ModeratorDefault(_defaultPermissions.Default[PermissionType.Moderator]),
                     CommonPermissionLayers.Moderator(_conferenceConfigWatcher.ModeratorPermissions ??
-                                                     ImmutableDictionary<string, JsonElement>.Empty),
+                                                     ImmutableDictionary<string, JValue>.Empty),
                 });
 
             if (_tempPermissions.Current.TryGetValue(participant.ParticipantId, out var temporaryPermissions))

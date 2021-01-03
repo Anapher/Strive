@@ -3,8 +3,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Extensions;
 using PaderConference.Core.Services.Permissions;
@@ -13,9 +13,9 @@ namespace PaderConference.Core.Tests.Services
 {
     public class MockPermissionsService : IPermissionsService
     {
-        private readonly Dictionary<string, IReadOnlyDictionary<string, JsonElement>> _permissions;
+        private readonly Dictionary<string, IReadOnlyDictionary<string, JValue>> _permissions;
 
-        public MockPermissionsService(Dictionary<string, IReadOnlyDictionary<string, JsonElement>> permissions)
+        public MockPermissionsService(Dictionary<string, IReadOnlyDictionary<string, JValue>> permissions)
         {
             _permissions = permissions;
         }
@@ -25,7 +25,7 @@ namespace PaderConference.Core.Tests.Services
             if (_permissions.TryGetValue(participant.ParticipantId, out var permissions))
                 return new PermissionStack(permissions.Yield().ToList());
 
-            return new PermissionStack(new IReadOnlyDictionary<string, JsonElement>[0]);
+            return new PermissionStack(new IReadOnlyDictionary<string, JValue>[0]);
         }
 
         public void RegisterLayerProvider(FetchPermissionsDelegate fetchPermissions)

@@ -2,7 +2,7 @@
 // this file is validated so the nullable annotations are enforced
 
 using System.Collections.Generic;
-using System.Text.Json;
+using Newtonsoft.Json.Linq;
 using PaderConference.Core.Domain.Entities;
 
 namespace PaderConference.Models.Request
@@ -11,6 +11,6 @@ namespace PaderConference.Models.Request
     {
         public ConferenceConfiguration Configuration { get; set; }
 
-        public Dictionary<PermissionType, Dictionary<string, JsonElement>>? Permissions { get; set; }
+        public Dictionary<PermissionType, Dictionary<string, JValue>>? Permissions { get; set; }
     }
 }
