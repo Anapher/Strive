@@ -133,6 +133,7 @@ namespace PaderConference
 
             services.AddSignalR().AddNewtonsoftJsonProtocol(options =>
             {
+                options.PayloadSerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
                 options.PayloadSerializerSettings.Converters.Add(
                     new StringEnumConverter(new CamelCaseNamingStrategy()));
 
@@ -149,7 +150,10 @@ namespace PaderConference
                         .ToDictionary(x => x.Key, x => x.Value.Errors.First().ErrorMessage)));
             }).AddFluentValidation(fv =>
                 fv.RegisterValidatorsFromAssemblyContaining<Startup>()
-                    .RegisterValidatorsFromAssemblyContaining<CoreModule>()).AddNewtonsoftJson();
+                    .RegisterValidatorsFromAssemblyContaining<CoreModule>()).AddNewtonsoftJson(options =>
+                {
+                    options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+                });
 
             services.AddAutoMapper(Assembly.GetExecutingAssembly(), typeof(CoreModule).Assembly);
 
