@@ -17,11 +17,6 @@ namespace PaderConference.Core.Domain.Entities
         public IImmutableList<string> Moderators { get; set; } = ImmutableList<string>.Empty;
 
         /// <summary>
-        ///     The type of the conference. Set by the front end to synchronize devices
-        /// </summary>
-        public string? ConferenceType { get; set; }
-
-        /// <summary>
         ///     The starting time of this conference. If <see cref="ScheduleCron" /> is not null, this is the first time the
         ///     conference starts
         /// </summary>
