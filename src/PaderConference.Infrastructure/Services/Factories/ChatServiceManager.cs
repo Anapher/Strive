@@ -2,17 +2,15 @@
 using System.Collections.Generic;
 using Autofac;
 using Autofac.Core;
-using PaderConference.Core.Services.BreakoutRoom;
+using PaderConference.Core.Services.Chat;
 using PaderConference.Core.Services.Permissions;
-using PaderConference.Core.Services.Rooms;
 using PaderConference.Core.Services.Synchronization;
-using PaderConference.Infrastructure.ServiceFactories.Base;
 
-namespace PaderConference.Infrastructure.ServiceFactories
+namespace PaderConference.Infrastructure.Services.Factories
 {
-    public class BreakoutRoomServiceManager : AutowiredConferenceServiceManager<BreakoutRoomService>
+    public class ChatServiceManager : AutowiredConferenceServiceManager<ChatService>
     {
-        public BreakoutRoomServiceManager(IComponentContext context) : base(context)
+        public ChatServiceManager(IComponentContext context) : base(context)
         {
         }
 
@@ -21,7 +19,7 @@ namespace PaderConference.Infrastructure.ServiceFactories
         {
             yield return await ResolveServiceAsync<PermissionsService>(conferenceId);
             yield return await ResolveServiceAsync<SynchronizationService>(conferenceId);
-            yield return await ResolveServiceAsync<RoomsService>(conferenceId);
+            yield return await ResolveOptions(conferenceId, disposables, conference => conference.Configuration.Chat);
         }
     }
 }

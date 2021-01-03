@@ -73,22 +73,25 @@ namespace PaderConference.Infrastructure.Conferencing
         public async ValueTask<Participant> Participate(string conferenceId, string participantId, string role,
             string? displayName)
         {
-            using (_logger.BeginScope("Participate()"))
-            using (_logger.BeginScope(new Dictionary<string, object>
+            using (_logger.BeginMethodScope(new Dictionary<string, object>
             {
                 {"conferenceId", conferenceId}, {"participantId", participantId},
             }))
             {
-                var conference = await _conferenceRepo.FindById(conferenceId);
-                if (conference == null)
+                if (!_participantsMap.ConferenceParticipants.ContainsKey(conferenceId))
                 {
-                    _logger.LogDebug("The conference was not found.");
-                    throw new ConferenceNotFoundException(conferenceId);
+                    var conference = await _conferenceRepo.FindById(conferenceId);
+                    if (conference == null)
+                    {
+                        _logger.LogDebug("The conference was not found.");
+                        throw new ConferenceNotFoundException(conferenceId);
+                    }
                 }
 
                 // conference must not be open to participate
 
-                _logger.LogDebug("Conference: {@conference}", conference);
+                _logger.LogDebug("User {participantId} participates in conference {conferenceId}", participantId,
+                    conferenceId);
 
                 var participant = new Participant(participantId, displayName, role, DateTimeOffset.UtcNow);
                 if (!_participantsMap.AddParticipant(conferenceId, participant))

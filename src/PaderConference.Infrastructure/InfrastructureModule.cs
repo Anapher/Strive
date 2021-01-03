@@ -10,7 +10,7 @@ using PaderConference.Infrastructure.Data.Repos;
 using PaderConference.Infrastructure.Hubs;
 using PaderConference.Infrastructure.Interfaces;
 using PaderConference.Infrastructure.Redis;
-using PaderConference.Infrastructure.ServiceFactories.Base;
+using PaderConference.Infrastructure.Services;
 using PaderConference.Infrastructure.Sockets;
 
 namespace PaderConference.Infrastructure
@@ -42,6 +42,8 @@ namespace PaderConference.Infrastructure
             builder.RegisterType<CachedConferenceRepo>().As<IConferenceRepo>().SingleInstance();
 
             builder.RegisterType<OptionsAuthService>().AsImplementedInterfaces().SingleInstance();
+
+            builder.RegisterType<ServiceInvokerFactory>().AsImplementedInterfaces().SingleInstance();
         }
     }
 }

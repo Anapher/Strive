@@ -14,32 +14,33 @@ namespace PaderConference.Core.Services
 
 
         // Conference
-        Conference_NotFound = 1000000,
+        Conference_NotFound,
         Conference_UnexpectedError,
         Conference_NotOpen,
         Conference_ParticipantNotRegistered,
         Conference_InternalServiceError,
         Conference_ParticipantConnectionNotFound,
+        Conference_InternalError,
 
         // Chat
-        Chat_InvalidMode = 1000003,
+        Chat_InvalidMode,
 
         // Rooms
-        Rooms_NotFound = 1000203,
+        Rooms_NotFound,
 
         // Permissions
-        Permissions_PermissionKeyNotFound = 1000300,
-        Permissions_InvalidPermissionValueType = 1000302,
+        Permissions_PermissionKeyNotFound,
+        Permissions_InvalidPermissionValueType,
 
         // Equipment
-        Equipment_NotFound = 1000400,
+        Equipment_NotFound,
 
         // Scenes
-        Scenes_RoomNotFound = 1000501,
+        Scenes_RoomNotFound,
 
         // Breakout Rooms
-        BreakoutRoom_AlreadyOpen = 1000600,
-        BreakoutRoom_NotOpen = 1000602,
+        BreakoutRoom_AlreadyOpen,
+        BreakoutRoom_NotOpen,
         BreakoutRoom_AssigningParticipantsFailed,
     }
 }

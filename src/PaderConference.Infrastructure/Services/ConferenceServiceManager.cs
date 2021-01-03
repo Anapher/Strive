@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Nito.AsyncEx;
 using PaderConference.Core.Services;
 
-namespace PaderConference.Infrastructure.ServiceFactories.Base
+namespace PaderConference.Infrastructure.Services
 {
     public abstract class ConferenceServiceManager<TService> : IConferenceServiceManager<TService>
         where TService : IConferenceService

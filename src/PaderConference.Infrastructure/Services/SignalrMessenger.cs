@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.SignalR;
 using PaderConference.Core.Signaling;
 
-namespace PaderConference.Infrastructure.ServiceFactories.Base
+namespace PaderConference.Infrastructure.Services
 {
     public class SignalrMessenger<THub> : ISignalMessenger where THub : Hub
     {

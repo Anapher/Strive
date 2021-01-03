@@ -1,8 +1,7 @@
 ﻿using Autofac;
 using PaderConference.Core.Services.Synchronization;
-using PaderConference.Infrastructure.ServiceFactories.Base;
 
-namespace PaderConference.Infrastructure.ServiceFactories
+namespace PaderConference.Infrastructure.Services.Factories
 {
     public class SynchronizationServiceManager : AutowiredConferenceServiceManager<SynchronizationService>
     {

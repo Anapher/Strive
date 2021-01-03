@@ -12,7 +12,8 @@ namespace PaderConference.Core.Services
         ValueTask InitializeAsync();
 
         /// <summary>
-        ///     A new client connected.
+        ///     A new client connected. This method may be used to register that participant internally. The participant must not
+        ///     receive data here.
         /// </summary>
         /// <param name="participant">The participant that connected</param>
         ValueTask OnClientConnected(Participant participant);
@@ -24,7 +25,8 @@ namespace PaderConference.Core.Services
         ValueTask InitializeParticipant(Participant participant);
 
         /// <summary>
-        ///     A client disconnected
+        ///     A client disconnected. Please note that it is not necessary that <see cref="OnClientConnected" /> or
+        ///     <see cref="InitializeParticipant" /> was called before.
         /// </summary>
         /// <param name="participant">The participant that disconnected</param>
         ValueTask OnClientDisconnected(Participant participant);

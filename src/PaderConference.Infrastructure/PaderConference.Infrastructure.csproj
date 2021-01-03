@@ -23,9 +23,5 @@
     <ProjectReference Include="..\PaderConference.Core\PaderConference.Core.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Hubs\Dto\" />
-  </ItemGroup>
-
   <Import Project="../nullable.props" />
 </Project>

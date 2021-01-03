@@ -5,20 +5,16 @@ using System.Security.Claims;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Xml;
-using Autofac;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using PaderConference.Core;
-using PaderConference.Core.Domain;
-using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Dto;
+using PaderConference.Core.Dto.UseCaseRequests;
 using PaderConference.Core.Extensions;
 using PaderConference.Core.Interfaces;
-using PaderConference.Core.Interfaces.Gateways.Repositories;
-using PaderConference.Core.Interfaces.Services;
-using PaderConference.Core.Services;
+using PaderConference.Core.Interfaces.UseCases;
 using PaderConference.Core.Services.BreakoutRoom;
 using PaderConference.Core.Services.BreakoutRoom.Dto;
 using PaderConference.Core.Services.BreakoutRoom.Requests;
@@ -39,240 +35,138 @@ using PaderConference.Core.Services.Rooms;
 using PaderConference.Core.Services.Rooms.Requests;
 using PaderConference.Core.Signaling;
 using PaderConference.Infrastructure.Extensions;
+using PaderConference.Infrastructure.Services;
 
 namespace PaderConference.Infrastructure.Hubs
 {
     [Authorize]
-    public class CoreHub : ServiceHubBase
+    public class CoreHub : Hub
     {
-        private readonly IConnectionMapping _connectionMapping;
-        private readonly IConferenceRepo _conferenceRepo;
+        private readonly IJoinConferenceUseCase _joinConferenceUseCase;
+        private readonly ILeaveConferenceUseCase _leaveConferenceUseCase;
+        private readonly IServiceInvoker _invoker;
         private readonly ILogger<CoreHub> _logger;
 
-        public CoreHub(IConferenceManager conferenceManager, IConnectionMapping connectionMapping,
-            IEnumerable<IConferenceServiceManager> conferenceServices, IComponentContext componentContext,
-            IConferenceRepo conferenceRepo, ILogger<CoreHub> logger) : base(connectionMapping, conferenceManager,
-            conferenceServices, componentContext, logger)
+        public CoreHub(IJoinConferenceUseCase joinConferenceUseCase, ILeaveConferenceUseCase leaveConferenceUseCase,
+            IServiceInvokerFactory serviceInvokerFactory, ILogger<CoreHub> logger)
         {
+            _joinConferenceUseCase = joinConferenceUseCase;
+            _leaveConferenceUseCase = leaveConferenceUseCase;
+            _invoker = serviceInvokerFactory.CreateForHub(this);
             _logger = logger;
-            _connectionMapping = connectionMapping;
-            _conferenceRepo = conferenceRepo;
         }
 
         public override async Task OnConnectedAsync()
         {
-            using (_logger.BeginMethodScope())
-            using (_logger.BeginScope(new Dictionary<string, object> {{"connectionId", Context.ConnectionId}}))
+            using (_logger.BeginMethodScope(new Dictionary<string, object> {{"connectionId", Context.ConnectionId}}))
             {
-                var httpContext = Context.GetHttpContext();
-                if (httpContext != null)
+                _logger.LogDebug("Client tries to connect");
+
+                SuccessOrError result;
+                try
                 {
-                    var conferenceId = httpContext.Request.Query["conferenceId"].ToString();
-                    var participantId = httpContext.User.GetUserId();
-                    var role = httpContext.User.Claims.First(x => x.Type == ClaimTypes.Role).Value;
+                    result = await HandleJoin();
+                }
+                catch (Exception e)
+                {
+                    _logger.LogError(e, "An error occurred when trying to join");
+                    result = ConferenceError.UnexpectedError("An unexpected error occurred");
+                }
 
-                    using (_logger.BeginScope(new Dictionary<string, object>
-                    {
-                        {"conferenceId", conferenceId}, {"participantId", participantId}, {"role", role},
-                    }))
-                    {
-                        _logger.LogDebug("Client tries to connect");
+                if (!result.Success)
+                {
+                    _logger.LogWarning("Client join was not successful: {@error}", result.Error);
 
-                        // initialize all services before submitting events
-                        try
-                        {
-                            var conference = await _conferenceRepo.FindById(conferenceId);
-                            if (conference == null)
-                            {
-                                _logger.LogDebug("Conference was not found");
-
-                                await Clients.Caller.SendAsync(CoreHubMessages.Response.OnConnectionError,
-                                    ConferenceError.ConferenceNotFound);
-                                Context.Abort();
-                                return;
-                            }
-
-                            var services = ConferenceServices.Select(x => x.GetService(conferenceId)).ToList();
-                            foreach (var valueTask in services)
-                            {
-                                await valueTask;
-                            }
-
-                            switch (role)
-                            {
-                                case PrincipalRoles.Equipment:
-                                {
-                                    if (!ConferenceManager.TryGetParticipant(conferenceId, participantId,
-                                        out var participant))
-                                    {
-                                        await Clients.Caller.SendAsync(CoreHubMessages.Response.OnConnectionError,
-                                            ConferenceError.UnexpectedError(
-                                                "Participant is not connected to this conference."));
-                                        Context.Abort();
-                                        return;
-                                    }
-
-                                    if (!_connectionMapping.Add(Context.ConnectionId, participant, true))
-                                    {
-                                        _logger.LogError(
-                                            "Participant {participantId} could not be added to connection mapping.",
-                                            participant.ParticipantId);
-                                        await Clients.Caller.SendAsync(CoreHubMessages.Response.OnConnectionError,
-                                            ConferenceError.UnexpectedError(
-                                                "Participant could not be added to connection mapping."));
-                                        Context.Abort();
-                                        return;
-                                    }
-
-                                    var equipmentService = await ConferenceServices
-                                        .OfType<IConferenceServiceManager<EquipmentService>>().First()
-                                        .GetService(conferenceId);
-
-                                    await equipmentService.OnEquipmentConnected(participant, Context.ConnectionId);
-                                    break;
-                                }
-                                case PrincipalRoles.Moderator:
-                                case PrincipalRoles.User:
-                                case PrincipalRoles.Guest:
-                                {
-                                    Participant participant;
-                                    try
-                                    {
-                                        participant = await ConferenceManager.Participate(conferenceId, participantId,
-                                            role, httpContext.User.Identity?.Name);
-                                    }
-                                    catch (ConferenceNotFoundException)
-                                    {
-                                        _logger.LogDebug("Abort connection");
-                                        await Clients.Caller.SendAsync(CoreHubMessages.Response.OnConnectionError,
-                                            ConferenceError.ConferenceNotFound);
-                                        Context.Abort();
-                                        return;
-                                    }
-                                    catch (Exception e)
-                                    {
-                                        _logger.LogError(e, "Unexpected exception occurred.");
-                                        await Clients.Caller.SendAsync(CoreHubMessages.Response.OnConnectionError,
-                                            ConferenceError.UnexpectedError(e.Message));
-                                        Context.Abort();
-                                        return;
-                                    }
-
-                                    if (!_connectionMapping.Add(Context.ConnectionId, participant))
-                                    {
-                                        _logger.LogError(
-                                            "Participant {participantId} could not be added to connection mapping.",
-                                            participant.ParticipantId);
-                                        await Clients.Caller.SendAsync(CoreHubMessages.Response.OnConnectionError,
-                                            ConferenceError.UnexpectedError(
-                                                "Participant could not be added to connection mapping."));
-                                        Context.Abort();
-                                        return;
-                                    }
-
-                                    foreach (var service in services)
-                                    {
-                                        await service.Result.OnClientConnected(participant);
-                                    }
-
-                                    await Groups.AddToGroupAsync(Context.ConnectionId, conferenceId);
-
-                                    foreach (var service in services)
-                                    {
-                                        await service.Result.InitializeParticipant(participant);
-                                    }
-
-                                    break;
-                                }
-                            }
-                        }
-                        catch (Exception e)
-                        {
-                            await Clients.Caller.SendAsync(CoreHubMessages.Response.OnConnectionError,
-                                ConferenceError.UnexpectedError("An unexpected error occurred"));
-                            Context.Abort();
-                        }
-                    }
+                    await Clients.Caller.SendAsync(CoreHubMessages.Response.OnConnectionError, result.Error);
+                    Context.Abort();
                 }
             }
         }
 
-        public override async Task OnDisconnectedAsync(Exception exception)
+        private async Task<SuccessOrError> HandleJoin()
         {
-            if (!_connectionMapping.Connections.TryGetValue(Context.ConnectionId, out var participant))
-                return;
-
-            var conferenceId = ConferenceManager.GetConferenceOfParticipant(participant);
-
-            var role = Context.User.Claims.First(x => x.Type == ClaimTypes.Role).Value;
-            if (role == PrincipalRoles.Equipment)
+            var httpContext = Context.GetHttpContext();
+            if (httpContext != null)
             {
-                var equipmentService = await ConferenceServices.OfType<IConferenceServiceManager<EquipmentService>>()
-                    .First().GetService(conferenceId);
+                var conferenceId = httpContext.Request.Query["conferenceId"].ToString();
+                var participantId = httpContext.User.GetUserId();
+                var role = httpContext.User.Claims.First(x => x.Type == ClaimTypes.Role).Value;
+                var name = httpContext.User.Identity?.Name;
 
-                await equipmentService.OnEquipmentDisconnected(participant, Context.ConnectionId);
-                _connectionMapping.Remove(Context.ConnectionId);
-                return;
+                using var _ = _logger.BeginMethodScope(new Dictionary<string, object>
+                {
+                    {"conferenceId", conferenceId}, {"participantId", participantId}, {"role", role},
+                });
+
+                var login = await _joinConferenceUseCase.Handle(new JoinConferenceRequest(conferenceId, participantId,
+                    role, name, Context.ConnectionId, Context.ConnectionAborted,
+                    () => Groups.AddToGroupAsync(Context.ConnectionId, conferenceId)));
+
+                if (!login.Success)
+                    return login.Error;
+
+                return SuccessOrError.Succeeded;
             }
 
-            // important for participants list, else the disconnected participant will still be in the list
-            await ConferenceManager.RemoveParticipant(participant);
+            _logger.LogError("HttpContext is null");
+            return ConferenceError.UnexpectedError("An unexpected error occurred: HttpContext is null");
+        }
 
-            // Todo: close conference if it was the last participant and some time passed
-            foreach (var service in ConferenceServices)
-                await (await service.GetService(conferenceId)).OnClientDisconnected(participant);
-
-            _connectionMapping.Remove(Context.ConnectionId);
+        public override async Task OnDisconnectedAsync(Exception exception)
+        {
+            _logger.LogDebug(exception, "Connection {connectionId} disconnected", Context.ConnectionId);
+            await _leaveConferenceUseCase.Handle(new LeaveConferenceRequest(Context.ConnectionId));
         }
 
         public Task<SuccessOrError> OpenConference()
         {
-            return InvokeService<ConferenceControlService>(service => service.OpenConference,
+            return _invoker.InvokeService<ConferenceControlService>(service => service.OpenConference,
                 new MethodOptions {ConferenceCanBeClosed = true});
         }
 
         public Task<SuccessOrError> CloseConference()
         {
-            return InvokeService<ConferenceControlService>(service => service.CloseConference);
+            return _invoker.InvokeService<ConferenceControlService>(service => service.CloseConference);
         }
 
         public Task<SuccessOrError> KickParticipant(KickParticipantRequest message)
         {
-            return InvokeService<ConferenceControlService, KickParticipantRequest>(message,
+            return _invoker.InvokeService<ConferenceControlService, KickParticipantRequest>(message,
                 service => service.KickParticipant);
         }
 
         public Task<SuccessOrError<ParticipantPermissionInfo>> FetchPermissions(string? participantId)
         {
-            return InvokeService<PermissionsService, string?, ParticipantPermissionInfo>(participantId,
+            return _invoker.InvokeService<PermissionsService, string?, ParticipantPermissionInfo>(participantId,
                 service => service.FetchPermissions);
         }
 
         public Task<SuccessOrError> SetTemporaryPermission(SetTemporaryPermissionRequest dto)
         {
-            return InvokeService<PermissionsService, SetTemporaryPermissionRequest>(dto,
+            return _invoker.InvokeService<PermissionsService, SetTemporaryPermissionRequest>(dto,
                 service => service.SetTemporaryPermission);
         }
 
         public Task<SuccessOrError> CreateRooms(IReadOnlyList<CreateRoomMessage> dto)
         {
-            return InvokeService<RoomsService, IReadOnlyList<CreateRoomMessage>>(dto, service => service.CreateRooms);
+            return _invoker.InvokeService<RoomsService, IReadOnlyList<CreateRoomMessage>>(dto,
+                service => service.CreateRooms);
         }
 
         public Task<SuccessOrError> RemoveRooms(IReadOnlyList<string> dto)
         {
-            return InvokeService<RoomsService, IReadOnlyList<string>>(dto, service => service.RemoveRooms);
+            return _invoker.InvokeService<RoomsService, IReadOnlyList<string>>(dto, service => service.RemoveRooms);
         }
 
         public Task<SuccessOrError> OpenBreakoutRooms(OpenBreakoutRoomsRequest request)
         {
-            return InvokeService<BreakoutRoomService, OpenBreakoutRoomsRequest>(request,
+            return _invoker.InvokeService<BreakoutRoomService, OpenBreakoutRoomsRequest>(request,
                 service => service.OpenBreakoutRooms);
         }
 
         public Task<SuccessOrError> CloseBreakoutRooms()
         {
-            return InvokeService<BreakoutRoomService>(service => service.CloseBreakoutRooms);
+            return _invoker.InvokeService<BreakoutRoomService>(service => service.CloseBreakoutRooms);
         }
 
         public Task<SuccessOrError> ChangeBreakoutRooms(JsonPatchDocument<BreakoutRoomsOptions> dto)
@@ -282,105 +176,102 @@ namespace PaderConference.Infrastructure.Hubs
             if (timespanPatchOp?.value != null)
                 timespanPatchOp.value = XmlConvert.ToTimeSpan((string) timespanPatchOp.value);
 
-            return InvokeService<BreakoutRoomService, JsonPatchDocument<BreakoutRoomsOptions>>(dto,
+            return _invoker.InvokeService<BreakoutRoomService, JsonPatchDocument<BreakoutRoomsOptions>>(dto,
                 service => service.ChangeBreakoutRooms);
         }
 
         public Task<SuccessOrError> SwitchRoom(SwitchRoomRequest dto)
         {
-            return InvokeService<RoomsService, SwitchRoomRequest>(dto, service => service.SwitchRoom);
+            return _invoker.InvokeService<RoomsService, SwitchRoomRequest>(dto, service => service.SwitchRoom);
         }
 
         public Task<SuccessOrError> SendChatMessage(SendChatMessageRequest dto)
         {
-            return InvokeService<ChatService, SendChatMessageRequest>(dto, service => service.SendMessage);
+            return _invoker.InvokeService<ChatService, SendChatMessageRequest>(dto, service => service.SendMessage);
         }
 
         public Task<SuccessOrError<IReadOnlyList<ChatMessageDto>>> RequestChat()
         {
-            return InvokeService<ChatService, IReadOnlyList<ChatMessageDto>>(service => service.FetchMyMessages);
+            return _invoker.InvokeService<ChatService, IReadOnlyList<ChatMessageDto>>(
+                service => service.FetchMyMessages);
         }
 
         public Task<SuccessOrError> SetUserIsTyping(bool isTyping)
         {
-            return InvokeService<ChatService, bool>(isTyping, service => service.SetUserIsTyping);
+            return _invoker.InvokeService<ChatService, bool>(isTyping, service => service.SetUserIsTyping);
         }
 
         public Task<SuccessOrError<JsonElement?>> RequestRouterCapabilities()
         {
-            return InvokeService<MediaService, JsonElement?>(service => service.GetRouterCapabilities,
+            return _invoker.InvokeService<MediaService, JsonElement?>(service => service.GetRouterCapabilities,
                 new MethodOptions {ConferenceCanBeClosed = true});
         }
 
         public Task<SuccessOrError<JsonElement?>> InitializeConnection(JsonElement element)
         {
-            return InvokeService<MediaService, JsonElement, JsonElement?>(element,
+            return _invoker.InvokeService<MediaService, JsonElement, JsonElement?>(element,
                 service => service.Redirect<JsonElement>(RedisChannels.Media.Request.InitializeConnection),
                 new MethodOptions {ConferenceCanBeClosed = true});
         }
 
         public Task<SuccessOrError<JsonElement?>> CreateWebRtcTransport(JsonElement element)
         {
-            return InvokeService<MediaService, JsonElement, JsonElement?>(element,
+            return _invoker.InvokeService<MediaService, JsonElement, JsonElement?>(element,
                 service => service.Redirect<JsonElement>(RedisChannels.Media.Request.CreateTransport),
                 new MethodOptions {ConferenceCanBeClosed = true});
         }
 
         public Task<SuccessOrError<JsonElement?>> ConnectWebRtcTransport(JsonElement element)
         {
-            return InvokeService<MediaService, JsonElement, JsonElement?>(element,
-                service => service.Redirect<JsonElement>(RedisChannels.Media.Request.ConnectTransport),
-                new MethodOptions {ConferenceCanBeClosed = true});
+            return _invoker.InvokeService<MediaService, JsonElement, JsonElement?>(element,
+                service => service.Redirect<JsonElement>(RedisChannels.Media.Request.ConnectTransport));
         }
 
         public Task<SuccessOrError<JsonElement?>> ProduceWebRtcTransport(JsonElement element)
         {
-            return InvokeService<MediaService, JsonElement, JsonElement?>(element,
-                service => service.Redirect<JsonElement>(RedisChannels.Media.Request.TransportProduce),
-                new MethodOptions {ConferenceCanBeClosed = true});
+            return _invoker.InvokeService<MediaService, JsonElement, JsonElement?>(element,
+                service => service.Redirect<JsonElement>(RedisChannels.Media.Request.TransportProduce));
         }
 
         public Task<SuccessOrError<JsonElement?>> ChangeStream(ChangeStreamDto dto)
         {
-            return InvokeService<MediaService, ChangeStreamDto, JsonElement?>(dto,
-                service => service.Redirect<ChangeStreamDto>(RedisChannels.Media.Request.ChangeStream),
-                new MethodOptions {ConferenceCanBeClosed = true});
+            return _invoker.InvokeService<MediaService, ChangeStreamDto, JsonElement?>(dto,
+                service => service.Redirect<ChangeStreamDto>(RedisChannels.Media.Request.ChangeStream));
         }
 
         public Task<SuccessOrError<JsonElement?>> ChangeProducerSource(ChangeParticipantProducerSourceDto dto)
         {
-            return InvokeService<MediaService, ChangeParticipantProducerSourceDto, JsonElement?>(dto,
+            return _invoker.InvokeService<MediaService, ChangeParticipantProducerSourceDto, JsonElement?>(dto,
                 service => service.RedirectChangeProducerSource(RedisChannels.Media.Request.ChangeProducerSource));
         }
 
         public Task<SuccessOrError<string>> GetEquipmentToken()
         {
-            return InvokeService<EquipmentService, string>(service => service.GetEquipmentToken,
+            return _invoker.InvokeService<EquipmentService, string>(service => service.GetEquipmentToken,
                 new MethodOptions {ConferenceCanBeClosed = true});
         }
 
         public Task<SuccessOrError> RegisterEquipment(RegisterEquipmentRequestDto dto)
         {
-            return InvokeService<EquipmentService, RegisterEquipmentRequestDto>(dto,
-                service => service.RegisterEquipment, new MethodOptions {ConferenceCanBeClosed = true});
+            return _invoker.InvokeService<EquipmentService, RegisterEquipmentRequestDto>(dto,
+                service => service.RegisterEquipment);
         }
 
         public Task<SuccessOrError> SendEquipmentCommand(EquipmentCommand dto)
         {
-            return InvokeService<EquipmentService, EquipmentCommand>(dto, service => service.SendEquipmentCommand,
-                new MethodOptions {ConferenceCanBeClosed = true});
+            return _invoker.InvokeService<EquipmentService, EquipmentCommand>(dto,
+                service => service.SendEquipmentCommand);
         }
 
         public Task<SuccessOrError> EquipmentErrorOccurred(Error dto)
         {
-            return InvokeService<EquipmentService, Error>(dto, service => service.EquipmentErrorOccurred,
-                new MethodOptions {ConferenceCanBeClosed = true});
+            return _invoker.InvokeService<EquipmentService, Error>(dto, service => service.EquipmentErrorOccurred);
         }
 
         public Task<SuccessOrError> EquipmentUpdateStatus(Dictionary<string, UseMediaStateInfo> dto)
         {
-            return InvokeService<EquipmentService, Dictionary<string, UseMediaStateInfo>>(dto,
-                service => service.EquipmentUpdateStatus, new MethodOptions {ConferenceCanBeClosed = true});
+            return _invoker.InvokeService<EquipmentService, Dictionary<string, UseMediaStateInfo>>(dto,
+                service => service.EquipmentUpdateStatus);
         }
     }
 }

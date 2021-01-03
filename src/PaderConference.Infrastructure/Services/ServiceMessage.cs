@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.SignalR;
 using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Services;
 
-namespace PaderConference.Infrastructure.ServiceFactories.Base
+namespace PaderConference.Infrastructure.Services
 {
     public class ServiceMessage : IServiceMessage
     {

@@ -24,5 +24,10 @@ namespace PaderConference.Core
         {
             return BadRequest(message, ServiceErrorCode.Conference_UnexpectedError);
         }
+
+        public static Error InternalError(string message)
+        {
+            return InternalServerError(message, ServiceErrorCode.Conference_InternalError);
+        }
     }
 }

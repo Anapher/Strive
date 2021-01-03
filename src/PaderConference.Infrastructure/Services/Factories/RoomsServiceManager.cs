@@ -5,9 +5,8 @@ using Autofac.Core;
 using PaderConference.Core.Services.Permissions;
 using PaderConference.Core.Services.Rooms;
 using PaderConference.Core.Services.Synchronization;
-using PaderConference.Infrastructure.ServiceFactories.Base;
 
-namespace PaderConference.Infrastructure.ServiceFactories
+namespace PaderConference.Infrastructure.Services.Factories
 {
     public class RoomsServiceManager : AutowiredConferenceServiceManager<RoomsService>
     {

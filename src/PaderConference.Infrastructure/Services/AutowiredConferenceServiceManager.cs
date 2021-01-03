@@ -8,7 +8,7 @@ using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Interfaces.Gateways.Repositories;
 using PaderConference.Core.Services;
 
-namespace PaderConference.Infrastructure.ServiceFactories.Base
+namespace PaderConference.Infrastructure.Services
 {
     public class AutowiredConferenceServiceManager<TService> : ConferenceServiceManager<TService>
         where TService : ConferenceService
