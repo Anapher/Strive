@@ -3,7 +3,7 @@ import AddIcon from '@material-ui/icons/Add';
 import NavigationIcon from '@material-ui/icons/Navigation';
 import React from 'react';
 import { useDispatch } from 'react-redux';
-import { openCreateDialog } from '../reducer';
+import { openDialogToCreateAsync } from '../reducer';
 import CreateConferenceDialog from './CreateConferenceDialog';
 
 const useStyles = makeStyles((theme) => ({
@@ -19,7 +19,7 @@ function ConferenceControls() {
    const classes = useStyles();
    const dispatch = useDispatch();
 
-   const handleCreateConference = () => dispatch(openCreateDialog());
+   const handleCreateConference = () => dispatch(openDialogToCreateAsync());
 
    return (
       <>

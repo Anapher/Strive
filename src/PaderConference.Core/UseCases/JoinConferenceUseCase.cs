@@ -9,6 +9,7 @@ using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Dto.UseCaseRequests;
 using PaderConference.Core.Dto.UseCaseResponses;
 using PaderConference.Core.Interfaces;
+using PaderConference.Core.Interfaces.Gateways.Repositories;
 using PaderConference.Core.Interfaces.Services;
 using PaderConference.Core.Interfaces.UseCases;
 using PaderConference.Core.Services;
@@ -21,19 +22,26 @@ namespace PaderConference.Core.UseCases
         private readonly IConferenceManager _conferenceManager;
         private readonly IConnectionMapping _connectionMapping;
         private readonly IEnumerable<IConferenceServiceManager> _conferenceServices;
+        private readonly IConferenceRepo _conferenceRepo;
         private readonly ILogger<JoinConferenceUseCase> _logger;
 
         public JoinConferenceUseCase(IConferenceManager conferenceManager, IConnectionMapping connectionMapping,
-            IEnumerable<IConferenceServiceManager> conferenceServices, ILogger<JoinConferenceUseCase> logger)
+            IEnumerable<IConferenceServiceManager> conferenceServices, IConferenceRepo conferenceRepo,
+            ILogger<JoinConferenceUseCase> logger)
         {
             _conferenceManager = conferenceManager;
             _connectionMapping = connectionMapping;
             _conferenceServices = conferenceServices;
+            _conferenceRepo = conferenceRepo;
             _logger = logger;
         }
 
         public async ValueTask<SuccessOrError<JoinConferenceResponse>> Handle(JoinConferenceRequest message)
         {
+            if (!await _conferenceManager.GetIsConferenceOpen(message.ConferenceId))
+                if (await _conferenceRepo.FindById(message.ConferenceId) == null)
+                    return ConferenceError.ConferenceNotFound;
+
             // initialize services
             var services =
                 await Task.WhenAll(_conferenceServices.Select(x => x.GetService(message.ConferenceId).AsTask()));

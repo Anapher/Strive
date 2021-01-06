@@ -11,13 +11,14 @@ import * as coreHub from 'src/core-hub';
 import { setSendingMode } from 'src/features/chat/reducer';
 import { patchParticipantAudio } from 'src/features/media/reducer';
 import { selectParticipantAudioInfo } from 'src/features/media/selectors';
-import usePermission, {
+import usePermission from 'src/hooks/usePermission';
+import {
    CHAT_CAN_SEND_PRIVATE_CHAT_MESSAGE,
    CONFERENCE_CAN_KICK_PARTICIPANT,
    MEDIA_CAN_CHANGE_PARTICIPANTS_PRODUCER,
    PERMISSIONS_CAN_GIVE_TEMPORARY_PERMISSION,
    PERMISSIONS_CAN_SEE_ANY_PARTICIPANTS_PERMISSIONS,
-} from 'src/hooks/usePermission';
+} from 'src/permissions';
 import { RootState } from 'src/store';
 import { showMessage } from 'src/store/notifier/actions';
 import { ParticipantDto } from '../types';

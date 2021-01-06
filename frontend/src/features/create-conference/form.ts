@@ -1,26 +1,40 @@
-import { Permissions } from 'src/core-hub.types';
+import { DateTime } from 'luxon';
+import { ConferenceData } from './types';
 
 export type UserInfo = {
    name: string;
    id: string;
 };
 
-// export type CreateConferenceFormState = {
-//    permissions: {};
-// };
+export type ConferenceDataForm = ConferenceData & {
+   additionalFormData: {
+      enableSchedule: boolean;
+      enableStartTime: boolean;
+   };
+};
 
-// export const mapFormToDto = (form: CreateConferenceFormState): CreateConferenceDto => ({
-//    name: form.name,
-//    moderators: form.moderators.map((x) => x.id),
+export const mapDataToForm: (data: ConferenceData) => ConferenceDataForm = (data) => ({
+   ...data,
+   configuration: {
+      ...data.configuration,
+      scheduleCron: data.configuration.scheduleCron || '0 0 15 ? * MON *',
+      startTime: data.configuration.startTime || DateTime.local().plus({ days: 1 }).toFormat("yyyy-MM-dd'T'HH:mm"),
+   },
+   additionalFormData: {
+      enableSchedule: !!data.configuration.scheduleCron,
+      enableStartTime: !!data.configuration.startTime,
+   },
+});
 
-//    conferenceType: form.conferenceType,
-
-//    startTime: form.enableStartTime ? form.startTime : undefined,
-//    endTime: undefined,
-
-//    scheduleCron: form.schedule ? form.scheduleCron : undefined,
-
-//    permissions: form.permissions,
-//    defaultRoomPermissions: form.defaultRoomPermissions,
-//    moderatorPermissions: form.moderatorPermissions,
-// });
+export const mapFormToData: (form: ConferenceDataForm) => ConferenceData = ({
+   configuration,
+   permissions,
+   additionalFormData,
+}) => ({
+   configuration: {
+      ...configuration,
+      startTime: additionalFormData.enableStartTime ? configuration.startTime : undefined,
+      scheduleCron: additionalFormData.enableSchedule ? configuration.scheduleCron : undefined,
+   },
+   permissions,
+});

@@ -20,10 +20,8 @@ import CompactInput from 'src/components/CompactInput';
 import { setUserTyping } from 'src/core-hub';
 import { SendChatMessageDto, SendingMode } from 'src/core-hub.types';
 import { selectOtherParticipants } from 'src/features/conference/selectors';
-import usePermission, {
-   CHAT_CAN_SEND_ANONYMOUS_MESSAGE,
-   CHAT_CAN_SEND_PRIVATE_CHAT_MESSAGE,
-} from 'src/hooks/usePermission';
+import usePermission from 'src/hooks/usePermission';
+import { CHAT_CAN_SEND_ANONYMOUS_MESSAGE, CHAT_CAN_SEND_PRIVATE_CHAT_MESSAGE } from 'src/permissions';
 import { RootState } from 'src/store';
 import { setSendingMode } from '../reducer';
 import EmojisPopper from './EmojisPopper';

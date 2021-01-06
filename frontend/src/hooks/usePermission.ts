@@ -1,40 +1,12 @@
 import { useSelector } from 'react-redux';
-import { PermissionValue } from 'src/core-hub.types';
+import { Permission, BoolPermission } from 'src/permissions';
 import { RootState } from 'src/store';
 
-export const CONFERENCE_CAN_OPEN_AND_CLOSE = newPerm<boolean>('conference.canOpenAndClose');
-export const CONFERENCE_CAN_RAISE_HAND = newPerm<boolean>('conference.canRaiseHand');
-export const CONFERENCE_CAN_KICK_PARTICIPANT = newPerm<boolean>('conference.canKickParticipant');
-
-export const ROOMS_CAN_CREATE_REMOVE = newPerm<boolean>('rooms.canCreateAndRemove');
-
-export const MEDIA_CAN_SHARE_AUDIO = newPerm<boolean>('media.canShareAudio');
-export const MEDIA_CAN_SHARE_SCREEN = newPerm<boolean>('media.canShareScreen');
-export const MEDIA_CAN_SHARE_WEBCAM = newPerm<boolean>('media.canShareWebcam');
-export const MEDIA_CAN_CHANGE_PARTICIPANTS_PRODUCER = newPerm<boolean>('media.canChangeOtherParticipantsProducers');
-
-export const CHAT_CAN_SEND_CHAT_MESSAGE = newPerm<boolean>('chat.canSendMessage');
-export const CHAT_CAN_SEND_PRIVATE_CHAT_MESSAGE = newPerm<boolean>('chat.canSendPrivateMessage');
-export const CHAT_CAN_SEND_ANONYMOUS_MESSAGE = newPerm<boolean>('chat.canSendAnonymousMessage');
-
-export const PERMISSIONS_CAN_GIVE_TEMPORARY_PERMISSION = newPerm<boolean>('permissions.canGiveTemporaryPermission');
-export const PERMISSIONS_CAN_SEE_ANY_PARTICIPANTS_PERMISSIONS = newPerm<boolean>(
-   'permissions.canSeeAnyParticipantsPermissions',
-);
-
-export default function usePermission<T>(perm: Permission<T>): T | undefined {
+export default function usePermission<T extends Permission>(
+   perm: T,
+): (T extends BoolPermission ? boolean : number) | undefined {
    const permissions = useSelector((state: RootState) => state.conference.myPermissions);
    if (!permissions) return undefined;
 
    return permissions[perm.key] as any;
-}
-
-// the type parameter is used as metadata
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-type Permission<T> = {
-   key: string;
-};
-
-function newPerm<T extends PermissionValue>(key: string): Permission<T> {
-   return { key };
 }

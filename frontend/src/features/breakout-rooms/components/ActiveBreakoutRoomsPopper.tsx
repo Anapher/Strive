@@ -4,7 +4,8 @@ import React from 'react';
 import Countdown, { CountdownRenderProps } from 'react-countdown';
 import { useDispatch, useSelector } from 'react-redux';
 import { changeBreakoutRooms, closeBreakoutRooms } from 'src/core-hub';
-import usePermission, { ROOMS_CAN_CREATE_REMOVE } from 'src/hooks/usePermission';
+import usePermission from 'src/hooks/usePermission';
+import { ROOMS_CAN_CREATE_REMOVE } from 'src/permissions';
 import { setCreationDialogOpen } from '../reducer';
 import { selectBreakoutRoomState } from '../selectors';
 

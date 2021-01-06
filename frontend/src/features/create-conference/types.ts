@@ -22,7 +22,7 @@ export type ConferenceConfiguration = {
    chat: ChatOptions;
 };
 
-export type ConferencePermissions = { [key in PermissionType]: Permissions };
+export type ConferencePermissions = { [key in PermissionType]?: Permissions };
 
 export type ConferenceData = {
    configuration: ConferenceConfiguration;

@@ -8,7 +8,7 @@ import DesktopWindowsIcon from '@material-ui/icons/DesktopWindows';
 import MicIcon from '@material-ui/icons/Mic';
 import VideocamIcon from '@material-ui/icons/Videocam';
 import { setTemporaryPermission } from 'src/core-hub';
-import { MEDIA_CAN_SHARE_AUDIO, MEDIA_CAN_SHARE_SCREEN, MEDIA_CAN_SHARE_WEBCAM } from 'src/hooks/usePermission';
+import { MEDIA_CAN_SHARE_AUDIO, MEDIA_CAN_SHARE_SCREEN, MEDIA_CAN_SHARE_WEBCAM } from 'src/permissions';
 import { showMessage } from 'src/store/notifier/actions';
 
 type Props = {

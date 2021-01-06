@@ -20,12 +20,13 @@ import { signOut } from 'src/features/auth/reducer';
 import { selectAccessToken } from 'src/features/auth/selectors';
 import { setOpen } from 'src/features/diagnostics/reducer';
 import { openSettings } from 'src/features/settings/reducer';
-import usePermission, { CONFERENCE_CAN_OPEN_AND_CLOSE } from 'src/hooks/usePermission';
+import usePermission from 'src/hooks/usePermission';
 import { RootState } from 'src/store';
 import useWebRtcStatus from 'src/store/webrtc/hooks/useWebRtcStatus';
 import { selectParticipants } from '../selectors';
 import BreakoutRoomChips from './appbar/BreakoutRoomChip';
 import clsx from 'classnames';
+import { CONFERENCE_CAN_OPEN_AND_CLOSE } from 'src/permissions';
 
 const useStyles = makeStyles((theme) =>
    createStyles({

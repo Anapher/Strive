@@ -9,12 +9,13 @@ import AnimatedCamIcon from 'src/assets/animated-icons/AnimatedCamIcon';
 import AnimatedMicIcon from 'src/assets/animated-icons/AnimatedMicIcon';
 import AnimatedScreenIcon from 'src/assets/animated-icons/AnimatedScreenIcon';
 import Debug from 'src/features/conference/components/Troubleshooting';
-import usePermission, {
+import usePermission from 'src/hooks/usePermission';
+import {
    CONFERENCE_CAN_RAISE_HAND,
    MEDIA_CAN_SHARE_AUDIO,
    MEDIA_CAN_SHARE_SCREEN,
    MEDIA_CAN_SHARE_WEBCAM,
-} from 'src/hooks/usePermission';
+} from 'src/permissions';
 import { RootState } from 'src/store';
 import useMicrophone from 'src/store/webrtc/hooks/useMicrophone';
 import useScreen from 'src/store/webrtc/hooks/useScreen';

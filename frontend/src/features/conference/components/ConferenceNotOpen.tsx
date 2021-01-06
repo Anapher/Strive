@@ -13,11 +13,12 @@ import { DateTime } from 'luxon';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectAccessToken } from 'src/features/auth/selectors';
-import usePermission, { CONFERENCE_CAN_OPEN_AND_CLOSE } from 'src/hooks/usePermission';
+import usePermission from 'src/hooks/usePermission';
 import { RootState } from 'src/store';
 import * as coreHub from 'src/core-hub';
 import { ConferenceInfo } from '../types';
 import { openSettings } from 'src/features/settings/reducer';
+import { CONFERENCE_CAN_OPEN_AND_CLOSE } from 'src/permissions';
 
 const useStyles = makeStyles((theme) => ({
    root: {

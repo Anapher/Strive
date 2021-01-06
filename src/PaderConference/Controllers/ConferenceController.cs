@@ -1,12 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json.Linq;
-using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Dto.Services;
 using PaderConference.Core.Dto.UseCaseRequests;
 using PaderConference.Core.Interfaces.UseCases;
@@ -48,15 +46,18 @@ namespace PaderConference.Controllers
             return Ok();
         }
 
-        // GET api/v1/conference/default-permissions
-        [HttpGet("default-permissions")]
+        // GET api/v1/conference/default-data
+        [HttpGet("default-data")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [Authorize(Roles = AppRoles.Moderator)]
-        public ActionResult<Dictionary<PermissionType, IReadOnlyDictionary<string, JValue>>> GetDefaultPermissions(
-            [FromServices] IOptions<DefaultPermissionOptions> options)
+        public ActionResult<ConferenceData> GetDefault([FromServices] IOptions<DefaultPermissionOptions> options)
         {
-            return options.Value.Default;
+            return new ConferenceData
+            {
+                Permissions = options.Value.Default.ToDictionary(x => x.Key,
+                    x => x.Value.ToDictionary(y => y.Key, y => y.Value)),
+            };
         }
     }
 }

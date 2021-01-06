@@ -1,38 +1,41 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { DomainError } from 'src/communication-types';
 import * as conferenceServices from 'src/services/api/conference';
 import { ConferenceData, CreateConferenceResponse, ConferencePermissions } from './types';
 
 export type CreateConferenceState = {
+   loadingConferenceDataError: DomainError | null;
+   conferenceData: ConferenceData | null;
+
    dialogOpen: boolean;
+   mode: 'create' | 'edit';
+
    isCreating: boolean;
    createdConferenceId: string | null;
-   defaultPermissions: ConferencePermissions | null;
 };
 
 const initialState: CreateConferenceState = {
+   mode: 'create',
+   loadingConferenceDataError: null,
    dialogOpen: false,
    isCreating: false,
    createdConferenceId: null,
-   defaultPermissions: null,
+   conferenceData: null,
 };
 
 export const createConferenceAsync = createAsyncThunk('createConference/create', async (dto: ConferenceData) => {
    return await conferenceServices.create(dto);
 });
 
-export const loadDefaultPermissionsAsync = createAsyncThunk('createConference/loadDefaultPermissions', async () => {
-   return await conferenceServices.getDefaultPermissions();
+export const openDialogToCreateAsync = createAsyncThunk('createConference/openForCreate', async () => {
+   return await conferenceServices.getDefault();
 });
 
 const createConference = createSlice({
    name: 'createConference',
    initialState,
    reducers: {
-      openCreateDialog(state) {
-         state.dialogOpen = true;
-         state.createdConferenceId = null;
-      },
-      closeCreateDialog(state) {
+      closeDialog(state) {
          state.dialogOpen = false;
       },
    },
@@ -47,11 +50,22 @@ const createConference = createSlice({
          state.isCreating = false;
          state.createdConferenceId = action.payload.conferenceId;
       },
-      [loadDefaultPermissionsAsync.fulfilled.type]: (state, action: PayloadAction<ConferencePermissions>) => {
-         state.defaultPermissions = action.payload;
+      [openDialogToCreateAsync.pending.type]: (state) => {
+         state.conferenceData = null;
+         state.dialogOpen = true;
+         state.createdConferenceId = null;
+         state.loadingConferenceDataError = null;
+         state.mode = 'create';
+      },
+      [openDialogToCreateAsync.fulfilled.type]: (state, action: PayloadAction<ConferenceData>) => {
+         state.conferenceData = action.payload;
+      },
+      [openDialogToCreateAsync.rejected.type]: (state, action: PayloadAction<void, string, never, DomainError>) => {
+         state.loadingConferenceDataError = action.error;
       },
    },
 });
 
-export const { openCreateDialog, closeCreateDialog } = createConference.actions;
+export const { closeDialog } = createConference.actions;
+
 export default createConference.reducer;
