@@ -50,6 +50,7 @@ function CreateConferenceDialog() {
          aria-labelledby="create-conference-dialog-title"
          fullWidth
          maxWidth="sm"
+         scroll="paper"
       >
          <DialogTitle id="create-conference-dialog-title">Create a new conference</DialogTitle>
          {createdConferenceId ? (

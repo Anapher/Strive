@@ -19,7 +19,10 @@ import { ConferenceDataForm } from '../form';
 
 const checkBoxWidth = 150;
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles((theme) => ({
+   root: {
+      padding: theme.spacing(3),
+   },
    checkBoxLabel: {
       width: checkBoxWidth,
    },
@@ -53,7 +56,7 @@ export default function TabCommon({ form: { control, watch, register, errors, ge
    }, [scheduleCron]);
 
    return (
-      <Grid container>
+      <Grid container className={classes.root}>
          <Grid item xs={12}>
             <Box display="flex" flexDirection="row" alignItems="center">
                <FormControlLabel

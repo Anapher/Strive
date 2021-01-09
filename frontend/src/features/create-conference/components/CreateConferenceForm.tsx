@@ -15,6 +15,10 @@ const useStyles = makeStyles((theme) => ({
       bottom: theme.spacing(2),
       right: theme.spacing(2),
    },
+   tabPanel: {
+      height: '100%',
+      padding: 0,
+   },
 }));
 
 type Props = {
@@ -60,11 +64,11 @@ export default function CreateConferenceForm({ defaultValues, onSubmit, isSubmit
                      <Tab label="Permissions" value="3" />
                   </Tabs>
                </Paper>
-               <Box height={300} position="relative">
-                  <TabPanel value="1">
+               <Box height={400} position="relative">
+                  <TabPanel value="1" className={classes.tabPanel}>
                      <TabCommon form={form} />
                   </TabPanel>
-                  <TabPanel value="1">
+                  <TabPanel value="3" className={classes.tabPanel}>
                      <TabPermissions form={form} />
                   </TabPanel>
                </Box>
