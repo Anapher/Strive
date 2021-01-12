@@ -56,11 +56,12 @@ namespace PaderConference.Infrastructure.Services
             return AsyncEnumerable.Empty<Parameter>();
         }
 
-        protected async ValueTask<Parameter> ResolveServiceAsync<T>(string conferenceId) where T : IConferenceService
+        protected async ValueTask<Parameter> ResolveServiceAsync<T>(string conferenceId, Type? type = null)
+            where T : IConferenceService
         {
             var serviceManager = _context.Resolve<IConferenceServiceManager<T>>();
             var service = await serviceManager.GetService(conferenceId);
-            return new TypedParameter(typeof(T), service);
+            return ResolvedParameter(service);
         }
 
         protected async ValueTask<Parameter> ResolveOptions<T>(string conferenceId, IList<IAsyncDisposable> disposables,
@@ -71,7 +72,12 @@ namespace PaderConference.Infrastructure.Services
             await options.InitializeAsync();
             disposables.Add(options);
 
-            return new TypedParameter(typeof(T), options);
+            return ResolvedParameter(options);
+        }
+
+        private static Parameter ResolvedParameter<T>(T value)
+        {
+            return new ResolvedParameter((x, _) => x.ParameterType.IsAssignableFrom(typeof(T)), (_, _) => value);
         }
     }
 }

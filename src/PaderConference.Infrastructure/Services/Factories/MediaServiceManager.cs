@@ -17,7 +17,8 @@ namespace PaderConference.Infrastructure.Services.Factories
         protected override async IAsyncEnumerable<Parameter> GetParameters(string conferenceId,
             IList<IAsyncDisposable> disposables)
         {
-            yield return await ResolveServiceAsync<SynchronizationService>(conferenceId);
+            yield return await ResolveServiceAsync<SynchronizationService>(conferenceId,
+                typeof(ISynchronizationManager));
             yield return await ResolveServiceAsync<PermissionsService>(conferenceId);
         }
     }

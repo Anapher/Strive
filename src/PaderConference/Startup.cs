@@ -21,11 +21,14 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
+using MongoDB.Bson.Serialization.Serializers;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using PaderConference.Auth;
 using PaderConference.Core;
+using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Errors;
 using PaderConference.Core.Services.Chat.Dto;
 using PaderConference.Extensions;
@@ -90,6 +93,8 @@ namespace PaderConference
                 typeof(ImmutableListSerializer<>));
             BsonSerializer.RegisterGenericSerializerDefinition(typeof(IImmutableDictionary<,>),
                 typeof(ImmutableDictionarySerializer<,>));
+            BsonSerializer.RegisterSerializer(new JTokenBsonSerializer());
+            BsonSerializer.RegisterSerializer(new EnumSerializer<PermissionType>(BsonType.String));
 
             var tokenValidationParameters = new TokenValidationParameters
             {

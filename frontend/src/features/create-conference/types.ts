@@ -28,3 +28,16 @@ export type ConferenceData = {
    configuration: ConferenceConfiguration;
    permissions: ConferencePermissions;
 };
+
+export type UserInfoFound = {
+   id: string;
+   notFound: undefined;
+   displayName: string;
+};
+
+export type UserInfoNotFound = {
+   id: string;
+   notFound: true;
+};
+
+export type UserInfo = UserInfoFound | UserInfoNotFound;

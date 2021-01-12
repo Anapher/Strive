@@ -1,6 +1,6 @@
 import { PayloadAction } from '@reduxjs/toolkit';
 import { ActionPattern, put, takeEvery } from 'redux-saga/effects';
-import { SuccessOrError } from 'src/communication-types';
+import { DomainError, SuccessOrError } from 'src/communication-types';
 import { showMessage } from './actions';
 
 export function showErrorOn<P extends ActionPattern>(pattern: P) {
@@ -27,4 +27,8 @@ export function showLoadingHubAction(hubAction: CoreHubAction, message: string) 
          }
       }
    });
+}
+
+export function* reduxThunkShowError({ error }: PayloadAction<void, string, never, DomainError>) {
+   yield put(showMessage({ type: 'error', message: error.message }));
 }

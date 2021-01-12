@@ -18,10 +18,10 @@ namespace PaderConference.Infrastructure.Data.Repos
 
         static ConferenceRepo()
         {
-            BsonClassMap.RegisterClassMap<Conference>(x =>
+            BsonClassMap.RegisterClassMap<Conference>(config =>
             {
-                x.AutoMap();
-                x.MapIdMember(x => x.ConferenceId);
+                config.AutoMap();
+                config.MapIdMember(x => x.ConferenceId);
             });
         }
 

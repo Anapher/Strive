@@ -12,5 +12,9 @@ export function serializeRequestError(error: unknown): SerializedError {
       return errors.serverUnavailable();
    }
 
+   if (!axiosError.response.data.code) {
+      return errors.unknownRequestError(`Status: ${axiosError.response.status}`);
+   }
+
    return axiosError.response.data;
 }

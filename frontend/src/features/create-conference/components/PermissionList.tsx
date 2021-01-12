@@ -14,6 +14,8 @@ import React from 'react';
 import { Permissions } from 'src/core-hub.types';
 import * as allPermissions from 'src/permissions';
 
+const PERMISSION_DELIMITER = '/';
+
 const useStyles = makeStyles((theme) => ({
    root: {
       backgroundColor: theme.palette.background.paper,
@@ -34,7 +36,7 @@ type Props = {
    inherited: Permissions;
 };
 
-const extractPermissionName = (s: string) => s.split('.')[1];
+const extractPermissionName = (s: string) => s.split(PERMISSION_DELIMITER)[1];
 
 export default function PermissionsList({ value, onChange, inherited }: Props) {
    const classes = useStyles();
@@ -54,7 +56,7 @@ export default function PermissionsList({ value, onChange, inherited }: Props) {
       <List subheader={<li />} className={classes.root} dense>
          {_(Object.values(allPermissions))
             .orderBy((x) => x.key)
-            .groupBy((x) => x.key.split('.')[0])
+            .groupBy((x) => x.key.split(PERMISSION_DELIMITER)[0])
             .map((list, key) => (
                <li key={key} className={classes.listSection}>
                   <ul className={classes.ul}>

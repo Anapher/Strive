@@ -1,7 +1,11 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { DomainError } from 'src/communication-types';
 import * as conferenceServices from 'src/services/api/conference';
-import { ConferenceData, CreateConferenceResponse, ConferencePermissions } from './types';
+import * as userServices from 'src/services/api/user';
+import { RootState } from 'src/store';
+import { serializeRequestError } from 'src/utils/error-result';
+import { selectMyParticipantId } from '../auth/selectors';
+import { ConferenceData, CreateConferenceResponse, UserInfo } from './types';
 
 export type CreateConferenceState = {
    loadingConferenceDataError: DomainError | null;
@@ -12,6 +16,7 @@ export type CreateConferenceState = {
 
    isCreating: boolean;
    createdConferenceId: string | null;
+   userInfo: UserInfo[];
 };
 
 const initialState: CreateConferenceState = {
@@ -21,14 +26,38 @@ const initialState: CreateConferenceState = {
    isCreating: false,
    createdConferenceId: null,
    conferenceData: null,
+   userInfo: [],
 };
 
-export const createConferenceAsync = createAsyncThunk('createConference/create', async (dto: ConferenceData) => {
-   return await conferenceServices.create(dto);
-});
+export const createConferenceAsync = createAsyncThunk(
+   'createConference/create',
+   async (dto: ConferenceData) => {
+      return await conferenceServices.create(dto);
+   },
+   {
+      serializeError: serializeRequestError,
+   },
+);
 
-export const openDialogToCreateAsync = createAsyncThunk('createConference/openForCreate', async () => {
-   return await conferenceServices.getDefault();
+export const loadUserInfo = createAsyncThunk(
+   'createConference/loadUserInfo',
+   async (ids: string[]) => {
+      return await userServices.getUserInfo(ids);
+   },
+   {
+      serializeError: serializeRequestError,
+   },
+);
+
+export const openDialogToCreateAsync = createAsyncThunk('createConference/openForCreate', async (_, { getState }) => {
+   const defaultState = await conferenceServices.getDefault();
+   const myId = selectMyParticipantId(getState() as RootState);
+   const result: ConferenceData = {
+      ...defaultState,
+      configuration: { ...defaultState.configuration, moderators: myId ? [myId] : [] },
+   };
+
+   return result;
 });
 
 const createConference = createSlice({
@@ -62,6 +91,9 @@ const createConference = createSlice({
       },
       [openDialogToCreateAsync.rejected.type]: (state, action: PayloadAction<void, string, never, DomainError>) => {
          state.loadingConferenceDataError = action.error;
+      },
+      [loadUserInfo.fulfilled.type]: (state, action: PayloadAction<UserInfo[]>) => {
+         state.userInfo = action.payload;
       },
    },
 });

@@ -1,10 +1,25 @@
-import { Box, Button, DialogActions, LinearProgress, makeStyles, Paper, Tab, Tabs, TextField } from '@material-ui/core';
+import {
+   Box,
+   Button,
+   DialogActions,
+   Fab,
+   LinearProgress,
+   makeStyles,
+   Paper,
+   Tab,
+   Tabs,
+   TextField,
+   useTheme,
+   Zoom,
+} from '@material-ui/core';
 import { TabContext, TabPanel } from '@material-ui/lab';
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { ConferenceDataForm } from '../form';
 import TabCommon from './TabCommon';
+import TabModerators from './TabModerators';
 import TabPermissions from './TabPermissions';
+import AddIcon from '@material-ui/icons/Add';
 
 const useStyles = makeStyles((theme) => ({
    header: {
@@ -43,6 +58,20 @@ export default function CreateConferenceForm({ defaultValues, onSubmit, isSubmit
 
    const { register, formState, handleSubmit } = form;
    const classes = useStyles();
+   const theme = useTheme();
+
+   const transitionDuration = {
+      enter: theme.transitions.duration.enteringScreen,
+      exit: theme.transitions.duration.leavingScreen,
+   };
+
+   const handleAddModerator = () => {
+      const id = prompt('Enter the id of the user to add to moderators');
+      if (id) {
+         const currentMods = form.getValues('configuration.moderators') as string[];
+         if (!currentMods.includes(id)) form.setValue('configuration.moderators', [...currentMods, id]);
+      }
+   };
 
    return (
       <form onSubmit={handleSubmit(onSubmit)}>
@@ -68,9 +97,28 @@ export default function CreateConferenceForm({ defaultValues, onSubmit, isSubmit
                   <TabPanel value="1" className={classes.tabPanel}>
                      <TabCommon form={form} />
                   </TabPanel>
+                  <TabPanel value="2" className={classes.tabPanel}>
+                     <TabModerators form={form} />
+                  </TabPanel>
                   <TabPanel value="3" className={classes.tabPanel}>
                      <TabPermissions form={form} />
                   </TabPanel>
+                  <Zoom
+                     in={currentTab === '2'}
+                     timeout={transitionDuration}
+                     style={{
+                        transitionDelay: `${currentTab === '2' ? transitionDuration.exit : 0}ms`,
+                     }}
+                  >
+                     <Fab
+                        aria-label="Add moderator"
+                        className={classes.fab}
+                        color="primary"
+                        onClick={handleAddModerator}
+                     >
+                        <AddIcon />
+                     </Fab>
+                  </Zoom>
                </Box>
             </TabContext>
          </Box>

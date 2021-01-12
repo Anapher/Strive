@@ -18,7 +18,8 @@ namespace PaderConference.Infrastructure.Services.Factories
             IList<IAsyncDisposable> disposables)
         {
             yield return await ResolveServiceAsync<PermissionsService>(conferenceId);
-            yield return await ResolveServiceAsync<SynchronizationService>(conferenceId);
+            yield return await ResolveServiceAsync<SynchronizationService>(conferenceId,
+                typeof(ISynchronizationManager));
         }
     }
 }

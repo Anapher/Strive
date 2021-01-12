@@ -11,12 +11,10 @@ import {
 } from '@material-ui/core';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectAccessToken } from 'src/features/auth/selectors';
 import { RootState } from 'src/store';
 import to from 'src/utils/to';
-import { mapDataToForm } from '../form';
-import { closeDialog } from '../reducer';
-import { ConferenceData } from '../types';
+import { ConferenceDataForm, mapDataToForm, mapFormToData } from '../form';
+import { closeDialog, createConferenceAsync } from '../reducer';
 import CreateConferenceForm from './CreateConferenceForm';
 
 const useStyles = makeStyles((theme) => ({
@@ -34,14 +32,14 @@ function CreateConferenceDialog() {
       (state: RootState) => state.createConference,
    );
 
-   const handleCreate = (data: ConferenceData) => {
-      // const dto = mapFormToDto(data);
-      // dispatch(dispatch(createConferenceAsync(dto)));
+   const handleSubmit = (data: ConferenceDataForm) => {
+      const dto = mapFormToData(data);
+      if (mode === 'create') {
+         dispatch(createConferenceAsync(dto));
+      }
    };
 
    const handleClose = () => dispatch(closeDialog());
-
-   const user = useSelector(selectAccessToken);
 
    return (
       <Dialog
@@ -84,7 +82,7 @@ function CreateConferenceDialog() {
                   <CreateConferenceForm
                      onClose={handleClose}
                      isSubmitting={isCreating}
-                     onSubmit={handleCreate}
+                     onSubmit={handleSubmit}
                      defaultValues={mapDataToForm(conferenceData)}
                   />
                ) : (

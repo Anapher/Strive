@@ -1,11 +1,6 @@
 import { DateTime } from 'luxon';
 import { ConferenceData } from './types';
 
-export type UserInfo = {
-   name: string;
-   id: string;
-};
-
 export type ConferenceDataForm = ConferenceData & {
    additionalFormData: {
       enableSchedule: boolean;

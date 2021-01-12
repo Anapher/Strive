@@ -58,7 +58,7 @@ namespace PaderConference.Infrastructure.Redis.Repos
         {
             var routerCapabilities = await _database.GetAsync<JObject>(
                 RedisKeys.Media.RtpCapabilitiesKey.GetName(conferenceId));
-            if (routerCapabilities.Type == JTokenType.Undefined)
+            if (routerCapabilities == null || routerCapabilities.Type == JTokenType.Undefined)
                 return null;
 
             return routerCapabilities;
