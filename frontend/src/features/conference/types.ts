@@ -14,4 +14,14 @@ export type ConferenceInfo = {
    moderators: string[];
 };
 
+export type ConferenceLink = {
+   conferenceId: string;
+   isActive: boolean;
+   conferenceName?: string;
+   starred: string;
+   isModerator: boolean;
+   lastJoin: string;
+   scheduled?: string;
+};
+
 export type TemporaryPermissions = { [participantId: string]: Permissions };

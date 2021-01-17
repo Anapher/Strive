@@ -38,7 +38,7 @@ namespace PaderConference.IntegrationTests.Controllers
         [Fact]
         public async Task GetConferenceLinks_Unauthorized_ReturnError()
         {
-            var response = await _client.GetAsync("/api/v1/conference-links");
+            var response = await _client.GetAsync("/api/v1/conference-link");
             Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
         }
 
@@ -48,7 +48,7 @@ namespace PaderConference.IntegrationTests.Controllers
             var authResponse = await AuthHelper.Login(_client, _login);
             AuthHelper.SetupHttpClient(authResponse, _client);
 
-            var response = await _client.GetAsync("/api/v1/conference-links");
+            var response = await _client.GetAsync("/api/v1/conference-link");
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
             var result = await response.Content.ReadFromJsonAsync<ConferenceLinkDto[]>();
@@ -67,7 +67,7 @@ namespace PaderConference.IntegrationTests.Controllers
 
             var conferenceResult = await response.Content.ReadFromJsonAsync<StartConferenceResponseDto>();
 
-            var res = await _client.GetAsync("/api/v1/conference-links");
+            var res = await _client.GetAsync("/api/v1/conference-link");
             Assert.Equal(HttpStatusCode.OK, res.StatusCode);
 
             var result = await res.Content.ReadFromJsonAsync<SerializableConferenceLinkDto[]>();
@@ -87,7 +87,7 @@ namespace PaderConference.IntegrationTests.Controllers
             var response = await _client.PostAsync("/api/v1/conference", new JsonContent(GetValidConference()));
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            var res = await _client.GetAsync("/api/v1/conference-links");
+            var res = await _client.GetAsync("/api/v1/conference-link");
             Assert.Equal(HttpStatusCode.OK, res.StatusCode);
 
             var result = await res.Content.ReadFromJsonAsync<SerializableConferenceLinkDto[]>();
@@ -99,10 +99,10 @@ namespace PaderConference.IntegrationTests.Controllers
             patch.Replace(x => x.Starred, true);
 
             var patchRes =
-                await _client.PatchAsync($"/api/v1/conference-links/{dto.ConferenceId}", new JsonContent(patch));
+                await _client.PatchAsync($"/api/v1/conference-link/{dto.ConferenceId}", new JsonContent(patch));
             Assert.Equal(HttpStatusCode.OK, patchRes.StatusCode);
 
-            res = await _client.GetAsync("/api/v1/conference-links");
+            res = await _client.GetAsync("/api/v1/conference-link");
             result = await res.Content.ReadFromJsonAsync<SerializableConferenceLinkDto[]>();
             dto = Assert.Single(result);
 

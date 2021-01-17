@@ -57,7 +57,7 @@ namespace PaderConference.Core.Domain.Entities
         public void UpdateFromConference(Conference conference)
         {
             ConferenceName = conference.Configuration.Name;
-            IsModerator = conference.Configuration.Moderators.Contains(ConferenceId);
+            IsModerator = conference.Configuration.Moderators.Contains(ParticipantId);
             StartTime = conference.Configuration.StartTime;
             ScheduleCron = conference.Configuration.ScheduleCron;
         }

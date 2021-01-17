@@ -1,9 +1,11 @@
 import { Button, makeStyles, Typography } from '@material-ui/core';
-import React from 'react';
-import { useDispatch } from 'react-redux';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { signOut } from 'src/features/auth/reducer';
 import MyConferencesList from 'src/features/conference/components/MyConferencesList';
+import { fetchConferenceLinks } from 'src/features/conference/reducer';
 import ConferenceControls from 'src/features/create-conference/components/ConferenceControls';
+import { RootState } from 'src/store';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -20,7 +22,6 @@ const useStyles = makeStyles((theme) => ({
    },
    sideList: {
       width: 300,
-      backgroundColor: 'red',
       minHeight: 200,
       [theme.breakpoints.down('sm')]: {
          marginTop: 40,
@@ -70,14 +71,22 @@ export default function MainRoute() {
    const dispatch = useDispatch();
    const handleSignOut = () => dispatch(signOut());
 
+   useEffect(() => {
+      dispatch(fetchConferenceLinks());
+   }, [dispatch]);
+
+   const links = useSelector((state: RootState) => state.conference.conferenceLinks);
+
    return (
       <div className={classes.root}>
          <Button className={classes.signOutButton} onClick={handleSignOut}>
             Sign out
          </Button>
-         <div className={classes.sideList}>
-            <MyConferencesList />
-         </div>
+         {links && links.length > 0 && (
+            <div className={classes.sideList}>
+               <MyConferencesList links={links} />
+            </div>
+         )}
          <div className={classes.container}>
             <div className={classes.contentContainer}>
                <Typography variant="h2" className={classes.title} align="center">

@@ -20,7 +20,7 @@ using SpeciVacation;
 
 namespace PaderConference.Controllers
 {
-    [Route("api/v1/conference-links")]
+    [Route("api/v1/conference-link")]
     [ApiController]
     public class ConferenceLinkController : Controller
     {

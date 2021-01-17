@@ -4,6 +4,7 @@ import {
    Checkbox,
    Container,
    FormControlLabel,
+   IconButton,
    makeStyles,
    Typography,
    useTheme,
@@ -19,6 +20,8 @@ import * as coreHub from 'src/core-hub';
 import { ConferenceInfo } from '../types';
 import { openSettings } from 'src/features/settings/reducer';
 import { CONFERENCE_CAN_OPEN_AND_CLOSE } from 'src/permissions';
+import ArrowBackIcon from '@material-ui/icons/ArrowBack';
+import to from 'src/utils/to';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -102,6 +105,11 @@ export default function ConferenceNotOpen({ conferenceInfo }: Props) {
       <div className={classes.root}>
          <Box display="flex" flexDirection="row" position="absolute" right={32} top={32}>
             <Button onClick={handleOpenSettings}>Settings</Button>
+         </Box>
+         <Box display="flex" flexDirection="row" position="absolute" left={32} top={32}>
+            <IconButton {...to('/')}>
+               <ArrowBackIcon />
+            </IconButton>
          </Box>
          <Box display="flex" flexDirection="row" position="absolute" left={32} bottom={32}>
             <FormControlLabel control={<Checkbox checked={true} />} label="Play a sound when the conference opens" />

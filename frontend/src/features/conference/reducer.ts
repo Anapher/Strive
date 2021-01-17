@@ -1,10 +1,12 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { DomainError, SuccessOrError } from 'src/communication-types';
 import { events, fetchPermissions } from 'src/core-hub';
 import { ParticipantPermissionInfo, Permissions } from 'src/core-hub.types';
 import { connectSignal, onConnected, onConnectionError, onEventOccurred } from 'src/store/signal/actions';
 import { createSynchronizeObjectReducer } from 'src/store/signal/synchronized-object';
-import { ConferenceInfo, ParticipantDto, TemporaryPermissions } from './types';
+import { serializeRequestError } from 'src/utils/error-result';
+import { ConferenceInfo, ConferenceLink, ParticipantDto, TemporaryPermissions } from './types';
+import * as conferenceLinks from 'src/services/api/conference-link';
 
 export type ConferenceState = {
    conferenceId: string | null;
@@ -14,6 +16,8 @@ export type ConferenceState = {
    myPermissions: Permissions | null;
    participantsOpen: boolean;
    tempPermissions: TemporaryPermissions | null;
+
+   conferenceLinks: ConferenceLink[] | null;
 
    permissionDialogData: ParticipantPermissionInfo | null;
    permissionDialogOpen: boolean;
@@ -29,7 +33,18 @@ const initialState: ConferenceState = {
    permissionDialogData: null,
    permissionDialogOpen: false,
    tempPermissions: null,
+   conferenceLinks: null,
 };
+
+export const fetchConferenceLinks = createAsyncThunk(
+   'conference/fetchLinks',
+   async () => {
+      return await conferenceLinks.fetch();
+   },
+   {
+      serializeError: serializeRequestError,
+   },
+);
 
 const conferenceSlice = createSlice({
    name: 'conference',
@@ -65,6 +80,9 @@ const conferenceSlice = createSlice({
             state.permissionDialogData = payload.response;
             state.permissionDialogOpen = true;
          }
+      },
+      [fetchConferenceLinks.fulfilled.type]: (state, { payload }: PayloadAction<ConferenceLink[]>) => {
+         state.conferenceLinks = payload;
       },
       ...createSynchronizeObjectReducer(['participants', 'conferenceState', 'tempPermissions']),
    },
