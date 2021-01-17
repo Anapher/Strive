@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using MediatR;
 using Moq;
 using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Dto.Services;
@@ -16,12 +17,14 @@ namespace PaderConference.Core.Tests.UseCases
         {
             // arrange
             var conferenceRepo = new Mock<IConferenceRepo>();
-            var useCase = new CreateConferenceUseCase(conferenceRepo.Object);
+            var mediator = new Mock<IMediator>();
+
+            var useCase = new CreateConferenceUseCase(conferenceRepo.Object, mediator.Object);
 
             var conferenceData = new ConferenceData();
 
             // act
-            var result = await useCase.Handle(new CreateConferenceRequest(conferenceData));
+            var result = await useCase.Handle(new CreateConferenceRequest(conferenceData, "test"));
 
             // assert
             Assert.True(result.Success);

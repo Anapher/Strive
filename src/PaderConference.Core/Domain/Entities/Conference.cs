@@ -1,6 +1,4 @@
-﻿// ReSharper disable AutoPropertyCanBeMadeGetOnly.Local
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 
 namespace PaderConference.Core.Domain.Entities
@@ -11,14 +9,6 @@ namespace PaderConference.Core.Domain.Entities
         {
             ConferenceId = conferenceId;
         }
-
-        // for deserialization
-#pragma warning disable 8618
-        // ReSharper disable once UnusedMember.Local
-        private Conference()
-        {
-        }
-#pragma warning restore 8618
 
         /// <summary>
         ///     The unique conference id
@@ -31,6 +21,8 @@ namespace PaderConference.Core.Domain.Entities
         public Dictionary<PermissionType, Dictionary<string, JValue>> Permissions { get; set; } = new();
 
         public ConferenceConfiguration Configuration { get; set; } = new();
+
+        public int Version { get; set; }
 
         protected bool Equals(Conference other)
         {

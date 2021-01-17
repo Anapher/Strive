@@ -2,6 +2,7 @@ using Autofac;
 using FluentValidation;
 using PaderConference.Core.Interfaces;
 using PaderConference.Core.Services;
+using PaderConference.Core.Services.ConferenceControl;
 
 namespace PaderConference.Core
 {
@@ -14,6 +15,8 @@ namespace PaderConference.Core
                 .InstancePerDependency();
             builder.RegisterAssemblyTypes(ThisAssembly).AsClosedTypesOf(typeof(AbstractValidator<>))
                 .AsImplementedInterfaces().SingleInstance();
+
+            builder.RegisterType<ConferenceScheduler>().AsImplementedInterfaces().SingleInstance();
         }
     }
 }

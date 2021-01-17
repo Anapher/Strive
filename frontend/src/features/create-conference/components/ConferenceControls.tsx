@@ -1,6 +1,5 @@
 import { Fab, makeStyles } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
-import NavigationIcon from '@material-ui/icons/Navigation';
 import React from 'react';
 import { useDispatch } from 'react-redux';
 import { openDialogToCreateAsync } from '../reducer';
@@ -26,10 +25,6 @@ function ConferenceControls() {
          <Fab color="secondary" variant="extended" onClick={handleCreateConference}>
             <AddIcon className={classes.extendedIcon} />
             Start new conference
-         </Fab>
-         <Fab color="primary" variant="extended" className={classes.fabMargin}>
-            <NavigationIcon className={classes.extendedIcon} />
-            Join conference
          </Fab>
 
          <CreateConferenceDialog />

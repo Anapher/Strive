@@ -10,7 +10,7 @@ namespace PaderConference.Core.Interfaces.Gateways.Repositories
 
         Task Create(Conference conference);
 
-        Task Update(Conference conference);
+        Task<OptimisticUpdateResult> Update(Conference conference);
 
         Task<IAsyncDisposable> SubscribeConferenceUpdated(string conferenceId, Func<Conference, Task> handler);
     }

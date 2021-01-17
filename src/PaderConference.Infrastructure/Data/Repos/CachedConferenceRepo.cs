@@ -37,7 +37,7 @@ namespace PaderConference.Infrastructure.Data.Repos
             return _conferenceRepo.Create(conference);
         }
 
-        public Task Update(Conference conference)
+        public Task<OptimisticUpdateResult> Update(Conference conference)
         {
             var key = GetConferenceKey(conference.ConferenceId);
             _memoryCache.Remove(key);

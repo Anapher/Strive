@@ -1,22 +1,26 @@
 ﻿using System;
 using System.Threading.Tasks;
 using HashidsNet;
+using MediatR;
 using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Dto.UseCaseRequests;
 using PaderConference.Core.Dto.UseCaseResponses;
 using PaderConference.Core.Interfaces;
 using PaderConference.Core.Interfaces.Gateways.Repositories;
 using PaderConference.Core.Interfaces.UseCases;
+using PaderConference.Core.Notifications;
 
 namespace PaderConference.Core.UseCases
 {
     public class CreateConferenceUseCase : ICreateConferenceUseCase
     {
         private readonly IConferenceRepo _repo;
+        private readonly IMediator _mediator;
 
-        public CreateConferenceUseCase(IConferenceRepo repo)
+        public CreateConferenceUseCase(IConferenceRepo repo, IMediator mediator)
         {
             _repo = repo;
+            _mediator = mediator;
         }
 
         public async ValueTask<SuccessOrError<CreateConferenceResponse>> Handle(CreateConferenceRequest message)
@@ -37,6 +41,7 @@ namespace PaderConference.Core.UseCases
                 throw;
             }
 
+            await _mediator.Publish(new ConferenceJoinedNotification(id, message.ParticipantId));
             return new CreateConferenceResponse(id);
         }
 

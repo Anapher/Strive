@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson.Serialization;
+using MongoDB.Concurrency;
 using MongoDB.Driver;
 using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Interfaces.Gateways.Repositories;
@@ -40,9 +41,9 @@ namespace PaderConference.Infrastructure.Data.Repos
             return Collection.InsertOneAsync(conference);
         }
 
-        public Task Update(Conference conference)
+        public Task<OptimisticUpdateResult> Update(Conference conference)
         {
-            return Collection.ReplaceOneAsync(c => c.ConferenceId == conference.ConferenceId, conference);
+            return Collection.Optimistic(x => x.Version).UpdateAsync(conference).Wrap();
         }
 
         public async Task<IAsyncDisposable> SubscribeConferenceUpdated(string conferenceId,

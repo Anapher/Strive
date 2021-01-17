@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Immutable;
 using PaderConference.Core.Services.Chat;
+using PaderConference.Core.Services.ConferenceControl;
 
 namespace PaderConference.Core.Domain.Entities
 {
-    public class ConferenceConfiguration
+    public class ConferenceConfiguration : IScheduleInfo
     {
         /// <summary>
         ///     The name of the conference. May be null

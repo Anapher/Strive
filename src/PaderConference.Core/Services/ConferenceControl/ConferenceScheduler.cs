@@ -1,24 +1,39 @@
 ﻿using System;
-using PaderConference.Core.Domain.Entities;
-using PaderConference.Core.Extensions;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using PaderConference.Core.Domain;
 
 namespace PaderConference.Core.Services.ConferenceControl
 {
-    public class ConferenceScheduler
+    public class ConferenceScheduler : IConferenceScheduler
     {
-        public static DateTimeOffset? GetNextExecution(ConferenceConfiguration config, DateTimeOffset now,
-            TimeZoneInfo timeZone)
+        private readonly IOptions<ConferenceSchedulerOptions> _options;
+        private readonly ILogger<ConferenceScheduler> _logger;
+
+        public ConferenceScheduler(IOptions<ConferenceSchedulerOptions> options, ILogger<ConferenceScheduler> logger)
         {
-            if (config.StartTime != null)
-                // if the start time is in future
-                if (config.StartTime > now)
-                    return config.StartTime.Value;
+            _options = options;
+            _logger = logger;
+        }
 
-            if (config.ScheduleCron != null)
-                return CronYearParser.GetNextOccurrence(config.ScheduleCron, now, timeZone);
+        public DateTimeOffset? GetNextExecution(IScheduleInfo config)
+        {
+            var now = DateTimeOffset.UtcNow;
 
-            // there is no next execution
-            return null;
+            TimeZoneInfo timeZone;
+            try
+            {
+                timeZone = TimeZoneInfo.FindSystemTimeZoneById(_options.Value.CronTimezone);
+            }
+            catch (Exception e)
+            {
+                timeZone = TimeZoneInfo.Local;
+                _logger.LogWarning(e,
+                    "Error occurred on finding the time zone \"{timeZone}\". Please make sure to select a valid time zone. Local time zone ({local}) is used.",
+                    _options.Value.CronTimezone, timeZone);
+            }
+
+            return ScheduleUtils.GetNextExecution(config, now, timeZone);
         }
     }
 }

@@ -6,11 +6,14 @@ namespace PaderConference.Core.Dto.UseCaseRequests
 {
     public class CreateConferenceRequest : IUseCaseRequest<CreateConferenceResponse>
     {
-        public CreateConferenceRequest(ConferenceData data)
+        public CreateConferenceRequest(ConferenceData data, string participantId)
         {
             Data = data;
+            ParticipantId = participantId;
         }
 
         public ConferenceData Data { get; }
+
+        public string ParticipantId { get; }
     }
 }

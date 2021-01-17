@@ -14,21 +14,19 @@ namespace PaderConference.IntegrationTests.Controllers
     public class AuthIntegrationTests : IClassFixture<CustomWebApplicationFactory>
     {
         private readonly HttpClient _client;
+        private readonly UserLogin _login;
 
         public AuthIntegrationTests(CustomWebApplicationFactory factory)
         {
             _client = factory.CreateClient();
+            _login = factory.CreateLogin();
         }
 
         [Fact]
         public async Task Login_HasValidCredentials_ReturnAccessToken()
         {
             var httpResponse = await _client.PostAsync("/api/v1/auth/login",
-                new JsonContent(new LoginRequestDto
-                {
-                    UserName = CustomWebApplicationFactory.USERNAME,
-                    Password = CustomWebApplicationFactory.PASSWORD,
-                }));
+                new JsonContent(new LoginRequestDto {UserName = _login.Name, Password = _login.Password}));
             httpResponse.EnsureSuccessStatusCode();
 
             var stringResponse = await httpResponse.Content.ReadAsStringAsync();
@@ -63,7 +61,7 @@ namespace PaderConference.IntegrationTests.Controllers
         [Fact]
         public async Task ExchangeRefreshToken_ValidRequest_ReturnNewToken()
         {
-            var loginResponse = await AuthHelper.Login(_client);
+            var loginResponse = await AuthHelper.Login(_client, _login);
 
             var httpResponse = await _client.PostAsync("/api/v1/auth/refreshtoken",
                 new JsonContent(new ExchangeRefreshTokenRequestDto
@@ -82,7 +80,7 @@ namespace PaderConference.IntegrationTests.Controllers
         [Fact]
         public async Task ExchangeRefreshToken_RefreshTwice_SecondRefreshCausesError()
         {
-            var loginResponse = await AuthHelper.Login(_client);
+            var loginResponse = await AuthHelper.Login(_client, _login);
 
             var httpResponse = await _client.PostAsync("/api/v1/auth/refreshtoken",
                 new JsonContent(new ExchangeRefreshTokenRequestDto
@@ -103,7 +101,7 @@ namespace PaderConference.IntegrationTests.Controllers
         [Fact]
         public async Task ExchangeRefreshToken_ExchangeTheExchangedToken_ReturnNewToken()
         {
-            var loginResponse = await AuthHelper.Login(_client);
+            var loginResponse = await AuthHelper.Login(_client, _login);
 
             var httpResponse = await _client.PostAsync("/api/v1/auth/refreshtoken",
                 new JsonContent(new ExchangeRefreshTokenRequestDto
@@ -130,7 +128,7 @@ namespace PaderConference.IntegrationTests.Controllers
         [Fact]
         public async Task ExchangeRefreshToken_InvalidRefreshToken_ResponseError()
         {
-            var loginResponse = await AuthHelper.Login(_client);
+            var loginResponse = await AuthHelper.Login(_client, _login);
 
             var httpResponse = await _client.PostAsync("/api/v1/auth/refreshtoken",
                 new JsonContent(new ExchangeRefreshTokenRequestDto

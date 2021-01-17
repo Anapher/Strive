@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -26,7 +27,8 @@ namespace PaderConference.Controllers
         public async Task<ActionResult<StartConferenceResponseDto>> Create([FromBody] ConferenceData request,
             [FromServices] ICreateConferenceUseCase useCase)
         {
-            var result = await useCase.Handle(new CreateConferenceRequest(request));
+            var userId = User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value;
+            var result = await useCase.Handle(new CreateConferenceRequest(request, userId));
             if (!result.Success) return result.ToActionResult();
 
             return new StartConferenceResponseDto(result.Response.ConferenceId);

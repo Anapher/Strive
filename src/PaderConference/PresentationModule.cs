@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using PaderConference.Presenters;
 
 namespace PaderConference
 {
@@ -7,6 +8,8 @@ namespace PaderConference
         protected override void Load(ContainerBuilder builder)
         {
             base.Load(builder);
+
+            builder.RegisterType<ConferenceLinkPresenter>().AsImplementedInterfaces().InstancePerDependency();
         }
     }
 }

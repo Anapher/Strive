@@ -10,7 +10,7 @@ namespace PaderConference.Infrastructure.Data
 
         public Dictionary<string, string> CollectionNames { get; set; } = new()
         {
-            {"Conferences", "Conferences"}, {"RefreshToken", "RefreshToken"},
+            {"Conference", "Conference"}, {"RefreshToken", "RefreshToken"}, {"ConferenceLink", "ConferenceLink"},
         };
     }
 }

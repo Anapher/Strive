@@ -20,5 +20,7 @@ namespace PaderConference.Core.Services
         {
             return InternalServerError(message, ServiceErrorCode.Conference_InternalServiceError);
         }
+
+        public static Error ConcurrencyError => InternalServiceError("A concurrency error occurred.");
     }
 }

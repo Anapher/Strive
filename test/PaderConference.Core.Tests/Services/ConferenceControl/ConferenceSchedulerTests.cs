@@ -16,7 +16,7 @@ namespace PaderConference.Core.Tests.Services.ConferenceControl
             var timezone = TimeZoneInfo.Utc;
 
             // act
-            var next = ConferenceScheduler.GetNextExecution(new ConferenceConfiguration {StartTime = startTime}, now,
+            var next = ScheduleUtils.GetNextExecution(new ConferenceConfiguration {StartTime = startTime}, now,
                 timezone);
 
             // assert
@@ -34,7 +34,7 @@ namespace PaderConference.Core.Tests.Services.ConferenceControl
             var cron = "0 0 16 ? * MON *";
 
             // act
-            var next = ConferenceScheduler.GetNextExecution(
+            var next = ScheduleUtils.GetNextExecution(
                 new ConferenceConfiguration {StartTime = startTime, ScheduleCron = cron}, now, timezone);
 
             // assert
@@ -52,7 +52,7 @@ namespace PaderConference.Core.Tests.Services.ConferenceControl
             var cron = "0 0 16 ? * MON *";
 
             // act
-            var next = ConferenceScheduler.GetNextExecution(
+            var next = ScheduleUtils.GetNextExecution(
                 new ConferenceConfiguration {StartTime = startTime, ScheduleCron = cron}, now, timezone);
 
             // assert

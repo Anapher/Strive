@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using MediatR;
 using Microsoft.Extensions.Logging;
 using PaderConference.Core.Domain;
 using PaderConference.Core.Domain.Entities;
@@ -12,6 +13,7 @@ using PaderConference.Core.Interfaces;
 using PaderConference.Core.Interfaces.Gateways.Repositories;
 using PaderConference.Core.Interfaces.Services;
 using PaderConference.Core.Interfaces.UseCases;
+using PaderConference.Core.Notifications;
 using PaderConference.Core.Services;
 using PaderConference.Core.Services.Equipment;
 
@@ -23,16 +25,18 @@ namespace PaderConference.Core.UseCases
         private readonly IConnectionMapping _connectionMapping;
         private readonly IEnumerable<IConferenceServiceManager> _conferenceServices;
         private readonly IConferenceRepo _conferenceRepo;
+        private readonly IMediator _mediator;
         private readonly ILogger<JoinConferenceUseCase> _logger;
 
         public JoinConferenceUseCase(IConferenceManager conferenceManager, IConnectionMapping connectionMapping,
             IEnumerable<IConferenceServiceManager> conferenceServices, IConferenceRepo conferenceRepo,
-            ILogger<JoinConferenceUseCase> logger)
+            IMediator mediator, ILogger<JoinConferenceUseCase> logger)
         {
             _conferenceManager = conferenceManager;
             _connectionMapping = connectionMapping;
             _conferenceServices = conferenceServices;
             _conferenceRepo = conferenceRepo;
+            _mediator = mediator;
             _logger = logger;
         }
 
@@ -110,6 +114,8 @@ namespace PaderConference.Core.UseCases
                         return ConferenceError.InternalError("An error occurred on initializing participant.");
                     }
 
+                    await _mediator.Publish(new ConferenceJoinedNotification(message.ConferenceId,
+                        message.ParticipantId));
                     return new JoinConferenceResponse(participant);
                 }
                 case PrincipalRoles.Equipment:

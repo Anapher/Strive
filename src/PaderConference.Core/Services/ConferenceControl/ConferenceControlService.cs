@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Extensions;
 using PaderConference.Core.Interfaces;
@@ -21,16 +19,16 @@ namespace PaderConference.Core.Services.ConferenceControl
         private readonly IConferenceManager _conferenceManager;
         private readonly IConferenceRepo _conferenceRepo;
         private readonly IConnectionMapping _connectionMapping;
+        private readonly IConferenceScheduler _scheduler;
         private readonly ILogger<ConferenceControlService> _logger;
         private readonly ISignalMessenger _messenger;
-        private readonly IOptions<ConferenceSchedulerOptions> _options;
         private readonly IPermissionsService _permissionsService;
         private readonly ISynchronizedObject<SynchronizedConferenceInfo> _synchronizedObject;
 
         public ConferenceControlService(Conference conference, IConferenceManager conferenceManager,
             IConferenceRepo conferenceRepo, ISynchronizationManager synchronizationManager,
             IPermissionsService permissionsService, ISignalMessenger messenger, IConnectionMapping connectionMapping,
-            IOptions<ConferenceSchedulerOptions> options, ILogger<ConferenceControlService> logger)
+            IConferenceScheduler scheduler, ILogger<ConferenceControlService> logger)
         {
             _conferenceId = conference.ConferenceId;
 
@@ -39,7 +37,7 @@ namespace PaderConference.Core.Services.ConferenceControl
             _permissionsService = permissionsService;
             _messenger = messenger;
             _connectionMapping = connectionMapping;
-            _options = options;
+            _scheduler = scheduler;
             _logger = logger;
 
             _synchronizedObject = synchronizationManager.Register("conferenceState",
@@ -116,31 +114,11 @@ namespace PaderConference.Core.Services.ConferenceControl
 
         private async Task OnConferenceUpdated(Conference arg)
         {
-            var scheduledDate = GetNextExecution(arg.Configuration);
+            var scheduledDate = _scheduler.GetNextExecution(arg.Configuration);
             var open = await _conferenceManager.GetIsConferenceOpen(arg.ConferenceId);
 
             await _synchronizedObject.Update(
                 new SynchronizedConferenceInfo(arg) {ScheduledDate = scheduledDate, IsOpen = open});
-        }
-
-        private DateTimeOffset? GetNextExecution(ConferenceConfiguration config)
-        {
-            var now = DateTimeOffset.UtcNow;
-
-            TimeZoneInfo timeZone;
-            try
-            {
-                timeZone = TimeZoneInfo.FindSystemTimeZoneById(_options.Value.CronTimezone);
-            }
-            catch (Exception e)
-            {
-                timeZone = TimeZoneInfo.Local;
-                _logger.LogWarning(e,
-                    "Error occurred on finding the time zone \"{timeZone}\". Please make sure to select a valid time zone. Local time zone ({local}) is used.",
-                    _options.Value.CronTimezone, timeZone);
-            }
-
-            return ConferenceScheduler.GetNextExecution(config, now, timeZone);
         }
     }
 }

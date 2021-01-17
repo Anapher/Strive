@@ -37,9 +37,9 @@ namespace PaderConference.Infrastructure
             builder.RegisterType<SignalrMessenger<CoreHub>>().AsImplementedInterfaces().SingleInstance();
 
             builder.RegisterAssemblyTypes(ThisAssembly).AsClosedTypesOf(typeof(MongoRepo<>)).AsSelf()
-                .AsImplementedInterfaces().SingleInstance();
+                .AsImplementedInterfaces().InstancePerDependency();
 
-            builder.RegisterType<CachedConferenceRepo>().As<IConferenceRepo>().SingleInstance();
+            builder.RegisterType<CachedConferenceRepo>().As<IConferenceRepo>().InstancePerDependency();
 
             builder.RegisterType<OptionsAuthService>().AsImplementedInterfaces().SingleInstance();
 

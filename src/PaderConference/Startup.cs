@@ -10,6 +10,7 @@ using Autofac.Extensions.DependencyInjection;
 using AutoMapper;
 using FluentValidation.AspNetCore;
 using JsonSubTypes;
+using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -51,6 +52,16 @@ namespace PaderConference
             Configuration = configuration;
         }
 
+        static Startup()
+        {
+            BsonSerializer.RegisterGenericSerializerDefinition(typeof(IImmutableList<>),
+                typeof(ImmutableListSerializer<>));
+            BsonSerializer.RegisterGenericSerializerDefinition(typeof(IImmutableDictionary<,>),
+                typeof(ImmutableDictionarySerializer<,>));
+            BsonSerializer.RegisterSerializer(new JTokenBsonSerializer());
+            BsonSerializer.RegisterSerializer(new EnumSerializer<PermissionType>(BsonType.String));
+        }
+
         public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
@@ -88,13 +99,6 @@ namespace PaderConference
             //    new MongoClient(services.GetRequiredService<MongoDbOptions>().ConnectionString));
 
             services.AddHostedService<MongoDbBuilder>();
-
-            BsonSerializer.RegisterGenericSerializerDefinition(typeof(IImmutableList<>),
-                typeof(ImmutableListSerializer<>));
-            BsonSerializer.RegisterGenericSerializerDefinition(typeof(IImmutableDictionary<,>),
-                typeof(ImmutableDictionarySerializer<,>));
-            BsonSerializer.RegisterSerializer(new JTokenBsonSerializer());
-            BsonSerializer.RegisterSerializer(new EnumSerializer<PermissionType>(BsonType.String));
 
             var tokenValidationParameters = new TokenValidationParameters
             {
@@ -187,6 +191,8 @@ namespace PaderConference
 
                 c.AddFluentValidationRules();
             });
+
+            services.AddMediatR(typeof(Startup), typeof(CoreModule));
 
             services.AddHostedService<ConferenceInitializer>();
 
