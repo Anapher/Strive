@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.JsonPatch;
 using Newtonsoft.Json.Linq;
 using PaderConference.Core.Domain.Entities;
 using PaderConference.IntegrationTests._Helpers;
@@ -77,9 +78,41 @@ namespace PaderConference.IntegrationTests.Controllers
             Assert.Equal(conferenceResult.ConferenceId, dtoConferenceId);
         }
 
+        [Fact]
+        public async Task PatchConferenceLink_ValidPatchDocument_ConferenceLinkChanged()
+        {
+            var authResponse = await AuthHelper.Login(_client, _login);
+            AuthHelper.SetupHttpClient(authResponse, _client);
+
+            var response = await _client.PostAsync("/api/v1/conference", new JsonContent(GetValidConference()));
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var res = await _client.GetAsync("/api/v1/conference-links");
+            Assert.Equal(HttpStatusCode.OK, res.StatusCode);
+
+            var result = await res.Content.ReadFromJsonAsync<SerializableConferenceLinkDto[]>();
+            var dto = Assert.Single(result);
+
+            Assert.False(dto.Starred);
+
+            var patch = new JsonPatchDocument<SerializableConferenceLinkDto>();
+            patch.Replace(x => x.Starred, true);
+
+            var patchRes =
+                await _client.PatchAsync($"/api/v1/conference-links/{dto.ConferenceId}", new JsonContent(patch));
+            Assert.Equal(HttpStatusCode.OK, patchRes.StatusCode);
+
+            res = await _client.GetAsync("/api/v1/conference-links");
+            result = await res.Content.ReadFromJsonAsync<SerializableConferenceLinkDto[]>();
+            dto = Assert.Single(result);
+
+            Assert.True(dto.Starred);
+        }
+
         public class SerializableConferenceLinkDto
         {
             public string ConferenceId { get; set; }
+            public bool Starred { get; set; }
         }
     }
 }

@@ -10,7 +10,7 @@ namespace PaderConference.Models.Response
             ConferenceId = link.ConferenceId;
             IsActive = isActive;
             ConferenceName = link.ConferenceName;
-            IsStarred = link.Starred;
+            Starred = link.Starred;
             IsModerator = link.IsModerator;
             LastJoin = link.LastJoin;
             Scheduled = scheduled;
@@ -22,7 +22,7 @@ namespace PaderConference.Models.Response
 
         public string? ConferenceName { get; set; }
 
-        public bool IsStarred { get; set; }
+        public bool Starred { get; set; }
 
         public bool IsModerator { get; set; }
 

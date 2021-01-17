@@ -66,7 +66,7 @@ namespace PaderConference.Controllers
         // PATCH api/v1/conference-links/{conferenceId}
         [HttpPatch("{conferenceId}")]
         [Authorize]
-        public async Task<ActionResult> ChangeStarConferenceLink(string conferenceId,
+        public async Task<ActionResult> PatchConferenceLink(string conferenceId,
             JsonPatchDocument<ChangeConferenceLinkStarDto> patch, [FromServices] IConferenceLinkRepo repo,
             [FromServices] IOptions<ConcurrencyOptions> options)
         {
