@@ -1,0 +1,42 @@
+version: "3.4"
+
+services:
+  nosqldata:
+    image: mongo
+
+  sfu-cache:
+    image: redis:alpine
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+
+  sfu:
+    image: ${DOCKER_REGISTRY-}sfu
+    build:
+      dockerfile: Services/SFU/Dockerfile
+    depends_on:
+      - sfu-cache
+
+  identity-api:
+    image: ${DOCKER_REGISTRY-}identityapi
+    build:
+      context: .
+      dockerfile: Services/Identity/Identity.API/Dockerfile
+
+  paderconference:
+    image: ${DOCKER_REGISTRY-}paderconference
+    build:
+      context: .
+      dockerfile: Services/ConferenceManagement/PaderConference/Dockerfile
+    depends_on:
+      - nosqldata
+
+  webspa:
+    image: ${DOCKER_REGISTRY-}webspa
+    build:
+      context: .
+      dockerfile: Web/WebSPA/Dockerfile
+    depends_on:
+      - identity-api
+      - sfu
+      - paderconference
