@@ -1,12 +1,14 @@
-import { Redis } from 'ioredis';
+import { ProducerLink } from './../types';
 import { Producer, Router } from 'mediasoup/lib/types';
 import { MEDIA_CAN_SHARE_AUDIO, MEDIA_CAN_SHARE_SCREEN, MEDIA_CAN_SHARE_WEBCAM, Permission } from '../permissions';
-import Connection from './connection';
-import Logger from './logger';
-import { MediasoupMixer } from './mediasoup-utils/mediasoup-mixer';
-import { ParticipantPermissions } from './pader-conference/participant-permissions';
-import { Participant, ProducerLink, ProducerSource, producerSources } from './participant';
-import { ISignalWrapper } from './signal-wrapper';
+import Logger from '../../utils/logger';
+import { ConferenceMessenger } from '../conference/conference-messenger';
+import Connection from '../connection';
+import { MediasoupMixer } from '../media-soup/mediasoup-mixer';
+import { Participant } from '../participant';
+import { ProducerSource, producerSources } from '../types';
+import { ParticipantPermissions } from '../participant-permissions';
+import { ConferenceRepository } from '../synchronization/conference-repository';
 
 type ProducerPermission = {
    permission?: Permission<boolean>;
@@ -37,9 +39,10 @@ export default class Room {
 
    constructor(
       public id: string,
-      signal: ISignalWrapper,
+      signal: ConferenceMessenger,
       router: Router,
-      private redis: Redis,
+      private repo: ConferenceRepository,
+      private conferenceId: string,
       private producerSources: ProducerSource[],
    ) {
       this.mixer = new MediasoupMixer(router, signal);
@@ -85,7 +88,8 @@ export default class Room {
             status.receivingConns.push(receiveConn);
          }
 
-         const permissions = new ParticipantPermissions(participant.participantId, this.redis);
+         const conferenceInfo = await this.repo.getConference(this.conferenceId);
+         const permissions = new ParticipantPermissions(participant.participantId, conferenceInfo);
 
          for (const { permission, source } of producerPermissions) {
             if (!this.producerSources.includes(source)) continue;

@@ -1,5 +1,5 @@
+import { Producer } from 'mediasoup/lib/types';
 import Connection from './connection';
-import { ProducerLink, ProducerSource } from './types';
 
 export class Participant {
    constructor(public participantId: string) {}
@@ -18,3 +18,19 @@ export class Participant {
       return undefined;
    }
 }
+
+export const producerSources = [
+   'mic',
+   'webcam',
+   'screen',
+   'loopback-mic',
+   'loopback-webcam',
+   'loopback-screen',
+] as const;
+
+export type ProducerSource = typeof producerSources[number];
+
+export type ProducerLink = {
+   connectionId: string;
+   producer: Producer;
+};

@@ -1,9 +1,10 @@
-import { Redis } from 'ioredis';
 import { Router } from 'mediasoup/lib/Router';
-import Logger from './logger';
-import { Participant, ProducerSource } from './participant';
+import Logger from '../../utils/logger';
+import { ConferenceMessenger } from '../conference/conference-messenger';
+import { Participant } from '../participant';
+import { ConferenceRepository } from '../synchronization/conference-repository';
+import { ProducerSource } from '../types';
 import Room from './room';
-import { ISignalWrapper } from './signal-wrapper';
 
 const LOOPBACK_PRODUCER_SOURCES: ProducerSource[] = ['loopback-mic', 'loopback-webcam', 'loopback-screen'];
 
@@ -20,7 +21,12 @@ const logger = new Logger('LoopbackManager');
 export class LoopbackManager {
    private loopbackMap = new Map<string, Room>();
 
-   constructor(private signal: ISignalWrapper, private router: Router, private redis: Redis) {}
+   constructor(
+      private signal: ConferenceMessenger,
+      private router: Router,
+      private repo: ConferenceRepository,
+      private conferenceId: string,
+   ) {}
 
    /**
     * Update the participant, create or remove the looopback room depending whether the participant has active loopback sources
@@ -52,7 +58,7 @@ export class LoopbackManager {
          logger.info('Enable loopback for %s', participant.participantId);
 
          const roomId = `loopback-${participant.participantId}`;
-         room = new Room(roomId, this.signal, this.router, this.redis, LOOPBACK_PRODUCER_SOURCES);
+         room = new Room(roomId, this.signal, this.router, this.repo, this.conferenceId, LOOPBACK_PRODUCER_SOURCES);
          this.loopbackMap.set(participant.participantId, room);
 
          await room.join(participant);

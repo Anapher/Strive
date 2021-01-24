@@ -10,8 +10,6 @@ namespace PaderConference.Core.Interfaces.Gateways.Repositories
 {
     public interface IMediaRepo
     {
-        Task RegisterConference(string conferenceId);
-
         Task<Func<Task>> SubscribeOnSendMessage(string conferenceId, Func<SendToConnectionDto, Task> handler);
 
         Task<Func<Task>> SubscribeStreamsChanged(string conferenceId, Func<Task> handler);

@@ -1,7 +1,7 @@
-import { Redis } from 'ioredis';
 import { Router } from 'mediasoup/lib/types';
 import { LoopbackManager } from './loopback-manager';
 import * as redisKeys from './pader-conference/redis-keys';
+import { ConferenceData } from './pader-conference/requests';
 import { Participant, ProducerSource } from './participant';
 import Room from './room';
 import { ISignalWrapper } from './signal-wrapper';
@@ -14,7 +14,7 @@ const DEFAULT_ROOM_SOURCES: ProducerSource[] = ['mic', 'webcam', 'screen'];
 export class RoomManager {
    private participantToRoomKey: string;
 
-   constructor(conferenceId: string, private signal: ISignalWrapper, private router: Router, private redis: Redis) {
+   constructor(conferenceId: string, private signal: ISignalWrapper, private router: Router, private redis: ConferenceData) {
       this.participantToRoomKey = redisKeys.participantToRoom(conferenceId);
       this.loopbackManager = new LoopbackManager(signal, router, redis);
    }

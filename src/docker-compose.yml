@@ -4,9 +4,6 @@ services:
   nosqldata:
     image: mongo
 
-  sfu-cache:
-    image: redis:alpine
-
   rabbitmq:
     image: rabbitmq:3-management-alpine
 

@@ -46,6 +46,13 @@ const config: Config = {
       },
       maxIncomingBitrate: 1500000,
    },
+   http: {
+      port: Number(process.env.HTTP_PORT) || 3000,
+   },
+   services: {
+      conferenceManagementUrl: '',
+      rabbitMq: process.env.AMQP_CONNECTION_STRING || 'amqp://localhost:5672',
+   },
 };
 
 export default config;
@@ -59,5 +66,12 @@ type Config = {
    webRtcTransport: {
       options: WebRtcTransportOptions;
       maxIncomingBitrate?: number;
+   };
+   http: {
+      port: number;
+   };
+   services: {
+      conferenceManagementUrl: string;
+      rabbitMq: string;
    };
 };
