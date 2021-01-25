@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using AutoMapper;
@@ -20,7 +18,6 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
@@ -33,11 +30,9 @@ using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Errors;
 using PaderConference.Core.Services.Chat.Dto;
 using PaderConference.Extensions;
+using PaderConference.Hubs;
 using PaderConference.Infrastructure;
-using PaderConference.Infrastructure.Auth;
-using PaderConference.Infrastructure.Auth.AuthService;
 using PaderConference.Infrastructure.Data;
-using PaderConference.Infrastructure.Hubs;
 using PaderConference.Infrastructure.Serialization;
 using PaderConference.Services;
 using StackExchange.Redis.Extensions.Core.Configuration;
@@ -69,69 +64,11 @@ namespace PaderConference
         {
             services.AddLogging();
 
-            // Register the ConfigurationBuilder instance of AuthSettings
-            var authSettings = Configuration.GetSection(nameof(AuthSettings));
-            services.Configure<AuthSettings>(authSettings);
-
-            var optionsAuthService = Configuration.GetSection("OptionsAuthService");
-            services.Configure<UserCredentialsOptions>(optionsAuthService);
-
-            var signingKey =
-                new SymmetricSecurityKey(Encoding.ASCII.GetBytes(authSettings[nameof(AuthSettings.SecretKey)]));
-
-            // jwt wire up
-            // Get options from app settings
-            var jwtAppSettingOptions = Configuration.GetSection(nameof(JwtIssuerOptions));
-
-            // Configure JwtIssuerOptions
-            services.Configure<JwtIssuerOptions>(options =>
-            {
-                options.Issuer = jwtAppSettingOptions[nameof(JwtIssuerOptions.Issuer)];
-                options.Audience = jwtAppSettingOptions[nameof(JwtIssuerOptions.Audience)];
-                options.SigningCredentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
-            });
-
             // Configure MongoDb options
             services.Configure<MongoDbOptions>(Configuration.GetSection("MongoDb"));
 
             // add MongoDb
-            //services.AddSingleton(services =>
-            //    new MongoClient(services.GetRequiredService<MongoDbOptions>().ConnectionString));
-
             services.AddHostedService<MongoDbBuilder>();
-
-            var tokenValidationParameters = new TokenValidationParameters
-            {
-                ValidateIssuer = true,
-                ValidIssuer = jwtAppSettingOptions[nameof(JwtIssuerOptions.Issuer)],
-                ValidateAudience = true,
-                ValidAudience = jwtAppSettingOptions[nameof(JwtIssuerOptions.Audience)],
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = signingKey,
-                RequireExpirationTime = false,
-                ValidateLifetime = true,
-                ClockSkew = TimeSpan.Zero,
-            };
-
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(configureOptions =>
-            {
-                configureOptions.ClaimsIssuer = jwtAppSettingOptions[nameof(JwtIssuerOptions.Issuer)];
-                configureOptions.TokenValidationParameters = tokenValidationParameters;
-                configureOptions.SaveToken = true;
-
-                configureOptions.Events = new JwtBearerEvents
-                {
-                    OnMessageReceived = context =>
-                    {
-                        var accessToken = context.Request.Query["access_token"];
-                        var path = context.HttpContext.Request.Path;
-
-                        if (!string.IsNullOrEmpty(accessToken))
-                            context.Token = accessToken;
-                        return Task.CompletedTask;
-                    },
-                };
-            }).AddEquipmentAuth(options => { });
 
             services.AddAuthorization(options =>
             {

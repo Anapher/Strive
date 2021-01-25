@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json.Linq;
 using PaderConference.Core;
 using PaderConference.Core.Dto;
 using PaderConference.Core.Dto.UseCaseRequests;
@@ -26,8 +25,6 @@ using PaderConference.Core.Services.ConferenceControl.Requests;
 using PaderConference.Core.Services.Equipment;
 using PaderConference.Core.Services.Equipment.Data;
 using PaderConference.Core.Services.Equipment.Dto;
-using PaderConference.Core.Services.Media;
-using PaderConference.Core.Services.Media.Communication;
 using PaderConference.Core.Services.Permissions;
 using PaderConference.Core.Services.Permissions.Dto;
 using PaderConference.Core.Services.Permissions.Requests;
@@ -37,14 +34,14 @@ using PaderConference.Core.Signaling;
 using PaderConference.Infrastructure.Extensions;
 using PaderConference.Infrastructure.Services;
 
-namespace PaderConference.Infrastructure.Hubs
+namespace PaderConference.Hubs
 {
     [Authorize]
     public class CoreHub : Hub
     {
+        private readonly IServiceInvoker _invoker;
         private readonly IJoinConferenceUseCase _joinConferenceUseCase;
         private readonly ILeaveConferenceUseCase _leaveConferenceUseCase;
-        private readonly IServiceInvoker _invoker;
         private readonly ILogger<CoreHub> _logger;
 
         public CoreHub(IJoinConferenceUseCase joinConferenceUseCase, ILeaveConferenceUseCase leaveConferenceUseCase,
@@ -199,50 +196,6 @@ namespace PaderConference.Infrastructure.Hubs
         public Task<SuccessOrError> SetUserIsTyping(bool isTyping)
         {
             return _invoker.InvokeService<ChatService, bool>(isTyping, service => service.SetUserIsTyping);
-        }
-
-        public Task<SuccessOrError<JObject?>> RequestRouterCapabilities()
-        {
-            return _invoker.InvokeService<MediaService, JObject?>(service => service.GetRouterCapabilities,
-                new MethodOptions {ConferenceCanBeClosed = true});
-        }
-
-        public Task<SuccessOrError<JToken?>> InitializeConnection(JToken element)
-        {
-            return _invoker.InvokeService<MediaService, JToken, JToken?>(element,
-                service => service.Redirect<JToken>(RedisChannels.Media.Request.InitializeConnection),
-                new MethodOptions {ConferenceCanBeClosed = true});
-        }
-
-        public Task<SuccessOrError<JToken?>> CreateWebRtcTransport(JToken element)
-        {
-            return _invoker.InvokeService<MediaService, JToken, JToken?>(element,
-                service => service.Redirect<JToken>(RedisChannels.Media.Request.CreateTransport),
-                new MethodOptions {ConferenceCanBeClosed = true});
-        }
-
-        public Task<SuccessOrError<JToken?>> ConnectWebRtcTransport(JToken element)
-        {
-            return _invoker.InvokeService<MediaService, JToken, JToken?>(element,
-                service => service.Redirect<JToken>(RedisChannels.Media.Request.ConnectTransport));
-        }
-
-        public Task<SuccessOrError<JToken?>> ProduceWebRtcTransport(JToken element)
-        {
-            return _invoker.InvokeService<MediaService, JToken, JToken?>(element,
-                service => service.Redirect<JToken>(RedisChannels.Media.Request.TransportProduce));
-        }
-
-        public Task<SuccessOrError<JToken?>> ChangeStream(ChangeStreamDto dto)
-        {
-            return _invoker.InvokeService<MediaService, ChangeStreamDto, JToken?>(dto,
-                service => service.Redirect<ChangeStreamDto>(RedisChannels.Media.Request.ChangeStream));
-        }
-
-        public Task<SuccessOrError<JToken?>> ChangeProducerSource(ChangeParticipantProducerSourceDto dto)
-        {
-            return _invoker.InvokeService<MediaService, ChangeParticipantProducerSourceDto, JToken?>(dto,
-                service => service.RedirectChangeProducerSource(RedisChannels.Media.Request.ChangeProducerSource));
         }
 
         public Task<SuccessOrError<string>> GetEquipmentToken()

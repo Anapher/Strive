@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using PaderConference.Core.Interfaces;
 using PaderConference.Core.Services;
-using PaderConference.Infrastructure.Hubs;
 
 namespace PaderConference.Infrastructure.Services
 {

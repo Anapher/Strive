@@ -22,6 +22,8 @@ namespace WebSPA
         {
             services.AddHealthChecks().AddCheck("self", () => HealthCheckResult.Healthy());
 
+            services.Configure<AppSettings>(Configuration);
+
             services.AddControllers();
 
             // In production, the React files will be served from this directory

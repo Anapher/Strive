@@ -1,4 +1,4 @@
-﻿namespace PaderConference.Infrastructure.Hubs
+﻿namespace PaderConference.Infrastructure.Services
 {
     public struct MethodOptions
     {

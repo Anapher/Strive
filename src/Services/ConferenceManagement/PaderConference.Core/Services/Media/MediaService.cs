@@ -2,14 +2,11 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json.Linq;
 using PaderConference.Core.Domain.Entities;
-using PaderConference.Core.Interfaces;
 using PaderConference.Core.Interfaces.Gateways.Repositories;
 using PaderConference.Core.Interfaces.Services;
 using PaderConference.Core.Services.Media.Communication;
 using PaderConference.Core.Services.Media.Mediasoup;
-using PaderConference.Core.Services.Permissions;
 using PaderConference.Core.Services.Synchronization;
 using PaderConference.Core.Signaling;
 
@@ -22,7 +19,6 @@ namespace PaderConference.Core.Services.Media
         private readonly string _conferenceId;
         private readonly ILogger<MediaService> _logger;
         private readonly IConnectionMapping _connectionMapping;
-        private readonly IPermissionsService _permissionsService;
         private readonly ISynchronizedObject<Dictionary<string, ParticipantStreamInfo>> _synchronizedStreams;
 
         private Func<Task>? _unsubscribeSendMessage;
@@ -30,13 +26,12 @@ namespace PaderConference.Core.Services.Media
 
         public MediaService(string conferenceId, ISignalMessenger clients,
             ISynchronizationManager synchronizationManager, IMediaRepo repo, IConnectionMapping connectionMapping,
-            IPermissionsService permissionsService, ILogger<MediaService> logger)
+            ILogger<MediaService> logger)
         {
             _conferenceId = conferenceId;
             _clients = clients;
             _repo = repo;
             _connectionMapping = connectionMapping;
-            _permissionsService = permissionsService;
             _logger = logger;
 
             _synchronizedStreams =
@@ -45,9 +40,6 @@ namespace PaderConference.Core.Services.Media
 
         public override async ValueTask InitializeAsync()
         {
-            // notify sfu about new conference
-            await _repo.RegisterConference(_conferenceId);
-
             // initialize synchronous message sending
             _unsubscribeSendMessage = await _repo.SubscribeOnSendMessage(_conferenceId, OnSendMessageToConnection);
 
@@ -90,54 +82,29 @@ namespace PaderConference.Core.Services.Media
             }
         }
 
-        public Func<IServiceMessage<ChangeParticipantProducerSourceDto>, ValueTask<SuccessOrError<JToken?>>>
-            RedirectChangeProducerSource(ConferenceDependentKey dependentKey)
-        {
-            async ValueTask<SuccessOrError<JToken?>> Invoke(IServiceMessage<ChangeParticipantProducerSourceDto> message)
-            {
-                var permissions = await _permissionsService.GetPermissions(message.Participant);
-                if (!await permissions.GetPermission(PermissionsList.Media.CanChangeOtherParticipantsProducers))
-                    return CommonError.PermissionDenied(PermissionsList.Media.CanChangeOtherParticipantsProducers);
+        //public Func<IServiceMessage<ChangeParticipantProducerSourceDto>, ValueTask<SuccessOrError<JToken?>>>
+        //    RedirectChangeProducerSource(ConferenceDependentKey dependentKey)
+        //{
+        //    async ValueTask<SuccessOrError<JToken?>> Invoke(IServiceMessage<ChangeParticipantProducerSourceDto> message)
+        //    {
+        //        var permissions = await _permissionsService.GetPermissions(message.Participant);
+        //        if (!await permissions.GetPermission(PermissionsList.Media.CanChangeOtherParticipantsProducers))
+        //            return CommonError.PermissionDenied(PermissionsList.Media.CanChangeOtherParticipantsProducers);
 
-                var meta = GetMeta(message);
-                meta.ParticipantId = message.Payload.ParticipantId;
-                var request = new ConnectionMessage<ChangeProducerSourceRequest>(
-                    new ChangeProducerSourceRequest(message.Payload.Source, message.Payload.Action), meta);
+        //        var meta = GetMeta(message);
+        //        meta.ParticipantId = message.Payload.ParticipantId;
+        //        var request = new ConnectionMessage<ChangeProducerSourceRequest>(
+        //            new ChangeProducerSourceRequest(message.Payload.Source, message.Payload.Action), meta);
 
-                return await _repo.SendMessage(dependentKey, _conferenceId, request);
-            }
+        //        return await _repo.SendMessage(dependentKey, _conferenceId, request);
+        //    }
 
-            return Invoke;
-        }
+        //    return Invoke;
+        //}
 
         private async Task OnSendMessageToConnection(SendToConnectionDto arg)
         {
             await _clients.SendToConnectionAsync(arg.ConnectionId, arg.MethodName, arg.Payload);
-        }
-
-        private ConnectionMessageMetadata GetMeta(IServiceMessage message)
-        {
-            return new ConnectionMessageMetadata(_conferenceId, message.ConnectionId,
-                message.Participant.ParticipantId);
-        }
-
-        public Func<IServiceMessage<TRequest>, ValueTask<SuccessOrError<JToken?>>> Redirect<TRequest>(
-            ConferenceDependentKey dependentKey)
-        {
-            async ValueTask<SuccessOrError<JToken?>> Invoke(IServiceMessage<TRequest> message)
-            {
-                var meta = GetMeta(message);
-                var request = new ConnectionMessage<TRequest>(message.Payload, meta);
-
-                return await _repo.SendMessage(dependentKey, _conferenceId, request);
-            }
-
-            return Invoke;
-        }
-
-        public async ValueTask<SuccessOrError<JObject?>> GetRouterCapabilities(IServiceMessage _)
-        {
-            return await _repo.GetRtpCapabilities(_conferenceId);
         }
     }
 }

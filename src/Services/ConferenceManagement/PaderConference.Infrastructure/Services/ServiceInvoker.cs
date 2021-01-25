@@ -13,7 +13,6 @@ using PaderConference.Core.Extensions;
 using PaderConference.Core.Interfaces;
 using PaderConference.Core.Interfaces.Services;
 using PaderConference.Core.Services;
-using PaderConference.Infrastructure.Hubs;
 
 namespace PaderConference.Infrastructure.Services
 {
