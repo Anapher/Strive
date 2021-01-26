@@ -1,3 +1,4 @@
+import { useReactOidc } from '@axa-fr/react-oidc-context';
 import { Link } from '@material-ui/core';
 import React, { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -13,7 +14,7 @@ import { close } from 'src/store/signal/actions';
 import { WebRtcContext } from 'src/store/webrtc/WebRtcContext';
 import { WebRtcManager } from 'src/store/webrtc/WebRtcManager';
 import to from 'src/utils/to';
-import { ConferenceRouteParams } from '../types';
+import { ConferenceRouteParams } from './types';
 
 const defaultEvents: string[] = [
    coreHub.events.onSynchronizeObjectState,
@@ -32,10 +33,11 @@ function ConferenceRoute({
    },
 }: Props) {
    const error = useSelector((state: RootState) => state.conference.connectionError);
-   const accessToken = useSelector((state: RootState) => state.auth.token?.accessToken);
    const conferenceState = useSelector((state: RootState) => state.conference.conferenceState);
    const { isConnected, isReconnecting } = useSelector((state: RootState) => state.signalr);
    const webRtc = useRef(new WebRtcManager({ sendMedia: true, receiveMedia: true })).current;
+
+   const { oidcUser } = useReactOidc();
 
    const dispatch = useDispatch();
 
@@ -44,13 +46,11 @@ function ConferenceRoute({
    }, []);
 
    useEffect(() => {
-      if (!accessToken) return; // should not happen as this is an authenticated route
-
-      dispatch(coreHub.joinConference(id, defaultEvents, accessToken));
+      dispatch(coreHub.joinConference(id, defaultEvents, oidcUser.access_token));
       return () => {
          dispatch(close());
       };
-   }, [id, close, dispatch, accessToken]);
+   }, [id, close, dispatch, oidcUser]);
 
    useEffect(() => {
       webRtc.beginConnecting();

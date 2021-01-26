@@ -3,13 +3,13 @@ import { Pin, PinOff } from 'mdi-material-ui';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import * as coreHub from 'src/core-hub';
-import { selectAccessToken } from 'src/features/auth/selectors';
 import ParticipantItem from 'src/features/conference/components/ParticipantItem';
 import SceneManagement from 'src/features/scenes/components/SceneManagement';
 import { RootState } from 'src/store';
 import { selectRoomViewModels } from '../selectors';
 import RoomHeader from './RoomHeader';
 import clsx from 'classnames';
+import useMyParticipantId from 'src/hooks/useMyParticipantId';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -54,7 +54,7 @@ export default function RoomsList({ pinned, onTogglePinned }: Props) {
 
    const rooms = useSelector(selectRoomViewModels);
    const participants = useSelector((state: RootState) => state.conference.participants);
-   const accessInfo = useSelector(selectAccessToken);
+   const myId = useMyParticipantId();
 
    const dispatch = useDispatch();
    const handleSwitchRoom = (roomId: string) => dispatch(coreHub.switchRoom({ roomId }));
@@ -78,7 +78,7 @@ export default function RoomsList({ pinned, onTogglePinned }: Props) {
                   <RoomHeader
                      className={classes.roomHeader}
                      room={x}
-                     selected={accessInfo && x.participants.includes(accessInfo.nameid)}
+                     selected={myId && x.participants.includes(myId.nameid)}
                      onClick={() => handleSwitchRoom(x.roomId)}
                   />
                   <div className={classes.participants}>

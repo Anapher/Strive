@@ -1,17 +1,23 @@
+import { AuthenticationProvider, InMemoryWebStorage, oidcLog } from '@axa-fr/react-oidc-context';
+import 'fontsource-roboto';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import App from './App';
+import { ocidConfig } from './config';
 import * as serviceWorker from './serviceWorker';
-import configure from './startup';
 import store from './store';
-import 'fontsource-roboto';
-
-configure(store);
 
 ReactDOM.render(
    <Provider store={store}>
-      <App />
+      <AuthenticationProvider
+         configuration={ocidConfig}
+         loggerLevel={oidcLog.DEBUG}
+         isEnabled
+         UserStore={InMemoryWebStorage}
+      >
+         <App />
+      </AuthenticationProvider>
    </Provider>,
    document.getElementById('root'),
 );

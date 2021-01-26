@@ -16,8 +16,6 @@ import SettingsIcon from '@material-ui/icons/Settings';
 import React, { useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import * as coreHub from 'src/core-hub';
-import { signOut } from 'src/features/auth/reducer';
-import { selectAccessToken } from 'src/features/auth/selectors';
 import { setOpen } from 'src/features/diagnostics/reducer';
 import { openSettings } from 'src/features/settings/reducer';
 import usePermission from 'src/hooks/usePermission';
@@ -27,6 +25,7 @@ import { selectParticipants } from '../selectors';
 import BreakoutRoomChips from './appbar/BreakoutRoomChip';
 import clsx from 'classnames';
 import { CONFERENCE_CAN_OPEN_AND_CLOSE } from 'src/permissions';
+import { useReactOidc } from '@axa-fr/react-oidc-context';
 
 const useStyles = makeStyles((theme) =>
    createStyles({
@@ -65,7 +64,6 @@ type Props = {
 export default function ConferenceAppBar({ chatWidth }: Props) {
    const classes = useStyles();
    const dispatch = useDispatch();
-   const handleSignOut = () => dispatch(signOut());
 
    const diagnosticsOpen = useSelector((state: RootState) => state.diagnostics.open);
 
@@ -73,7 +71,7 @@ export default function ConferenceAppBar({ chatWidth }: Props) {
    const handleCloseConference = () => dispatch(coreHub.closeConference());
    const handleOpenSettings = () => dispatch(openSettings());
 
-   const token = useSelector(selectAccessToken);
+   const { logout, oidcUser } = useReactOidc();
    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
    const handleOpenMenu = () => setIsMenuOpen(true);
@@ -128,10 +126,10 @@ export default function ConferenceAppBar({ chatWidth }: Props) {
                alignItems="center"
                justifyContent="flex-end"
             >
-               {token && (
+               {oidcUser && (
                   <Box mr={2}>
                      <Typography variant="caption">
-                        Signed in as <b>{token.unique_name}</b>
+                        Signed in as <b>{oidcUser.profile.given_name}</b>
                      </Typography>
                   </Box>
                )}
@@ -151,7 +149,7 @@ export default function ConferenceAppBar({ chatWidth }: Props) {
                   Diagnostics
                </MenuItem>
                {canCloseConference && <MenuItem onClick={handleCloseConference}>Close Conference</MenuItem>}
-               <MenuItem onClick={handleSignOut}>Sign out</MenuItem>
+               <MenuItem onClick={logout as any}>Sign out</MenuItem>
             </Menu>
          </Toolbar>
       </AppBar>

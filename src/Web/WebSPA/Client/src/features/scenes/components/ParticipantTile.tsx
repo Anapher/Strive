@@ -12,7 +12,7 @@ import useConsumer from 'src/store/webrtc/hooks/useConsumer';
 import { Size } from 'src/types';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import ParticipantContextMenuPopper from 'src/features/conference/components/ParticipantContextMenuPopper';
-import { selectMyParticipantId } from 'src/features/auth/selectors';
+import useMyParticipantId from 'src/hooks/useMyParticipantId';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -93,7 +93,7 @@ export default function ParticipantTile({ className, participant, size, disableL
    const videoRef = useRef<HTMLVideoElement | null>(null);
    const producers = useSelector((state: RootState) => selectParticipantProducers(state, participant?.participantId));
    const isWebcamActive = consumer?.paused === false;
-   const myParticipantId = useSelector(selectMyParticipantId);
+   const myParticipantId = useMyParticipantId();
 
    const isMe = participant.participantId === myParticipantId;
 

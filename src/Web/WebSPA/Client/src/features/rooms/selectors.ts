@@ -2,13 +2,13 @@ import { RoomViewModel } from './types';
 import { createSelector } from '@reduxjs/toolkit';
 import { RootState } from 'src/store';
 import _ from 'lodash';
-import { selectAccessToken, selectMyParticipantId } from '../auth/selectors';
+import { selectMyParticipantId } from '../auth/selectors';
 
 export const selectRooms = (state: RootState) => state.rooms.synchronized;
 
-export const selectParticipantRoom = createSelector(selectRooms, selectAccessToken, (rooms, token) => {
-   if (!token) return undefined;
-   return rooms?.participants[token.nameid];
+export const selectParticipantRoom = createSelector(selectRooms, selectMyParticipantId, (rooms, myId) => {
+   if (!myId) return undefined;
+   return rooms?.participants[myId];
 });
 
 export const selectParticipantsOfCurrentRoom = createSelector(selectParticipantRoom, selectRooms, (room, rooms) => {

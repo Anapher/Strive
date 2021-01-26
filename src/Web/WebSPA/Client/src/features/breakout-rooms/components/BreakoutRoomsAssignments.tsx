@@ -16,9 +16,8 @@ import { ParticipantDto } from 'src/features/conference/types';
 import React, { useEffect } from 'react';
 import clsx from 'classnames';
 import PersonIcon from '@material-ui/icons/Person';
-import { selectMyParticipantId } from 'src/features/auth/selectors';
-import { useSelector } from 'react-redux';
 import _ from 'lodash';
+import useMyParticipantId from 'src/hooks/useMyParticipantId';
 
 const useStyles = makeStyles((theme) => ({
    roomListDragOver: {
@@ -68,7 +67,7 @@ const droppableIdToRoom = (s: string) => (s === 'defaultRoom' ? undefined : Numb
 
 export default function BreakoutRoomsAssignments({ data, participants, createdRooms, onChange }: Props) {
    const unassignedParticipants = participants.filter((x) => !data.find((y) => y.includes(x.participantId)));
-   const myParticipantId = useSelector(selectMyParticipantId);
+   const myParticipantId = useMyParticipantId();
 
    useEffect(() => {
       if (data.length > createdRooms) {

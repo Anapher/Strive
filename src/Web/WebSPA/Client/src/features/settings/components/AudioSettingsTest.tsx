@@ -4,8 +4,8 @@ import hark from 'hark';
 import React, { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import ErrorWrapper from 'src/components/ErrorWrapper';
-import { selectMyParticipantId } from 'src/features/auth/selectors';
 import useDeviceManagement from 'src/features/media/useDeviceManagement';
+import useMyParticipantId from 'src/hooks/useMyParticipantId';
 import { RootState } from 'src/store';
 import useConsumer from 'src/store/webrtc/hooks/useConsumer';
 import useMicrophone from 'src/store/webrtc/hooks/useMicrophone';
@@ -30,7 +30,7 @@ const useStyles = makeStyles((theme) => ({
 export default function AudioSettingsTest() {
    const classes = useStyles();
 
-   const myId = useSelector(selectMyParticipantId);
+   const myId = useMyParticipantId();
    const consumer = useConsumer(myId, 'loopback-mic');
    const audioLevel = useMotionValue(0);
 

@@ -1,7 +1,7 @@
+import { AuthenticationContext } from '@axa-fr/react-oidc-context';
 import { Button, makeStyles, Typography } from '@material-ui/core';
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { signOut } from 'src/features/auth/reducer';
 import MyConferencesList from 'src/features/conference/components/MyConferencesList';
 import { fetchConferenceLinks } from 'src/features/conference/reducer';
 import ConferenceControls from 'src/features/create-conference/components/ConferenceControls';
@@ -69,7 +69,6 @@ export default function MainRoute() {
    const classes = useStyles();
 
    const dispatch = useDispatch();
-   const handleSignOut = () => dispatch(signOut());
 
    useEffect(() => {
       dispatch(fetchConferenceLinks());
@@ -79,9 +78,14 @@ export default function MainRoute() {
 
    return (
       <div className={classes.root}>
-         <Button className={classes.signOutButton} onClick={handleSignOut}>
-            Sign out
-         </Button>
+         <AuthenticationContext.Consumer>
+            {({ logout }) => (
+               <Button className={classes.signOutButton} onClick={() => logout()}>
+                  Sign out
+               </Button>
+            )}
+         </AuthenticationContext.Consumer>
+
          {links && links.length > 0 && (
             <div className={classes.sideList}>
                <MyConferencesList links={links} />

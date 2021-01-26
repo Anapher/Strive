@@ -10,12 +10,12 @@ import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import useWebRtc from 'src/store/webrtc/hooks/useWebRtc';
 import { Consumer } from 'mediasoup-client/lib/Consumer';
 import { selectParticipantAudio } from 'src/features/media/selectors';
-import { selectMyParticipantId } from 'src/features/auth/selectors';
+import useMyParticipantId from 'src/hooks/useMyParticipantId';
 
 export default function DiagnosticsView() {
    const participantsOfRoom = useSelector(selectParticipantsOfCurrentRoom);
    const participants = useSelector(selectParticipants);
-   const myId = useSelector(selectMyParticipantId);
+   const myId = useMyParticipantId();
 
    const streams = useSelector((state: RootState) => state.media.streams);
    const audio = useSelector(selectParticipantAudio);

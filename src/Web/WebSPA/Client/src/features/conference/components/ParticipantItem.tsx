@@ -6,8 +6,8 @@ import { useSelector } from 'react-redux';
 import AnimatedMicIcon from 'src/assets/animated-icons/AnimatedMicIcon';
 import IconHide from 'src/components/IconHide';
 import { Roles } from 'src/consts';
-import { selectMyParticipantId } from 'src/features/auth/selectors';
 import { selectParticipantProducers } from 'src/features/media/selectors';
+import useMyParticipantId from 'src/hooks/useMyParticipantId';
 import { RootState } from 'src/store';
 import { ParticipantDto } from '../types';
 import ParticipantContextMenuPopper from './ParticipantContextMenuPopper';
@@ -38,7 +38,7 @@ type Props = {
 export default function ParticipantItem({ participant }: Props) {
    const classes = useStyles();
    const producers = useSelector((state: RootState) => selectParticipantProducers(state, participant?.participantId));
-   const myParticipantId = useSelector(selectMyParticipantId);
+   const myParticipantId = useMyParticipantId();
 
    const theme = useTheme();
 

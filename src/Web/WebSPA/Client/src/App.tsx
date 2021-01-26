@@ -1,3 +1,4 @@
+import { AuthenticationProvider, InMemoryWebStorage, oidcLog, OidcSecure } from '@axa-fr/react-oidc-context';
 import LuxonUtils from '@date-io/luxon';
 import { createMuiTheme, CssBaseline, makeStyles } from '@material-ui/core';
 import { blue, pink } from '@material-ui/core/colors';
@@ -5,12 +6,10 @@ import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import { ThemeProvider } from '@material-ui/styles';
 import React from 'react';
 import { Toaster } from 'react-hot-toast';
-import { useSelector } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
 import UserInteractionListener from './features/media/components/UserInteractionListener';
-import AnonymousRoutes from './routes/anonymous';
-import AuthenticatedRoutes from './routes/authenticated';
-import { RootState } from './store';
+import { ocidConfig } from './config';
+import AuthenticatedRoutes from './routes';
 
 const useStyles = makeStyles((theme) => ({
    toast: {
@@ -36,15 +35,17 @@ const theme = createMuiTheme({
 });
 
 function App() {
-   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
-
    return (
       <MuiPickersUtilsProvider utils={LuxonUtils}>
          <ThemeProvider theme={theme}>
             <MaterialUiToaster />
             <UserInteractionListener />
             <CssBaseline />
-            <BrowserRouter>{isAuthenticated ? <AuthenticatedRoutes /> : <AnonymousRoutes />}</BrowserRouter>
+            <OidcSecure>
+               <BrowserRouter>
+                  <AuthenticatedRoutes />
+               </BrowserRouter>
+            </OidcSecure>
          </ThemeProvider>
       </MuiPickersUtilsProvider>
    );

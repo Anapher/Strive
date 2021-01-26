@@ -39,9 +39,9 @@ export type AppDispatch = typeof store.dispatch;
 
 // Store persistence
 function persistInLocalStorage(state: RootState): Partial<RootState> {
-   return { auth: state.auth.rememberMe ? state.auth : undefined };
+   return {};
 }
 
 function persistInSessionStorage(state: RootState): Partial<RootState> {
-   return { auth: !state.auth.rememberMe ? state.auth : undefined };
+   return {};
 }

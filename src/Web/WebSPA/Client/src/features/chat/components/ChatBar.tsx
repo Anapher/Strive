@@ -3,8 +3,8 @@ import React, { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import * as coreHub from 'src/core-hub';
 import { SendChatMessageDto } from 'src/core-hub.types';
-import { selectMyParticipantId } from 'src/features/auth/selectors';
 import { selectParticipants } from 'src/features/conference/selectors';
+import useMyParticipantId from 'src/hooks/useMyParticipantId';
 import { RootState } from 'src/store';
 import * as actions from '../actions';
 import { hashCode, numberToColor } from '../color-utils';
@@ -52,7 +52,7 @@ export default function ChatBar() {
 
    const handleSendMessage = (dto: SendChatMessageDto) => dispatch(coreHub.sendChatMessage(dto));
    const participantsTyping = useSelector(selectParticipantsTyping);
-   const participantId = useSelector(selectMyParticipantId);
+   const participantId = useMyParticipantId();
 
    const participantColors = useMemo(
       () =>

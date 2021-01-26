@@ -1,7 +1,4 @@
 import { combineReducers } from 'redux';
-
-import auth from '../features/auth/reducer';
-import signIn from '../features/auth/sign-in-reducer';
 import conference from '../features/conference/reducer';
 import chat from '../features/chat/reducer';
 import createConference from '../features/create-conference/reducer';
@@ -13,10 +10,10 @@ import equipment from '../features/equipment/reducer';
 import scenes from '../features/scenes/reducer';
 import breakoutRooms from '../features/breakout-rooms/reducer';
 import diagnostics from '../features/diagnostics/reducer';
+import auth from '../features/auth/reducer';
 
 const rootReducer = combineReducers({
    auth,
-   signIn,
    conference,
    createConference,
    chat,

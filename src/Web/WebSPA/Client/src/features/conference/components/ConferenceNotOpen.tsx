@@ -13,7 +13,6 @@ import _ from 'lodash';
 import { DateTime } from 'luxon';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectAccessToken } from 'src/features/auth/selectors';
 import usePermission from 'src/hooks/usePermission';
 import { RootState } from 'src/store';
 import * as coreHub from 'src/core-hub';
@@ -22,6 +21,7 @@ import { openSettings } from 'src/features/settings/reducer';
 import { CONFERENCE_CAN_OPEN_AND_CLOSE } from 'src/permissions';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import to from 'src/utils/to';
+import useMyParticipantId from 'src/hooks/useMyParticipantId';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -87,9 +87,9 @@ type Props = {
 export default function ConferenceNotOpen({ conferenceInfo }: Props) {
    const classes = useStyles();
    const participants = useSelector((state: RootState) => state.conference.participants);
-   const user = useSelector(selectAccessToken);
+   const myId = useMyParticipantId();
 
-   const isUserModerator = !!user && conferenceInfo.moderators.includes(user.nameid);
+   const isUserModerator = !!myId && conferenceInfo.moderators.includes(myId);
    const isModeratorJoined =
       !!participants && _.some(participants, (x) => conferenceInfo.moderators.includes(x.participantId));
 
