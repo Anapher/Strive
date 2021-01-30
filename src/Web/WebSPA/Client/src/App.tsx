@@ -8,8 +8,14 @@ import React from 'react';
 import { Toaster } from 'react-hot-toast';
 import { BrowserRouter } from 'react-router-dom';
 import UserInteractionListener from './features/media/components/UserInteractionListener';
-import { ocidConfig } from './config';
+import appSettings, { ocidConfig } from './config';
 import AuthenticatedRoutes from './routes';
+import AuthCallback from './features/auth/components/AuthCallback';
+import NotAuthenticated from './features/auth/components/NotAuthenticated';
+import { User } from 'oidc-client';
+import Axios from 'axios';
+
+Axios.defaults.baseURL = appSettings.conferenceUrl;
 
 const useStyles = makeStyles((theme) => ({
    toast: {
@@ -41,11 +47,28 @@ function App() {
             <MaterialUiToaster />
             <UserInteractionListener />
             <CssBaseline />
-            <OidcSecure>
-               <BrowserRouter>
-                  <AuthenticatedRoutes />
-               </BrowserRouter>
-            </OidcSecure>
+            <BrowserRouter>
+               <AuthenticationProvider
+                  configuration={ocidConfig}
+                  loggerLevel={oidcLog.DEBUG}
+                  isEnabled
+                  UserStore={InMemoryWebStorage}
+                  callbackComponentOverride={AuthCallback}
+                  notAuthenticated={NotAuthenticated}
+                  customEvents={
+                     {
+                        onUserLoaded: (user: User) =>
+                           (Axios.defaults.headers.common = {
+                              Authorization: `Bearer ${user.access_token}`,
+                           }),
+                     } as any
+                  }
+               >
+                  <OidcSecure>
+                     <AuthenticatedRoutes />
+                  </OidcSecure>
+               </AuthenticationProvider>
+            </BrowserRouter>
          </ThemeProvider>
       </MuiPickersUtilsProvider>
    );

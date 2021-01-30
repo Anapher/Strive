@@ -15,13 +15,13 @@ const appSettings: AppSettings = Object.fromEntries(
 export default appSettings;
 
 export const ocidConfig: UserManagerSettings = {
-   client_id: 'interactive.public.short',
+   client_id: 'spa',
    redirect_uri: `${appSettings.frontendUrl}/authentication/callback`,
    response_type: 'code',
    post_logout_redirect_uri: `${appSettings.frontendUrl}/`,
-   scope: 'openid profile email api offline_access',
-   authority: 'https://demo.identityserver.io',
-   silent_redirect_uri: 'http://localhost:3000/authentication/silent_callback',
+   scope: 'openid profile',
+   authority: appSettings.identityUrl,
+   silent_redirect_uri: `${appSettings.frontendUrl}/authentication/silent_callback`,
    automaticSilentRenew: true,
    loadUserInfo: true,
 };

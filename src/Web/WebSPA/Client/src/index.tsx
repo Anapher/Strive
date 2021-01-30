@@ -4,20 +4,12 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import App from './App';
-import { ocidConfig } from './config';
 import * as serviceWorker from './serviceWorker';
 import store from './store';
 
 ReactDOM.render(
    <Provider store={store}>
-      <AuthenticationProvider
-         configuration={ocidConfig}
-         loggerLevel={oidcLog.DEBUG}
-         isEnabled
-         UserStore={InMemoryWebStorage}
-      >
-         <App />
-      </AuthenticationProvider>
+      <App />
    </Provider>,
    document.getElementById('root'),
 );

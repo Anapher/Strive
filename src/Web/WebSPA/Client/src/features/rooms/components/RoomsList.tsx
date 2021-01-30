@@ -78,7 +78,7 @@ export default function RoomsList({ pinned, onTogglePinned }: Props) {
                   <RoomHeader
                      className={classes.roomHeader}
                      room={x}
-                     selected={myId && x.participants.includes(myId.nameid)}
+                     selected={x.participants.includes(myId)}
                      onClick={() => handleSwitchRoom(x.roomId)}
                   />
                   <div className={classes.participants}>
