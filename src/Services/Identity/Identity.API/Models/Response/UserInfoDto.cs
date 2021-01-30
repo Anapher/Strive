@@ -1,4 +1,4 @@
-﻿namespace PaderConference.Models.Response
+﻿namespace Identity.API.Models.Response
 {
     public class UserInfoDto
     {
@@ -15,12 +15,12 @@
 
         public static UserInfoDto CreateNotFound(string id)
         {
-            return new(id, true, null);
+            return new UserInfoDto(id, true, null);
         }
 
         public static UserInfoDto Create(string id, string displayName)
         {
-            return new(id, false, displayName);
+            return new UserInfoDto(id, false, displayName);
         }
     }
 }

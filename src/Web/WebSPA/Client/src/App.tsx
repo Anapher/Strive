@@ -4,18 +4,16 @@ import { createMuiTheme, CssBaseline, makeStyles } from '@material-ui/core';
 import { blue, pink } from '@material-ui/core/colors';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import { ThemeProvider } from '@material-ui/styles';
+import Axios from 'axios';
+import { User } from 'oidc-client';
 import React from 'react';
 import { Toaster } from 'react-hot-toast';
 import { BrowserRouter } from 'react-router-dom';
-import UserInteractionListener from './features/media/components/UserInteractionListener';
-import appSettings, { ocidConfig } from './config';
-import AuthenticatedRoutes from './routes';
+import { ocidConfig } from './config';
 import AuthCallback from './features/auth/components/AuthCallback';
 import NotAuthenticated from './features/auth/components/NotAuthenticated';
-import { User } from 'oidc-client';
-import Axios from 'axios';
-
-Axios.defaults.baseURL = appSettings.conferenceUrl;
+import UserInteractionListener from './features/media/components/UserInteractionListener';
+import AuthenticatedRoutes from './routes';
 
 const useStyles = makeStyles((theme) => ({
    toast: {
