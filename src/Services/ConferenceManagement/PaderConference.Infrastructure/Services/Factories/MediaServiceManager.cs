@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Autofac;
 using Autofac.Core;
 using PaderConference.Core.Services.Media;
-using PaderConference.Core.Services.Permissions;
 using PaderConference.Core.Services.Synchronization;
 
 namespace PaderConference.Infrastructure.Services.Factories

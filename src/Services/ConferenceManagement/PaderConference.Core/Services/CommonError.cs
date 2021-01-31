@@ -1,6 +1,6 @@
 ﻿using PaderConference.Core.Dto;
 using PaderConference.Core.Errors;
-using PaderConference.Core.Services.Permissions;
+using PaderConference.Core.NewServices.Permissions;
 
 namespace PaderConference.Core.Services
 {

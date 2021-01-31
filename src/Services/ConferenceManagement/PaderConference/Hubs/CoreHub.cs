@@ -14,6 +14,8 @@ using PaderConference.Core.Dto.UseCaseRequests;
 using PaderConference.Core.Extensions;
 using PaderConference.Core.Interfaces;
 using PaderConference.Core.Interfaces.UseCases;
+using PaderConference.Core.NewServices.Permissions.Dto;
+using PaderConference.Core.NewServices.Permissions.Requests;
 using PaderConference.Core.Services.BreakoutRoom;
 using PaderConference.Core.Services.BreakoutRoom.Dto;
 using PaderConference.Core.Services.BreakoutRoom.Requests;
@@ -25,12 +27,8 @@ using PaderConference.Core.Services.ConferenceControl.Requests;
 using PaderConference.Core.Services.Equipment;
 using PaderConference.Core.Services.Equipment.Data;
 using PaderConference.Core.Services.Equipment.Dto;
-using PaderConference.Core.Services.Permissions;
-using PaderConference.Core.Services.Permissions.Dto;
-using PaderConference.Core.Services.Permissions.Requests;
 using PaderConference.Core.Services.Rooms;
 using PaderConference.Core.Services.Rooms.Requests;
-using PaderConference.Core.Signaling;
 using PaderConference.Infrastructure.Extensions;
 using PaderConference.Infrastructure.Services;
 
@@ -132,9 +130,9 @@ namespace PaderConference.Hubs
                 service => service.KickParticipant);
         }
 
-        public Task<SuccessOrError<ParticipantPermissionInfo>> FetchPermissions(string? participantId)
+        public Task<SuccessOrError<ParticipantPermissionDto>> FetchPermissions(string? participantId)
         {
-            return _invoker.InvokeService<PermissionsService, string?, ParticipantPermissionInfo>(participantId,
+            return _invoker.InvokeService<PermissionsService, string?, ParticipantPermissionDto>(participantId,
                 service => service.FetchPermissions);
         }
 

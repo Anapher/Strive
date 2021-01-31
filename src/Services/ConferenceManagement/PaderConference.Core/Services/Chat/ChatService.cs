@@ -11,10 +11,10 @@ using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Extensions;
 using PaderConference.Core.Interfaces;
 using PaderConference.Core.Interfaces.Services;
+using PaderConference.Core.NewServices.Permissions;
 using PaderConference.Core.Services.Chat.Dto;
 using PaderConference.Core.Services.Chat.Filters;
 using PaderConference.Core.Services.Chat.Requests;
-using PaderConference.Core.Services.Permissions;
 using PaderConference.Core.Services.Synchronization;
 using PaderConference.Core.Signaling;
 using Timer = System.Timers.Timer;
@@ -122,16 +122,16 @@ namespace PaderConference.Core.Services.Chat
             var messageDto = message.Payload;
 
             var permissions = await _permissionsService.GetPermissions(message.Participant);
-            if (!await permissions.GetPermission(PermissionsList.Chat.CanSendChatMessage))
-                return CommonError.PermissionDenied(PermissionsList.Chat.CanSendChatMessage);
+            if (!await permissions.GetPermissionValue(DefinedPermissions.Chat.CanSendChatMessage))
+                return CommonError.PermissionDenied(DefinedPermissions.Chat.CanSendChatMessage);
 
             // here would be the point to implement e. g. language filter
 
             if (messageDto.Mode != null)
                 if (messageDto.Mode is SendAnonymously)
                 {
-                    if (!await permissions.GetPermission(PermissionsList.Chat.CanSendAnonymousMessage))
-                        return CommonError.PermissionDenied(PermissionsList.Chat.CanSendAnonymousMessage);
+                    if (!await permissions.GetPermissionValue(DefinedPermissions.Chat.CanSendAnonymousMessage))
+                        return CommonError.PermissionDenied(DefinedPermissions.Chat.CanSendAnonymousMessage);
                 }
                 else if (messageDto.Mode is SendPrivately sendPrivately)
                 {
@@ -139,8 +139,8 @@ namespace PaderConference.Core.Services.Chat
                         sendPrivately.To.ParticipantId, out var participant))
                         return CommonError.ParticipantNotFound;
 
-                    if (!await permissions.GetPermission(PermissionsList.Chat.CanSendPrivateChatMessage))
-                        return CommonError.PermissionDenied(PermissionsList.Chat.CanSendPrivateChatMessage);
+                    if (!await permissions.GetPermissionValue(DefinedPermissions.Chat.CanSendPrivateChatMessage))
+                        return CommonError.PermissionDenied(DefinedPermissions.Chat.CanSendPrivateChatMessage);
 
                     sendPrivately.To.DisplayName = participant.DisplayName;
                 }

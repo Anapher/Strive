@@ -8,15 +8,18 @@ using Autofac.Extensions.DependencyInjection;
 using AutoMapper;
 using FluentValidation.AspNetCore;
 using JsonSubTypes;
+using MassTransit;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using MongoDB.Bson;
@@ -106,6 +109,17 @@ namespace PaderConference
             var redisConfig = Configuration.GetSection("Redis").Get<RedisConfiguration>() ?? new RedisConfiguration();
             services.AddStackExchangeRedisExtensions<CamelCaseNewtonSerializer>(redisConfig);
 
+            services.AddHealthChecks().AddMongoDb(Configuration["MongoDb:ConnectionString"]);
+
+            services.Configure<HealthCheckPublisherOptions>(options =>
+            {
+                options.Delay = TimeSpan.FromSeconds(2);
+                options.Predicate = check => check.Tags.Contains("ready");
+            });
+
+            services.AddMassTransit(x => { x.UsingRabbitMq(); });
+            services.AddMassTransitHostedService();
+
             // Register the Swagger generator, defining 1 or more Swagger documents
             services.AddSwaggerGen(c =>
             {
@@ -166,6 +180,14 @@ namespace PaderConference
             {
                 endpoints.MapControllerRoute("default", "{controller}/{action=Index}/{id?}");
                 endpoints.MapHub<CoreHub>("/signalr");
+            });
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapHealthChecks("/health/ready",
+                    new HealthCheckOptions {Predicate = check => check.Tags.Contains("ready")});
+
+                endpoints.MapHealthChecks("/health/live", new HealthCheckOptions());
             });
         }
     }

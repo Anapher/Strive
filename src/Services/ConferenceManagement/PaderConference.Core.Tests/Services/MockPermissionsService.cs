@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Extensions;
-using PaderConference.Core.Services.Permissions;
+using PaderConference.Core.NewServices.Permissions;
 
 namespace PaderConference.Core.Tests.Services
 {
@@ -23,9 +23,9 @@ namespace PaderConference.Core.Tests.Services
         public async ValueTask<IPermissionStack> GetPermissions(Participant participant)
         {
             if (_permissions.TryGetValue(participant.ParticipantId, out var permissions))
-                return new PermissionStack(permissions.Yield().ToList());
+                return new CachedPermissionStack(permissions.Yield().ToList());
 
-            return new PermissionStack(new IReadOnlyDictionary<string, JValue>[0]);
+            return new CachedPermissionStack(new IReadOnlyDictionary<string, JValue>[0]);
         }
 
         public void RegisterLayerProvider(FetchPermissionsDelegate fetchPermissions)

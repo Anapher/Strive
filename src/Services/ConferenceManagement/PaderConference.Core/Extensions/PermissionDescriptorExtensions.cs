@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
-using PaderConference.Core.Services.Permissions;
+using PaderConference.Core.NewServices.Permissions;
 
 namespace PaderConference.Core.Extensions
 {

@@ -9,7 +9,7 @@ using Microsoft.Extensions.Options;
 using PaderConference.Core.Dto.Services;
 using PaderConference.Core.Dto.UseCaseRequests;
 using PaderConference.Core.Interfaces.UseCases;
-using PaderConference.Core.Services.Permissions;
+using PaderConference.Core.NewServices.Permissions.Options;
 using PaderConference.Extensions;
 using PaderConference.Models.Response;
 

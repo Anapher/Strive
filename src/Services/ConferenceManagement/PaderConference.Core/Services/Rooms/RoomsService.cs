@@ -12,7 +12,7 @@ using PaderConference.Core.Extensions;
 using PaderConference.Core.Interfaces;
 using PaderConference.Core.Interfaces.Gateways.Repositories;
 using PaderConference.Core.Interfaces.Services;
-using PaderConference.Core.Services.Permissions;
+using PaderConference.Core.NewServices.Permissions;
 using PaderConference.Core.Services.Rooms.Requests;
 using PaderConference.Core.Services.Synchronization;
 
@@ -149,8 +149,8 @@ namespace PaderConference.Core.Services.Rooms
             using var _ = _logger.BeginMethodScope();
 
             var permissions = await _permissionsService.GetPermissions(message.Participant);
-            if (!await permissions.GetPermission(PermissionsList.Rooms.CanSwitchRoom))
-                return CommonError.PermissionDenied(PermissionsList.Rooms.CanSwitchRoom);
+            if (!await permissions.GetPermissionValue(DefinedPermissions.Rooms.CanSwitchRoom))
+                return CommonError.PermissionDenied(DefinedPermissions.Rooms.CanSwitchRoom);
 
             return await SetRoom(message.Participant.ParticipantId, message.Payload.RoomId);
         }
@@ -160,8 +160,8 @@ namespace PaderConference.Core.Services.Rooms
             using var _ = _logger.BeginMethodScope();
 
             var permissions = await _permissionsService.GetPermissions(message.Participant);
-            if (!await permissions.GetPermission(PermissionsList.Rooms.CanCreateAndRemove))
-                return CommonError.PermissionDenied(PermissionsList.Rooms.CanCreateAndRemove);
+            if (!await permissions.GetPermissionValue(DefinedPermissions.Rooms.CanCreateAndRemove))
+                return CommonError.PermissionDenied(DefinedPermissions.Rooms.CanCreateAndRemove);
 
             await CreateRooms(message.Payload);
             return SuccessOrError.Succeeded;
@@ -192,8 +192,8 @@ namespace PaderConference.Core.Services.Rooms
             using var _ = _logger.BeginMethodScope();
 
             var permissions = await _permissionsService.GetPermissions(message.Participant);
-            if (!await permissions.GetPermission(PermissionsList.Rooms.CanCreateAndRemove))
-                return CommonError.PermissionDenied(PermissionsList.Rooms.CanCreateAndRemove);
+            if (!await permissions.GetPermissionValue(DefinedPermissions.Rooms.CanCreateAndRemove))
+                return CommonError.PermissionDenied(DefinedPermissions.Rooms.CanCreateAndRemove);
 
             await RemoveRooms(message.Payload);
             return SuccessOrError.Succeeded;

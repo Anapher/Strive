@@ -8,7 +8,6 @@ using Newtonsoft.Json.Linq;
 using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Interfaces.Gateways.Repositories;
 using PaderConference.Core.Interfaces.Services;
-using PaderConference.Core.Services.Permissions;
 using Xunit;
 
 namespace PaderConference.Core.Tests.Services.Permissions

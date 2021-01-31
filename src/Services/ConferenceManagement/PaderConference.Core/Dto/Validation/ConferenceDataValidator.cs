@@ -2,7 +2,7 @@
 using FluentValidation;
 using PaderConference.Core.Dto.Services;
 using PaderConference.Core.Extensions;
-using PaderConference.Core.Services.Permissions;
+using PaderConference.Core.NewServices.Permissions;
 
 namespace PaderConference.Core.Dto.Validation
 {
@@ -34,9 +34,9 @@ namespace PaderConference.Core.Dto.Validation
             RuleForEach(x => x.Permissions).ChildRules(group =>
             {
                 group.RuleFor(x => x.Key).IsInEnum();
-                group.RuleForEach(x => x.Value).Must(x => PermissionsListUtil.All.ContainsKey(x.Key))
+                group.RuleForEach(x => x.Value).Must(x => DefinedPermissionsProvider.All.ContainsKey(x.Key))
                     .WithMessage(x => $"The permission key {x.Key} was not found.")
-                    .Must(x => PermissionsListUtil.All.TryGetValue(x.Key, out var descriptor) &&
+                    .Must(x => DefinedPermissionsProvider.All.TryGetValue(x.Key, out var descriptor) &&
                                descriptor.ValidateValue(x.Value)).WithMessage(x =>
                         $"The value of permission key {x.Key} doesn't match value type.");
             });

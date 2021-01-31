@@ -1,4 +1,4 @@
-﻿using PaderConference.Core.Services.Permissions;
+﻿using PaderConference.Core.NewServices.Permissions;
 using Xunit;
 
 namespace PaderConference.Core.Tests.Services.Permissions
@@ -8,7 +8,7 @@ namespace PaderConference.Core.Tests.Services.Permissions
         [Fact]
         public void TestNotEmpty()
         {
-            Assert.NotEmpty(PermissionsListUtil.All);
+            Assert.NotEmpty(DefinedPermissionsProvider.All);
         }
     }
 }

@@ -6,8 +6,8 @@ using PaderConference.Core.Extensions;
 using PaderConference.Core.Interfaces;
 using PaderConference.Core.Interfaces.Gateways.Repositories;
 using PaderConference.Core.Interfaces.Services;
+using PaderConference.Core.NewServices.Permissions;
 using PaderConference.Core.Services.ConferenceControl.Requests;
-using PaderConference.Core.Services.Permissions;
 using PaderConference.Core.Services.Synchronization;
 using PaderConference.Core.Signaling;
 
@@ -80,19 +80,13 @@ namespace PaderConference.Core.Services.ConferenceControl
 
         public async ValueTask<SuccessOrError> OpenConference(IServiceMessage message)
         {
-            var permissions = await _permissionsService.GetPermissions(message.Participant);
-            if (!await permissions.GetPermission(PermissionsList.Conference.CanOpenAndClose))
-                return CommonError.PermissionDenied(PermissionsList.Conference.CanOpenAndClose);
-
-            await _conferenceManager.OpenConference(_conferenceId);
-            return SuccessOrError.Succeeded;
         }
 
         public async ValueTask<SuccessOrError> CloseConference(IServiceMessage message)
         {
             var permissions = await _permissionsService.GetPermissions(message.Participant);
-            if (!await permissions.GetPermission(PermissionsList.Conference.CanOpenAndClose))
-                return CommonError.PermissionDenied(PermissionsList.Conference.CanOpenAndClose);
+            if (!await permissions.GetPermissionValue(DefinedPermissions.Conference.CanOpenAndClose))
+                return CommonError.PermissionDenied(DefinedPermissions.Conference.CanOpenAndClose);
 
             await _conferenceManager.CloseConference(_conferenceId);
             return SuccessOrError.Succeeded;
@@ -101,8 +95,8 @@ namespace PaderConference.Core.Services.ConferenceControl
         public async ValueTask<SuccessOrError> KickParticipant(IServiceMessage<KickParticipantRequest> message)
         {
             var permissions = await _permissionsService.GetPermissions(message.Participant);
-            if (!await permissions.GetPermission(PermissionsList.Conference.CanKickParticipant))
-                return CommonError.PermissionDenied(PermissionsList.Conference.CanKickParticipant);
+            if (!await permissions.GetPermissionValue(DefinedPermissions.Conference.CanKickParticipant))
+                return CommonError.PermissionDenied(DefinedPermissions.Conference.CanKickParticipant);
 
             if (!_connectionMapping.ConnectionsR.TryGetValue(message.Payload.ParticipantId, out var connections))
                 return ConferenceError.ParticipantConnectionNotFound;

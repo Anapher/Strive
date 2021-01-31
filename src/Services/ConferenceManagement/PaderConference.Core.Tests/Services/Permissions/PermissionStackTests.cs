@@ -3,7 +3,7 @@ using System.Collections.Immutable;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using PaderConference.Core.Extensions;
-using PaderConference.Core.Services.Permissions;
+using PaderConference.Core.NewServices.Permissions;
 using Xunit;
 
 namespace PaderConference.Core.Tests.Services.Permissions
@@ -23,10 +23,10 @@ namespace PaderConference.Core.Tests.Services.Permissions
                 new[] {_testDescriptor1.Configure(false)}.ToImmutableDictionary(),
             };
 
-            var stack = new PermissionStack(layers);
+            var stack = new CachedPermissionStack(layers);
 
             // act
-            var permission = await stack.GetPermission(_testDescriptor1);
+            var permission = await stack.GetPermissionValue(_testDescriptor1);
 
             // assert
             Assert.False(permission);
@@ -41,10 +41,10 @@ namespace PaderConference.Core.Tests.Services.Permissions
                 new[] {_testDescriptor1.Configure(true)}.ToImmutableDictionary(),
             };
 
-            var stack = new PermissionStack(layers);
+            var stack = new CachedPermissionStack(layers);
 
             // act
-            var permission = await stack.GetPermission(_testDescriptor2);
+            var permission = await stack.GetPermissionValue(_testDescriptor2);
 
             // assert
             Assert.Equal(0, permission);
@@ -60,7 +60,7 @@ namespace PaderConference.Core.Tests.Services.Permissions
                 new[] {_testDescriptor1.Configure(false)}.ToImmutableDictionary(),
             };
 
-            var stack = new PermissionStack(layers);
+            var stack = new CachedPermissionStack(layers);
 
             // act
             var flatten = stack.Flatten();

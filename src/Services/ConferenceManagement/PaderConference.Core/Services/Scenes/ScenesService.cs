@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 using Nito.AsyncEx;
 using PaderConference.Core.Extensions;
 using PaderConference.Core.Interfaces;
-using PaderConference.Core.Services.Permissions;
+using PaderConference.Core.NewServices.Permissions;
 using PaderConference.Core.Services.Rooms;
 using PaderConference.Core.Services.Scenes.Requests;
 using PaderConference.Core.Services.Synchronization;
@@ -58,8 +58,8 @@ namespace PaderConference.Core.Services.Scenes
         public async ValueTask<SuccessOrError> SetScene(IServiceMessage<ChangeSceneRequest> message)
         {
             var permissions = await _permissionsService.GetPermissions(message.Participant);
-            if (!await permissions.GetPermission(PermissionsList.Scenes.CanSetScene))
-                return CommonError.PermissionDenied(PermissionsList.Scenes.CanSetScene);
+            if (!await permissions.GetPermissionValue(DefinedPermissions.Scenes.CanSetScene))
+                return CommonError.PermissionDenied(DefinedPermissions.Scenes.CanSetScene);
 
             using (await _roomManagementLock.LockAsync())
             {

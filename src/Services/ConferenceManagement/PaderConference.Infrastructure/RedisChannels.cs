@@ -1,7 +1,6 @@
 ﻿using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Services;
 using PaderConference.Core.Services.Media.Communication;
-using PaderConference.Core.Services.Permissions.Dto;
 using StackExchange.Redis;
 
 namespace PaderConference.Infrastructure

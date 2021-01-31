@@ -6,11 +6,11 @@ using Moq;
 using Newtonsoft.Json.Linq;
 using PaderConference.Core.Extensions;
 using PaderConference.Core.Interfaces.Services;
+using PaderConference.Core.NewServices.Permissions;
 using PaderConference.Core.Services;
 using PaderConference.Core.Services.Chat;
 using PaderConference.Core.Services.Chat.Dto;
 using PaderConference.Core.Services.Chat.Requests;
-using PaderConference.Core.Services.Permissions;
 using PaderConference.Core.Signaling;
 using PaderConference.Infrastructure.Sockets;
 using Xunit;
@@ -32,7 +32,7 @@ namespace PaderConference.Core.Tests.Services.Chat
             {
                 {
                     TestParticipants.Default.ParticipantId,
-                    new[] {PermissionsList.Chat.CanSendChatMessage.Configure(true)}.ToDictionary(x => x.Key,
+                    new[] {DefinedPermissions.Chat.CanSendChatMessage.Configure(true)}.ToDictionary(x => x.Key,
                         x => x.Value)
                 },
             });
@@ -122,8 +122,8 @@ namespace PaderConference.Core.Tests.Services.Chat
                     TestParticipants.Default.ParticipantId,
                     new[]
                     {
-                        PermissionsList.Chat.CanSendChatMessage.Configure(true),
-                        PermissionsList.Chat.CanSendAnonymousMessage.Configure(true),
+                        DefinedPermissions.Chat.CanSendChatMessage.Configure(true),
+                        DefinedPermissions.Chat.CanSendAnonymousMessage.Configure(true),
                     }.ToDictionary(x => x.Key, x => x.Value)
                 },
             });
@@ -322,8 +322,8 @@ namespace PaderConference.Core.Tests.Services.Chat
                     TestParticipants.Default.ParticipantId,
                     new[]
                     {
-                        PermissionsList.Chat.CanSendChatMessage.Configure(true),
-                        PermissionsList.Chat.CanSendPrivateChatMessage.Configure(true),
+                        DefinedPermissions.Chat.CanSendChatMessage.Configure(true),
+                        DefinedPermissions.Chat.CanSendPrivateChatMessage.Configure(true),
                     }.ToDictionary(x => x.Key, x => x.Value)
                 },
             });

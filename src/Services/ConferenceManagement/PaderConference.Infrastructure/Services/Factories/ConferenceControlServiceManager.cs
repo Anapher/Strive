@@ -5,7 +5,6 @@ using Autofac.Core;
 using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Interfaces.Gateways.Repositories;
 using PaderConference.Core.Services.ConferenceControl;
-using PaderConference.Core.Services.Permissions;
 using PaderConference.Core.Services.Synchronization;
 
 namespace PaderConference.Infrastructure.Services.Factories

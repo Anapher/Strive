@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Autofac;
 using Autofac.Core;
 using PaderConference.Core.Services.BreakoutRoom;
-using PaderConference.Core.Services.Permissions;
 using PaderConference.Core.Services.Rooms;
 using PaderConference.Core.Services.Synchronization;
 

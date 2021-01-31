@@ -6,12 +6,11 @@ using Microsoft.Extensions.Options;
 using Moq;
 using Newtonsoft.Json.Linq;
 using PaderConference.Core.Extensions;
-using PaderConference.Core.Services.Permissions;
+using PaderConference.Core.NewServices.Permissions;
 using PaderConference.Core.Services.Rooms;
 using PaderConference.Core.Services.Scenes;
 using PaderConference.Core.Services.Scenes.Modes;
 using PaderConference.Core.Services.Scenes.Requests;
-using PaderConference.Core.Signaling;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -57,7 +56,7 @@ namespace PaderConference.Core.Tests.Services.Scenes
             {
                 {
                     TestParticipants.Default.ParticipantId,
-                    new[] {PermissionsList.Scenes.CanSetScene.Configure(true)}.ToDictionary(x => x.Key, x => x.Value)
+                    new[] {DefinedPermissions.Scenes.CanSetScene.Configure(true)}.ToDictionary(x => x.Key, x => x.Value)
                 },
             });
         }

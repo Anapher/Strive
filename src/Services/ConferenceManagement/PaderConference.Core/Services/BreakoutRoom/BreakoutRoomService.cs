@@ -9,11 +9,11 @@ using Microsoft.Extensions.Logging;
 using Nito.AsyncEx;
 using PaderConference.Core.Extensions;
 using PaderConference.Core.Interfaces;
+using PaderConference.Core.NewServices.Permissions;
 using PaderConference.Core.Services.BreakoutRoom.Dto;
 using PaderConference.Core.Services.BreakoutRoom.Naming;
 using PaderConference.Core.Services.BreakoutRoom.Requests;
 using PaderConference.Core.Services.BreakoutRoom.Validation;
-using PaderConference.Core.Services.Permissions;
 using PaderConference.Core.Services.Rooms;
 using PaderConference.Core.Services.Rooms.Requests;
 using PaderConference.Core.Services.Synchronization;
@@ -68,10 +68,10 @@ namespace PaderConference.Core.Services.BreakoutRoom
                 if (_synchronizedObject.Current.Active != null) return BreakoutRoomError.AlreadyOpen;
 
                 var permissions = await _permissionsService.GetPermissions(message.Participant);
-                if (!await permissions.GetPermission(PermissionsList.Rooms.CanCreateAndRemove))
+                if (!await permissions.GetPermissionValue(DefinedPermissions.Rooms.CanCreateAndRemove))
                 {
                     _logger.LogDebug("Permissions denied, cannot create or remove rooms.");
-                    return CommonError.PermissionDenied(PermissionsList.Rooms.CanCreateAndRemove);
+                    return CommonError.PermissionDenied(DefinedPermissions.Rooms.CanCreateAndRemove);
                 }
 
                 var deadline = message.Payload.Duration == null
@@ -121,8 +121,8 @@ namespace PaderConference.Core.Services.BreakoutRoom
                 if (_synchronizedObject.Current.Active == null) return BreakoutRoomError.NotOpen;
 
                 var permissions = await _permissionsService.GetPermissions(message.Participant);
-                if (!await permissions.GetPermission(PermissionsList.Rooms.CanCreateAndRemove))
-                    return CommonError.PermissionDenied(PermissionsList.Rooms.CanCreateAndRemove);
+                if (!await permissions.GetPermissionValue(DefinedPermissions.Rooms.CanCreateAndRemove))
+                    return CommonError.PermissionDenied(DefinedPermissions.Rooms.CanCreateAndRemove);
 
                 await ApplyState(null);
                 return SuccessOrError.Succeeded;
@@ -136,8 +136,8 @@ namespace PaderConference.Core.Services.BreakoutRoom
             using (await _breakoutLock.LockAsync())
             {
                 var permissions = await _permissionsService.GetPermissions(message.Participant);
-                if (!await permissions.GetPermission(PermissionsList.Rooms.CanCreateAndRemove))
-                    return CommonError.PermissionDenied(PermissionsList.Rooms.CanCreateAndRemove);
+                if (!await permissions.GetPermissionValue(DefinedPermissions.Rooms.CanCreateAndRemove))
+                    return CommonError.PermissionDenied(DefinedPermissions.Rooms.CanCreateAndRemove);
 
                 var current = _synchronizedObject.Current;
                 if (current.Active == null)
