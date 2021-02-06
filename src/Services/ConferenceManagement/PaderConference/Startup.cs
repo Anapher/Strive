@@ -31,7 +31,6 @@ using PaderConference.Auth;
 using PaderConference.Core;
 using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Errors;
-using PaderConference.Core.Services.Chat.Dto;
 using PaderConference.Extensions;
 using PaderConference.Hubs;
 using PaderConference.Infrastructure;

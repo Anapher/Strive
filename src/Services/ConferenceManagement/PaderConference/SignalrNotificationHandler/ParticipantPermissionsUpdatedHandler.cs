@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.SignalR;
-using PaderConference.Core.NewServices.Permissions.Notifications;
+using PaderConference.Core.Services.Permissions.Notifications;
 using PaderConference.Hubs;
 
 namespace PaderConference.SignalrNotificationHandler

@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using MongoDB.Concurrency.Optimistic;
 using MongoDB.Driver;
-using PaderConference.Core.Interfaces.Gateways.Repositories;
+using PaderConference.Core.Interfaces.Gateways;
 
 namespace PaderConference.Infrastructure.Utilities
 {

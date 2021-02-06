@@ -11,7 +11,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{F6
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Identity", "Identity", "{47C54AC4-6A2B-4BA8-8581-041AE9102396}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Identity.API", "Services\Identity\Identity.API\Identity.API.csproj", "{60FD749B-D5BD-4C37-89E0-31AA1146991E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Identity.API", "Services\Identity\Identity.API\Identity.API.csproj", "{60FD749B-D5BD-4C37-89E0-31AA1146991E}"
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{4C86576B-C7CE-46F8-B79A-05EBDB42D921}"
 EndProject
@@ -43,6 +43,10 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PaderConference.Tests", "Services\ConferenceManagement\PaderConference.Tests\PaderConference.Tests.csproj", "{D6D34A8A-D2DD-46C4-ACAD-C60E395024B9}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{BD9A0067-58EE-43C5-A171-4660EF33B40F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PaderConference.CoreOld", "Services\ConferenceManagement\PaderConference.CoreOld\PaderConference.CoreOld.csproj", "{A8699926-0495-4D7C-AF53-96D33E7100FB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PaderConference.Core.TestsOld", "Services\ConferenceManagement\PaderConference.Core.TestsOld\PaderConference.Core.TestsOld.csproj", "{C5BD2082-629C-4EB7-84F7-57255CF064CE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -98,6 +102,14 @@ Global
 		{D6D34A8A-D2DD-46C4-ACAD-C60E395024B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D6D34A8A-D2DD-46C4-ACAD-C60E395024B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D6D34A8A-D2DD-46C4-ACAD-C60E395024B9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A8699926-0495-4D7C-AF53-96D33E7100FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A8699926-0495-4D7C-AF53-96D33E7100FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A8699926-0495-4D7C-AF53-96D33E7100FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A8699926-0495-4D7C-AF53-96D33E7100FB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C5BD2082-629C-4EB7-84F7-57255CF064CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C5BD2082-629C-4EB7-84F7-57255CF064CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C5BD2082-629C-4EB7-84F7-57255CF064CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C5BD2082-629C-4EB7-84F7-57255CF064CE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -118,6 +130,8 @@ Global
 		{1D4840A5-5A27-44E8-8348-8A044F6DA57F} = {BD9A0067-58EE-43C5-A171-4660EF33B40F}
 		{D6D34A8A-D2DD-46C4-ACAD-C60E395024B9} = {BD9A0067-58EE-43C5-A171-4660EF33B40F}
 		{BD9A0067-58EE-43C5-A171-4660EF33B40F} = {1E91B583-050D-4034-A376-C14503186A40}
+		{A8699926-0495-4D7C-AF53-96D33E7100FB} = {1E91B583-050D-4034-A376-C14503186A40}
+		{C5BD2082-629C-4EB7-84F7-57255CF064CE} = {BD9A0067-58EE-43C5-A171-4660EF33B40F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6C6656CC-2AAB-43CD-9AD4-2233F632192A}

@@ -2,7 +2,7 @@
 using FluentValidation;
 using PaderConference.Core.Dto.Services;
 using PaderConference.Core.Extensions;
-using PaderConference.Core.NewServices.Permissions;
+using PaderConference.Core.Services.Permissions;
 
 namespace PaderConference.Core.Dto.Validation
 {

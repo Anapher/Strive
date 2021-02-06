@@ -3,7 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using PaderConference.Core.NewServices.Permissions.Gateways;
+using PaderConference.Core.Services.Permissions.Gateways;
 using PaderConference.Infrastructure.Redis.Repos;
 using StackExchange.Redis;
 using StackExchange.Redis.Extensions.Core.Abstractions;
@@ -30,6 +30,14 @@ namespace PaderConference.Infrastructure.Redis.NewRepos
             var updated = PermissionDictionaryToHashEntries(permissions);
 
             await ReplaceHashSet(redisKey, updated);
+        }
+
+        public async ValueTask<T> GetPermissionsValue<T>(string conferenceId, string participantId, string key)
+        {
+            var redisKey = RedisKeyBuilder.ForProperty(PROPERTY_KEY).ForConference(conferenceId)
+                .ForParticipant(participantId).ToString();
+
+            return await _redisDatabase.HashGetAsync<T>(redisKey, key);
         }
 
         private static HashEntry[] PermissionDictionaryToHashEntries(Dictionary<string, JValue> dictionary)

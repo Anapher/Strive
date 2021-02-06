@@ -22,7 +22,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\PaderConference.Core\PaderConference.Core.csproj" />
-    <ProjectReference Include="..\PaderConference.Infrastructure\PaderConference.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

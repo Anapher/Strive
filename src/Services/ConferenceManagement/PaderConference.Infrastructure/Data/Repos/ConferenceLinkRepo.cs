@@ -5,6 +5,7 @@ using MongoDB.Bson.Serialization;
 using MongoDB.Concurrency;
 using MongoDB.Driver;
 using PaderConference.Core.Domain.Entities;
+using PaderConference.Core.Interfaces.Gateways;
 using PaderConference.Core.Interfaces.Gateways.Repositories;
 using PaderConference.Infrastructure.Utilities;
 using SpeciVacation;

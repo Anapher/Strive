@@ -1,4 +1,6 @@
-﻿namespace PaderConference.Core.Services.ConferenceControl.Requests
+﻿using MediatR;
+
+namespace PaderConference.Core.Services.ConferenceControl.Requests
 {
-    public record KickParticipantRequest(string ParticipantId);
+    public record KickParticipantRequest(string ParticipantId) : IRequest;
 }

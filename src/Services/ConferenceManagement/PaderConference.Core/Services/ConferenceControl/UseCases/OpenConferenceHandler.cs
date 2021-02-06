@@ -1,41 +1,63 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using PaderConference.Core.Domain.Entities;
-using PaderConference.Core.Interfaces;
-using PaderConference.Core.Interfaces.Services;
-using PaderConference.Core.NewServices.Permissions;
+using Microsoft.Extensions.Logging;
+using PaderConference.Core.Interfaces.Gateways.Repositories;
+using PaderConference.Core.Services.ConferenceControl.Gateways;
+using PaderConference.Core.Services.ConferenceControl.Notifications;
 using PaderConference.Core.Services.ConferenceControl.Requests;
 
 namespace PaderConference.Core.Services.ConferenceControl.UseCases
 {
-    public class OpenConferenceHandler : IRequestHandler<OpenConferenceRequest, SuccessOrError>
+    public class OpenConferenceHandler : IRequestHandler<OpenConferenceRequest>
     {
-        private readonly IPermissionsService _permissionsService;
-        private readonly IConferenceManager _conferenceManager;
+        private readonly IConferenceRepo _conferenceRepo;
+        private readonly ILogger<OpenConferenceHandler> _logger;
+        private readonly IMediator _mediator;
+        private readonly IOpenConferenceRepository _openConferenceRepository;
 
-        public OpenConferenceHandler(IPermissionsService permissionsService, IConferenceManager conferenceManager)
+        public OpenConferenceHandler(IOpenConferenceRepository openConferenceRepository, IConferenceRepo conferenceRepo,
+            IMediator mediator, ILogger<OpenConferenceHandler> logger)
         {
-            _permissionsService = permissionsService;
-            _conferenceManager = conferenceManager;
+            _openConferenceRepository = openConferenceRepository;
+            _conferenceRepo = conferenceRepo;
+            _mediator = mediator;
+            _logger = logger;
         }
 
-        public async Task<SuccessOrError> Handle(OpenConferenceRequest request, CancellationToken cancellationToken)
+        public async Task<Unit> Handle(OpenConferenceRequest request, CancellationToken cancellationToken)
         {
-            var permissionCheckResult = await VerifyPermissions(request.Meta.Sender);
-            if (!permissionCheckResult.Success) return permissionCheckResult;
+            var conferenceId = request.ConferenceId;
+            _logger.LogDebug("Attempt to open conference {conferenceId}", conferenceId);
 
-            await _conferenceManager.OpenConference(request.Meta.ConferenceId);
-            return SuccessOrError.Succeeded;
+            await VerifyConferenceExists(conferenceId);
+
+            if (await TryOpenConference(request.ConferenceId))
+            {
+                _logger.LogDebug("Conference opened");
+                await _mediator.Publish(new ConferenceOpenedNotification(conferenceId));
+            }
+            else
+            {
+                _logger.LogDebug("The conference is already open.");
+            }
+
+            return Unit.Value;
         }
 
-        private async Task<SuccessOrError> VerifyPermissions(Participant participant)
+        private async Task VerifyConferenceExists(string conferenceId)
         {
-            var permissions = await _permissionsService.GetPermissions(participant);
-            if (!await permissions.GetPermissionValue(DefinedPermissions.Conference.CanOpenAndClose))
-                return CommonError.PermissionDenied(DefinedPermissions.Conference.CanOpenAndClose);
+            var conference = await _conferenceRepo.FindById(conferenceId);
+            if (conference == null)
+            {
+                _logger.LogDebug("Conference was not found in database");
+                throw new ConferenceNotFoundException(conferenceId);
+            }
+        }
 
-            return SuccessOrError.Succeeded;
+        private Task<bool> TryOpenConference(string conferenceId)
+        {
+            return _openConferenceRepository.Create(conferenceId);
         }
     }
 }

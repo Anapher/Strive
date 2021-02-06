@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
-using PaderConference.Core.NewServices.Permissions.Gateways;
+using PaderConference.Core.Services.Permissions.Gateways;
 using PaderConference.Infrastructure.Redis.Repos;
 using StackExchange.Redis.Extensions.Core.Abstractions;
 
