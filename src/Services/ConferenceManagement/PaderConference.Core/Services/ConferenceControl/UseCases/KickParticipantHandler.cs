@@ -1,7 +1,7 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
+using PaderConference.Core.Services.ConferenceControl.Notifications;
 using PaderConference.Core.Services.ConferenceControl.Requests;
 
 namespace PaderConference.Core.Services.ConferenceControl.UseCases
@@ -17,7 +17,9 @@ namespace PaderConference.Core.Services.ConferenceControl.UseCases
 
         public async Task<Unit> Handle(KickParticipantRequest request, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            await _mediator.Publish(new ParticipantKickedNotification(request.ParticipantId, request.ConferenceId));
+
+            return Unit.Value;
         }
     }
 }

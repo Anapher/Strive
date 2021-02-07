@@ -46,11 +46,6 @@ namespace PaderConference.Infrastructure.Data.Repos
             return _conferenceRepo.Update(conference);
         }
 
-        public Task<IAsyncDisposable> SubscribeConferenceUpdated(string conferenceId, Func<Conference, Task> handler)
-        {
-            return _conferenceRepo.SubscribeConferenceUpdated(conferenceId, handler);
-        }
-
         private static string GetConferenceKey(string conferenceId)
         {
             return KEY_PREFIX + conferenceId;

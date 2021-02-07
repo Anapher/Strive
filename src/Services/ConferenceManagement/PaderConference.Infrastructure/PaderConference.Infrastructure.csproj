@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Redis\Scripts\*.lua" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="DistributedLock.Redis" Version="1.0.0" />
     <PackageReference Include="MassTransit" Version="7.1.4" />
     <PackageReference Include="MassTransit.RabbitMQ" Version="7.1.4" />
@@ -19,6 +23,7 @@
     <PackageReference Include="System.Linq.Async" Version="5.0.0" />
     <PackageReference Include="StackExchange.Redis" Version="2.2.4" />
     <PackageReference Include="StackExchange.Redis.Extensions.Core" Version="6.3.6" />
+    <PackageReference Include="StackExchange.Redis.Extensions.Newtonsoft" Version="6.3.6" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using PaderConference.Core.Domain.Entities;
 
 namespace PaderConference.Core.Interfaces.Gateways.Repositories
@@ -11,7 +10,5 @@ namespace PaderConference.Core.Interfaces.Gateways.Repositories
         Task Create(Conference conference);
 
         Task<OptimisticUpdateResult> Update(Conference conference);
-
-        Task<IAsyncDisposable> SubscribeConferenceUpdated(string conferenceId, Func<Conference, Task> handler);
     }
 }

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson.Serialization;
 using MongoDB.Concurrency;
@@ -45,15 +44,6 @@ namespace PaderConference.Infrastructure.Data.Repos
         public Task<OptimisticUpdateResult> Update(Conference conference)
         {
             return Collection.Optimistic(x => x.Version).UpdateAsync(conference).Wrap();
-        }
-
-        public async Task<IAsyncDisposable> SubscribeConferenceUpdated(string conferenceId,
-            Func<Conference, Task> handler)
-        {
-            var channelName = RedisChannels.OnConferenceUpdated(conferenceId);
-            await _database.SubscribeAsync(channelName, handler);
-
-            return new DelegateAsyncDisposable(() => _database.UnsubscribeAsync(channelName, handler));
         }
     }
 }

@@ -4,6 +4,8 @@
     <TargetFramework>net5.0</TargetFramework>
 
     <IsPackable>false</IsPackable>
+	  <Nullable>enable</Nullable>
+
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\PaderConference\PaderConference.csproj" />
+    <ProjectReference Include="..\PaderConference.Infrastructure\PaderConference.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
