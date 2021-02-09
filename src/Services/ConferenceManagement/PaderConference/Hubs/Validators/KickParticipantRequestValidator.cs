@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
 using PaderConference.Core.Services.ConferenceControl.Requests;
 
-namespace PaderConference.Core.Services.ConferenceControl.Validation
+namespace PaderConference.Hubs.Validators
 {
     public class KickParticipantRequestValidator : AbstractValidator<KickParticipantRequest>
     {

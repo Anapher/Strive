@@ -1,18 +1,21 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Autofac;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using PaderConference.Core;
-using PaderConference.Core.Dto;
 using PaderConference.Core.Extensions;
 using PaderConference.Core.Interfaces;
-using PaderConference.Core.Services;
 using PaderConference.Core.Services.ConferenceControl.Notifications;
 using PaderConference.Core.Services.ConferenceControl.Requests;
 using PaderConference.Core.Services.Permissions;
+using PaderConference.Extensions;
+using PaderConference.Hubs.Dtos;
+using PaderConference.Hubs.Services;
+using PaderConference.Hubs.Services.Middlewares;
 using PaderConference.Infrastructure.Extensions;
 
 namespace PaderConference.Hubs
@@ -21,17 +24,24 @@ namespace PaderConference.Hubs
     public class CoreHub : Hub
     {
         private readonly IMediator _mediator;
-        private readonly IParticipantPermissions _participantPermissions;
+        private readonly IComponentContext _context;
         private readonly ICoreHubConnections _connections;
         private readonly ILogger<CoreHub> _logger;
 
-        public CoreHub(IMediator mediator, IParticipantPermissions participantPermissions,
-            ICoreHubConnections connections, ILogger<CoreHub> logger)
+        public CoreHub(IMediator mediator, IComponentContext context, ICoreHubConnections connections,
+            ILogger<CoreHub> logger)
         {
             _mediator = mediator;
-            _participantPermissions = participantPermissions;
+            _context = context;
             _connections = connections;
             _logger = logger;
+        }
+
+        private IServiceInvoker GetInvoker()
+        {
+            var (conferenceId, participantId) = GetContextInfo();
+            return new ServiceInvoker(_mediator,
+                new ServiceInvokerContext(this, _context, conferenceId, participantId));
         }
 
         public override async Task OnConnectedAsync()
@@ -46,7 +56,7 @@ namespace PaderConference.Hubs
                 }
                 catch (Exception e)
                 {
-                    var error = ExceptionToError(e);
+                    var error = e.ToError();
                     _logger.LogWarning("Client join was not successful: {@error}", error);
 
                     await Clients.Caller.SendAsync(CoreHubMessages.Response.OnConnectionError, error);
@@ -79,15 +89,6 @@ namespace PaderConference.Hubs
             return (conferenceId, participantId);
         }
 
-
-        private static Error ExceptionToError(Exception e)
-        {
-            if (e is IdErrorException idError)
-                return idError.Error;
-
-            return ConferenceError.UnexpectedError("An unexpected error occurred");
-        }
-
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
             _logger.LogDebug(exception, "Connection {connectionId} disconnected", Context.ConnectionId);
@@ -99,53 +100,26 @@ namespace PaderConference.Hubs
             _connections.RemoveParticipant(participantId);
         }
 
-        private async Task<SuccessOrError<TResponse>> WrapMediatorSend<TResponse>(IRequest<TResponse> request)
-        {
-            try
-            {
-                var result = await _mediator.Send(request, Context.ConnectionAborted);
-                return SuccessOrError<TResponse>.Succeeded(result);
-            }
-            catch (Exception e)
-            {
-                return ExceptionToError(e);
-            }
-        }
-
-        private async Task<SuccessOrError<TResponse>> ExecuteIfPermissions<TResponse>(
-            Func<Task<SuccessOrError<TResponse>>> action, params PermissionDescriptor<bool>[] requiredPermissions)
-        {
-            var (conferenceId, participantId) = GetContextInfo();
-            var permissions = await _participantPermissions.FetchForParticipant(conferenceId, participantId);
-
-            foreach (var permission in requiredPermissions)
-            {
-                var permissionValue = await permissions.GetPermissionValue(permission);
-                if (!permissionValue) return CommonError.PermissionDenied(permission);
-            }
-
-            return await action();
-        }
-
         public Task<SuccessOrError<Unit>> OpenConference()
         {
             var (conferenceId, _) = GetContextInfo();
-            return ExecuteIfPermissions(() => WrapMediatorSend(new OpenConferenceRequest(conferenceId)),
-                DefinedPermissions.Conference.CanOpenAndClose);
+            return GetInvoker().Create(new OpenConferenceRequest(conferenceId))
+                .RequirePermissions(DefinedPermissions.Conference.CanOpenAndClose).Send();
         }
 
         public Task<SuccessOrError<Unit>> CloseConference()
         {
             var (conferenceId, _) = GetContextInfo();
-            return ExecuteIfPermissions(() => WrapMediatorSend(new CloseConferenceRequest(conferenceId)),
-                DefinedPermissions.Conference.CanOpenAndClose);
+            return GetInvoker().Create(new CloseConferenceRequest(conferenceId))
+                .RequirePermissions(DefinedPermissions.Conference.CanOpenAndClose).Send();
         }
 
-        //public Task<SuccessOrError> KickParticipant(KickParticipantRequest message)
-        //{
-        //    return _invoker.InvokeService<ConferenceControlService, KickParticipantRequest>(message,
-        //        service => service.KickParticipant);
-        //}
+        public Task<SuccessOrError<Unit>> KickParticipant(KickParticipantRequestDto message)
+        {
+            var (conferenceId, _) = GetContextInfo();
+            return GetInvoker().Create(new KickParticipantRequest(message.ParticipantId, conferenceId))
+                .ValidateObject(message).RequirePermissions(DefinedPermissions.Conference.CanKickParticipant).Send();
+        }
 
         //public Task<SuccessOrError<ParticipantPermissionDto>> FetchPermissions(string? participantId)
         //{
