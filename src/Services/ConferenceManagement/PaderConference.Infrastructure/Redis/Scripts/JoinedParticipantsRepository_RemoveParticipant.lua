@@ -14,9 +14,11 @@ local function REMOVEPARTICIPANT(participantId, participantKey, conferenceKeyTem
   redis.call("DEL", participantKey)
 
   local conferenceKey = string.gsub(conferenceKeyTemplate, "%*", conferenceId)
+  local previousConnectionId = redis.call("HGET", conferenceKey, participantId)
+
   redis.call("HDEL", conferenceKey, participantId)
 
-  return conferenceId
+  return {conferenceId, previousConnectionId}
 end
 
 return REMOVEPARTICIPANT(KEYS[1], KEYS[2], KEYS[3])

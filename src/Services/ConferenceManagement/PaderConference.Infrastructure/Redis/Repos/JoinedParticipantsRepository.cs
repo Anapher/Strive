@@ -19,7 +19,8 @@ namespace PaderConference.Infrastructure.Redis.Repos
             _redisDatabase = redisDatabase;
         }
 
-        public async Task<string?> AddParticipant(string participantId, string conferenceId, string connectionId)
+        public async Task<PreviousParticipantState?> AddParticipant(string participantId, string conferenceId,
+            string connectionId)
         {
             var participantToConferenceKey = RedisKeyBuilder.ForProperty(PARTICIPANT_TO_CONFERENCE_KEY)
                 .ForParticipant(participantId).ToString();
@@ -45,7 +46,8 @@ namespace PaderConference.Infrastructure.Redis.Repos
             return await RemoveParticipantSafe(_redisDatabase.Database, participantId, connectionId) == true;
         }
 
-        private static async Task<string?> RemoveParticipant(IDatabaseAsync database, string participantId)
+        private static async Task<PreviousParticipantState?> RemoveParticipant(IDatabaseAsync database,
+            string participantId)
         {
             var participantToConferenceKey = RedisKeyBuilder.ForProperty(PARTICIPANT_TO_CONFERENCE_KEY)
                 .ForParticipant(participantId).ToString();
@@ -57,7 +59,9 @@ namespace PaderConference.Infrastructure.Redis.Repos
                 new RedisKey[] {participantId, participantToConferenceKey, conferenceToParticipantsKey});
 
             if (result.IsNull) return null;
-            return (string) result;
+
+            var arr = (string[]) result;
+            return new PreviousParticipantState(arr[0], arr[1]);
         }
 
         private static async Task<bool?> RemoveParticipantSafe(IDatabaseAsync database, string participantId,

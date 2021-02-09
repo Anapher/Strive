@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using PaderConference.Hubs;
 using PaderConference.Presenters;
 
 namespace PaderConference
@@ -10,6 +11,7 @@ namespace PaderConference
             base.Load(builder);
 
             builder.RegisterType<ConferenceLinkPresenter>().AsImplementedInterfaces().InstancePerDependency();
+            builder.RegisterType<CoreHubConnections>().AsImplementedInterfaces().SingleInstance();
         }
     }
 }

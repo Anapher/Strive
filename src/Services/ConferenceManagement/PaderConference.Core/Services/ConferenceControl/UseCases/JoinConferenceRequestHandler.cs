@@ -30,14 +30,14 @@ namespace PaderConference.Core.Services.ConferenceControl.UseCases
             _logger.LogDebug("Participant {participantId} is joining conference {conferenceId}", participantId,
                 conferenceId);
 
-            var previousConferenceId = await _joinedParticipantsRepository.AddParticipant(participantId,
+            var previousSession = await _joinedParticipantsRepository.AddParticipant(participantId,
                 conferenceId, connectionId);
 
-            if (previousConferenceId != null)
+            if (previousSession != null)
             {
                 _logger.LogDebug("The participant {participantId} was already joined, kick him.", participantId);
-                await _mediator.Publish(new ParticipantKickedNotification(participantId, previousConferenceId,
-                    ParticipantKickedReason.NewSessionConnected));
+                await _mediator.Publish(new ParticipantKickedNotification(participantId, previousSession.ConferenceId,
+                    previousSession.ConnectionId, ParticipantKickedReason.NewSessionConnected));
             }
 
             // enable messaging just after kicking client

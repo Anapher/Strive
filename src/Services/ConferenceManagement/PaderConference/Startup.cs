@@ -118,7 +118,7 @@ namespace PaderConference
             services.AddMassTransit(x =>
             {
                 x.UsingRabbitMq();
-                x.AddConsumersFromNamespaceContaining<ParticipantKickedNotificationConsumer>();
+                x.AddConsumersFromNamespaceContaining<ParticipantKickedConsumer>();
             });
             services.AddMassTransitHostedService();
 

@@ -22,12 +22,15 @@ namespace PaderConference.Hubs
     {
         private readonly IMediator _mediator;
         private readonly IParticipantPermissions _participantPermissions;
+        private readonly ICoreHubConnections _connections;
         private readonly ILogger<CoreHub> _logger;
 
-        public CoreHub(IMediator mediator, IParticipantPermissions participantPermissions, ILogger<CoreHub> logger)
+        public CoreHub(IMediator mediator, IParticipantPermissions participantPermissions,
+            ICoreHubConnections connections, ILogger<CoreHub> logger)
         {
             _mediator = mediator;
             _participantPermissions = participantPermissions;
+            _connections = connections;
             _logger = logger;
         }
 
@@ -59,6 +62,8 @@ namespace PaderConference.Hubs
 
             await _mediator.Send(new JoinConferenceRequest(conferenceId, participantId, connectionId),
                 Context.ConnectionAborted);
+
+            _connections.SetParticipant(participantId, new ParticipantConnection(conferenceId, Context.ConnectionId));
         }
 
         private (string conferenceId, string participantId) GetContextInfo()
@@ -91,6 +96,7 @@ namespace PaderConference.Hubs
             var connectionId = Context.ConnectionId;
 
             await _mediator.Publish(new ParticipantLeftNotification(participantId, conferenceId, connectionId));
+            _connections.RemoveParticipant(participantId);
         }
 
         private async Task<SuccessOrError<TResponse>> WrapMediatorSend<TResponse>(IRequest<TResponse> request)
