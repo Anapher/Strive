@@ -9,6 +9,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Redis\Scripts\JoinedParticipantsRepository_RemoveParticipantSafe.lua" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="DistributedLock.Redis" Version="1.0.0" />
     <PackageReference Include="MassTransit" Version="7.1.4" />
     <PackageReference Include="MassTransit.RabbitMQ" Version="7.1.4" />

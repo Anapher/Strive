@@ -3,9 +3,8 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.SignalR;
 using PaderConference.Core.Services.Permissions.Notifications;
-using PaderConference.Hubs;
 
-namespace PaderConference.SignalrNotificationHandler
+namespace PaderConference.Hubs.NotificationHandlers
 {
     public class ParticipantPermissionsUpdatedHandler : INotificationHandler<ParticipantPermissionsUpdatedNotification>
     {
@@ -19,10 +18,9 @@ namespace PaderConference.SignalrNotificationHandler
         public async Task Handle(ParticipantPermissionsUpdatedNotification notification,
             CancellationToken cancellationToken)
         {
-            foreach (var permission in notification.UpdatedPermissions)
+            foreach (var (participantId, permissions) in notification.UpdatedPermissions)
             {
-                await _hubContext.Clients.Client(permission.Key)
-                    .SendAsync(CoreHubMessages.Response.OnPermissionsUpdated, permission, cancellationToken);
+                await _hubContext.Clients.Client(participantId).OnPermissionsUpdated(permissions, cancellationToken);
             }
         }
     }

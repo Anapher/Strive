@@ -33,5 +33,6 @@ namespace PaderConference.Infrastructure.Redis.Scripts
     public enum RedisScript
     {
         JoinedParticipantsRepository_RemoveParticipant,
+        JoinedParticipantsRepository_RemoveParticipantSafe,
     }
 }

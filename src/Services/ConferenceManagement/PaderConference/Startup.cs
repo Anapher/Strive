@@ -7,7 +7,6 @@ using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using AutoMapper;
 using FluentValidation.AspNetCore;
-using JsonSubTypes;
 using MassTransit;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -28,6 +27,7 @@ using MongoDB.Bson.Serialization.Serializers;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using PaderConference.Auth;
+using PaderConference.Consumers;
 using PaderConference.Core;
 using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Errors;
@@ -85,9 +85,9 @@ namespace PaderConference
                 options.PayloadSerializerSettings.Converters.Add(
                     new StringEnumConverter(new CamelCaseNamingStrategy()));
 
-                options.PayloadSerializerSettings.Converters.Add(JsonSubtypesConverterBuilder
-                    .Of<SendingMode>(nameof(SendingMode.Type)).RegisterSubtype<SendAnonymously>(SendAnonymously.TYPE)
-                    .RegisterSubtype<SendPrivately>(SendPrivately.TYPE).SerializeDiscriminatorProperty().Build());
+                //options.PayloadSerializerSettings.Converters.Add(JsonSubtypesConverterBuilder
+                //    .Of<SendingMode>(nameof(SendingMode.Type)).RegisterSubtype<SendAnonymously>(SendAnonymously.TYPE)
+                //    .RegisterSubtype<SendPrivately>(SendPrivately.TYPE).SerializeDiscriminatorProperty().Build());
             });
 
             services.AddMvc().ConfigureApiBehaviorOptions(options =>
@@ -112,11 +112,14 @@ namespace PaderConference
 
             services.Configure<HealthCheckPublisherOptions>(options =>
             {
-                options.Delay = TimeSpan.FromSeconds(2);
                 options.Predicate = check => check.Tags.Contains("ready");
             });
 
-            services.AddMassTransit(x => { x.UsingRabbitMq(); });
+            services.AddMassTransit(x =>
+            {
+                x.UsingRabbitMq();
+                x.AddConsumersFromNamespaceContaining<ParticipantKickedNotificationConsumer>();
+            });
             services.AddMassTransitHostedService();
 
             // Register the Swagger generator, defining 1 or more Swagger documents
@@ -140,8 +143,6 @@ namespace PaderConference
             });
 
             services.AddMediatR(typeof(Startup), typeof(CoreModule));
-
-            services.AddHostedService<ConferenceInitializer>();
 
             // Now register our services with Autofac container.
             var builder = new ContainerBuilder();

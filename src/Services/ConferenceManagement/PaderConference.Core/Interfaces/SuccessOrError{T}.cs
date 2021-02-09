@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using MediatR;
 using PaderConference.Core.Dto;
 
 namespace PaderConference.Core.Interfaces
@@ -11,7 +12,7 @@ namespace PaderConference.Core.Interfaces
     public class SuccessOrError<T> : ISuccessOrError
     {
         /// <summary>
-        ///     Initialize a new instance of <see cref="SuccessOrError" /> as succeeded with a return value
+        ///     Initialize a new instance of <see cref="SuccessOrError{T}" /> as succeeded with a return value
         /// </summary>
         /// <param name="response">The return value</param>
         public SuccessOrError(T response)
@@ -20,7 +21,7 @@ namespace PaderConference.Core.Interfaces
         }
 
         /// <summary>
-        ///     Initialize a new instance of <see cref="SuccessOrError" /> as failed
+        ///     Initialize a new instance of <see cref="SuccessOrError{T}" /> as failed
         /// </summary>
         /// <param name="error">The error that is responsible for the failure</param>
         public SuccessOrError(Error error)
@@ -29,7 +30,7 @@ namespace PaderConference.Core.Interfaces
         }
 
         /// <summary>
-        ///     Initialize a new instance of <see cref="SuccessOrError" />. Please not that either <see cref="Error" /> or
+        ///     Initialize a new instance of <see cref="SuccessOrError{T}" />. Please not that either <see cref="Error" /> or
         ///     <see cref="Response" /> must be set
         /// </summary>
         public SuccessOrError()
@@ -50,7 +51,16 @@ namespace PaderConference.Core.Interfaces
         public T? Response { get; init; }
 
         /// <summary>
-        ///     Create a new instance of <see cref="SuccessOrError" /> as succeeded with a return value
+        ///     Determine whether <see cref="Response" /> should be serialized
+        /// </summary>
+        /// <returns>Return true it should be serialized</returns>
+        public bool ShouldSerializeResponse()
+        {
+            return Response != null && Response.GetType() != typeof(Unit);
+        }
+
+        /// <summary>
+        ///     Create a new instance of <see cref="SuccessOrError{T}" /> as succeeded with a return value
         /// </summary>
         /// <param name="response">The return value</param>
         public static SuccessOrError<T> Succeeded(T response)
@@ -59,7 +69,7 @@ namespace PaderConference.Core.Interfaces
         }
 
         /// <summary>
-        ///     Initialize a new instance of <see cref="SuccessOrError" /> as failed
+        ///     Initialize a new instance of <see cref="SuccessOrError{T}" /> as failed
         /// </summary>
         /// <param name="error">The error that is responsible for the failure</param>
         public static SuccessOrError<T> Failed(Error error)
@@ -68,7 +78,7 @@ namespace PaderConference.Core.Interfaces
         }
 
         /// <summary>
-        ///     Implicitly create a new <see cref="SuccessOrError" /> that failed from an error
+        ///     Implicitly create a new <see cref="SuccessOrError{T}" /> that failed from an error
         /// </summary>
         /// <param name="error">The error that is responsible for the failure</param>
         public static implicit operator SuccessOrError<T>(Error error)
@@ -77,7 +87,7 @@ namespace PaderConference.Core.Interfaces
         }
 
         /// <summary>
-        ///     Implicitly create a new instance of <see cref="SuccessOrError" /> if the action did not fail with a return value
+        ///     Implicitly create a new instance of <see cref="SuccessOrError{T}" /> if the action did not fail with a return value
         /// </summary>
         /// <param name="response">The return value</param>
         public static implicit operator SuccessOrError<T>(T response)

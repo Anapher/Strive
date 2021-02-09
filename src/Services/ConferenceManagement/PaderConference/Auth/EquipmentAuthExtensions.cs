@@ -10,8 +10,9 @@ namespace PaderConference.Auth
         public static AuthenticationBuilder AddEquipmentAuth(this AuthenticationBuilder builder,
             Action<EquipmentAuthOptions> configureOptions)
         {
-            return builder.AddScheme<EquipmentAuthOptions, EquipmentAuthHandler>(EquipmentAuthScheme, "Equipment Auth",
-                configureOptions);
+            return builder;
+            //return builder.AddScheme<EquipmentAuthOptions, EquipmentAuthHandler>(EquipmentAuthScheme, "Equipment Auth",
+            //    configureOptions);
         }
     }
 }

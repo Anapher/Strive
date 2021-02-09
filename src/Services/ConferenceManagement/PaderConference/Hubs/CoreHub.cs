@@ -1,41 +1,33 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
-using System.Xml;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using PaderConference.Core;
 using PaderConference.Core.Dto;
-using PaderConference.Core.Dto.UseCaseRequests;
 using PaderConference.Core.Extensions;
 using PaderConference.Core.Interfaces;
-using PaderConference.Core.Interfaces.UseCases;
+using PaderConference.Core.Services;
+using PaderConference.Core.Services.ConferenceControl.Notifications;
 using PaderConference.Core.Services.ConferenceControl.Requests;
-using PaderConference.Core.Services.Permissions.Dto;
-using PaderConference.Core.Services.Permissions.Requests;
+using PaderConference.Core.Services.Permissions;
 using PaderConference.Infrastructure.Extensions;
-using PaderConference.Infrastructure.Services;
 
 namespace PaderConference.Hubs
 {
     [Authorize]
     public class CoreHub : Hub
     {
-        private readonly IServiceInvoker _invoker;
-        private readonly IJoinConferenceUseCase _joinConferenceUseCase;
-        private readonly ILeaveConferenceUseCase _leaveConferenceUseCase;
+        private readonly IMediator _mediator;
+        private readonly IParticipantPermissions _participantPermissions;
         private readonly ILogger<CoreHub> _logger;
 
-        public CoreHub(IJoinConferenceUseCase joinConferenceUseCase, ILeaveConferenceUseCase leaveConferenceUseCase,
-            IServiceInvokerFactory serviceInvokerFactory, ILogger<CoreHub> logger)
+        public CoreHub(IMediator mediator, IParticipantPermissions participantPermissions, ILogger<CoreHub> logger)
         {
-            _joinConferenceUseCase = joinConferenceUseCase;
-            _leaveConferenceUseCase = leaveConferenceUseCase;
-            _invoker = serviceInvokerFactory.CreateForHub(this);
+            _mediator = mediator;
+            _participantPermissions = participantPermissions;
             _logger = logger;
         }
 
@@ -45,172 +37,203 @@ namespace PaderConference.Hubs
             {
                 _logger.LogDebug("Client tries to connect");
 
-                SuccessOrError result;
                 try
                 {
-                    result = await HandleJoin();
+                    await HandleJoin();
                 }
                 catch (Exception e)
                 {
-                    _logger.LogError(e, "An error occurred when trying to join");
-                    result = ConferenceError.UnexpectedError("An unexpected error occurred");
-                }
+                    var error = ExceptionToError(e);
+                    _logger.LogWarning("Client join was not successful: {@error}", error);
 
-                if (!result.Success)
-                {
-                    _logger.LogWarning("Client join was not successful: {@error}", result.Error);
-
-                    await Clients.Caller.SendAsync(CoreHubMessages.Response.OnConnectionError, result.Error);
+                    await Clients.Caller.SendAsync(CoreHubMessages.Response.OnConnectionError, error);
                     Context.Abort();
                 }
             }
         }
 
-        private async Task<SuccessOrError> HandleJoin()
+        private async Task HandleJoin()
+        {
+            var (conferenceId, participantId) = GetContextInfo();
+            var connectionId = Context.ConnectionId;
+
+            await _mediator.Send(new JoinConferenceRequest(conferenceId, participantId, connectionId),
+                Context.ConnectionAborted);
+        }
+
+        private (string conferenceId, string participantId) GetContextInfo()
         {
             var httpContext = Context.GetHttpContext();
-            if (httpContext != null)
-            {
-                var conferenceId = httpContext.Request.Query["conferenceId"].ToString();
-                var participantId = httpContext.User.GetUserId();
-                var role = httpContext.User.Claims.First(x => x.Type == ClaimTypes.Role).Value;
-                var name = httpContext.User.Identity?.Name;
+            if (httpContext == null)
+                throw ConferenceError.UnexpectedError("An unexpected error occurred: HttpContext is null")
+                    .ToException();
 
-                using var _ = _logger.BeginMethodScope(new Dictionary<string, object>
-                {
-                    {"conferenceId", conferenceId}, {"participantId", participantId}, {"role", role},
-                });
+            var conferenceId = httpContext.Request.Query["conferenceId"].ToString();
+            var participantId = httpContext.User.GetUserId();
 
-                var login = await _joinConferenceUseCase.Handle(new JoinConferenceRequest(conferenceId, participantId,
-                    role, name, Context.ConnectionId, Context.ConnectionAborted,
-                    () => Groups.AddToGroupAsync(Context.ConnectionId, conferenceId)));
-
-                if (!login.Success)
-                    return login.Error;
-
-                return SuccessOrError.Succeeded;
-            }
-
-            _logger.LogError("HttpContext is null");
-            return ConferenceError.UnexpectedError("An unexpected error occurred: HttpContext is null");
+            return (conferenceId, participantId);
         }
 
-        public override async Task OnDisconnectedAsync(Exception exception)
+
+        private static Error ExceptionToError(Exception e)
+        {
+            if (e is IdErrorException idError)
+                return idError.Error;
+
+            return ConferenceError.UnexpectedError("An unexpected error occurred");
+        }
+
+        public override async Task OnDisconnectedAsync(Exception? exception)
         {
             _logger.LogDebug(exception, "Connection {connectionId} disconnected", Context.ConnectionId);
-            await _leaveConferenceUseCase.Handle(new LeaveConferenceRequest(Context.ConnectionId));
+
+            var (conferenceId, participantId) = GetContextInfo();
+            var connectionId = Context.ConnectionId;
+
+            await _mediator.Publish(new ParticipantLeftNotification(participantId, conferenceId, connectionId));
         }
 
-        public Task<SuccessOrError> OpenConference()
+        private async Task<SuccessOrError<TResponse>> WrapMediatorSend<TResponse>(IRequest<TResponse> request)
         {
-            return _invoker.InvokeService<ConferenceControlService>(service => service.OpenConference,
-                new MethodOptions {ConferenceCanBeClosed = true});
+            try
+            {
+                var result = await _mediator.Send(request, Context.ConnectionAborted);
+                return SuccessOrError<TResponse>.Succeeded(result);
+            }
+            catch (Exception e)
+            {
+                return ExceptionToError(e);
+            }
         }
 
-        public Task<SuccessOrError> CloseConference()
+        private async Task<SuccessOrError<TResponse>> ExecuteIfPermissions<TResponse>(
+            Func<Task<SuccessOrError<TResponse>>> action, params PermissionDescriptor<bool>[] requiredPermissions)
         {
-            return _invoker.InvokeService<ConferenceControlService>(service => service.CloseConference);
+            var (conferenceId, participantId) = GetContextInfo();
+            var permissions = await _participantPermissions.FetchForParticipant(conferenceId, participantId);
+
+            foreach (var permission in requiredPermissions)
+            {
+                var permissionValue = await permissions.GetPermissionValue(permission);
+                if (!permissionValue) return CommonError.PermissionDenied(permission);
+            }
+
+            return await action();
         }
 
-        public Task<SuccessOrError> KickParticipant(KickParticipantRequest message)
+        public Task<SuccessOrError<Unit>> OpenConference()
         {
-            return _invoker.InvokeService<ConferenceControlService, KickParticipantRequest>(message,
-                service => service.KickParticipant);
+            var (conferenceId, _) = GetContextInfo();
+            return ExecuteIfPermissions(() => WrapMediatorSend(new OpenConferenceRequest(conferenceId)),
+                DefinedPermissions.Conference.CanOpenAndClose);
         }
 
-        public Task<SuccessOrError<ParticipantPermissionDto>> FetchPermissions(string? participantId)
+        public Task<SuccessOrError<Unit>> CloseConference()
         {
-            return _invoker.InvokeService<PermissionsService, string?, ParticipantPermissionDto>(participantId,
-                service => service.FetchPermissions);
+            var (conferenceId, _) = GetContextInfo();
+            return ExecuteIfPermissions(() => WrapMediatorSend(new CloseConferenceRequest(conferenceId)),
+                DefinedPermissions.Conference.CanOpenAndClose);
         }
 
-        public Task<SuccessOrError> SetTemporaryPermission(SetTemporaryPermissionRequest dto)
-        {
-            return _invoker.InvokeService<PermissionsService, SetTemporaryPermissionRequest>(dto,
-                service => service.SetTemporaryPermission);
-        }
+        //public Task<SuccessOrError> KickParticipant(KickParticipantRequest message)
+        //{
+        //    return _invoker.InvokeService<ConferenceControlService, KickParticipantRequest>(message,
+        //        service => service.KickParticipant);
+        //}
 
-        public Task<SuccessOrError> CreateRooms(IReadOnlyList<CreateRoomMessage> dto)
-        {
-            return _invoker.InvokeService<RoomsService, IReadOnlyList<CreateRoomMessage>>(dto,
-                service => service.CreateRooms);
-        }
+        //public Task<SuccessOrError<ParticipantPermissionDto>> FetchPermissions(string? participantId)
+        //{
+        //    return _invoker.InvokeService<PermissionsService, string?, ParticipantPermissionDto>(participantId,
+        //        service => service.FetchPermissions);
+        //}
 
-        public Task<SuccessOrError> RemoveRooms(IReadOnlyList<string> dto)
-        {
-            return _invoker.InvokeService<RoomsService, IReadOnlyList<string>>(dto, service => service.RemoveRooms);
-        }
+        //public Task<SuccessOrError> SetTemporaryPermission(SetTemporaryPermissionRequest dto)
+        //{
+        //    return _invoker.InvokeService<PermissionsService, SetTemporaryPermissionRequest>(dto,
+        //        service => service.SetTemporaryPermission);
+        //}
 
-        public Task<SuccessOrError> OpenBreakoutRooms(OpenBreakoutRoomsRequest request)
-        {
-            return _invoker.InvokeService<BreakoutRoomService, OpenBreakoutRoomsRequest>(request,
-                service => service.OpenBreakoutRooms);
-        }
+        //public Task<SuccessOrError> CreateRooms(IReadOnlyList<CreateRoomMessage> dto)
+        //{
+        //    return _invoker.InvokeService<RoomsService, IReadOnlyList<CreateRoomMessage>>(dto,
+        //        service => service.CreateRooms);
+        //}
 
-        public Task<SuccessOrError> CloseBreakoutRooms()
-        {
-            return _invoker.InvokeService<BreakoutRoomService>(service => service.CloseBreakoutRooms);
-        }
+        //public Task<SuccessOrError> RemoveRooms(IReadOnlyList<string> dto)
+        //{
+        //    return _invoker.InvokeService<RoomsService, IReadOnlyList<string>>(dto, service => service.RemoveRooms);
+        //}
 
-        public Task<SuccessOrError> ChangeBreakoutRooms(JsonPatchDocument<BreakoutRoomsOptions> dto)
-        {
-            // convert timestamp value from string to actual timestamp
-            var timespanPatchOp = dto.Operations.FirstOrDefault(x => x.path == "/duration");
-            if (timespanPatchOp?.value != null)
-                timespanPatchOp.value = XmlConvert.ToTimeSpan((string) timespanPatchOp.value);
+        //public Task<SuccessOrError> OpenBreakoutRooms(OpenBreakoutRoomsRequest request)
+        //{
+        //    return _invoker.InvokeService<BreakoutRoomService, OpenBreakoutRoomsRequest>(request,
+        //        service => service.OpenBreakoutRooms);
+        //}
 
-            return _invoker.InvokeService<BreakoutRoomService, JsonPatchDocument<BreakoutRoomsOptions>>(dto,
-                service => service.ChangeBreakoutRooms);
-        }
+        //public Task<SuccessOrError> CloseBreakoutRooms()
+        //{
+        //    return _invoker.InvokeService<BreakoutRoomService>(service => service.CloseBreakoutRooms);
+        //}
 
-        public Task<SuccessOrError> SwitchRoom(SwitchRoomRequest dto)
-        {
-            return _invoker.InvokeService<RoomsService, SwitchRoomRequest>(dto, service => service.SwitchRoom);
-        }
+        //public Task<SuccessOrError> ChangeBreakoutRooms(JsonPatchDocument<BreakoutRoomsOptions> dto)
+        //{
+        //    // convert timestamp value from string to actual timestamp
+        //    var timespanPatchOp = dto.Operations.FirstOrDefault(x => x.path == "/duration");
+        //    if (timespanPatchOp?.value != null)
+        //        timespanPatchOp.value = XmlConvert.ToTimeSpan((string) timespanPatchOp.value);
 
-        public Task<SuccessOrError> SendChatMessage(SendChatMessageRequest dto)
-        {
-            return _invoker.InvokeService<ChatService, SendChatMessageRequest>(dto, service => service.SendMessage);
-        }
+        //    return _invoker.InvokeService<BreakoutRoomService, JsonPatchDocument<BreakoutRoomsOptions>>(dto,
+        //        service => service.ChangeBreakoutRooms);
+        //}
 
-        public Task<SuccessOrError<IReadOnlyList<ChatMessageDto>>> RequestChat()
-        {
-            return _invoker.InvokeService<ChatService, IReadOnlyList<ChatMessageDto>>(
-                service => service.FetchMyMessages);
-        }
+        //public Task<SuccessOrError> SwitchRoom(SwitchRoomRequest dto)
+        //{
+        //    return _invoker.InvokeService<RoomsService, SwitchRoomRequest>(dto, service => service.SwitchRoom);
+        //}
 
-        public Task<SuccessOrError> SetUserIsTyping(bool isTyping)
-        {
-            return _invoker.InvokeService<ChatService, bool>(isTyping, service => service.SetUserIsTyping);
-        }
+        //public Task<SuccessOrError> SendChatMessage(SendChatMessageRequest dto)
+        //{
+        //    return _invoker.InvokeService<ChatService, SendChatMessageRequest>(dto, service => service.SendMessage);
+        //}
 
-        public Task<SuccessOrError<string>> GetEquipmentToken()
-        {
-            return _invoker.InvokeService<EquipmentService, string>(service => service.GetEquipmentToken,
-                new MethodOptions {ConferenceCanBeClosed = true});
-        }
+        //public Task<SuccessOrError<IReadOnlyList<ChatMessageDto>>> RequestChat()
+        //{
+        //    return _invoker.InvokeService<ChatService, IReadOnlyList<ChatMessageDto>>(
+        //        service => service.FetchMyMessages);
+        //}
 
-        public Task<SuccessOrError> RegisterEquipment(RegisterEquipmentRequestDto dto)
-        {
-            return _invoker.InvokeService<EquipmentService, RegisterEquipmentRequestDto>(dto,
-                service => service.RegisterEquipment);
-        }
+        //public Task<SuccessOrError> SetUserIsTyping(bool isTyping)
+        //{
+        //    return _invoker.InvokeService<ChatService, bool>(isTyping, service => service.SetUserIsTyping);
+        //}
 
-        public Task<SuccessOrError> SendEquipmentCommand(EquipmentCommand dto)
-        {
-            return _invoker.InvokeService<EquipmentService, EquipmentCommand>(dto,
-                service => service.SendEquipmentCommand);
-        }
+        //public Task<SuccessOrError<string>> GetEquipmentToken()
+        //{
+        //    return _invoker.InvokeService<EquipmentService, string>(service => service.GetEquipmentToken,
+        //        new MethodOptions {ConferenceCanBeClosed = true});
+        //}
 
-        public Task<SuccessOrError> EquipmentErrorOccurred(Error dto)
-        {
-            return _invoker.InvokeService<EquipmentService, Error>(dto, service => service.EquipmentErrorOccurred);
-        }
+        //public Task<SuccessOrError> RegisterEquipment(RegisterEquipmentRequestDto dto)
+        //{
+        //    return _invoker.InvokeService<EquipmentService, RegisterEquipmentRequestDto>(dto,
+        //        service => service.RegisterEquipment);
+        //}
 
-        public Task<SuccessOrError> EquipmentUpdateStatus(Dictionary<string, UseMediaStateInfo> dto)
-        {
-            return _invoker.InvokeService<EquipmentService, Dictionary<string, UseMediaStateInfo>>(dto,
-                service => service.EquipmentUpdateStatus);
-        }
+        //public Task<SuccessOrError> SendEquipmentCommand(EquipmentCommand dto)
+        //{
+        //    return _invoker.InvokeService<EquipmentService, EquipmentCommand>(dto,
+        //        service => service.SendEquipmentCommand);
+        //}
+
+        //public Task<SuccessOrError> EquipmentErrorOccurred(Error dto)
+        //{
+        //    return _invoker.InvokeService<EquipmentService, Error>(dto, service => service.EquipmentErrorOccurred);
+        //}
+
+        //public Task<SuccessOrError> EquipmentUpdateStatus(Dictionary<string, UseMediaStateInfo> dto)
+        //{
+        //    return _invoker.InvokeService<EquipmentService, Dictionary<string, UseMediaStateInfo>>(dto,
+        //        service => service.EquipmentUpdateStatus);
+        //}
     }
 }

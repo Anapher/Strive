@@ -41,23 +41,14 @@ namespace PaderConference.Core.Services.Permissions
             }
             else
             {
-                switch (type)
+                DefaultValue = type switch
                 {
-                    case PermissionValueType.Boolean:
-                        DefaultValue = false;
-                        break;
-                    case PermissionValueType.Integer:
-                        DefaultValue = 0;
-                        break;
-                    case PermissionValueType.Decimal:
-                        DefaultValue = 0.0;
-                        break;
-                    case PermissionValueType.Text:
-                        DefaultValue = "";
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException(nameof(type), type, null);
-                }
+                    PermissionValueType.Boolean => false,
+                    PermissionValueType.Integer => 0,
+                    PermissionValueType.Decimal => 0.0,
+                    PermissionValueType.Text => "",
+                    _ => throw new ArgumentOutOfRangeException(nameof(type), type, null),
+                };
             }
         }
 

@@ -9,7 +9,7 @@ using PaderConference.Core.Services.Permissions.Requests;
 
 namespace PaderConference.Core.Services.Permissions.UseCases
 {
-    public class SetTemporaryPermissionHandler : IRequestHandler<SetTemporaryPermissionRequest, SuccessOrError>
+    public class SetTemporaryPermissionHandler : IRequestHandler<SetTemporaryPermissionRequest, SuccessOrError<Unit>>
     {
         private readonly IMediator _mediator;
         private readonly ITemporaryPermissionRepository _temporaryPermissionRepository;
@@ -23,7 +23,7 @@ namespace PaderConference.Core.Services.Permissions.UseCases
             _logger = logger;
         }
 
-        public async Task<SuccessOrError> Handle(SetTemporaryPermissionRequest request,
+        public async Task<SuccessOrError<Unit>> Handle(SetTemporaryPermissionRequest request,
             CancellationToken cancellationToken)
         {
             var (targetParticipantId, permissionKey, value, conferenceId) = request;
@@ -49,7 +49,7 @@ namespace PaderConference.Core.Services.Permissions.UseCases
             }
 
             await _mediator.Send(new UpdateParticipantsPermissionsRequest(conferenceId, new[] {targetParticipantId}));
-            return SuccessOrError.Succeeded;
+            return Unit.Value;
         }
     }
 }

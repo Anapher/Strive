@@ -9,16 +9,19 @@ namespace PaderConference.Core.Services.ConferenceControl.Gateways
         ///     Register a participant in the mapping
         /// </summary>
         /// <returns>Return the conference id that was previously set or null if the participant did not belong to a conference</returns>
-        Task<string?> RegisterParticipant(string participantId, string conferenceId, JoinedParticipantData data);
+        Task<string?> AddParticipant(string participantId, string conferenceId, string connectionId);
+
 
         /// <summary>
-        ///     Remove the participant from the mapping
+        ///     Try to remove participant from mapping if the mapping still refers to the connection id. This is important as if a
+        ///     client joins and overwrites the mapping of an already joined client, the joined client will be kicked and will try
+        ///     to remove the mapping on leave
         /// </summary>
-        /// <returns>Return the conference id that was previously set or null if the participant did not belong to a conference</returns>
-        Task<string?> RemoveParticipant(string participantId);
+        /// <returns>Return false if the participant was not joined or if he belongs to a different conference</returns>
+        Task<bool> RemoveParticipant(string participantId, string connectionId);
 
         Task<string?> GetConferenceIdOfParticipant(string participantId);
 
-        Task<IReadOnlyDictionary<string, JoinedParticipantData>> GetParticipantsOfConference(string conferenceId);
+        Task<IEnumerable<string>> GetParticipantsOfConference(string conferenceId);
     }
 }

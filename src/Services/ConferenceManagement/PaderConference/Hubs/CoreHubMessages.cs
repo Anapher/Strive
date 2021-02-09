@@ -1,4 +1,10 @@
-﻿namespace PaderConference.Hubs
+﻿using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.SignalR;
+using PaderConference.Hubs.Responses;
+using PermissionsDict = System.Collections.Generic.Dictionary<string, Newtonsoft.Json.Linq.JValue>;
+
+namespace PaderConference.Hubs
 {
     public static class CoreHubMessages
     {
@@ -24,6 +30,21 @@
             public const string OnEquipmentCommand = "OnEquipmentCommand";
 
             public const string OnRequestDisconnect = "OnRequestDisconnect";
+        }
+    }
+
+    public static class CoreHubMessage
+    {
+        public static Task OnPermissionsUpdated(this IClientProxy clientProxy, PermissionsDict payload,
+            CancellationToken token = default)
+        {
+            return clientProxy.SendAsync(CoreHubMessages.Response.OnPermissionsUpdated, payload, token);
+        }
+
+        public static Task OnRequestDisconnect(this IClientProxy clientProxy, RequestDisconnectDto payload,
+            CancellationToken token = default)
+        {
+            return clientProxy.SendAsync(CoreHubMessages.Response.OnRequestDisconnect, payload, token);
         }
     }
 }
