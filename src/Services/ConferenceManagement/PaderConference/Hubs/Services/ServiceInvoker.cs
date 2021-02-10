@@ -1,5 +1,6 @@
 ﻿using System;
 using MediatR;
+using PaderConference.Core.Interfaces;
 
 namespace PaderConference.Hubs.Services
 {
@@ -22,6 +23,17 @@ namespace PaderConference.Hubs.Services
         public IServiceRequestBuilder<TResponse> Create<TResponse>(Func<IRequest<TResponse>> requestFactory)
         {
             return new ServiceRequestBuilder<TResponse>(requestFactory, _mediator, _context);
+        }
+
+        public IServiceRequestBuilder<TResponse> Create<TResponse>(IRequest<SuccessOrError<TResponse>> request)
+        {
+            return new ServiceRequestBuilderSuccessOrError<TResponse>(() => request, _mediator, _context);
+        }
+
+        public IServiceRequestBuilder<TResponse> Create<TResponse>(
+            Func<IRequest<SuccessOrError<TResponse>>> requestFactory)
+        {
+            return new ServiceRequestBuilderSuccessOrError<TResponse>(requestFactory, _mediator, _context);
         }
     }
 }

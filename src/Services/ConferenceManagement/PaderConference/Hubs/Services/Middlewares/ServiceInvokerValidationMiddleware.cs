@@ -17,7 +17,7 @@ namespace PaderConference.Hubs.Services.Middlewares
             return builder.AddMiddleware(context => ValidateObject(context, obj));
         }
 
-        private static async ValueTask<SuccessOrError<Unit>> ValidateObject<T>(ServiceInvokerContext context, T obj)
+        public static async ValueTask<SuccessOrError<Unit>> ValidateObject<T>(ServiceInvokerContext context, T obj)
         {
             if (!context.Context.TryResolve<IValidator<T>>(out var validator))
                 return SuccessOrError<Unit>.Succeeded(Unit.Value);

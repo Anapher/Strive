@@ -22,15 +22,4 @@ namespace PaderConference.Hubs
             return _connections.TryGetValue(participantId, out connection);
         }
     }
-
-    public interface ICoreHubConnections
-    {
-        void SetParticipant(string participantId, ParticipantConnection connection);
-
-        void RemoveParticipant(string participantId);
-
-        bool TryGetParticipant(string participantId, [NotNullWhen(true)] out ParticipantConnection? connection);
-    }
-
-    public record ParticipantConnection(string ConferenceId, string ConnectionId);
 }

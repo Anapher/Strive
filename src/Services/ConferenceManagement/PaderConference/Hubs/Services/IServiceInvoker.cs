@@ -1,5 +1,6 @@
 ﻿using System;
 using MediatR;
+using PaderConference.Core.Interfaces;
 
 namespace PaderConference.Hubs.Services
 {
@@ -8,5 +9,9 @@ namespace PaderConference.Hubs.Services
         IServiceRequestBuilder<TResponse> Create<TResponse>(IRequest<TResponse> request);
 
         IServiceRequestBuilder<TResponse> Create<TResponse>(Func<IRequest<TResponse>> request);
+
+        IServiceRequestBuilder<TResponse> Create<TResponse>(IRequest<SuccessOrError<TResponse>> request);
+
+        IServiceRequestBuilder<TResponse> Create<TResponse>(Func<IRequest<SuccessOrError<TResponse>>> requestFactory);
     }
 }

@@ -15,9 +15,11 @@ namespace PaderConference.Hubs.Services.Middlewares
             return builder.AddMiddleware(context => CheckPermissions(context, requiredPermissions));
         }
 
-        private static async ValueTask<SuccessOrError<Unit>> CheckPermissions(ServiceInvokerContext context,
-            PermissionDescriptor<bool>[] requiredPermissions)
+        public static async ValueTask<SuccessOrError<Unit>> CheckPermissions(ServiceInvokerContext context,
+            params PermissionDescriptor<bool>[] requiredPermissions)
         {
+            if (requiredPermissions.Length == 0) return SuccessOrError<Unit>.Succeeded(Unit.Value);
+
             var participantPermissions = context.Context.Resolve<IParticipantPermissions>();
             var permissions =
                 await participantPermissions.FetchForParticipant(context.ConferenceId, context.ParticipantId);
