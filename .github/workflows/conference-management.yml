@@ -1,19 +1,23 @@
-name: Test ASP.NET Core server
+name: Test Conference Management
 on:
   push:
     paths:
-      - "src/**"
-      - "test/**"
-      - "**.sln"
+      - src/Services/ConferenceManagement/**
+      - .github/workflows/conference-management.yml
+
   pull_request:
+    branches:
+      - develop
     paths:
-      - "src/**"
-      - "test/**"
-      - "**.sln"
+      - src/Services/ConferenceManagement/**
+      - .github/workflows/conference-management.yml
 
 jobs:
   test:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./src/Services/ConferenceManagement
     steps:
       - uses: actions/checkout@v2
       - name: Setup .NET Core
