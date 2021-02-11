@@ -34,5 +34,6 @@ namespace PaderConference.Infrastructure.Redis.Scripts
     {
         JoinedParticipantsRepository_RemoveParticipant,
         JoinedParticipantsRepository_RemoveParticipantSafe,
+        RoomRepository_SetParticipantRoom,
     }
 }

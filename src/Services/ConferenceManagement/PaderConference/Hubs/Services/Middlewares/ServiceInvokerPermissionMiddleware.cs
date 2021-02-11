@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Autofac;
 using MediatR;
 using PaderConference.Core.Interfaces;
@@ -13,6 +15,12 @@ namespace PaderConference.Hubs.Services.Middlewares
             this IServiceRequestBuilder<TResponse> builder, params PermissionDescriptor<bool>[] requiredPermissions)
         {
             return builder.AddMiddleware(context => CheckPermissions(context, requiredPermissions));
+        }
+
+        public static IServiceRequestBuilder<TResponse> RequirePermissions<TResponse>(
+            this IServiceRequestBuilder<TResponse> builder, IEnumerable<PermissionDescriptor<bool>> requiredPermissions)
+        {
+            return builder.RequirePermissions(requiredPermissions.ToArray());
         }
 
         public static async ValueTask<SuccessOrError<Unit>> CheckPermissions(ServiceInvokerContext context,

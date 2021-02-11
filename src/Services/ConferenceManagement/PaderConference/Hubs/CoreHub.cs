@@ -12,6 +12,10 @@ using PaderConference.Core.Interfaces;
 using PaderConference.Core.Services.ConferenceControl.Notifications;
 using PaderConference.Core.Services.ConferenceControl.Requests;
 using PaderConference.Core.Services.Permissions;
+using PaderConference.Core.Services.Permissions.Requests;
+using PaderConference.Core.Services.Permissions.Responses;
+using PaderConference.Core.Services.Rooms;
+using PaderConference.Core.Services.Rooms.Requests;
 using PaderConference.Extensions;
 using PaderConference.Hubs.Dtos;
 using PaderConference.Hubs.Services;
@@ -21,27 +25,24 @@ using PaderConference.Infrastructure.Extensions;
 namespace PaderConference.Hubs
 {
     [Authorize]
-    public class CoreHub : Hub
+    public class CoreHub : ScopedHub
     {
         private readonly IMediator _mediator;
-        private readonly IComponentContext _context;
         private readonly ICoreHubConnections _connections;
         private readonly ILogger<CoreHub> _logger;
 
-        public CoreHub(IMediator mediator, IComponentContext context, ICoreHubConnections connections,
-            ILogger<CoreHub> logger)
+        public CoreHub(ILifetimeScope scope) : base(scope)
         {
-            _mediator = mediator;
-            _context = context;
-            _connections = connections;
-            _logger = logger;
+            _mediator = HubScope.Resolve<IMediator>();
+            _connections = HubScope.Resolve<ICoreHubConnections>();
+            _logger = HubScope.Resolve<ILogger<CoreHub>>();
         }
 
         private IServiceInvoker GetInvoker()
         {
             var (conferenceId, participantId) = GetContextInfo();
             return new ServiceInvoker(_mediator,
-                new ServiceInvokerContext(this, _context, conferenceId, participantId));
+                new ServiceInvokerContext(this, HubScope, conferenceId, participantId));
         }
 
         public override async Task OnConnectedAsync()
@@ -111,38 +112,66 @@ namespace PaderConference.Hubs
         {
             var (conferenceId, _) = GetContextInfo();
             return GetInvoker().Create(new CloseConferenceRequest(conferenceId))
-                .RequirePermissions(DefinedPermissions.Conference.CanOpenAndClose).Send();
+                .RequirePermissions(DefinedPermissions.Conference.CanOpenAndClose).ConferenceMustBeOpen().Send();
         }
 
         public Task<SuccessOrError<Unit>> KickParticipant(KickParticipantRequestDto message)
         {
             var (conferenceId, _) = GetContextInfo();
             return GetInvoker().Create(new KickParticipantRequest(message.ParticipantId, conferenceId))
-                .ValidateObject(message).RequirePermissions(DefinedPermissions.Conference.CanKickParticipant).Send();
+                .ValidateObject(message).RequirePermissions(DefinedPermissions.Conference.CanKickParticipant)
+                .ConferenceMustBeOpen().Send();
         }
 
-        //public Task<SuccessOrError<ParticipantPermissionDto>> FetchPermissions(string? participantId)
-        //{
-        //    return _invoker.InvokeService<PermissionsService, string?, ParticipantPermissionDto>(participantId,
-        //        service => service.FetchPermissions);
-        //}
+        public Task<SuccessOrError<ParticipantPermissionResponse>> FetchPermissions(string? targetParticipantId)
+        {
+            var (conferenceId, myParticipantId) = GetContextInfo();
+            var fetchPermissionsOfParticipantId = targetParticipantId ?? myParticipantId;
 
-        //public Task<SuccessOrError> SetTemporaryPermission(SetTemporaryPermissionRequest dto)
-        //{
-        //    return _invoker.InvokeService<PermissionsService, SetTemporaryPermissionRequest>(dto,
-        //        service => service.SetTemporaryPermission);
-        //}
+            var requiredPermissions = new List<PermissionDescriptor<bool>>();
+            if (fetchPermissionsOfParticipantId != myParticipantId)
+                requiredPermissions.Add(DefinedPermissions.Permissions.CanSeeAnyParticipantsPermissions);
 
-        //public Task<SuccessOrError> CreateRooms(IReadOnlyList<CreateRoomMessage> dto)
-        //{
-        //    return _invoker.InvokeService<RoomsService, IReadOnlyList<CreateRoomMessage>>(dto,
-        //        service => service.CreateRooms);
-        //}
+            return GetInvoker().Create(new FetchPermissionsRequest(fetchPermissionsOfParticipantId, conferenceId))
+                .ConferenceMustBeOpen().RequirePermissions(requiredPermissions).Send();
+        }
 
-        //public Task<SuccessOrError> RemoveRooms(IReadOnlyList<string> dto)
-        //{
-        //    return _invoker.InvokeService<RoomsService, IReadOnlyList<string>>(dto, service => service.RemoveRooms);
-        //}
+        public Task<SuccessOrError<Unit>> SetTemporaryPermission(SetTemporaryPermissionDto dto)
+        {
+            var (conferenceId, _) = GetContextInfo();
+
+            return GetInvoker()
+                .Create(
+                    new SetTemporaryPermissionRequest(dto.ParticipantId, dto.PermissionKey, dto.Value, conferenceId))
+                .RequirePermissions(DefinedPermissions.Permissions.CanGiveTemporaryPermission).ValidateObject(dto)
+                .ConferenceMustBeOpen().Send();
+        }
+
+        public Task<SuccessOrError<IReadOnlyList<Room>>> CreateRooms(IReadOnlyList<RoomCreationInfo> dto)
+        {
+            var (conferenceId, _) = GetContextInfo();
+
+            return GetInvoker().Create(new CreateRoomsRequest(conferenceId, dto))
+                .RequirePermissions(DefinedPermissions.Rooms.CanCreateAndRemove).ValidateObject(dto)
+                .ConferenceMustBeOpen().Send();
+        }
+
+        public Task<SuccessOrError<Unit>> RemoveRooms(IReadOnlyList<string> dto)
+        {
+            var (conferenceId, _) = GetContextInfo();
+
+            return GetInvoker().Create(new RemoveRoomsRequest(conferenceId, dto))
+                .RequirePermissions(DefinedPermissions.Rooms.CanCreateAndRemove).ConferenceMustBeOpen().Send();
+        }
+
+        public Task<SuccessOrError<Unit>> SwitchRoom(SwitchRoomDto dto)
+        {
+            var (conferenceId, participantId) = GetContextInfo();
+
+            return GetInvoker().Create(new SetParticipantRoomRequest(conferenceId, participantId, dto.RoomId))
+                .RequirePermissions(DefinedPermissions.Rooms.CanSwitchRoom).ValidateObject(dto).ConferenceMustBeOpen()
+                .Send();
+        }
 
         //public Task<SuccessOrError> OpenBreakoutRooms(OpenBreakoutRoomsRequest request)
         //{
@@ -164,11 +193,6 @@ namespace PaderConference.Hubs
 
         //    return _invoker.InvokeService<BreakoutRoomService, JsonPatchDocument<BreakoutRoomsOptions>>(dto,
         //        service => service.ChangeBreakoutRooms);
-        //}
-
-        //public Task<SuccessOrError> SwitchRoom(SwitchRoomRequest dto)
-        //{
-        //    return _invoker.InvokeService<RoomsService, SwitchRoomRequest>(dto, service => service.SwitchRoom);
         //}
 
         //public Task<SuccessOrError> SendChatMessage(SendChatMessageRequest dto)

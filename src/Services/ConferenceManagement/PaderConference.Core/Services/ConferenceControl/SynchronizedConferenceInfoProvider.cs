@@ -26,7 +26,7 @@ namespace PaderConference.Core.Services.ConferenceControl
             if (conference == null) throw new ConferenceNotFoundException(conferenceId);
 
             var nextDate = _scheduler.GetNextExecution(conference.Configuration);
-            var isOpen = await _openConferenceRepository.Exists(conferenceId);
+            var isOpen = await _openConferenceRepository.IsOpen(conferenceId);
 
             return new SynchronizedConferenceInfo(conference) {IsOpen = isOpen, ScheduledDate = nextDate};
         }

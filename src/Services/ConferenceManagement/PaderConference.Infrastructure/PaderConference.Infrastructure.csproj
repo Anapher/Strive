@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <None Remove="Redis\Scripts\JoinedParticipantsRepository_RemoveParticipantSafe.lua" />
+    <None Remove="Redis\Scripts\RoomRepository_SetParticipantRoom.lua" />
   </ItemGroup>
 
   <ItemGroup>

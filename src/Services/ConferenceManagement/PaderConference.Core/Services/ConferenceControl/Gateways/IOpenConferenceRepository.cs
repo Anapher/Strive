@@ -23,6 +23,6 @@ namespace PaderConference.Core.Services.ConferenceControl.Gateways
         /// </summary>
         /// <param name="conferenceId">The conference id</param>
         /// <returns>Return true if the conference exists</returns>
-        Task<bool> Exists(string conferenceId);
+        Task<bool> IsOpen(string conferenceId);
     }
 }

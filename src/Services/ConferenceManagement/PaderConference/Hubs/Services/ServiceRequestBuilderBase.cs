@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Autofac;
+using Microsoft.Extensions.Logging;
 using PaderConference.Core.Interfaces;
 using PaderConference.Extensions;
 
@@ -18,6 +20,8 @@ namespace PaderConference.Hubs.Services
         }
 
         protected abstract Task<SuccessOrError<TResponse>> CreateRequest(CancellationToken token);
+
+        protected abstract Type GetRequestType();
 
         public IServiceRequestBuilder<TResponse> AddMiddleware(ServiceMiddleware func)
         {
@@ -37,12 +41,25 @@ namespace PaderConference.Hubs.Services
                 token.ThrowIfCancellationRequested();
             }
 
+            var requestType = GetRequestType();
+
+            var logger = _context.Context.Resolve<ILogger<ServiceRequestBuilderBase<TResponse>>>();
+            using var _ = logger.BeginScope(new Dictionary<string, object>
+            {
+                {"conferenceId", _context.ConferenceId},
+                {"participantId", _context.ParticipantId},
+                {"requestType", requestType.FullName!},
+            });
+
+            logger.LogDebug("Send request {requestType}...", requestType);
+
             try
             {
                 return await CreateRequest(token);
             }
             catch (Exception e)
             {
+                logger.LogError(e, "An error occurred on sending request {requestType}...", requestType);
                 return e.ToError();
             }
         }

@@ -8,20 +8,25 @@ namespace PaderConference.Hubs.Services
 {
     public class ServiceRequestBuilderSuccessOrError<TResponse> : ServiceRequestBuilderBase<TResponse>
     {
-        private readonly Func<IRequest<SuccessOrError<TResponse>>> _requestFactory;
         private readonly IMediator _mediator;
+        private readonly Lazy<IRequest<SuccessOrError<TResponse>>> _lazyRequest;
 
         public ServiceRequestBuilderSuccessOrError(Func<IRequest<SuccessOrError<TResponse>>> requestFactory,
             IMediator mediator, ServiceInvokerContext context) : base(context)
         {
-            _requestFactory = requestFactory;
+            _lazyRequest = new Lazy<IRequest<SuccessOrError<TResponse>>>(requestFactory);
             _mediator = mediator;
         }
 
         protected override async Task<SuccessOrError<TResponse>> CreateRequest(CancellationToken token)
         {
-            var request = _requestFactory();
+            var request = _lazyRequest.Value;
             return await _mediator.Send(request, token);
+        }
+
+        protected override Type GetRequestType()
+        {
+            return _lazyRequest.Value.GetType();
         }
     }
 }
