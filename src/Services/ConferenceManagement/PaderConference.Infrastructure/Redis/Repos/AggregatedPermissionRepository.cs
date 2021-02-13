@@ -4,8 +4,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PaderConference.Core.Services.Permissions.Gateways;
-using StackExchange.Redis;
-using StackExchange.Redis.Extensions.Core.Abstractions;
+using PaderConference.Infrastructure.Redis.Abstractions;
 
 namespace PaderConference.Infrastructure.Redis.Repos
 {
@@ -13,11 +12,11 @@ namespace PaderConference.Infrastructure.Redis.Repos
     {
         private const string PROPERTY_KEY = "Permissions";
 
-        private readonly IRedisDatabase _redisDatabase;
+        private readonly IKeyValueDatabase _database;
 
-        public AggregatedPermissionRepository(IRedisDatabase redisDatabase)
+        public AggregatedPermissionRepository(IKeyValueDatabase database)
         {
-            _redisDatabase = redisDatabase;
+            _database = database;
         }
 
         public async ValueTask SetPermissions(string conferenceId, string participantId,
@@ -31,28 +30,39 @@ namespace PaderConference.Infrastructure.Redis.Repos
             await ReplaceHashSet(redisKey, updated);
         }
 
-        public async ValueTask<T> GetPermissionsValue<T>(string conferenceId, string participantId, string key)
+        public async ValueTask<T?> GetPermissionsValue<T>(string conferenceId, string participantId, string key)
         {
             var redisKey = RedisKeyBuilder.ForProperty(PROPERTY_KEY).ForConference(conferenceId)
                 .ForParticipant(participantId).ToString();
 
-            return await _redisDatabase.HashGetAsync<T>(redisKey, key);
+            return await _database.HashGetAsync<T>(redisKey, key);
         }
 
-        private static HashEntry[] PermissionDictionaryToHashEntries(Dictionary<string, JValue> dictionary)
+        public async ValueTask DeletePermissions(string conferenceId, string participantId)
         {
-            return dictionary.Select(x => new HashEntry(x.Key, x.Value.ToString(Formatting.None))).ToArray();
+            var redisKey = RedisKeyBuilder.ForProperty(PROPERTY_KEY).ForConference(conferenceId)
+                .ForParticipant(participantId).ToString();
+
+            await _database.KeyDeleteAsync(redisKey);
         }
 
-        private async Task ReplaceHashSet(string key, HashEntry[] entries)
+        private static IEnumerable<KeyValuePair<string, string>> PermissionDictionaryToHashEntries(
+            Dictionary<string, JValue> dictionary)
         {
-            var trans = _redisDatabase.Database.CreateTransaction();
-            var deleteTask = trans.KeyDeleteAsync(key);
-            var _ = trans.HashSetAsync(key, entries);
+            return dictionary.Select(x => new KeyValuePair<string, string>(x.Key, x.Value.ToString(Formatting.None)));
+        }
 
-            await trans.ExecuteAsync();
+        private async Task ReplaceHashSet(string key, IEnumerable<KeyValuePair<string, string>> entries)
+        {
+            using (var trans = _database.CreateTransaction())
+            {
+                var deleteTask = trans.KeyDeleteAsync(key);
+                var _ = trans.HashSetAsync(key, entries);
 
-            await deleteTask; // if the operation failed, this will throw an exception
+                await trans.ExecuteAsync();
+
+                await deleteTask; // if the operation failed, this will throw an exception
+            }
         }
     }
 }

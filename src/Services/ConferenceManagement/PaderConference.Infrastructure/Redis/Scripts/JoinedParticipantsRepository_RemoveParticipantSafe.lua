@@ -13,8 +13,8 @@ local function REMOVEPARTICIPANTSAFE(participantId, participantKey, conferenceKe
   end
 
   local conferenceKey = string.gsub(conferenceKeyTemplate, "%*", conferenceId)
-
   local actualConnectionId = redis.call("HGET", conferenceKey, participantId)
+
   if actualConnectionId == connectionId then
     redis.call("HDEL", conferenceKey, participantId)
     redis.call("DEL", participantKey)

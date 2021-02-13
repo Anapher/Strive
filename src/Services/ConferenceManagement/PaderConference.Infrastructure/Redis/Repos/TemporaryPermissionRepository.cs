@@ -42,5 +42,13 @@ namespace PaderConference.Infrastructure.Redis.Repos
 
             return await _redisDatabase.HashGetAllAsync<JValue>(redisKey);
         }
+
+        public async ValueTask RemoveAllTemporaryPermissions(string conferenceId, string participantId)
+        {
+            var redisKey = RedisKeyBuilder.ForProperty(PROPERTY_KEY).ForConference(conferenceId)
+                .ForParticipant(participantId).ToString();
+
+            await _redisDatabase.RemoveAsync(redisKey);
+        }
     }
 }

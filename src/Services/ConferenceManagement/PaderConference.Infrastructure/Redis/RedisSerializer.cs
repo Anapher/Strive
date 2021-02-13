@@ -20,7 +20,6 @@ namespace PaderConference.Infrastructure.Redis
         public static T? DeserializeValue<T>(string data)
         {
             if (string.IsNullOrEmpty(data)) return default;
-
             return JsonConvert.DeserializeObject<T>(data, Settings);
         }
     }

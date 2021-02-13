@@ -4,6 +4,7 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using PaderConference.Core.Extensions;
 using PaderConference.Core.Interfaces;
+using PaderConference.Core.Services.ConferenceControl.Gateways;
 using PaderConference.Core.Services.Permissions.Gateways;
 using PaderConference.Core.Services.Permissions.Requests;
 
@@ -13,13 +14,16 @@ namespace PaderConference.Core.Services.Permissions.UseCases
     {
         private readonly IMediator _mediator;
         private readonly ITemporaryPermissionRepository _temporaryPermissionRepository;
+        private readonly IJoinedParticipantsRepository _participantsRepository;
         private readonly ILogger<SetTemporaryPermissionHandler> _logger;
 
         public SetTemporaryPermissionHandler(IMediator mediator,
-            ITemporaryPermissionRepository temporaryPermissionRepository, ILogger<SetTemporaryPermissionHandler> logger)
+            ITemporaryPermissionRepository temporaryPermissionRepository,
+            IJoinedParticipantsRepository participantsRepository, ILogger<SetTemporaryPermissionHandler> logger)
         {
             _mediator = mediator;
             _temporaryPermissionRepository = temporaryPermissionRepository;
+            _participantsRepository = participantsRepository;
             _logger = logger;
         }
 
@@ -41,6 +45,13 @@ namespace PaderConference.Core.Services.Permissions.UseCases
 
                 await _temporaryPermissionRepository.SetTemporaryPermission(conferenceId, targetParticipantId,
                     descriptor.Key, value);
+
+                if (!await _participantsRepository.IsParticipantJoined(conferenceId, targetParticipantId))
+                {
+                    await _temporaryPermissionRepository.RemoveAllTemporaryPermissions(conferenceId,
+                        targetParticipantId);
+                    return SuccessOrError<Unit>.Succeeded(Unit.Value);
+                }
             }
             else
             {

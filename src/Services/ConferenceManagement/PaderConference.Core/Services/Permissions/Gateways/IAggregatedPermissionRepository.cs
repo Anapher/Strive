@@ -8,6 +8,8 @@ namespace PaderConference.Core.Services.Permissions.Gateways
     {
         ValueTask SetPermissions(string conferenceId, string participantId, Dictionary<string, JValue> permissions);
 
-        ValueTask<T> GetPermissionsValue<T>(string conferenceId, string participantId, string key);
+        ValueTask<T?> GetPermissionsValue<T>(string conferenceId, string participantId, string key);
+
+        ValueTask DeletePermissions(string conferenceId, string participantId);
     }
 }

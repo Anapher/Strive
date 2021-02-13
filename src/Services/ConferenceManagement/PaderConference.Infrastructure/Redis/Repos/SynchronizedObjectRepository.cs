@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Medallion.Threading.Redis;
 using PaderConference.Core.Services.Synchronization.Gateways;
-using StackExchange.Redis.Extensions.Core.Abstractions;
+using PaderConference.Infrastructure.Redis.Abstractions;
 
 namespace PaderConference.Infrastructure.Redis.Repos
 {
@@ -11,11 +10,11 @@ namespace PaderConference.Infrastructure.Redis.Repos
         private const string PROPERTY_KEY = "SyncObject";
         private const string LOCK_KEY = "SyncObjectLock";
 
-        private readonly IRedisDatabase _redisDatabase;
+        private readonly IKeyValueDatabase _database;
 
-        public SynchronizedObjectRepository(IRedisDatabase redisDatabase)
+        public SynchronizedObjectRepository(IKeyValueDatabase database)
         {
-            _redisDatabase = redisDatabase;
+            _database = database;
         }
 
         public async Task<T?> Update<T>(string conferenceId, string name, T value)
@@ -23,10 +22,8 @@ namespace PaderConference.Infrastructure.Redis.Repos
             var redisKey = RedisKeyBuilder.ForProperty(PROPERTY_KEY).ForConference(conferenceId).ForParticipant(name)
                 .ToString();
 
-            var data = RedisSerializer.SerializeValue(value);
-
-            var previous = await _redisDatabase.Database.StringGetSetAsync(redisKey, data);
-            return RedisSerializer.DeserializeValue<T>(previous);
+            var previous = await _database.GetSetAsync(redisKey, value);
+            return previous;
         }
 
         public async Task<(T? previousValue, T newValue)> Update<T>(string conferenceId, string name,
@@ -38,18 +35,14 @@ namespace PaderConference.Infrastructure.Redis.Repos
             var lockKey = RedisKeyBuilder.ForProperty(LOCK_KEY).ForConference(conferenceId).ForParticipant(name)
                 .ToString();
 
-            var @lock = new RedisDistributedLock(lockKey, _redisDatabase.Database,
-                builder => builder.Expiry(TimeSpan.FromSeconds(5)));
-
+            var @lock = _database.CreateLock(lockKey);
             await using (await @lock.AcquireAsync())
             {
-                var currentData = await _redisDatabase.Database.StringGetAsync(redisKey);
-                var currentValue = RedisSerializer.DeserializeValue<T>(currentData);
+                var currentValue = await _database.GetAsync<T>(redisKey);
 
                 var newValue = updateValueFn(currentValue);
-                var newData = RedisSerializer.SerializeValue(newValue);
 
-                await _redisDatabase.Database.StringSetAsync(redisKey, newData);
+                await _database.SetAsync(redisKey, newValue);
                 return (currentValue, newValue);
             }
         }

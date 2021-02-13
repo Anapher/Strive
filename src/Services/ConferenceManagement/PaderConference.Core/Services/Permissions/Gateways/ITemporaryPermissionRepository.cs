@@ -11,5 +11,7 @@ namespace PaderConference.Core.Services.Permissions.Gateways
         ValueTask RemoveTemporaryPermission(string conferenceId, string participantId, string key);
 
         ValueTask<Dictionary<string, JValue>> FetchTemporaryPermissions(string conferenceId, string participantId);
+
+        ValueTask RemoveAllTemporaryPermissions(string conferenceId, string participantId);
     }
 }

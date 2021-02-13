@@ -4,9 +4,8 @@ using System.Threading.Tasks;
 using PaderConference.Core.Interfaces.Gateways.Repositories;
 using PaderConference.Core.Services.Rooms;
 using PaderConference.Core.Services.Rooms.Gateways;
+using PaderConference.Infrastructure.Redis.Abstractions;
 using PaderConference.Infrastructure.Redis.Scripts;
-using StackExchange.Redis;
-using StackExchange.Redis.Extensions.Core.Abstractions;
 
 namespace PaderConference.Infrastructure.Redis.Repos
 {
@@ -15,45 +14,45 @@ namespace PaderConference.Infrastructure.Redis.Repos
         private const string ROOMS_PROPERTY_KEY = "Rooms";
         private const string ROOMMAPPING_PROPERTY_KEY = "RoomMapping";
 
-        private readonly IRedisDatabase _redisDatabase;
+        private readonly IKeyValueDatabase _database;
 
-        public RoomRepository(IRedisDatabase redisDatabase)
+        public RoomRepository(IKeyValueDatabase database)
         {
-            _redisDatabase = redisDatabase;
+            _database = database;
         }
 
         public async Task CreateRoom(string conferenceId, Room room)
         {
             var key = GetRoomListKey(conferenceId);
-            await _redisDatabase.HashSetAsync(key, room.RoomId, room);
+            await _database.HashSetAsync(key, room.RoomId, room);
         }
 
         public async Task<bool> RemoveRoom(string conferenceId, string roomId)
         {
             var key = GetRoomListKey(conferenceId);
-            return await _redisDatabase.HashDeleteAsync(key, roomId);
+            return await _database.HashDeleteAsync(key, roomId);
         }
 
         public async Task<IReadOnlyList<string>> GetParticipantsOfRoom(string conferenceId, string roomId)
         {
             var key = GetRoomMappingKey(conferenceId);
-            var hashValues = await _redisDatabase.Database.HashGetAllAsync(key);
+            var hashValues = await _database.HashGetAllAsync(key);
 
-            return hashValues.Where(x => x.Name == roomId).Select(x => (string) x.Value).ToList();
+            return hashValues.Where(x => x.Key == roomId).Select(x => x.Value).ToList();
         }
 
         public async Task<IEnumerable<Room>> GetRooms(string conferenceId)
         {
             var key = GetRoomListKey(conferenceId);
-            var result = await _redisDatabase.HashGetAllAsync<Room>(key);
+            var result = await _database.HashGetAllAsync<Room>(key);
             return result.Values;
         }
 
         public async Task<IReadOnlyDictionary<string, string>> GetParticipantRooms(string conferenceId)
         {
             var key = GetRoomMappingKey(conferenceId);
-            var result = await _redisDatabase.Database.HashGetAllAsync(key);
-            return result.ToDictionary(x => (string) x.Name, x => (string) x.Value);
+            var result = await _database.HashGetAllAsync(key);
+            return result.ToDictionary(x => x.Key, x => x.Value);
         }
 
         public async Task<DeleteAllResult> DeleteAllRoomsAndMappingsOfConference(string conferenceId)
@@ -61,23 +60,25 @@ namespace PaderConference.Infrastructure.Redis.Repos
             var mappingKey = GetRoomMappingKey(conferenceId);
             var roomListKey = GetRoomListKey(conferenceId);
 
-            var trans = _redisDatabase.Database.CreateTransaction();
-            var allParticipantsTask = trans.HashGetAllAsync(mappingKey);
-            var allRoomsTask = trans.HashGetAllAsync(roomListKey);
-
-            _ = trans.KeyDeleteAsync(mappingKey);
-            _ = trans.KeyDeleteAsync(roomListKey);
-
-            await trans.ExecuteAsync();
-
-            var allParticipants = await allParticipantsTask;
-            var allRooms = await allRoomsTask;
-
-            return new DeleteAllResult
+            using (var trans = _database.CreateTransaction())
             {
-                DeletedParticipants = allParticipants.Select(x => (string) x.Name).ToList(),
-                DeletedRooms = allRooms.Select(x => (string) x.Name).ToList(),
-            };
+                var allParticipantsTask = trans.HashGetAllAsync(mappingKey);
+                var allRoomsTask = trans.HashGetAllAsync(roomListKey);
+
+                _ = trans.KeyDeleteAsync(mappingKey);
+                _ = trans.KeyDeleteAsync(roomListKey);
+
+                await trans.ExecuteAsync();
+
+                var allParticipants = await allParticipantsTask;
+                var allRooms = await allRoomsTask;
+
+                return new DeleteAllResult
+                {
+                    DeletedParticipants = allParticipants.Select(x => x.Key).ToList(),
+                    DeletedRooms = allRooms.Select(x => x.Key).ToList(),
+                };
+            }
         }
 
         public async Task SetParticipantRoom(string conferenceId, string participantId, string roomId)
@@ -85,9 +86,8 @@ namespace PaderConference.Infrastructure.Redis.Repos
             var roomMappingKey = GetRoomMappingKey(conferenceId);
             var roomListKey = GetRoomListKey(conferenceId);
 
-            var scriptContent = RedisScriptLoader.Load(RedisScript.RoomRepository_SetParticipantRoom);
-            var result = await _redisDatabase.Database.ScriptEvaluateAsync(scriptContent,
-                new RedisKey[] {roomMappingKey, roomListKey, participantId, roomId});
+            var result = await _database.ExecuteScriptAsync(RedisScript.RoomRepository_SetParticipantRoom,
+                roomMappingKey, roomListKey, participantId, roomId);
 
             if (!(bool) result)
                 throw new ConcurrencyException("Failed to set room of participant: The room does not exist.");
@@ -96,15 +96,15 @@ namespace PaderConference.Infrastructure.Redis.Repos
         public async Task UnsetParticipantRoom(string conferenceId, string participantId)
         {
             var roomMappingKey = GetRoomMappingKey(conferenceId);
-            await _redisDatabase.Database.HashDeleteAsync(roomMappingKey, participantId);
+            await _database.HashDeleteAsync(roomMappingKey, participantId);
         }
 
-        private string GetRoomMappingKey(string conferenceId)
+        private static string GetRoomMappingKey(string conferenceId)
         {
             return RedisKeyBuilder.ForProperty(ROOMMAPPING_PROPERTY_KEY).ForConference(conferenceId).ToString();
         }
 
-        private string GetRoomListKey(string conferenceId)
+        private static string GetRoomListKey(string conferenceId)
         {
             return RedisKeyBuilder.ForProperty(ROOMS_PROPERTY_KEY).ForConference(conferenceId).ToString();
         }
