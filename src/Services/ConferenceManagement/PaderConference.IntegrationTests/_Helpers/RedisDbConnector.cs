@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using PaderConference.Infrastructure.Redis.Extensions;
-using StackExchange.Redis.Extensions.Core.Abstractions;
+using StackExchange.Redis;
 using StackExchange.Redis.Extensions.Core.Configuration;
 using StackExchange.Redis.Extensions.Core.Implementations;
 
@@ -18,16 +18,16 @@ namespace PaderConference.IntegrationTests._Helpers
             _connectionPool = new RedisCacheConnectionPoolManager(config);
         }
 
-        public IRedisDatabase CreateConnection()
+        public IDatabase CreateConnection()
         {
             return new RedisDatabase(_connectionPool, new CamelCaseNewtonSerializer(), new ServerEnumerationStrategy(),
-                0, 200 /*, _instanceId + ":" + Guid.NewGuid().ToString("N")*/);
+                0, 200 /*, _instanceId + ":" + Guid.NewGuid().ToString("N")*/).Database;
         }
 
         public async ValueTask DisposeAsync()
         {
             var connection = CreateConnection();
-            await connection.RemoveAsync(_instanceId + "*");
+            await connection.KeyDeleteAsync(_instanceId + "*");
 
             _connectionPool?.Dispose();
         }

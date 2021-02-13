@@ -2,6 +2,7 @@
 using PaderConference.Core.Interfaces.Gateways.Repositories;
 using PaderConference.Core.Services.Rooms;
 using PaderConference.Core.Services.Rooms.Gateways;
+using PaderConference.Infrastructure.Redis.Impl;
 using PaderConference.Infrastructure.Redis.Repos;
 using PaderConference.IntegrationTests._Helpers;
 using StackExchange.Redis;
@@ -16,9 +17,9 @@ namespace PaderConference.IntegrationTests.Infrastructure.Redis
 
         public RoomRepositoryTests(RedisDbConnector connector)
         {
-            var redisDb = connector.CreateConnection();
-            _repository = new RoomRepository(redisDb);
-            _database = redisDb.Database;
+            var database = connector.CreateConnection();
+            _repository = new RoomRepository(new RedisKeyValueDatabase(database));
+            _database = database;
         }
 
         [Fact]

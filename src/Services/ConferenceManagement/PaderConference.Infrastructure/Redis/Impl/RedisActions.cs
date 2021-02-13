@@ -22,35 +22,35 @@ namespace PaderConference.Infrastructure.Redis.Impl
             return await _database.KeyDeleteAsync(key);
         }
 
-        public async ValueTask<string?> HashGetAsync(string hashKey, string key)
+        public async ValueTask<string?> HashGetAsync(string key, string field)
         {
-            return await _database.HashGetAsync(hashKey, key);
+            return await _database.HashGetAsync(key, field);
         }
 
-        public async ValueTask HashSetAsync(string hashKey, IEnumerable<KeyValuePair<string, string>> keyValuePairs)
+        public async ValueTask HashSetAsync(string key, IEnumerable<KeyValuePair<string, string>> keyValuePairs)
         {
             var hashEntries = keyValuePairs.Select(x => new HashEntry(x.Key, x.Value)).ToArray();
-            await _database.HashSetAsync(hashKey, hashEntries);
+            await _database.HashSetAsync(key, hashEntries);
         }
 
-        public async ValueTask HashSetAsync(string hashKey, string key, string value)
+        public async ValueTask HashSetAsync(string key, string field, string value)
         {
-            await _database.HashSetAsync(hashKey, key, value);
+            await _database.HashSetAsync(key, field, value);
         }
 
-        public async ValueTask<bool> HashExists(string hashKey, string key)
+        public async ValueTask<bool> HashExistsAsync(string key, string field)
         {
-            return await _database.HashExistsAsync(hashKey, key);
+            return await _database.HashExistsAsync(key, field);
         }
 
-        public async ValueTask<bool> HashDeleteAsync(string hashKey, string key)
+        public async ValueTask<bool> HashDeleteAsync(string key, string field)
         {
-            return await _database.HashDeleteAsync(hashKey, key);
+            return await _database.HashDeleteAsync(key, field);
         }
 
-        public async ValueTask<IReadOnlyDictionary<string, string>> HashGetAllAsync(string hashKey)
+        public async ValueTask<IReadOnlyDictionary<string, string>> HashGetAllAsync(string key)
         {
-            var hashEntries = await _database.HashGetAllAsync(hashKey);
+            var hashEntries = await _database.HashGetAllAsync(key);
             return hashEntries.ToStringDictionary();
         }
 
@@ -69,7 +69,7 @@ namespace PaderConference.Infrastructure.Redis.Impl
             await _database.StringSetAsync(key, value);
         }
 
-        public async ValueTask<RedisResult> ExecuteScriptAsync(RedisScript script, params object[] parameters)
+        public async ValueTask<RedisResult> ExecuteScriptAsync(RedisScript script, params string[] parameters)
         {
             var scriptContent = RedisScriptLoader.Load(script);
             return await _database.ScriptEvaluateAsync(scriptContent, parameters.Select(x => (RedisKey) x).ToArray());

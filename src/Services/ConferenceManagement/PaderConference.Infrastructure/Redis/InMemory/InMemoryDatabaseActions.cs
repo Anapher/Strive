@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Threading.Tasks;
 using PaderConference.Core.Extensions;
 using PaderConference.Infrastructure.Redis.Abstractions;
@@ -18,8 +19,6 @@ namespace PaderConference.Infrastructure.Redis.InMemory
             _data = data;
         }
 
-        protected abstract IDisposable Lock();
-
         public virtual ValueTask<bool> KeyDeleteAsync(string key)
         {
             using (Lock())
@@ -28,14 +27,14 @@ namespace PaderConference.Infrastructure.Redis.InMemory
             }
         }
 
-        public virtual ValueTask<string?> HashGetAsync(string hashKey, string key)
+        public virtual ValueTask<string?> HashGetAsync(string key, string field)
         {
             using (Lock())
             {
-                if (_data.TryGetValue(hashKey, out var hashSetObj))
+                if (_data.TryGetValue(key, out var hashSetObj))
                 {
                     var hashSet = (Dictionary<string, string>) hashSetObj;
-                    if (hashSet.TryGetValue(key, out var value))
+                    if (hashSet.TryGetValue(field, out var value))
                         return new ValueTask<string?>(value);
                 }
             }
@@ -43,57 +42,64 @@ namespace PaderConference.Infrastructure.Redis.InMemory
             return new ValueTask<string?>((string?) null);
         }
 
-        public virtual ValueTask HashSetAsync(string hashKey, IEnumerable<KeyValuePair<string, string>> keyValuePairs)
+        public virtual ValueTask HashSetAsync(string key, IEnumerable<KeyValuePair<string, string>> keyValuePairs)
         {
             using (Lock())
             {
-                if (!_data.TryGetValue(hashKey, out var hashSetObj))
-                    _data[hashKey] = hashSetObj = new Dictionary<string, string>();
+                if (!_data.TryGetValue(key, out var hashSetObj))
+                    _data[key] = hashSetObj = new Dictionary<string, string>();
 
                 var hashSet = (Dictionary<string, string>) hashSetObj;
-                foreach (var (key, value) in keyValuePairs)
+                foreach (var (field, value) in keyValuePairs)
                 {
-                    hashSet[key] = value;
+                    hashSet[field] = value;
                 }
             }
 
             return new ValueTask();
         }
 
-        public virtual ValueTask HashSetAsync(string hashKey, string key, string value)
+        public virtual ValueTask HashSetAsync(string key, string field, string value)
         {
-            return HashSetAsync(hashKey, new KeyValuePair<string, string>(key, value).Yield());
+            return HashSetAsync(key, new KeyValuePair<string, string>(field, value).Yield());
         }
 
-        public virtual ValueTask<bool> HashExists(string hashKey, string key)
+        public virtual ValueTask<bool> HashExistsAsync(string key, string field)
         {
             using (Lock())
             {
-                if (!_data.TryGetValue(hashKey, out var hashSetObj))
+                if (!_data.TryGetValue(key, out var hashSetObj))
                     return new ValueTask<bool>(false);
 
                 var hashSet = (Dictionary<string, string>) hashSetObj;
-                return new ValueTask<bool>(hashSet.ContainsKey(key));
+                return new ValueTask<bool>(hashSet.ContainsKey(field));
             }
         }
 
-        public virtual ValueTask<bool> HashDeleteAsync(string hashKey, string key)
+        public virtual ValueTask<bool> HashDeleteAsync(string key, string field)
         {
             using (Lock())
             {
-                if (!_data.TryGetValue(hashKey, out var hashSetObj))
+                if (!_data.TryGetValue(key, out var hashSetObj))
                     return new ValueTask<bool>(false);
 
                 var hashSet = (Dictionary<string, string>) hashSetObj;
-                return new ValueTask<bool>(hashSet.Remove(key));
+                if (hashSet.Remove(field))
+                {
+                    if (!hashSet.Any()) _data.Remove(key);
+
+                    return new ValueTask<bool>(true);
+                }
+
+                return new ValueTask<bool>(false);
             }
         }
 
-        public virtual ValueTask<IReadOnlyDictionary<string, string>> HashGetAllAsync(string hashKey)
+        public virtual ValueTask<IReadOnlyDictionary<string, string>> HashGetAllAsync(string key)
         {
             using (Lock())
             {
-                if (!_data.TryGetValue(hashKey, out var hashSetObj))
+                if (!_data.TryGetValue(key, out var hashSetObj))
                     return new ValueTask<IReadOnlyDictionary<string, string>>(ImmutableDictionary<string, string>
                         .Empty);
 
@@ -134,25 +140,27 @@ namespace PaderConference.Infrastructure.Redis.InMemory
             }
         }
 
-        public virtual ValueTask<RedisResult> ExecuteScriptAsync(RedisScript script, params object[] parameters)
+        public virtual ValueTask<RedisResult> ExecuteScriptAsync(RedisScript script, params string[] parameters)
         {
             var actions = new NoLockInMemoryDatabaseActions(_data);
 
             switch (script)
             {
                 case RedisScript.JoinedParticipantsRepository_RemoveParticipant:
-                    return JoinedParticipantsRepository_RemoveParticipant(actions, (string) parameters[0],
-                        (string) parameters[1], (string) parameters[2]);
+                    return JoinedParticipantsRepository_RemoveParticipant(actions, parameters[0], parameters[1],
+                        parameters[2]);
                 case RedisScript.JoinedParticipantsRepository_RemoveParticipantSafe:
-                    return JoinedParticipantsRepository_RemoveParticipantSafe(actions, (string) parameters[0],
-                        (string) parameters[1], (string) parameters[2], (string) parameters[3]);
+                    return JoinedParticipantsRepository_RemoveParticipantSafe(actions, parameters[0], parameters[1],
+                        parameters[2], parameters[3]);
                 case RedisScript.RoomRepository_SetParticipantRoom:
-                    return RoomRepository_SetParticipantRoom(actions, (string) parameters[0], (string) parameters[1],
-                        (string) parameters[2], (string) parameters[3]);
+                    return RoomRepository_SetParticipantRoom(actions, parameters[0], parameters[1], parameters[2],
+                        parameters[3]);
                 default:
                     throw new ArgumentOutOfRangeException(nameof(script), script, null);
             }
         }
+
+        protected abstract IDisposable Lock();
 
         private static async ValueTask<RedisResult> JoinedParticipantsRepository_RemoveParticipant(
             IKeyValueDatabaseActions actions, string participantId, string participantKey, string conferenceKeyTemplate)
@@ -194,7 +202,7 @@ namespace PaderConference.Infrastructure.Redis.InMemory
         private static async ValueTask<RedisResult> RoomRepository_SetParticipantRoom(IKeyValueDatabaseActions actions,
             string roomMappingKey, string roomListKey, string participantId, string newRoomId)
         {
-            var roomExists = await actions.HashExists(roomListKey, newRoomId);
+            var roomExists = await actions.HashExistsAsync(roomListKey, newRoomId);
             if (!roomExists) return RedisResult.Create(false);
 
             await actions.HashSetAsync(roomMappingKey, participantId, newRoomId);

@@ -4,11 +4,11 @@ using PaderConference.Infrastructure.Redis.Abstractions;
 
 namespace PaderConference.Infrastructure.Redis.InMemory
 {
-    public class InMemoryInMemoryDatabase : InMemoryDatabaseActions, IKeyValueDatabase
+    public class InMemoryKeyValueDatabase : InMemoryDatabaseActions, IKeyValueDatabase
     {
-        private readonly InMemoryDatabaseData _data;
+        private readonly InMemoryKeyValueData _data;
 
-        public InMemoryInMemoryDatabase(InMemoryDatabaseData data) : base(data.Data)
+        public InMemoryKeyValueDatabase(InMemoryKeyValueData data) : base(data.Data)
         {
             _data = data;
         }

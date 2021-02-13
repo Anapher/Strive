@@ -12,12 +12,12 @@ namespace PaderConference.Infrastructure.Redis.InMemory
 {
     public class InMemoryDatabaseTransaction : InMemoryDatabaseActions, IKeyValueDatabaseTransaction
     {
-        private readonly InMemoryDatabaseData _data;
+        private readonly InMemoryKeyValueData _data;
         private readonly List<Func<ValueTask>> _transactionSteps = new();
         private readonly CancellationTokenSource _cancellationTokenSource = new();
         private bool _isExecuting;
 
-        public InMemoryDatabaseTransaction(InMemoryDatabaseData data) : base(data.Data)
+        public InMemoryDatabaseTransaction(InMemoryKeyValueData data) : base(data.Data)
         {
             _data = data;
         }
@@ -86,34 +86,34 @@ namespace PaderConference.Infrastructure.Redis.InMemory
             return AddTransactionStep(() => base.KeyDeleteAsync(key));
         }
 
-        public override ValueTask<string?> HashGetAsync(string hashKey, string key)
+        public override ValueTask<string?> HashGetAsync(string key, string field)
         {
-            return AddTransactionStep(() => base.HashGetAsync(hashKey, key));
+            return AddTransactionStep(() => base.HashGetAsync(key, field));
         }
 
-        public override ValueTask HashSetAsync(string hashKey, IEnumerable<KeyValuePair<string, string>> keyValuePairs)
+        public override ValueTask HashSetAsync(string key, IEnumerable<KeyValuePair<string, string>> keyValuePairs)
         {
-            return AddTransactionStep(() => base.HashSetAsync(hashKey, keyValuePairs));
+            return AddTransactionStep(() => base.HashSetAsync(key, keyValuePairs));
         }
 
-        public override ValueTask HashSetAsync(string hashKey, string key, string value)
+        public override ValueTask HashSetAsync(string key, string field, string value)
         {
-            return AddTransactionStep(() => base.HashSetAsync(hashKey, key, value));
+            return AddTransactionStep(() => base.HashSetAsync(key, field, value));
         }
 
-        public override ValueTask<bool> HashExists(string hashKey, string key)
+        public override ValueTask<bool> HashExistsAsync(string key, string field)
         {
-            return AddTransactionStep(() => base.HashExists(hashKey, key));
+            return AddTransactionStep(() => base.HashExistsAsync(key, field));
         }
 
-        public override ValueTask<bool> HashDeleteAsync(string hashKey, string key)
+        public override ValueTask<bool> HashDeleteAsync(string key, string field)
         {
-            return AddTransactionStep(() => base.HashDeleteAsync(hashKey, key));
+            return AddTransactionStep(() => base.HashDeleteAsync(key, field));
         }
 
-        public override ValueTask<IReadOnlyDictionary<string, string>> HashGetAllAsync(string hashKey)
+        public override ValueTask<IReadOnlyDictionary<string, string>> HashGetAllAsync(string key)
         {
-            return AddTransactionStep(() => base.HashGetAllAsync(hashKey));
+            return AddTransactionStep(() => base.HashGetAllAsync(key));
         }
 
         public override ValueTask<string?> GetAsync(string key)
@@ -131,7 +131,7 @@ namespace PaderConference.Infrastructure.Redis.InMemory
             return AddTransactionStep(() => base.SetAsync(key, value));
         }
 
-        public override ValueTask<RedisResult> ExecuteScriptAsync(RedisScript script, params object[] parameters)
+        public override ValueTask<RedisResult> ExecuteScriptAsync(RedisScript script, params string[] parameters)
         {
             return AddTransactionStep(() => base.ExecuteScriptAsync(script, parameters));
         }

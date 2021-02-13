@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using PaderConference.Core.Services.ConferenceControl.Gateways;
+using PaderConference.Infrastructure.Redis.Impl;
 using PaderConference.Infrastructure.Redis.Repos;
 using PaderConference.IntegrationTests._Helpers;
 using StackExchange.Redis;
@@ -14,9 +15,9 @@ namespace PaderConference.IntegrationTests.Infrastructure.Redis
 
         public JoinedParticipantsRepositoryTests(RedisDbConnector connector)
         {
-            var redisDb = connector.CreateConnection();
-            _repository = new JoinedParticipantsRepository(redisDb);
-            _database = redisDb.Database;
+            var database = connector.CreateConnection();
+            _repository = new JoinedParticipantsRepository(new RedisKeyValueDatabase(database));
+            _database = database;
         }
 
         [Fact]

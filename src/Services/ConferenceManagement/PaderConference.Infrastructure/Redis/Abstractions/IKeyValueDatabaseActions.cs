@@ -9,17 +9,17 @@ namespace PaderConference.Infrastructure.Redis.Abstractions
     {
         ValueTask<bool> KeyDeleteAsync(string key);
 
-        ValueTask<string?> HashGetAsync(string hashKey, string key);
+        ValueTask<string?> HashGetAsync(string key, string field);
 
-        ValueTask HashSetAsync(string hashKey, IEnumerable<KeyValuePair<string, string>> keyValuePairs);
+        ValueTask HashSetAsync(string key, IEnumerable<KeyValuePair<string, string>> keyValuePairs);
 
-        ValueTask HashSetAsync(string hashKey, string key, string value);
+        ValueTask HashSetAsync(string key, string field, string value);
 
-        ValueTask<bool> HashExists(string hashKey, string key);
+        ValueTask<bool> HashExistsAsync(string key, string field);
 
-        ValueTask<bool> HashDeleteAsync(string hashKey, string key);
+        ValueTask<bool> HashDeleteAsync(string key, string field);
 
-        ValueTask<IReadOnlyDictionary<string, string>> HashGetAllAsync(string hashKey);
+        ValueTask<IReadOnlyDictionary<string, string>> HashGetAllAsync(string key);
 
         ValueTask<string?> GetAsync(string key);
 
@@ -27,6 +27,6 @@ namespace PaderConference.Infrastructure.Redis.Abstractions
 
         ValueTask SetAsync(string key, string value);
 
-        ValueTask<RedisResult> ExecuteScriptAsync(RedisScript script, params object[] parameters);
+        ValueTask<RedisResult> ExecuteScriptAsync(RedisScript script, params string[] parameters);
     }
 }
