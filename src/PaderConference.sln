@@ -44,9 +44,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PaderConference.Tests", "Se
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{BD9A0067-58EE-43C5-A171-4660EF33B40F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PaderConference.CoreOld", "Services\ConferenceManagement\PaderConference.CoreOld\PaderConference.CoreOld.csproj", "{A8699926-0495-4D7C-AF53-96D33E7100FB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PaderConference.CoreOld", "Services\ConferenceManagement\PaderConference.CoreOld\PaderConference.CoreOld.csproj", "{A8699926-0495-4D7C-AF53-96D33E7100FB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PaderConference.Core.TestsOld", "Services\ConferenceManagement\PaderConference.Core.TestsOld\PaderConference.Core.TestsOld.csproj", "{C5BD2082-629C-4EB7-84F7-57255CF064CE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PaderConference.Core.TestsOld", "Services\ConferenceManagement\PaderConference.Core.TestsOld\PaderConference.Core.TestsOld.csproj", "{C5BD2082-629C-4EB7-84F7-57255CF064CE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PaderConference.Core.IntegrationTests", "Services\ConferenceManagement\PaderConference.Core.IntegrationTests\PaderConference.Core.IntegrationTests.csproj", "{7312667B-171C-44BB-82D9-DBCFD089B81F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -110,6 +112,10 @@ Global
 		{C5BD2082-629C-4EB7-84F7-57255CF064CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C5BD2082-629C-4EB7-84F7-57255CF064CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C5BD2082-629C-4EB7-84F7-57255CF064CE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7312667B-171C-44BB-82D9-DBCFD089B81F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7312667B-171C-44BB-82D9-DBCFD089B81F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7312667B-171C-44BB-82D9-DBCFD089B81F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7312667B-171C-44BB-82D9-DBCFD089B81F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -132,6 +138,7 @@ Global
 		{BD9A0067-58EE-43C5-A171-4660EF33B40F} = {1E91B583-050D-4034-A376-C14503186A40}
 		{A8699926-0495-4D7C-AF53-96D33E7100FB} = {1E91B583-050D-4034-A376-C14503186A40}
 		{C5BD2082-629C-4EB7-84F7-57255CF064CE} = {BD9A0067-58EE-43C5-A171-4660EF33B40F}
+		{7312667B-171C-44BB-82D9-DBCFD089B81F} = {BD9A0067-58EE-43C5-A171-4660EF33B40F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6C6656CC-2AAB-43CD-9AD4-2233F632192A}

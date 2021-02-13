@@ -6,9 +6,6 @@ namespace PaderConference.Core.Services
 {
     public class CommonError : ErrorsProvider<ServiceErrorCode>
     {
-        public static Error ParticipantNotFound =>
-            NotFound("The participant was not found.", ServiceErrorCode.ParticipantNotFound);
-
         public static Error PermissionDenied(PermissionDescriptor requiredPermission)
         {
             return NotFound(

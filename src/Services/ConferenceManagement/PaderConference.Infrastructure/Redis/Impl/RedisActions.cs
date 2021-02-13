@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Medallion.Threading;
 using PaderConference.Infrastructure.Redis.Abstractions;
 using PaderConference.Infrastructure.Redis.Scripts;
 using StackExchange.Redis;
@@ -74,7 +73,5 @@ namespace PaderConference.Infrastructure.Redis.Impl
             var scriptContent = RedisScriptLoader.Load(script);
             return await _database.ScriptEvaluateAsync(scriptContent, parameters.Select(x => (RedisKey) x).ToArray());
         }
-
-        public abstract IDistributedLock CreateLock(string lockKey);
     }
 }

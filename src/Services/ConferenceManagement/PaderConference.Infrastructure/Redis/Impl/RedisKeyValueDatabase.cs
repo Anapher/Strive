@@ -18,10 +18,10 @@ namespace PaderConference.Infrastructure.Redis.Impl
         public IKeyValueDatabaseTransaction CreateTransaction()
         {
             var transaction = _database.CreateTransaction();
-            return new RedisTransaction(transaction, _database);
+            return new RedisTransaction(transaction);
         }
 
-        public override IDistributedLock CreateLock(string lockKey)
+        public IDistributedLock CreateLock(string lockKey)
         {
             return new RedisDistributedLock(lockKey, _database, builder => builder.Expiry(TimeSpan.FromSeconds(5)));
         }

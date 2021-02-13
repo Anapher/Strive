@@ -39,7 +39,9 @@ namespace PaderConference.Core.Services.Rooms.UseCases
 
             if (!await _openConferenceRepository.IsOpen(conferenceId))
             {
+                _logger.LogWarning("The conference was not open, revert creating rooms");
                 await RevertRoomCreations(rooms, conferenceId);
+
                 throw new ConcurrencyException("The conference is not open.");
             }
 
