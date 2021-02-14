@@ -3,16 +3,14 @@ using System.Threading.Tasks;
 
 namespace PaderConference.Core.Services.Synchronization
 {
-    public interface ISynchronizedObjectProvider<T>
+    public interface ISynchronizedObjectProvider
     {
-        ValueTask<T> GetInitialValue(string conferenceId);
+        Type SynchronizedObjectType { get; }
 
-        string Name { get; }
+        ValueTask<bool> CanSubscribe(string conferenceId, string participantId);
 
-        ParticipantGroup TargetGroup { get; }
+        ValueTask<object> FetchValue(string conferenceId, string participantId);
 
-        ValueTask<T> Update(string conferenceId, T newValue);
-
-        ValueTask<T> Update(string conferenceId, Func<T, T> updateStateFn);
+        ValueTask<string> GetSynchronizedObjectId(string conferenceId, string participantId);
     }
 }

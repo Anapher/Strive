@@ -23,8 +23,8 @@ namespace PaderConference.Core
             builder.RegisterType<PermissionLayersAggregator>().AsImplementedInterfaces().InstancePerDependency();
             builder.RegisterType<ParticipantPermissions>().AsImplementedInterfaces().InstancePerDependency();
 
-            builder.RegisterAssemblyTypes(ThisAssembly).AsClosedTypesOf(typeof(ISynchronizedObjectProvider<>))
-                .AsImplementedInterfaces().InstancePerDependency();
+            builder.RegisterAssemblyTypes(ThisAssembly).AssignableTo<ISynchronizedObjectProvider>()
+                .AsImplementedInterfaces().InstancePerLifetimeScope();
         }
     }
 }

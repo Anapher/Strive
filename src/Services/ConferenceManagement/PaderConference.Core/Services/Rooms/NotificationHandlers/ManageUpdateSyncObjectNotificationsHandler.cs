@@ -4,19 +4,21 @@ using MediatR;
 using PaderConference.Core.Services.Rooms.Notifications;
 using PaderConference.Core.Services.Rooms.Notifications.Base;
 using PaderConference.Core.Services.Synchronization;
-using PaderConference.Core.Services.Synchronization.Extensions;
+using PaderConference.Core.Services.Synchronization.Requests;
 
 namespace PaderConference.Core.Services.Rooms.NotificationHandlers
 {
     public class ManageUpdateSyncObjectNotificationsHandler : INotificationHandler<RoomsChangedNotificationBase>,
         INotificationHandler<ParticipantsRoomChangedNotification>
     {
-        private readonly ISynchronizedObjectProvider<SynchronizedRooms> _synchronizedObject;
+        private readonly IMediator _mediator;
+        private readonly IParticipantAggregator _participantAggregator;
 
-        public ManageUpdateSyncObjectNotificationsHandler(
-            ISynchronizedObjectProvider<SynchronizedRooms> synchronizedObject)
+        public ManageUpdateSyncObjectNotificationsHandler(IMediator mediator,
+            IParticipantAggregator participantAggregator)
         {
-            _synchronizedObject = synchronizedObject;
+            _mediator = mediator;
+            _participantAggregator = participantAggregator;
         }
 
         public Task Handle(RoomsChangedNotificationBase notification, CancellationToken cancellationToken)
@@ -31,7 +33,9 @@ namespace PaderConference.Core.Services.Rooms.NotificationHandlers
 
         private async Task UpdateSynchronizedObject(string conferenceId)
         {
-            await _synchronizedObject.UpdateWithInitialValue(conferenceId);
+            var participants = await _participantAggregator.OfConference(conferenceId);
+            await _mediator.Send(
+                UpdateSynchronizedObjectRequest.Create<SynchronizedRoomsProvider>(conferenceId, participants));
         }
     }
 }

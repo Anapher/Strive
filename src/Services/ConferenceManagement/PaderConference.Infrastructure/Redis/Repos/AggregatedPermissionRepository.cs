@@ -22,9 +22,7 @@ namespace PaderConference.Infrastructure.Redis.Repos
         public async ValueTask SetPermissions(string conferenceId, string participantId,
             Dictionary<string, JValue> permissions)
         {
-            var redisKey = RedisKeyBuilder.ForProperty(PROPERTY_KEY).ForConference(conferenceId)
-                .ForParticipant(participantId).ToString();
-
+            var redisKey = GetPermissionsKey(conferenceId, participantId);
             var updated = PermissionDictionaryToHashEntries(permissions);
 
             await ReplaceHashSet(redisKey, updated);
@@ -32,17 +30,20 @@ namespace PaderConference.Infrastructure.Redis.Repos
 
         public async ValueTask<T?> GetPermissionsValue<T>(string conferenceId, string participantId, string key)
         {
-            var redisKey = RedisKeyBuilder.ForProperty(PROPERTY_KEY).ForConference(conferenceId)
-                .ForParticipant(participantId).ToString();
-
+            var redisKey = GetPermissionsKey(conferenceId, participantId);
             return await _database.HashGetAsync<T>(redisKey, key);
+        }
+
+        public async ValueTask<Dictionary<string, JValue>> GetPermissions(string conferenceId, string participantId)
+        {
+            var redisKey = GetPermissionsKey(conferenceId, participantId);
+            var dictionary = await _database.HashGetAllAsync(redisKey);
+            return dictionary.ToDictionary(x => x.Key, x => (JValue) JToken.Parse(x.Value));
         }
 
         public async ValueTask DeletePermissions(string conferenceId, string participantId)
         {
-            var redisKey = RedisKeyBuilder.ForProperty(PROPERTY_KEY).ForConference(conferenceId)
-                .ForParticipant(participantId).ToString();
-
+            var redisKey = GetPermissionsKey(conferenceId, participantId);
             await _database.KeyDeleteAsync(redisKey);
         }
 
@@ -63,6 +64,12 @@ namespace PaderConference.Infrastructure.Redis.Repos
 
                 await deleteTask; // if the operation failed, this will throw an exception
             }
+        }
+
+        private static string GetPermissionsKey(string conferenceId, string participantId)
+        {
+            return RedisKeyBuilder.ForProperty(PROPERTY_KEY).ForConference(conferenceId).ForParticipant(participantId)
+                .ToString();
         }
     }
 }

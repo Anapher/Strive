@@ -51,5 +51,15 @@ namespace PaderConference.Infrastructure.Redis.Abstractions
 
             return RedisSerializer.DeserializeValue<T>(result);
         }
+
+        public static async ValueTask<object?> GetSetAsync(this IKeyValueDatabaseActions database, string key,
+            object value)
+        {
+            var serialized = RedisSerializer.SerializeValue(value);
+            var result = await database.GetSetAsync(key, serialized);
+            if (result == null) return default;
+
+            return RedisSerializer.DeserializeValue(result, value.GetType());
+        }
     }
 }

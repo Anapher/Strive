@@ -4,29 +4,34 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using PaderConference.Core.Services.ConferenceControl.Notifications;
 using PaderConference.Core.Services.Synchronization;
-using PaderConference.Core.Services.Synchronization.Extensions;
+using PaderConference.Core.Services.Synchronization.Requests;
 
 namespace PaderConference.Core.Services.ConferenceControl.NotificationHandlers
 {
     public class ConferenceStateUpdatedNotificationHandler : INotificationHandler<ConferenceStateUpdatedNotification>
     {
-        private readonly ISynchronizedObjectProvider<SynchronizedConferenceInfo> _synchronizedObjectProvider;
+        private readonly IMediator _mediator;
+        private readonly IParticipantAggregator _participantAggregator;
         private readonly ILogger<ConferenceStateUpdatedNotificationHandler> _logger;
 
-        public ConferenceStateUpdatedNotificationHandler(
-            ISynchronizedObjectProvider<SynchronizedConferenceInfo> synchronizedObjectProvider,
-            ILogger<ConferenceStateUpdatedNotificationHandler> logger)
+        public ConferenceStateUpdatedNotificationHandler(IMediator mediator,
+            IParticipantAggregator participantAggregator, ILogger<ConferenceStateUpdatedNotificationHandler> logger)
         {
-            _synchronizedObjectProvider = synchronizedObjectProvider;
+            _mediator = mediator;
+            _participantAggregator = participantAggregator;
             _logger = logger;
         }
 
         public async Task Handle(ConferenceStateUpdatedNotification notification, CancellationToken cancellationToken)
         {
-            _logger.LogDebug("Conference {conferenceId} updated, update synchronized object",
-                notification.ConferenceId);
+            var conferenceId = notification.ConferenceId;
 
-            await _synchronizedObjectProvider.UpdateWithInitialValue(notification.ConferenceId);
+            _logger.LogDebug("Conference {conferenceId} updated, update synchronized object", conferenceId);
+
+            var participants = await _participantAggregator.OfConference(conferenceId);
+            await _mediator.Send(
+                UpdateSynchronizedObjectRequest.Create<SynchronizedConferenceInfoProvider>(conferenceId, participants),
+                cancellationToken);
         }
     }
 }

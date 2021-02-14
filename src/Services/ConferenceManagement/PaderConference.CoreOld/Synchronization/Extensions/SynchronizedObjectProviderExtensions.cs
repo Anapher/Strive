@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using PaderConference.Core.Services.Synchronization2;
 
 namespace PaderConference.Core.Services.Synchronization.Extensions
 {

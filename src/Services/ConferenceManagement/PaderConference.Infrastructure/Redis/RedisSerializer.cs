@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 
@@ -12,7 +13,7 @@ namespace PaderConference.Infrastructure.Redis
             Converters = {new StringEnumConverter(new CamelCaseNamingStrategy())},
         };
 
-        public static string SerializeValue<T>(T value)
+        public static string SerializeValue(object? value)
         {
             return JsonConvert.SerializeObject(value, Settings);
         }
@@ -21,6 +22,12 @@ namespace PaderConference.Infrastructure.Redis
         {
             if (string.IsNullOrEmpty(data)) return default;
             return JsonConvert.DeserializeObject<T>(data, Settings);
+        }
+
+        public static object? DeserializeValue(string data, Type type)
+        {
+            if (string.IsNullOrEmpty(data)) return default;
+            return JsonConvert.DeserializeObject(data, type, Settings);
         }
     }
 }

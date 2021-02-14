@@ -1,5 +1,4 @@
 ﻿using System.Threading.Tasks;
-using MediatR;
 using PaderConference.Core.Interfaces.Gateways.Repositories;
 using PaderConference.Core.Services.ConferenceControl.Gateways;
 using PaderConference.Core.Services.Synchronization;
@@ -13,22 +12,32 @@ namespace PaderConference.Core.Services.ConferenceControl
         private readonly IOpenConferenceRepository _openConferenceRepository;
 
         public SynchronizedConferenceInfoProvider(IConferenceRepo conferenceRepo, IConferenceScheduler scheduler,
-            IOpenConferenceRepository openConferenceRepository, IMediator mediator) : base(mediator)
+            IOpenConferenceRepository openConferenceRepository)
         {
             _conferenceRepo = conferenceRepo;
             _scheduler = scheduler;
             _openConferenceRepository = openConferenceRepository;
         }
 
-        public override async ValueTask<SynchronizedConferenceInfo> GetInitialValue(string conferenceId)
+        public override ValueTask<bool> CanSubscribe(string conferenceId, string participantId)
+        {
+            return new(true);
+        }
+
+        protected override async ValueTask<SynchronizedConferenceInfo> InternalFetchValue(string conferenceId,
+            string participantId)
         {
             var conference = await _conferenceRepo.FindById(conferenceId);
             if (conference == null) throw new ConferenceNotFoundException(conferenceId);
 
             var nextDate = _scheduler.GetNextExecution(conference.Configuration);
             var isOpen = await _openConferenceRepository.IsOpen(conferenceId);
+            return new SynchronizedConferenceInfo(isOpen, conference.Configuration.Moderators, nextDate);
+        }
 
-            return new SynchronizedConferenceInfo(conference) {IsOpen = isOpen, ScheduledDate = nextDate};
+        public override ValueTask<string> GetSynchronizedObjectId(string conferenceId, string participantId)
+        {
+            return new(SynchronizedObjectIds.CONFERENCE);
         }
     }
 }

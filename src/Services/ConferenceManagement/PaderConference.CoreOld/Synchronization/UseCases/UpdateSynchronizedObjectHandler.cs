@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using PaderConference.Core.Services.Synchronization.Gateways;
-using PaderConference.Core.Services.Synchronization.Notifications;
 using PaderConference.Core.Services.Synchronization.Requests;
 using PaderConference.Core.Services.Synchronization.UpdateStrategy;
+using PaderConference.Core.Services.Synchronization2.Notifications;
 
 namespace PaderConference.Core.Services.Synchronization.UseCases
 {

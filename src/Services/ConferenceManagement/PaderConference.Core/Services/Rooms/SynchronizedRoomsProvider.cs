@@ -1,6 +1,5 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
-using MediatR;
 using PaderConference.Core.Services.Rooms.Gateways;
 using PaderConference.Core.Services.Synchronization;
 
@@ -10,12 +9,18 @@ namespace PaderConference.Core.Services.Rooms
     {
         private readonly IRoomRepository _roomRepository;
 
-        public SynchronizedRoomsProvider(IMediator mediator, IRoomRepository roomRepository) : base(mediator)
+        public SynchronizedRoomsProvider(IRoomRepository roomRepository)
         {
             _roomRepository = roomRepository;
         }
 
-        public override async ValueTask<SynchronizedRooms> GetInitialValue(string conferenceId)
+        public override ValueTask<bool> CanSubscribe(string conferenceId, string participantId)
+        {
+            return new(true);
+        }
+
+        protected override async ValueTask<SynchronizedRooms> InternalFetchValue(string conferenceId,
+            string participantId)
         {
             const string defaultRoomId = RoomOptions.DEFAULT_ROOM_ID;
             var rooms = (await _roomRepository.GetRooms(conferenceId)).OrderBy(x => x.RoomId)
@@ -23,6 +28,11 @@ namespace PaderConference.Core.Services.Rooms
             var roomMap = await _roomRepository.GetParticipantRooms(conferenceId);
 
             return new SynchronizedRooms(rooms, defaultRoomId, roomMap);
+        }
+
+        public override ValueTask<string> GetSynchronizedObjectId(string conferenceId, string participantId)
+        {
+            return new(SynchronizedObjectIds.ROOMS);
         }
     }
 }

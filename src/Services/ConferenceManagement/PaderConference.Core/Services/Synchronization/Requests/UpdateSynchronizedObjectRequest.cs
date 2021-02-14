@@ -1,8 +1,16 @@
-﻿using MediatR;
-using PaderConference.Core.Services.Synchronization.UpdateStrategy;
+﻿using System;
+using System.Collections.Generic;
+using MediatR;
 
 namespace PaderConference.Core.Services.Synchronization.Requests
 {
-    public record UpdateSynchronizedObjectRequest<T>
-        (IValueUpdate<T> ValueUpdate, SynchronizedObjectMetadata Metadata) : IRequest<T> where T : notnull;
+    public record UpdateSynchronizedObjectRequest(string ConferenceId, IEnumerable<string> ParticipantIds,
+        Type ProviderType) : IRequest<Unit>
+    {
+        public static UpdateSynchronizedObjectRequest Create<T>(string conferenceId, IEnumerable<string> participantIds)
+            where T : ISynchronizedObjectProvider
+        {
+            return new(conferenceId, participantIds, typeof(T));
+        }
+    }
 }

@@ -1,55 +1,21 @@
 ﻿using System;
 using System.Threading.Tasks;
-using MediatR;
-using PaderConference.Core.Services.Synchronization.Requests;
-using PaderConference.Core.Services.Synchronization.UpdateStrategy;
 
 namespace PaderConference.Core.Services.Synchronization
 {
-    public abstract class SynchronizedObjectProvider<T> : ISynchronizedObjectProvider<T> where T : class
+    public abstract class SynchronizedObjectProvider<T> : ISynchronizedObjectProvider where T : class
     {
-        private readonly IMediator _mediator;
+        public Type SynchronizedObjectType { get; } = typeof(T);
 
-        protected SynchronizedObjectProvider(IMediator mediator)
+        public abstract ValueTask<bool> CanSubscribe(string conferenceId, string participantId);
+
+        public async ValueTask<object> FetchValue(string conferenceId, string participantId)
         {
-            _mediator = mediator;
+            return await InternalFetchValue(conferenceId, participantId);
         }
 
-        public abstract ValueTask<T> GetInitialValue(string conferenceId);
+        protected abstract ValueTask<T> InternalFetchValue(string conferenceId, string participantId);
 
-        public virtual string Name { get; } = typeof(T).Name;
-
-        public virtual ParticipantGroup TargetGroup { get; } = ParticipantGroup.All;
-
-        public async ValueTask<T> Update(string conferenceId, T newValue)
-        {
-            var metadata = GetMetadata(conferenceId);
-            var result =
-                await _mediator.Send(
-                    new UpdateSynchronizedObjectRequest<T>(new ReplaceValueUpdate<T>(newValue), metadata));
-
-            return result;
-        }
-
-        public async ValueTask<T> Update(string conferenceId, Func<T, T> updateStateFn)
-        {
-            var currentVal = await GetInitialValue(conferenceId);
-
-            T WrapUpdateFn(T? o)
-            {
-                return updateStateFn(o ?? currentVal);
-            }
-
-            var metadata = GetMetadata(conferenceId);
-            var result = await _mediator.Send(
-                new UpdateSynchronizedObjectRequest<T>(new PatchValueUpdate<T>(WrapUpdateFn), metadata));
-
-            return result;
-        }
-
-        private SynchronizedObjectMetadata GetMetadata(string conferenceId)
-        {
-            return new(conferenceId, Name, TargetGroup);
-        }
+        public abstract ValueTask<string> GetSynchronizedObjectId(string conferenceId, string participantId);
     }
 }

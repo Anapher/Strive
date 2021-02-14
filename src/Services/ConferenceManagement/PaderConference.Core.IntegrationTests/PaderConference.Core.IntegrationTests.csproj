@@ -4,6 +4,7 @@
     <TargetFramework>net50</TargetFramework>
 
     <IsPackable>false</IsPackable>
+	  <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>

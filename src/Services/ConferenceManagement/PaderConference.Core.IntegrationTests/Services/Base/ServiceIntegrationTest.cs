@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using Autofac;
+using Autofac.Features.Variance;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using PaderConference.Core.IntegrationTests._TestUtils;
 using PaderConference.Core.Tests._TestUtils;
 using PaderConference.Infrastructure;
 using PaderConference.Infrastructure.Redis;
@@ -20,7 +22,9 @@ namespace PaderConference.Core.IntegrationTests.Services.Base
 
         protected IMediator Mediator;
 
-        public ServiceIntegrationTest(ITestOutputHelper testOutputHelper)
+        protected MediatorNotificationCollector NotificationCollector = new();
+
+        protected ServiceIntegrationTest(ITestOutputHelper testOutputHelper)
         {
             _testOutputHelper = testOutputHelper;
 
@@ -33,6 +37,9 @@ namespace PaderConference.Core.IntegrationTests.Services.Base
             var loggerFactory = _testOutputHelper.CreateLoggerFactory();
 
             var builder = new ContainerBuilder();
+
+            builder.RegisterSource(new ContravariantRegistrationSource());
+            builder.RegisterInstance(NotificationCollector).AsImplementedInterfaces();
 
             builder.RegisterInstance(Data).AsSelf();
             builder.RegisterType<InMemoryKeyValueDatabase>().AsImplementedInterfaces();
@@ -50,7 +57,7 @@ namespace PaderConference.Core.IntegrationTests.Services.Base
             });
 
             var serviceTypes = FetchServiceTypes().ToArray();
-            builder.RegisterTypes(serviceTypes).AsImplementedInterfaces(); // via assembly scan
+            builder.RegisterTypes(serviceTypes).AsImplementedInterfaces();
 
             builder.RegisterAssemblyTypes(typeof(InfrastructureModule).Assembly).AssignableTo<IRedisRepo>()
                 .AsImplementedInterfaces().SingleInstance();

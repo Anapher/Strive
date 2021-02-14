@@ -24,7 +24,7 @@ namespace PaderConference.Infrastructure
             builder.RegisterAssemblyTypes(ThisAssembly).AsClosedTypesOf(typeof(MongoRepo<>)).AsSelf()
                 .AsImplementedInterfaces().InstancePerDependency();
 
-            builder.RegisterType<CachedConferenceRepo>().As<IConferenceRepo>().InstancePerDependency();
+            builder.RegisterType<CachedConferenceRepo>().As<IConferenceRepo>().InstancePerLifetimeScope();
         }
     }
 }

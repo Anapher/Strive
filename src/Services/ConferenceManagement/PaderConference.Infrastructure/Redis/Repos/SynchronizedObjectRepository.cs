@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using PaderConference.Core.Services.Synchronization.Gateways;
 using PaderConference.Infrastructure.Redis.Abstractions;
 
@@ -8,7 +7,6 @@ namespace PaderConference.Infrastructure.Redis.Repos
     public class SynchronizedObjectRepository : ISynchronizedObjectRepository, IRedisRepo
     {
         private const string PROPERTY_KEY = "SyncObject";
-        private const string LOCK_KEY = "SyncObjectLock";
 
         private readonly IKeyValueDatabase _database;
 
@@ -17,34 +15,22 @@ namespace PaderConference.Infrastructure.Redis.Repos
             _database = database;
         }
 
-        public async Task<T?> Update<T>(string conferenceId, string name, T value)
+        public async ValueTask<object?> Create(string conferenceId, string syncObjId, object newValue)
         {
-            var redisKey = RedisKeyBuilder.ForProperty(PROPERTY_KEY).ForConference(conferenceId).ForParticipant(name)
-                .ToString();
-
-            var previous = await _database.GetSetAsync(redisKey, value);
-            return previous;
+            var key = GetKey(conferenceId, syncObjId);
+            return await _database.GetSetAsync(key, newValue);
         }
 
-        public async Task<(T? previousValue, T newValue)> Update<T>(string conferenceId, string name,
-            Func<T?, T> updateValueFn)
+        public async ValueTask Remove(string conferenceId, string syncObjId)
         {
-            var redisKey = RedisKeyBuilder.ForProperty(PROPERTY_KEY).ForConference(conferenceId).ForParticipant(name)
+            var key = GetKey(conferenceId, syncObjId);
+            await _database.KeyDeleteAsync(key);
+        }
+
+        private static string GetKey(string conferenceId, string syncObjId)
+        {
+            return RedisKeyBuilder.ForProperty(PROPERTY_KEY).ForConference(conferenceId).ForParticipant(syncObjId)
                 .ToString();
-
-            var lockKey = RedisKeyBuilder.ForProperty(LOCK_KEY).ForConference(conferenceId).ForParticipant(name)
-                .ToString();
-
-            var @lock = _database.CreateLock(lockKey);
-            await using (await @lock.AcquireAsync())
-            {
-                var currentValue = await _database.GetAsync<T>(redisKey);
-
-                var newValue = updateValueFn(currentValue);
-
-                await _database.SetAsync(redisKey, newValue);
-                return (currentValue, newValue);
-            }
         }
     }
 }
