@@ -1,31 +1,29 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Autofac;
 using MediatR;
 using PaderConference.Core.Services.Synchronization.Gateways;
 using PaderConference.Core.Services.Synchronization.Notifications;
 using PaderConference.Core.Services.Synchronization.Requests;
+using PaderConference.Core.Services.Synchronization.Utilities;
 
 namespace PaderConference.Core.Services.Synchronization.UseCases
 {
     public class UpdateSynchronizedObjectUseCase : IRequestHandler<UpdateSynchronizedObjectRequest>
     {
-        private readonly IComponentContext _context;
+        private readonly IEnumerable<ISynchronizedObjectProvider> _providers;
         private readonly ISynchronizedObjectRepository _synchronizedObjectRepository;
         private readonly ISynchronizedObjectSubscriptionsRepository _subscriptionsRepository;
         private readonly IMediator _mediator;
 
-        private readonly Dictionary<string, SynchronizedObjectUpdatedNotification> _cachedSyncObjectNotifications =
-            new();
-
-        public UpdateSynchronizedObjectUseCase(IComponentContext context,
+        public UpdateSynchronizedObjectUseCase(IEnumerable<ISynchronizedObjectProvider> providers,
             ISynchronizedObjectRepository synchronizedObjectRepository,
             ISynchronizedObjectSubscriptionsRepository subscriptionsRepository, IMediator mediator)
         {
-            _context = context;
+            _providers = providers;
             _synchronizedObjectRepository = synchronizedObjectRepository;
             _subscriptionsRepository = subscriptionsRepository;
             _mediator = mediator;
@@ -33,48 +31,39 @@ namespace PaderConference.Core.Services.Synchronization.UseCases
 
         public async Task<Unit> Handle(UpdateSynchronizedObjectRequest request, CancellationToken cancellationToken)
         {
-            var provider = (ISynchronizedObjectProvider) _context.Resolve(request.ProviderType);
+            var (conferenceId, synchronizedObjectId) = request;
 
-            foreach (var participantId in request.ParticipantIds)
-            {
-                await UpdateSynchronizedObject(request.ConferenceId, participantId, provider);
-            }
+            var provider = GetProvider(synchronizedObjectId);
+            var participantIds = await GetParticipantIdsSubscribedTo(conferenceId, synchronizedObjectId);
 
-            foreach (var notification in _cachedSyncObjectNotifications.Values)
-            {
-                await _mediator.Publish(notification);
-            }
+            if (!participantIds.Any()) return Unit.Value;
+
+            var newValue = await provider.FetchValue(conferenceId, synchronizedObjectId);
+            var previousValue =
+                await _synchronizedObjectRepository.Create(conferenceId, synchronizedObjectId.ToString(), newValue);
+
+            await _mediator.Publish(
+                new SynchronizedObjectUpdatedNotification(conferenceId, participantIds, synchronizedObjectId.ToString(),
+                    newValue, previousValue), cancellationToken);
 
             return Unit.Value;
         }
 
-        private async ValueTask UpdateSynchronizedObject(string conferenceId, string participantId,
-            ISynchronizedObjectProvider provider)
+        private ISynchronizedObjectProvider GetProvider(SynchronizedObjectId synchronizedObjectId)
         {
-            var syncObjId = await provider.GetSynchronizedObjectId(conferenceId, participantId);
-            if (!await ParticipantHasSubscribed(conferenceId, participantId, syncObjId)) return;
+            var provider = _providers.FirstOrDefault(x => x.Id == synchronizedObjectId.Id);
+            if (provider == null)
+                throw new InvalidOperationException($"There was no provider registered for {synchronizedObjectId.Id}.");
 
-            if (_cachedSyncObjectNotifications.TryGetValue(syncObjId, out var notification))
-            {
-                _cachedSyncObjectNotifications[syncObjId] = notification with
-                {
-                    ParticipantIds = notification.ParticipantIds.Add(participantId),
-                };
-                return;
-            }
-
-            var newValue = await provider.FetchValue(conferenceId, participantId);
-            var previousValue = await _synchronizedObjectRepository.Create(conferenceId, syncObjId, newValue);
-
-            _cachedSyncObjectNotifications[syncObjId] = new SynchronizedObjectUpdatedNotification(conferenceId,
-                new List<string> {participantId}.ToImmutableList(), syncObjId, newValue, previousValue);
+            return provider;
         }
 
-        private async ValueTask<bool> ParticipantHasSubscribed(string conferenceId, string participantId,
-            string syncObjId)
+        private async ValueTask<IImmutableList<string>> GetParticipantIdsSubscribedTo(string conferenceId,
+            SynchronizedObjectId synchronizedObjectId)
         {
-            var subscriptions = await _subscriptionsRepository.Get(conferenceId, participantId);
-            return subscriptions?.Contains(syncObjId) == true;
+            var subscriptions = await _subscriptionsRepository.GetOfConference(conferenceId);
+            return ConferenceSubscriptionHelper.GetParticipantIdsSubscribedTo(subscriptions, synchronizedObjectId)
+                .ToImmutableList();
         }
     }
 }

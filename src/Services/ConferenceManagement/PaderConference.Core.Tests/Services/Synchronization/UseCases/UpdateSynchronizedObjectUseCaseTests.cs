@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Autofac;
 using MediatR;
 using Moq;
 using PaderConference.Core.Services.Synchronization;
@@ -17,83 +18,96 @@ namespace PaderConference.Core.Tests.Services.Synchronization.UseCases
 {
     public class UpdateSynchronizedObjectUseCaseTests
     {
-        private readonly ContainerBuilder _builder = new();
         private readonly Mock<ISynchronizedObjectSubscriptionsRepository> _subscriptionsRepo = new();
         private readonly Mock<ISynchronizedObjectRepository> _syncObjRepo = new();
         private readonly Mock<IMediator> _mediator = new();
+        private readonly List<ISynchronizedObjectProvider> _providers = new();
+        private readonly Dictionary<string, List<string>> _participantSubscriptions = new();
+
+        private const string ConferenceId = "123";
 
         public UpdateSynchronizedObjectUseCase Create()
         {
-            return new(_builder.Build(), _syncObjRepo.Object, _subscriptionsRepo.Object, _mediator.Object);
+            return new(_providers, _syncObjRepo.Object, _subscriptionsRepo.Object, _mediator.Object);
         }
 
-        private void AddResultForParticipant(Mock<ISynchronizedObjectProvider> mock, string conferenceId,
-            string participantId, string syncObjId, object value)
+        private void SetupProvider(SynchronizedObjectId syncObjId, object value)
         {
-            mock.Setup(x => x.CanSubscribe(conferenceId, participantId))
-                .ThrowsAsync(new Exception("That should not be called"));
-            mock.Setup(x => x.FetchValue(conferenceId, participantId)).ReturnsAsync(value);
-            mock.Setup(x => x.GetSynchronizedObjectId(conferenceId, participantId)).ReturnsAsync(syncObjId);
+            var providerMock = new Mock<ISynchronizedObjectProvider>();
+            providerMock.SetupGet(x => x.Id).Returns(syncObjId.Id);
+            providerMock.Setup(x => x.FetchValue(ConferenceId, syncObjId)).ReturnsAsync(value);
+
+            _providers.Add(providerMock.Object);
         }
 
-        private void ParticipantHasSubscribed(string conferenceId, string participantId,
-            IReadOnlyList<string> subscribed)
+        private void ParticipantHasSubscribed(string participantId, SynchronizedObjectId subscribed)
         {
-            _subscriptionsRepo.Setup(x => x.Get(conferenceId, participantId)).ReturnsAsync(subscribed);
+            if (!_participantSubscriptions.TryGetValue(participantId, out var subscriptions))
+                _participantSubscriptions[participantId] = subscriptions = new List<string>();
+
+            subscriptions.Add(subscribed.ToString());
+
+            _subscriptionsRepo.Setup(x => x.GetOfConference(ConferenceId)).ReturnsAsync(
+                _participantSubscriptions.ToDictionary(x => x.Key, x => (IReadOnlyList<string>?) x.Value));
+        }
+
+        [Fact]
+        public async Task Handle_ProviderDoesNotExist_ThrowException()
+        {
+            // arrange
+            var syncObjId = new SynchronizedObjectId("testSyncId");
+            var useCase = Create();
+
+            // act
+            var request = new UpdateSynchronizedObjectRequest(ConferenceId, syncObjId);
+            await Assert.ThrowsAnyAsync<Exception>(async () => await useCase.Handle(request, CancellationToken.None));
         }
 
         [Fact]
         public async Task Handle_SingleParticipantHasSubscribed_PublishSynchronizedObjectUpdatedNotification()
         {
-            const string syncObjId = "testSyncId";
-            const string conferenceId = "conid";
             const string participantId = "34";
             var syncObjValue = "testValue";
 
             // arrange
-            var providerMock = new Mock<ISynchronizedObjectProvider>();
-            AddResultForParticipant(providerMock, conferenceId, participantId, syncObjId, syncObjValue);
-            _builder.RegisterInstance(providerMock.Object).AsSelf();
-
-            ParticipantHasSubscribed(conferenceId, participantId, new[] {syncObjId});
+            var syncObjId = new SynchronizedObjectId("testSyncId");
+            SetupProvider(syncObjId, syncObjValue);
+            ParticipantHasSubscribed(participantId, syncObjId);
 
             var capturedNotification = _mediator.CaptureNotification<SynchronizedObjectUpdatedNotification>();
 
             var useCase = Create();
 
             // act
-            var request =
-                new UpdateSynchronizedObjectRequest(conferenceId, new[] {participantId}, providerMock.Object.GetType());
+            var request = new UpdateSynchronizedObjectRequest(ConferenceId, syncObjId);
             await useCase.Handle(request, CancellationToken.None);
 
             // assert
             capturedNotification.AssertReceived();
 
             var notification = capturedNotification.GetNotification();
-            Assert.Equal(conferenceId, notification.ConferenceId);
+            Assert.Equal(ConferenceId, notification.ConferenceId);
             Assert.Equal(participantId, Assert.Single(notification.ParticipantIds));
-            Assert.Equal(syncObjId, notification.SyncObjId);
+            Assert.Equal(syncObjId.ToString(), notification.SyncObjId);
             Assert.Equal(syncObjValue, notification.Value);
         }
 
         [Fact]
-        public async Task Handle_SingleParticipantHasNotSubscribed_DoNothing()
+        public async Task Handle_NoSubscriptions_DoNothing()
         {
-            const string syncObjId = "testSyncId";
-            const string conferenceId = "conid";
-            const string participantId = "34";
             var syncObjValue = "testValue";
 
             // arrange
-            var providerMock = new Mock<ISynchronizedObjectProvider>();
-            AddResultForParticipant(providerMock, conferenceId, participantId, syncObjId, syncObjValue);
-            _builder.RegisterInstance(providerMock.Object).AsSelf();
+            var syncObjId = new SynchronizedObjectId("testSyncId");
+            SetupProvider(syncObjId, syncObjValue);
+
+            _subscriptionsRepo.Setup(x => x.GetOfConference(ConferenceId))
+                .ReturnsAsync(ImmutableDictionary<string, IReadOnlyList<string>?>.Empty);
 
             var useCase = Create();
 
             // act
-            var request =
-                new UpdateSynchronizedObjectRequest(conferenceId, new[] {participantId}, providerMock.Object.GetType());
+            var request = new UpdateSynchronizedObjectRequest(ConferenceId, syncObjId);
             await useCase.Handle(request, CancellationToken.None);
 
             // assert
@@ -103,28 +117,24 @@ namespace PaderConference.Core.Tests.Services.Synchronization.UseCases
         [Fact]
         public async Task Handle_MultipleParticipantsSameSyncObject_PublishSingleSynchronizedObjectUpdatedNotification()
         {
-            const string syncObjId = "testSyncId";
-            const string conferenceId = "conid";
             const string participantId = "34";
             const string participantId2 = "45";
             var syncObjValue = "testValue";
 
             // arrange
-            var providerMock = new Mock<ISynchronizedObjectProvider>();
-            AddResultForParticipant(providerMock, conferenceId, participantId, syncObjId, syncObjValue);
-            AddResultForParticipant(providerMock, conferenceId, participantId2, syncObjId, syncObjValue);
-            _builder.RegisterInstance(providerMock.Object).AsSelf();
+            var syncObjId = new SynchronizedObjectId("testSyncId");
 
-            ParticipantHasSubscribed(conferenceId, participantId, new[] {syncObjId});
-            ParticipantHasSubscribed(conferenceId, participantId2, new[] {syncObjId});
+            SetupProvider(syncObjId, syncObjValue);
+
+            ParticipantHasSubscribed(participantId, syncObjId);
+            ParticipantHasSubscribed(participantId2, syncObjId);
 
             var capturedNotification = _mediator.CaptureNotification<SynchronizedObjectUpdatedNotification>();
 
             var useCase = Create();
 
             // act
-            var request = new UpdateSynchronizedObjectRequest(conferenceId, new[] {participantId, participantId2},
-                providerMock.Object.GetType());
+            var request = new UpdateSynchronizedObjectRequest(ConferenceId, syncObjId);
             await useCase.Handle(request, CancellationToken.None);
 
             // assert
@@ -132,40 +142,6 @@ namespace PaderConference.Core.Tests.Services.Synchronization.UseCases
 
             var notification = capturedNotification.GetNotification();
             AssertHelper.AssertScrambledEquals(new[] {participantId, participantId2}, notification.ParticipantIds);
-        }
-
-        [Fact]
-        public async Task
-            Handle_MultipleParticipantsSameSyncObjectOnlyOneSubcribed_PublishNotificationForOneParticipant()
-        {
-            const string syncObjId = "testSyncId";
-            const string conferenceId = "conid";
-            const string participantId = "34";
-            const string participantId2 = "45";
-            var syncObjValue = "testValue";
-
-            // arrange
-            var providerMock = new Mock<ISynchronizedObjectProvider>();
-            AddResultForParticipant(providerMock, conferenceId, participantId, syncObjId, syncObjValue);
-            AddResultForParticipant(providerMock, conferenceId, participantId2, syncObjId, syncObjValue);
-            _builder.RegisterInstance(providerMock.Object).AsSelf();
-
-            ParticipantHasSubscribed(conferenceId, participantId, new[] {syncObjId});
-
-            var capturedNotification = _mediator.CaptureNotification<SynchronizedObjectUpdatedNotification>();
-
-            var useCase = Create();
-
-            // act
-            var request = new UpdateSynchronizedObjectRequest(conferenceId, new[] {participantId, participantId2},
-                providerMock.Object.GetType());
-            await useCase.Handle(request, CancellationToken.None);
-
-            // assert
-            capturedNotification.AssertReceived();
-
-            var notification = capturedNotification.GetNotification();
-            AssertHelper.AssertScrambledEquals(new[] {participantId}, notification.ParticipantIds);
         }
     }
 }

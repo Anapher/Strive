@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using PaderConference.Core.Services.ConferenceControl.Notifications;
-using PaderConference.Core.Services.Synchronization;
 using PaderConference.Core.Services.Synchronization.Requests;
 
 namespace PaderConference.Core.Services.ConferenceControl.NotificationHandlers
@@ -11,14 +10,12 @@ namespace PaderConference.Core.Services.ConferenceControl.NotificationHandlers
     public class ConferenceStateUpdatedNotificationHandler : INotificationHandler<ConferenceStateUpdatedNotification>
     {
         private readonly IMediator _mediator;
-        private readonly IParticipantAggregator _participantAggregator;
         private readonly ILogger<ConferenceStateUpdatedNotificationHandler> _logger;
 
         public ConferenceStateUpdatedNotificationHandler(IMediator mediator,
-            IParticipantAggregator participantAggregator, ILogger<ConferenceStateUpdatedNotificationHandler> logger)
+            ILogger<ConferenceStateUpdatedNotificationHandler> logger)
         {
             _mediator = mediator;
-            _participantAggregator = participantAggregator;
             _logger = logger;
         }
 
@@ -28,10 +25,9 @@ namespace PaderConference.Core.Services.ConferenceControl.NotificationHandlers
 
             _logger.LogDebug("Conference {conferenceId} updated, update synchronized object", conferenceId);
 
-            var participants = await _participantAggregator.OfConference(conferenceId);
             await _mediator.Send(
-                UpdateSynchronizedObjectRequest.Create<SynchronizedConferenceInfoProvider>(conferenceId, participants),
-                cancellationToken);
+                new UpdateSynchronizedObjectRequest(conferenceId,
+                    SynchronizedConferenceInfoProvider.SynchronizedObjectId), cancellationToken);
         }
     }
 }

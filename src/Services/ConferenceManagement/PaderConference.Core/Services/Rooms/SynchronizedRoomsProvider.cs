@@ -1,5 +1,7 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using PaderConference.Core.Extensions;
 using PaderConference.Core.Services.Rooms.Gateways;
 using PaderConference.Core.Services.Synchronization;
 
@@ -14,13 +16,12 @@ namespace PaderConference.Core.Services.Rooms
             _roomRepository = roomRepository;
         }
 
-        public override ValueTask<bool> CanSubscribe(string conferenceId, string participantId)
-        {
-            return new(true);
-        }
+        public static SynchronizedObjectId SynchronizedObjectId { get; } = new(SynchronizedObjectIds.ROOMS);
+
+        public override string Id { get; } = SynchronizedObjectIds.ROOMS;
 
         protected override async ValueTask<SynchronizedRooms> InternalFetchValue(string conferenceId,
-            string participantId)
+            SynchronizedObjectId synchronizedObjectId)
         {
             const string defaultRoomId = RoomOptions.DEFAULT_ROOM_ID;
             var rooms = (await _roomRepository.GetRooms(conferenceId)).OrderBy(x => x.RoomId)
@@ -30,9 +31,10 @@ namespace PaderConference.Core.Services.Rooms
             return new SynchronizedRooms(rooms, defaultRoomId, roomMap);
         }
 
-        public override ValueTask<string> GetSynchronizedObjectId(string conferenceId, string participantId)
+        public override ValueTask<IEnumerable<SynchronizedObjectId>> GetAvailableObjects(string conferenceId,
+            string participantId)
         {
-            return new(SynchronizedObjectIds.ROOMS);
+            return new(SynchronizedObjectId.Yield());
         }
     }
 }

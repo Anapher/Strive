@@ -1,16 +1,14 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace PaderConference.Core.Services.Synchronization
 {
     public interface ISynchronizedObjectProvider
     {
-        Type SynchronizedObjectType { get; }
+        string Id { get; }
 
-        ValueTask<bool> CanSubscribe(string conferenceId, string participantId);
+        ValueTask<object> FetchValue(string conferenceId, SynchronizedObjectId synchronizedObjectId);
 
-        ValueTask<object> FetchValue(string conferenceId, string participantId);
-
-        ValueTask<string> GetSynchronizedObjectId(string conferenceId, string participantId);
+        ValueTask<IEnumerable<SynchronizedObjectId>> GetAvailableObjects(string conferenceId, string participantId);
     }
 }

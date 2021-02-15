@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using MediatR;
 using PaderConference.Core.Services.Rooms.Notifications;
 using PaderConference.Core.Services.Rooms.Notifications.Base;
-using PaderConference.Core.Services.Synchronization;
 using PaderConference.Core.Services.Synchronization.Requests;
 
 namespace PaderConference.Core.Services.Rooms.NotificationHandlers
@@ -12,13 +11,10 @@ namespace PaderConference.Core.Services.Rooms.NotificationHandlers
         INotificationHandler<ParticipantsRoomChangedNotification>
     {
         private readonly IMediator _mediator;
-        private readonly IParticipantAggregator _participantAggregator;
 
-        public ManageUpdateSyncObjectNotificationsHandler(IMediator mediator,
-            IParticipantAggregator participantAggregator)
+        public ManageUpdateSyncObjectNotificationsHandler(IMediator mediator)
         {
             _mediator = mediator;
-            _participantAggregator = participantAggregator;
         }
 
         public Task Handle(RoomsChangedNotificationBase notification, CancellationToken cancellationToken)
@@ -33,9 +29,8 @@ namespace PaderConference.Core.Services.Rooms.NotificationHandlers
 
         private async Task UpdateSynchronizedObject(string conferenceId)
         {
-            var participants = await _participantAggregator.OfConference(conferenceId);
-            await _mediator.Send(
-                UpdateSynchronizedObjectRequest.Create<SynchronizedRoomsProvider>(conferenceId, participants));
+            await _mediator.Send(new UpdateSynchronizedObjectRequest(conferenceId,
+                SynchronizedRoomsProvider.SynchronizedObjectId));
         }
     }
 }

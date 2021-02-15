@@ -5,11 +5,6 @@
         // global/for all
         public const string ROOMS = "rooms";
         public const string CONFERENCE = "conference";
-
-        // individual
-        public static string ParticipantPermissions(string participantId)
-        {
-            return $"participantPermissions:{participantId}";
-        }
+        public const string PARTICIPANT_PERMISSIONS = "participantPermissions";
     }
 }
