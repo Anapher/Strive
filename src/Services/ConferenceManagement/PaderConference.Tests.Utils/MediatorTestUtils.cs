@@ -5,7 +5,7 @@ using MediatR;
 using Moq;
 using Xunit;
 
-namespace PaderConference.Core.Tests._TestUtils
+namespace PaderConference.Tests.Utils
 {
     public static class MediatorTestUtils
     {

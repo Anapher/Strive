@@ -9,7 +9,6 @@ using PaderConference.Core.Services.ConferenceControl.Gateways;
 using PaderConference.Core.Services.Rooms;
 using PaderConference.Core.Services.Rooms.Notifications;
 using PaderConference.Core.Services.Rooms.Requests;
-using PaderConference.Core.Services.Synchronization;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -25,7 +24,7 @@ namespace PaderConference.Core.IntegrationTests.Services
 
         protected override IEnumerable<Type> FetchServiceTypes()
         {
-            return FetchTypesOfNamespace(typeof(Room)).Concat(FetchTypesOfNamespace(typeof(SynchronizedObjectId)));
+            return FetchTypesOfNamespace(typeof(Room)).Concat(FetchTypesForSynchronizedObjects());
         }
 
         [Fact]
@@ -44,7 +43,7 @@ namespace PaderConference.Core.IntegrationTests.Services
         }
 
         [Fact]
-        public async Task CreateRoomsRequest_ConferenceIsOpen_ConcurrencyException()
+        public async Task CreateRoomsRequest_ConferenceIsOpen_CreateRooms()
         {
             // arrange
             var conferenceOpenRepo = Container.Resolve<IOpenConferenceRepository>();

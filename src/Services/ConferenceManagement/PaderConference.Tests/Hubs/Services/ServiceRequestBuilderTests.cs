@@ -4,22 +4,31 @@ using System.Threading.Tasks;
 using Autofac;
 using MediatR;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Logging;
 using Moq;
 using PaderConference.Core.Interfaces;
 using PaderConference.Core.Services;
 using PaderConference.Hubs.Services;
+using PaderConference.Tests.Utils;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace PaderConference.Tests.Hubs.Services
 {
     public class ServiceRequestBuilderTests
     {
+        private readonly ITestOutputHelper _testOutputHelper;
         private readonly Mock<IMediator> _mediator = new();
+
+        public ServiceRequestBuilderTests(ITestOutputHelper testOutputHelper)
+        {
+            _testOutputHelper = testOutputHelper;
+        }
 
         private IServiceRequestBuilder<TResponse> CreateBuilder<TResponse>(Func<IRequest<TResponse>> requestFactory,
             CancellationToken token = default)
         {
-            var container = new ContainerBuilder().Build();
+            var container = BuildContainerWithLogger();
 
             return new ServiceRequestBuilder<TResponse>(requestFactory, _mediator.Object,
                 new ServiceInvokerContext(new TestHub(token), container, string.Empty, string.Empty));
@@ -28,10 +37,21 @@ namespace PaderConference.Tests.Hubs.Services
         private IServiceRequestBuilder<TResponse> CreateBuilder<TResponse>(
             Func<IRequest<SuccessOrError<TResponse>>> requestFactory, CancellationToken token = default)
         {
-            var container = new ContainerBuilder().Build();
+            var container = BuildContainerWithLogger();
 
             return new ServiceRequestBuilderSuccessOrError<TResponse>(requestFactory, _mediator.Object,
                 new ServiceInvokerContext(new TestHub(token), container, string.Empty, string.Empty));
+        }
+
+        private ILifetimeScope BuildContainerWithLogger()
+        {
+            var builder = new ContainerBuilder();
+
+            var loggerFactory = _testOutputHelper.CreateLoggerFactory();
+            builder.RegisterInstance(loggerFactory).As<ILoggerFactory>();
+            builder.RegisterGeneric(typeof(Logger<>)).As(typeof(ILogger<>)).SingleInstance();
+
+            return builder.Build();
         }
 
         [Fact]

@@ -11,7 +11,7 @@ using PaderConference.Core.Services.Synchronization.Gateways;
 using PaderConference.Core.Services.Synchronization.Notifications;
 using PaderConference.Core.Services.Synchronization.Requests;
 using PaderConference.Core.Services.Synchronization.UseCases;
-using PaderConference.Core.Tests._TestUtils;
+using PaderConference.Tests.Utils;
 using Xunit;
 
 namespace PaderConference.Core.Tests.Services.Synchronization.UseCases

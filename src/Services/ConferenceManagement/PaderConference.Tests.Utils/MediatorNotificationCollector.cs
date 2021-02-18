@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using MediatR;
 using Xunit;
 
-namespace PaderConference.Core.IntegrationTests._TestUtils
+namespace PaderConference.Tests.Utils
 {
     public class MediatorNotificationCollector : INotificationHandler<INotification>
     {

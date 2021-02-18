@@ -3,7 +3,7 @@ using Serilog;
 using Serilog.Extensions.Logging;
 using Xunit.Abstractions;
 
-namespace PaderConference.Core.Tests._TestUtils
+namespace PaderConference.Tests.Utils
 {
     public static class TestOutputHelperUtils
     {

@@ -2,7 +2,7 @@
 using System.Linq;
 using Xunit;
 
-namespace PaderConference.Core.Tests._TestUtils
+namespace PaderConference.Tests.Utils
 {
     public static class AssertHelper
     {

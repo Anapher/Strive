@@ -7,12 +7,12 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using Moq;
 using PaderConference.Core.Domain.Entities;
-using PaderConference.Core.IntegrationTests._TestUtils;
 using PaderConference.Core.Interfaces.Gateways.Repositories;
-using PaderConference.Core.Tests._TestUtils;
+using PaderConference.Core.Services.Synchronization;
 using PaderConference.Infrastructure;
 using PaderConference.Infrastructure.Redis;
 using PaderConference.Infrastructure.Redis.InMemory;
+using PaderConference.Tests.Utils;
 using Xunit.Abstractions;
 
 namespace PaderConference.Core.IntegrationTests.Services.Base
@@ -76,6 +76,11 @@ namespace PaderConference.Core.IntegrationTests.Services.Base
         protected IEnumerable<Type> FetchTypesOfNamespace(Type type)
         {
             return type.Assembly.GetTypes().Where(x => x.IsClass && x.IsInNamespace(type.Namespace!));
+        }
+
+        protected IEnumerable<Type> FetchTypesForSynchronizedObjects()
+        {
+            return FetchTypesOfNamespace(typeof(SynchronizedObjectId));
         }
 
         protected void AddConferenceRepo(ContainerBuilder builder, Conference conference)

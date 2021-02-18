@@ -23,8 +23,4 @@
     <ProjectReference Include="..\PaderConference.Infrastructure\PaderConference.Infrastructure.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Auth\" />
-  </ItemGroup>
-
 </Project>

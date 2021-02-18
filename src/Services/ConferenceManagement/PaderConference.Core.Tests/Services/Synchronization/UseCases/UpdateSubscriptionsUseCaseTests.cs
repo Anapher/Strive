@@ -10,7 +10,7 @@ using PaderConference.Core.Services.Synchronization.Gateways;
 using PaderConference.Core.Services.Synchronization.Notifications;
 using PaderConference.Core.Services.Synchronization.Requests;
 using PaderConference.Core.Services.Synchronization.UseCases;
-using PaderConference.Core.Tests._TestUtils;
+using PaderConference.Tests.Utils;
 using Xunit;
 
 namespace PaderConference.Core.Tests.Services.Synchronization.UseCases
@@ -18,6 +18,7 @@ namespace PaderConference.Core.Tests.Services.Synchronization.UseCases
     public class UpdateSubscriptionsUseCaseTests
     {
         private readonly Mock<ISynchronizedObjectSubscriptionsRepository> _subscriptionRepo = new();
+        private readonly Mock<ISynchronizedObjectRepository> _syncObjRepo = new();
         private readonly Mock<IMediator> _mediator = new();
         private readonly List<ISynchronizedObjectProvider> _providers = new();
 
@@ -26,7 +27,7 @@ namespace PaderConference.Core.Tests.Services.Synchronization.UseCases
 
         private UpdateSubscriptionsUseCase Create()
         {
-            return new(_subscriptionRepo.Object, _providers, _mediator.Object);
+            return new(_subscriptionRepo.Object, _syncObjRepo.Object, _providers, _mediator.Object);
         }
 
         [Fact]

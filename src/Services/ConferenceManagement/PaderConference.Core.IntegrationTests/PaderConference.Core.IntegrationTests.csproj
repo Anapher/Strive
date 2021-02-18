@@ -21,12 +21,13 @@
     </PackageReference>
     <PackageReference Include="Serilog.Extensions.Logging" Version="3.0.1" />
     <PackageReference Include="Serilog.Sinks.XUnit" Version="2.0.4" />
-    <PackageReference Include="Moq" Version="4.15.2" />
+    <PackageReference Include="Moq" Version="4.16.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\PaderConference.Core\PaderConference.Core.csproj" />
     <ProjectReference Include="..\PaderConference.Infrastructure\PaderConference.Infrastructure.csproj" />
+    <ProjectReference Include="..\PaderConference.Tests.Utils\PaderConference.Tests.Utils.csproj" />
   </ItemGroup>
 
 </Project>

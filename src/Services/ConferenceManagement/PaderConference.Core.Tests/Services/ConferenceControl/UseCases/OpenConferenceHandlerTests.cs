@@ -10,7 +10,7 @@ using PaderConference.Core.Services.ConferenceControl.Gateways;
 using PaderConference.Core.Services.ConferenceControl.Notifications;
 using PaderConference.Core.Services.ConferenceControl.Requests;
 using PaderConference.Core.Services.ConferenceControl.UseCases;
-using PaderConference.Core.Tests._TestUtils;
+using PaderConference.Tests.Utils;
 using Xunit;
 using Xunit.Abstractions;
 
