@@ -5,7 +5,7 @@ using PaderConference.Infrastructure.Redis.Abstractions;
 
 namespace PaderConference.Infrastructure.Redis.Repos
 {
-    public class SynchronizedObjectSubscriptionsRepository : ISynchronizedObjectSubscriptionsRepository
+    public class SynchronizedObjectSubscriptionsRepository : ISynchronizedObjectSubscriptionsRepository, IRedisRepo
     {
         private const string PROPERTY_KEY = "SyncObjectSubscriptions";
 

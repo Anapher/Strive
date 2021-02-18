@@ -23,6 +23,14 @@ namespace PaderConference.Core.IntegrationTests._TestUtils
             return Task.CompletedTask;
         }
 
+        public void Reset()
+        {
+            lock (_notificationsLock)
+            {
+                _notifications.Clear();
+            }
+        }
+
         public void AssertSingleNotificationIssued<T>(Action<T>? assertNotificationFunc = null) where T : INotification
         {
             var notification = _notifications.OfType<T>().Single();

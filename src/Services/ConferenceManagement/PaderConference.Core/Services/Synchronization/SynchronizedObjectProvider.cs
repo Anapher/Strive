@@ -1,10 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace PaderConference.Core.Services.Synchronization
 {
     public abstract class SynchronizedObjectProvider<T> : ISynchronizedObjectProvider where T : class
     {
+        public Type Type { get; } = typeof(T);
+
         public abstract string Id { get; }
 
         public abstract ValueTask<IEnumerable<SynchronizedObjectId>> GetAvailableObjects(string conferenceId,

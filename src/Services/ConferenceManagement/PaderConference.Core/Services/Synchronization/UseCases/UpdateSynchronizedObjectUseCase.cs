@@ -39,8 +39,10 @@ namespace PaderConference.Core.Services.Synchronization.UseCases
             if (!participantIds.Any()) return Unit.Value;
 
             var newValue = await provider.FetchValue(conferenceId, synchronizedObjectId);
-            var previousValue =
-                await _synchronizedObjectRepository.Create(conferenceId, synchronizedObjectId.ToString(), newValue);
+            var previousValue = await _synchronizedObjectRepository.Create(conferenceId,
+                synchronizedObjectId.ToString(), newValue, provider.Type);
+
+            if (Equals(newValue, previousValue)) return Unit.Value;
 
             await _mediator.Publish(
                 new SynchronizedObjectUpdatedNotification(conferenceId, participantIds, synchronizedObjectId.ToString(),

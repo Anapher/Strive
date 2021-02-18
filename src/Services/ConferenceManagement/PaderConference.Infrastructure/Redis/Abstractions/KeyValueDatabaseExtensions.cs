@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -37,6 +38,14 @@ namespace PaderConference.Infrastructure.Redis.Abstractions
             return RedisSerializer.DeserializeValue<T>(result);
         }
 
+        public static async ValueTask<object?> GetAsync(this IKeyValueDatabaseActions database, string key, Type type)
+        {
+            var result = await database.GetAsync(key);
+            if (result == null) return default;
+
+            return RedisSerializer.DeserializeValue(result, type);
+        }
+
         public static ValueTask SetAsync<T>(this IKeyValueDatabaseActions database, string key, T value)
         {
             var serialized = RedisSerializer.SerializeValue(value);
@@ -53,13 +62,13 @@ namespace PaderConference.Infrastructure.Redis.Abstractions
         }
 
         public static async ValueTask<object?> GetSetAsync(this IKeyValueDatabaseActions database, string key,
-            object value)
+            object value, Type type)
         {
             var serialized = RedisSerializer.SerializeValue(value);
             var result = await database.GetSetAsync(key, serialized);
             if (result == null) return default;
 
-            return RedisSerializer.DeserializeValue(result, value.GetType());
+            return RedisSerializer.DeserializeValue(result, type);
         }
     }
 }

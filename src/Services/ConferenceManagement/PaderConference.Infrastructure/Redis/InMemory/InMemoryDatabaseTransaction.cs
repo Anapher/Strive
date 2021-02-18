@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Nito.Disposables;
+using PaderConference.Core.Extensions;
 using PaderConference.Infrastructure.Redis.Abstractions;
 using PaderConference.Infrastructure.Redis.Scripts;
 using StackExchange.Redis;
@@ -98,7 +99,8 @@ namespace PaderConference.Infrastructure.Redis.InMemory
 
         public override ValueTask HashSetAsync(string key, string field, string value)
         {
-            return AddTransactionStep(() => base.HashSetAsync(key, field, value));
+            return AddTransactionStep(() =>
+                base.HashSetAsync(key, new KeyValuePair<string, string>(field, value).Yield()));
         }
 
         public override ValueTask<bool> HashExistsAsync(string key, string field)

@@ -1,10 +1,13 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 namespace PaderConference.Core.Services.Synchronization.Gateways
 {
     public interface ISynchronizedObjectRepository
     {
-        ValueTask<object?> Create(string conferenceId, string syncObjId, object newValue);
+        ValueTask<object?> Create(string conferenceId, string syncObjId, object newValue, Type type);
+
+        ValueTask<object?> Get(string conferenceId, string syncObjId, Type type);
 
         ValueTask Remove(string conferenceId, string syncObjId);
     }

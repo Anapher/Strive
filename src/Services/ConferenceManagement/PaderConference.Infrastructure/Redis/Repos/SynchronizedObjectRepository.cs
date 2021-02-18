@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using PaderConference.Core.Services.Synchronization.Gateways;
 using PaderConference.Infrastructure.Redis.Abstractions;
 
@@ -15,10 +16,16 @@ namespace PaderConference.Infrastructure.Redis.Repos
             _database = database;
         }
 
-        public async ValueTask<object?> Create(string conferenceId, string syncObjId, object newValue)
+        public async ValueTask<object?> Create(string conferenceId, string syncObjId, object newValue, Type type)
         {
             var key = GetKey(conferenceId, syncObjId);
-            return await _database.GetSetAsync(key, newValue);
+            return await _database.GetSetAsync(key, newValue, type);
+        }
+
+        public async ValueTask<object?> Get(string conferenceId, string syncObjId, Type type)
+        {
+            var key = GetKey(conferenceId, syncObjId);
+            return await _database.GetAsync(key, type);
         }
 
         public async ValueTask Remove(string conferenceId, string syncObjId)

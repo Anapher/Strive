@@ -12,14 +12,17 @@ namespace PaderConference.Core.Services.Synchronization.UseCases
 {
     public class UpdateSubscriptionsUseCase : IRequestHandler<UpdateSubscriptionsRequest>
     {
-        private readonly ISynchronizedObjectSubscriptionsRepository _repository;
+        private readonly ISynchronizedObjectSubscriptionsRepository _subscriptionsRepository;
+        private readonly ISynchronizedObjectRepository _synchronizedObjectRepository;
         private readonly IEnumerable<ISynchronizedObjectProvider> _providers;
         private readonly IMediator _mediator;
 
-        public UpdateSubscriptionsUseCase(ISynchronizedObjectSubscriptionsRepository repository,
+        public UpdateSubscriptionsUseCase(ISynchronizedObjectSubscriptionsRepository subscriptionsRepository,
+            ISynchronizedObjectRepository synchronizedObjectRepository,
             IEnumerable<ISynchronizedObjectProvider> providers, IMediator mediator)
         {
-            _repository = repository;
+            _subscriptionsRepository = subscriptionsRepository;
+            _synchronizedObjectRepository = synchronizedObjectRepository;
             _providers = providers;
             _mediator = mediator;
         }
@@ -36,7 +39,7 @@ namespace PaderConference.Core.Services.Synchronization.UseCases
             }
 
             var oldSubscriptions =
-                await _repository.GetSet(conferenceId, participantId,
+                await _subscriptionsRepository.GetSet(conferenceId, participantId,
                     subscriptions.Select(x => x.ToString()).ToList()) ?? ImmutableList<string>.Empty;
 
             var newSubscriptions = subscriptions.Where(x => !oldSubscriptions.Contains(x.ToString()));
@@ -55,12 +58,27 @@ namespace PaderConference.Core.Services.Synchronization.UseCases
         {
             foreach (var syncObjId in subscriptions)
             {
-                var provider = _providers.First(x => x.Id == syncObjId.Id);
-                var value = await provider.FetchValue(conferenceId, syncObjId);
+                var value = await GetCurrentValueOfSynchronizedObject(conferenceId, syncObjId);
 
                 await _mediator.Publish(new SynchronizedObjectUpdatedNotification(conferenceId,
                     new[] {participantId}.ToImmutableList(), syncObjId.ToString(), value, null));
             }
+        }
+
+        private async Task<object> GetCurrentValueOfSynchronizedObject(string conferenceId,
+            SynchronizedObjectId syncObjId)
+        {
+            var provider = _providers.First(x => x.Id == syncObjId.Id);
+
+            var currentStoredValue =
+                await _synchronizedObjectRepository.Get(conferenceId, syncObjId.ToString(), provider.Type);
+
+            if (currentStoredValue != null) return currentStoredValue;
+
+            var currentValue = await provider.FetchValue(conferenceId, syncObjId);
+            await _synchronizedObjectRepository.Create(conferenceId, syncObjId.ToString(), currentValue, provider.Type);
+
+            return currentValue;
         }
     }
 }

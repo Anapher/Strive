@@ -8,12 +8,12 @@ using PaderConference.Core.Services.Synchronization.Requests;
 
 namespace PaderConference.Core.Services.Synchronization.NotificationHandlers
 {
-    public class ParticipantRemovedNotificationHandler : INotificationHandler<ParticipantLeftNotification>
+    public class ParticipantLeftNotificationHandler : INotificationHandler<ParticipantLeftNotification>
     {
         private readonly IMediator _mediator;
         private readonly ISynchronizedObjectSubscriptionsRepository _subscriptionsRepository;
 
-        public ParticipantRemovedNotificationHandler(IMediator mediator,
+        public ParticipantLeftNotificationHandler(IMediator mediator,
             ISynchronizedObjectSubscriptionsRepository subscriptionsRepository)
         {
             _mediator = mediator;

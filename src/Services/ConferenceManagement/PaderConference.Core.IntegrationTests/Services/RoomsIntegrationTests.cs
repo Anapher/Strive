@@ -25,8 +25,7 @@ namespace PaderConference.Core.IntegrationTests.Services
 
         protected override IEnumerable<Type> FetchServiceTypes()
         {
-            return FetchTypesOfNamespace(typeof(Room))
-                .Concat(FetchTypesOfNamespace(typeof(SynchronizedObjectMetadata)));
+            return FetchTypesOfNamespace(typeof(Room)).Concat(FetchTypesOfNamespace(typeof(SynchronizedObjectId)));
         }
 
         [Fact]

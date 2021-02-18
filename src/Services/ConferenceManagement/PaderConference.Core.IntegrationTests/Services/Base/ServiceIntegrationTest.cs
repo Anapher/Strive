@@ -5,7 +5,10 @@ using Autofac;
 using Autofac.Features.Variance;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using Moq;
+using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.IntegrationTests._TestUtils;
+using PaderConference.Core.Interfaces.Gateways.Repositories;
 using PaderConference.Core.Tests._TestUtils;
 using PaderConference.Infrastructure;
 using PaderConference.Infrastructure.Redis;
@@ -32,22 +35,19 @@ namespace PaderConference.Core.IntegrationTests.Services.Base
             Mediator = Container.Resolve<IMediator>();
         }
 
-        protected virtual ILifetimeScope BuildContainer()
+        protected virtual void ConfigureContainer(ContainerBuilder builder)
         {
-            var loggerFactory = _testOutputHelper.CreateLoggerFactory();
-
-            var builder = new ContainerBuilder();
-
             builder.RegisterSource(new ContravariantRegistrationSource());
             builder.RegisterInstance(NotificationCollector).AsImplementedInterfaces();
 
             builder.RegisterInstance(Data).AsSelf();
             builder.RegisterType<InMemoryKeyValueDatabase>().AsImplementedInterfaces();
 
+            var loggerFactory = _testOutputHelper.CreateLoggerFactory();
             builder.RegisterInstance(loggerFactory).As<ILoggerFactory>();
             builder.RegisterGeneric(typeof(Logger<>)).As(typeof(ILogger<>)).SingleInstance();
 
-            builder.RegisterModule<CoreModule>();
+            //builder.RegisterModule<CoreModule>();
 
             builder.RegisterType<Mediator>().As<IMediator>().InstancePerLifetimeScope();
             builder.Register<ServiceFactory>(context =>
@@ -61,6 +61,12 @@ namespace PaderConference.Core.IntegrationTests.Services.Base
 
             builder.RegisterAssemblyTypes(typeof(InfrastructureModule).Assembly).AssignableTo<IRedisRepo>()
                 .AsImplementedInterfaces().SingleInstance();
+        }
+
+        protected virtual ILifetimeScope BuildContainer()
+        {
+            var builder = new ContainerBuilder();
+            ConfigureContainer(builder);
 
             return builder.Build();
         }
@@ -69,7 +75,15 @@ namespace PaderConference.Core.IntegrationTests.Services.Base
 
         protected IEnumerable<Type> FetchTypesOfNamespace(Type type)
         {
-            return type.Assembly.GetTypes().Where(x => x.IsClass && x.IsInNamespace(type.Namespace));
+            return type.Assembly.GetTypes().Where(x => x.IsClass && x.IsInNamespace(type.Namespace!));
+        }
+
+        protected void AddConferenceRepo(ContainerBuilder builder, Conference conference)
+        {
+            var mock = new Mock<IConferenceRepo>();
+            mock.Setup(x => x.FindById(conference.ConferenceId)).ReturnsAsync(conference);
+
+            builder.RegisterInstance(mock.Object).As<IConferenceRepo>();
         }
     }
 }
