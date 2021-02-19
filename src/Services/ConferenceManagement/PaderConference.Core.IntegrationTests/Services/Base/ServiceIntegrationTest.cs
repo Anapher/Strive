@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Autofac;
 using Autofac.Features.Variance;
 using MediatR;
@@ -8,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Interfaces.Gateways.Repositories;
+using PaderConference.Core.Services.ConferenceControl.Gateways;
 using PaderConference.Core.Services.Synchronization;
 using PaderConference.Infrastructure;
 using PaderConference.Infrastructure.Redis;
@@ -33,6 +35,13 @@ namespace PaderConference.Core.IntegrationTests.Services.Base
 
             Container = BuildContainer();
             Mediator = Container.Resolve<IMediator>();
+
+            SetupTest(Container).Wait();
+        }
+
+        protected virtual Task SetupTest(ILifetimeScope container)
+        {
+            return Task.CompletedTask;
         }
 
         protected virtual void ConfigureContainer(ContainerBuilder builder)
@@ -89,6 +98,18 @@ namespace PaderConference.Core.IntegrationTests.Services.Base
             mock.Setup(x => x.FindById(conference.ConferenceId)).ReturnsAsync(conference);
 
             builder.RegisterInstance(mock.Object).As<IConferenceRepo>();
+        }
+
+        protected async ValueTask SetParticipantJoined(string conferenceId, string participantId)
+        {
+            var joinedParticipantRepo = Container.Resolve<IJoinedParticipantsRepository>();
+            await joinedParticipantRepo.AddParticipant(participantId, conferenceId, "testConn");
+        }
+
+        protected async ValueTask RemoveParticipantJoined(string participantId)
+        {
+            var joinedParticipantRepo = Container.Resolve<IJoinedParticipantsRepository>();
+            await joinedParticipantRepo.RemoveParticipant(participantId, "testConn");
         }
     }
 }

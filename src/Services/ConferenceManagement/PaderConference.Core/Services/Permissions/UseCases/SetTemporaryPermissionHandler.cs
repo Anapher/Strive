@@ -32,7 +32,7 @@ namespace PaderConference.Core.Services.Permissions.UseCases
         {
             var (targetParticipantId, permissionKey, value, conferenceId) = request;
 
-            _logger.LogDebug("Set temporary permission \"{permissionKey}\" of participant {participantId} to {value}",
+            _logger.LogDebug("Set temporary permission {permissionKey} of participant {participantId} to {value}",
                 permissionKey, targetParticipantId, value);
 
             if (!DefinedPermissionsProvider.All.TryGetValue(permissionKey, out var descriptor))

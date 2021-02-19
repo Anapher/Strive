@@ -42,15 +42,21 @@ namespace PaderConference.Core.IntegrationTests.Services
             var conference = new Conference(ConferenceId);
             AddConferenceRepo(builder, conference);
 
-            SetHasPermissionsForParticipant(ParticipantIdWithPermissions);
-            SetHasNoPermissionsForParticipant(ParticipantIdWithoutPermissions);
-
             _providerMock.Setup(x => x.Id).Returns(SyncObjId);
             _providerMock
                 .Setup(x => x.FetchValue(It.IsAny<string>(), It.Is<SynchronizedObjectId>(s => s.Id == SyncObjId)))
                 .ReturnsAsync(() => SyncObjValue);
 
             builder.RegisterInstance(_providerMock.Object).As<ISynchronizedObjectProvider>();
+        }
+
+        protected override async Task SetupTest(ILifetimeScope container)
+        {
+            await SetParticipantJoined(ConferenceId, ParticipantIdWithPermissions);
+            await SetParticipantJoined(ConferenceId, ParticipantIdWithoutPermissions);
+
+            SetHasPermissionsForParticipant(ParticipantIdWithPermissions);
+            SetHasNoPermissionsForParticipant(ParticipantIdWithoutPermissions);
         }
 
         private void SetHasPermissionsForParticipant(string participantId)
@@ -63,6 +69,27 @@ namespace PaderConference.Core.IntegrationTests.Services
         {
             _providerMock.Setup(x => x.GetAvailableObjects(ConferenceId, participantId))
                 .ReturnsAsync(new List<SynchronizedObjectId>());
+        }
+
+        private async Task AssertParticipantNoSubscriptions(string participantId)
+        {
+            var subscriptionRepo = Container.Resolve<ISynchronizedObjectSubscriptionsRepository>();
+            var subscriptions = await subscriptionRepo.Get(ConferenceId, participantId);
+            Assert.Null(subscriptions);
+        }
+
+        private async Task AssertSyncObjectCached()
+        {
+            var subscriptionRepo = Container.Resolve<ISynchronizedObjectRepository>();
+            var obj = await subscriptionRepo.Get(ConferenceId, SyncObjId, SyncObjValue.GetType());
+            Assert.NotNull(obj);
+        }
+
+        private async Task AssertSyncObjectNotCached()
+        {
+            var subscriptionRepo = Container.Resolve<ISynchronizedObjectRepository>();
+            var obj = await subscriptionRepo.Get(ConferenceId, SyncObjId, SyncObjValue.GetType());
+            Assert.Null(obj);
         }
 
         [Fact]
@@ -82,6 +109,8 @@ namespace PaderConference.Core.IntegrationTests.Services
                 Assert.Equal(SyncObjValue, n.Value);
                 Assert.Equal(ParticipantIdWithPermissions, Assert.Single(n.ParticipantIds));
             });
+
+            await AssertSyncObjectCached();
         }
 
         [Fact]
@@ -171,16 +200,19 @@ namespace PaderConference.Core.IntegrationTests.Services
         [Fact]
         public async Task ParticipantLeft_WasTheOnlyParticipant_ClearSubscriptionsAndCachedSyncObject()
         {
+            const string connectionId = "connId";
+
             // arrange
             await Mediator.Publish(new ParticipantJoinedNotification(ParticipantIdWithPermissions, ConferenceId));
             Assert.NotEmpty(Data.Data);
 
             // act
-            await Mediator.Publish(
-                new ParticipantLeftNotification(ParticipantIdWithPermissions, ConferenceId, "connid"));
+            await Mediator.Publish(new ParticipantLeftNotification(ParticipantIdWithPermissions, ConferenceId,
+                connectionId));
 
             // assert
-            Assert.Empty(Data.Data);
+            await AssertParticipantNoSubscriptions(ParticipantIdWithPermissions);
+            await AssertSyncObjectNotCached();
         }
 
         [Fact]
@@ -189,6 +221,7 @@ namespace PaderConference.Core.IntegrationTests.Services
             var participantId2WithPermissions = "234";
 
             // arrange
+            await SetParticipantJoined(ConferenceId, participantId2WithPermissions);
             SetHasPermissionsForParticipant(participantId2WithPermissions);
 
             await Mediator.Publish(new ParticipantJoinedNotification(ParticipantIdWithPermissions, ConferenceId));
@@ -199,7 +232,7 @@ namespace PaderConference.Core.IntegrationTests.Services
                 new ParticipantLeftNotification(ParticipantIdWithPermissions, ConferenceId, "connid"));
 
             // assert
-            Assert.NotEmpty(Data.Data);
+            await AssertSyncObjectCached();
 
             var syncObjRepo = Container.Resolve<ISynchronizedObjectRepository>();
             Assert.NotNull(await syncObjRepo.Get(ConferenceId, SyncObjId, SyncObjValue.GetType()));
@@ -225,6 +258,7 @@ namespace PaderConference.Core.IntegrationTests.Services
             const string randomParticipant = "c3a993ffed6f4c229fdfdf755cb2564e";
 
             // arrange
+            await SetParticipantJoined(ConferenceId, randomParticipant);
             SetHasNoPermissionsForParticipant(randomParticipant);
 
             await Mediator.Publish(new ParticipantJoinedNotification(randomParticipant, ConferenceId));
@@ -245,6 +279,7 @@ namespace PaderConference.Core.IntegrationTests.Services
             const string randomParticipant = "562ce878f2284eb59fdd13a484736085";
 
             // arrange
+            await SetParticipantJoined(ConferenceId, randomParticipant);
             SetHasPermissionsForParticipant(randomParticipant);
 
             await Mediator.Publish(new ParticipantJoinedNotification(randomParticipant, ConferenceId));
@@ -261,6 +296,46 @@ namespace PaderConference.Core.IntegrationTests.Services
 
             // assert
             NotificationCollector.AssertSingleNotificationIssued<ParticipantSubscriptionsRemovedNotification>();
+            NotificationCollector.AssertNoMoreNotifications();
+        }
+
+        [Fact]
+        public async Task UpdateSubscriptions_ParticipantNotJoined_NoSubscriptionsAndNotifications()
+        {
+            const string randomParticipant = "562ce878f2284eb59fdd13a484736085";
+
+            // arrange
+            SetHasPermissionsForParticipant(randomParticipant);
+
+            // act
+            await Mediator.Publish(new ParticipantJoinedNotification(randomParticipant, ConferenceId));
+
+            // assert
+            await AssertParticipantNoSubscriptions(randomParticipant);
+
+            NotificationCollector.AssertSingleNotificationIssued<ParticipantJoinedNotification>();
+            NotificationCollector.AssertNoMoreNotifications();
+        }
+
+        [Fact]
+        public async Task UpdateSubscriptions_ParticipantLeft_NoNotifications()
+        {
+            const string randomParticipant = "562ce878f2284eb59fdd13a484736085";
+
+            // arrange
+            await SetParticipantJoined(ConferenceId, randomParticipant);
+            SetHasPermissionsForParticipant(randomParticipant);
+
+            await Mediator.Publish(new ParticipantJoinedNotification(randomParticipant, ConferenceId));
+
+            NotificationCollector.Reset();
+            await RemoveParticipantJoined(randomParticipant);
+
+            // act
+            await Mediator.Send(new UpdateSubscriptionsRequest(ConferenceId, randomParticipant));
+
+            // assert
+            await AssertParticipantNoSubscriptions(randomParticipant);
             NotificationCollector.AssertNoMoreNotifications();
         }
     }

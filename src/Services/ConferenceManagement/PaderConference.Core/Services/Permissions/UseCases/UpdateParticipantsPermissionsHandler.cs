@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
@@ -58,7 +59,10 @@ namespace PaderConference.Core.Services.Permissions.UseCases
                     await _permissionRepository.DeletePermissions(conferenceId, participantId);
             }
 
-            await _mediator.Publish(new ParticipantPermissionsUpdatedNotification(conferenceId, appliedPermissions));
+            if (appliedPermissions.Any())
+                await _mediator.Publish(
+                    new ParticipantPermissionsUpdatedNotification(conferenceId, appliedPermissions));
+
             return Unit.Value;
         }
     }

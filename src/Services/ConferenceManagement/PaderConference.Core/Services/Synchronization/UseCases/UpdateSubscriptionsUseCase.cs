@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
+using PaderConference.Core.Services.ConferenceControl.Gateways;
 using PaderConference.Core.Services.Synchronization.Gateways;
 using PaderConference.Core.Services.Synchronization.Notifications;
 using PaderConference.Core.Services.Synchronization.Requests;
@@ -14,15 +15,18 @@ namespace PaderConference.Core.Services.Synchronization.UseCases
     {
         private readonly ISynchronizedObjectSubscriptionsRepository _subscriptionsRepository;
         private readonly ISynchronizedObjectRepository _synchronizedObjectRepository;
+        private readonly IJoinedParticipantsRepository _joinedParticipantsRepository;
         private readonly IEnumerable<ISynchronizedObjectProvider> _providers;
         private readonly IMediator _mediator;
 
         public UpdateSubscriptionsUseCase(ISynchronizedObjectSubscriptionsRepository subscriptionsRepository,
             ISynchronizedObjectRepository synchronizedObjectRepository,
+            IJoinedParticipantsRepository joinedParticipantsRepository,
             IEnumerable<ISynchronizedObjectProvider> providers, IMediator mediator)
         {
             _subscriptionsRepository = subscriptionsRepository;
             _synchronizedObjectRepository = synchronizedObjectRepository;
+            _joinedParticipantsRepository = joinedParticipantsRepository;
             _providers = providers;
             _mediator = mediator;
         }
@@ -41,6 +45,12 @@ namespace PaderConference.Core.Services.Synchronization.UseCases
             var oldSubscriptions =
                 await _subscriptionsRepository.GetSet(conferenceId, participantId,
                     subscriptions.Select(x => x.ToString()).ToList()) ?? ImmutableList<string>.Empty;
+
+            if (!await _joinedParticipantsRepository.IsParticipantJoined(participantId, conferenceId))
+            {
+                await _subscriptionsRepository.Remove(conferenceId, participantId);
+                return Unit.Value;
+            }
 
             var newSubscriptions = subscriptions.Where(x => !oldSubscriptions.Contains(x.ToString()));
             await SendCurrentSynchronizedObjectValues(conferenceId, participantId, newSubscriptions);
