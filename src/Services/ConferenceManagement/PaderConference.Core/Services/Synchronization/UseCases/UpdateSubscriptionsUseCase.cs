@@ -46,7 +46,7 @@ namespace PaderConference.Core.Services.Synchronization.UseCases
                 await _subscriptionsRepository.GetSet(conferenceId, participantId,
                     subscriptions.Select(x => x.ToString()).ToList()) ?? ImmutableList<string>.Empty;
 
-            if (!await _joinedParticipantsRepository.IsParticipantJoined(participantId, conferenceId))
+            if (!await _joinedParticipantsRepository.IsParticipantJoined(conferenceId, participantId))
             {
                 await _subscriptionsRepository.Remove(conferenceId, participantId);
                 return Unit.Value;

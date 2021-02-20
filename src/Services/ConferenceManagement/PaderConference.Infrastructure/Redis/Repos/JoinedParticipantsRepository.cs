@@ -94,7 +94,7 @@ namespace PaderConference.Infrastructure.Redis.Repos
             return (await _database.HashGetAllAsync(conferenceToParticipantsKey)).Keys;
         }
 
-        public async Task<bool> IsParticipantJoined(string participantId, string conferenceId)
+        public async Task<bool> IsParticipantJoined(string conferenceId, string participantId)
         {
             return await GetConferenceIdOfParticipant(participantId) == conferenceId;
         }

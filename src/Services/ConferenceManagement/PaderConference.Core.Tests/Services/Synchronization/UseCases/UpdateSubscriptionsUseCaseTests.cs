@@ -35,7 +35,7 @@ namespace PaderConference.Core.Tests.Services.Synchronization.UseCases
 
         private void SetIsParticipantJoined()
         {
-            _joinedParticipantsRepo.Setup(x => x.IsParticipantJoined(ParticipantId, ConferenceId)).ReturnsAsync(true);
+            _joinedParticipantsRepo.Setup(x => x.IsParticipantJoined(ConferenceId, ParticipantId)).ReturnsAsync(true);
         }
 
         [Fact]

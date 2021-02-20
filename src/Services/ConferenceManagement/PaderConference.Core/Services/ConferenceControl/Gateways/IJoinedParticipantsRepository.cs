@@ -24,6 +24,6 @@ namespace PaderConference.Core.Services.ConferenceControl.Gateways
 
         Task<IEnumerable<string>> GetParticipantsOfConference(string conferenceId);
 
-        Task<bool> IsParticipantJoined(string participantId, string conferenceId);
+        Task<bool> IsParticipantJoined(string conferenceId, string participantId);
     }
 }

@@ -53,7 +53,7 @@ namespace PaderConference.Core.Services.Permissions.UseCases
             {
                 await _permissionRepository.SetPermissions(conferenceId, participantId, permissions);
 
-                if (await _joinedParticipantsRepository.IsParticipantJoined(participantId, conferenceId))
+                if (await _joinedParticipantsRepository.IsParticipantJoined(conferenceId, participantId))
                     appliedPermissions.Add(participantId, permissions);
                 else
                     await _permissionRepository.DeletePermissions(conferenceId, participantId);

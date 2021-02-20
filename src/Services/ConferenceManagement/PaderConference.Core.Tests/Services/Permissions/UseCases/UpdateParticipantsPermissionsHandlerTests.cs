@@ -44,7 +44,7 @@ namespace PaderConference.Core.Tests.Services.Permissions.UseCases
 
         private void SetParticipantJoined(string participantId)
         {
-            _joinedParticipants.Setup(x => x.IsParticipantJoined(participantId, ConferenceId)).ReturnsAsync(true);
+            _joinedParticipants.Setup(x => x.IsParticipantJoined(ConferenceId, participantId)).ReturnsAsync(true);
         }
 
         private void SetParticipantHasPermission(string participantId,

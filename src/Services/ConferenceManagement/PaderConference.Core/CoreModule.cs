@@ -25,6 +25,8 @@ namespace PaderConference.Core
 
             builder.RegisterAssemblyTypes(ThisAssembly).AssignableTo<ISynchronizedObjectProvider>()
                 .AsImplementedInterfaces().InstancePerLifetimeScope();
+
+            builder.RegisterType<DefinedPermissionValidator>().As<IPermissionValidator>().SingleInstance();
         }
     }
 }

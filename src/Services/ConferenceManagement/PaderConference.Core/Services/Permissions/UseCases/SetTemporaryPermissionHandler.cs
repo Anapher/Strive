@@ -15,27 +15,31 @@ namespace PaderConference.Core.Services.Permissions.UseCases
         private readonly IMediator _mediator;
         private readonly ITemporaryPermissionRepository _temporaryPermissionRepository;
         private readonly IJoinedParticipantsRepository _participantsRepository;
+        private readonly IPermissionValidator _permissionValidator;
         private readonly ILogger<SetTemporaryPermissionHandler> _logger;
 
         public SetTemporaryPermissionHandler(IMediator mediator,
             ITemporaryPermissionRepository temporaryPermissionRepository,
-            IJoinedParticipantsRepository participantsRepository, ILogger<SetTemporaryPermissionHandler> logger)
+            IJoinedParticipantsRepository participantsRepository, IPermissionValidator permissionValidator,
+            ILogger<SetTemporaryPermissionHandler> logger)
         {
             _mediator = mediator;
             _temporaryPermissionRepository = temporaryPermissionRepository;
             _participantsRepository = participantsRepository;
+            _permissionValidator = permissionValidator;
             _logger = logger;
         }
 
         public async Task<SuccessOrError<Unit>> Handle(SetTemporaryPermissionRequest request,
             CancellationToken cancellationToken)
         {
-            var (targetParticipantId, permissionKey, value, conferenceId) = request;
+            var (participantId, permissionKey, value, conferenceId) = request;
 
             _logger.LogDebug("Set temporary permission {permissionKey} of participant {participantId} to {value}",
-                permissionKey, targetParticipantId, value);
+                permissionKey, participantId,
+                value?.ToString()); // serilog serialized JValue as an empty enumerable... {$value} does sadly not work for some reason
 
-            if (!DefinedPermissionsProvider.All.TryGetValue(permissionKey, out var descriptor))
+            if (!_permissionValidator.TryGetDescriptor(permissionKey, out var descriptor))
                 return PermissionsError.PermissionKeyNotFound(permissionKey);
 
             if (value != null)
@@ -43,23 +47,26 @@ namespace PaderConference.Core.Services.Permissions.UseCases
                 if (!descriptor.ValidateValue(value))
                     return PermissionsError.InvalidPermissionValueType;
 
-                await _temporaryPermissionRepository.SetTemporaryPermission(conferenceId, targetParticipantId,
-                    descriptor.Key, value);
+                await _temporaryPermissionRepository.SetTemporaryPermission(conferenceId, participantId, descriptor.Key,
+                    value);
 
-                if (!await _participantsRepository.IsParticipantJoined(conferenceId, targetParticipantId))
+                if (!await _participantsRepository.IsParticipantJoined(conferenceId, participantId))
                 {
-                    await _temporaryPermissionRepository.RemoveAllTemporaryPermissions(conferenceId,
-                        targetParticipantId);
-                    return SuccessOrError<Unit>.Succeeded(Unit.Value);
+                    _logger.LogDebug(
+                        "After setting temporary permissions for participant {participantId}, it was noticed that the participant is not currently joined. Remove temporary permission.",
+                        participantId);
+
+                    await _temporaryPermissionRepository.RemoveAllTemporaryPermissions(conferenceId, participantId);
+                    return CommonError.ConcurrencyError;
                 }
             }
             else
             {
-                await _temporaryPermissionRepository.RemoveTemporaryPermission(conferenceId, targetParticipantId,
+                await _temporaryPermissionRepository.RemoveTemporaryPermission(conferenceId, participantId,
                     descriptor.Key);
             }
 
-            await _mediator.Send(new UpdateParticipantsPermissionsRequest(conferenceId, new[] {targetParticipantId}));
+            await _mediator.Send(new UpdateParticipantsPermissionsRequest(conferenceId, new[] {participantId}));
             return Unit.Value;
         }
     }
