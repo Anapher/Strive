@@ -3,6 +3,5 @@ using MediatR;
 
 namespace PaderConference.Core.Services.Permissions.Requests
 {
-    public record UpdateParticipantsPermissionsRequest
-        (string ConferenceId, IEnumerable<string> ParticipantIds) : IRequest;
+    public record UpdateParticipantsPermissionsRequest (IEnumerable<Participant> Participants) : IRequest;
 }

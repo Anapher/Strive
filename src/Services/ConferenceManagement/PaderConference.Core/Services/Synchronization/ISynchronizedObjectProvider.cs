@@ -12,6 +12,6 @@ namespace PaderConference.Core.Services.Synchronization
 
         ValueTask<object> FetchValue(string conferenceId, SynchronizedObjectId synchronizedObjectId);
 
-        ValueTask<IEnumerable<SynchronizedObjectId>> GetAvailableObjects(string conferenceId, string participantId);
+        ValueTask<IEnumerable<SynchronizedObjectId>> GetAvailableObjects(Participant participant);
     }
 }

@@ -4,6 +4,6 @@ using PermissionsDict = System.Collections.Generic.Dictionary<string, Newtonsoft
 
 namespace PaderConference.Core.Services.Permissions.Notifications
 {
-    public record ParticipantPermissionsUpdatedNotification (string ConferenceId,
-        Dictionary<string, PermissionsDict> UpdatedPermissions) : INotification;
+    public record ParticipantPermissionsUpdatedNotification (
+        Dictionary<Participant, PermissionsDict> UpdatedPermissions) : INotification;
 }

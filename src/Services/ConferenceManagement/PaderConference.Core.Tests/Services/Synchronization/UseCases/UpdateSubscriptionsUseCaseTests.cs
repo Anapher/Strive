@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using MediatR;
 using Moq;
 using PaderConference.Core.Extensions;
+using PaderConference.Core.Services;
 using PaderConference.Core.Services.ConferenceControl.Gateways;
 using PaderConference.Core.Services.Synchronization;
 using PaderConference.Core.Services.Synchronization.Gateways;
@@ -27,6 +28,8 @@ namespace PaderConference.Core.Tests.Services.Synchronization.UseCases
         private const string ConferenceId = "123";
         private const string ParticipantId = "45";
 
+        private static readonly Participant _participant = new(ConferenceId, ParticipantId);
+
         private UpdateSubscriptionsUseCase Create()
         {
             return new(_subscriptionRepo.Object, _syncObjRepo.Object, _joinedParticipantsRepo.Object, _providers,
@@ -35,7 +38,7 @@ namespace PaderConference.Core.Tests.Services.Synchronization.UseCases
 
         private void SetIsParticipantJoined()
         {
-            _joinedParticipantsRepo.Setup(x => x.IsParticipantJoined(ConferenceId, ParticipantId)).ReturnsAsync(true);
+            _joinedParticipantsRepo.Setup(x => x.IsParticipantJoined(_participant)).ReturnsAsync(true);
         }
 
         [Fact]
@@ -46,7 +49,7 @@ namespace PaderConference.Core.Tests.Services.Synchronization.UseCases
             SetIsParticipantJoined();
 
             // act
-            await useCase.Handle(new UpdateSubscriptionsRequest(ConferenceId, ParticipantId), CancellationToken.None);
+            await useCase.Handle(new UpdateSubscriptionsRequest(_participant), CancellationToken.None);
 
             // assert
             _mediator.VerifyNoOtherCalls();
@@ -57,7 +60,7 @@ namespace PaderConference.Core.Tests.Services.Synchronization.UseCases
         {
             // arrange
             var provider = new Mock<ISynchronizedObjectProvider>();
-            provider.Setup(x => x.GetAvailableObjects(ConferenceId, ParticipantId))
+            provider.Setup(x => x.GetAvailableObjects(_participant))
                 .ReturnsAsync(Enumerable.Empty<SynchronizedObjectId>());
 
             SetIsParticipantJoined();
@@ -65,7 +68,7 @@ namespace PaderConference.Core.Tests.Services.Synchronization.UseCases
             var useCase = Create();
 
             // act
-            await useCase.Handle(new UpdateSubscriptionsRequest(ConferenceId, ParticipantId), CancellationToken.None);
+            await useCase.Handle(new UpdateSubscriptionsRequest(_participant), CancellationToken.None);
 
             // assert
             _mediator.VerifyNoOtherCalls();
@@ -81,7 +84,7 @@ namespace PaderConference.Core.Tests.Services.Synchronization.UseCases
             var capturedNotification = _mediator.CaptureNotification<SynchronizedObjectUpdatedNotification>();
 
             var provider = new Mock<ISynchronizedObjectProvider>();
-            provider.Setup(x => x.GetAvailableObjects(ConferenceId, ParticipantId)).ReturnsAsync(syncObjId.Yield());
+            provider.Setup(x => x.GetAvailableObjects(_participant)).ReturnsAsync(syncObjId.Yield());
             provider.Setup(x => x.FetchValue(ConferenceId, syncObjId)).ReturnsAsync(syncObjValue);
             provider.SetupGet(x => x.Id).Returns(syncObjId.Id);
             _providers.Add(provider.Object);
@@ -91,14 +94,13 @@ namespace PaderConference.Core.Tests.Services.Synchronization.UseCases
             var useCase = Create();
 
             // act
-            await useCase.Handle(new UpdateSubscriptionsRequest(ConferenceId, ParticipantId), CancellationToken.None);
+            await useCase.Handle(new UpdateSubscriptionsRequest(_participant), CancellationToken.None);
 
             // assert
             capturedNotification.AssertReceived();
 
             var notification = capturedNotification.GetNotification();
-            Assert.Equal(ConferenceId, notification.ConferenceId);
-            Assert.Equal(ParticipantId, Assert.Single(notification.ParticipantIds));
+            Assert.Equal(_participant, Assert.Single(notification.Participants));
             Assert.Equal(syncObjId.ToString(), notification.SyncObjId);
             Assert.Equal(syncObjValue, notification.Value);
             Assert.Null(notification.PreviousValue);
@@ -111,7 +113,7 @@ namespace PaderConference.Core.Tests.Services.Synchronization.UseCases
             var syncObjId = SynchronizedObjectId.Parse("test");
 
             var provider = new Mock<ISynchronizedObjectProvider>();
-            provider.Setup(x => x.GetAvailableObjects(ConferenceId, ParticipantId)).ReturnsAsync(syncObjId.Yield());
+            provider.Setup(x => x.GetAvailableObjects(_participant)).ReturnsAsync(syncObjId.Yield());
             provider.SetupGet(x => x.Id).Returns(syncObjId.Id);
             _providers.Add(provider.Object);
 
@@ -120,11 +122,11 @@ namespace PaderConference.Core.Tests.Services.Synchronization.UseCases
             var useCase = Create();
 
             // act
-            await useCase.Handle(new UpdateSubscriptionsRequest(ConferenceId, ParticipantId), CancellationToken.None);
+            await useCase.Handle(new UpdateSubscriptionsRequest(_participant), CancellationToken.None);
 
             // assert
             _subscriptionRepo.Verify(
-                x => x.GetSet(ConferenceId, ParticipantId,
+                x => x.GetSet(_participant,
                     It.Is<IReadOnlyList<string>>(x => x.Count == 1 && x[0] == syncObjId.ToString())), Times.Once);
         }
 
@@ -135,10 +137,10 @@ namespace PaderConference.Core.Tests.Services.Synchronization.UseCases
             var syncObjId = SynchronizedObjectId.Parse("test");
 
             var provider = new Mock<ISynchronizedObjectProvider>();
-            provider.Setup(x => x.GetAvailableObjects(ConferenceId, ParticipantId)).ReturnsAsync(syncObjId.Yield());
+            provider.Setup(x => x.GetAvailableObjects(_participant)).ReturnsAsync(syncObjId.Yield());
             _providers.Add(provider.Object);
 
-            _subscriptionRepo.Setup(x => x.GetSet(ConferenceId, ParticipantId, It.IsAny<IReadOnlyList<string>>()))
+            _subscriptionRepo.Setup(x => x.GetSet(_participant, It.IsAny<IReadOnlyList<string>>()))
                 .ReturnsAsync(new List<string> {syncObjId.ToString()});
 
             SetIsParticipantJoined();
@@ -146,7 +148,7 @@ namespace PaderConference.Core.Tests.Services.Synchronization.UseCases
             var useCase = Create();
 
             // act
-            await useCase.Handle(new UpdateSubscriptionsRequest(ConferenceId, ParticipantId), CancellationToken.None);
+            await useCase.Handle(new UpdateSubscriptionsRequest(_participant), CancellationToken.None);
 
             // assert
             _mediator.VerifyNoOtherCalls();
@@ -160,11 +162,11 @@ namespace PaderConference.Core.Tests.Services.Synchronization.UseCases
             var oldSyncObjId = SynchronizedObjectId.Parse("test2");
 
             var provider = new Mock<ISynchronizedObjectProvider>();
-            provider.Setup(x => x.GetAvailableObjects(ConferenceId, ParticipantId)).ReturnsAsync(syncObjId.Yield());
+            provider.Setup(x => x.GetAvailableObjects(_participant)).ReturnsAsync(syncObjId.Yield());
             provider.SetupGet(x => x.Id).Returns(syncObjId.Id);
             _providers.Add(provider.Object);
 
-            _subscriptionRepo.Setup(x => x.GetSet(ConferenceId, ParticipantId, It.IsAny<IReadOnlyList<string>>()))
+            _subscriptionRepo.Setup(x => x.GetSet(_participant, It.IsAny<IReadOnlyList<string>>()))
                 .ReturnsAsync(new List<string> {oldSyncObjId.ToString()});
 
             var capturedNotification = _mediator.CaptureNotification<ParticipantSubscriptionsRemovedNotification>();
@@ -174,14 +176,13 @@ namespace PaderConference.Core.Tests.Services.Synchronization.UseCases
             SetIsParticipantJoined();
 
             // act
-            await useCase.Handle(new UpdateSubscriptionsRequest(ConferenceId, ParticipantId), CancellationToken.None);
+            await useCase.Handle(new UpdateSubscriptionsRequest(_participant), CancellationToken.None);
 
             // assert
             capturedNotification.AssertReceived();
 
             var notification = capturedNotification.GetNotification();
-            Assert.Equal(ConferenceId, notification.ConferenceId);
-            Assert.Equal(ParticipantId, notification.ParticipantId);
+            Assert.Equal(_participant, notification.Participant);
             Assert.Equal(oldSyncObjId.ToString(), Assert.Single(notification.RemovedSubscriptions));
         }
 
@@ -194,7 +195,7 @@ namespace PaderConference.Core.Tests.Services.Synchronization.UseCases
             var syncObjId = SynchronizedObjectId.Parse("test");
 
             var provider = new Mock<ISynchronizedObjectProvider>();
-            provider.Setup(x => x.GetAvailableObjects(ConferenceId, ParticipantId)).ReturnsAsync(syncObjId.Yield());
+            provider.Setup(x => x.GetAvailableObjects(_participant)).ReturnsAsync(syncObjId.Yield());
             provider.Setup(x => x.FetchValue(ConferenceId, syncObjId)).ReturnsAsync(syncObjValue);
             provider.SetupGet(x => x.Id).Returns(syncObjId.Id);
             _providers.Add(provider.Object);
@@ -202,11 +203,11 @@ namespace PaderConference.Core.Tests.Services.Synchronization.UseCases
             var useCase = Create();
 
             // act
-            await useCase.Handle(new UpdateSubscriptionsRequest(ConferenceId, ParticipantId), CancellationToken.None);
+            await useCase.Handle(new UpdateSubscriptionsRequest(_participant), CancellationToken.None);
 
             // assert
             _mediator.VerifyNoOtherCalls();
-            _subscriptionRepo.Verify(x => x.Remove(ConferenceId, ParticipantId), Times.Once);
+            _subscriptionRepo.Verify(x => x.Remove(_participant), Times.Once);
         }
     }
 }

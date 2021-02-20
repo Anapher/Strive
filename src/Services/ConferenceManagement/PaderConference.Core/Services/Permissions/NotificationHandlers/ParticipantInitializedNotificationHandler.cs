@@ -18,9 +18,8 @@ namespace PaderConference.Core.Services.Permissions.NotificationHandlers
 
         public async Task Handle(ParticipantInitializedNotification notification, CancellationToken cancellationToken)
         {
-            var (participantId, conferenceId) = notification;
-            await _mediator.Send(new UpdateParticipantsPermissionsRequest(conferenceId, participantId.Yield()),
-                cancellationToken);
+            var participant = notification.Participant;
+            await _mediator.Send(new UpdateParticipantsPermissionsRequest(participant.Yield()), cancellationToken);
         }
     }
 }

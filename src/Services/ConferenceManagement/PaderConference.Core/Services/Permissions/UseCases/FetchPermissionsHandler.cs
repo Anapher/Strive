@@ -18,11 +18,10 @@ namespace PaderConference.Core.Services.Permissions.UseCases
         public async Task<ParticipantPermissionResponse> Handle(FetchPermissionsRequest request,
             CancellationToken cancellationToken)
         {
-            var (participantId, conferenceId) = request;
+            var participant = request.Participant;
 
-            var permissions =
-                await _permissionLayersAggregator.FetchParticipantPermissionLayers(conferenceId, participantId);
-            return new ParticipantPermissionResponse(participantId, permissions);
+            var permissions = await _permissionLayersAggregator.FetchParticipantPermissionLayers(participant);
+            return new ParticipantPermissionResponse(participant.Id, permissions);
         }
     }
 }

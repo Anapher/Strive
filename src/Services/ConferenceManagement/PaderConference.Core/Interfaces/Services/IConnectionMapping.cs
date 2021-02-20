@@ -9,14 +9,14 @@ namespace PaderConference.Core.Interfaces.Services
         /// <summary>
         ///     Map connection ids to participant
         /// </summary>
-        ConcurrentDictionary<string, Participant> Connections { get; }
+        ConcurrentDictionary<string, ParticipantData> Connections { get; }
 
         /// <summary>
         ///     Map participant ids to connections
         /// </summary>
         ConcurrentDictionary<string, IParticipantConnections> ConnectionsR { get; }
 
-        bool Add(string connectionId, Participant participant, bool equipment = false);
+        bool Add(string connectionId, ParticipantData participantData, bool equipment = false);
 
         bool Remove(string connectionId);
     }

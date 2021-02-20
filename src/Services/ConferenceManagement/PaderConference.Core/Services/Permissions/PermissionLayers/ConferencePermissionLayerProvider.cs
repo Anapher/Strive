@@ -15,19 +15,20 @@ namespace PaderConference.Core.Services.Permissions.PermissionLayers
             _conferenceRepo = conferenceRepo;
         }
 
-        public async ValueTask<IEnumerable<PermissionLayer>> FetchPermissionsForParticipant(string conferenceId,
-            string participantId)
+        public async ValueTask<IEnumerable<PermissionLayer>> FetchPermissionsForParticipant(Participant participant)
         {
+            var (conferenceId, participantId) = participant;
+
             var conference = await _conferenceRepo.FindById(conferenceId);
             if (conference == null) throw new ConferenceNotFoundException(conferenceId);
 
-            var result = new List<PermissionLayer>
-            {
-                CommonPermissionLayers.Conference(conference.Permissions[PermissionType.Conference]),
-            };
+            var result = new List<PermissionLayer>();
+            if (conference.Permissions.TryGetValue(PermissionType.Conference, out var conferencePermissions))
+                result.Add(CommonPermissionLayers.Conference(conferencePermissions));
 
-            if (conference.Configuration.Moderators.Contains(participantId))
-                result.Add(CommonPermissionLayers.Moderator(conference.Permissions[PermissionType.Moderator]));
+            if (conference.Configuration.Moderators.Contains(participantId) &&
+                conference.Permissions.TryGetValue(PermissionType.Moderator, out var moderatorPermissions))
+                result.Add(CommonPermissionLayers.Moderator(moderatorPermissions));
 
             return result;
         }

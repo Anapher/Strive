@@ -24,16 +24,22 @@ namespace PaderConference.Core.Services.Permissions
             SynchronizedObjectId synchronizedObjectId)
         {
             var participantId = synchronizedObjectId.Parameters[PROP_PARTICIPANT_ID];
-            var permissions = await _permissionRepository.GetPermissions(conferenceId, participantId);
+            var joinedParticipant = new Participant(conferenceId, participantId);
+
+            var permissions = await _permissionRepository.GetPermissions(joinedParticipant);
 
             return new SynchronizedParticipantPermissions(permissions);
         }
 
-        public override ValueTask<IEnumerable<SynchronizedObjectId>> GetAvailableObjects(string conferenceId,
-            string participantId)
+        public override ValueTask<IEnumerable<SynchronizedObjectId>> GetAvailableObjects(Participant participant)
         {
-            return new(new SynchronizedObjectId(Id,
-                new Dictionary<string, string> {{PROP_PARTICIPANT_ID, participantId}}).Yield());
+            return new(GetObjIdOfParticipant(participant.Id).Yield());
+        }
+
+        public static SynchronizedObjectId GetObjIdOfParticipant(string participantId)
+        {
+            return new(SynchronizedObjectIds.PARTICIPANT_PERMISSIONS,
+                new Dictionary<string, string> {{PROP_PARTICIPANT_ID, participantId}});
         }
     }
 }

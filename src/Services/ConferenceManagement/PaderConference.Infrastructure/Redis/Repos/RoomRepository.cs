@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using PaderConference.Core.Interfaces.Gateways.Repositories;
+using PaderConference.Core.Services;
 using PaderConference.Core.Services.Rooms;
 using PaderConference.Core.Services.Rooms.Gateways;
 using PaderConference.Infrastructure.Redis.Abstractions;
@@ -33,19 +34,19 @@ namespace PaderConference.Infrastructure.Redis.Repos
             return await _database.HashDeleteAsync(key, roomId);
         }
 
-        public async Task<IReadOnlyList<string>> GetParticipantsOfRoom(string conferenceId, string roomId)
+        public async Task<IReadOnlyList<Participant>> GetParticipantsOfRoom(string conferenceId, string roomId)
         {
             var key = GetRoomMappingKey(conferenceId);
             var hashValues = await _database.HashGetAllAsync(key);
 
-            return hashValues.Where(x => x.Key == roomId).Select(x => x.Value).ToList();
+            return hashValues.Where(x => x.Key == roomId).Select(x => new Participant(conferenceId, x.Value)).ToList();
         }
 
         public async Task<IEnumerable<Room>> GetRooms(string conferenceId)
         {
             var key = GetRoomListKey(conferenceId);
             var result = await _database.HashGetAllAsync<Room>(key);
-            return result.Values;
+            return result.Values.Where(x => x != null);
         }
 
         public async Task<IReadOnlyDictionary<string, string>> GetParticipantRooms(string conferenceId)
@@ -81,22 +82,22 @@ namespace PaderConference.Infrastructure.Redis.Repos
             }
         }
 
-        public async Task SetParticipantRoom(string conferenceId, string participantId, string roomId)
+        public async Task SetParticipantRoom(Participant participant, string roomId)
         {
-            var roomMappingKey = GetRoomMappingKey(conferenceId);
-            var roomListKey = GetRoomListKey(conferenceId);
+            var roomMappingKey = GetRoomMappingKey(participant.ConferenceId);
+            var roomListKey = GetRoomListKey(participant.ConferenceId);
 
             var result = await _database.ExecuteScriptAsync(RedisScript.RoomRepository_SetParticipantRoom,
-                roomMappingKey, roomListKey, participantId, roomId);
+                roomMappingKey, roomListKey, participant.Id, roomId);
 
             if (!(bool) result)
                 throw new ConcurrencyException("Failed to set room of participant: The room does not exist.");
         }
 
-        public async Task UnsetParticipantRoom(string conferenceId, string participantId)
+        public async Task UnsetParticipantRoom(Participant participant)
         {
-            var roomMappingKey = GetRoomMappingKey(conferenceId);
-            await _database.HashDeleteAsync(roomMappingKey, participantId);
+            var roomMappingKey = GetRoomMappingKey(participant.ConferenceId);
+            await _database.HashDeleteAsync(roomMappingKey, participant.Id);
         }
 
         private static string GetRoomMappingKey(string conferenceId)

@@ -6,12 +6,12 @@ namespace PaderConference.Core.Services.Permissions.Gateways
 {
     public interface ITemporaryPermissionRepository
     {
-        ValueTask SetTemporaryPermission(string conferenceId, string participantId, string key, JValue value);
+        ValueTask SetTemporaryPermission(Participant participant, string key, JValue value);
 
-        ValueTask RemoveTemporaryPermission(string conferenceId, string participantId, string key);
+        ValueTask RemoveTemporaryPermission(Participant participant, string key);
 
-        ValueTask<Dictionary<string, JValue>> FetchTemporaryPermissions(string conferenceId, string participantId);
+        ValueTask<IReadOnlyDictionary<string, JValue?>> FetchTemporaryPermissions(Participant participant);
 
-        ValueTask RemoveAllTemporaryPermissions(string conferenceId, string participantId);
+        ValueTask RemoveAllTemporaryPermissions(Participant participant);
     }
 }

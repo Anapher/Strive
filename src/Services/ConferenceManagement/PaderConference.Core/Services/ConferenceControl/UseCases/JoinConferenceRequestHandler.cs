@@ -25,19 +25,20 @@ namespace PaderConference.Core.Services.ConferenceControl.UseCases
 
         public async Task<Unit> Handle(JoinConferenceRequest request, CancellationToken cancellationToken)
         {
-            var (conferenceId, participantId, connectionId) = request;
+            var (participant, connectionId) = request;
+            var (conferenceId, participantId) = participant;
 
             _logger.LogDebug("Participant {participantId} is joining conference {conferenceId}", participantId,
                 conferenceId);
 
-            var previousSession = await _joinedParticipantsRepository.AddParticipant(participantId,
-                conferenceId, connectionId);
+            var previousSession = await _joinedParticipantsRepository.AddParticipant(participant, connectionId);
 
             if (previousSession != null)
             {
                 _logger.LogDebug("The participant {participantId} was already joined, kick him.", participantId);
-                await _mediator.Publish(new ParticipantKickedNotification(participantId, previousSession.ConferenceId,
-                    previousSession.ConnectionId, ParticipantKickedReason.NewSessionConnected));
+                await _mediator.Publish(new ParticipantKickedNotification(
+                    new Participant(previousSession.ConferenceId, participantId), previousSession.ConnectionId,
+                    ParticipantKickedReason.NewSessionConnected));
             }
 
             // enable messaging just after kicking client
@@ -46,7 +47,7 @@ namespace PaderConference.Core.Services.ConferenceControl.UseCases
             await _mediator.Send(new EnableParticipantMessagingRequest(participantId, conferenceId, connectionId),
                 cancellationToken);
 
-            await _mediator.Publish(new ParticipantJoinedNotification(participantId, conferenceId));
+            await _mediator.Publish(new ParticipantJoinedNotification(participant));
 
             return Unit.Value;
         }

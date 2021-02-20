@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
+using PaderConference.Core.Services;
 using PaderConference.Core.Services.Permissions.Gateways;
-using StackExchange.Redis.Extensions.Core.Abstractions;
+using PaderConference.Infrastructure.Redis.Abstractions;
 
 namespace PaderConference.Infrastructure.Redis.Repos
 {
@@ -10,45 +11,42 @@ namespace PaderConference.Infrastructure.Redis.Repos
     {
         private const string PROPERTY_KEY = "TemporaryPermissions";
 
-        private readonly IRedisDatabase _redisDatabase;
+        private readonly IKeyValueDatabase _redisDatabase;
 
-        public TemporaryPermissionRepository(IRedisDatabase redisDatabase)
+        public TemporaryPermissionRepository(IKeyValueDatabase redisDatabase)
         {
             _redisDatabase = redisDatabase;
         }
 
-        public async ValueTask SetTemporaryPermission(string conferenceId, string participantId, string key,
-            JValue? value)
+        public async ValueTask SetTemporaryPermission(Participant participant, string key, JValue? value)
         {
-            var redisKey = RedisKeyBuilder.ForProperty(PROPERTY_KEY).ForConference(conferenceId)
-                .ForParticipant(participantId).ToString();
+            var redisKey = GetKey(participant);
 
             await _redisDatabase.HashSetAsync(redisKey, key, value);
         }
 
-        public async ValueTask RemoveTemporaryPermission(string conferenceId, string participantId, string key)
+        public async ValueTask RemoveTemporaryPermission(Participant participant, string key)
         {
-            var redisKey = RedisKeyBuilder.ForProperty(PROPERTY_KEY).ForConference(conferenceId)
-                .ForParticipant(participantId).ToString();
-
+            var redisKey = GetKey(participant);
             await _redisDatabase.HashDeleteAsync(redisKey, key);
         }
 
-        public async ValueTask<Dictionary<string, JValue>> FetchTemporaryPermissions(string conferenceId,
-            string participantId)
+        public async ValueTask<IReadOnlyDictionary<string, JValue?>> FetchTemporaryPermissions(Participant participant)
         {
-            var redisKey = RedisKeyBuilder.ForProperty(PROPERTY_KEY).ForConference(conferenceId)
-                .ForParticipant(participantId).ToString();
-
+            var redisKey = GetKey(participant);
             return await _redisDatabase.HashGetAllAsync<JValue>(redisKey);
         }
 
-        public async ValueTask RemoveAllTemporaryPermissions(string conferenceId, string participantId)
+        public async ValueTask RemoveAllTemporaryPermissions(Participant participant)
         {
-            var redisKey = RedisKeyBuilder.ForProperty(PROPERTY_KEY).ForConference(conferenceId)
-                .ForParticipant(participantId).ToString();
+            var redisKey = GetKey(participant);
+            await _redisDatabase.KeyDeleteAsync(redisKey);
+        }
 
-            await _redisDatabase.RemoveAsync(redisKey);
+        private static string GetKey(Participant participant)
+        {
+            return RedisKeyBuilder.ForProperty(PROPERTY_KEY).ForConference(participant.ConferenceId)
+                .ForParticipant(participant.Id).ToString();
         }
     }
 }

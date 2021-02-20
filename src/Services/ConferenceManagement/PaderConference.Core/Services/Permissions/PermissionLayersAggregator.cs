@@ -14,22 +14,20 @@ namespace PaderConference.Core.Services.Permissions
             _permissionProviders = permissionProviders;
         }
 
-        public async ValueTask<Dictionary<string, JValue>> FetchAggregatedPermissions(string conferenceId,
-            string participantId)
+        public async ValueTask<Dictionary<string, JValue>> FetchAggregatedPermissions(Participant participant)
         {
-            var layers = await FetchParticipantPermissionLayers(conferenceId, participantId);
+            var layers = await FetchParticipantPermissionLayers(participant);
 
             var stack = new CachedPermissionStack(layers.OrderBy(x => x.Order).Select(x => x.Permissions).ToList());
             return stack.Flatten();
         }
 
-        public async ValueTask<List<PermissionLayer>> FetchParticipantPermissionLayers(string conferenceId,
-            string participantId)
+        public async ValueTask<List<PermissionLayer>> FetchParticipantPermissionLayers(Participant participant)
         {
             var layers = new List<PermissionLayer>();
             foreach (var provider in _permissionProviders)
             {
-                layers.AddRange(await provider.FetchPermissionsForParticipant(conferenceId, participantId));
+                layers.AddRange(await provider.FetchPermissionsForParticipant(participant));
             }
 
             return layers;

@@ -36,8 +36,7 @@ namespace PaderConference.Core.Services.ConferenceControl
             return new SynchronizedConferenceInfo(isOpen, conference.Configuration.Moderators, nextDate);
         }
 
-        public override ValueTask<IEnumerable<SynchronizedObjectId>> GetAvailableObjects(string conferenceId,
-            string participantId)
+        public override ValueTask<IEnumerable<SynchronizedObjectId>> GetAvailableObjects(Participant participant)
         {
             return new(new SynchronizedObjectId(Id).Yield());
         }

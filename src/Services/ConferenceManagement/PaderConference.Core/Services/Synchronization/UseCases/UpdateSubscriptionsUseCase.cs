@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
+using PaderConference.Core.Extensions;
 using PaderConference.Core.Services.ConferenceControl.Gateways;
 using PaderConference.Core.Services.Synchronization.Gateways;
 using PaderConference.Core.Services.Synchronization.Notifications;
@@ -33,45 +34,45 @@ namespace PaderConference.Core.Services.Synchronization.UseCases
 
         public async Task<Unit> Handle(UpdateSubscriptionsRequest request, CancellationToken cancellationToken)
         {
-            var (conferenceId, participantId) = request;
+            var participant = request.Participant;
 
             var subscriptions = new List<SynchronizedObjectId>();
             foreach (var provider in _providers)
             {
-                var availableSubscriptions = await provider.GetAvailableObjects(conferenceId, participantId);
+                var availableSubscriptions = await provider.GetAvailableObjects(participant);
                 subscriptions.AddRange(availableSubscriptions);
             }
 
             var oldSubscriptions =
-                await _subscriptionsRepository.GetSet(conferenceId, participantId,
-                    subscriptions.Select(x => x.ToString()).ToList()) ?? ImmutableList<string>.Empty;
+                await _subscriptionsRepository.GetSet(participant, subscriptions.Select(x => x.ToString()).ToList()) ??
+                ImmutableList<string>.Empty;
 
-            if (!await _joinedParticipantsRepository.IsParticipantJoined(conferenceId, participantId))
+            if (!await _joinedParticipantsRepository.IsParticipantJoined(participant))
             {
-                await _subscriptionsRepository.Remove(conferenceId, participantId);
+                await _subscriptionsRepository.Remove(participant);
                 return Unit.Value;
             }
 
             var newSubscriptions = subscriptions.Where(x => !oldSubscriptions.Contains(x.ToString()));
-            await SendCurrentSynchronizedObjectValues(conferenceId, participantId, newSubscriptions);
+            await SendCurrentSynchronizedObjectValues(participant, newSubscriptions);
 
             var removedSubscriptions = oldSubscriptions.Except(subscriptions.Select(x => x.ToString())).ToList();
             if (removedSubscriptions.Any())
                 await _mediator.Publish(
-                    new ParticipantSubscriptionsRemovedNotification(conferenceId, participantId, removedSubscriptions));
+                    new ParticipantSubscriptionsRemovedNotification(participant, removedSubscriptions));
 
             return Unit.Value;
         }
 
-        private async ValueTask SendCurrentSynchronizedObjectValues(string conferenceId, string participantId,
+        private async ValueTask SendCurrentSynchronizedObjectValues(Participant participant,
             IEnumerable<SynchronizedObjectId> subscriptions)
         {
             foreach (var syncObjId in subscriptions)
             {
-                var value = await GetCurrentValueOfSynchronizedObject(conferenceId, syncObjId);
+                var value = await GetCurrentValueOfSynchronizedObject(participant.ConferenceId, syncObjId);
 
-                await _mediator.Publish(new SynchronizedObjectUpdatedNotification(conferenceId,
-                    new[] {participantId}.ToImmutableList(), syncObjId.ToString(), value, null));
+                await _mediator.Publish(new SynchronizedObjectUpdatedNotification(participant.Yield().ToImmutableList(),
+                    syncObjId.ToString(), value, null));
             }
         }
 

@@ -8,7 +8,7 @@ namespace PaderConference.Core
     {
         public MapperProfile()
         {
-            CreateMap<Participant, ParticipantDto>();
+            CreateMap<ParticipantData, ParticipantDto>();
         }
     }
 }

@@ -22,12 +22,12 @@ namespace PaderConference.Core.Services.Synchronization.NotificationHandlers
 
         public async Task Handle(ParticipantLeftNotification notification, CancellationToken cancellationToken)
         {
-            var (participantId, conferenceId, _) = notification;
+            var (participant, _) = notification;
 
-            var removedSubscriptions = await _subscriptionsRepository.Remove(conferenceId, participantId);
+            var removedSubscriptions = await _subscriptionsRepository.Remove(participant);
             if (removedSubscriptions?.Any() == true)
                 await _mediator.Publish(
-                    new ParticipantSubscriptionsRemovedNotification(conferenceId, participantId, removedSubscriptions),
+                    new ParticipantSubscriptionsRemovedNotification(participant, removedSubscriptions),
                     cancellationToken);
         }
     }

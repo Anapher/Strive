@@ -46,7 +46,8 @@ namespace PaderConference.Core.Interfaces.Services
         /// <returns>Return the created participant</returns>
         /// <exception cref="ConferenceNotFoundException">Thrown if the conference was not found.</exception>
         /// <exception cref="InvalidOperationException">If the participant already participates in the conference.</exception>
-        ValueTask<Participant> Participate(string conferenceId, string participantId, string role, string? displayName);
+        ValueTask<ParticipantData> Participate(string conferenceId, string participantId, string role,
+            string? displayName);
 
         /// <summary>
         ///     Check if the conference is open
@@ -60,21 +61,21 @@ namespace PaderConference.Core.Interfaces.Services
         /// </summary>
         /// <param name="conferenceId">The conference id</param>
         /// <returns>Return the participants of the conference.</returns>
-        ICollection<Participant> GetParticipants(string conferenceId);
+        ICollection<ParticipantData> GetParticipants(string conferenceId);
 
         /// <summary>
         ///     Remove a participant from a conference. If the participant was not found, do not throw an exception
         /// </summary>
-        /// <param name="participant">The participant id</param>
-        ValueTask RemoveParticipant(Participant participant);
+        /// <param name="participantData">The participant id</param>
+        ValueTask RemoveParticipant(ParticipantData participantData);
 
         /// <summary>
         ///     Get the conference of a participant
         /// </summary>
-        /// <param name="participant">The participant id</param>
+        /// <param name="participantData">The participant id</param>
         /// <returns>Return the conference id as string of the participant</returns>
         /// <exception cref="KeyNotFoundException">Thrown if the participant is not in a conference</exception>
-        string GetConferenceOfParticipant(Participant participant);
+        string GetConferenceOfParticipant(ParticipantData participantData);
 
         /// <summary>
         ///     Try to get a participant from a conference. If the participant does not exist or is in a different conference,
@@ -85,6 +86,6 @@ namespace PaderConference.Core.Interfaces.Services
         /// <param name="participant">The participant object.</param>
         /// <returns>Return true if the participant could be found.</returns>
         bool TryGetParticipant(string conferenceId, string participantId,
-            [NotNullWhen(true)] out Participant? participant);
+            [NotNullWhen(true)] out ParticipantData? participant);
     }
 }

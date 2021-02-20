@@ -20,10 +20,10 @@ namespace PaderConference.Core.Services.Permissions.NotificationHandlers
 
         public async Task Handle(ParticipantLeftNotification notification, CancellationToken cancellationToken)
         {
-            var (participantId, conferenceId, _) = notification;
+            var (participant, _) = notification;
 
-            await _permissionRepository.DeletePermissions(conferenceId, participantId);
-            await _temporaryPermissionRepository.RemoveAllTemporaryPermissions(conferenceId, participantId);
+            await _permissionRepository.DeletePermissions(participant);
+            await _temporaryPermissionRepository.RemoveAllTemporaryPermissions(participant);
         }
     }
 }

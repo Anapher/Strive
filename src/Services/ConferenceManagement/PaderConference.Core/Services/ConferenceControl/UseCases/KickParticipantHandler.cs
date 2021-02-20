@@ -18,7 +18,7 @@ namespace PaderConference.Core.Services.ConferenceControl.UseCases
         public async Task<Unit> Handle(KickParticipantRequest request, CancellationToken cancellationToken)
         {
             // there is not much we can do
-            await _mediator.Publish(new ParticipantKickedNotification(request.ParticipantId, request.ConferenceId, null,
+            await _mediator.Publish(new ParticipantKickedNotification(request.Participant, null,
                 ParticipantKickedReason.ByModerator));
             return Unit.Value;
         }

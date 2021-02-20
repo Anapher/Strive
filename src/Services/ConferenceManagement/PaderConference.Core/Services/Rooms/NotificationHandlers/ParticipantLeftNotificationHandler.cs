@@ -17,7 +17,7 @@ namespace PaderConference.Core.Services.Rooms.NotificationHandlers
 
         public async Task Handle(ParticipantLeftNotification notification, CancellationToken cancellationToken)
         {
-            await _roomRepository.UnsetParticipantRoom(notification.ConferenceId, notification.ParticipantId);
+            await _roomRepository.UnsetParticipantRoom(notification.Participant);
         }
     }
 }

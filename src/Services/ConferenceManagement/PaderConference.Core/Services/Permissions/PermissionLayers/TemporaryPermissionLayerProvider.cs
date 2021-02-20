@@ -13,12 +13,9 @@ namespace PaderConference.Core.Services.Permissions.PermissionLayers
             _temporaryPermissionRepository = temporaryPermissionRepository;
         }
 
-        public async ValueTask<IEnumerable<PermissionLayer>> FetchPermissionsForParticipant(string conferenceId,
-            string participantId)
+        public async ValueTask<IEnumerable<PermissionLayer>> FetchPermissionsForParticipant(Participant participant)
         {
-            var permissions =
-                await _temporaryPermissionRepository.FetchTemporaryPermissions(conferenceId, participantId);
-
+            var permissions = await _temporaryPermissionRepository.FetchTemporaryPermissions(participant);
             return new List<PermissionLayer> {CommonPermissionLayers.Temporary(permissions)};
         }
     }

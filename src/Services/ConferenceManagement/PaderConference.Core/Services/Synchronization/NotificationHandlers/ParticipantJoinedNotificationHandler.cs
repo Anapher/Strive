@@ -17,8 +17,7 @@ namespace PaderConference.Core.Services.Synchronization.NotificationHandlers
 
         public async Task Handle(ParticipantJoinedNotification notification, CancellationToken cancellationToken)
         {
-            await _mediator.Send(new UpdateSubscriptionsRequest(notification.ConferenceId, notification.ParticipantId),
-                cancellationToken);
+            await _mediator.Send(new UpdateSubscriptionsRequest(notification.Participant), cancellationToken);
         }
     }
 }

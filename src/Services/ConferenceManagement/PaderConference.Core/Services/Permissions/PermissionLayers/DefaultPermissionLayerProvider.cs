@@ -14,15 +14,16 @@ namespace PaderConference.Core.Services.Permissions.PermissionLayers
         private readonly DefaultPermissionOptions _options;
 
         public DefaultPermissionLayerProvider(IConferenceRepo conferenceRepo,
-            IOptionsSnapshot<DefaultPermissionOptions> options)
+            IOptions<DefaultPermissionOptions> options)
         {
             _conferenceRepo = conferenceRepo;
             _options = options.Value;
         }
 
-        public async ValueTask<IEnumerable<PermissionLayer>> FetchPermissionsForParticipant(string conferenceId,
-            string participantId)
+        public async ValueTask<IEnumerable<PermissionLayer>> FetchPermissionsForParticipant(Participant participant)
         {
+            var (conferenceId, participantId) = participant;
+
             var result = new List<PermissionLayer>
             {
                 CommonPermissionLayers.ConferenceDefault(_options.Default[PermissionType.Conference]),

@@ -4,5 +4,5 @@ using MediatR;
 namespace PaderConference.Core.Services.Rooms.Notifications
 {
     public record ParticipantsRoomChangedNotification
-        (string ConferenceId, IEnumerable<string> Participants) : INotification;
+        (string ConferenceId, IEnumerable<Participant> Participants) : INotification;
 }

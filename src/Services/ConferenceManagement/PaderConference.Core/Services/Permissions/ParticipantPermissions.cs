@@ -12,9 +12,9 @@ namespace PaderConference.Core.Services.Permissions
             _permissionsRepo = permissionsRepo;
         }
 
-        public async ValueTask<IPermissionStack> FetchForParticipant(string conferenceId, string participantId)
+        public async ValueTask<IPermissionStack> FetchForParticipant(Participant participant)
         {
-            return new RepositoryPermissionStack(_permissionsRepo, conferenceId, participantId);
+            return new RepositoryPermissionStack(_permissionsRepo, participant);
         }
     }
 }

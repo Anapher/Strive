@@ -31,17 +31,16 @@ namespace PaderConference.Core.Services.Rooms.NotificationHandlers
 
             await EnsureDefaultRoomCreated(conferenceId);
 
-            var joinedParticipants = await _joinedParticipantsRepository.GetParticipantsOfConference(conferenceId);
-            foreach (var participantId in joinedParticipants)
+            var participants = await _joinedParticipantsRepository.GetParticipantsOfConference(conferenceId);
+            foreach (var participant in participants)
             {
-                await MoveParticipantToDefaultRoom(conferenceId, participantId);
+                await MoveParticipantToDefaultRoom(participant);
             }
         }
 
-        private async Task MoveParticipantToDefaultRoom(string conferenceId, string participantId)
+        private async Task MoveParticipantToDefaultRoom(Participant participant)
         {
-            await _mediator.Send(
-                new SetParticipantRoomRequest(conferenceId, participantId, RoomOptions.DEFAULT_ROOM_ID));
+            await _mediator.Send(new SetParticipantRoomRequest(participant, RoomOptions.DEFAULT_ROOM_ID));
         }
 
         private async Task EnsureDefaultRoomCreated(string conferenceId)

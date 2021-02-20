@@ -4,11 +4,11 @@ namespace PaderConference.Core.Dto.UseCaseResponses
 {
     public class JoinConferenceResponse
     {
-        public JoinConferenceResponse(Participant participant)
+        public JoinConferenceResponse(ParticipantData participantData)
         {
-            Participant = participant;
+            ParticipantData = participantData;
         }
 
-        public Participant Participant { get; }
+        public ParticipantData ParticipantData { get; }
     }
 }

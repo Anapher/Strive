@@ -8,7 +8,9 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using Moq;
 using PaderConference.Core.Domain.Entities;
+using PaderConference.Core.IntegrationTests._TestHelpers;
 using PaderConference.Core.Interfaces.Gateways.Repositories;
+using PaderConference.Core.Services;
 using PaderConference.Core.Services.ConferenceControl.Gateways;
 using PaderConference.Core.Services.Synchronization;
 using PaderConference.Infrastructure;
@@ -28,6 +30,7 @@ namespace PaderConference.Core.IntegrationTests.Services.Base
         protected IMediator Mediator;
 
         protected MediatorNotificationCollector NotificationCollector = new();
+        protected readonly SynchronizedObjectListener SynchronizedObjectListener = new();
 
         protected ServiceIntegrationTest(ITestOutputHelper testOutputHelper)
         {
@@ -48,6 +51,7 @@ namespace PaderConference.Core.IntegrationTests.Services.Base
         {
             builder.RegisterSource(new ContravariantRegistrationSource());
             builder.RegisterInstance(NotificationCollector).AsImplementedInterfaces();
+            builder.RegisterInstance(SynchronizedObjectListener).AsImplementedInterfaces();
 
             builder.RegisterInstance(Data).AsSelf();
             builder.RegisterType<InMemoryKeyValueDatabase>().AsImplementedInterfaces();
@@ -100,10 +104,10 @@ namespace PaderConference.Core.IntegrationTests.Services.Base
             builder.RegisterInstance(mock.Object).As<IConferenceRepo>();
         }
 
-        protected async ValueTask SetParticipantJoined(string conferenceId, string participantId)
+        protected async ValueTask SetParticipantJoined(Participant participant)
         {
             var joinedParticipantRepo = Container.Resolve<IJoinedParticipantsRepository>();
-            await joinedParticipantRepo.AddParticipant(participantId, conferenceId, "testConn");
+            await joinedParticipantRepo.AddParticipant(participant, "testConn");
         }
 
         protected async ValueTask RemoveParticipantJoined(string participantId)

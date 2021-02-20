@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Moq;
 using Newtonsoft.Json.Linq;
 using PaderConference.Core.Extensions;
+using PaderConference.Core.Services;
 using PaderConference.Core.Services.Permissions;
 using PaderConference.Tests.Utils;
 using Xunit;
@@ -15,6 +16,8 @@ namespace PaderConference.Core.Tests.Services.Permissions
         private const string ConferenceId = "123";
         private const string ParticipantId = "45";
 
+        private static readonly Participant Participant = new(ConferenceId, ParticipantId);
+
         private readonly KeyValuePair<string, JValue> _testPermission = new("test", (JValue) JToken.FromObject("test"));
 
         [Fact]
@@ -25,7 +28,7 @@ namespace PaderConference.Core.Tests.Services.Permissions
             var aggregator = new PermissionLayersAggregator(providers);
 
             // act
-            var result = await aggregator.FetchAggregatedPermissions(ConferenceId, ParticipantId);
+            var result = await aggregator.FetchAggregatedPermissions(Participant);
 
             // assert
             Assert.Empty(result);
@@ -38,14 +41,14 @@ namespace PaderConference.Core.Tests.Services.Permissions
             var permissions = new Dictionary<string, JValue>(_testPermission.Yield());
 
             var providerMock = new Mock<IPermissionLayerProvider>();
-            providerMock.Setup(x => x.FetchPermissionsForParticipant(ConferenceId, ParticipantId))
+            providerMock.Setup(x => x.FetchPermissionsForParticipant(Participant))
                 .ReturnsAsync(new PermissionLayer(1, "Test", permissions).Yield());
 
             var providers = new[] {providerMock.Object};
             var aggregator = new PermissionLayersAggregator(providers);
 
             // act
-            var result = await aggregator.FetchAggregatedPermissions(ConferenceId, ParticipantId);
+            var result = await aggregator.FetchAggregatedPermissions(Participant);
 
             // assert
             AssertHelper.AssertScrambledEquals(permissions, result);
@@ -59,14 +62,13 @@ namespace PaderConference.Core.Tests.Services.Permissions
             var layer = new PermissionLayer(1, "Test", permissions);
 
             var providerMock = new Mock<IPermissionLayerProvider>();
-            providerMock.Setup(x => x.FetchPermissionsForParticipant(ConferenceId, ParticipantId))
-                .ReturnsAsync(layer.Yield());
+            providerMock.Setup(x => x.FetchPermissionsForParticipant(Participant)).ReturnsAsync(layer.Yield());
 
             var providers = new[] {providerMock.Object};
             var aggregator = new PermissionLayersAggregator(providers);
 
             // act
-            var result = await aggregator.FetchParticipantPermissionLayers(ConferenceId, ParticipantId);
+            var result = await aggregator.FetchParticipantPermissionLayers(Participant);
 
             // assert
             var actualLayer = Assert.Single(result);

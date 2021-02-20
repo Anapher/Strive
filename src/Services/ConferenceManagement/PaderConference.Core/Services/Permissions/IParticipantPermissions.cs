@@ -4,6 +4,6 @@ namespace PaderConference.Core.Services.Permissions
 {
     public interface IParticipantPermissions
     {
-        ValueTask<IPermissionStack> FetchForParticipant(string conferenceId, string participantId);
+        ValueTask<IPermissionStack> FetchForParticipant(Participant participant);
     }
 }

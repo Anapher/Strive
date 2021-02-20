@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Moq;
+using PaderConference.Core.Services;
 using PaderConference.Core.Services.ConferenceControl.ClientControl;
 using PaderConference.Core.Services.ConferenceControl.Gateways;
 using PaderConference.Core.Services.ConferenceControl.Notifications;
@@ -24,6 +25,8 @@ namespace PaderConference.Core.Tests.Services.ConferenceControl.UseCases
         private const string ParticipantId = "34";
         private const string ConnectionId = "324";
 
+        private static readonly Participant Participant = new(ConferenceId, ParticipantId);
+
         public JoinConferenceRequestHandlerTests(ITestOutputHelper outputHelper)
         {
             _mediatorMock = new Mock<IMediator>();
@@ -38,7 +41,7 @@ namespace PaderConference.Core.Tests.Services.ConferenceControl.UseCases
 
         private JoinConferenceRequest CreateDefaultRequest()
         {
-            return new(ConferenceId, ParticipantId, ConnectionId);
+            return new(new Participant(ConferenceId, ParticipantId), ConnectionId);
         }
 
         [Fact]
@@ -87,10 +90,13 @@ namespace PaderConference.Core.Tests.Services.ConferenceControl.UseCases
         public async Task Handle_ParticipantAlreadyJoined_KickParticipant()
         {
             const string connectedConnectionId = "differentConnectionId";
+            var participantToKick = new Participant("differentConference", ParticipantId);
 
             // arrange
-            _joinedParticipantsRepositoryMock.Setup(x => x.AddParticipant(ParticipantId, ConferenceId, ConnectionId))
-                .ReturnsAsync(new PreviousParticipantState("differentConference", connectedConnectionId));
+            var capturedNotification = _mediatorMock.CaptureNotification<ParticipantKickedNotification>();
+
+            _joinedParticipantsRepositoryMock.Setup(x => x.AddParticipant(Participant, ConnectionId))
+                .ReturnsAsync(new PreviousParticipantState(participantToKick.ConferenceId, connectedConnectionId));
 
             var request = CreateDefaultRequest();
             var handler = Create();
@@ -99,11 +105,11 @@ namespace PaderConference.Core.Tests.Services.ConferenceControl.UseCases
             await handler.Handle(request, CancellationToken.None);
 
             // assert
-            _mediatorMock.Verify(
-                mediator => mediator.Publish(
-                    It.Is<ParticipantKickedNotification>(x =>
-                        x.ParticipantId == ParticipantId && x.ConnectionId == connectedConnectionId),
-                    It.IsAny<CancellationToken>()), Times.Once);
+            capturedNotification.AssertReceived();
+
+            var notification = capturedNotification.GetNotification();
+            Assert.Equal(participantToKick, notification.Participant);
+            Assert.Equal(connectedConnectionId, notification.ConnectionId);
         }
     }
 }

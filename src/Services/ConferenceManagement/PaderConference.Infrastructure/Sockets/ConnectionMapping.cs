@@ -6,21 +6,20 @@ namespace PaderConference.Infrastructure.Sockets
 {
     public class ConnectionMapping : IConnectionMapping
     {
-        public ConcurrentDictionary<string, Participant> Connections { get; } =
-            new ConcurrentDictionary<string, Participant>();
+        public ConcurrentDictionary<string, ParticipantData> Connections { get; } = new();
 
         public ConcurrentDictionary<string, IParticipantConnections> ConnectionsR { get; } =
             new ConcurrentDictionary<string, IParticipantConnections>();
 
-        public bool Add(string connectionId, Participant participant, bool equipment)
+        public bool Add(string connectionId, ParticipantData participantData, bool equipment)
         {
-            if (!Connections.TryAdd(connectionId, participant))
+            if (!Connections.TryAdd(connectionId, participantData))
                 return false;
 
             if (equipment)
             {
                 // receive participant connections object
-                if (!ConnectionsR.TryGetValue(participant.ParticipantId, out var connections))
+                if (!ConnectionsR.TryGetValue(participantData.ParticipantId, out var connections))
                 {
                     Connections.TryRemove(connectionId, out _);
                     return false;
@@ -37,7 +36,7 @@ namespace PaderConference.Infrastructure.Sockets
             {
                 // create participant connections object and try to add
                 var connections = new ParticipantConnections(connectionId);
-                if (!ConnectionsR.TryAdd(participant.ParticipantId, connections))
+                if (!ConnectionsR.TryAdd(participantData.ParticipantId, connections))
                 {
                     Connections.TryRemove(connectionId, out _);
                     return false;

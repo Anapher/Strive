@@ -8,22 +8,18 @@ namespace PaderConference.Core.Services.Permissions
     /// </summary>
     public class RepositoryPermissionStack : IPermissionStack
     {
-        private readonly string _participantId;
-        private readonly string _conferenceId;
         private readonly IAggregatedPermissionRepository _repo;
+        private readonly Participant _participant;
 
-        public RepositoryPermissionStack(IAggregatedPermissionRepository repo, string participantId,
-            string conferenceId)
+        public RepositoryPermissionStack(IAggregatedPermissionRepository repo, Participant participant)
         {
             _repo = repo;
-            _participantId = participantId;
-            _conferenceId = conferenceId;
+            _participant = participant;
         }
 
         public async ValueTask<T> GetPermissionValue<T>(PermissionDescriptor<T> descriptor)
         {
-            return await _repo.GetPermissionsValue<T>(_conferenceId, _participantId, descriptor.Key) ??
-                   (T) descriptor.DefaultValue;
+            return await _repo.GetPermissionsValue<T>(_participant, descriptor.Key) ?? (T) descriptor.DefaultValue;
         }
     }
 }

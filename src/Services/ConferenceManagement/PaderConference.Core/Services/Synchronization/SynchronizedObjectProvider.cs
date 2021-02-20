@@ -10,8 +10,7 @@ namespace PaderConference.Core.Services.Synchronization
 
         public abstract string Id { get; }
 
-        public abstract ValueTask<IEnumerable<SynchronizedObjectId>> GetAvailableObjects(string conferenceId,
-            string participantId);
+        public abstract ValueTask<IEnumerable<SynchronizedObjectId>> GetAvailableObjects(Participant participant);
 
         protected abstract ValueTask<T> InternalFetchValue(string conferenceId,
             SynchronizedObjectId synchronizedObjectId);

@@ -69,20 +69,19 @@ namespace PaderConference.Core.Services.Rooms.UseCases
             return removed;
         }
 
-        private async Task MoveParticipantsToDefaultRoom(string conferenceId, IEnumerable<string> participants)
+        private async Task MoveParticipantsToDefaultRoom(string conferenceId, IEnumerable<Participant> participants)
         {
-            foreach (var participantId in participants)
+            foreach (var participant in participants)
             {
                 try
                 {
-                    await _mediator.Send(new SetParticipantRoomRequest(conferenceId, participantId,
-                        RoomOptions.DEFAULT_ROOM_ID));
+                    await _mediator.Send(new SetParticipantRoomRequest(participant, RoomOptions.DEFAULT_ROOM_ID));
                 }
                 catch (Exception e)
                 {
                     _logger.LogError(e,
                         "An error occurred on trying to switch participant {participant} to the default room",
-                        participantId);
+                        participant);
                 }
             }
         }

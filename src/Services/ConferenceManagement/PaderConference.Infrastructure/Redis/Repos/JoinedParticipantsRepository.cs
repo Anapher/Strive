@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using PaderConference.Core.Services;
 using PaderConference.Core.Services.ConferenceControl.Gateways;
 using PaderConference.Infrastructure.Redis.Abstractions;
 using PaderConference.Infrastructure.Redis.Scripts;
@@ -18,20 +20,17 @@ namespace PaderConference.Infrastructure.Redis.Repos
             _database = database;
         }
 
-        public async Task<PreviousParticipantState?> AddParticipant(string participantId, string conferenceId,
-            string connectionId)
+        public async Task<PreviousParticipantState?> AddParticipant(Participant participant, string connectionId)
         {
-            var participantToConferenceKey = RedisKeyBuilder.ForProperty(PARTICIPANT_TO_CONFERENCE_KEY)
-                .ForParticipant(participantId).ToString();
-            var conferenceToParticipantsKey = RedisKeyBuilder.ForProperty(CONFERENCE_TO_PARTICIPANTS_KEY)
-                .ForConference(conferenceId).ToString();
+            var participantToConferenceKey = GetParticipantToConferenceKey(participant.Id);
+            var conferenceToParticipantsKey = GetConferenceToParticipantsKey(participant.ConferenceId);
 
             using (var trans = _database.CreateTransaction())
             {
-                var previousConferenceIdTask = RemoveParticipant(trans, participantId);
+                var previousConferenceIdTask = RemoveParticipant(trans, participant.Id);
 
-                _ = trans.SetAsync(participantToConferenceKey, conferenceId);
-                _ = trans.HashSetAsync(conferenceToParticipantsKey, participantId, connectionId);
+                _ = trans.SetAsync(participantToConferenceKey, participant.ConferenceId);
+                _ = trans.HashSetAsync(conferenceToParticipantsKey, participant.Id, connectionId);
 
                 await trans.ExecuteAsync();
 
@@ -48,10 +47,8 @@ namespace PaderConference.Infrastructure.Redis.Repos
         private static async Task<PreviousParticipantState?> RemoveParticipant(IKeyValueDatabaseActions database,
             string participantId)
         {
-            var participantToConferenceKey = RedisKeyBuilder.ForProperty(PARTICIPANT_TO_CONFERENCE_KEY)
-                .ForParticipant(participantId).ToString();
-            var conferenceToParticipantsKey = RedisKeyBuilder.ForProperty(CONFERENCE_TO_PARTICIPANTS_KEY)
-                .ForConference("*").ToString();
+            var participantToConferenceKey = GetParticipantToConferenceKey(participantId);
+            var conferenceToParticipantsKey = GetConferenceToParticipantsKey("*");
 
             var result = await database.ExecuteScriptAsync(RedisScript.JoinedParticipantsRepository_RemoveParticipant,
                 participantId, participantToConferenceKey, conferenceToParticipantsKey);
@@ -65,10 +62,8 @@ namespace PaderConference.Infrastructure.Redis.Repos
         private static async Task<bool?> RemoveParticipantSafe(IKeyValueDatabaseActions database, string participantId,
             string connectionId)
         {
-            var participantToConferenceKey = RedisKeyBuilder.ForProperty(PARTICIPANT_TO_CONFERENCE_KEY)
-                .ForParticipant(participantId).ToString();
-            var conferenceToParticipantsKey = RedisKeyBuilder.ForProperty(CONFERENCE_TO_PARTICIPANTS_KEY)
-                .ForConference("*").ToString();
+            var participantToConferenceKey = GetParticipantToConferenceKey(participantId);
+            var conferenceToParticipantsKey = GetConferenceToParticipantsKey("*");
 
             var result = await database.ExecuteScriptAsync(
                 RedisScript.JoinedParticipantsRepository_RemoveParticipantSafe, participantId,
@@ -80,23 +75,32 @@ namespace PaderConference.Infrastructure.Redis.Repos
 
         public async Task<string?> GetConferenceIdOfParticipant(string participantId)
         {
-            var key = RedisKeyBuilder.ForProperty(PARTICIPANT_TO_CONFERENCE_KEY).ForParticipant(participantId)
-                .ToString();
-
+            var key = GetParticipantToConferenceKey(participantId);
             return await _database.GetAsync(key);
         }
 
-        public async Task<IEnumerable<string>> GetParticipantsOfConference(string conferenceId)
+        public async Task<IEnumerable<Participant>> GetParticipantsOfConference(string conferenceId)
         {
             var conferenceToParticipantsKey = RedisKeyBuilder.ForProperty(CONFERENCE_TO_PARTICIPANTS_KEY)
                 .ForConference(conferenceId).ToString();
 
-            return (await _database.HashGetAllAsync(conferenceToParticipantsKey)).Keys;
+            return (await _database.HashGetAllAsync(conferenceToParticipantsKey)).Keys.Select(participantId =>
+                new Participant(conferenceId, participantId));
         }
 
-        public async Task<bool> IsParticipantJoined(string conferenceId, string participantId)
+        public async Task<bool> IsParticipantJoined(Participant participant)
         {
-            return await GetConferenceIdOfParticipant(participantId) == conferenceId;
+            return await GetConferenceIdOfParticipant(participant.Id) == participant.ConferenceId;
+        }
+
+        private static string GetParticipantToConferenceKey(string participantId)
+        {
+            return RedisKeyBuilder.ForProperty(PARTICIPANT_TO_CONFERENCE_KEY).ForParticipant(participantId).ToString();
+        }
+
+        private static string GetConferenceToParticipantsKey(string conferenceId)
+        {
+            return RedisKeyBuilder.ForProperty(CONFERENCE_TO_PARTICIPANTS_KEY).ForConference(conferenceId).ToString();
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Moq;
+using PaderConference.Core.Services;
 using PaderConference.Core.Services.ConferenceControl.Gateways;
 
 namespace PaderConference.Core.Tests._TestHelpers
@@ -9,14 +10,14 @@ namespace PaderConference.Core.Tests._TestHelpers
 
         public IJoinedParticipantsRepository Object => Mock.Object;
 
-        public void JoinParticipant(string conferenceId, string participantId)
+        public void JoinParticipant(Participant participant)
         {
-            Mock.Setup(x => x.IsParticipantJoined(conferenceId, participantId)).ReturnsAsync(true);
+            Mock.Setup(x => x.IsParticipantJoined(participant)).ReturnsAsync(true);
         }
 
-        public void RemoveParticipant(string conferenceId, string participantId)
+        public void RemoveParticipant(Participant participant)
         {
-            Mock.Setup(x => x.IsParticipantJoined(conferenceId, participantId)).ReturnsAsync(false);
+            Mock.Setup(x => x.IsParticipantJoined(participant)).ReturnsAsync(false);
         }
     }
 }

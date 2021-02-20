@@ -2,6 +2,5 @@
 
 namespace PaderConference.Core.Services.ConferenceControl.Notifications
 {
-    public record ParticipantLeftNotification
-        (string ParticipantId, string ConferenceId, string ConnectionId) : INotification;
+    public record ParticipantLeftNotification (Participant Participant, string ConnectionId) : INotification;
 }

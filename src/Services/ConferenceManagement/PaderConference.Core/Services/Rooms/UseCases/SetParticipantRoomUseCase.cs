@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using PaderConference.Core.Extensions;
 using PaderConference.Core.Services.Rooms.Gateways;
 using PaderConference.Core.Services.Rooms.Notifications;
 using PaderConference.Core.Services.Rooms.Requests;
@@ -24,11 +25,12 @@ namespace PaderConference.Core.Services.Rooms.UseCases
 
         public async Task<Unit> Handle(SetParticipantRoomRequest request, CancellationToken cancellationToken)
         {
-            var (conferenceId, participantId, roomId) = request;
+            var (participant, roomId) = request;
 
-            _logger.LogDebug("Switch participant {participantId} to room {roomId}", participantId, roomId);
-            await _roomRepository.SetParticipantRoom(conferenceId, participantId, roomId);
-            await _mediator.Publish(new ParticipantsRoomChangedNotification(conferenceId, new[] {participantId}));
+            _logger.LogDebug("Switch participant {participant} to room {roomId}", participant, roomId);
+            await _roomRepository.SetParticipantRoom(participant, roomId);
+            await _mediator.Publish(
+                new ParticipantsRoomChangedNotification(participant.ConferenceId, participant.Yield()));
 
             return Unit.Value;
         }

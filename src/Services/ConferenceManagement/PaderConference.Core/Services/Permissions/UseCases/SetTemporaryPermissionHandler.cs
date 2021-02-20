@@ -33,10 +33,10 @@ namespace PaderConference.Core.Services.Permissions.UseCases
         public async Task<SuccessOrError<Unit>> Handle(SetTemporaryPermissionRequest request,
             CancellationToken cancellationToken)
         {
-            var (participantId, permissionKey, value, conferenceId) = request;
+            var (participant, permissionKey, value) = request;
 
             _logger.LogDebug("Set temporary permission {permissionKey} of participant {participantId} to {value}",
-                permissionKey, participantId,
+                permissionKey, participant,
                 value?.ToString()); // serilog serialized JValue as an empty enumerable... {$value} does sadly not work for some reason
 
             if (!_permissionValidator.TryGetDescriptor(permissionKey, out var descriptor))
@@ -47,26 +47,24 @@ namespace PaderConference.Core.Services.Permissions.UseCases
                 if (!descriptor.ValidateValue(value))
                     return PermissionsError.InvalidPermissionValueType;
 
-                await _temporaryPermissionRepository.SetTemporaryPermission(conferenceId, participantId, descriptor.Key,
-                    value);
+                await _temporaryPermissionRepository.SetTemporaryPermission(participant, descriptor.Key, value);
 
-                if (!await _participantsRepository.IsParticipantJoined(conferenceId, participantId))
+                if (!await _participantsRepository.IsParticipantJoined(participant))
                 {
                     _logger.LogDebug(
                         "After setting temporary permissions for participant {participantId}, it was noticed that the participant is not currently joined. Remove temporary permission.",
-                        participantId);
+                        participant);
 
-                    await _temporaryPermissionRepository.RemoveAllTemporaryPermissions(conferenceId, participantId);
+                    await _temporaryPermissionRepository.RemoveAllTemporaryPermissions(participant);
                     return CommonError.ConcurrencyError;
                 }
             }
             else
             {
-                await _temporaryPermissionRepository.RemoveTemporaryPermission(conferenceId, participantId,
-                    descriptor.Key);
+                await _temporaryPermissionRepository.RemoveTemporaryPermission(participant, descriptor.Key);
             }
 
-            await _mediator.Send(new UpdateParticipantsPermissionsRequest(conferenceId, new[] {participantId}));
+            await _mediator.Send(new UpdateParticipantsPermissionsRequest(participant.Yield()));
             return Unit.Value;
         }
     }

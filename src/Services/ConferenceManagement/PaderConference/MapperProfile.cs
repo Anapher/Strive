@@ -12,7 +12,7 @@ namespace PaderConference
         public MapperProfile()
         {
             //CreateMap<ChatMessage, ChatMessageDto>();
-            CreateMap<Participant, ParticipantDto>();
+            CreateMap<ParticipantData, ParticipantDto>();
         }
     }
 }

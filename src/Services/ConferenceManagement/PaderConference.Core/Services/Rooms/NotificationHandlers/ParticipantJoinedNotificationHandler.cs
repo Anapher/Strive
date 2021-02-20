@@ -22,12 +22,11 @@ namespace PaderConference.Core.Services.Rooms.NotificationHandlers
 
         public async Task Handle(ParticipantJoinedNotification notification, CancellationToken cancellationToken)
         {
-            var (participantId, conferenceId) = notification;
+            var participant = notification.Participant;
 
             try
             {
-                await _mediator.Send(
-                    new SetParticipantRoomRequest(conferenceId, participantId, RoomOptions.DEFAULT_ROOM_ID),
+                await _mediator.Send(new SetParticipantRoomRequest(participant, RoomOptions.DEFAULT_ROOM_ID),
                     cancellationToken);
             }
             catch (ConcurrencyException e)

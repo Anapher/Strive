@@ -9,7 +9,7 @@ namespace PaderConference.Core.Services.ConferenceControl.Gateways
         ///     Register a participant in the mapping
         /// </summary>
         /// <returns>Return the conference id that was previously set or null if the participant did not belong to a conference</returns>
-        Task<PreviousParticipantState?> AddParticipant(string participantId, string conferenceId, string connectionId);
+        Task<PreviousParticipantState?> AddParticipant(Participant participant, string connectionId);
 
 
         /// <summary>
@@ -22,8 +22,8 @@ namespace PaderConference.Core.Services.ConferenceControl.Gateways
 
         Task<string?> GetConferenceIdOfParticipant(string participantId);
 
-        Task<IEnumerable<string>> GetParticipantsOfConference(string conferenceId);
+        Task<IEnumerable<Participant>> GetParticipantsOfConference(string conferenceId);
 
-        Task<bool> IsParticipantJoined(string conferenceId, string participantId);
+        Task<bool> IsParticipantJoined(Participant participant);
     }
 }

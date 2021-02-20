@@ -5,7 +5,6 @@ namespace PaderConference.Core.Services.Permissions
 {
     public interface IPermissionLayerProvider
     {
-        ValueTask<IEnumerable<PermissionLayer>> FetchPermissionsForParticipant(string conferenceId,
-            string participantId);
+        ValueTask<IEnumerable<PermissionLayer>> FetchPermissionsForParticipant(Participant participant);
     }
 }

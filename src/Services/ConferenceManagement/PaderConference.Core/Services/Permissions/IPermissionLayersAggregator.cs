@@ -6,8 +6,8 @@ namespace PaderConference.Core.Services.Permissions
 {
     public interface IPermissionLayersAggregator
     {
-        ValueTask<Dictionary<string, JValue>> FetchAggregatedPermissions(string conferenceId, string participantId);
+        ValueTask<Dictionary<string, JValue>> FetchAggregatedPermissions(Participant participant);
 
-        ValueTask<List<PermissionLayer>> FetchParticipantPermissionLayers(string conferenceId, string participantId);
+        ValueTask<List<PermissionLayer>> FetchParticipantPermissionLayers(Participant participant);
     }
 }

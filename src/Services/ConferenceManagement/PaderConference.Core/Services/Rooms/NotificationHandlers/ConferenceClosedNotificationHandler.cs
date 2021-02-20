@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using PaderConference.Core.Services.ConferenceControl.Notifications;
@@ -30,7 +31,8 @@ namespace PaderConference.Core.Services.Rooms.NotificationHandlers
 
             var result = await _roomRepository.DeleteAllRoomsAndMappingsOfConference(conferenceId);
             await _mediator.Publish(new RoomsRemovedNotification(conferenceId, result.DeletedRooms));
-            await _mediator.Publish(new ParticipantsRoomChangedNotification(conferenceId, result.DeletedParticipants));
+            await _mediator.Publish(new ParticipantsRoomChangedNotification(conferenceId,
+                result.DeletedParticipants.Select(participantId => new Participant(conferenceId, participantId))));
         }
     }
 }

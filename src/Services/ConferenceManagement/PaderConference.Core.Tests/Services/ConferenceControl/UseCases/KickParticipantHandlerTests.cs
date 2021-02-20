@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using MediatR;
 using Moq;
+using PaderConference.Core.Services;
 using PaderConference.Core.Services.ConferenceControl.Notifications;
 using PaderConference.Core.Services.ConferenceControl.Requests;
 using PaderConference.Core.Services.ConferenceControl.UseCases;
@@ -29,9 +30,11 @@ namespace PaderConference.Core.Tests.Services.ConferenceControl.UseCases
             const string participantId = "123";
             const string conferenceId = "45";
 
+            var participant = new Participant(conferenceId, participantId);
+
             // arrange
             var handler = CreateHandler();
-            var request = new KickParticipantRequest(participantId, conferenceId);
+            var request = new KickParticipantRequest(participant);
 
             // act
             await handler.Handle(request, CancellationToken.None);

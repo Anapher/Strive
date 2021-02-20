@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Moq;
 using Newtonsoft.Json.Linq;
+using PaderConference.Core.Services;
 using PaderConference.Core.Services.Permissions;
 using PaderConference.Core.Services.Permissions.Requests;
 using PaderConference.Core.Services.Permissions.UseCases;
@@ -16,6 +17,8 @@ namespace PaderConference.Core.Tests.Services.Permissions.UseCases
         private const string ConferenceId = "123";
         private const string ParticipantId = "asdf";
 
+        private static readonly Participant Participant = new(ConferenceId, ParticipantId);
+
         private FetchPermissionsHandler Create()
         {
             return new(_aggregator.Object);
@@ -27,14 +30,13 @@ namespace PaderConference.Core.Tests.Services.Permissions.UseCases
             // arrange
             var permissionLayer = new PermissionLayer(23, "asd", new Dictionary<string, JValue>());
 
-            _aggregator.Setup(x => x.FetchParticipantPermissionLayers(ConferenceId, ParticipantId))
+            _aggregator.Setup(x => x.FetchParticipantPermissionLayers(Participant))
                 .ReturnsAsync(new List<PermissionLayer> {permissionLayer});
 
             var handler = Create();
 
             // act
-            var result = await handler.Handle(new FetchPermissionsRequest(ParticipantId, ConferenceId),
-                CancellationToken.None);
+            var result = await handler.Handle(new FetchPermissionsRequest(Participant), CancellationToken.None);
 
             // assert
             var actualLayer = Assert.Single(result.Layers);

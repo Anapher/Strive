@@ -17,7 +17,7 @@ namespace PaderConference.Core.Services.ConferenceControl.NotificationHandlers
 
         public async Task Handle(ParticipantLeftNotification notification, CancellationToken cancellationToken)
         {
-            await _joinedParticipantsRepository.RemoveParticipant(notification.ParticipantId,
+            await _joinedParticipantsRepository.RemoveParticipant(notification.Participant.Id,
                 notification.ConnectionId);
         }
     }

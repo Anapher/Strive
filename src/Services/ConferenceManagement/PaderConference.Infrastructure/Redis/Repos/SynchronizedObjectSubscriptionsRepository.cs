@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using PaderConference.Core.Services;
 using PaderConference.Core.Services.Synchronization.Gateways;
 using PaderConference.Infrastructure.Redis.Abstractions;
 
@@ -16,35 +17,35 @@ namespace PaderConference.Infrastructure.Redis.Repos
             _database = database;
         }
 
-        public async ValueTask<IReadOnlyList<string>?> GetSet(string conferenceId, string participantId,
+        public async ValueTask<IReadOnlyList<string>?> GetSet(Participant participant,
             IReadOnlyList<string> subscriptions)
         {
-            var key = GetKey(conferenceId);
+            var key = GetKey(participant.ConferenceId);
 
             using (var transaction = _database.CreateTransaction())
             {
-                var previousSubs = transaction.HashGetAsync<List<string>>(key, participantId);
-                _ = transaction.HashSetAsync(key, participantId, subscriptions);
+                var previousSubs = transaction.HashGetAsync<List<string>>(key, participant.Id);
+                _ = transaction.HashSetAsync(key, participant.Id, subscriptions);
                 await transaction.ExecuteAsync();
 
                 return await previousSubs;
             }
         }
 
-        public async ValueTask<IReadOnlyList<string>?> Get(string conferenceId, string participantId)
+        public async ValueTask<IReadOnlyList<string>?> Get(Participant participant)
         {
-            var key = GetKey(conferenceId);
-            return await _database.HashGetAsync<List<string>>(key, participantId);
+            var key = GetKey(participant.ConferenceId);
+            return await _database.HashGetAsync<List<string>>(key, participant.Id);
         }
 
-        public async ValueTask<IReadOnlyList<string>?> Remove(string conferenceId, string participantId)
+        public async ValueTask<IReadOnlyList<string>?> Remove(Participant participant)
         {
-            var key = GetKey(conferenceId);
+            var key = GetKey(participant.ConferenceId);
 
             using (var transaction = _database.CreateTransaction())
             {
-                var previousSubs = transaction.HashGetAsync<List<string>>(key, participantId);
-                _ = transaction.HashDeleteAsync(key, participantId);
+                var previousSubs = transaction.HashGetAsync<List<string>>(key, participant.Id);
+                _ = transaction.HashDeleteAsync(key, participant.Id);
                 await transaction.ExecuteAsync();
 
                 return await previousSubs;

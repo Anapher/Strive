@@ -2,9 +2,9 @@
 
 namespace PaderConference.Core.Domain.Entities
 {
-    public class Participant
+    public class ParticipantData
     {
-        public Participant(string participantId, string? displayName, string role, DateTimeOffset timestamp)
+        public ParticipantData(string participantId, string? displayName, string role, DateTimeOffset timestamp)
         {
             ParticipantId = participantId;
             DisplayName = displayName;
@@ -20,7 +20,7 @@ namespace PaderConference.Core.Domain.Entities
 
         public DateTimeOffset Timestamp { get; }
 
-        protected bool Equals(Participant other)
+        protected bool Equals(ParticipantData other)
         {
             return ParticipantId == other.ParticipantId;
         }
@@ -30,7 +30,7 @@ namespace PaderConference.Core.Domain.Entities
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != GetType()) return false;
-            return Equals((Participant) obj);
+            return Equals((ParticipantData) obj);
         }
 
         public override int GetHashCode()

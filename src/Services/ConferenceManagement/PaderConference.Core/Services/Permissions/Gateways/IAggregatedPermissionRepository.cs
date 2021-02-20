@@ -6,12 +6,12 @@ namespace PaderConference.Core.Services.Permissions.Gateways
 {
     public interface IAggregatedPermissionRepository
     {
-        ValueTask SetPermissions(string conferenceId, string participantId, Dictionary<string, JValue> permissions);
+        ValueTask SetPermissions(Participant participant, Dictionary<string, JValue> permissions);
 
-        ValueTask<T?> GetPermissionsValue<T>(string conferenceId, string participantId, string key);
+        ValueTask<T?> GetPermissionsValue<T>(Participant participant, string key);
 
-        ValueTask<Dictionary<string, JValue>> GetPermissions(string conferenceId, string participantId);
+        ValueTask<Dictionary<string, JValue>> GetPermissions(Participant participant);
 
-        ValueTask DeletePermissions(string conferenceId, string participantId);
+        ValueTask DeletePermissions(Participant participant);
     }
 }

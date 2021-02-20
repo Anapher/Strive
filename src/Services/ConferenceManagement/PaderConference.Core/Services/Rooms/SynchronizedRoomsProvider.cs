@@ -31,8 +31,7 @@ namespace PaderConference.Core.Services.Rooms
             return new SynchronizedRooms(rooms, defaultRoomId, roomMap);
         }
 
-        public override ValueTask<IEnumerable<SynchronizedObjectId>> GetAvailableObjects(string conferenceId,
-            string participantId)
+        public override ValueTask<IEnumerable<SynchronizedObjectId>> GetAvailableObjects(Participant participant)
         {
             return new(SynchronizedObjectId.Yield());
         }

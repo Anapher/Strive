@@ -26,7 +26,7 @@ namespace PaderConference.Core.Services.Synchronization.NotificationHandlers
         public async Task Handle(ParticipantSubscriptionsRemovedNotification notification,
             CancellationToken cancellationToken)
         {
-            var (conferenceId, _, removedSubscriptions) = notification;
+            var ((conferenceId, _), removedSubscriptions) = notification;
 
             var conferenceSubscriptions = await _subscriptionsRepository.GetOfConference(conferenceId);
             var activeSyncObjects = conferenceSubscriptions.SelectMany(x => x.Value ?? ImmutableList<string>.Empty)
