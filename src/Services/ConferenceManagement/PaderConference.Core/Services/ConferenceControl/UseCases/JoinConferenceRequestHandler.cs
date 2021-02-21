@@ -35,7 +35,8 @@ namespace PaderConference.Core.Services.ConferenceControl.UseCases
 
             if (previousSession != null)
             {
-                _logger.LogDebug("The participant {participantId} was already joined, kick him.", participantId);
+                _logger.LogDebug("The participant {participantId} was already joined, kick existing connection.",
+                    participantId);
                 await _mediator.Publish(new ParticipantKickedNotification(
                     new Participant(previousSession.ConferenceId, participantId), previousSession.ConnectionId,
                     ParticipantKickedReason.NewSessionConnected));

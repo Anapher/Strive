@@ -23,7 +23,7 @@ namespace PaderConference.Core.Services.ConferenceControl.NotificationHandlers
         {
             var conferenceId = notification.ConferenceId;
 
-            _logger.LogDebug("Conference {conferenceId} updated, update synchronized object", conferenceId);
+            _logger.LogDebug("Conference {conferenceId} state updated, update synchronized object", conferenceId);
 
             await _mediator.Send(
                 new UpdateSynchronizedObjectRequest(conferenceId,
