@@ -18,7 +18,7 @@ namespace PaderConference.Infrastructure.Redis.Repos
         public async Task<bool> Create(string conferenceId)
         {
             var key = GetKey(conferenceId);
-            return await _database.GetSetAsync(key, bool.TrueString) != null;
+            return await _database.GetSetAsync(key, bool.TrueString) == null;
         }
 
         public async Task<bool> Delete(string conferenceId)

@@ -38,11 +38,6 @@ namespace PaderConference.Core.Services.Rooms.NotificationHandlers
             }
         }
 
-        private async Task MoveParticipantToDefaultRoom(Participant participant)
-        {
-            await _mediator.Send(new SetParticipantRoomRequest(participant, RoomOptions.DEFAULT_ROOM_ID));
-        }
-
         private async Task EnsureDefaultRoomCreated(string conferenceId)
         {
             var defaultRoom = GetDefaultRoom();
@@ -52,6 +47,11 @@ namespace PaderConference.Core.Services.Rooms.NotificationHandlers
         private Room GetDefaultRoom()
         {
             return new(RoomOptions.DEFAULT_ROOM_ID, _options.DefaultRoomName);
+        }
+
+        private async Task MoveParticipantToDefaultRoom(Participant participant)
+        {
+            await _mediator.Send(new SetParticipantRoomRequest(participant, RoomOptions.DEFAULT_ROOM_ID));
         }
     }
 }

@@ -39,6 +39,20 @@ namespace PaderConference.Tests.Utils
             assertNotificationFunc?.Invoke(notification);
         }
 
+        public void AssertLastNotificationIssued<T>(Action<T>? assertNotificationFunc = null) where T : INotification
+        {
+            var notification = _notifications.OfType<T>().Reverse().First();
+            _notifications.Remove(notification);
+
+            assertNotificationFunc?.Invoke(notification);
+        }
+
+        public void AssertNoNotificationOfType<T>() where T : INotification
+        {
+            var hasNotification = _notifications.OfType<T>().Any();
+            Assert.False(hasNotification);
+        }
+
         public void AssertNoMoreNotifications()
         {
             Assert.Empty(_notifications);

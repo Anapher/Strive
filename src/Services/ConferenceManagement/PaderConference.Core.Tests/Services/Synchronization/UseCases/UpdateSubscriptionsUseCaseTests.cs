@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
+using Microsoft.Extensions.Logging;
 using Moq;
 using PaderConference.Core.Extensions;
 using PaderConference.Core.Services;
@@ -14,26 +15,33 @@ using PaderConference.Core.Services.Synchronization.Requests;
 using PaderConference.Core.Services.Synchronization.UseCases;
 using PaderConference.Tests.Utils;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace PaderConference.Core.Tests.Services.Synchronization.UseCases
 {
     public class UpdateSubscriptionsUseCaseTests
     {
-        private readonly Mock<ISynchronizedObjectSubscriptionsRepository> _subscriptionRepo = new();
-        private readonly Mock<ISynchronizedObjectRepository> _syncObjRepo = new();
-        private readonly Mock<IMediator> _mediator = new();
-        private readonly List<ISynchronizedObjectProvider> _providers = new();
-        private readonly Mock<IJoinedParticipantsRepository> _joinedParticipantsRepo = new();
-
         private const string ConferenceId = "123";
         private const string ParticipantId = "45";
 
         private static readonly Participant _participant = new(ConferenceId, ParticipantId);
 
+        private readonly Mock<ISynchronizedObjectSubscriptionsRepository> _subscriptionRepo = new();
+        private readonly Mock<ISynchronizedObjectRepository> _syncObjRepo = new();
+        private readonly Mock<IMediator> _mediator = new();
+        private readonly List<ISynchronizedObjectProvider> _providers = new();
+        private readonly Mock<IJoinedParticipantsRepository> _joinedParticipantsRepo = new();
+        private readonly ILogger<UpdateSubscriptionsUseCase> _logger;
+
+        public UpdateSubscriptionsUseCaseTests(ITestOutputHelper testOutputHelper)
+        {
+            _logger = testOutputHelper.CreateLogger<UpdateSubscriptionsUseCase>();
+        }
+
         private UpdateSubscriptionsUseCase Create()
         {
             return new(_subscriptionRepo.Object, _syncObjRepo.Object, _joinedParticipantsRepo.Object, _providers,
-                _mediator.Object);
+                _mediator.Object, _logger);
         }
 
         private void SetIsParticipantJoined()

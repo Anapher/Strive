@@ -42,7 +42,9 @@ namespace PaderConference.Core.Services.Rooms.UseCases
                 if (removed) removedRooms.Add(roomId);
             }
 
-            await _mediator.Publish(new RoomsRemovedNotification(conferenceId, removedRooms));
+            if (removedRooms.Any())
+                await _mediator.Publish(new RoomsRemovedNotification(conferenceId, removedRooms));
+
             return Unit.Value;
         }
 
@@ -58,7 +60,7 @@ namespace PaderConference.Core.Services.Rooms.UseCases
                 {
                     _logger.LogDebug("{count} participants were still in room {roomId}, remove them.",
                         participants.Count, roomId);
-                    await MoveParticipantsToDefaultRoom(conferenceId, participants);
+                    await MoveParticipantsToDefaultRoom(participants);
                 }
             }
             else
@@ -69,7 +71,7 @@ namespace PaderConference.Core.Services.Rooms.UseCases
             return removed;
         }
 
-        private async Task MoveParticipantsToDefaultRoom(string conferenceId, IEnumerable<Participant> participants)
+        private async Task MoveParticipantsToDefaultRoom(IEnumerable<Participant> participants)
         {
             foreach (var participant in participants)
             {

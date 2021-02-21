@@ -6,11 +6,14 @@ using Autofac;
 using Autofac.Features.Variance;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Moq;
 using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.IntegrationTests._TestHelpers;
 using PaderConference.Core.Interfaces.Gateways.Repositories;
 using PaderConference.Core.Services;
+using PaderConference.Core.Services.ConferenceControl;
+using PaderConference.Core.Services.ConferenceControl.ClientControl;
 using PaderConference.Core.Services.ConferenceControl.Gateways;
 using PaderConference.Core.Services.Synchronization;
 using PaderConference.Infrastructure;
@@ -85,6 +88,18 @@ namespace PaderConference.Core.IntegrationTests.Services.Base
         }
 
         protected abstract IEnumerable<Type> FetchServiceTypes();
+
+        protected void SetupConferenceControl(ContainerBuilder builder)
+        {
+            builder.RegisterInstance(new OptionsWrapper<ConferenceSchedulerOptions>(new ConferenceSchedulerOptions()))
+                .AsImplementedInterfaces();
+
+            builder.RegisterTypes(FetchTypesOfNamespace(typeof(SynchronizedConferenceInfo)).ToArray())
+                .AsImplementedInterfaces();
+
+            var mockMessagingHandler = new Mock<IRequestHandler<EnableParticipantMessagingRequest>>();
+            builder.RegisterInstance(mockMessagingHandler.Object).AsImplementedInterfaces();
+        }
 
         protected IEnumerable<Type> FetchTypesOfNamespace(Type type)
         {
