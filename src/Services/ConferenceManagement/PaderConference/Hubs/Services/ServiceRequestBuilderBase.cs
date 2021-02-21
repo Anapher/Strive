@@ -19,10 +19,6 @@ namespace PaderConference.Hubs.Services
             _context = context;
         }
 
-        protected abstract Task<SuccessOrError<TResponse>> CreateRequest(CancellationToken token);
-
-        protected abstract Type GetRequestType();
-
         public IServiceRequestBuilder<TResponse> AddMiddleware(ServiceMiddleware func)
         {
             _middlewares.Add(func);
@@ -46,9 +42,9 @@ namespace PaderConference.Hubs.Services
             var logger = _context.Context.Resolve<ILogger<ServiceRequestBuilderBase<TResponse>>>();
             using var _ = logger.BeginScope(new Dictionary<string, object>
             {
-                {"conferenceId", _context.ConferenceId},
-                {"participantId", _context.ParticipantId},
-                {"requestType", requestType.FullName!},
+                {"conferenceId", _context.Participant.ConferenceId},
+                {"participantId", _context.Participant.Id},
+                {"requestType", requestType.FullName!}
             });
 
             logger.LogDebug("Send request {requestType}...", requestType);
@@ -63,5 +59,9 @@ namespace PaderConference.Hubs.Services
                 return e.ToError();
             }
         }
+
+        protected abstract Task<SuccessOrError<TResponse>> CreateRequest(CancellationToken token);
+
+        protected abstract Type GetRequestType();
     }
 }

@@ -18,7 +18,7 @@ namespace PaderConference.Hubs.Services.Middlewares
         public static async ValueTask<SuccessOrError<Unit>> ValidateConferenceIsOpen(ServiceInvokerContext context)
         {
             var openConferenceRepo = context.Context.Resolve<IOpenConferenceRepository>();
-            if (!await openConferenceRepo.IsOpen(context.ConferenceId))
+            if (!await openConferenceRepo.IsOpen(context.Participant.ConferenceId))
                 return ConferenceError.ConferenceNotOpen;
 
             return SuccessOrError<Unit>.Succeeded(Unit.Value);

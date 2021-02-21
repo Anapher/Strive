@@ -110,9 +110,10 @@ namespace PaderConference.Tests.Hubs.Services.Middlewares
         private IParticipantPermissions CreateParticipantPermissions(params KeyValuePair<string, JValue>[] permissions)
         {
             var permissionStack = CreatePermissionStack(permissions);
+            var participant = new Participant(ConferenceId, ParticipantId);
 
             var participantPermissions = new Mock<IParticipantPermissions>();
-            participantPermissions.Setup(x => x.FetchForParticipant(ConferenceId, ParticipantId))
+            participantPermissions.Setup(x => x.FetchForParticipant(participant))
                 .ReturnsAsync(permissionStack);
 
             return participantPermissions.Object;

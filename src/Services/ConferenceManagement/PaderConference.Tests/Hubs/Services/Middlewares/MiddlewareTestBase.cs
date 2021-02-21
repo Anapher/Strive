@@ -2,6 +2,7 @@
 using Autofac;
 using Microsoft.AspNetCore.SignalR;
 using Moq;
+using PaderConference.Core.Services;
 using PaderConference.Hubs.Services;
 using Xunit;
 
@@ -12,12 +13,14 @@ namespace PaderConference.Tests.Hubs.Services.Middlewares
         protected const string ConferenceId = "test";
         protected const string ParticipantId = "test2";
 
+        private static readonly Participant TestParticipant = new(ConferenceId, ParticipantId);
+
         protected ServiceInvokerContext CreateContext(Action<ContainerBuilder>? configureContainer = null)
         {
             var builder = new ContainerBuilder();
             configureContainer?.Invoke(builder);
 
-            return new ServiceInvokerContext(new Mock<Hub>().Object, builder.Build(), ConferenceId, ParticipantId);
+            return new ServiceInvokerContext(new Mock<Hub>().Object, builder.Build(), TestParticipant);
         }
 
         protected abstract IServiceRequestBuilder<string> Execute(IServiceRequestBuilder<string> builder);

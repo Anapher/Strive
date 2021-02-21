@@ -18,9 +18,9 @@ namespace PaderConference.Hubs.NotificationHandlers
         public async Task Handle(ParticipantPermissionsUpdatedNotification notification,
             CancellationToken cancellationToken)
         {
-            foreach (var (participantId, permissions) in notification.UpdatedPermissions)
+            foreach (var (participant, permissions) in notification.UpdatedPermissions)
             {
-                await _hubContext.Clients.Group(CoreHubGroups.OfParticipant(participantId))
+                await _hubContext.Clients.Group(CoreHubGroups.OfParticipant(participant.Id))
                     .OnPermissionsUpdated(permissions, cancellationToken);
             }
         }

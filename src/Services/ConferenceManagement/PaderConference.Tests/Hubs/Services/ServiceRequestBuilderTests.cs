@@ -17,8 +17,8 @@ namespace PaderConference.Tests.Hubs.Services
 {
     public class ServiceRequestBuilderTests
     {
-        private readonly ITestOutputHelper _testOutputHelper;
         private readonly Mock<IMediator> _mediator = new();
+        private readonly ITestOutputHelper _testOutputHelper;
 
         public ServiceRequestBuilderTests(ITestOutputHelper testOutputHelper)
         {
@@ -31,7 +31,7 @@ namespace PaderConference.Tests.Hubs.Services
             var container = BuildContainerWithLogger();
 
             return new ServiceRequestBuilder<TResponse>(requestFactory, _mediator.Object,
-                new ServiceInvokerContext(new TestHub(token), container, string.Empty, string.Empty));
+                new ServiceInvokerContext(new TestHub(token), container, new Participant()));
         }
 
         private IServiceRequestBuilder<TResponse> CreateBuilder<TResponse>(
@@ -40,7 +40,7 @@ namespace PaderConference.Tests.Hubs.Services
             var container = BuildContainerWithLogger();
 
             return new ServiceRequestBuilderSuccessOrError<TResponse>(requestFactory, _mediator.Object,
-                new ServiceInvokerContext(new TestHub(token), container, string.Empty, string.Empty));
+                new ServiceInvokerContext(new TestHub(token), container, new Participant()));
         }
 
         private ILifetimeScope BuildContainerWithLogger()

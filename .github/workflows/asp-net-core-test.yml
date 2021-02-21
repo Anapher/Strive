@@ -27,4 +27,4 @@ jobs:
       - name: Install dependencies
         run: dotnet restore
       - name: Test
-        run: dotnet test --no-restore --verbosity normal
+        run: dotnet test PaderConference.Temp.Tests.sln --no-restore --verbosity normal

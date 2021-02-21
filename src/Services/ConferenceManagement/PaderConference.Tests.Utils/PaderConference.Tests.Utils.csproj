@@ -2,6 +2,7 @@
 
   <PropertyGroup>
 	  <TargetFramework>net50</TargetFramework>
+	  <IsTestProject>false</IsTestProject>
   </PropertyGroup>
 
   <ItemGroup>

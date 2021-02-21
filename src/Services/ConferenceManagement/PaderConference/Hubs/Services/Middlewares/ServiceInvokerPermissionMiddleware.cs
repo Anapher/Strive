@@ -30,7 +30,7 @@ namespace PaderConference.Hubs.Services.Middlewares
 
             var participantPermissions = context.Context.Resolve<IParticipantPermissions>();
             var permissions =
-                await participantPermissions.FetchForParticipant(context.ConferenceId, context.ParticipantId);
+                await participantPermissions.FetchForParticipant(context.Participant);
 
             foreach (var permission in requiredPermissions)
             {
