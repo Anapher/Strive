@@ -25,6 +25,6 @@ jobs:
         with:
           dotnet-version: 5.0.x
       - name: Install dependencies
-        run: dotnet restore
+        run: dotnet restore PaderConference.Temp.Tests.sln
       - name: Test
         run: dotnet test PaderConference.Temp.Tests.sln --no-restore --verbosity normal
