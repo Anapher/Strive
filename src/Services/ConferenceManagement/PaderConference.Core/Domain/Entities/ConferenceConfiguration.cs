@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Immutable;
 using PaderConference.Core.Services.Chat;
-using PaderConference.Core.Services.ConferenceControl;
 
 namespace PaderConference.Core.Domain.Entities
 {

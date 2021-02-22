@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using PaderConference.Core.Extensions;
 using PaderConference.Core.Interfaces.Gateways.Repositories;
 using PaderConference.Core.Services;
 using PaderConference.Core.Services.Rooms;
@@ -46,7 +47,7 @@ namespace PaderConference.Infrastructure.Redis.Repos
         {
             var key = GetRoomListKey(conferenceId);
             var result = await _database.HashGetAllAsync<Room>(key);
-            return result.Values.Where(x => x != null);
+            return result.Values.WhereNotNull();
         }
 
         public async Task<IReadOnlyDictionary<string, string>> GetParticipantRooms(string conferenceId)

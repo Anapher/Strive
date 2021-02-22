@@ -31,10 +31,10 @@ namespace PaderConference.Infrastructure.Redis.Repos
             await _redisDatabase.HashDeleteAsync(redisKey, key);
         }
 
-        public async ValueTask<IReadOnlyDictionary<string, JValue?>> FetchTemporaryPermissions(Participant participant)
+        public async ValueTask<IReadOnlyDictionary<string, JValue>> FetchTemporaryPermissions(Participant participant)
         {
             var redisKey = GetKey(participant);
-            return await _redisDatabase.HashGetAllAsync<JValue>(redisKey);
+            return (await _redisDatabase.HashGetAllAsync<JValue>(redisKey))!;
         }
 
         public async ValueTask RemoveAllTemporaryPermissions(Participant participant)

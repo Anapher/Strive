@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using PaderConference.Core.Interfaces.Gateways.Repositories;
-using PaderConference.Core.Interfaces.Services;
 using PaderConference.Core.Services.ConferenceControl;
+using PaderConference.Core.Services.ConferenceControl.Gateways;
 using PaderConference.Core.Specifications;
 using PaderConference.Models.Response;
 
@@ -16,15 +16,15 @@ namespace PaderConference.Presenters
     public class ConferenceLinkPresenter : IConferenceLinkPresenter
     {
         private readonly IConferenceLinkRepo _conferenceLinkRepo;
-        private readonly IConferenceManager _conferenceManager;
         private readonly IConferenceScheduler _scheduler;
+        private readonly IOpenConferenceRepository _openConferenceRepository;
 
-        public ConferenceLinkPresenter(IConferenceLinkRepo conferenceLinkRepo, IConferenceManager conferenceManager,
-            IConferenceScheduler scheduler)
+        public ConferenceLinkPresenter(IConferenceLinkRepo conferenceLinkRepo, IConferenceScheduler scheduler,
+            IOpenConferenceRepository openConferenceRepository)
         {
             _conferenceLinkRepo = conferenceLinkRepo;
-            _conferenceManager = conferenceManager;
             _scheduler = scheduler;
+            _openConferenceRepository = openConferenceRepository;
         }
 
         public async Task<IReadOnlyList<ConferenceLinkDto>> GetConferenceLinks(string participantId)
@@ -34,7 +34,7 @@ namespace PaderConference.Presenters
             var links = await _conferenceLinkRepo.FindAsync(new ConferenceLinkByParticipant(participantId));
             foreach (var conferenceLink in links)
             {
-                var isActive = await _conferenceManager.GetIsConferenceOpen(conferenceLink.ConferenceId);
+                var isActive = await _openConferenceRepository.IsOpen(conferenceLink.ConferenceId);
                 var scheduled = _scheduler.GetNextExecution(conferenceLink);
                 result.Add(new ConferenceLinkDto(conferenceLink, isActive, scheduled));
             }

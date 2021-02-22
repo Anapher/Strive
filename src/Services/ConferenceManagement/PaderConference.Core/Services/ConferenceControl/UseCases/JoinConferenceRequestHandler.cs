@@ -32,7 +32,6 @@ namespace PaderConference.Core.Services.ConferenceControl.UseCases
                 conferenceId);
 
             var previousSession = await _joinedParticipantsRepository.AddParticipant(participant, connectionId);
-
             if (previousSession != null)
             {
                 _logger.LogDebug("The participant {participantId} was already joined, kick existing connection.",
