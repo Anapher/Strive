@@ -37,12 +37,11 @@ namespace PaderConference.Core.Services.Synchronization.UseCases
         {
             var (conferenceId, synchronizedObjectId) = request;
 
-            _logger.LogDebug("Update synchronized object {syncObj}", synchronizedObjectId);
-
             var provider = GetProvider(synchronizedObjectId);
             var participantIds = await GetParticipantIdsSubscribedTo(conferenceId, synchronizedObjectId);
 
-            _logger.LogDebug("Found {count} subscribers", participantIds.Count);
+            _logger.LogDebug("Update synchronized object {syncObj} ({count} subscribers)", synchronizedObjectId,
+                participantIds.Count);
 
             if (!participantIds.Any()) return Unit.Value;
 

@@ -11,10 +11,8 @@ using Moq;
 using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.IntegrationTests._TestHelpers;
 using PaderConference.Core.Interfaces.Gateways.Repositories;
-using PaderConference.Core.Services;
 using PaderConference.Core.Services.ConferenceControl;
 using PaderConference.Core.Services.ConferenceControl.ClientControl;
-using PaderConference.Core.Services.ConferenceControl.Gateways;
 using PaderConference.Core.Services.Synchronization;
 using PaderConference.Infrastructure;
 using PaderConference.Infrastructure.Redis;
@@ -89,13 +87,14 @@ namespace PaderConference.Core.IntegrationTests.Services.Base
 
         protected abstract IEnumerable<Type> FetchServiceTypes();
 
-        protected void SetupConferenceControl(ContainerBuilder builder)
+        protected void SetupConferenceControl(ContainerBuilder builder, Func<Type, bool>? typeFilter = null)
         {
             builder.RegisterInstance(new OptionsWrapper<ConferenceSchedulerOptions>(new ConferenceSchedulerOptions()))
                 .AsImplementedInterfaces();
 
-            builder.RegisterTypes(FetchTypesOfNamespace(typeof(SynchronizedConferenceInfo)).ToArray())
-                .AsImplementedInterfaces();
+            var types = FetchTypesOfNamespace(typeof(SynchronizedConferenceInfo));
+            if (typeFilter != null) types = types.Where(typeFilter);
+            builder.RegisterTypes(types.ToArray()).AsImplementedInterfaces();
 
             var mockMessagingHandler = new Mock<IRequestHandler<EnableParticipantMessagingRequest>>();
             builder.RegisterInstance(mockMessagingHandler.Object).AsImplementedInterfaces();
@@ -117,18 +116,6 @@ namespace PaderConference.Core.IntegrationTests.Services.Base
             mock.Setup(x => x.FindById(conference.ConferenceId)).ReturnsAsync(conference);
 
             builder.RegisterInstance(mock.Object).As<IConferenceRepo>();
-        }
-
-        protected async ValueTask SetParticipantJoined(Participant participant)
-        {
-            var joinedParticipantRepo = Container.Resolve<IJoinedParticipantsRepository>();
-            await joinedParticipantRepo.AddParticipant(participant, "testConn");
-        }
-
-        protected async ValueTask RemoveParticipantJoined(string participantId)
-        {
-            var joinedParticipantRepo = Container.Resolve<IJoinedParticipantsRepository>();
-            await joinedParticipantRepo.RemoveParticipant(participantId, "testConn");
         }
     }
 }

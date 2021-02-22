@@ -57,6 +57,11 @@ namespace PaderConference.Core.IntegrationTests.Services
             return syncObj!;
         }
 
+        private JoinConferenceRequest CreateTestParticipantJoinRequest()
+        {
+            return new(_testParticipant, ConnectionId, new ParticipantMetadata("Vincent"));
+        }
+
         private void AssertSyncObjParticipantIsInRoom(string roomId)
         {
             var syncObj = GetSyncRoomsForTestParticipant();
@@ -103,7 +108,7 @@ namespace PaderConference.Core.IntegrationTests.Services
 
             // arrange
             await Mediator.Send(new OpenConferenceRequest(ConferenceId));
-            await Mediator.Send(new JoinConferenceRequest(_testParticipant, ConnectionId));
+            await Mediator.Send(CreateTestParticipantJoinRequest());
 
             // act
             var room = new RoomCreationInfo(roomDisplayName);
@@ -118,7 +123,7 @@ namespace PaderConference.Core.IntegrationTests.Services
         public async Task ParticipantJoined_ConferenceNotOpen_DoNothing()
         {
             // act
-            await Mediator.Send(new JoinConferenceRequest(_testParticipant, ConnectionId));
+            await Mediator.Send(CreateTestParticipantJoinRequest());
 
             // assert
             NotificationCollector.AssertNoNotificationOfType<ParticipantsRoomChangedNotification>();
@@ -134,7 +139,7 @@ namespace PaderConference.Core.IntegrationTests.Services
             await Mediator.Send(new OpenConferenceRequest(ConferenceId));
 
             // act
-            await Mediator.Send(new JoinConferenceRequest(_testParticipant, ConnectionId));
+            await Mediator.Send(CreateTestParticipantJoinRequest());
 
             // assert
             AssertSyncObjParticipantIsInRoom(RoomOptions.DEFAULT_ROOM_ID);
@@ -151,7 +156,7 @@ namespace PaderConference.Core.IntegrationTests.Services
         {
             // arrange
             await Mediator.Send(new OpenConferenceRequest(ConferenceId));
-            await Mediator.Send(new JoinConferenceRequest(_testParticipant, ConnectionId));
+            await Mediator.Send(CreateTestParticipantJoinRequest());
             var createdRooms =
                 await Mediator.Send(new CreateRoomsRequest(ConferenceId, new[] {new RoomCreationInfo("test")}));
             var createdRoom = Assert.Single(createdRooms);
@@ -174,7 +179,7 @@ namespace PaderConference.Core.IntegrationTests.Services
         {
             // arrange
             await Mediator.Send(new OpenConferenceRequest(ConferenceId));
-            await Mediator.Send(new JoinConferenceRequest(_testParticipant, ConnectionId));
+            await Mediator.Send(CreateTestParticipantJoinRequest());
 
             NotificationCollector.Reset();
 
@@ -196,7 +201,7 @@ namespace PaderConference.Core.IntegrationTests.Services
         public async Task OpenConference_ParticipantAlreadyJoined_MoveParticipantToDefaultRoom()
         {
             // arrange
-            await Mediator.Send(new JoinConferenceRequest(_testParticipant, ConnectionId));
+            await Mediator.Send(CreateTestParticipantJoinRequest());
 
             // act
             await Mediator.Send(new OpenConferenceRequest(ConferenceId));
@@ -216,7 +221,7 @@ namespace PaderConference.Core.IntegrationTests.Services
         {
             // arrange
             await Mediator.Send(new OpenConferenceRequest(ConferenceId));
-            await Mediator.Send(new JoinConferenceRequest(_testParticipant, ConnectionId));
+            await Mediator.Send(CreateTestParticipantJoinRequest());
 
             NotificationCollector.Reset();
 

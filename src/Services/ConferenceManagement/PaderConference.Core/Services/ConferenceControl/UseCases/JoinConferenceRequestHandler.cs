@@ -25,7 +25,7 @@ namespace PaderConference.Core.Services.ConferenceControl.UseCases
 
         public async Task<Unit> Handle(JoinConferenceRequest request, CancellationToken cancellationToken)
         {
-            var (participant, connectionId) = request;
+            var (participant, connectionId, meta) = request;
             var (conferenceId, participantId) = participant;
 
             _logger.LogDebug("Participant {participantId} is joining conference {conferenceId}", participantId,
@@ -42,12 +42,13 @@ namespace PaderConference.Core.Services.ConferenceControl.UseCases
             }
 
             // enable messaging just after kicking client
+            await _mediator.Publish(new ParticipantInitializedNotification(participant));
 
             // do not merge these together as handlers for ParticipantJoinedNotification may want to send messages to the participant
             await _mediator.Send(new EnableParticipantMessagingRequest(participantId, conferenceId, connectionId),
                 cancellationToken);
 
-            await _mediator.Publish(new ParticipantJoinedNotification(participant));
+            await _mediator.Publish(new ParticipantJoinedNotification(participant, meta));
 
             return Unit.Value;
         }

@@ -11,7 +11,9 @@ using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Extensions;
 using PaderConference.Core.IntegrationTests.Services.Base;
 using PaderConference.Core.Services;
+using PaderConference.Core.Services.ConferenceControl;
 using PaderConference.Core.Services.ConferenceControl.Notifications;
+using PaderConference.Core.Services.ConferenceControl.Requests;
 using PaderConference.Core.Services.Permissions;
 using PaderConference.Core.Services.Permissions.Gateways;
 using PaderConference.Core.Services.Permissions.Options;
@@ -26,6 +28,8 @@ namespace PaderConference.Core.IntegrationTests.Services
     {
         private const string ParticipantId = "123";
         private const string ConferenceId = "45";
+        private const string ConnectionId = "connId";
+        private const string Username = "Vincent";
 
         private readonly SynchronizedObjectId _participantSyncObj =
             SynchronizedParticipantPermissionsProvider.GetObjIdOfParticipant(ParticipantId);
@@ -62,6 +66,8 @@ namespace PaderConference.Core.IntegrationTests.Services
             base.ConfigureContainer(builder);
 
             AddConferenceRepo(builder, new Conference(ConferenceId));
+            SetupConferenceControl(builder);
+
             builder.RegisterInstance(new OptionsWrapper<DefaultPermissionOptions>(new DefaultPermissionOptions()))
                 .AsImplementedInterfaces();
 
@@ -74,32 +80,38 @@ namespace PaderConference.Core.IntegrationTests.Services
             return FetchTypesOfNamespace(typeof(PermissionsError)).Concat(FetchTypesForSynchronizedObjects());
         }
 
-        [Fact]
-        public async Task ParticipantInitialized_UpdateSynchronizedObject()
+        private JoinConferenceRequest CreateTestParticipantJoinRequest()
         {
-            // arrange
-            await SetParticipantJoined(TestParticipant);
+            return new(TestParticipant, ConnectionId, new ParticipantMetadata(Username));
+        }
 
-            // act
-            await Mediator.Publish(new ParticipantInitializedNotification(TestParticipant));
-            await Mediator.Publish(new ParticipantJoinedNotification(TestParticipant));
-
-            // assert
+        private SynchronizedParticipantPermissions GetSyncObj()
+        {
             var syncObj =
                 SynchronizedObjectListener.GetSynchronizedObject<SynchronizedParticipantPermissions>(TestParticipant,
                     _participantSyncObj);
 
             Assert.NotNull(syncObj);
+
+            return syncObj!;
+        }
+
+        [Fact]
+        public async Task ParticipantInitialized_UpdateSynchronizedObject()
+        {
+            // act
+            await Mediator.Send(CreateTestParticipantJoinRequest());
+
+            // assert
+            GetSyncObj();
         }
 
         [Fact]
         public async Task SetTemporaryPermission_UpdateSyncObj()
         {
             // arrange
-            await SetParticipantJoined(TestParticipant);
+            await Mediator.Send(CreateTestParticipantJoinRequest());
 
-            await Mediator.Publish(new ParticipantInitializedNotification(TestParticipant));
-            await Mediator.Publish(new ParticipantJoinedNotification(TestParticipant));
             var permission = TestPermission.Configure(true);
 
             // act
@@ -108,22 +120,17 @@ namespace PaderConference.Core.IntegrationTests.Services
 
             // assert
             Assert.True(result.Success);
-            var syncObj =
-                SynchronizedObjectListener.GetSynchronizedObject<SynchronizedParticipantPermissions>(TestParticipant,
-                    _participantSyncObj);
 
-            Assert.NotNull(syncObj);
-            Assert.Contains(permission.Key, syncObj!.Permissions.Keys);
+            var syncObj = GetSyncObj();
+            Assert.Contains(permission.Key, syncObj.Permissions.Keys);
         }
 
         [Fact]
         public async Task SetTemporaryPermission_UpdateParticipantPermissions()
         {
             // arrange
-            await SetParticipantJoined(TestParticipant);
+            await Mediator.Send(CreateTestParticipantJoinRequest());
 
-            await Mediator.Publish(new ParticipantInitializedNotification(TestParticipant));
-            await Mediator.Publish(new ParticipantJoinedNotification(TestParticipant));
             var permission = TestPermission.Configure(true);
 
             // act
@@ -140,10 +147,7 @@ namespace PaderConference.Core.IntegrationTests.Services
         public async Task UpdateParticipantsPermissions_NewPermissionsAvailable()
         {
             // arrange
-            await SetParticipantJoined(TestParticipant);
-
-            await Mediator.Publish(new ParticipantInitializedNotification(TestParticipant));
-            await Mediator.Publish(new ParticipantJoinedNotification(TestParticipant));
+            await Mediator.Send(CreateTestParticipantJoinRequest());
 
             await AssertTestParticipantHasTestPermissionValue(false);
 
@@ -164,10 +168,7 @@ namespace PaderConference.Core.IntegrationTests.Services
         public async Task ParticipantLeft_ClearCachedPermissions()
         {
             // arrange
-            await SetParticipantJoined(TestParticipant);
-
-            await Mediator.Publish(new ParticipantInitializedNotification(TestParticipant));
-            await Mediator.Publish(new ParticipantJoinedNotification(TestParticipant));
+            await Mediator.Send(CreateTestParticipantJoinRequest());
 
             await Mediator.Send(new SetTemporaryPermissionRequest(TestParticipant, TestPermission.Key,
                 (JValue) JToken.FromObject(true)));

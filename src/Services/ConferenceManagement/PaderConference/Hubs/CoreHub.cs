@@ -1,15 +1,19 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Autofac;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using PaderConference.Core;
 using PaderConference.Core.Extensions;
 using PaderConference.Core.Interfaces;
 using PaderConference.Core.Services;
+using PaderConference.Core.Services.ConferenceControl;
 using PaderConference.Core.Services.ConferenceControl.Notifications;
 using PaderConference.Core.Services.ConferenceControl.Requests;
 using PaderConference.Core.Services.Permissions;
@@ -69,26 +73,43 @@ namespace PaderConference.Hubs
 
         private async Task HandleJoin()
         {
-            var (conferenceId, participantId) = GetContextParticipant();
+            var participant = GetContextParticipant();
+            var metadata = GetMetadata();
             var connectionId = Context.ConnectionId;
 
-            await _mediator.Send(new JoinConferenceRequest(new Participant(conferenceId, participantId), connectionId),
+            await _mediator.Send(new JoinConferenceRequest(participant, connectionId, metadata),
                 Context.ConnectionAborted);
 
-            _connections.SetParticipant(participantId, new ParticipantConnection(conferenceId, Context.ConnectionId));
+            _connections.SetParticipant(participant.Id,
+                new ParticipantConnection(participant.ConferenceId, Context.ConnectionId));
         }
 
         private Participant GetContextParticipant()
+        {
+            var httpContext = GetHttpContext();
+
+            var conferenceId = httpContext.Request.Query["conferenceId"].ToString();
+            var participantId = httpContext.User.GetUserId();
+
+            return new Participant(conferenceId, participantId);
+        }
+
+        private ParticipantMetadata GetMetadata()
+        {
+            var httpContext = GetHttpContext();
+            var name = httpContext.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Name)?.Value ?? string.Empty;
+
+            return new ParticipantMetadata(name);
+        }
+
+        private HttpContext GetHttpContext()
         {
             var httpContext = Context.GetHttpContext();
             if (httpContext == null)
                 throw ConferenceError.UnexpectedError("An unexpected error occurred: HttpContext is null")
                     .ToException();
 
-            var conferenceId = httpContext.Request.Query["conferenceId"].ToString();
-            var participantId = httpContext.User.GetUserId();
-
-            return new Participant(conferenceId, participantId);
+            return httpContext;
         }
 
         public override async Task OnDisconnectedAsync(Exception? exception)

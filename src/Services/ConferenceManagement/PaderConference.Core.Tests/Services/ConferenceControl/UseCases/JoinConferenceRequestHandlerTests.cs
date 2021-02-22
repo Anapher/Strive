@@ -4,6 +4,7 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using Moq;
 using PaderConference.Core.Services;
+using PaderConference.Core.Services.ConferenceControl;
 using PaderConference.Core.Services.ConferenceControl.ClientControl;
 using PaderConference.Core.Services.ConferenceControl.Gateways;
 using PaderConference.Core.Services.ConferenceControl.Notifications;
@@ -41,7 +42,7 @@ namespace PaderConference.Core.Tests.Services.ConferenceControl.UseCases
 
         private JoinConferenceRequest CreateDefaultRequest()
         {
-            return new(new Participant(ConferenceId, ParticipantId), ConnectionId);
+            return new(new Participant(ConferenceId, ParticipantId), ConnectionId, new ParticipantMetadata("Vincent"));
         }
 
         [Fact]

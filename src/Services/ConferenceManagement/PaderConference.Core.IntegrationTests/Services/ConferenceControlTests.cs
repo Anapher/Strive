@@ -17,7 +17,8 @@ namespace PaderConference.Core.IntegrationTests.Services
     {
         private const string ConferenceId = "123";
         private const string ConnectionId = "connectionId";
-        private readonly Participant _testParticipant = new(ConferenceId, "Vincent");
+        private readonly Participant _testParticipant = new(ConferenceId, "participantId");
+        private const string Username = "Vincent";
 
         public ConferenceControlTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
         {
@@ -38,7 +39,7 @@ namespace PaderConference.Core.IntegrationTests.Services
 
         private JoinConferenceRequest CreateTestParticipantJoinRequest()
         {
-            return new(_testParticipant, ConnectionId);
+            return new(_testParticipant, ConnectionId, new ParticipantMetadata(Username));
         }
 
         private SynchronizedConferenceInfo GetSyncObjOfTestParticipant()
@@ -144,10 +145,12 @@ namespace PaderConference.Core.IntegrationTests.Services
             const string oldConnectionId = "oldConnectionId";
 
             // arrange
-            await Mediator.Send(new JoinConferenceRequest(_testParticipant, oldConnectionId));
+            await Mediator.Send(new JoinConferenceRequest(_testParticipant, oldConnectionId,
+                new ParticipantMetadata(Username)));
 
             // act
-            await Mediator.Send(new JoinConferenceRequest(_testParticipant, ConnectionId));
+            await Mediator.Send(new JoinConferenceRequest(_testParticipant, ConnectionId,
+                new ParticipantMetadata(Username)));
 
             // assert
             NotificationCollector.AssertSingleNotificationIssued<ParticipantKickedNotification>(notification =>
