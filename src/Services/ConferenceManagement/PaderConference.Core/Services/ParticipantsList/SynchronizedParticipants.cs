@@ -2,5 +2,5 @@
 
 namespace PaderConference.Core.Services.ParticipantsList
 {
-    public record SynchronizedParticipants(IImmutableList<string> Participants);
+    public record SynchronizedParticipants(IImmutableDictionary<string, ParticipantData> Participants);
 }

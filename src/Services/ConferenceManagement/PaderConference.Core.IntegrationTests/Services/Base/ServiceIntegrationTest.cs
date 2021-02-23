@@ -13,6 +13,8 @@ using PaderConference.Core.IntegrationTests._TestHelpers;
 using PaderConference.Core.Interfaces.Gateways.Repositories;
 using PaderConference.Core.Services.ConferenceControl;
 using PaderConference.Core.Services.ConferenceControl.ClientControl;
+using PaderConference.Core.Services.ConferenceControl.Notifications;
+using PaderConference.Core.Services.ConferenceControl.Requests;
 using PaderConference.Core.Services.Synchronization;
 using PaderConference.Infrastructure;
 using PaderConference.Infrastructure.Redis;
@@ -112,10 +114,27 @@ namespace PaderConference.Core.IntegrationTests.Services.Base
 
         protected void AddConferenceRepo(ContainerBuilder builder, Conference conference)
         {
+            AddConferenceRepo(builder, conference.ConferenceId, () => conference);
+        }
+
+        protected void AddConferenceRepo(ContainerBuilder builder, string conferenceId, Func<Conference> conferenceFunc)
+        {
             var mock = new Mock<IConferenceRepo>();
-            mock.Setup(x => x.FindById(conference.ConferenceId)).ReturnsAsync(conference);
+            mock.Setup(x => x.FindById(conferenceId)).ReturnsAsync(conferenceFunc);
 
             builder.RegisterInstance(mock.Object).As<IConferenceRepo>();
+        }
+
+        protected async Task JoinParticipant(TestParticipantConnection connection)
+        {
+            var request = new JoinConferenceRequest(connection.Participant, connection.ConnectionId, connection.Meta);
+            await Mediator.Send(request);
+        }
+
+        protected async Task NotifyParticipantLeft(TestParticipantConnection connection)
+        {
+            var request = new ParticipantLeftNotification(connection.Participant, connection.ConnectionId);
+            await Mediator.Publish(request);
         }
     }
 }
