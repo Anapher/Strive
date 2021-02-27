@@ -20,16 +20,31 @@ namespace PaderConference.Core.Tests.Services.Chat
 
         private readonly Participant _testParticipant = new(ConferenceId, "123");
         private readonly Mock<IMediator> _mediator = new();
+        private ITaskDelay _taskDelay = new TaskDelay();
 
         private ParticipantTypingTimer Create()
         {
-            return new(_mediator.Object);
+            return new(_mediator.Object, _taskDelay);
+        }
+
+        private Action SetupTaskDelayGetTrigger()
+        {
+            var task = new TaskCompletionSource();
+
+            var taskDelay = new Mock<ITaskDelay>();
+            taskDelay.Setup(x => x.Delay(It.IsAny<TimeSpan>(), It.IsAny<CancellationToken>())).Returns(task.Task);
+
+            _taskDelay = taskDelay.Object;
+
+            return () => task.SetResult();
         }
 
         [Fact]
-        public async Task RemoveParticipantTypingAfter_WaitTimeout_SendRequest()
+        public void RemoveParticipantTypingAfter_WaitTimeout_SendRequest()
         {
             // arrange
+            var trigger = SetupTaskDelayGetTrigger();
+
             var timer = Create();
             var capturedRequest = _mediator.CaptureRequest<SetParticipantTypingRequest, Unit>();
 
@@ -39,7 +54,7 @@ namespace PaderConference.Core.Tests.Services.Chat
             // assert
             capturedRequest.AssertNotReceived();
 
-            await Task.Delay(60);
+            trigger();
 
             capturedRequest.AssertReceived();
         }
@@ -80,7 +95,7 @@ namespace PaderConference.Core.Tests.Services.Chat
             var tasks = Enumerable.Range(0, 4).Select(x => Task.Run(TestRemoveParticipant)).ToList();
             await Task.WhenAll(tasks);
 
-            await Task.Delay(50);
+            await Task.Delay(100);
 
             // assert
             AssertHelper.AssertScrambledEquals(expectedRequests, receivedRequests);
@@ -97,9 +112,11 @@ namespace PaderConference.Core.Tests.Services.Chat
         }
 
         [Fact]
-        public async Task CancelTimer_TimerWasSet_NoRequest()
+        public void CancelTimer_TimerWasSet_NoRequest()
         {
             // arrange
+            var trigger = SetupTaskDelayGetTrigger();
+
             var timer = Create();
             var capturedRequest = _mediator.CaptureRequest<SetParticipantTypingRequest, Unit>();
 
@@ -109,16 +126,18 @@ namespace PaderConference.Core.Tests.Services.Chat
             timer.CancelTimer(_testParticipant, Channel);
 
             // assert
-            await Task.Delay(120);
+            trigger();
             capturedRequest.AssertNotReceived();
         }
 
         [Fact]
-        public async Task CancelTimer_TimerWasSet_Reschedule()
+        public void CancelTimer_TimerWasSet_Reschedule()
         {
             const string channel2 = "testChannel2";
 
             // arrange
+            var trigger = SetupTaskDelayGetTrigger();
+
             var timer = Create();
             var capturedRequest = _mediator.CaptureRequest<SetParticipantTypingRequest, Unit>();
 
@@ -129,7 +148,7 @@ namespace PaderConference.Core.Tests.Services.Chat
             timer.CancelTimer(_testParticipant, Channel);
 
             // assert
-            await Task.Delay(120);
+            trigger();
             capturedRequest.AssertReceived();
 
             var request = capturedRequest.GetRequest();
@@ -150,9 +169,11 @@ namespace PaderConference.Core.Tests.Services.Chat
         }
 
         [Fact]
-        public async Task CancelAllTimers_TimerWasSet_CancelAndReturnChannel()
+        public void CancelAllTimers_TimerWasSet_CancelAndReturnChannel()
         {
             // arrange
+            var trigger = SetupTaskDelayGetTrigger();
+
             var timer = Create();
             var capturedRequest = _mediator.CaptureRequest<SetParticipantTypingRequest, Unit>();
 
@@ -164,7 +185,7 @@ namespace PaderConference.Core.Tests.Services.Chat
             // assert
             Assert.Equal(Channel, Assert.Single(timers));
 
-            await Task.Delay(100);
+            trigger();
             capturedRequest.AssertNotReceived();
         }
     }

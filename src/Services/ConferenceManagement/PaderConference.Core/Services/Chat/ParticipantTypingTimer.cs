@@ -12,14 +12,16 @@ namespace PaderConference.Core.Services.Chat
     public class ParticipantTypingTimer : IParticipantTypingTimer
     {
         private readonly IMediator _mediator;
+        private readonly ITaskDelay _taskDelay;
         private readonly object _lock = new();
 
         private readonly Dictionary<ParticipantInChannel, DateTimeOffset> _timers = new();
         private CancellationTokenSource? _cancellationTokenSource;
 
-        public ParticipantTypingTimer(IMediator mediator)
+        public ParticipantTypingTimer(IMediator mediator, ITaskDelay taskDelay)
         {
             _mediator = mediator;
+            _taskDelay = taskDelay;
         }
 
         public void RemoveParticipantTypingAfter(Participant participant, string channel, TimeSpan timespan)
@@ -91,7 +93,7 @@ namespace PaderConference.Core.Services.Chat
             if (timeLeft > TimeSpan.Zero)
                 try
                 {
-                    await Task.Delay(timeLeft, token);
+                    await _taskDelay.Delay(timeLeft, token);
                 }
                 catch (TaskCanceledException)
                 {

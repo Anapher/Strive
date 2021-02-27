@@ -1,6 +1,7 @@
 using Autofac;
 using FluentValidation;
 using PaderConference.Core.Interfaces;
+using PaderConference.Core.Services;
 using PaderConference.Core.Services.ConferenceControl;
 using PaderConference.Core.Services.Permissions;
 using PaderConference.Core.Services.Synchronization;
@@ -27,6 +28,7 @@ namespace PaderConference.Core
                 .AsImplementedInterfaces().InstancePerLifetimeScope();
 
             builder.RegisterType<DefinedPermissionValidator>().As<IPermissionValidator>().SingleInstance();
+            builder.RegisterType<TaskDelay>().As<ITaskDelay>().SingleInstance();
         }
     }
 }
