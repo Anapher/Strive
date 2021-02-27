@@ -8,6 +8,7 @@ using PaderConference.Core.IntegrationTests.Services.Base;
 using PaderConference.Core.Notifications;
 using PaderConference.Core.Services;
 using PaderConference.Core.Services.ParticipantsList;
+using PaderConference.Core.Services.ParticipantsList.Requests;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -121,6 +122,28 @@ namespace PaderConference.Core.IntegrationTests.Services
             var syncObj = GetSyncObj(testParticipant.Participant);
             var (_, data) = Assert.Single(syncObj.Participants);
             Assert.True(data.IsModerator);
+        }
+
+        [Fact]
+        public async Task FetchParticipantMetadata_ParticipantNotJoined_ThrowException()
+        {
+            // act
+            await Assert.ThrowsAsync<ParticipantNotFoundException>(async () =>
+                await Mediator.Send(new FetchParticipantsMetadataRequest(TestData.Vincent.Participant)));
+        }
+
+        [Fact]
+        public async Task FetchParticipantMetadata_ParticipantJoined_ReturnData()
+        {
+            // arrange
+            var testParticipant = TestData.Vincent;
+            await JoinParticipant(testParticipant);
+
+            // act
+            var result = await Mediator.Send(new FetchParticipantsMetadataRequest(TestData.Vincent.Participant));
+
+            // assert
+            Assert.Equal(testParticipant.Meta, result);
         }
     }
 }

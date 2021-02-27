@@ -11,5 +11,7 @@ namespace PaderConference.Core.Services.ParticipantsList.Gateways
         ValueTask AddParticipant(Participant participant, ParticipantMetadata data);
 
         ValueTask RemoveParticipant(Participant participant);
+
+        ValueTask<ParticipantMetadata?> GetParticipantMetadata(Participant participant);
     }
 }

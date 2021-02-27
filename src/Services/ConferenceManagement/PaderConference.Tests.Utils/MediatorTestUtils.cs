@@ -72,6 +72,11 @@ namespace PaderConference.Tests.Utils
             _asserted = true;
         }
 
+        public void AssertNotReceived()
+        {
+            Assert.False(_task.IsCompleted);
+        }
+
         public T GetRequest()
         {
             AssertReceived();

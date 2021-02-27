@@ -19,8 +19,6 @@ namespace PaderConference.Core.Services.Permissions.Options
                 new[]
                 {
                     DefinedPermissions.Chat.CanSendChatMessage.Configure(true),
-                    DefinedPermissions.Chat.CanSendAnonymousMessage.Configure(true),
-                    DefinedPermissions.Chat.CanSendPrivateChatMessage.Configure(true),
                     DefinedPermissions.Rooms.CanSwitchRoom.Configure(true),
                     DefinedPermissions.Conference.CanRaiseHand.Configure(true),
                 }.ToImmutableDictionary()

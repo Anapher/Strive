@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using PaderConference.Infrastructure.Redis.InMemory;
+using PaderConference.Tests.Utils;
 using Xunit;
 
 namespace PaderConference.Infrastructure.Tests.Redis.InMemory
@@ -424,6 +425,331 @@ namespace PaderConference.Infrastructure.Tests.Redis.InMemory
 
             var actualKeyValue = await database.GetAsync(key);
             Assert.Equal(value, actualKeyValue);
+        }
+
+        [Fact]
+        public async Task ListRightPushAsync_KeyDoesNotExist_CreateListAndAddItem()
+        {
+            const string key = "test";
+            const string value = "testValue";
+
+            // arrange
+            var data = new InMemoryKeyValueData();
+            var database = new InMemoryKeyValueDatabase(data);
+
+            // act
+            await database.ListRightPushAsync(key, value);
+
+            // assert
+            var entry = Assert.Single(data.Data);
+            Assert.Equal(key, entry.Key);
+            var list = Assert.IsType<List<string>>(entry.Value);
+            Assert.Equal(value, Assert.Single(list));
+        }
+
+        [Fact]
+        public async Task ListRightPushAsync_ListAlreadyContainsItem_AddItemToEndOfList()
+        {
+            const string key = "test";
+            const string initialValue = "init";
+            const string value = "testValue";
+
+            // arrange
+            var data = new InMemoryKeyValueData();
+            var database = new InMemoryKeyValueDatabase(data);
+
+            await database.ListRightPushAsync(key, initialValue);
+
+            // act
+            await database.ListRightPushAsync(key, value);
+
+            // assert
+            var entry = Assert.Single(data.Data);
+            var list = Assert.IsType<List<string>>(entry.Value);
+            Assert.Equal(new[] {initialValue, value}, list);
+        }
+
+        [Fact]
+        public async Task ListLenAsync_KeyDoesNotExist_ReturnZero()
+        {
+            const string key = "test";
+
+            // arrange
+            var data = new InMemoryKeyValueData();
+            var database = new InMemoryKeyValueDatabase(data);
+
+            // act
+            var actual = await database.ListLenAsync(key);
+
+            // assert
+            Assert.Equal(0, actual);
+        }
+
+        [Fact]
+        public async Task ListLenAsync_ListExists_ReturnListCount()
+        {
+            const string key = "test";
+
+            // arrange
+            var data = new InMemoryKeyValueData();
+            var database = new InMemoryKeyValueDatabase(data);
+
+            await database.ListRightPushAsync(key, "test1");
+            await database.ListRightPushAsync(key, "test2");
+
+            // act
+            var actual = await database.ListLenAsync(key);
+
+            // assert
+            Assert.Equal(2, actual);
+        }
+
+        [Fact]
+        public async Task ListRangeAsync_KeyDoesNotExist_ReturnEmptyCollection()
+        {
+            const string key = "test";
+
+            // arrange
+            var data = new InMemoryKeyValueData();
+            var database = new InMemoryKeyValueDatabase(data);
+
+            // act
+            var actual = await database.ListRangeAsync(key, 0, -1);
+
+            // assert
+            Assert.Empty(actual);
+        }
+
+        [Theory]
+        [InlineData(0, 1)]
+        [InlineData(0, -1)]
+        [InlineData(0, 200)]
+        [InlineData(-1, 0)]
+        public async Task ListRangeAsync_SingleItemExists_ReturnThisItem(int start, int end)
+        {
+            const string key = "test";
+            const string item = "testItem";
+
+            // arrange
+            var data = new InMemoryKeyValueData();
+            var database = new InMemoryKeyValueDatabase(data);
+
+            await database.ListRightPushAsync(key, item);
+
+            // act
+            var actual = await database.ListRangeAsync(key, start, end);
+
+            // assert
+            Assert.Equal(item, Assert.Single(actual));
+        }
+
+        [Theory]
+        [InlineData(1, 1)]
+        [InlineData(5, 100)]
+        public async Task ListRangeAsync_SingleItemExists_ReturnEmptyCollection(int start, int end)
+        {
+            const string key = "test";
+            const string item = "testItem";
+
+            // arrange
+            var data = new InMemoryKeyValueData();
+            var database = new InMemoryKeyValueDatabase(data);
+
+            await database.ListRightPushAsync(key, item);
+
+            // act
+            var actual = await database.ListRangeAsync(key, start, end);
+
+            // assert
+            Assert.Empty(actual);
+        }
+
+        [Theory]
+        [InlineData(1, 1, new[] {"item1"})]
+        [InlineData(1, 2, new[] {"item1", "item2"})]
+        [InlineData(0, 2, new[] {"item0", "item1", "item2"})]
+        [InlineData(-2, -1, new[] {"item8", "item9"})]
+        [InlineData(8, 100, new[] {"item8", "item9"})]
+        [InlineData(6, -1, new[] {"item6", "item7", "item8", "item9"})]
+        [InlineData(10, 11, new string[0])]
+        public async Task ListRangeAsync_MultipleItems_CorrectlyReturnRange(int start, int end, string[] expected)
+        {
+            const string key = "test";
+
+            // arrange
+            var data = new InMemoryKeyValueData();
+            var database = new InMemoryKeyValueDatabase(data);
+
+            for (var i = 0; i < 10; i++)
+            {
+                await database.ListRightPushAsync(key, $"item{i}");
+            }
+
+            // act
+            var actual = await database.ListRangeAsync(key, start, end);
+
+            // assert
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public async Task SetAddAsync_SetDoesNotExist_CreateSetAndReturnTrue()
+        {
+            const string key = "test";
+            const string value = "test1";
+
+            // arrange
+            var data = new InMemoryKeyValueData();
+            var database = new InMemoryKeyValueDatabase(data);
+
+            // act
+            var result = await database.SetAddAsync(key, value);
+
+            // assert
+            Assert.True(result);
+            Assert.NotEmpty(data.Data);
+        }
+
+        [Fact]
+        public async Task SetAddAsync_SetDoesExist_AddValueToExistingSet()
+        {
+            const string key = "test";
+            const string value1 = "test1";
+            const string value2 = "test2";
+
+            // arrange
+            var data = new InMemoryKeyValueData();
+            var database = new InMemoryKeyValueDatabase(data);
+
+            await database.SetAddAsync(key, value1);
+
+            // act
+            var result = await database.SetAddAsync(key, value2);
+
+            // assert
+            Assert.True(result);
+
+            var actualSet = await database.SetMembersAsync(key);
+            AssertHelper.AssertScrambledEquals(new[] {value1, value2}, actualSet);
+        }
+
+        [Fact]
+        public async Task SetAddAsync_ItemAlreadyExists_ReturnFalse()
+        {
+            const string key = "test";
+            const string value1 = "test1";
+
+            // arrange
+            var data = new InMemoryKeyValueData();
+            var database = new InMemoryKeyValueDatabase(data);
+
+            await database.SetAddAsync(key, value1);
+
+            // act
+            var result = await database.SetAddAsync(key, value1);
+
+            // assert
+            Assert.False(result);
+
+            var actualSet = await database.SetMembersAsync(key);
+            AssertHelper.AssertScrambledEquals(new[] {value1}, actualSet);
+        }
+
+        [Fact]
+        public async Task SetRemoveAsync_SetDoesNotExist_ReturnFalse()
+        {
+            const string key = "test";
+
+            // arrange
+            var data = new InMemoryKeyValueData();
+            var database = new InMemoryKeyValueDatabase(data);
+
+            // act
+            var result = await database.SetRemoveAsync(key, "test");
+
+            // assert
+            Assert.False(result);
+            Assert.Empty(data.Data);
+        }
+
+        [Fact]
+        public async Task SetRemoveAsync_LastItem_ReturnTrueAndDeleteKey()
+        {
+            const string key = "test";
+            const string item = "item";
+
+            // arrange
+            var data = new InMemoryKeyValueData();
+            var database = new InMemoryKeyValueDatabase(data);
+
+            await database.SetAddAsync(key, item);
+
+            // act
+            var result = await database.SetRemoveAsync(key, item);
+
+            // assert
+            Assert.True(result);
+            Assert.Empty(data.Data);
+        }
+
+        [Fact]
+        public async Task SetRemoveAsync_ItemExists_ReturnTrueAndDeleteItem()
+        {
+            const string key = "test";
+            const string item1 = "item1";
+            const string item2 = "item2";
+
+            // arrange
+            var data = new InMemoryKeyValueData();
+            var database = new InMemoryKeyValueDatabase(data);
+
+            await database.SetAddAsync(key, item1);
+            await database.SetAddAsync(key, item2);
+
+            // act
+            var result = await database.SetRemoveAsync(key, item1);
+
+            // assert
+            Assert.True(result);
+
+            var items = await database.SetMembersAsync(key);
+            AssertHelper.AssertScrambledEquals(new[] {item2}, items);
+        }
+
+        [Fact]
+        public async Task SetMembersAsync_KeyDoesNotExist_ReturnEmptyList()
+        {
+            const string key = "test";
+
+            // arrange
+            var data = new InMemoryKeyValueData();
+            var database = new InMemoryKeyValueDatabase(data);
+
+            // act
+            var result = await database.SetMembersAsync(key);
+
+            // assert
+            Assert.Empty(result);
+        }
+
+        [Fact]
+        public async Task SetMembersAsync_MembersExist_ReturnList()
+        {
+            const string key = "test";
+            const string value = "value";
+
+            // arrange
+            var data = new InMemoryKeyValueData();
+            var database = new InMemoryKeyValueDatabase(data);
+
+            await database.SetAddAsync(key, value);
+
+            // act
+            var result = await database.SetMembersAsync(key);
+
+            // assert
+            var actualValue = Assert.Single(result);
+            Assert.Equal(value, actualValue);
         }
 
         [Fact]

@@ -33,7 +33,7 @@ namespace PaderConference.Infrastructure.Redis.InMemory
         {
             _cancellationTokenSource.Token.ThrowIfCancellationRequested();
 
-            using (_data.Lock.Lock())
+            using (_data.Lock.WriterLock())
             {
                 _isExecuting = true;
 
@@ -136,6 +136,36 @@ namespace PaderConference.Infrastructure.Redis.InMemory
         public override ValueTask<RedisResult> ExecuteScriptAsync(RedisScript script, params string[] parameters)
         {
             return AddTransactionStep(() => base.ExecuteScriptAsync(script, parameters));
+        }
+
+        public override ValueTask ListRightPushAsync(string key, string item)
+        {
+            return AddTransactionStep(() => base.ListRightPushAsync(key, item));
+        }
+
+        public override ValueTask<int> ListLenAsync(string key)
+        {
+            return AddTransactionStep(() => base.ListLenAsync(key));
+        }
+
+        public override ValueTask<IReadOnlyList<string>> ListRangeAsync(string key, int start, int end)
+        {
+            return AddTransactionStep(() => base.ListRangeAsync(key, start, end));
+        }
+
+        public override ValueTask<bool> SetAddAsync(string key, string value)
+        {
+            return AddTransactionStep(() => base.SetAddAsync(key, value));
+        }
+
+        public override ValueTask<bool> SetRemoveAsync(string key, string value)
+        {
+            return AddTransactionStep(() => base.SetRemoveAsync(key, value));
+        }
+
+        public override ValueTask<IReadOnlyList<string>> SetMembersAsync(string key)
+        {
+            return AddTransactionStep(() => base.SetMembersAsync(key));
         }
     }
 }

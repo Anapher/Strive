@@ -4,6 +4,7 @@ using Newtonsoft.Json.Linq;
 using PaderConference.Core.Services;
 using PaderConference.Core.Services.Permissions.Gateways;
 using PaderConference.Infrastructure.Redis.Abstractions;
+using PaderConference.Infrastructure.Redis.Extensions;
 
 namespace PaderConference.Infrastructure.Redis.Repos
 {
@@ -46,7 +47,7 @@ namespace PaderConference.Infrastructure.Redis.Repos
         private static string GetKey(Participant participant)
         {
             return RedisKeyBuilder.ForProperty(PROPERTY_KEY).ForConference(participant.ConferenceId)
-                .ForParticipant(participant.Id).ToString();
+                .ForSecondary(participant.Id).ToString();
         }
     }
 }

@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using PaderConference.Core.Services.Synchronization.Gateways;
 using PaderConference.Infrastructure.Redis.Abstractions;
+using PaderConference.Infrastructure.Redis.Extensions;
 
 namespace PaderConference.Infrastructure.Redis.Repos
 {
@@ -36,7 +37,7 @@ namespace PaderConference.Infrastructure.Redis.Repos
 
         private static string GetKey(string conferenceId, string syncObjId)
         {
-            return RedisKeyBuilder.ForProperty(PROPERTY_KEY).ForConference(conferenceId).ForParticipant(syncObjId)
+            return RedisKeyBuilder.ForProperty(PROPERTY_KEY).ForConference(conferenceId).ForSecondary(syncObjId)
                 .ToString();
         }
     }

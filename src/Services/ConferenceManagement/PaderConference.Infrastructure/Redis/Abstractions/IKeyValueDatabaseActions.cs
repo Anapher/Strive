@@ -27,6 +27,23 @@ namespace PaderConference.Infrastructure.Redis.Abstractions
 
         ValueTask SetAsync(string key, string value);
 
+        ValueTask ListRightPushAsync(string key, string item);
+
+        ValueTask<int> ListLenAsync(string key);
+
+        ValueTask<IReadOnlyList<string>> ListRangeAsync(string key, int start, int end);
+
+        /// <returns>
+        ///     <see langword="true" /> if the element is added to the set; <see langword="false" /> if the element is already
+        ///     present.
+        /// </returns>
+        ValueTask<bool> SetAddAsync(string key, string value);
+
+        /// <returns><see langword="true" /> if the element is successfully found and removed; otherwise, <see langword="false" />.</returns>
+        ValueTask<bool> SetRemoveAsync(string key, string value);
+
+        ValueTask<IReadOnlyList<string>> SetMembersAsync(string key);
+
         ValueTask<RedisResult> ExecuteScriptAsync(RedisScript script, params string[] parameters);
     }
 }

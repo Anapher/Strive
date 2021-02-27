@@ -8,9 +8,9 @@ namespace PaderConference.Infrastructure.Redis.InMemory
 {
     public class AsyncDistributedLock : IDistributedLock
     {
-        private readonly AsyncLock _lockObject;
+        private readonly AsyncReaderWriterLock _lockObject;
 
-        public AsyncDistributedLock(AsyncLock lockObject)
+        public AsyncDistributedLock(AsyncReaderWriterLock lockObject)
         {
             _lockObject = lockObject;
         }
@@ -22,7 +22,7 @@ namespace PaderConference.Infrastructure.Redis.InMemory
 
         public IDistributedSynchronizationHandle Acquire(TimeSpan? timeout, CancellationToken cancellationToken)
         {
-            var taken = _lockObject.Lock(cancellationToken);
+            var taken = _lockObject.WriterLock(cancellationToken);
             return new AsyncLockDistributedHandle(taken);
         }
 

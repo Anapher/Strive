@@ -6,23 +6,25 @@ namespace PaderConference.Core.Services.Rooms.Gateways
 {
     public interface IRoomRepository
     {
-        Task CreateRoom(string conferenceId, Room room);
+        ValueTask CreateRoom(string conferenceId, Room room);
 
         /// <exception cref="ConcurrencyException">A concurrency exception occurs if the room does not exist</exception>
-        Task SetParticipantRoom(Participant participant, string roomId);
+        ValueTask SetParticipantRoom(Participant participant, string roomId);
 
-        Task UnsetParticipantRoom(Participant participant);
+        ValueTask UnsetParticipantRoom(Participant participant);
 
         /// <returns>Returns true if the room was actually removed, false if the room did not exist</returns>
-        Task<bool> RemoveRoom(string conferenceId, string roomId);
+        ValueTask<bool> RemoveRoom(string conferenceId, string roomId);
 
-        Task<IReadOnlyList<Participant>> GetParticipantsOfRoom(string conferenceId, string roomId);
+        ValueTask<IReadOnlyList<Participant>> GetParticipantsOfRoom(string conferenceId, string roomId);
 
-        Task<IEnumerable<Room>> GetRooms(string conferenceId);
+        ValueTask<IEnumerable<Room>> GetRooms(string conferenceId);
 
-        Task<IReadOnlyDictionary<string, string>> GetParticipantRooms(string conferenceId);
+        ValueTask<IReadOnlyDictionary<string, string>> GetParticipantRooms(string conferenceId);
 
-        Task<DeleteAllResult> DeleteAllRoomsAndMappingsOfConference(string conferenceId);
+        ValueTask<DeleteAllResult> DeleteAllRoomsAndMappingsOfConference(string conferenceId);
+
+        ValueTask<string?> GetRoomOfParticipant(Participant participant);
     }
 
     public struct DeleteAllResult

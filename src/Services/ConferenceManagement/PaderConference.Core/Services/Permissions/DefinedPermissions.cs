@@ -21,12 +21,6 @@
         public static class Chat
         {
             public static readonly PermissionDescriptor<bool> CanSendChatMessage = new("chat/canSendMessage");
-
-            public static readonly PermissionDescriptor<bool> CanSendPrivateChatMessage =
-                new("chat/canSendPrivateMessage");
-
-            public static readonly PermissionDescriptor<bool> CanSendAnonymousMessage =
-                new("chat/canSendAnonymousMessage");
         }
 
         public static class Media

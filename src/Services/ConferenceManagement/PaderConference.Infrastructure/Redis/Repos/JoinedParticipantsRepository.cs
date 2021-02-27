@@ -95,7 +95,7 @@ namespace PaderConference.Infrastructure.Redis.Repos
 
         private static string GetParticipantToConferenceKey(string participantId)
         {
-            return RedisKeyBuilder.ForProperty(PARTICIPANT_TO_CONFERENCE_KEY).ForParticipant(participantId).ToString();
+            return RedisKeyBuilder.ForProperty(PARTICIPANT_TO_CONFERENCE_KEY).ForSecondary(participantId).ToString();
         }
 
         private static string GetConferenceToParticipantsKey(string conferenceId)

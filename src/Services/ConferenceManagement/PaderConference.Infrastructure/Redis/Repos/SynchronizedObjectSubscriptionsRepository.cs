@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using PaderConference.Core.Services;
 using PaderConference.Core.Services.Synchronization.Gateways;
 using PaderConference.Infrastructure.Redis.Abstractions;
+using PaderConference.Infrastructure.Redis.Extensions;
 
 namespace PaderConference.Infrastructure.Redis.Repos
 {
@@ -58,7 +59,7 @@ namespace PaderConference.Infrastructure.Redis.Repos
             return await _database.HashGetAllAsync<IReadOnlyList<string>>(key);
         }
 
-        private static string GetKey(string conferenceId)
+        public static string GetKey(string conferenceId)
         {
             return RedisKeyBuilder.ForProperty(PROPERTY_KEY).ForConference(conferenceId).ToString();
         }

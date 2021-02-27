@@ -7,5 +7,6 @@
         public const string CONFERENCE = "conference";
         public const string PARTICIPANTS = "participants";
         public const string PARTICIPANT_PERMISSIONS = "participantPermissions";
+        public const string CHAT = "chat";
     }
 }

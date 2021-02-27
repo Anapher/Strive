@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using MediatR;
 using PaderConference.Core.Services.ConferenceControl.Notifications;
 using PaderConference.Core.Services.Synchronization.Gateways;
-using PaderConference.Core.Services.Synchronization.Requests;
+using PaderConference.Core.Services.Synchronization.Notifications;
 
 namespace PaderConference.Core.Services.Synchronization.NotificationHandlers
 {

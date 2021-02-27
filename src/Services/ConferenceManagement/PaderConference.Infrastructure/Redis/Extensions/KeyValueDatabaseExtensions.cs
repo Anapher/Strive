@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using PaderConference.Infrastructure.Redis.Abstractions;
 
-namespace PaderConference.Infrastructure.Redis.Abstractions
+namespace PaderConference.Infrastructure.Redis.Extensions
 {
     public static class KeyValueDatabaseExtensions
     {
@@ -69,6 +70,19 @@ namespace PaderConference.Infrastructure.Redis.Abstractions
             if (result == null) return default;
 
             return RedisSerializer.DeserializeValue(result, type);
+        }
+
+        public static ValueTask ListRightPushAsync(this IKeyValueDatabaseActions database, string key, object item)
+        {
+            var serialized = RedisSerializer.SerializeValue(item);
+            return database.ListRightPushAsync(key, serialized);
+        }
+
+        public static async ValueTask<IReadOnlyList<T?>> ListRangeAsync<T>(this IKeyValueDatabaseActions database,
+            string key, int start, int end)
+        {
+            var result = await database.ListRangeAsync(key, start, end);
+            return result.Select(RedisSerializer.DeserializeValue<T>).ToList();
         }
     }
 }

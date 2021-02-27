@@ -15,7 +15,12 @@ namespace PaderConference.Infrastructure.Redis.InMemory
 
         protected override IDisposable Lock()
         {
-            return _data.Lock.Lock();
+            return _data.Lock.WriterLock();
+        }
+
+        protected override IDisposable LockRead()
+        {
+            return _data.Lock.ReaderLock();
         }
 
         public IDistributedLock CreateLock(string lockKey)

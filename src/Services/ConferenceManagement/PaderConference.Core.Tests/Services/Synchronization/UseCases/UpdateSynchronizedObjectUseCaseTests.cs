@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,11 +20,10 @@ namespace PaderConference.Core.Tests.Services.Synchronization.UseCases
 {
     public class UpdateSynchronizedObjectUseCaseTests
     {
-        private readonly Mock<ISynchronizedObjectSubscriptionsRepository> _subscriptionsRepo = new();
         private readonly Mock<ISynchronizedObjectRepository> _syncObjRepo = new();
         private readonly Mock<IMediator> _mediator = new();
         private readonly List<ISynchronizedObjectProvider> _providers = new();
-        private readonly Dictionary<string, List<string>> _participantSubscriptions = new();
+        private readonly Dictionary<string, List<Participant>> _participantSubscriptions = new();
         private readonly ILogger<UpdateSynchronizedObjectUseCase> _logger;
 
         private const string ConferenceId = "123";
@@ -37,7 +35,7 @@ namespace PaderConference.Core.Tests.Services.Synchronization.UseCases
 
         public UpdateSynchronizedObjectUseCase Create()
         {
-            return new(_providers, _syncObjRepo.Object, _subscriptionsRepo.Object, _mediator.Object, _logger);
+            return new(_providers, _syncObjRepo.Object, _mediator.Object, _logger);
         }
 
         private void SetupProvider(SynchronizedObjectId syncObjId, object value)
@@ -49,15 +47,15 @@ namespace PaderConference.Core.Tests.Services.Synchronization.UseCases
             _providers.Add(providerMock.Object);
         }
 
-        private void ParticipantHasSubscribed(string participantId, SynchronizedObjectId subscribed)
+        private void ParticipantHasSubscribed(Participant participant, SynchronizedObjectId subscribed)
         {
-            if (!_participantSubscriptions.TryGetValue(participantId, out var subscriptions))
-                _participantSubscriptions[participantId] = subscriptions = new List<string>();
+            if (!_participantSubscriptions.TryGetValue(subscribed.ToString(), out var participants))
+                _participantSubscriptions[subscribed.ToString()] = participants = new List<Participant>();
 
-            subscriptions.Add(subscribed.ToString());
+            participants.Add(participant);
 
-            _subscriptionsRepo.Setup(x => x.GetOfConference(ConferenceId)).ReturnsAsync(
-                _participantSubscriptions.ToDictionary(x => x.Key, x => (IReadOnlyList<string>?) x.Value));
+            _mediator.Setup(x => x.Send(It.IsAny<FetchSubscribedParticipantsRequest>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(participants);
         }
 
         [Fact]
@@ -81,7 +79,7 @@ namespace PaderConference.Core.Tests.Services.Synchronization.UseCases
             // arrange
             var syncObjId = new SynchronizedObjectId("testSyncId");
             SetupProvider(syncObjId, syncObjValue);
-            ParticipantHasSubscribed(participant.Id, syncObjId);
+            ParticipantHasSubscribed(participant, syncObjId);
 
             var capturedNotification = _mediator.CaptureNotification<SynchronizedObjectUpdatedNotification>();
 
@@ -109,8 +107,8 @@ namespace PaderConference.Core.Tests.Services.Synchronization.UseCases
             var syncObjId = new SynchronizedObjectId("testSyncId");
             SetupProvider(syncObjId, syncObjValue);
 
-            _subscriptionsRepo.Setup(x => x.GetOfConference(ConferenceId))
-                .ReturnsAsync(ImmutableDictionary<string, IReadOnlyList<string>?>.Empty);
+            _mediator.Setup(x => x.Send(It.IsAny<FetchSubscribedParticipantsRequest>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(Array.Empty<Participant>());
 
             var useCase = Create();
 
@@ -119,6 +117,8 @@ namespace PaderConference.Core.Tests.Services.Synchronization.UseCases
             await useCase.Handle(request, CancellationToken.None);
 
             // assert
+            _mediator.Verify(x => x.Send(It.IsAny<FetchSubscribedParticipantsRequest>(), It.IsAny<CancellationToken>()),
+                Times.Once);
             _mediator.VerifyNoOtherCalls();
         }
 
@@ -134,8 +134,8 @@ namespace PaderConference.Core.Tests.Services.Synchronization.UseCases
 
             SetupProvider(syncObjId, syncObjValue);
 
-            ParticipantHasSubscribed(participantId, syncObjId);
-            ParticipantHasSubscribed(participantId2, syncObjId);
+            ParticipantHasSubscribed(new Participant(ConferenceId, participantId), syncObjId);
+            ParticipantHasSubscribed(new Participant(ConferenceId, participantId2), syncObjId);
 
             var capturedNotification = _mediator.CaptureNotification<SynchronizedObjectUpdatedNotification>();
 

@@ -27,9 +27,7 @@ namespace PaderConference.Core.Dto.Validation
                 return true;
             });
 
-            RuleFor(x => x.Configuration.Chat.CancelParticipantIsTypingInterval).GreaterThanOrEqualTo(1);
             RuleFor(x => x.Configuration.Chat.CancelParticipantIsTypingAfter).GreaterThanOrEqualTo(1);
-            RuleFor(x => x.Configuration.Chat.MaxChatMessageHistory).GreaterThanOrEqualTo(1);
 
             RuleForEach(x => x.Permissions).ChildRules(group =>
             {

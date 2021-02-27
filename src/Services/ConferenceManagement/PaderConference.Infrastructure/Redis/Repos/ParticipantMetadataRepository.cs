@@ -4,6 +4,7 @@ using PaderConference.Core.Services;
 using PaderConference.Core.Services.ConferenceControl;
 using PaderConference.Core.Services.ParticipantsList.Gateways;
 using PaderConference.Infrastructure.Redis.Abstractions;
+using PaderConference.Infrastructure.Redis.Extensions;
 
 namespace PaderConference.Infrastructure.Redis.Repos
 {
@@ -35,6 +36,12 @@ namespace PaderConference.Infrastructure.Redis.Repos
         {
             var key = GetKey(participant.ConferenceId);
             await _database.HashDeleteAsync(key, participant.Id);
+        }
+
+        public async ValueTask<ParticipantMetadata?> GetParticipantMetadata(Participant participant)
+        {
+            var key = GetKey(participant.ConferenceId);
+            return await _database.HashGetAsync<ParticipantMetadata>(key, participant.Id);
         }
 
         private static string GetKey(string conferenceId)

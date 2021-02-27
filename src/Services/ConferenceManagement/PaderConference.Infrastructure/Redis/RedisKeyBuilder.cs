@@ -5,7 +5,7 @@ namespace PaderConference.Infrastructure.Redis
     public class RedisKeyBuilder
     {
         private string? _conferenceId;
-        private string? _participantId;
+        private string? _secondary;
         private readonly string _propertyKey;
 
         private RedisKeyBuilder(string propertyKey)
@@ -24,9 +24,9 @@ namespace PaderConference.Infrastructure.Redis
             return this;
         }
 
-        public RedisKeyBuilder ForParticipant(string participantId)
+        public RedisKeyBuilder ForSecondary(string secondary)
         {
-            _participantId = participantId;
+            _secondary = secondary;
             return this;
         }
 
@@ -34,7 +34,7 @@ namespace PaderConference.Infrastructure.Redis
         {
             var segments = new List<string>();
             if (_conferenceId != null) segments.Add(_conferenceId);
-            if (_participantId != null) segments.Add(_participantId);
+            if (_secondary != null) segments.Add(_secondary);
             segments.Add(_propertyKey);
 
             return string.Join(":", segments);

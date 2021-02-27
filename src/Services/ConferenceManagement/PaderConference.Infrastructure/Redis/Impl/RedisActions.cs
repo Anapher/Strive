@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using PaderConference.Infrastructure.Redis.Abstractions;
@@ -66,6 +67,43 @@ namespace PaderConference.Infrastructure.Redis.Impl
         public async ValueTask SetAsync(string key, string value)
         {
             await _database.StringSetAsync(key, value);
+        }
+
+        public async ValueTask ListRightPushAsync(string key, string item)
+        {
+            await _database.ListRightPushAsync(key, item);
+        }
+
+        public async ValueTask<int> ListLenAsync(string key)
+        {
+            var result = await _database.ListLengthAsync(key);
+            if (result > int.MaxValue)
+                throw new InvalidOperationException(
+                    "Seems like a list grew larger than the maximum size of the integer. Maybe it's time to switch to long as return type.");
+
+            return (int) result;
+        }
+
+        public async ValueTask<IReadOnlyList<string>> ListRangeAsync(string key, int start, int end)
+        {
+            var result = await _database.ListRangeAsync(key, start, end);
+            return result.ToStringArray();
+        }
+
+        public async ValueTask<bool> SetAddAsync(string key, string value)
+        {
+            return await _database.SetAddAsync(key, value);
+        }
+
+        public async ValueTask<bool> SetRemoveAsync(string key, string value)
+        {
+            return await _database.SetRemoveAsync(key, value);
+        }
+
+        public async ValueTask<IReadOnlyList<string>> SetMembersAsync(string key)
+        {
+            var result = await _database.SetMembersAsync(key);
+            return result.ToStringArray();
         }
 
         public async ValueTask<RedisResult> ExecuteScriptAsync(RedisScript script, params string[] parameters)

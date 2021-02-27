@@ -29,7 +29,7 @@ namespace PaderConference.Infrastructure.Redis.InMemory
 
         public virtual ValueTask<string?> HashGetAsync(string key, string field)
         {
-            using (Lock())
+            using (LockRead())
             {
                 if (_data.TryGetValue(key, out var hashSetObj))
                 {
@@ -44,7 +44,7 @@ namespace PaderConference.Infrastructure.Redis.InMemory
 
         public virtual ValueTask HashSetAsync(string key, IEnumerable<KeyValuePair<string, string>> keyValuePairs)
         {
-            using (Lock())
+            using (LockRead())
             {
                 if (!_data.TryGetValue(key, out var hashSetObj))
                     _data[key] = hashSetObj = new Dictionary<string, string>();
@@ -66,7 +66,7 @@ namespace PaderConference.Infrastructure.Redis.InMemory
 
         public virtual ValueTask<bool> HashExistsAsync(string key, string field)
         {
-            using (Lock())
+            using (LockRead())
             {
                 if (!_data.TryGetValue(key, out var hashSetObj))
                     return new ValueTask<bool>(false);
@@ -97,7 +97,7 @@ namespace PaderConference.Infrastructure.Redis.InMemory
 
         public virtual ValueTask<IReadOnlyDictionary<string, string>> HashGetAllAsync(string key)
         {
-            using (Lock())
+            using (LockRead())
             {
                 if (!_data.TryGetValue(key, out var hashSetObj))
                     return new ValueTask<IReadOnlyDictionary<string, string>>(ImmutableDictionary<string, string>
@@ -111,7 +111,7 @@ namespace PaderConference.Infrastructure.Redis.InMemory
 
         public virtual ValueTask<string?> GetAsync(string key)
         {
-            using (Lock())
+            using (LockRead())
             {
                 if (_data.TryGetValue(key, out var value))
                     return new ValueTask<string?>((string) value);
@@ -140,6 +140,102 @@ namespace PaderConference.Infrastructure.Redis.InMemory
             }
         }
 
+        public virtual ValueTask ListRightPushAsync(string key, string item)
+        {
+            using (Lock())
+            {
+                if (!_data.TryGetValue(key, out var listObj))
+                    _data[key] = listObj = new List<string>();
+
+                var list = (List<string>) listObj;
+                list.Add(item);
+
+                return new ValueTask();
+            }
+        }
+
+        public virtual ValueTask<int> ListLenAsync(string key)
+        {
+            using (LockRead())
+            {
+                if (!_data.TryGetValue(key, out var listObj))
+                    return new ValueTask<int>(0);
+
+                var list = (List<string>) listObj;
+                return new ValueTask<int>(list.Count);
+            }
+        }
+
+        public virtual ValueTask<IReadOnlyList<string>> ListRangeAsync(string key, int start, int end)
+        {
+            using (LockRead())
+            {
+                if (!_data.TryGetValue(key, out var listObj))
+                    return new ValueTask<IReadOnlyList<string>>(ImmutableList<string>.Empty);
+
+                var list = (List<string>) listObj;
+
+                start = TranslateIndexAndEnforceBoundaries(list.Count, start);
+                end = TranslateIndexAndEnforceBoundaries(list.Count, end);
+
+                if (start > end) (start, end) = (end, start);
+                if (start > list.Count) return new ValueTask<IReadOnlyList<string>>(ImmutableList<string>.Empty);
+                end = Math.Min(end, list.Count - 1);
+
+                var rangeLength = end - start + 1;
+                var range = list.Skip(start).Take(rangeLength).ToList();
+                return new ValueTask<IReadOnlyList<string>>(range);
+            }
+        }
+
+        public virtual ValueTask<bool> SetAddAsync(string key, string value)
+        {
+            using (Lock())
+            {
+                if (!_data.TryGetValue(key, out var setObj))
+                    _data[key] = setObj = new HashSet<string>();
+
+                var set = (HashSet<string>) setObj;
+                var added = set.Add(value);
+                return new ValueTask<bool>(added);
+            }
+        }
+
+        public virtual ValueTask<bool> SetRemoveAsync(string key, string value)
+        {
+            using (Lock())
+            {
+                if (!_data.TryGetValue(key, out var setObj))
+                    return new ValueTask<bool>(false);
+
+                var set = (HashSet<string>) setObj;
+                var removed = set.Remove(value);
+
+                if (removed && !set.Any())
+                    _data.Remove(key);
+
+                return new ValueTask<bool>(removed);
+            }
+        }
+
+        public virtual ValueTask<IReadOnlyList<string>> SetMembersAsync(string key)
+        {
+            using (LockRead())
+            {
+                if (!_data.TryGetValue(key, out var setObj))
+                    return new ValueTask<IReadOnlyList<string>>(ImmutableList<string>.Empty);
+
+                var set = (HashSet<string>) setObj;
+                return new ValueTask<IReadOnlyList<string>>(set.ToList());
+            }
+        }
+
+        private static int TranslateIndexAndEnforceBoundaries(int length, int index)
+        {
+            if (index < 0) index = length + index;
+            return Math.Max(index, 0);
+        }
+
         public virtual ValueTask<RedisResult> ExecuteScriptAsync(RedisScript script, params string[] parameters)
         {
             var actions = new NoLockInMemoryDatabaseActions(_data);
@@ -161,6 +257,11 @@ namespace PaderConference.Infrastructure.Redis.InMemory
         }
 
         protected abstract IDisposable Lock();
+
+        protected virtual IDisposable LockRead()
+        {
+            return Lock();
+        }
 
         private static async ValueTask<RedisResult> JoinedParticipantsRepository_RemoveParticipant(
             IKeyValueDatabaseActions actions, string participantId, string participantKey, string conferenceKeyTemplate)

@@ -5,7 +5,7 @@ namespace PaderConference.Infrastructure.Redis.InMemory
 {
     public class InMemoryKeyValueData
     {
-        public readonly AsyncLock Lock = new();
+        public readonly AsyncReaderWriterLock Lock = new();
         public readonly Dictionary<string, object> Data = new();
     }
 }

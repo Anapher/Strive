@@ -7,6 +7,7 @@ using PaderConference.Core.Services;
 using PaderConference.Core.Services.Rooms;
 using PaderConference.Core.Services.Rooms.Gateways;
 using PaderConference.Infrastructure.Redis.Abstractions;
+using PaderConference.Infrastructure.Redis.Extensions;
 using PaderConference.Infrastructure.Redis.Scripts;
 
 namespace PaderConference.Infrastructure.Redis.Repos
@@ -23,19 +24,19 @@ namespace PaderConference.Infrastructure.Redis.Repos
             _database = database;
         }
 
-        public async Task CreateRoom(string conferenceId, Room room)
+        public async ValueTask CreateRoom(string conferenceId, Room room)
         {
             var key = GetRoomListKey(conferenceId);
             await _database.HashSetAsync(key, room.RoomId, room);
         }
 
-        public async Task<bool> RemoveRoom(string conferenceId, string roomId)
+        public async ValueTask<bool> RemoveRoom(string conferenceId, string roomId)
         {
             var key = GetRoomListKey(conferenceId);
             return await _database.HashDeleteAsync(key, roomId);
         }
 
-        public async Task<IReadOnlyList<Participant>> GetParticipantsOfRoom(string conferenceId, string roomId)
+        public async ValueTask<IReadOnlyList<Participant>> GetParticipantsOfRoom(string conferenceId, string roomId)
         {
             var key = GetRoomMappingKey(conferenceId);
             var hashValues = await _database.HashGetAllAsync(key);
@@ -43,21 +44,20 @@ namespace PaderConference.Infrastructure.Redis.Repos
             return hashValues.Where(x => x.Key == roomId).Select(x => new Participant(conferenceId, x.Value)).ToList();
         }
 
-        public async Task<IEnumerable<Room>> GetRooms(string conferenceId)
+        public async ValueTask<IEnumerable<Room>> GetRooms(string conferenceId)
         {
             var key = GetRoomListKey(conferenceId);
             var result = await _database.HashGetAllAsync<Room>(key);
             return result.Values.WhereNotNull();
         }
 
-        public async Task<IReadOnlyDictionary<string, string>> GetParticipantRooms(string conferenceId)
+        public async ValueTask<IReadOnlyDictionary<string, string>> GetParticipantRooms(string conferenceId)
         {
             var key = GetRoomMappingKey(conferenceId);
-            var result = await _database.HashGetAllAsync(key);
-            return result.ToDictionary(x => x.Key, x => x.Value);
+            return await _database.HashGetAllAsync(key);
         }
 
-        public async Task<DeleteAllResult> DeleteAllRoomsAndMappingsOfConference(string conferenceId)
+        public async ValueTask<DeleteAllResult> DeleteAllRoomsAndMappingsOfConference(string conferenceId)
         {
             var mappingKey = GetRoomMappingKey(conferenceId);
             var roomListKey = GetRoomListKey(conferenceId);
@@ -83,7 +83,14 @@ namespace PaderConference.Infrastructure.Redis.Repos
             }
         }
 
-        public async Task SetParticipantRoom(Participant participant, string roomId)
+        public async ValueTask<string?> GetRoomOfParticipant(Participant participant)
+        {
+            var mappingKey = GetRoomMappingKey(participant.ConferenceId);
+            var mapping = await _database.HashGetAllAsync(mappingKey);
+            return mapping.Where(x => x.Value == participant.Id).Select(x => x.Key).FirstOrDefault();
+        }
+
+        public async ValueTask SetParticipantRoom(Participant participant, string roomId)
         {
             var roomMappingKey = GetRoomMappingKey(participant.ConferenceId);
             var roomListKey = GetRoomListKey(participant.ConferenceId);
@@ -95,7 +102,7 @@ namespace PaderConference.Infrastructure.Redis.Repos
                 throw new ConcurrencyException("Failed to set room of participant: The room does not exist.");
         }
 
-        public async Task UnsetParticipantRoom(Participant participant)
+        public async ValueTask UnsetParticipantRoom(Participant participant)
         {
             var roomMappingKey = GetRoomMappingKey(participant.ConferenceId);
             await _database.HashDeleteAsync(roomMappingKey, participant.Id);

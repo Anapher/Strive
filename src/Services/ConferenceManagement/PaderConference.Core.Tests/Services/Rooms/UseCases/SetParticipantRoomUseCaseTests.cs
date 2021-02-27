@@ -40,7 +40,7 @@ namespace PaderConference.Core.Tests.Services.Rooms.UseCases
             // arrange
             var handler = Create();
             _roomRepo.Setup(x => x.SetParticipantRoom(_testParticipant, NewRoomId))
-                .ThrowsAsync(new ConcurrencyException("yikes"));
+                .Throws(new ConcurrencyException("yikes"));
 
             // act
             await Assert.ThrowsAsync<ConcurrencyException>(async () =>
