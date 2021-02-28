@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
+using PaderConference.Core.Services.Chat.Channels;
 using PaderConference.Core.Services.Chat.Requests;
 
 namespace PaderConference.Core.Services.Chat
@@ -24,7 +25,7 @@ namespace PaderConference.Core.Services.Chat
             _taskDelay = taskDelay;
         }
 
-        public void RemoveParticipantTypingAfter(Participant participant, string channel, TimeSpan timespan)
+        public void RemoveParticipantTypingAfter(Participant participant, ChatChannel channel, TimeSpan timespan)
         {
             var now = DateTimeOffset.UtcNow;
             var timeout = now.Add(timespan);
@@ -38,7 +39,7 @@ namespace PaderConference.Core.Services.Chat
             }
         }
 
-        public IEnumerable<string> CancelAllTimers(Participant participant)
+        public IEnumerable<ChatChannel> CancelAllTimers(Participant participant)
         {
             lock (_lock)
             {
@@ -53,7 +54,7 @@ namespace PaderConference.Core.Services.Chat
             }
         }
 
-        public void CancelTimer(Participant participant, string channel)
+        public void CancelTimer(Participant participant, ChatChannel channel)
         {
             lock (_lock)
             {
@@ -119,6 +120,6 @@ namespace PaderConference.Core.Services.Chat
             await _mediator.Send(new SetParticipantTypingRequest(participant.Participant, participant.Channel, false));
         }
 
-        private record ParticipantInChannel(Participant Participant, string Channel);
+        private record ParticipantInChannel(Participant Participant, ChatChannel Channel);
     }
 }

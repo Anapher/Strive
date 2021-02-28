@@ -2,6 +2,5 @@
 {
     public record GlobalChatChannel : ChatChannel
     {
-        public override ChatChannelType Type { get; } = ChatChannelType.Global;
     }
 }

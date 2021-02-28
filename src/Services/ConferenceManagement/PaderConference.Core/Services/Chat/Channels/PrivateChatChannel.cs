@@ -16,7 +16,19 @@ namespace PaderConference.Core.Services.Chat.Channels
             _participants = participants;
         }
 
-        public override ChatChannelType Type { get; } = ChatChannelType.Private;
         public IEnumerable<string> Participants => _participants.OrderBy(x => x);
+
+        public virtual bool Equals(PrivateChatChannel? other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return base.Equals(other) && _participants.SetEquals(other._participants);
+        }
+
+        public override int GetHashCode()
+        {
+            var ordered = _participants.OrderBy(x => x).ToList();
+            return HashCode.Combine(ordered[0], ordered[1]);
+        }
     }
 }

@@ -7,6 +7,7 @@ using MediatR;
 using Moq;
 using PaderConference.Core.Services;
 using PaderConference.Core.Services.Chat;
+using PaderConference.Core.Services.Chat.Channels;
 using PaderConference.Core.Services.Chat.Requests;
 using PaderConference.Tests.Utils;
 using Xunit;
@@ -16,7 +17,7 @@ namespace PaderConference.Core.Tests.Services.Chat
     public class ParticipantTypingTimerTests
     {
         private const string ConferenceId = "conferenceId";
-        private const string Channel = "testChatChannel";
+        private static readonly ChatChannel Channel = new GlobalChatChannel();
 
         private readonly Participant _testParticipant = new(ConferenceId, "123");
         private readonly Mock<IMediator> _mediator = new();
@@ -92,7 +93,7 @@ namespace PaderConference.Core.Tests.Services.Chat
                 }
             }
 
-            var tasks = Enumerable.Range(0, 4).Select(x => Task.Run(TestRemoveParticipant)).ToList();
+            var tasks = Enumerable.Range(0, 4).Select(_ => Task.Run(TestRemoveParticipant)).ToList();
             await Task.WhenAll(tasks);
 
             await Task.Delay(100);
@@ -133,7 +134,7 @@ namespace PaderConference.Core.Tests.Services.Chat
         [Fact]
         public void CancelTimer_TimerWasSet_Reschedule()
         {
-            const string channel2 = "testChannel2";
+            ChatChannel channel2 = new RoomChatChannel("test123");
 
             // arrange
             var trigger = SetupTaskDelayGetTrigger();

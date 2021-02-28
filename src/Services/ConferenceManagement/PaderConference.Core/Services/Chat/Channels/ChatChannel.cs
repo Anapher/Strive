@@ -2,6 +2,5 @@
 {
     public abstract record ChatChannel
     {
-        public abstract ChatChannelType Type { get; }
     }
 }

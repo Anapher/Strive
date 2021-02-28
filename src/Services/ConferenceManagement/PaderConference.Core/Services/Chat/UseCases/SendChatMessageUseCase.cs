@@ -17,14 +17,11 @@ namespace PaderConference.Core.Services.Chat.UseCases
     public class SendChatMessageUseCase : IRequestHandler<SendChatMessageRequest, SuccessOrError<Unit>>
     {
         private readonly IMediator _mediator;
-        private readonly IChatChannelSelector _chatChannelSelector;
         private readonly IChatRepository _chatRepository;
 
-        public SendChatMessageUseCase(IMediator mediator, IChatChannelSelector chatChannelSelector,
-            IChatRepository chatRepository)
+        public SendChatMessageUseCase(IMediator mediator, IChatRepository chatRepository)
         {
             _mediator = mediator;
-            _chatChannelSelector = chatChannelSelector;
             _chatRepository = chatRepository;
         }
 
@@ -33,9 +30,6 @@ namespace PaderConference.Core.Services.Chat.UseCases
         {
             var (participant, _, channel, _) = request;
             var conferenceId = participant.ConferenceId;
-
-            if (!await _chatChannelSelector.CanParticipantSendMessageToChannel(participant, channel))
-                return ChatError.InvalidChannel;
 
             var message = await BuildChatMessage(request);
             var channelId = ChannelSerializer.Encode(channel);

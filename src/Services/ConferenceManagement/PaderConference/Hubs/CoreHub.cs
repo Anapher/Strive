@@ -10,9 +10,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using PaderConference.Core;
+using PaderConference.Core.Errors;
 using PaderConference.Core.Extensions;
 using PaderConference.Core.Interfaces;
 using PaderConference.Core.Services;
+using PaderConference.Core.Services.Chat.Requests;
 using PaderConference.Core.Services.ConferenceControl;
 using PaderConference.Core.Services.ConferenceControl.Notifications;
 using PaderConference.Core.Services.ConferenceControl.Requests;
@@ -21,10 +23,13 @@ using PaderConference.Core.Services.Permissions.Requests;
 using PaderConference.Core.Services.Permissions.Responses;
 using PaderConference.Core.Services.Rooms;
 using PaderConference.Core.Services.Rooms.Requests;
+using PaderConference.Core.Utilities;
 using PaderConference.Extensions;
 using PaderConference.Hubs.Dtos;
+using PaderConference.Hubs.Responses;
 using PaderConference.Hubs.Services;
 using PaderConference.Hubs.Services.Middlewares;
+using PaderConference.Hubs.Validators.Extensions;
 using PaderConference.Infrastructure.Extensions;
 
 namespace PaderConference.Hubs
@@ -46,8 +51,7 @@ namespace PaderConference.Hubs
         private IServiceInvoker GetInvoker()
         {
             var participant = GetContextParticipant();
-            return new ServiceInvoker(_mediator,
-                new ServiceInvokerContext(this, HubScope, participant));
+            return new ServiceInvoker(_mediator, new ServiceInvokerContext(this, HubScope, participant));
         }
 
         public override async Task OnConnectedAsync()
@@ -164,9 +168,8 @@ namespace PaderConference.Hubs
             var (conferenceId, _) = GetContextParticipant();
 
             return GetInvoker()
-                .Create(
-                    new SetTemporaryPermissionRequest(new Participant(conferenceId, dto.ParticipantId),
-                        dto.PermissionKey, dto.Value))
+                .Create(new SetTemporaryPermissionRequest(new Participant(conferenceId, dto.ParticipantId),
+                    dto.PermissionKey, dto.Value))
                 .RequirePermissions(DefinedPermissions.Permissions.CanGiveTemporaryPermission).ValidateObject(dto)
                 .ConferenceMustBeOpen().Send();
         }
@@ -219,21 +222,51 @@ namespace PaderConference.Hubs
         //        service => service.ChangeBreakoutRooms);
         //}
 
-        //public Task<SuccessOrError> SendChatMessage(SendChatMessageRequest dto)
-        //{
-        //    return _invoker.InvokeService<ChatService, SendChatMessageRequest>(dto, service => service.SendMessage);
-        //}
+        public async Task<SuccessOrError<Unit>> SendChatMessage(SendChatMessageDto dto)
+        {
+            if (!ChatValidationExtensions.TryParseChatChannel(dto.Channel, out var channel))
+                return new FieldValidationError(nameof(FetchChatMessagesDto.Channel), "Could not parse chat channel");
 
-        //public Task<SuccessOrError<IReadOnlyList<ChatMessageDto>>> RequestChat()
-        //{
-        //    return _invoker.InvokeService<ChatService, IReadOnlyList<ChatMessageDto>>(
-        //        service => service.FetchMyMessages);
-        //}
+            var participant = GetContextParticipant();
+            return await GetInvoker().Create(new SendChatMessageRequest(participant, dto.Message, channel, dto.Options))
+                .VerifyCanSendToChatChannel(channel).ValidateObject(dto).ConferenceMustBeOpen().Send();
+        }
 
-        //public Task<SuccessOrError> SetUserIsTyping(bool isTyping)
-        //{
-        //    return _invoker.InvokeService<ChatService, bool>(isTyping, service => service.SetUserIsTyping);
-        //}
+        public async Task<SuccessOrError<IReadOnlyList<ChatMessageDto>>> RequestChat(FetchChatMessagesDto dto)
+        {
+            if (!ChatValidationExtensions.TryParseChatChannel(dto.Channel, out var channel))
+                return new FieldValidationError(nameof(FetchChatMessagesDto.Channel), "Could not parse chat channel");
+
+            var participant = GetContextParticipant();
+            var result = await GetInvoker()
+                .Create(new FetchMessagesRequest(participant.ConferenceId, channel, dto.Start, dto.End))
+                .VerifyCanSendToChatChannel(channel).Send();
+
+            if (!result.Success) return result.Error;
+
+            var (messages, totalMessages) = result.Response;
+            var (start, _) = IndexUtils.TranslateStartEndIndex(dto.Start, dto.End, totalMessages);
+
+            var messageDtos = new List<ChatMessageDto>(messages.Count);
+            var currentId = start;
+            foreach (var chatMessage in messages)
+            {
+                messageDtos.Add(new ChatMessageDto(currentId++, dto.Channel, chatMessage.Sender, chatMessage.Message,
+                    chatMessage.Timestamp, chatMessage.Options));
+            }
+
+            return messageDtos;
+        }
+
+        public async Task<SuccessOrError<Unit>> SetUserIsTyping(SetUserTypingDto dto)
+        {
+            if (!ChatValidationExtensions.TryParseChatChannel(dto.Channel, out var channel))
+                return new FieldValidationError(nameof(FetchChatMessagesDto.Channel), "Could not parse chat channel");
+
+            var participant = GetContextParticipant();
+            return await GetInvoker().Create(new SetParticipantTypingRequest(participant, channel, dto.IsTyping))
+                .VerifyCanSendToChatChannel(channel).ConferenceMustBeOpen().Send();
+        }
 
         //public Task<SuccessOrError<string>> GetEquipmentToken()
         //{

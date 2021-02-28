@@ -12,23 +12,29 @@ namespace PaderConference.Core.Services.Chat.Channels
         public static SynchronizedObjectId Encode(ChatChannel channel)
         {
             var parameters = new Dictionary<string, string>();
+            ChatChannelType type;
+
             switch (channel)
             {
                 case GlobalChatChannel:
+                    type = ChatChannelType.Global;
                     break;
                 case PrivateChatChannel privateChatChannel:
+                    type = ChatChannelType.Private;
+
                     var participants = privateChatChannel.Participants.ToList();
                     parameters.Add("p1", participants[0]);
                     parameters.Add("p2", participants[1]);
                     break;
                 case RoomChatChannel roomChatChannel:
+                    type = ChatChannelType.Room;
                     parameters.Add("roomId", roomChatChannel.RoomId);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(channel));
             }
 
-            return CreateSyncChannel(channel.Type, parameters);
+            return CreateSyncChannel(type, parameters);
         }
 
         public static ChatChannel Decode(SynchronizedObjectId channel)

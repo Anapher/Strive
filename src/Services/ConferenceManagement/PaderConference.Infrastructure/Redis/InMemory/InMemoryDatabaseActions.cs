@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using PaderConference.Core.Extensions;
+using PaderConference.Core.Utilities;
 using PaderConference.Infrastructure.Redis.Abstractions;
 using PaderConference.Infrastructure.Redis.Scripts;
 using StackExchange.Redis;
@@ -174,13 +175,11 @@ namespace PaderConference.Infrastructure.Redis.InMemory
                     return new ValueTask<IReadOnlyList<string>>(ImmutableList<string>.Empty);
 
                 var list = (List<string>) listObj;
+                if (!list.Any())
+                    return new ValueTask<IReadOnlyList<string>>(ImmutableList<string>.Empty);
 
-                start = TranslateIndexAndEnforceBoundaries(list.Count, start);
-                end = TranslateIndexAndEnforceBoundaries(list.Count, end);
-
-                if (start > end) (start, end) = (end, start);
+                (start, end) = IndexUtils.TranslateStartEndIndex(start, end, list.Count);
                 if (start > list.Count) return new ValueTask<IReadOnlyList<string>>(ImmutableList<string>.Empty);
-                end = Math.Min(end, list.Count - 1);
 
                 var rangeLength = end - start + 1;
                 var range = list.Skip(start).Take(rangeLength).ToList();
@@ -228,12 +227,6 @@ namespace PaderConference.Infrastructure.Redis.InMemory
                 var set = (HashSet<string>) setObj;
                 return new ValueTask<IReadOnlyList<string>>(set.ToList());
             }
-        }
-
-        private static int TranslateIndexAndEnforceBoundaries(int length, int index)
-        {
-            if (index < 0) index = length + index;
-            return Math.Max(index, 0);
         }
 
         public virtual ValueTask<RedisResult> ExecuteScriptAsync(RedisScript script, params string[] parameters)
