@@ -12,6 +12,7 @@ using PaderConference.Core.Services.Chat.Channels;
 using PaderConference.Core.Services.Chat.Notifications;
 using PaderConference.Core.Services.Chat.Requests;
 using PaderConference.Core.Services.ConferenceControl;
+using PaderConference.Core.Services.ConferenceControl.Notifications;
 using PaderConference.Core.Services.ConferenceControl.Requests;
 using PaderConference.Core.Services.ParticipantsList;
 using PaderConference.Core.Services.Rooms;
@@ -74,7 +75,7 @@ namespace PaderConference.Core.IntegrationTests.Services
 
             // act
             var messageOptions = new ChatMessageOptions();
-            await Mediator.Send(new SendChatMessageRequest(sender.Participant, message, new GlobalChatChannel(),
+            await Mediator.Send(new SendChatMessageRequest(sender.Participant, message, GlobalChatChannel.Instance,
                 messageOptions));
 
             // assert
@@ -121,13 +122,35 @@ namespace PaderConference.Core.IntegrationTests.Services
         }
 
         [Fact]
+        public async Task SendChatMessage_ParticipantIsTyping_RemoveParticipantTyping()
+        {
+            var sender = TestParticipantConnection1;
+
+            // arrange
+            await Mediator.Send(new OpenConferenceRequest(ConferenceId));
+
+            await JoinParticipant(TestParticipantConnection1);
+            await Mediator.Send(new SetParticipantTypingRequest(TestParticipant1, GlobalChatChannel.Instance, true));
+
+            // act
+            await Mediator.Send(new SendChatMessageRequest(sender.Participant, "Hello World",
+                GlobalChatChannel.Instance, new ChatMessageOptions()));
+
+            // assert
+            var syncObjId = SynchronizedChatProvider.GetSyncObjId(GlobalChatChannel.Instance);
+            var syncObj =
+                SynchronizedObjectListener.GetSynchronizedObject<SynchronizedChat>(TestParticipant1, syncObjId);
+            Assert.Empty(syncObj.ParticipantsTyping);
+        }
+
+        [Fact]
         public async Task SetParticipantIsTyping_SetTypingToTrue_UpdateSynchronizedObject()
         {
             // arrange
             await JoinParticipant(TestParticipantConnection1);
 
             // act
-            var channel = new GlobalChatChannel();
+            var channel = GlobalChatChannel.Instance;
             await Mediator.Send(new SetParticipantTypingRequest(TestParticipant1, channel, true));
 
             // assert
@@ -146,7 +169,7 @@ namespace PaderConference.Core.IntegrationTests.Services
             await JoinParticipant(TestParticipantConnection1);
 
             // act
-            var channel = new GlobalChatChannel();
+            var channel = GlobalChatChannel.Instance;
             await Mediator.Send(new SetParticipantTypingRequest(TestParticipant1, channel, true));
             await Mediator.Send(new SetParticipantTypingRequest(TestParticipant1, channel, false));
 
@@ -166,7 +189,7 @@ namespace PaderConference.Core.IntegrationTests.Services
 
             // act
             var messages =
-                await Mediator.Send(new FetchMessagesRequest(ConferenceId, new GlobalChatChannel(), -50, -1));
+                await Mediator.Send(new FetchMessagesRequest(ConferenceId, GlobalChatChannel.Instance, -50, -1));
 
             // assert
             Assert.Equal(0, messages.TotalLength);
@@ -180,16 +203,68 @@ namespace PaderConference.Core.IntegrationTests.Services
             await Mediator.Send(new OpenConferenceRequest(ConferenceId));
             await JoinParticipant(TestParticipantConnection1);
 
-            await Mediator.Send(new SendChatMessageRequest(TestParticipant1, "Hello World", new GlobalChatChannel(),
+            await Mediator.Send(new SendChatMessageRequest(TestParticipant1, "Hello World", GlobalChatChannel.Instance,
                 new ChatMessageOptions()));
 
             // act
             var messages =
-                await Mediator.Send(new FetchMessagesRequest(ConferenceId, new GlobalChatChannel(), -50, -1));
+                await Mediator.Send(new FetchMessagesRequest(ConferenceId, GlobalChatChannel.Instance, -50, -1));
 
             // assert
             Assert.Equal(1, messages.TotalLength);
             Assert.Single(messages.Result);
+        }
+
+        [Fact]
+        public async Task ParticipantLeft_IsStillTyping_RemoveTypingStatus()
+        {
+            var channel = GlobalChatChannel.Instance;
+
+            // arrange
+            await Mediator.Send(new OpenConferenceRequest(ConferenceId));
+            await JoinParticipant(TestParticipantConnection1);
+            await JoinParticipant(TestParticipantConnection2);
+
+            await Mediator.Send(new SetParticipantTypingRequest(TestParticipant2, channel, true));
+
+            // act
+            await Mediator.Publish(new ParticipantLeftNotification(TestParticipant2,
+                TestParticipantConnection2.ConnectionId));
+
+            // assert
+            var syncObjId = SynchronizedChatProvider.GetSyncObjId(channel);
+            var syncObj =
+                SynchronizedObjectListener.GetSynchronizedObject<SynchronizedChat>(TestParticipant1, syncObjId);
+
+            Assert.Empty(syncObj.ParticipantsTyping);
+        }
+
+        [Fact]
+        public async Task ParticipantRoomChanged_IsStillTyping_RemoveTypingStatus()
+        {
+            // arrange
+            await Mediator.Send(new OpenConferenceRequest(ConferenceId));
+            await JoinParticipant(TestParticipantConnection1);
+            await JoinParticipant(TestParticipantConnection2);
+
+            var rooms = await Mediator.Send(new CreateRoomsRequest(ConferenceId,
+                new[] {new RoomCreationInfo("Room1"), new RoomCreationInfo("Room2")}));
+
+            await Mediator.Send(new SetParticipantRoomRequest(TestParticipant1, rooms[0].RoomId));
+            await Mediator.Send(new SetParticipantRoomRequest(TestParticipant2, rooms[0].RoomId));
+
+            var channel = new RoomChatChannel(rooms[0].RoomId);
+            await Mediator.Send(new SetParticipantTypingRequest(TestParticipant2, channel, true));
+
+            // act
+            await Mediator.Send(new SetParticipantRoomRequest(TestParticipant2, rooms[1].RoomId));
+
+            // assert
+            var syncObjId = SynchronizedChatProvider.GetSyncObjId(channel);
+            var syncObj =
+                SynchronizedObjectListener.GetSynchronizedObject<SynchronizedChat>(TestParticipant1, syncObjId);
+
+            Assert.Empty(syncObj.ParticipantsTyping);
         }
     }
 }

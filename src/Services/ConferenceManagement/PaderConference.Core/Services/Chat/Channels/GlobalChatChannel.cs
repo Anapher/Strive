@@ -2,5 +2,6 @@
 {
     public record GlobalChatChannel : ChatChannel
     {
+        public static GlobalChatChannel Instance { get; } = new();
     }
 }

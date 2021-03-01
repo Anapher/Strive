@@ -56,9 +56,10 @@ namespace PaderConference.Core.Services.Chat.UseCases
 
             var removed = await _chatRepository.RemoveParticipantTyping(participant, channelId);
             if (removed)
+            {
                 _participantTypingTimer.CancelTimer(participant, channel);
-
-            if (removed) await NotifyParticipantTypingUpdatedIfEnabled(participant.ConferenceId, channel);
+                await NotifyParticipantTypingUpdatedIfEnabled(participant.ConferenceId, channel);
+            }
         }
 
         private async ValueTask NotifyParticipantTypingUpdatedIfEnabled(string conferenceId, ChatChannel channel)

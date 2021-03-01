@@ -47,6 +47,8 @@ namespace PaderConference.Core.Services.Chat.UseCases
             await _mediator.Publish(new ChatMessageReceivedNotification(conferenceId, subscribedParticipants, message,
                 messagesCount));
 
+            await _mediator.Send(new SetParticipantTypingRequest(participant, channel, false));
+
             return Unit.Value;
         }
 

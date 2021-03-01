@@ -23,7 +23,7 @@ namespace PaderConference.Core.Tests.Services.Chat.Channels
         protected static readonly Participant TestParticipant = new("testConferenceId", "testParticipantId");
         protected const string RoomId = "123";
 
-        private readonly ChatChannel _globalChat = new GlobalChatChannel();
+        private readonly ChatChannel _globalChat = GlobalChatChannel.Instance;
         private readonly ChatChannel _roomChat = new RoomChatChannel(RoomId);
 
         private readonly ChatChannel _privateChat =

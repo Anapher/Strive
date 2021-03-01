@@ -29,7 +29,7 @@ namespace PaderConference.Core.Services.Chat
             var result = new List<ChatChannel>();
 
             if (IsGlobalChatAvailable())
-                result.Add(new GlobalChatChannel());
+                result.Add(GlobalChatChannel.Instance);
 
             var roomChatChannel = await GetParticipantRoomChatChannel(participant);
             if (roomChatChannel != null)

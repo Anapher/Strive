@@ -17,7 +17,7 @@ namespace PaderConference.Core.Tests.Services.Chat
     public class ParticipantTypingTimerTests
     {
         private const string ConferenceId = "conferenceId";
-        private static readonly ChatChannel Channel = new GlobalChatChannel();
+        private static readonly ChatChannel Channel = GlobalChatChannel.Instance;
 
         private readonly Participant _testParticipant = new(ConferenceId, "123");
         private readonly Mock<IMediator> _mediator = new();

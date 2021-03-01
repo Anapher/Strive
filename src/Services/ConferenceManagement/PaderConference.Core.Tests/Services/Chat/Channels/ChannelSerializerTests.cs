@@ -9,7 +9,7 @@ namespace PaderConference.Core.Tests.Services.Chat.Channels
     {
         public static readonly TheoryData<ChatChannel, SynchronizedObjectId> TestData = new()
         {
-            {new GlobalChatChannel(), SynchronizedObjectId.Parse("chat?type=global")},
+            {GlobalChatChannel.Instance, SynchronizedObjectId.Parse("chat?type=global")},
             {new RoomChatChannel("testId"), SynchronizedObjectId.Parse("chat?type=room&roomId=testId")},
             {
                 new PrivateChatChannel(new HashSet<string> {"participantId1", "participantId2"}),

@@ -45,7 +45,7 @@ namespace PaderConference.Core.Services.Chat.Channels
             switch (type)
             {
                 case ChatChannelType.Global:
-                    return new GlobalChatChannel();
+                    return GlobalChatChannel.Instance;
                 case ChatChannelType.Room:
                     return new RoomChatChannel(channel.Parameters["roomId"]);
                 case ChatChannelType.Private:
