@@ -14,6 +14,7 @@ using PaderConference.Core.Errors;
 using PaderConference.Core.Extensions;
 using PaderConference.Core.Interfaces;
 using PaderConference.Core.Services;
+using PaderConference.Core.Services.Chat;
 using PaderConference.Core.Services.Chat.Requests;
 using PaderConference.Core.Services.ConferenceControl;
 using PaderConference.Core.Services.ConferenceControl.Notifications;
@@ -228,8 +229,12 @@ namespace PaderConference.Hubs
                 return new FieldValidationError(nameof(FetchChatMessagesDto.Channel), "Could not parse chat channel");
 
             var participant = GetContextParticipant();
-            return await GetInvoker().Create(new SendChatMessageRequest(participant, dto.Message, channel, dto.Options))
-                .VerifyCanSendToChatChannel(channel).ValidateObject(dto).ConferenceMustBeOpen().Send();
+            var builder = GetInvoker()
+                .Create(new SendChatMessageRequest(participant, dto.Message, channel, dto.Options))
+                .VerifyCanSendToChatChannel(channel).VerifyMessageConformsOptions(dto, channel).ValidateObject(dto)
+                .ConferenceMustBeOpen();
+
+            return await builder.Send();
         }
 
         public async Task<SuccessOrError<IReadOnlyList<ChatMessageDto>>> RequestChat(FetchChatMessagesDto dto)
@@ -251,7 +256,11 @@ namespace PaderConference.Hubs
             var currentId = start;
             foreach (var chatMessage in messages)
             {
-                messageDtos.Add(new ChatMessageDto(currentId++, dto.Channel, chatMessage.Sender, chatMessage.Message,
+                ChatMessageSender? sender = null;
+                if (!chatMessage.Options.IsAnonymous)
+                    sender = chatMessage.Sender;
+
+                messageDtos.Add(new ChatMessageDto(currentId++, dto.Channel, sender, chatMessage.Message,
                     chatMessage.Timestamp, chatMessage.Options));
             }
 

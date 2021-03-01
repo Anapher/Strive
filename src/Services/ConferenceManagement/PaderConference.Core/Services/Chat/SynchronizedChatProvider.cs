@@ -28,7 +28,12 @@ namespace PaderConference.Core.Services.Chat
         public override async ValueTask<IEnumerable<SynchronizedObjectId>> GetAvailableObjects(Participant participant)
         {
             var result = await _chatChannelSelector.GetAvailableChannels(participant);
-            return result.Select(ChannelSerializer.Encode).ToList();
+            return result.Select(GetSyncObjId).ToList();
+        }
+
+        public static SynchronizedObjectId GetSyncObjId(ChatChannel channel)
+        {
+            return ChannelSerializer.Encode(channel);
         }
 
         protected override async ValueTask<SynchronizedChat> InternalFetchValue(string conferenceId,

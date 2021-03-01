@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,7 +14,6 @@ namespace PaderConference.Core.Services.Chat
         private readonly IMediator _mediator;
         private readonly ITaskDelay _taskDelay;
         private readonly object _lock = new();
-
         private readonly Dictionary<ParticipantInChannel, DateTimeOffset> _timers = new();
         private CancellationTokenSource? _cancellationTokenSource;
 
@@ -39,7 +37,7 @@ namespace PaderConference.Core.Services.Chat
             }
         }
 
-        public IEnumerable<ChatChannel> CancelAllTimers(Participant participant)
+        public IEnumerable<ChatChannel> CancelAllTimersOfParticipant(Participant participant)
         {
             lock (_lock)
             {
@@ -63,56 +61,65 @@ namespace PaderConference.Core.Services.Chat
             }
         }
 
+        public void CancelAllTimersOfConference(string conferenceId)
+        {
+            lock (_lock)
+            {
+                var timersToRemove = _timers.Keys.Where(x => x.Participant.ConferenceId == conferenceId).ToList();
+                foreach (var participantInChannel in timersToRemove)
+                {
+                    _timers.Remove(participantInChannel);
+                }
+
+                if (timersToRemove.Any()) Reschedule();
+            }
+        }
+
         private async void Reschedule()
         {
-            // the lock must be acquired here
-            //Debug.Assert(Monitor.IsEntered(_lock));
-
-            ParticipantInChannel nextParticipant;
-            DateTimeOffset nextTime;
-            CancellationToken token;
-
-            lock (_lock)
+            while (true)
             {
-                // cancel existing cancellation token and set new token
-                if (_cancellationTokenSource != null)
+                ParticipantInChannel nextParticipant;
+                DateTimeOffset nextTime;
+                CancellationToken token;
+
+                lock (_lock)
                 {
-                    _cancellationTokenSource.Cancel();
-                    _cancellationTokenSource.Dispose();
-                    _cancellationTokenSource = null;
+                    // cancel existing cancellation token and set new token
+                    if (_cancellationTokenSource != null)
+                    {
+                        _cancellationTokenSource.Cancel();
+                        _cancellationTokenSource.Dispose();
+                        _cancellationTokenSource = null;
+                    }
+
+                    if (!_timers.Any()) return;
+
+                    var cancellationTokenSource = _cancellationTokenSource = new CancellationTokenSource();
+                    token = cancellationTokenSource.Token;
+
+                    (nextParticipant, nextTime) = _timers.OrderBy(x => x.Value).First();
                 }
 
-                if (!_timers.Any()) return;
+                var timeLeft = nextTime.Subtract(DateTimeOffset.UtcNow);
+                if (timeLeft > TimeSpan.Zero)
+                    try
+                    {
+                        await _taskDelay.Delay(timeLeft, token);
+                    }
+                    catch (TaskCanceledException)
+                    {
+                        return;
+                    }
 
-                var cancellationTokenSource = _cancellationTokenSource = new CancellationTokenSource();
-                token = cancellationTokenSource.Token;
+                bool remove;
+                lock (_lock)
+                {
+                    remove = _timers.Remove(nextParticipant);
+                }
 
-                (nextParticipant, nextTime) = _timers.OrderBy(x => x.Value).First();
+                if (remove) _ = RemoveParticipantTyping(nextParticipant);
             }
-
-            var timeLeft = nextTime.Subtract(DateTimeOffset.UtcNow);
-            if (timeLeft > TimeSpan.Zero)
-                try
-                {
-                    await _taskDelay.Delay(timeLeft, token);
-                }
-                catch (TaskCanceledException)
-                {
-                    return;
-                }
-
-            bool remove;
-            lock (_lock)
-            {
-                remove = _timers.Remove(nextParticipant);
-                Console.WriteLine();
-                Debug.Print($"removed {remove} {nextParticipant}");
-            }
-
-            if (remove)
-                RemoveParticipantTyping(nextParticipant);
-
-            Reschedule();
         }
 
         private async Task RemoveParticipantTyping(ParticipantInChannel participant)

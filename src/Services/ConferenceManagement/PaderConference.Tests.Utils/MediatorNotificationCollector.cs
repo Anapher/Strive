@@ -57,5 +57,10 @@ namespace PaderConference.Tests.Utils
         {
             Assert.Empty(_notifications);
         }
+
+        public IReadOnlyList<T> GetNotificationsIssued<T>() where T : INotification
+        {
+            return _notifications.OfType<T>().ToList();
+        }
     }
 }

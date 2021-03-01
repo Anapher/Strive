@@ -8,8 +8,10 @@ namespace PaderConference.Core.Services.Chat
     {
         void RemoveParticipantTypingAfter(Participant participant, ChatChannel channel, TimeSpan timespan);
 
-        IEnumerable<ChatChannel> CancelAllTimers(Participant participant);
+        IEnumerable<ChatChannel> CancelAllTimersOfParticipant(Participant participant);
 
         void CancelTimer(Participant participant, ChatChannel channel);
+
+        void CancelAllTimersOfConference(string conferenceId);
     }
 }

@@ -25,6 +25,8 @@ namespace PaderConference.Core.Services
         // Chat
         Chat_InvalidMode,
         Chat_InvalidChannel,
+        Chat_AnonymousMessagesDisabled,
+        Chat_PrivateMessagesDisabled,
 
         // Rooms
         Rooms_NotFound,

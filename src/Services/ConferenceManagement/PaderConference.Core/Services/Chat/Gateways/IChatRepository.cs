@@ -10,7 +10,7 @@ namespace PaderConference.Core.Services.Chat.Gateways
 
         ValueTask<EntityPage<ChatMessage>> FetchMessages(string conferenceId, string channel, int start, int end);
 
-        ValueTask DeleteChanel(string conferenceId, string channel);
+        ValueTask DeleteChannel(string conferenceId, string channel);
 
         ValueTask<IReadOnlyList<string>> FetchAllChannels(string conferenceId);
 

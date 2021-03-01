@@ -58,7 +58,7 @@ namespace PaderConference.Infrastructure.Redis.Repos
             }
         }
 
-        public async ValueTask DeleteChanel(string conferenceId, string channel)
+        public async ValueTask DeleteChannel(string conferenceId, string channel)
         {
             var channelsKey = GetChannelSetKey(conferenceId);
 

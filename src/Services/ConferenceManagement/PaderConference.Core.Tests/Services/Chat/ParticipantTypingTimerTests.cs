@@ -157,20 +157,20 @@ namespace PaderConference.Core.Tests.Services.Chat
         }
 
         [Fact]
-        public void CancelAllTimers_TimerWasNotSet_DoNothing()
+        public void CancelAllTimersOfParticipant_TimerWasNotSet_DoNothing()
         {
             // arrange
             var timer = Create();
 
             // act
-            var timers = timer.CancelAllTimers(_testParticipant);
+            var timers = timer.CancelAllTimersOfParticipant(_testParticipant);
 
             // assert
             Assert.Empty(timers);
         }
 
         [Fact]
-        public void CancelAllTimers_TimerWasSet_CancelAndReturnChannel()
+        public void CancelAllTimersOfParticipant_TimerWasSet_CancelAndReturnChannel()
         {
             // arrange
             var trigger = SetupTaskDelayGetTrigger();
@@ -181,13 +181,47 @@ namespace PaderConference.Core.Tests.Services.Chat
             timer.RemoveParticipantTypingAfter(_testParticipant, Channel, TimeSpan.FromMilliseconds(100));
 
             // act
-            var timers = timer.CancelAllTimers(_testParticipant);
+            var timers = timer.CancelAllTimersOfParticipant(_testParticipant);
 
             // assert
             Assert.Equal(Channel, Assert.Single(timers));
 
             trigger();
             capturedRequest.AssertNotReceived();
+        }
+
+        [Fact]
+        public void CancelAllTimersOfConference_TimerWasNotSet_DoNothing()
+        {
+            // arrange
+            var timer = Create();
+
+            // act
+            timer.CancelAllTimersOfConference(ConferenceId);
+        }
+
+        [Fact]
+        public void CancelAllTimersOfConference_TimerWasSet_CancelTimersOfParticipantsFromConference()
+        {
+            const string conferenceId2 = "43t525";
+            var participantOfConference2 = new Participant(conferenceId2, "4325");
+
+            // arrange
+            var trigger = SetupTaskDelayGetTrigger();
+            var capturedRequest = _mediator.CaptureRequest<SetParticipantTypingRequest, Unit>();
+
+            var timer = Create();
+            timer.RemoveParticipantTypingAfter(_testParticipant, Channel, TimeSpan.FromDays(1));
+            timer.RemoveParticipantTypingAfter(participantOfConference2, Channel, TimeSpan.FromDays(1));
+
+            // act
+            timer.CancelAllTimersOfConference(ConferenceId);
+            trigger();
+
+            // assert
+            capturedRequest.AssertReceived();
+            var request = capturedRequest.GetRequest();
+            Assert.Equal(participantOfConference2, request.Participant);
         }
     }
 }

@@ -22,7 +22,7 @@ namespace PaderConference.Core.Services.Chat.NotificationHandlers
             {
                 var channel = new RoomChatChannel(removedRoomId);
                 var channelId = ChannelSerializer.Encode(channel);
-                await _chatRepository.DeleteChanel(notification.ConferenceId, channelId.ToString());
+                await _chatRepository.DeleteChannel(notification.ConferenceId, channelId.ToString());
             }
         }
     }

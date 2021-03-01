@@ -86,8 +86,7 @@ namespace PaderConference.Infrastructure.Redis.Repos
         public async ValueTask<string?> GetRoomOfParticipant(Participant participant)
         {
             var mappingKey = GetRoomMappingKey(participant.ConferenceId);
-            var mapping = await _database.HashGetAllAsync(mappingKey);
-            return mapping.Where(x => x.Value == participant.Id).Select(x => x.Key).FirstOrDefault();
+            return await _database.HashGetAsync(mappingKey, participant.Id);
         }
 
         public async ValueTask SetParticipantRoom(Participant participant, string roomId)
