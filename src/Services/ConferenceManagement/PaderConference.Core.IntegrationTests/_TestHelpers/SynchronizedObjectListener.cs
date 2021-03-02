@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,7 +21,7 @@ namespace PaderConference.Core.IntegrationTests._TestHelpers
             return Task.CompletedTask;
         }
 
-        public T? GetSynchronizedObject<T>(Participant participant, string syncObjId)
+        public T GetSynchronizedObject<T>(Participant participant, string syncObjId)
         {
             foreach (var notification in _notifications.AsEnumerable().Reverse())
             {
@@ -28,10 +29,10 @@ namespace PaderConference.Core.IntegrationTests._TestHelpers
                     return (T) notification.Value;
             }
 
-            return default;
+            throw new InvalidOperationException("The synchronized object does not exist");
         }
 
-        public T? GetSynchronizedObject<T>(Participant participant, SynchronizedObjectId syncObjId)
+        public T GetSynchronizedObject<T>(Participant participant, SynchronizedObjectId syncObjId)
         {
             return GetSynchronizedObject<T>(participant, syncObjId.ToString());
         }

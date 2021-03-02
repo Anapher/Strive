@@ -49,12 +49,8 @@ namespace PaderConference.Core.IntegrationTests.Services
 
         private SynchronizedRooms GetSyncRoomsForTestParticipant()
         {
-            var syncObj =
-                SynchronizedObjectListener.GetSynchronizedObject<SynchronizedRooms>(_testParticipant,
-                    _synchronizedRoomsId);
-
-            Assert.NotNull(syncObj);
-            return syncObj!;
+            return SynchronizedObjectListener.GetSynchronizedObject<SynchronizedRooms>(_testParticipant,
+                _synchronizedRoomsId);
         }
 
         private JoinConferenceRequest CreateTestParticipantJoinRequest()

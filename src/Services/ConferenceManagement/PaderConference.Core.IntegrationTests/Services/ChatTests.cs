@@ -36,8 +36,6 @@ namespace PaderConference.Core.IntegrationTests.Services
         private static readonly TestParticipantConnection TestParticipantConnection2 =
             new(TestParticipant2, "test2", new ParticipantMetadata("Alfred"));
 
-        private readonly ChatOptions _options = new();
-
         public ChatTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
         {
         }
@@ -50,7 +48,6 @@ namespace PaderConference.Core.IntegrationTests.Services
             AddConferenceRepo(builder, _conference);
             builder.RegisterType<TaskDelay>().AsImplementedInterfaces().SingleInstance();
             builder.RegisterType<ParticipantTypingTimer>().AsImplementedInterfaces().SingleInstance();
-            builder.Register(_ => new OptionsWrapper<ChatOptions>(_options)).AsImplementedInterfaces();
             builder.RegisterInstance(new OptionsWrapper<RoomOptions>(new RoomOptions())).AsImplementedInterfaces()
                 .SingleInstance();
         }

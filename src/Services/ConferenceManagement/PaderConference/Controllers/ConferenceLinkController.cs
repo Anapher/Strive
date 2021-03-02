@@ -24,7 +24,7 @@ namespace PaderConference.Controllers
     [ApiController]
     public class ConferenceLinkController : Controller
     {
-        // GET api/v1/conference-links
+        // GET v1/conference-links
         [HttpGet]
         [Authorize]
         public async Task<ActionResult<IReadOnlyList<ConferenceLinkDto>>> GetConferenceLinks(
@@ -36,7 +36,7 @@ namespace PaderConference.Controllers
             return Ok(result);
         }
 
-        // DELETE api/v1/conference-links/{conferenceId}
+        // DELETE v1/conference-links/{conferenceId}
         [HttpDelete("{conferenceId}")]
         [Authorize]
         public async Task<ActionResult> DeleteConferenceLink(string conferenceId,
@@ -63,7 +63,7 @@ namespace PaderConference.Controllers
             return Ok();
         }
 
-        // PATCH api/v1/conference-links/{conferenceId}
+        // PATCH v1/conference-links/{conferenceId}
         [HttpPatch("{conferenceId}")]
         [Authorize]
         public async Task<ActionResult> PatchConferenceLink(string conferenceId,

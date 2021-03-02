@@ -10,7 +10,6 @@ using FluentValidation.AspNetCore;
 using MassTransit;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
@@ -20,13 +19,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
-using PaderConference.Auth;
 using PaderConference.Consumers;
 using PaderConference.Core;
 using PaderConference.Core.Domain.Entities;
@@ -72,22 +71,21 @@ namespace PaderConference
             // add MongoDb
             services.AddHostedService<MongoDbBuilder>();
 
-            services.AddAuthorization(options =>
-            {
-                options.DefaultPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser()
-                    .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme,
-                        EquipmentAuthExtensions.EquipmentAuthScheme).Build();
-            });
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(
+                JwtBearerDefaults.AuthenticationScheme, options =>
+                {
+                    options.Authority = "http://localhost:55105";
+                    options.TokenValidationParameters = new TokenValidationParameters {ValidateAudience = false};
+#if DEBUG
+                    options.RequireHttpsMetadata = false;
+#endif
+                });
 
             services.AddSignalR().AddNewtonsoftJsonProtocol(options =>
             {
                 options.PayloadSerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
                 options.PayloadSerializerSettings.Converters.Add(
                     new StringEnumConverter(new CamelCaseNamingStrategy()));
-
-                //options.PayloadSerializerSettings.Converters.Add(JsonSubtypesConverterBuilder
-                //    .Of<SendingMode>(nameof(SendingMode.Type)).RegisterSubtype<SendAnonymously>(SendAnonymously.TYPE)
-                //    .RegisterSubtype<SendPrivately>(SendPrivately.TYPE).SerializeDiscriminatorProperty().Build());
             });
 
             services.AddMvc().ConfigureApiBehaviorOptions(options =>
@@ -144,6 +142,12 @@ namespace PaderConference
 
             services.AddMediatR(typeof(Startup), typeof(CoreModule));
 
+            services.AddCors(options =>
+                {
+                    options.AddPolicy("AllowAll",
+                        builder => { builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader(); });
+                });
+
             // Now register our services with Autofac container.
             var builder = new ContainerBuilder();
 
@@ -164,6 +168,8 @@ namespace PaderConference
                 app.UseDeveloperExceptionPage();
             else
                 app.UseHsts();
+
+            app.UseCors("AllowAll");
 
             // Enable middleware to serve generated Swagger as a JSON endpoint.
             app.UseSwagger();

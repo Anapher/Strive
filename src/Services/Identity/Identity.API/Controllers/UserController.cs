@@ -2,11 +2,13 @@
 using Identity.API.Models.Response;
 using IdentityServer4.Test;
 using IdentityServerHost.Quickstart.UI;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Identity.API.Controllers
 {
     [Route("api/v1/[controller]")]
+    [EnableCors("AllowAll")]
     public class UserController : Controller
     {
         private readonly TestUserStore _users;

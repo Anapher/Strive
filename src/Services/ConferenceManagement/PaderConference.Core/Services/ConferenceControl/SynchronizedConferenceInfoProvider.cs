@@ -1,20 +1,21 @@
 ﻿using System.Threading.Tasks;
-using PaderConference.Core.Interfaces.Gateways.Repositories;
+using MediatR;
 using PaderConference.Core.Services.ConferenceControl.Gateways;
+using PaderConference.Core.Services.ConferenceManagement.Requests;
 using PaderConference.Core.Services.Synchronization;
 
 namespace PaderConference.Core.Services.ConferenceControl
 {
     public class SynchronizedConferenceInfoProvider : SynchronizedObjectProviderForAll<SynchronizedConferenceInfo>
     {
-        private readonly IConferenceRepo _conferenceRepo;
+        private readonly IMediator _mediator;
         private readonly IConferenceScheduler _scheduler;
         private readonly IOpenConferenceRepository _openConferenceRepository;
 
-        public SynchronizedConferenceInfoProvider(IConferenceRepo conferenceRepo, IConferenceScheduler scheduler,
+        public SynchronizedConferenceInfoProvider(IMediator mediator, IConferenceScheduler scheduler,
             IOpenConferenceRepository openConferenceRepository)
         {
-            _conferenceRepo = conferenceRepo;
+            _mediator = mediator;
             _scheduler = scheduler;
             _openConferenceRepository = openConferenceRepository;
         }
@@ -25,8 +26,7 @@ namespace PaderConference.Core.Services.ConferenceControl
 
         protected override async ValueTask<SynchronizedConferenceInfo> InternalFetchValue(string conferenceId)
         {
-            var conference = await _conferenceRepo.FindById(conferenceId);
-            if (conference == null) throw new ConferenceNotFoundException(conferenceId);
+            var conference = await _mediator.Send(new FindConferenceByIdRequest(conferenceId));
 
             var nextDate = _scheduler.GetNextExecution(conference.Configuration);
             var isOpen = await _openConferenceRepository.IsOpen(conferenceId);

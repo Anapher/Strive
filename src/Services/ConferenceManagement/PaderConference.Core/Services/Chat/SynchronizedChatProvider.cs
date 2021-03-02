@@ -2,25 +2,26 @@
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Options;
+using MediatR;
 using PaderConference.Core.Services.Chat.Channels;
 using PaderConference.Core.Services.Chat.Gateways;
+using PaderConference.Core.Services.ConferenceManagement.Requests;
 using PaderConference.Core.Services.Synchronization;
 
 namespace PaderConference.Core.Services.Chat
 {
     public class SynchronizedChatProvider : SynchronizedObjectProvider<SynchronizedChat>
     {
+        private readonly IMediator _mediator;
         private readonly IChatChannelSelector _chatChannelSelector;
         private readonly IChatRepository _chatRepository;
-        private readonly ChatOptions _options;
 
-        public SynchronizedChatProvider(IChatChannelSelector chatChannelSelector, IChatRepository chatRepository,
-            IOptions<ChatOptions> options)
+        public SynchronizedChatProvider(IMediator mediator, IChatChannelSelector chatChannelSelector,
+            IChatRepository chatRepository)
         {
+            _mediator = mediator;
             _chatChannelSelector = chatChannelSelector;
             _chatRepository = chatRepository;
-            _options = options.Value;
         }
 
         public override string Id { get; } = SynchronizedObjectIds.CHAT;
@@ -39,7 +40,9 @@ namespace PaderConference.Core.Services.Chat
         protected override async ValueTask<SynchronizedChat> InternalFetchValue(string conferenceId,
             SynchronizedObjectId synchronizedObjectId)
         {
-            if (!_options.ShowTyping)
+            var conference = await _mediator.Send(new FindConferenceByIdRequest(conferenceId));
+
+            if (!conference.Configuration.Chat.ShowTyping)
                 return new SynchronizedChat(ImmutableDictionary<string, bool>.Empty);
 
             var participantsTyping =

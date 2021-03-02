@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
 using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Interfaces.Gateways;
-using PaderConference.Core.Interfaces.Gateways.Repositories;
+using PaderConference.Core.Services.ConferenceManagement.Gateways;
 
 namespace PaderConference.Infrastructure.Data.Repos
 {

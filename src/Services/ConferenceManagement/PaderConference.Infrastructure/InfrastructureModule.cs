@@ -1,5 +1,5 @@
 using Autofac;
-using PaderConference.Core.Interfaces.Gateways.Repositories;
+using PaderConference.Core.Services.ConferenceManagement.Gateways;
 using PaderConference.Infrastructure.Data;
 using PaderConference.Infrastructure.Data.Repos;
 using PaderConference.Infrastructure.Redis;

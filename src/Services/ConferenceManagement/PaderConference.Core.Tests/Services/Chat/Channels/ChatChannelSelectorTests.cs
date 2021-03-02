@@ -2,13 +2,16 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Options;
+using MediatR;
 using Moq;
+using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Services;
 using PaderConference.Core.Services.Chat;
 using PaderConference.Core.Services.Chat.Channels;
 using PaderConference.Core.Services.Chat.Gateways;
+using PaderConference.Core.Services.ConferenceManagement.Requests;
 using PaderConference.Core.Services.Rooms.Gateways;
 using Xunit;
 
@@ -31,7 +34,14 @@ namespace PaderConference.Core.Tests.Services.Chat.Channels
 
         private ChatChannelSelector Create()
         {
-            return new(new OptionsWrapper<ChatOptions>(_chatOptions), _roomRepository.Object, _chatRepository.Object);
+            var mediatorMock = new Mock<IMediator>();
+            mediatorMock
+                .Setup(x => x.Send(
+                    It.Is<FindConferenceByIdRequest>(x => x.ConferenceId == TestParticipant.ConferenceId),
+                    It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new Conference(TestParticipant.ConferenceId) {Configuration = {Chat = _chatOptions}});
+
+            return new ChatChannelSelector(mediatorMock.Object, _roomRepository.Object, _chatRepository.Object);
         }
 
         [Fact]

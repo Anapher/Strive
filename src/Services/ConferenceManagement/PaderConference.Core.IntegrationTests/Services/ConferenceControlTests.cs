@@ -44,11 +44,8 @@ namespace PaderConference.Core.IntegrationTests.Services
 
         private SynchronizedConferenceInfo GetSyncObjOfTestParticipant()
         {
-            var syncObj = SynchronizedObjectListener.GetSynchronizedObject<SynchronizedConferenceInfo>(_testParticipant,
+            return SynchronizedObjectListener.GetSynchronizedObject<SynchronizedConferenceInfo>(_testParticipant,
                 SynchronizedConferenceInfoProvider.SynchronizedObjectId);
-
-            Assert.NotNull(syncObj);
-            return syncObj!;
         }
 
         [Fact]

@@ -1,7 +1,8 @@
 ﻿using System.Threading.Tasks;
 using PaderConference.Core.Domain.Entities;
+using PaderConference.Core.Interfaces.Gateways;
 
-namespace PaderConference.Core.Interfaces.Gateways.Repositories
+namespace PaderConference.Core.Services.ConferenceManagement.Gateways
 {
     public interface IConferenceRepo
     {

@@ -4,12 +4,12 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using Moq;
 using PaderConference.Core.Domain.Entities;
-using PaderConference.Core.Interfaces.Gateways.Repositories;
 using PaderConference.Core.Services;
 using PaderConference.Core.Services.ConferenceControl.Gateways;
 using PaderConference.Core.Services.ConferenceControl.Notifications;
 using PaderConference.Core.Services.ConferenceControl.Requests;
 using PaderConference.Core.Services.ConferenceControl.UseCases;
+using PaderConference.Core.Tests._TestHelpers;
 using PaderConference.Tests.Utils;
 using Xunit;
 using Xunit.Abstractions;
@@ -19,28 +19,25 @@ namespace PaderConference.Core.Tests.Services.ConferenceControl.UseCases
     public class OpenConferenceHandlerTests
     {
         private readonly ILogger<OpenConferenceHandler> _logger;
-        private readonly Mock<IConferenceRepo> _conferenceRepo;
         private readonly Mock<IMediator> _mediator;
         private readonly Mock<IOpenConferenceRepository> _openConferenceRepository;
-
 
         public OpenConferenceHandlerTests(ITestOutputHelper outputHelper)
         {
             _logger = outputHelper.CreateLogger<OpenConferenceHandler>();
 
-            _conferenceRepo = new Mock<IConferenceRepo>();
             _openConferenceRepository = new Mock<IOpenConferenceRepository>();
             _mediator = new Mock<IMediator>();
         }
 
         private OpenConferenceHandler CreateHandler()
         {
-            return new(_openConferenceRepository.Object, _conferenceRepo.Object, _mediator.Object, _logger);
+            return new(_openConferenceRepository.Object, _mediator.Object, _logger);
         }
 
         private void InitializeConferenceInRepository(string conferenceId)
         {
-            _conferenceRepo.Setup(x => x.FindById(conferenceId)).ReturnsAsync(new Conference(conferenceId));
+            ConferenceManagementHelper.SetConferenceExists(_mediator, new Conference(conferenceId));
         }
 
         private void SetConferenceIsOpen(string conferenceId)
@@ -62,12 +59,15 @@ namespace PaderConference.Core.Tests.Services.ConferenceControl.UseCases
             SetConferenceIsClosed(conferenceId);
             var handler = CreateHandler();
 
+            ConferenceManagementHelper.SetConferenceDoesNotExist(_mediator, conferenceId);
+
             // act & assert
             await Assert.ThrowsAsync<ConferenceNotFoundException>(async () =>
             {
                 await handler.Handle(new OpenConferenceRequest(conferenceId), CancellationToken.None);
             });
 
+            ConferenceManagementHelper.VerifyAnyFindConferenceById(_mediator);
             _mediator.VerifyNoOtherCalls();
             _openConferenceRepository.VerifyNoOtherCalls();
         }
@@ -87,7 +87,7 @@ namespace PaderConference.Core.Tests.Services.ConferenceControl.UseCases
             await handler.Handle(new OpenConferenceRequest(conferenceId), CancellationToken.None);
 
             // assert
-
+            ConferenceManagementHelper.VerifyAnyFindConferenceById(_mediator);
             _mediator.VerifyNoOtherCalls();
         }
 

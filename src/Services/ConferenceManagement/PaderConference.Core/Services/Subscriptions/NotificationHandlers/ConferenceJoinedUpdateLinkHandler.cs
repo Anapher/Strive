@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using MediatR;
 using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Interfaces.Gateways.Repositories;
+using PaderConference.Core.Services;
+using PaderConference.Core.Services.ConferenceManagement.Requests;
 using PaderConference.Core.Specifications;
 using SpeciVacation;
 
@@ -11,13 +13,13 @@ namespace PaderConference.Core.Notifications.Handlers
 {
     public class ConferenceJoinedUpdateLinkHandler : INotificationHandler<ConferenceJoinedNotification>
     {
+        private readonly IMediator _mediator;
         private readonly IConferenceLinkRepo _conferenceLinkRepo;
-        private readonly IConferenceRepo _conferenceRepo;
 
-        public ConferenceJoinedUpdateLinkHandler(IConferenceLinkRepo conferenceLinkRepo, IConferenceRepo conferenceRepo)
+        public ConferenceJoinedUpdateLinkHandler(IMediator mediator, IConferenceLinkRepo conferenceLinkRepo)
         {
+            _mediator = mediator;
             _conferenceLinkRepo = conferenceLinkRepo;
-            _conferenceRepo = conferenceRepo;
         }
 
         public async Task Handle(ConferenceJoinedNotification notification, CancellationToken cancellationToken)
@@ -28,8 +30,16 @@ namespace PaderConference.Core.Notifications.Handlers
 
             if (link == null)
             {
-                var conference = await _conferenceRepo.FindById(notification.ConferenceId);
-                if (conference == null) return;
+                Conference conference;
+                try
+                {
+                    conference = await _mediator.Send(new FindConferenceByIdRequest(notification.ConferenceId),
+                        cancellationToken);
+                }
+                catch (ConferenceNotFoundException)
+                {
+                    return;
+                }
 
                 cancellationToken.ThrowIfCancellationRequested();
 

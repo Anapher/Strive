@@ -5,9 +5,8 @@ using MongoDB.Concurrency;
 using MongoDB.Driver;
 using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Interfaces.Gateways;
-using PaderConference.Core.Interfaces.Gateways.Repositories;
+using PaderConference.Core.Services.ConferenceManagement.Gateways;
 using PaderConference.Infrastructure.Utilities;
-using StackExchange.Redis.Extensions.Core.Abstractions;
 
 #pragma warning disable 8619
 
@@ -15,8 +14,6 @@ namespace PaderConference.Infrastructure.Data.Repos
 {
     public class ConferenceRepo : MongoRepo<Conference>, IConferenceRepo
     {
-        private readonly IRedisDatabase _database;
-
         static ConferenceRepo()
         {
             BsonClassMap.RegisterClassMap<Conference>(config =>
@@ -26,9 +23,8 @@ namespace PaderConference.Infrastructure.Data.Repos
             });
         }
 
-        public ConferenceRepo(IOptions<MongoDbOptions> options, IRedisDatabase database) : base(options)
+        public ConferenceRepo(IOptions<MongoDbOptions> options) : base(options)
         {
-            _database = database;
         }
 
         public Task<Conference?> FindById(string conferenceId)

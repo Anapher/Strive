@@ -1,9 +1,10 @@
 ﻿using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
+using MediatR;
 using PaderConference.Core.Domain.Entities;
-using PaderConference.Core.Interfaces.Gateways.Repositories;
 using PaderConference.Core.Services.ConferenceControl;
+using PaderConference.Core.Services.ConferenceManagement.Requests;
 using PaderConference.Core.Services.ParticipantsList.Gateways;
 using PaderConference.Core.Services.Synchronization;
 
@@ -11,13 +12,13 @@ namespace PaderConference.Core.Services.ParticipantsList
 {
     public class SynchronizedParticipantsProvider : SynchronizedObjectProviderForAll<SynchronizedParticipants>
     {
-        private readonly IConferenceRepo _conferenceRepo;
+        private readonly IMediator _mediator;
         private readonly IParticipantMetadataRepository _participantMetadataRepository;
 
-        public SynchronizedParticipantsProvider(IConferenceRepo conferenceRepo,
+        public SynchronizedParticipantsProvider(IMediator mediator,
             IParticipantMetadataRepository participantMetadataRepository)
         {
-            _conferenceRepo = conferenceRepo;
+            _mediator = mediator;
             _participantMetadataRepository = participantMetadataRepository;
         }
 
@@ -27,8 +28,7 @@ namespace PaderConference.Core.Services.ParticipantsList
 
         protected override async ValueTask<SynchronizedParticipants> InternalFetchValue(string conferenceId)
         {
-            var conference = await _conferenceRepo.FindById(conferenceId);
-            if (conference == null) throw new ConferenceNotFoundException(conferenceId);
+            var conference = await _mediator.Send(new FindConferenceByIdRequest(conferenceId));
 
             var participants = await _participantMetadataRepository.GetParticipantsOfConference(conferenceId);
             var participantsMap =

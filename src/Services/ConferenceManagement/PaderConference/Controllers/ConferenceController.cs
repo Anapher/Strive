@@ -1,16 +1,14 @@
 ﻿using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using PaderConference.Core.Dto.Services;
-using PaderConference.Core.Dto.UseCaseRequests;
-using PaderConference.Core.Interfaces.UseCases;
+using PaderConference.Core.Services.ConferenceManagement.Requests;
 using PaderConference.Core.Services.Permissions.Options;
-using PaderConference.Extensions;
 using PaderConference.Models.Response;
 
 namespace PaderConference.Controllers
@@ -19,36 +17,36 @@ namespace PaderConference.Controllers
     [ApiController]
     public class ConferenceController : Controller
     {
-        // POST api/v1/conference
+        private readonly IMediator _mediator;
+
+        public ConferenceController(IMediator mediator)
+        {
+            _mediator = mediator;
+        }
+
+        // POST v1/conference
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [Authorize(Roles = AppRoles.Moderator)]
-        public async Task<ActionResult<StartConferenceResponseDto>> Create([FromBody] ConferenceData request,
-            [FromServices] ICreateConferenceUseCase useCase)
+        public async Task<ActionResult<StartConferenceResponseDto>> Create([FromBody] ConferenceData data)
         {
-            var userId = User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value;
-            var result = await useCase.Handle(new CreateConferenceRequest(request, userId));
-            if (!result.Success) return result.ToActionResult();
-
-            return new StartConferenceResponseDto(result.Response.ConferenceId);
+            var conferenceId = await _mediator.Send(new CreateConferenceRequest(data), HttpContext.RequestAborted);
+            return new StartConferenceResponseDto(conferenceId);
         }
 
-        // PATCH api/v1/conference/{id}
+        // PATCH v1/conference/{id}
         [HttpPatch("{conferenceId}")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [Authorize(Roles = AppRoles.Moderator)]
-        public async Task<ActionResult> Patch(string conferenceId, [FromBody] JsonPatchDocument<ConferenceData> request,
-            [FromServices] IPatchConferenceUseCase useCase)
+        public async Task<ActionResult> Patch(string conferenceId, [FromBody] JsonPatchDocument<ConferenceData> patch)
         {
-            var result = await useCase.Handle(new PatchConferenceRequest(request, conferenceId));
-
-            if (!result.Success) return result.ToActionResult();
+            await _mediator.Send(new PatchConferenceRequest(conferenceId, patch));
             return Ok();
         }
 
-        // GET api/v1/conference/default-data
+        // GET v1/conference/default-data
         [HttpGet("default-data")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]

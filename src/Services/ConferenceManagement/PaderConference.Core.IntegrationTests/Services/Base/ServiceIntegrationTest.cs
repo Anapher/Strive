@@ -10,11 +10,12 @@ using Microsoft.Extensions.Options;
 using Moq;
 using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.IntegrationTests._TestHelpers;
-using PaderConference.Core.Interfaces.Gateways.Repositories;
 using PaderConference.Core.Services.ConferenceControl;
 using PaderConference.Core.Services.ConferenceControl.ClientControl;
 using PaderConference.Core.Services.ConferenceControl.Notifications;
 using PaderConference.Core.Services.ConferenceControl.Requests;
+using PaderConference.Core.Services.ConferenceManagement.Gateways;
+using PaderConference.Core.Services.ConferenceManagement.UseCases;
 using PaderConference.Core.Services.Synchronization;
 using PaderConference.Infrastructure;
 using PaderConference.Infrastructure.Redis;
@@ -94,7 +95,9 @@ namespace PaderConference.Core.IntegrationTests.Services.Base
             builder.RegisterInstance(new OptionsWrapper<ConferenceSchedulerOptions>(new ConferenceSchedulerOptions()))
                 .AsImplementedInterfaces();
 
-            var types = FetchTypesOfNamespace(typeof(SynchronizedConferenceInfo));
+            var types = FetchTypesOfNamespace(typeof(SynchronizedConferenceInfo))
+                .Concat(FetchTypesOfNamespace(typeof(FindConferenceByIdRequestHandler)));
+
             if (typeFilter != null) types = types.Where(typeFilter);
             builder.RegisterTypes(types.ToArray()).AsImplementedInterfaces();
 

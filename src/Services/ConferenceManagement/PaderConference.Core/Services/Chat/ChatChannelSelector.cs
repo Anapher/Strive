@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Options;
+using MediatR;
 using PaderConference.Core.Services.Chat.Channels;
 using PaderConference.Core.Services.Chat.Gateways;
+using PaderConference.Core.Services.ConferenceManagement.Requests;
 using PaderConference.Core.Services.Rooms.Gateways;
 using PaderConference.Core.Services.Synchronization;
 
@@ -12,14 +13,13 @@ namespace PaderConference.Core.Services.Chat
 {
     public class ChatChannelSelector : IChatChannelSelector
     {
-        private readonly ChatOptions _options;
+        private readonly IMediator _mediator;
         private readonly IRoomRepository _roomRepository;
         private readonly IChatRepository _chatRepository;
 
-        public ChatChannelSelector(IOptions<ChatOptions> options, IRoomRepository roomRepository,
-            IChatRepository chatRepository)
+        public ChatChannelSelector(IMediator mediator, IRoomRepository roomRepository, IChatRepository chatRepository)
         {
-            _options = options.Value;
+            _mediator = mediator;
             _roomRepository = roomRepository;
             _chatRepository = chatRepository;
         }
@@ -28,42 +28,49 @@ namespace PaderConference.Core.Services.Chat
         {
             var result = new List<ChatChannel>();
 
-            if (IsGlobalChatAvailable())
+            var conference = await _mediator.Send(new FindConferenceByIdRequest(participant.ConferenceId));
+            var chatOptions = conference.Configuration.Chat;
+
+            if (IsGlobalChatAvailable(chatOptions))
                 result.Add(GlobalChatChannel.Instance);
 
-            var roomChatChannel = await GetParticipantRoomChatChannel(participant);
+            var roomChatChannel = await GetParticipantRoomChatChannel(chatOptions, participant);
             if (roomChatChannel != null)
                 result.Add(roomChatChannel);
 
-            result.AddRange(await FetchPrivateChannels(participant));
+            result.AddRange(await FetchPrivateChannels(chatOptions, participant));
 
             return result;
         }
 
         public async ValueTask<bool> CanParticipantSendMessageToChannel(Participant participant, ChatChannel channel)
         {
+            var conference = await _mediator.Send(new FindConferenceByIdRequest(participant.ConferenceId));
+            var chatOptions = conference.Configuration.Chat;
+
             switch (channel)
             {
                 case GlobalChatChannel:
-                    return IsGlobalChatAvailable();
+                    return IsGlobalChatAvailable(chatOptions);
                 case PrivateChatChannel privateChatChannel:
-                    return CanParticipantSendPrivateChatInChannel(participant, privateChatChannel);
+                    return CanParticipantSendPrivateChatInChannel(chatOptions, participant, privateChatChannel);
                 case RoomChatChannel:
-                    var participantRoomChatChannel = await GetParticipantRoomChatChannel(participant);
+                    var participantRoomChatChannel = await GetParticipantRoomChatChannel(chatOptions, participant);
                     return Equals(participantRoomChatChannel, channel);
                 default:
                     throw new ArgumentOutOfRangeException(nameof(channel));
             }
         }
 
-        private bool IsGlobalChatAvailable()
+        private bool IsGlobalChatAvailable(ChatOptions options)
         {
-            return _options.IsGlobalChatEnabled;
+            return options.IsGlobalChatEnabled;
         }
 
-        private async ValueTask<ChatChannel?> GetParticipantRoomChatChannel(Participant participant)
+        private async ValueTask<ChatChannel?> GetParticipantRoomChatChannel(ChatOptions options,
+            Participant participant)
         {
-            if (!_options.IsRoomChatEnabled) return null;
+            if (!options.IsRoomChatEnabled) return null;
 
             var roomId = await _roomRepository.GetRoomOfParticipant(participant);
             if (roomId != null)
@@ -72,17 +79,18 @@ namespace PaderConference.Core.Services.Chat
             return null;
         }
 
-        private bool CanParticipantSendPrivateChatInChannel(Participant participant,
+        private bool CanParticipantSendPrivateChatInChannel(ChatOptions options, Participant participant,
             PrivateChatChannel privateChatChannel)
         {
-            if (!_options.IsPrivateChatEnabled) return false;
+            if (!options.IsPrivateChatEnabled) return false;
 
             return privateChatChannel.Participants.Contains(participant.Id);
         }
 
-        private async ValueTask<IEnumerable<ChatChannel>> FetchPrivateChannels(Participant participant)
+        private async ValueTask<IEnumerable<ChatChannel>> FetchPrivateChannels(ChatOptions options,
+            Participant participant)
         {
-            if (!_options.IsPrivateChatEnabled)
+            if (!options.IsPrivateChatEnabled)
                 return Enumerable.Empty<ChatChannel>();
 
             var allChannels = await _chatRepository.FetchAllChannels(participant.ConferenceId);

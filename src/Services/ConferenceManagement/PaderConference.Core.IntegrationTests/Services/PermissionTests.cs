@@ -87,13 +87,8 @@ namespace PaderConference.Core.IntegrationTests.Services
 
         private SynchronizedParticipantPermissions GetSyncObj()
         {
-            var syncObj =
-                SynchronizedObjectListener.GetSynchronizedObject<SynchronizedParticipantPermissions>(TestParticipant,
-                    _participantSyncObj);
-
-            Assert.NotNull(syncObj);
-
-            return syncObj!;
+            return SynchronizedObjectListener.GetSynchronizedObject<SynchronizedParticipantPermissions>(TestParticipant,
+                _participantSyncObj);
         }
 
         [Fact]

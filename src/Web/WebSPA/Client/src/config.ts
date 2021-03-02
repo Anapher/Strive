@@ -19,7 +19,7 @@ export const ocidConfig: UserManagerSettings = {
    redirect_uri: `${appSettings.frontendUrl}/authentication/callback`,
    response_type: 'code',
    post_logout_redirect_uri: `${appSettings.frontendUrl}/`,
-   scope: 'openid profile',
+   scope: 'openid profile user.info',
    authority: appSettings.identityUrl,
    silent_redirect_uri: `${appSettings.frontendUrl}/authentication/silent_callback`,
    automaticSilentRenew: true,

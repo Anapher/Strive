@@ -1,26 +1,26 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using MediatR;
 using PaderConference.Core.Domain.Entities;
-using PaderConference.Core.Interfaces.Gateways.Repositories;
+using PaderConference.Core.Services.ConferenceManagement.Requests;
 
 namespace PaderConference.Core.Services.Permissions.PermissionLayers
 {
     public class ConferencePermissionLayerProvider : IPermissionLayerProvider
     {
-        private readonly IConferenceRepo _conferenceRepo;
+        private readonly IMediator _mediator;
 
-        public ConferencePermissionLayerProvider(IConferenceRepo conferenceRepo)
+        public ConferencePermissionLayerProvider(IMediator mediator)
         {
-            _conferenceRepo = conferenceRepo;
+            _mediator = mediator;
         }
 
         public async ValueTask<IEnumerable<PermissionLayer>> FetchPermissionsForParticipant(Participant participant)
         {
             var (conferenceId, participantId) = participant;
 
-            var conference = await _conferenceRepo.FindById(conferenceId);
-            if (conference == null) throw new ConferenceNotFoundException(conferenceId);
+            var conference = await _mediator.Send(new FindConferenceByIdRequest(conferenceId));
 
             var result = new List<PermissionLayer>();
             if (conference.Permissions.TryGetValue(PermissionType.Conference, out var conferencePermissions))

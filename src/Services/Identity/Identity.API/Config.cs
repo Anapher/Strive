@@ -3,6 +3,7 @@
 
 
 using System.Collections.Generic;
+using System.Security.Claims;
 using IdentityServer4.Models;
 
 namespace Identity.API
@@ -10,13 +11,13 @@ namespace Identity.API
     public static class Config
     {
         public static IEnumerable<IdentityResource> IdentityResources =>
-            new IdentityResource[]
+            new[]
             {
-                new IdentityResources.OpenId(),
-                new IdentityResources.Profile(),
+                new IdentityResources.OpenId(), new IdentityResources.Profile(),
+                new IdentityResource {Name = "user.info", UserClaims = {ClaimTypes.Role, ClaimTypes.Name}},
             };
 
-        public static IEnumerable<ApiScope> ApiScopes => new[] {new ApiScope("scope1"), new ApiScope("scope2")};
+        public static IEnumerable<ApiScope> ApiScopes => new[] {new ApiScope("conference-management")};
 
         public static IEnumerable<Client> Clients =>
             new[]
@@ -44,9 +45,10 @@ namespace Identity.API
                     },
                     PostLogoutRedirectUris = {"http://localhost:55103/"},
                     AllowOfflineAccess = true,
-                    AllowedScopes = {"openid", "profile", "scope2"},
+                    AllowedScopes = {"openid", "profile", "user.info"},
                     AllowedCorsOrigins = {"http://localhost:55103"},
                     RequireClientSecret = false,
+                    AlwaysIncludeUserClaimsInIdToken = true,
                 },
             };
     }
