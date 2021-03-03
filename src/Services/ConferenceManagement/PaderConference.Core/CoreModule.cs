@@ -1,6 +1,5 @@
 using Autofac;
 using FluentValidation;
-using PaderConference.Core.Interfaces;
 using PaderConference.Core.Services;
 using PaderConference.Core.Services.ConferenceControl;
 using PaderConference.Core.Services.Permissions;
@@ -12,8 +11,6 @@ namespace PaderConference.Core
     {
         protected override void Load(ContainerBuilder builder)
         {
-            builder.RegisterAssemblyTypes(ThisAssembly).AsClosedTypesOf(typeof(IUseCaseRequestHandler<,>)).AsImplementedInterfaces();
-
             builder.RegisterAssemblyTypes(ThisAssembly).AsClosedTypesOf(typeof(AbstractValidator<>))
                 .AsImplementedInterfaces().SingleInstance();
 
