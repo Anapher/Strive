@@ -27,8 +27,6 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="5.0.0" />
     <PackageReference Include="System.Linq.Async" Version="5.0.0" />
     <PackageReference Include="StackExchange.Redis" Version="2.2.4" />
-    <PackageReference Include="StackExchange.Redis.Extensions.Core" Version="6.3.6" />
-    <PackageReference Include="StackExchange.Redis.Extensions.Newtonsoft" Version="6.3.6" />
   </ItemGroup>
 
   <ItemGroup>

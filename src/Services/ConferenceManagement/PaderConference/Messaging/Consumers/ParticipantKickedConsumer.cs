@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.SignalR;
 using PaderConference.Contracts;
 using PaderConference.Hubs;
 
-namespace PaderConference.Consumers
+namespace PaderConference.Messaging.Consumers
 {
     public class ParticipantKickedConsumer : IConsumer<ParticipantKicked>
     {

@@ -1,20 +1,18 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 using System.Reflection;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using AutoMapper;
 using FluentValidation.AspNetCore;
 using MassTransit;
+using MassTransit.SignalR;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -26,17 +24,22 @@ using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
-using PaderConference.Consumers;
+using PaderConference.Config;
 using PaderConference.Core;
 using PaderConference.Core.Domain.Entities;
-using PaderConference.Core.Errors;
+using PaderConference.Extensions;
 using PaderConference.Hubs;
 using PaderConference.Infrastructure;
 using PaderConference.Infrastructure.Data;
-using PaderConference.Infrastructure.Redis.Extensions;
+using PaderConference.Infrastructure.Redis.Abstractions;
+using PaderConference.Infrastructure.Redis.Impl;
+using PaderConference.Infrastructure.Redis.InMemory;
 using PaderConference.Infrastructure.Serialization;
+using PaderConference.Messaging.Consumers;
 using PaderConference.Services;
+using StackExchange.Redis.Extensions.Core.Abstractions;
 using StackExchange.Redis.Extensions.Core.Configuration;
+using StackExchange.Redis.Extensions.Newtonsoft;
 using Swashbuckle.AspNetCore.Swagger;
 
 namespace PaderConference
@@ -65,22 +68,19 @@ namespace PaderConference
         {
             services.AddLogging();
 
-            // Configure MongoDb options
-            services.Configure<MongoDbOptions>(Configuration.GetSection("MongoDb"));
-
-            // add MongoDb
-            services.AddHostedService<MongoDbBuilder>();
-
+            // Authentication
+            var authOptions = Configuration.GetSection("Authentication").Get<AuthOptions>();
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(
                 JwtBearerDefaults.AuthenticationScheme, options =>
                 {
-                    options.Authority = "http://localhost:55105";
+                    options.Authority = authOptions.Authority;
                     options.TokenValidationParameters = new TokenValidationParameters {ValidateAudience = false};
 #if DEBUG
                     options.RequireHttpsMetadata = false;
 #endif
                 });
 
+            // SignalR
             services.AddSignalR().AddNewtonsoftJsonProtocol(options =>
             {
                 options.PayloadSerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
@@ -88,39 +88,70 @@ namespace PaderConference
                     new StringEnumConverter(new CamelCaseNamingStrategy()));
             });
 
-            services.AddMvc().ConfigureApiBehaviorOptions(options =>
-            {
-                options.InvalidModelStateResponseFactory = context =>
-                    new BadRequestObjectResult(new FieldValidationError(context.ModelState
-                        .Where(x => x.Value.ValidationState == ModelValidationState.Invalid)
-                        .ToDictionary(x => x.Key, x => x.Value.Errors.First().ErrorMessage)));
-            }).AddFluentValidation(fv =>
-                fv.RegisterValidatorsFromAssemblyContaining<Startup>()
-                    .RegisterValidatorsFromAssemblyContaining<CoreModule>()).AddNewtonsoftJson(options =>
+            services.AddMvc().ConfigureApiBehaviorOptions(options => options.UseInvalidModelStateToError())
+                .AddFluentValidation(fv =>
+                    fv.RegisterValidatorsFromAssemblyContaining<Startup>()
+                        .RegisterValidatorsFromAssemblyContaining<CoreModule>()).AddNewtonsoftJson(options =>
                 {
                     options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
                 });
 
             services.AddAutoMapper(Assembly.GetExecutingAssembly(), typeof(CoreModule).Assembly);
 
-            var redisConfig = Configuration.GetSection("Redis").Get<RedisConfiguration>() ?? new RedisConfiguration();
-            services.AddStackExchangeRedisExtensions<CamelCaseNewtonSerializer>(redisConfig);
+            var healthChecks = services.AddHealthChecks();
 
-            services.AddHealthChecks().AddMongoDb(Configuration["MongoDb:ConnectionString"]);
+            // KeyValuDatabase
+            var keyValueOptions = Configuration.GetSection("KeyValueDatabase").Get<KeyValueDatabaseOptions>();
+            if (keyValueOptions.UseInMemory)
+            {
+                services.AddSingleton<IKeyValueDatabase, InMemoryKeyValueDatabase>(_ =>
+                    new InMemoryKeyValueDatabase(new InMemoryKeyValueData()));
+            }
+            else
+            {
+                var config = keyValueOptions.Redis ?? new RedisConfiguration();
+                services.AddStackExchangeRedisExtensions<NewtonsoftSerializer>(config);
+                services.AddSingleton(s => s.GetRequiredService<IRedisDatabase>().Database);
+                services.AddSingleton<IKeyValueDatabase, RedisKeyValueDatabase>();
+
+                healthChecks.AddRedis(config.ConnectionString);
+            }
+
+            // MongoDb
+            services.Configure<MongoDbOptions>(Configuration.GetSection("MongoDb"));
+            services.AddHostedService<MongoDbBuilder>();
+
+            var mongoOptions = Configuration.GetSection("MongoDb").Get<MongoDbOptions>();
+            healthChecks.AddMongoDb(mongoOptions.ConnectionString);
 
             services.Configure<HealthCheckPublisherOptions>(options =>
             {
                 options.Predicate = check => check.Tags.Contains("ready");
             });
 
+            // RabbitMq
+            var rabbitMqOptions = Configuration.GetSection("RabbitMq").Get<RabbitMqOptions>();
             services.AddMassTransit(x =>
             {
-                x.UsingRabbitMq();
+                x.AddSignalRHub<CoreHub>();
+
                 x.AddConsumersFromNamespaceContaining<ParticipantKickedConsumer>();
+
+                if (rabbitMqOptions.UseInMemory)
+                    x.UsingInMemory();
+                else
+                    x.UsingRabbitMq((context, configurator) =>
+                    {
+                        if (rabbitMqOptions.RabbitMq != null)
+                            configurator.ConfigureOptions(rabbitMqOptions.RabbitMq);
+
+                        configurator.UseHealthCheck(context);
+                        configurator.ConfigureEndpoints(context);
+                    });
             });
             services.AddMassTransitHostedService();
 
-            // Register the Swagger generator, defining 1 or more Swagger documents
+            // Swagger
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo {Title = "Pader Conference API", Version = "v1"});
@@ -143,10 +174,10 @@ namespace PaderConference
             services.AddMediatR(typeof(Startup), typeof(CoreModule));
 
             services.AddCors(options =>
-                {
-                    options.AddPolicy("AllowAll",
-                        builder => { builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader(); });
-                });
+            {
+                options.AddPolicy("AllowAll",
+                    builder => { builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader(); });
+            });
 
             // Now register our services with Autofac container.
             var builder = new ContainerBuilder();
