@@ -19,18 +19,19 @@ namespace PaderConference.Core.Tests.Services.Chat.Channels
 {
     public class ChatChannelSelectorTests
     {
-        private ChatOptions _chatOptions = new();
-        private readonly Mock<IRoomRepository> _roomRepository = new();
-        private readonly Mock<IChatRepository> _chatRepository = new();
-
-        protected static readonly Participant TestParticipant = new("testConferenceId", "testParticipantId");
         protected const string RoomId = "123";
 
+        protected static readonly Participant TestParticipant = new("testConferenceId", "testParticipantId");
+        private readonly Mock<IChatRepository> _chatRepository = new();
+
         private readonly ChatChannel _globalChat = GlobalChatChannel.Instance;
-        private readonly ChatChannel _roomChat = new RoomChatChannel(RoomId);
 
         private readonly ChatChannel _privateChat =
             new PrivateChatChannel(new HashSet<string> {TestParticipant.Id, "123"});
+
+        private readonly ChatChannel _roomChat = new RoomChatChannel(RoomId);
+        private readonly Mock<IRoomRepository> _roomRepository = new();
+        private ChatOptions _chatOptions = new();
 
         private ChatChannelSelector Create()
         {
@@ -39,7 +40,8 @@ namespace PaderConference.Core.Tests.Services.Chat.Channels
                 .Setup(x => x.Send(
                     It.Is<FindConferenceByIdRequest>(x => x.ConferenceId == TestParticipant.ConferenceId),
                     It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new Conference(TestParticipant.ConferenceId) {Configuration = {Chat = _chatOptions}});
+                .ReturnsAsync(new Conference(TestParticipant.ConferenceId)
+                    {Configuration = new ConferenceConfiguration() {Chat = _chatOptions}});
 
             return new ChatChannelSelector(mediatorMock.Object, _roomRepository.Object, _chatRepository.Object);
         }
@@ -50,7 +52,7 @@ namespace PaderConference.Core.Tests.Services.Chat.Channels
             // arrange
             _chatOptions = new ChatOptions
             {
-                IsPrivateChatEnabled = false, IsGlobalChatEnabled = false, IsRoomChatEnabled = false,
+                IsPrivateChatEnabled = false, IsGlobalChatEnabled = false, IsRoomChatEnabled = false
             };
 
             var selector = Create();
@@ -65,7 +67,7 @@ namespace PaderConference.Core.Tests.Services.Chat.Channels
             // arrange
             _chatOptions = new ChatOptions
             {
-                IsPrivateChatEnabled = false, IsGlobalChatEnabled = true, IsRoomChatEnabled = false,
+                IsPrivateChatEnabled = false, IsGlobalChatEnabled = true, IsRoomChatEnabled = false
             };
 
             var selector = Create();
@@ -80,7 +82,7 @@ namespace PaderConference.Core.Tests.Services.Chat.Channels
             // arrange
             _chatOptions = new ChatOptions
             {
-                IsPrivateChatEnabled = false, IsGlobalChatEnabled = true, IsRoomChatEnabled = false,
+                IsPrivateChatEnabled = false, IsGlobalChatEnabled = true, IsRoomChatEnabled = false
             };
 
             _roomRepository.Setup(x => x.GetRoomOfParticipant(TestParticipant)).ReturnsAsync((string?) null);
@@ -97,7 +99,7 @@ namespace PaderConference.Core.Tests.Services.Chat.Channels
             // arrange
             _chatOptions = new ChatOptions
             {
-                IsPrivateChatEnabled = false, IsGlobalChatEnabled = false, IsRoomChatEnabled = false,
+                IsPrivateChatEnabled = false, IsGlobalChatEnabled = false, IsRoomChatEnabled = false
             };
 
             _roomRepository.Setup(x => x.GetRoomOfParticipant(TestParticipant)).ReturnsAsync(RoomId);
@@ -114,7 +116,7 @@ namespace PaderConference.Core.Tests.Services.Chat.Channels
             // arrange
             _chatOptions = new ChatOptions
             {
-                IsPrivateChatEnabled = false, IsGlobalChatEnabled = false, IsRoomChatEnabled = true,
+                IsPrivateChatEnabled = false, IsGlobalChatEnabled = false, IsRoomChatEnabled = true
             };
 
             _roomRepository.Setup(x => x.GetRoomOfParticipant(TestParticipant)).ReturnsAsync(RoomId);
@@ -147,7 +149,7 @@ namespace PaderConference.Core.Tests.Services.Chat.Channels
             // arrange
             _chatOptions = new ChatOptions
             {
-                IsPrivateChatEnabled = true, IsGlobalChatEnabled = false, IsRoomChatEnabled = false,
+                IsPrivateChatEnabled = true, IsGlobalChatEnabled = false, IsRoomChatEnabled = false
             };
             _chatRepository.Setup(x => x.FetchAllChannels(TestParticipant.ConferenceId))
                 .ReturnsAsync(ImmutableList<string>.Empty);
@@ -167,13 +169,13 @@ namespace PaderConference.Core.Tests.Services.Chat.Channels
             // arrange
             _chatOptions = new ChatOptions
             {
-                IsPrivateChatEnabled = true, IsGlobalChatEnabled = false, IsRoomChatEnabled = false,
+                IsPrivateChatEnabled = true, IsGlobalChatEnabled = false, IsRoomChatEnabled = false
             };
 
             _chatRepository.Setup(x => x.FetchAllChannels(TestParticipant.ConferenceId)).ReturnsAsync(new[]
             {
                 "chat?type=global", "chat?type=room&roomId=123",
-                $"chat?type=private&p1=test&p2={TestParticipant.Id}", "chat?type=private&p1=t&p2=f",
+                $"chat?type=private&p1=test&p2={TestParticipant.Id}", "chat?type=private&p1=t&p2=f"
             });
 
             var selector = Create();

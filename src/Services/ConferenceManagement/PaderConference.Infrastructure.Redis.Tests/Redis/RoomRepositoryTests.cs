@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using PaderConference.Core.Interfaces.Gateways.Repositories;
+using PaderConference.Core.Services;
 using PaderConference.Core.Services.Rooms;
 using PaderConference.Core.Services.Rooms.Gateways;
 using PaderConference.Infrastructure.Redis.Impl;
@@ -32,7 +33,7 @@ namespace PaderConference.IntegrationTests.Infrastructure.Redis
             // act
             await Assert.ThrowsAsync<ConcurrencyException>(async () =>
             {
-                await _repository.SetParticipantRoom(conferenceId, participantId, roomId);
+                await _repository.SetParticipantRoom(new Participant(conferenceId, participantId), roomId);
             });
 
             // assert
@@ -52,7 +53,7 @@ namespace PaderConference.IntegrationTests.Infrastructure.Redis
             await _repository.CreateRoom(conferenceId, new Room(roomId, "hello"));
 
             // act
-            await _repository.SetParticipantRoom(conferenceId, participantId, roomId);
+            await _repository.SetParticipantRoom(new Participant(conferenceId, participantId), roomId);
 
             // assert
             var roomKey = $"{conferenceId}:RoomMapping";

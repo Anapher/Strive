@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
-using PaderConference.Infrastructure.Redis.Extensions;
 using StackExchange.Redis;
 using StackExchange.Redis.Extensions.Core.Configuration;
 using StackExchange.Redis.Extensions.Core.Implementations;
+using StackExchange.Redis.Extensions.Newtonsoft;
 
 namespace PaderConference.IntegrationTests._Helpers
 {
@@ -20,8 +20,8 @@ namespace PaderConference.IntegrationTests._Helpers
 
         public IDatabase CreateConnection()
         {
-            return new RedisDatabase(_connectionPool, new CamelCaseNewtonSerializer(), new ServerEnumerationStrategy(),
-                0, 200 /*, _instanceId + ":" + Guid.NewGuid().ToString("N")*/).Database;
+            return new RedisDatabase(_connectionPool, new NewtonsoftSerializer(), new ServerEnumerationStrategy(), 0,
+                200 /*, _instanceId + ":" + Guid.NewGuid().ToString("N")*/).Database;
         }
 
         public async ValueTask DisposeAsync()

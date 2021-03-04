@@ -1,61 +1,76 @@
-//using System;
-//using System.Collections.Generic;
-//using System.Threading;
-//using Microsoft.AspNetCore.Hosting;
-//using Microsoft.AspNetCore.Mvc.Testing;
-//using Microsoft.Extensions.DependencyInjection;
-//using Microsoft.Extensions.Options;
-//using Mongo2Go;
-//using Moq;
-//using PaderConference.Core.Interfaces.Gateways.Repositories;
-//using PaderConference.Core.Interfaces.Services;
-//using PaderConference.Infrastructure.Auth.AuthService;
-//using PaderConference.Infrastructure.Data;
-//using PaderConference.IntegrationTests._Helpers;
+using System;
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Mongo2Go;
+using PaderConference.IntegrationTests._Helpers;
 
-//namespace PaderConference.IntegrationTests
-//{
-//    public class CustomWebApplicationFactory : WebApplicationFactory<Startup>
-//    {
-//        private MongoDbRunner? _runner;
-//        private readonly UserCredentialsOptions _options = new() {Users = new Dictionary<string, OptionsUserData>()};
-//        private int _idCounter;
+namespace PaderConference.IntegrationTests
+{
+    public class CustomWebApplicationFactory : WebApplicationFactory<Startup>
+    {
+        private MongoDbRunner? _runner;
 
-//        protected override void Dispose(bool disposing)
-//        {
-//            _runner?.Dispose();
-//            base.Dispose(disposing);
-//        }
+        protected override void Dispose(bool disposing)
+        {
+            _runner?.Dispose();
+            base.Dispose(disposing);
+        }
 
-//        public UserLogin CreateLogin()
-//        {
-//            var username = Guid.NewGuid().ToString("N");
-//            var password = Guid.NewGuid().ToString("N");
-//            var id = Interlocked.Increment(ref _idCounter).ToString();
+        public MockJwtTokens JwtTokens { get; } = new();
 
-//            _options.Users.Add(username, new OptionsUserData {DisplayName = username, Id = id, Password = password});
+        public UserAccount CreateUser(string name, bool isModerator)
+        {
+            var sub = Guid.NewGuid().ToString("N");
 
-//            return new UserLogin {Id = id, Name = username, Password = password};
-//        }
+            var claims = new List<Claim> {new(ClaimTypes.NameIdentifier, sub), new(ClaimTypes.Name, name)};
+            if (isModerator)
+                claims.Add(new Claim(ClaimTypes.Role, AppRoles.Moderator));
 
-//        protected override void ConfigureWebHost(IWebHostBuilder builder)
-//        {
-//            var runner = MongoDbRunner.Start();
-//            _runner = runner;
+            var token = JwtTokens.GenerateJwtToken(claims);
+            return new UserAccount(sub, name, isModerator, token);
+        }
 
-//            builder.ConfigureServices(services =>
-//            {
-//                services.AddSingleton<IAuthService>(new OptionsAuthService(
-//                    new OptionsWrapper<UserCredentialsOptions>(_options)));
+        protected override void ConfigureWebHost(IWebHostBuilder builder)
+        {
+            _runner = MongoDbRunner.Start();
 
-//                services.AddSingleton<IOptions<MongoDbOptions>>(new OptionsWrapper<MongoDbOptions>(new MongoDbOptions
-//                {
-//                    DatabaseName = Guid.NewGuid().ToString("N"), ConnectionString = runner.ConnectionString,
-//                }));
+            var configuration = new ConfigurationBuilder()
+                .AddJsonFile(new EmbeddedFileProvider(typeof(CustomWebApplicationFactory).Assembly),
+                    "appsettings.IntegrationTest.json", false, false).Build();
 
-//                services.AddSingleton(new Mock<IOpenConferenceRepo>().Object);
-//            });
-//        }
-//    }
-//}
+            configuration["MongoDb:ConnectionString"] = _runner.ConnectionString;
 
+            builder.UseConfiguration(configuration);
+
+            builder.ConfigureServices(services =>
+            {
+                services.Configure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, options =>
+                {
+                    var config = new OpenIdConnectConfiguration {Issuer = JwtTokens.Issuer};
+
+                    config.SigningKeys.Add(JwtTokens.SecurityKey);
+                    options.Configuration = config;
+                });
+            });
+        }
+    }
+
+    public record UserAccount(string Sub, string Name, bool IsModerator, string Token)
+    {
+        public UserAccount SetupHttpClient(HttpClient client)
+        {
+            client.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue(JwtBearerDefaults.AuthenticationScheme, Token);
+            return this;
+        }
+    }
+}

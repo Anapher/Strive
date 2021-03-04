@@ -50,7 +50,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PaderConference.Core.TestsO
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PaderConference.Core.IntegrationTests", "Services\ConferenceManagement\PaderConference.Core.IntegrationTests\PaderConference.Core.IntegrationTests.csproj", "{7312667B-171C-44BB-82D9-DBCFD089B81F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PaderConference.Tests.Utils", "Services\ConferenceManagement\PaderConference.Tests.Utils\PaderConference.Tests.Utils.csproj", "{A8B829F0-C68C-4587-B0B2-B0535AB1AAD3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PaderConference.Tests.Utils", "Services\ConferenceManagement\PaderConference.Tests.Utils\PaderConference.Tests.Utils.csproj", "{A8B829F0-C68C-4587-B0B2-B0535AB1AAD3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PaderConference.Infrastructure.Redis.Tests", "Services\ConferenceManagement\PaderConference.Infrastructure.Redis.Tests\PaderConference.Infrastructure.Redis.Tests.csproj", "{BBFAD904-C2E3-486D-85D8-9651AE59646C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -122,6 +124,10 @@ Global
 		{A8B829F0-C68C-4587-B0B2-B0535AB1AAD3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A8B829F0-C68C-4587-B0B2-B0535AB1AAD3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A8B829F0-C68C-4587-B0B2-B0535AB1AAD3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BBFAD904-C2E3-486D-85D8-9651AE59646C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BBFAD904-C2E3-486D-85D8-9651AE59646C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BBFAD904-C2E3-486D-85D8-9651AE59646C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BBFAD904-C2E3-486D-85D8-9651AE59646C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -146,6 +152,7 @@ Global
 		{C5BD2082-629C-4EB7-84F7-57255CF064CE} = {BD9A0067-58EE-43C5-A171-4660EF33B40F}
 		{7312667B-171C-44BB-82D9-DBCFD089B81F} = {BD9A0067-58EE-43C5-A171-4660EF33B40F}
 		{A8B829F0-C68C-4587-B0B2-B0535AB1AAD3} = {BD9A0067-58EE-43C5-A171-4660EF33B40F}
+		{BBFAD904-C2E3-486D-85D8-9651AE59646C} = {BD9A0067-58EE-43C5-A171-4660EF33B40F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6C6656CC-2AAB-43CD-9AD4-2233F632192A}

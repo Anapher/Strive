@@ -44,6 +44,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PaderConference.Core.Integr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PaderConference.Tests.Utils", "Services\ConferenceManagement\PaderConference.Tests.Utils\PaderConference.Tests.Utils.csproj", "{A8B829F0-C68C-4587-B0B2-B0535AB1AAD3}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PaderConference.IntegrationTests", "Services\ConferenceManagement\PaderConference.IntegrationTests\PaderConference.IntegrationTests.csproj", "{30AC6B9A-B24A-488D-93CE-D5BC5FE6A0DE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -98,6 +100,10 @@ Global
 		{A8B829F0-C68C-4587-B0B2-B0535AB1AAD3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A8B829F0-C68C-4587-B0B2-B0535AB1AAD3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A8B829F0-C68C-4587-B0B2-B0535AB1AAD3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{30AC6B9A-B24A-488D-93CE-D5BC5FE6A0DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{30AC6B9A-B24A-488D-93CE-D5BC5FE6A0DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{30AC6B9A-B24A-488D-93CE-D5BC5FE6A0DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{30AC6B9A-B24A-488D-93CE-D5BC5FE6A0DE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -119,6 +125,7 @@ Global
 		{BD9A0067-58EE-43C5-A171-4660EF33B40F} = {1E91B583-050D-4034-A376-C14503186A40}
 		{7312667B-171C-44BB-82D9-DBCFD089B81F} = {BD9A0067-58EE-43C5-A171-4660EF33B40F}
 		{A8B829F0-C68C-4587-B0B2-B0535AB1AAD3} = {BD9A0067-58EE-43C5-A171-4660EF33B40F}
+		{30AC6B9A-B24A-488D-93CE-D5BC5FE6A0DE} = {BD9A0067-58EE-43C5-A171-4660EF33B40F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6C6656CC-2AAB-43CD-9AD4-2233F632192A}

@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using PaderConference.Core.Services;
 using PaderConference.Core.Services.ConferenceControl.Gateways;
 using PaderConference.Infrastructure.Redis.Impl;
 using PaderConference.Infrastructure.Redis.Repos;
@@ -117,7 +118,7 @@ namespace PaderConference.IntegrationTests.Infrastructure.Redis
             await _database.KeyDeleteAsync(conferenceKey);
 
             // act
-            var result = await _repository.AddParticipant(participantId, conferenceId, connectionId);
+            var result = await _repository.AddParticipant(new Participant(conferenceId, participantId), connectionId);
 
             // assert
             Assert.Null(result);
@@ -147,7 +148,7 @@ namespace PaderConference.IntegrationTests.Infrastructure.Redis
             await _database.HashSetAsync(oldConferenceKey, participantId, oldConnectionId);
 
             // act
-            var result = await _repository.AddParticipant(participantId, conferenceId, connectionId);
+            var result = await _repository.AddParticipant(new Participant(conferenceId, participantId), connectionId);
 
             // assert
             Assert.NotNull(result);
