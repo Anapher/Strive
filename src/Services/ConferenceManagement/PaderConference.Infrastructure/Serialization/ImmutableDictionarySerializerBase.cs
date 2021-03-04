@@ -232,8 +232,8 @@ namespace PaderConference.Infrastructure.Serialization
             bsonReader.ReadStartArray();
             while (bsonReader.ReadBsonType() != BsonType.EndOfDocument)
             {
-                TKey key;
-                TValue value;
+                TKey? key;
+                TValue? value;
 
                 var bsonType = bsonReader.GetCurrentBsonType();
                 switch (bsonType)
