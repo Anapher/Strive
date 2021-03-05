@@ -11,7 +11,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Mongo2Go;
-using Mongo2Go.Helper;
 using PaderConference.IntegrationTests._Helpers;
 
 namespace PaderConference.IntegrationTests
@@ -42,20 +41,10 @@ namespace PaderConference.IntegrationTests
 
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
-#pragma warning disable CS0618 // Type or member is obsolete
-            _runner = MongoDbRunner.StartUnitTest(Mongo2GoPortPool.Instance, new FileSystem(),
-                new MongoDbProcessStarter(), new MongoBinaryLocator(null, null));
-#pragma warning restore CS0618 // Type or member is obsolete
+            var configuration = StartMongoDbAndGetConfiguration();
 
-            var configuration = new ConfigurationBuilder()
-                .AddJsonFile(new EmbeddedFileProvider(typeof(CustomWebApplicationFactory).Assembly),
-                    "appsettings.IntegrationTest.json", false, false).Build();
-
-            throw new Exception("Using connection string for MongoDb: " + _runner.ConnectionString);
-
-            configuration["MongoDb:ConnectionString"] = _runner.ConnectionString;
-
-            builder.UseConfiguration(configuration);
+            builder.ConfigureAppConfiguration(configurationBuilder =>
+                configurationBuilder.AddConfiguration(configuration));
 
             builder.ConfigureServices(services =>
             {
@@ -67,6 +56,18 @@ namespace PaderConference.IntegrationTests
                     options.Configuration = config;
                 });
             });
+        }
+
+        private IConfiguration StartMongoDbAndGetConfiguration()
+        {
+            _runner = MongoDbRunner.Start();
+
+            var configuration = new ConfigurationBuilder()
+                .AddJsonFile(new EmbeddedFileProvider(typeof(CustomWebApplicationFactory).Assembly),
+                    "appsettings.IntegrationTest.json", false, false).Build();
+
+            configuration["MongoDb:ConnectionString"] = _runner.ConnectionString;
+            return configuration;
         }
     }
 
