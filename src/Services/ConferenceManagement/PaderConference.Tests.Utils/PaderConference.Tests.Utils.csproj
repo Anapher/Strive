@@ -7,7 +7,7 @@
 
   <ItemGroup>
     <PackageReference Include="MediatR" Version="9.0.0" />
-    <PackageReference Include="Moq" Version="4.16.0" />
+    <PackageReference Include="Moq" Version="4.16.1" />
     <PackageReference Include="Serilog.Extensions.Logging" Version="3.0.1" />
     <PackageReference Include="Serilog.Sinks.XUnit" Version="2.0.4" />
     <PackageReference Include="xunit" Version="2.4.1" />
