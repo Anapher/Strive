@@ -51,7 +51,7 @@ namespace PaderConference.IntegrationTests
                 .AddJsonFile(new EmbeddedFileProvider(typeof(CustomWebApplicationFactory).Assembly),
                     "appsettings.IntegrationTest.json", false, false).Build();
 
-            Console.WriteLine("Using connection string for MongoDb: " + _runner.ConnectionString);
+            throw new Exception("Using connection string for MongoDb: " + _runner.ConnectionString);
 
             configuration["MongoDb:ConnectionString"] = _runner.ConnectionString;
 
