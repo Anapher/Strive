@@ -51,7 +51,7 @@ namespace PaderConference.IntegrationTests
                 .AddJsonFile(new EmbeddedFileProvider(typeof(CustomWebApplicationFactory).Assembly),
                     "appsettings.IntegrationTest.json", false, false).Build();
 
-            configuration["MongoDb:ConnectionString"] = _runner.ConnectionString;
+            configuration["MongoDb:ConnectionString"] = _runner.ConnectionString + "?connect=replicaSet";
 
             builder.UseConfiguration(configuration);
 
