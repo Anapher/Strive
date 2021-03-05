@@ -147,10 +147,9 @@ namespace JsonPatchGenerator
         private static IEnumerable<ObjectComparisonValue> CompareObjects(object original, object modified)
         {
             var type = original.GetType();
-            if (type != modified.GetType())
-                throw new ArgumentException("Both objects must have the same type.");
+            var modifiedType = modified.GetType();
 
-            if (typeof(IDictionary).IsAssignableFrom(type))
+            if (typeof(IDictionary).IsAssignableFrom(type) && typeof(IDictionary).IsAssignableFrom(modifiedType))
             {
                 var originalDict = (IDictionary) original;
                 var modifiedDict = (IDictionary) modified;
@@ -168,6 +167,9 @@ namespace JsonPatchGenerator
             }
             else
             {
+                if (type != modifiedType)
+                    throw new ArgumentException("Both objects must have the same type.");
+
                 foreach (var property in type.GetProperties())
                 {
                     var originalValue = property.GetValue(original);

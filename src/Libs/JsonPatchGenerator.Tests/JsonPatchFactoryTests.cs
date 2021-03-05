@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Operations;
@@ -227,6 +228,14 @@ namespace JsonPatchGenerator.Tests
             TestPatch(new Dictionary<string, string> {{"hello", "world"}},
                 new Dictionary<string, string> {{"hello", "welt"}},
                 patch => { patch.Replace("hello", "welt"); });
+        }
+
+        [Fact]
+        public void TestPatchDifferentObjectTypesBothDictionary()
+        {
+            TestPatch(new Dictionary<string, int>(),
+                new Dictionary<string, int> {{"hello", 324}}.ToImmutableDictionary(),
+                document => document.Replace("/hello", "324"));
         }
 
         private void TestPatch(object obj, object update, Action<JsonPatchDocument> patchCreator)
