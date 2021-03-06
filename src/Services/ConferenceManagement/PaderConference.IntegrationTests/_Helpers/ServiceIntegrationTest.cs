@@ -61,15 +61,15 @@ namespace PaderConference.IntegrationTests._Helpers
             var conferenceId = createdConference!.ConferenceId;
             Logger.Information("Created conference {conferenceId}", conferenceId);
 
-            var connection = CreateHubConnection(user, conferenceId);
+            //var connection = CreateHubConnection(user, conferenceId);
 
-            var syncObjListener = SynchronizedObjectListener.Initialize(connection, Logger);
+            //var syncObjListener = SynchronizedObjectListener.Initialize(connection, Logger);
 
-            Logger.Information("Establish connection to SignalR for conference {conferenceId}", conferenceId);
-            await connection.StartAsync();
-            Logger.Information("Connection to SignalR established.");
+            //Logger.Information("Establish connection to SignalR for conference {conferenceId}", conferenceId);
+            //await connection.StartAsync();
+            //Logger.Information("Connection to SignalR established.");
 
-            return new ConnectedUser(connection, conferenceId, user, syncObjListener);
+            return new ConnectedUser(null!, conferenceId, user, null!);
         }
 
         protected async Task<SuccessOrError<Unit>> OpenConference(ConnectedUser connectedUser)
