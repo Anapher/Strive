@@ -6,7 +6,7 @@
     /// <typeparam name="T"></typeparam>
     public class PermissionDescriptor<T> : PermissionDescriptor
     {
-        public PermissionDescriptor(string key, T defaultValue = default) : base(key, TypeMapReverse[typeof(T)],
+        public PermissionDescriptor(string key, T? defaultValue = default) : base(key, TypeMapReverse[typeof(T)],
             defaultValue)
         {
         }
