@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.SignalR.Client;
 using PaderConference.Core.Interfaces;
 using PaderConference.Core.Services;
 using PaderConference.Core.Services.ConferenceControl;
+using PaderConference.Core.Services.Synchronization;
 using PaderConference.Hubs;
 using PaderConference.Hubs.Dtos;
 using PaderConference.Hubs.Responses;
@@ -16,6 +17,9 @@ namespace PaderConference.IntegrationTests.Controllers
     [Collection(IntegrationTestCollection.Definition)]
     public class ConferenceControlTests : ServiceIntegrationTest
     {
+        private static readonly SynchronizedObjectId
+            SyncObjId = SynchronizedConferenceInfoProvider.SynchronizedObjectId;
+
         public ConferenceControlTests(ITestOutputHelper testOutputHelper, MongoDbFixture mongoDb) : base(
             testOutputHelper, mongoDb)
         {
@@ -36,8 +40,7 @@ namespace PaderConference.IntegrationTests.Controllers
             AssertErrorCode(ServiceErrorCode.PermissionDenied, result.Error!);
 
             var conferenceControlObj =
-                connection.SyncObjects.GetSynchronizedObject<SynchronizedConferenceInfo>(
-                    SynchronizedConferenceInfoProvider.SynchronizedObjectId);
+                connection.SyncObjects.GetSynchronizedObject<SynchronizedConferenceInfo>(SyncObjId);
 
             Assert.False(conferenceControlObj.IsOpen);
         }
@@ -55,11 +58,8 @@ namespace PaderConference.IntegrationTests.Controllers
             // assert
             Assert.True(result.Success);
 
-            var conferenceControlObj =
-                connection.SyncObjects.GetSynchronizedObject<SynchronizedConferenceInfo>(
-                    SynchronizedConferenceInfoProvider.SynchronizedObjectId);
-
-            Assert.True(conferenceControlObj.IsOpen);
+            await connection.SyncObjects.AssertSyncObject<SynchronizedConferenceInfo>(SyncObjId,
+                value => Assert.True(value.IsOpen));
         }
 
         [Fact]
@@ -74,11 +74,8 @@ namespace PaderConference.IntegrationTests.Controllers
             // assert
             Assert.True(result.Success);
 
-            var conferenceControlObj =
-                connection.SyncObjects.GetSynchronizedObject<SynchronizedConferenceInfo>(
-                    SynchronizedConferenceInfoProvider.SynchronizedObjectId);
-
-            Assert.False(conferenceControlObj.IsOpen);
+            await connection.SyncObjects.AssertSyncObject<SynchronizedConferenceInfo>(SyncObjId,
+                value => Assert.False(value.IsOpen));
         }
 
         [Fact]

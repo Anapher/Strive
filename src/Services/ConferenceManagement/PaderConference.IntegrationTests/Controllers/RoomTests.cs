@@ -4,6 +4,7 @@ using MediatR;
 using Microsoft.AspNetCore.SignalR.Client;
 using PaderConference.Core.Interfaces;
 using PaderConference.Core.Services.Rooms;
+using PaderConference.Core.Services.Synchronization;
 using PaderConference.Hubs;
 using PaderConference.Hubs.Dtos;
 using PaderConference.IntegrationTests._Helpers;
@@ -15,6 +16,8 @@ namespace PaderConference.IntegrationTests.Controllers
     [Collection(IntegrationTestCollection.Definition)]
     public class RoomTests : ServiceIntegrationTest
     {
+        private static readonly SynchronizedObjectId SyncObjId = SynchronizedRoomsProvider.SynchronizedObjectId;
+
         public RoomTests(ITestOutputHelper testOutputHelper, MongoDbFixture mongoDb) : base(testOutputHelper, mongoDb)
         {
         }
@@ -27,9 +30,7 @@ namespace PaderConference.IntegrationTests.Controllers
             var connection = await ConnectUserToConference(Moderator, conference);
 
             // assert
-            var syncObj =
-                await connection.SyncObjects.WaitForSyncObj<SynchronizedRooms>(SynchronizedRoomsProvider
-                    .SynchronizedObjectId);
+            var syncObj = await connection.SyncObjects.WaitForSyncObj<SynchronizedRooms>(SyncObjId);
 
             Assert.Empty(syncObj.Participants);
             Assert.Empty(syncObj.Rooms);
@@ -42,12 +43,11 @@ namespace PaderConference.IntegrationTests.Controllers
             var (connection, _) = await ConnectToOpenedConference();
 
             // assert
-            var syncObj =
-                await connection.SyncObjects.WaitForSyncObj<SynchronizedRooms>(SynchronizedRoomsProvider
-                    .SynchronizedObjectId);
-
-            Assert.Single(syncObj.Participants);
-            Assert.Single(syncObj.Rooms);
+            await connection.SyncObjects.AssertSyncObject<SynchronizedRooms>(SyncObjId, value =>
+            {
+                Assert.Single(value.Participants);
+                Assert.Single(value.Rooms);
+            });
         }
 
         [Fact]
@@ -64,13 +64,12 @@ namespace PaderConference.IntegrationTests.Controllers
             Assert.True(result.Success);
             Assert.Equal(2, result.Response!.Count);
 
-            var syncObj =
-                await connection.SyncObjects.WaitForSyncObj<SynchronizedRooms>(SynchronizedRoomsProvider
-                    .SynchronizedObjectId);
-
-            Assert.Equal(3, syncObj.Rooms.Count);
-            Assert.Contains(syncObj.Rooms, x => x.DisplayName == "Test1");
-            Assert.Contains(syncObj.Rooms, x => x.DisplayName == "Test2");
+            await connection.SyncObjects.AssertSyncObject<SynchronizedRooms>(SyncObjId, value =>
+            {
+                Assert.Equal(3, value.Rooms.Count);
+                Assert.Contains(value.Rooms, x => x.DisplayName == "Test1");
+                Assert.Contains(value.Rooms, x => x.DisplayName == "Test2");
+            });
         }
 
         [Fact]
@@ -90,13 +89,12 @@ namespace PaderConference.IntegrationTests.Controllers
             // assert
             Assert.True(result.Success);
 
-            var syncObj =
-                await connection.SyncObjects.WaitForSyncObj<SynchronizedRooms>(SynchronizedRoomsProvider
-                    .SynchronizedObjectId);
-
-            var mapping = Assert.Single(syncObj.Participants);
-            Assert.Equal(connection.User.Sub, mapping.Key);
-            Assert.Equal(createdRoom.RoomId, mapping.Value);
+            await connection.SyncObjects.AssertSyncObject<SynchronizedRooms>(SyncObjId, value =>
+            {
+                var mapping = Assert.Single(value.Participants);
+                Assert.Equal(connection.User.Sub, mapping.Key);
+                Assert.Equal(createdRoom.RoomId, mapping.Value);
+            });
         }
 
         [Fact]
@@ -116,11 +114,8 @@ namespace PaderConference.IntegrationTests.Controllers
             // assert
             Assert.True(result.Success);
 
-            var syncObj =
-                await connection.SyncObjects.WaitForSyncObj<SynchronizedRooms>(SynchronizedRoomsProvider
-                    .SynchronizedObjectId);
-
-            Assert.Single(syncObj.Rooms);
+            await connection.SyncObjects.AssertSyncObject<SynchronizedRooms>(SyncObjId,
+                value => { Assert.Single(value.Rooms); });
         }
     }
 }
