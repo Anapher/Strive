@@ -4,7 +4,6 @@ using System.Collections.Immutable;
 using System.Reflection;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
-using AutoMapper;
 using FluentValidation.AspNetCore;
 using MassTransit;
 using MassTransit.SignalR;
@@ -78,6 +77,8 @@ namespace PaderConference
 #if DEBUG
                     options.RequireHttpsMetadata = false;
 #endif
+
+                    options.AcceptTokenFromQuery();
                 });
 
             // SignalR
