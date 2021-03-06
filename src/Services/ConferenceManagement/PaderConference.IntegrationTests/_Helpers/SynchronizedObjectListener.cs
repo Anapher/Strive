@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.SignalR.Client;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Nito.AsyncEx;
 using PaderConference.Core.Services.Synchronization;
 using PaderConference.Hubs;
 using Serilog;
@@ -15,6 +19,7 @@ namespace PaderConference.IntegrationTests._Helpers
         private readonly ILogger _logger;
         private readonly Dictionary<string, List<SyncObjEvent>> _cachedData = new();
         private readonly object _lock = new();
+        private readonly List<AsyncAutoResetEvent> _waiters = new();
 
         private SynchronizedObjectListener(HubConnection connection, ILogger logger)
         {
@@ -47,7 +52,14 @@ namespace PaderConference.IntegrationTests._Helpers
                 var initialEvent = events.Last(x => !x.IsPatch);
                 var patches = events.Skip(events.IndexOf(initialEvent) + 1);
 
-                var initialObj = initialEvent.Payload.ToObject<T>();
+                var initialObj = initialEvent.Payload.ToObject<T>(JsonSerializer.Create(new JsonSerializerSettings
+                {
+                    Converters = new List<JsonConverter>
+                    {
+                        new ReadOnlyListConverter(), new ReadOnlyDictionaryConverter(),
+                    },
+                }));
+
                 if (initialObj == null) throw new NullReferenceException("The initial object must not be null");
 
                 foreach (var patch in patches.Select(x => x.Payload))
@@ -60,6 +72,53 @@ namespace PaderConference.IntegrationTests._Helpers
 
                 return initialObj;
             }
+        }
+
+        public Task<T> WaitForSyncObj<T>(SynchronizedObjectId syncObjId, TimeSpan? timeout = null) where T : class
+        {
+            return WaitForSyncObj<T>(syncObjId.ToString(), timeout);
+        }
+
+        public async Task<T> WaitForSyncObj<T>(string syncObjId, TimeSpan? timeout = null) where T : class
+        {
+            var timeoutTimestamp = DateTimeOffset.UtcNow.Add(timeout ?? TimeSpan.FromSeconds(5));
+
+            var autoResetEvent = new AsyncAutoResetEvent(false);
+
+            lock (_lock)
+            {
+                if (_cachedData.ContainsKey(syncObjId))
+                    return GetSynchronizedObject<T>(syncObjId);
+
+                _waiters.Add(autoResetEvent);
+            }
+
+            try
+            {
+                while (timeoutTimestamp > DateTimeOffset.UtcNow)
+                {
+                    var timeLeft = timeoutTimestamp - DateTimeOffset.UtcNow;
+                    using (var tokenSource = new CancellationTokenSource(timeLeft))
+                    {
+                        await autoResetEvent.WaitAsync(tokenSource.Token);
+                    }
+
+                    lock (_lock)
+                    {
+                        if (_cachedData.ContainsKey(syncObjId))
+                            return GetSynchronizedObject<T>(syncObjId);
+                    }
+                }
+            }
+            finally
+            {
+                lock (_logger)
+                {
+                    _waiters.Remove(autoResetEvent);
+                }
+            }
+
+            throw new InvalidOperationException("The sync obj was never received");
         }
 
         private void HandleSynchronizedObjectUpdated(SyncObjPayload<JToken> value)
@@ -76,12 +135,19 @@ namespace PaderConference.IntegrationTests._Helpers
 
         private void AddEvent(SyncObjPayload<JToken> value, bool isPatch)
         {
+            List<AsyncAutoResetEvent> autoResetEvents;
             lock (_lock)
             {
                 if (!_cachedData.TryGetValue(value.Id, out var events))
                     _cachedData[value.Id] = events = new List<SyncObjEvent>();
 
                 events.Add(new SyncObjEvent(isPatch, value.Value));
+                autoResetEvents = _waiters.ToList();
+            }
+
+            foreach (var autoResetEvent in autoResetEvents)
+            {
+                autoResetEvent.Set();
             }
         }
 

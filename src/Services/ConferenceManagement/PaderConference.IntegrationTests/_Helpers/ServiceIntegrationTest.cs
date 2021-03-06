@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Net.Http;
@@ -11,7 +10,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json.Linq;
 using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Dto;
-using PaderConference.Core.Extensions;
 using PaderConference.Core.Interfaces;
 using PaderConference.Core.Services;
 using PaderConference.Hubs;
@@ -29,25 +27,29 @@ namespace PaderConference.IntegrationTests._Helpers
         protected readonly CustomWebApplicationFactory Factory;
         protected readonly Logger Logger;
         protected readonly HttpClient Client;
+        protected readonly UserAccount Moderator;
 
         protected ServiceIntegrationTest(ITestOutputHelper testOutputHelper, MongoDbFixture mongoDb)
         {
             Factory = new CustomWebApplicationFactory(mongoDb, testOutputHelper);
             Logger = testOutputHelper.CreateTestLogger();
             Client = Factory.CreateClient();
+
+            Moderator = CreateUser(true, "Vincent");
         }
 
-        protected async Task<ConnectedUser> InitializeConferenceAndConnect(bool isModerator = false)
+        protected UserAccount CreateUser(bool isModerator = false, string? name = null)
         {
-            var user = Factory.CreateUser("Vincent", true).SetupHttpClient(Client);
-            Logger.Information("Created user {sub}, user is moderator", user.Sub);
+            return Factory.CreateUser(name ?? "Olaf", isModerator).SetupHttpClient(Client);
+        }
 
+        protected async Task<ConferenceCreatedResponseDto> CreateConference(params UserAccount[] moderators)
+        {
             var creationDto = new CreateConferenceRequestDto
             {
                 Configuration = new ConferenceConfiguration
                 {
-                    Moderators = new[] {"0"}.Concat(isModerator ? user.Sub.Yield() : Array.Empty<string>())
-                        .ToImmutableList(),
+                    Moderators = new[] {"0"}.Concat(moderators.Select(x => x.Sub)).ToImmutableList(),
                 },
                 Permissions = new Dictionary<PermissionType, Dictionary<string, JValue>>(),
             };
@@ -58,9 +60,25 @@ namespace PaderConference.IntegrationTests._Helpers
             var createdConference = await response.Content.ReadFromJsonAsync<ConferenceCreatedResponseDto>();
             Assert.NotNull(createdConference);
 
-            var conferenceId = createdConference!.ConferenceId;
-            Logger.Information("Created conference {conferenceId}", conferenceId);
+            Logger.Information("Created conference {conferenceId}", createdConference?.ConferenceId);
 
+            return createdConference!;
+        }
+
+        protected async Task<(UserConnection, ConferenceCreatedResponseDto)> ConnectToOpenedConference()
+        {
+            var conference = await CreateConference(Moderator);
+            var connection = await ConnectUserToConference(Moderator, conference);
+            var result = await OpenConference(connection);
+            Assert.True(result.Success);
+
+            return (connection, conference);
+        }
+
+        protected async Task<UserConnection> ConnectUserToConference(UserAccount user,
+            ConferenceCreatedResponseDto conference)
+        {
+            var conferenceId = conference.ConferenceId;
             var connection = CreateHubConnection(user, conferenceId);
 
             var syncObjListener = SynchronizedObjectListener.Initialize(connection, Logger);
@@ -69,12 +87,12 @@ namespace PaderConference.IntegrationTests._Helpers
             await connection.StartAsync();
             Logger.Information("Connection to SignalR established.");
 
-            return new ConnectedUser(connection, conferenceId, user, syncObjListener);
+            return new UserConnection(connection, conferenceId, user, syncObjListener);
         }
 
-        protected async Task<SuccessOrError<Unit>> OpenConference(ConnectedUser connectedUser)
+        protected async Task<SuccessOrError<Unit>> OpenConference(UserConnection userConnection)
         {
-            return await connectedUser.Connection.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.OpenConference));
+            return await userConnection.Connection.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.OpenConference));
         }
 
         protected HubConnection CreateHubConnection(UserAccount user, string conferenceId)
@@ -91,6 +109,6 @@ namespace PaderConference.IntegrationTests._Helpers
         }
     }
 
-    public record ConnectedUser(HubConnection Connection, string ConferenceId, UserAccount User,
+    public record UserConnection(HubConnection Connection, string ConferenceId, UserAccount User,
         SynchronizedObjectListener SyncObjects);
 }

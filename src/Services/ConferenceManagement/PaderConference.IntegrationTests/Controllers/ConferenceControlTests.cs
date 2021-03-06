@@ -5,6 +5,8 @@ using PaderConference.Core.Interfaces;
 using PaderConference.Core.Services;
 using PaderConference.Core.Services.ConferenceControl;
 using PaderConference.Hubs;
+using PaderConference.Hubs.Dtos;
+using PaderConference.Hubs.Responses;
 using PaderConference.IntegrationTests._Helpers;
 using Xunit;
 using Xunit.Abstractions;
@@ -23,18 +25,19 @@ namespace PaderConference.IntegrationTests.Controllers
         public async Task OpenConference_UserNotModerator_PermissionDenied()
         {
             // arrange
-            var info = await InitializeConferenceAndConnect();
+            var conference = await CreateConference();
+            var connection = await ConnectUserToConference(Moderator, conference);
 
             // act
-            var result = await OpenConference(info);
+            var result = await OpenConference(connection);
 
             // assert
             Assert.False(result.Success);
             AssertErrorCode(ServiceErrorCode.PermissionDenied, result.Error!);
 
             var conferenceControlObj =
-                info.SyncObjects.GetSynchronizedObject<SynchronizedConferenceInfo>(SynchronizedConferenceInfoProvider
-                    .SynchronizedObjectId);
+                connection.SyncObjects.GetSynchronizedObject<SynchronizedConferenceInfo>(
+                    SynchronizedConferenceInfoProvider.SynchronizedObjectId);
 
             Assert.False(conferenceControlObj.IsOpen);
         }
@@ -43,17 +46,18 @@ namespace PaderConference.IntegrationTests.Controllers
         public async Task OpenConference_UserIsModerator_UpdateSynchronizedObject()
         {
             // arrange
-            var info = await InitializeConferenceAndConnect(true);
+            var conference = await CreateConference(Moderator);
+            var connection = await ConnectUserToConference(Moderator, conference);
 
             // act
-            var result = await OpenConference(info);
+            var result = await OpenConference(connection);
 
             // assert
             Assert.True(result.Success);
 
             var conferenceControlObj =
-                info.SyncObjects.GetSynchronizedObject<SynchronizedConferenceInfo>(SynchronizedConferenceInfoProvider
-                    .SynchronizedObjectId);
+                connection.SyncObjects.GetSynchronizedObject<SynchronizedConferenceInfo>(
+                    SynchronizedConferenceInfoProvider.SynchronizedObjectId);
 
             Assert.True(conferenceControlObj.IsOpen);
         }
@@ -62,21 +66,59 @@ namespace PaderConference.IntegrationTests.Controllers
         public async Task CloseConference_UserIsModerator_UpdateSynchronizedObject()
         {
             // arrange
-            var info = await InitializeConferenceAndConnect(true);
-            await OpenConference(info);
+            var (connection, _) = await ConnectToOpenedConference();
 
             // act
-            var result = await info.Connection.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.CloseConference));
+            var result = await connection.Connection.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.CloseConference));
 
             // assert
             Assert.True(result.Success);
 
             var conferenceControlObj =
-                info.SyncObjects.GetSynchronizedObject<SynchronizedConferenceInfo>(SynchronizedConferenceInfoProvider
-                    .SynchronizedObjectId);
+                connection.SyncObjects.GetSynchronizedObject<SynchronizedConferenceInfo>(
+                    SynchronizedConferenceInfoProvider.SynchronizedObjectId);
 
             Assert.False(conferenceControlObj.IsOpen);
         }
+
+        [Fact]
+        public async Task CloseConference_UserIsNotModerator_PermissionDenied()
+        {
+            // arrange
+            var conference = await CreateConference();
+            var connection = await ConnectUserToConference(Moderator, conference);
+
+            await OpenConference(connection);
+
+            // act
+            var result = await connection.Connection.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.CloseConference));
+
+            // assert
+            Assert.False(result.Success);
+            AssertErrorCode(ServiceErrorCode.PermissionDenied, result.Error!);
+        }
+
+        [Fact]
+        public async Task KickParticipant_ParticipantJoined_SendNotificationToParticipant()
+        {
+            // arrange
+            var (connection, conference) = await ConnectToOpenedConference();
+
+            var userToBeKicked = CreateUser();
+            var userToBeKickedConnection = await ConnectUserToConference(userToBeKicked, conference);
+
+            var disconnectRequested = false;
+            userToBeKickedConnection.Connection.On(CoreHubMessages.Response.OnRequestDisconnect,
+                (RequestDisconnectDto _) => disconnectRequested = true);
+
+            // act
+            var request = new KickParticipantRequestDto(userToBeKicked.Sub);
+            var result =
+                await connection.Connection.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.KickParticipant), request);
+
+            // assert
+            Assert.True(result.Success);
+            Assert.True(disconnectRequested);
+        }
     }
 }
-

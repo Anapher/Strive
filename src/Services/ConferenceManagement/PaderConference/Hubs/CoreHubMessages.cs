@@ -1,20 +1,7 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.JsonPatch;
-using Microsoft.AspNetCore.SignalR;
-using PaderConference.Hubs.Responses;
-using PermissionsDict = System.Collections.Generic.Dictionary<string, Newtonsoft.Json.Linq.JValue>;
-
-namespace PaderConference.Hubs
+﻿namespace PaderConference.Hubs
 {
     public static class CoreHubMessages
     {
-        public static class Request
-        {
-            public const string SendChatMessage = "SendChatMessage";
-            public const string RequestChat = "RequestChat";
-        }
-
         public static class Response
         {
             public const string OnError = "OnError";
@@ -33,33 +20,4 @@ namespace PaderConference.Hubs
             public const string OnRequestDisconnect = "OnRequestDisconnect";
         }
     }
-
-    public static class CoreHubMessage
-    {
-        public static Task OnPermissionsUpdated(this IClientProxy clientProxy, PermissionsDict payload,
-            CancellationToken token = default)
-        {
-            return clientProxy.SendAsync(CoreHubMessages.Response.OnPermissionsUpdated, payload, token);
-        }
-
-        public static Task OnRequestDisconnect(this IClientProxy clientProxy, RequestDisconnectDto payload,
-            CancellationToken token = default)
-        {
-            return clientProxy.SendAsync(CoreHubMessages.Response.OnRequestDisconnect, payload, token);
-        }
-
-        public static Task OnSynchronizeObjectState(this IClientProxy clientProxy, SyncObjPayload<object> payload,
-            CancellationToken token = default)
-        {
-            return clientProxy.SendAsync(CoreHubMessages.Response.OnSynchronizeObjectState, payload, token);
-        }
-
-        public static Task OnSynchronizedObjectUpdated(this IClientProxy clientProxy,
-            SyncObjPayload<JsonPatchDocument> payload, CancellationToken token = default)
-        {
-            return clientProxy.SendAsync(CoreHubMessages.Response.OnSynchronizedObjectUpdated, payload, token);
-        }
-    }
-
-    public record SyncObjPayload<T>(string Id, T Value);
 }
