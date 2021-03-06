@@ -22,7 +22,7 @@ namespace PaderConference.IntegrationTests.Controllers
         public CreateConferenceTest(CustomWebApplicationFactory factory)
         {
             _factory = factory;
-            _client = factory.CreateClient();
+            _client = factory.GetClient();
         }
 
         private static CreateConferenceRequestDto GetValidConference()

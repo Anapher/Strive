@@ -18,6 +18,7 @@ namespace PaderConference.IntegrationTests
     public class CustomWebApplicationFactory : WebApplicationFactory<Startup>
     {
         private MongoDbRunner? _runner;
+        private readonly object _lock = new();
 
         protected override void Dispose(bool disposing)
         {
@@ -26,6 +27,14 @@ namespace PaderConference.IntegrationTests
         }
 
         public MockJwtTokens JwtTokens { get; } = new();
+
+        public HttpClient GetClient()
+        {
+            lock (_lock)
+            {
+                return CreateClient();
+            }
+        }
 
         public UserAccount CreateUser(string name, bool isModerator)
         {
