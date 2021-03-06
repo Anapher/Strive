@@ -22,7 +22,7 @@ using Xunit.Abstractions;
 
 namespace PaderConference.IntegrationTests._Helpers
 {
-    public abstract class ServiceIntegrationTest : IClassFixture<CustomWebApplicationFactory>
+    public abstract class ServiceIntegrationTest
     {
         protected readonly CustomWebApplicationFactory Factory;
         protected readonly Logger Logger;
