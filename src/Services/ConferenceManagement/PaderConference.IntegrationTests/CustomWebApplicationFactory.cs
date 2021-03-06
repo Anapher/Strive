@@ -11,6 +11,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using PaderConference.IntegrationTests._Helpers;
+using Serilog;
+using Serilog.Events;
 using Xunit.Abstractions;
 
 namespace PaderConference.IntegrationTests
@@ -18,7 +20,7 @@ namespace PaderConference.IntegrationTests
     public class CustomWebApplicationFactory : WebApplicationFactory<Startup>
     {
         private readonly ITestOutputHelper _testOutputHelper;
-        private readonly MongoDbFixture? _mongoDb;
+        private readonly MongoDbFixture _mongoDb;
 
         public CustomWebApplicationFactory(MongoDbFixture mongoDb, ITestOutputHelper testOutputHelper)
         {
@@ -38,6 +40,11 @@ namespace PaderConference.IntegrationTests
 
             var token = JwtTokens.GenerateJwtToken(claims);
             return new UserAccount(sub, name, isModerator, token);
+        }
+
+        protected override IWebHostBuilder CreateWebHostBuilder()
+        {
+            return base.CreateWebHostBuilder().UseSerilog(_testOutputHelper.CreateTestLogger(LogEventLevel.Debug));
         }
 
         protected override void ConfigureWebHost(IWebHostBuilder builder)

@@ -23,8 +23,7 @@ namespace PaderConference.IntegrationTests.Controllers
 
         public CreateConferenceTest(MongoDbFixture mongoDb, ITestOutputHelper testOutputHelper)
         {
-            var factory = new CustomWebApplicationFactory(mongoDb, testOutputHelper);
-            _factory = factory;
+            _factory = new CustomWebApplicationFactory(mongoDb, testOutputHelper);
             _client = _factory.CreateClient();
         }
 
@@ -83,4 +82,3 @@ namespace PaderConference.IntegrationTests.Controllers
         }
     }
 }
-
