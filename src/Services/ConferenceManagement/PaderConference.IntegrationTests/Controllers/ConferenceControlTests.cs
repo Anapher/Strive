@@ -69,7 +69,7 @@ namespace PaderConference.IntegrationTests.Controllers
             var (connection, _) = await ConnectToOpenedConference();
 
             // act
-            var result = await connection.Connection.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.CloseConference));
+            var result = await connection.Hub.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.CloseConference));
 
             // assert
             Assert.True(result.Success);
@@ -91,7 +91,7 @@ namespace PaderConference.IntegrationTests.Controllers
             await OpenConference(connection);
 
             // act
-            var result = await connection.Connection.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.CloseConference));
+            var result = await connection.Hub.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.CloseConference));
 
             // assert
             Assert.False(result.Success);
@@ -108,13 +108,13 @@ namespace PaderConference.IntegrationTests.Controllers
             var userToBeKickedConnection = await ConnectUserToConference(userToBeKicked, conference);
 
             var disconnectRequested = false;
-            userToBeKickedConnection.Connection.On(CoreHubMessages.Response.OnRequestDisconnect,
+            userToBeKickedConnection.Hub.On(CoreHubMessages.Response.OnRequestDisconnect,
                 (RequestDisconnectDto _) => disconnectRequested = true);
 
             // act
             var request = new KickParticipantRequestDto(userToBeKicked.Sub);
             var result =
-                await connection.Connection.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.KickParticipant), request);
+                await connection.Hub.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.KickParticipant), request);
 
             // assert
             Assert.True(result.Success);

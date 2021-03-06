@@ -50,8 +50,7 @@ namespace PaderConference.IntegrationTests.Controllers
                 value => Assert.DoesNotContain(value.Permissions, x => x.Key == permission.Key));
 
             // act
-            var result = await connection.Connection.InvokeAsync<SuccessOrError<Unit>>(
-                nameof(CoreHub.SetTemporaryPermission),
+            var result = await connection.Hub.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.SetTemporaryPermission),
                 new SetTemporaryPermissionDto(testUser.Sub, permission.Key, (JValue) JToken.FromObject(true)));
 
             // assert
@@ -72,14 +71,12 @@ namespace PaderConference.IntegrationTests.Controllers
             var testUser = CreateUser();
             var testUserConnection = await ConnectUserToConference(testUser, conference);
 
-            var result = await connection.Connection.InvokeAsync<SuccessOrError<Unit>>(
-                nameof(CoreHub.SetTemporaryPermission),
+            var result = await connection.Hub.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.SetTemporaryPermission),
                 new SetTemporaryPermissionDto(testUser.Sub, permission.Key, (JValue) JToken.FromObject(true)));
             Assert.True(result.Success);
 
             // act
-            result = await connection.Connection.InvokeAsync<SuccessOrError<Unit>>(
-                nameof(CoreHub.SetTemporaryPermission),
+            result = await connection.Hub.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.SetTemporaryPermission),
                 new SetTemporaryPermissionDto(testUser.Sub, permission.Key, null));
 
             // assert
@@ -102,7 +99,7 @@ namespace PaderConference.IntegrationTests.Controllers
             var testUserConnection = await ConnectUserToConference(testUser, conference);
 
             // act
-            var result = await testUserConnection.Connection.InvokeAsync<SuccessOrError<Unit>>(
+            var result = await testUserConnection.Hub.InvokeAsync<SuccessOrError<Unit>>(
                 nameof(CoreHub.SetTemporaryPermission),
                 new SetTemporaryPermissionDto(testUser.Sub, permission.Key, (JValue) JToken.FromObject(true)));
 

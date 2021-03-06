@@ -57,7 +57,7 @@ namespace PaderConference.IntegrationTests.Controllers
             var (connection, _) = await ConnectToOpenedConference();
 
             // act
-            var result = await connection.Connection.InvokeAsync<SuccessOrError<IReadOnlyList<Room>>>(
+            var result = await connection.Hub.InvokeAsync<SuccessOrError<IReadOnlyList<Room>>>(
                 nameof(CoreHub.CreateRooms), new List<RoomCreationInfo> {new("Test1"), new("Test2")});
 
             // assert
@@ -79,12 +79,12 @@ namespace PaderConference.IntegrationTests.Controllers
             // arrange
             var (connection, _) = await ConnectToOpenedConference();
 
-            var roomCreationResponse = await connection.Connection.InvokeAsync<SuccessOrError<IReadOnlyList<Room>>>(
+            var roomCreationResponse = await connection.Hub.InvokeAsync<SuccessOrError<IReadOnlyList<Room>>>(
                 nameof(CoreHub.CreateRooms), new List<RoomCreationInfo> {new("Test Room")});
             var createdRoom = Assert.Single(roomCreationResponse.Response!);
 
             // act
-            var result = await connection.Connection.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.SwitchRoom),
+            var result = await connection.Hub.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.SwitchRoom),
                 new SwitchRoomDto(createdRoom!.RoomId));
 
             // assert
@@ -105,12 +105,12 @@ namespace PaderConference.IntegrationTests.Controllers
             // arrange
             var (connection, _) = await ConnectToOpenedConference();
 
-            var roomCreationResponse = await connection.Connection.InvokeAsync<SuccessOrError<IReadOnlyList<Room>>>(
+            var roomCreationResponse = await connection.Hub.InvokeAsync<SuccessOrError<IReadOnlyList<Room>>>(
                 nameof(CoreHub.CreateRooms), new List<RoomCreationInfo> {new("Test1")});
             var createdRoom = Assert.Single(roomCreationResponse.Response!);
 
             // act
-            var result = await connection.Connection.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.RemoveRooms),
+            var result = await connection.Hub.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.RemoveRooms),
                 new[] {createdRoom.RoomId});
 
             // assert

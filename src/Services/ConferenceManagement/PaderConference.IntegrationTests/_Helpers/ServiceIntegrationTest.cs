@@ -97,7 +97,7 @@ namespace PaderConference.IntegrationTests._Helpers
 
         protected async Task<SuccessOrError<Unit>> OpenConference(UserConnection userConnection)
         {
-            return await userConnection.Connection.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.OpenConference));
+            return await userConnection.Hub.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.OpenConference));
         }
 
         protected HubConnection CreateHubConnection(UserAccount user, string conferenceId)
@@ -114,6 +114,6 @@ namespace PaderConference.IntegrationTests._Helpers
         }
     }
 
-    public record UserConnection(HubConnection Connection, string ConferenceId, UserAccount User,
+    public record UserConnection(HubConnection Hub, string ConferenceId, UserAccount User,
         SynchronizedObjectListener SyncObjects);
 }

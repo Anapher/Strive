@@ -53,10 +53,13 @@ namespace PaderConference.IntegrationTests.Controllers
             var (connection, conference) = await ConnectToOpenedConference();
 
             var olaf = CreateUser();
-            await ConnectUserToConference(olaf, conference);
+            var olafConnection = await ConnectUserToConference(olaf, conference);
+
+            await connection.SyncObjects.AssertSyncObject<SynchronizedParticipants>(SyncObjId,
+                value => Assert.Contains(value.Participants, x => x.Key == olaf.Sub));
 
             // act
-            await connection.Connection.StopAsync();
+            await olafConnection.Hub.StopAsync();
 
             // assert
             await connection.SyncObjects.AssertSyncObject<SynchronizedParticipants>(SyncObjId,
