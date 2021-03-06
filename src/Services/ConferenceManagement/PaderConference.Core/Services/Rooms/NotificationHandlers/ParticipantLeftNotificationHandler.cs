@@ -25,7 +25,7 @@ namespace PaderConference.Core.Services.Rooms.NotificationHandlers
 
             await _roomRepository.UnsetParticipantRoom(participant);
             await _mediator.Publish(
-                new ParticipantsRoomChangedNotification(participant.ConferenceId, participant.Yield()));
+                new ParticipantsRoomChangedNotification(participant.ConferenceId, participant.Yield(), true));
         }
     }
 }

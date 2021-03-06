@@ -30,7 +30,7 @@ namespace PaderConference.Core.Services.Rooms.UseCases
             _logger.LogDebug("Switch participant {participant} to room {roomId}", participant, roomId);
             await _roomRepository.SetParticipantRoom(participant, roomId);
             await _mediator.Publish(
-                new ParticipantsRoomChangedNotification(participant.ConferenceId, participant.Yield()));
+                new ParticipantsRoomChangedNotification(participant.ConferenceId, participant.Yield(), false));
 
             return Unit.Value;
         }

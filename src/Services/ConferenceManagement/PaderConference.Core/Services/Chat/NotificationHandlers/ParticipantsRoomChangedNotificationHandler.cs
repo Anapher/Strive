@@ -24,7 +24,9 @@ namespace PaderConference.Core.Services.Chat.NotificationHandlers
             foreach (var participant in notification.Participants)
             {
                 await SetParticipantTypingFalseInPreviousRoom(participant);
-                await _mediator.Send(new UpdateSubscriptionsRequest(participant), cancellationToken);
+
+                if (!notification.ParticipantsLeft)
+                    await _mediator.Send(new UpdateSubscriptionsRequest(participant), cancellationToken);
             }
         }
 
