@@ -6,7 +6,6 @@ using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using FluentValidation.AspNetCore;
 using MassTransit;
-using MassTransit.SignalR;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -134,7 +133,7 @@ namespace PaderConference
             var rabbitMqOptions = Configuration.GetSection("RabbitMq").Get<RabbitMqOptions>();
             services.AddMassTransit(x =>
             {
-                x.AddSignalRHub<CoreHub>();
+                //x.AddSignalRHub<CoreHub>();
 
                 x.AddConsumersFromNamespaceContaining<ParticipantKickedConsumer>();
 
