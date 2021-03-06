@@ -18,6 +18,8 @@ namespace PaderConference.IntegrationTests._Helpers
 {
     public class SynchronizedObjectListener
     {
+        private static readonly TimeSpan DefaultTimeout = TimeSpan.FromSeconds(30);
+
         private readonly ILogger _logger;
         private readonly Dictionary<string, List<SyncObjEvent>> _cachedData = new();
         private readonly object _lock = new();
@@ -94,6 +96,37 @@ namespace PaderConference.IntegrationTests._Helpers
             }
         }
 
+        public Task AssertSyncObject<T>(SynchronizedObjectId syncObjId, Action<T> assertObjAction,
+            TimeSpan? timeout = null) where T : class
+        {
+            return AssertSyncObject(syncObjId.ToString(), assertObjAction, timeout);
+        }
+
+        public async Task AssertSyncObject<T>(string syncObjId, Action<T> assertObjAction, TimeSpan? timeout = null)
+            where T : class
+        {
+            bool TryAssert()
+            {
+                if (_cachedData.ContainsKey(syncObjId))
+                {
+                    var syncObj = GetSynchronizedObject<T>(syncObjId);
+                    try
+                    {
+                        assertObjAction(syncObj);
+                        return true;
+                    }
+                    catch (Exception)
+                    {
+                        return false;
+                    }
+                }
+
+                return false;
+            }
+
+            await WaitForEventInternal(TryAssert, timeout ?? DefaultTimeout);
+        }
+
         public Task<T> WaitForSyncObj<T>(SynchronizedObjectId syncObjId, TimeSpan? timeout = null) where T : class
         {
             return WaitForSyncObj<T>(syncObjId.ToString(), timeout);
@@ -101,13 +134,19 @@ namespace PaderConference.IntegrationTests._Helpers
 
         public async Task<T> WaitForSyncObj<T>(string syncObjId, TimeSpan? timeout = null) where T : class
         {
-            var timeoutTimestamp = DateTimeOffset.UtcNow.Add(timeout ?? TimeSpan.FromSeconds(5));
+            await WaitForEventInternal(() => _cachedData.ContainsKey(syncObjId), timeout ?? DefaultTimeout);
+            return GetSynchronizedObject<T>(syncObjId);
+        }
+
+        private async Task WaitForEventInternal(Func<bool> testCondition, TimeSpan timeout)
+        {
+            var timeoutTimestamp = DateTimeOffset.UtcNow.Add(timeout);
             var autoResetEvent = new AsyncAutoResetEvent(false);
 
             lock (_lock)
             {
-                if (_cachedData.ContainsKey(syncObjId))
-                    return GetSynchronizedObject<T>(syncObjId);
+                if (testCondition())
+                    return;
 
                 _waiters.Add(autoResetEvent);
             }
@@ -124,8 +163,8 @@ namespace PaderConference.IntegrationTests._Helpers
 
                     lock (_lock)
                     {
-                        if (_cachedData.ContainsKey(syncObjId))
-                            return GetSynchronizedObject<T>(syncObjId);
+                        if (testCondition())
+                            return;
                     }
                 }
             }

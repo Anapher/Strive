@@ -44,10 +44,10 @@ namespace PaderConference.IntegrationTests.Controllers
             var testUser = CreateUser();
             var testUserConnection = await ConnectUserToConference(testUser, conference);
 
-            var syncObj = await testUserConnection.SyncObjects.WaitForSyncObj<SynchronizedParticipantPermissions>(
-                SynchronizedParticipantPermissionsProvider.GetObjIdOfParticipant(testUser.Sub));
+            var syncObjId = SynchronizedParticipantPermissionsProvider.GetObjIdOfParticipant(testUser.Sub);
 
-            Assert.DoesNotContain(syncObj.Permissions, x => x.Key == permission.Key);
+            await testUserConnection.SyncObjects.AssertSyncObject<SynchronizedParticipantPermissions>(syncObjId,
+                value => Assert.DoesNotContain(value.Permissions, x => x.Key == permission.Key));
 
             // act
             var result = await connection.Connection.InvokeAsync<SuccessOrError<Unit>>(
@@ -57,10 +57,8 @@ namespace PaderConference.IntegrationTests.Controllers
             // assert
             Assert.True(result.Success);
 
-            syncObj = await testUserConnection.SyncObjects.WaitForSyncObj<SynchronizedParticipantPermissions>(
-                SynchronizedParticipantPermissionsProvider.GetObjIdOfParticipant(testUser.Sub));
-
-            Assert.Contains(syncObj.Permissions, x => x.Key == permission.Key);
+            await testUserConnection.SyncObjects.AssertSyncObject<SynchronizedParticipantPermissions>(syncObjId,
+                value => Assert.Contains(value.Permissions, x => x.Key == permission.Key));
         }
 
         [Fact]
@@ -87,12 +85,9 @@ namespace PaderConference.IntegrationTests.Controllers
             // assert
             Assert.True(result.Success);
 
-            await Task.Delay(2000);
-
-            var syncObj = await testUserConnection.SyncObjects.WaitForSyncObj<SynchronizedParticipantPermissions>(
-                SynchronizedParticipantPermissionsProvider.GetObjIdOfParticipant(testUser.Sub));
-
-            Assert.DoesNotContain(syncObj.Permissions, x => x.Key == permission.Key);
+            var syncObjId = SynchronizedParticipantPermissionsProvider.GetObjIdOfParticipant(testUser.Sub);
+            await testUserConnection.SyncObjects.AssertSyncObject<SynchronizedParticipantPermissions>(syncObjId,
+                value => Assert.DoesNotContain(value.Permissions, x => x.Key == permission.Key));
         }
 
         [Fact]
@@ -114,10 +109,9 @@ namespace PaderConference.IntegrationTests.Controllers
             // assert
             Assert.False(result.Success);
 
-            var syncObj = await testUserConnection.SyncObjects.WaitForSyncObj<SynchronizedParticipantPermissions>(
-                SynchronizedParticipantPermissionsProvider.GetObjIdOfParticipant(testUser.Sub));
-
-            Assert.DoesNotContain(syncObj.Permissions, x => x.Key == permission.Key);
+            var syncObjId = SynchronizedParticipantPermissionsProvider.GetObjIdOfParticipant(testUser.Sub);
+            await testUserConnection.SyncObjects.AssertSyncObject<SynchronizedParticipantPermissions>(syncObjId,
+                value => Assert.DoesNotContain(value.Permissions, x => x.Key == permission.Key));
         }
     }
 }
