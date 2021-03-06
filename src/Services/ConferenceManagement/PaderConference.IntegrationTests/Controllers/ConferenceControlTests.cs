@@ -1,14 +1,15 @@
 ﻿using System.Threading.Tasks;
+using PaderConference.Core.Services;
+using PaderConference.Core.Services.ConferenceControl;
 using PaderConference.IntegrationTests._Helpers;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace PaderConference.IntegrationTests.Controllers
 {
-    public class ConferenceControlTests : ServiceIntegrationTest, IClassFixture<CustomWebApplicationFactory>
+    public class ConferenceControlTests : ServiceIntegrationTest
     {
-        public ConferenceControlTests(CustomWebApplicationFactory factory, ITestOutputHelper testOutputHelper) : base(
-            factory, testOutputHelper)
+        public ConferenceControlTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
         {
         }
 
@@ -16,20 +17,20 @@ namespace PaderConference.IntegrationTests.Controllers
         public async Task OpenConference_UserNotModerator_PermissionDenied()
         {
             // arrange
-            //var info = await InitializeConferenceAndConnect();
+            var info = await InitializeConferenceAndConnect();
 
             // act
-            //var result = await OpenConference(info);
+            var result = await OpenConference(info);
 
-            //// assert
-            //Assert.False(result.Success);
-            //AssertErrorCode(ServiceErrorCode.PermissionDenied, result.Error!);
+            // assert
+            Assert.False(result.Success);
+            AssertErrorCode(ServiceErrorCode.PermissionDenied, result.Error!);
 
-            //var conferenceControlObj =
-            //    info.SyncObjects.GetSynchronizedObject<SynchronizedConferenceInfo>(SynchronizedConferenceInfoProvider
-            //        .SynchronizedObjectId);
+            var conferenceControlObj =
+                info.SyncObjects.GetSynchronizedObject<SynchronizedConferenceInfo>(SynchronizedConferenceInfoProvider
+                    .SynchronizedObjectId);
 
-            //Assert.False(conferenceControlObj.IsOpen);
+            Assert.False(conferenceControlObj.IsOpen);
         }
 
         //[Fact]

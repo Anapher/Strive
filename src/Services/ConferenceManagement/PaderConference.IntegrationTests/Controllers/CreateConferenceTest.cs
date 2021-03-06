@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Net;
 using System.Net.Http;
@@ -14,15 +15,20 @@ using Xunit;
 
 namespace PaderConference.IntegrationTests.Controllers
 {
-    public class CreateConferenceTest : IClassFixture<CustomWebApplicationFactory>
+    public class CreateConferenceTest : IDisposable
     {
         private readonly CustomWebApplicationFactory _factory;
         private readonly HttpClient _client;
 
-        public CreateConferenceTest(CustomWebApplicationFactory factory)
+        public CreateConferenceTest()
         {
-            _factory = factory;
-            _client = factory.GetClient();
+            _factory = new CustomWebApplicationFactory();
+            _client = _factory.CreateClient();
+        }
+
+        public void Dispose()
+        {
+            _factory.Dispose();
         }
 
         private static CreateConferenceRequestDto GetValidConference()
