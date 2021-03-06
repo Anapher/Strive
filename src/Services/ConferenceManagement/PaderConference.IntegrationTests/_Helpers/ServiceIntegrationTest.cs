@@ -43,7 +43,7 @@ namespace PaderConference.IntegrationTests._Helpers
             return Factory.CreateUser(name ?? "Olaf", isModerator).SetupHttpClient(Client);
         }
 
-        protected async Task<ConferenceCreatedResponseDto> CreateConference(params UserAccount[] moderators)
+        protected Task<ConferenceCreatedResponseDto> CreateConference(params UserAccount[] moderators)
         {
             var creationDto = new CreateConferenceRequestDto
             {
@@ -54,6 +54,11 @@ namespace PaderConference.IntegrationTests._Helpers
                 Permissions = new Dictionary<PermissionType, Dictionary<string, JValue>>(),
             };
 
+            return CreateConference(creationDto);
+        }
+
+        protected async Task<ConferenceCreatedResponseDto> CreateConference(CreateConferenceRequestDto creationDto)
+        {
             var response = await Client.PostAsJsonAsync("/v1/conference", creationDto);
             response.EnsureSuccessStatusCode();
 

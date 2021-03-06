@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
 using PaderConference.Core;
 using PaderConference.Core.Errors;
 using PaderConference.Core.Extensions;
@@ -166,6 +167,9 @@ namespace PaderConference.Hubs
 
         public Task<SuccessOrError<Unit>> SetTemporaryPermission(SetTemporaryPermissionDto dto)
         {
+            if (dto.Value?.Type == JTokenType.Null)
+                dto = dto with {Value = null};
+
             var (conferenceId, _) = GetContextParticipant();
 
             return GetInvoker()

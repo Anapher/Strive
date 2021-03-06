@@ -4,10 +4,12 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.JsonPatch.Operations;
 using Microsoft.AspNetCore.SignalR.Client;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Nito.AsyncEx;
+using PaderConference.Core.Services.Permissions;
 using PaderConference.Core.Services.Synchronization;
 using PaderConference.Hubs;
 using Serilog;
@@ -67,10 +69,28 @@ namespace PaderConference.IntegrationTests._Helpers
                     var jsonPatch = patch.ToObject<JsonPatchDocument<T>>();
                     if (jsonPatch == null) throw new NullReferenceException("A patch must never be null.");
 
-                    jsonPatch.ApplyTo(initialObj);
+                    if (initialObj is SynchronizedParticipantPermissions syncPermissions)
+                        PatchPermissionsDictionary(syncPermissions, jsonPatch);
+                    else
+                        jsonPatch.ApplyTo(initialObj);
                 }
 
                 return initialObj;
+            }
+        }
+
+        private void PatchPermissionsDictionary(SynchronizedParticipantPermissions initialObj,
+            IJsonPatchDocument document)
+        {
+            foreach (var operation in document.GetOperations())
+            {
+                var key = operation.path.Substring("/Permissions/".Length);
+
+                if (operation.OperationType == OperationType.Add)
+                    initialObj.Permissions[key] = (JValue) JToken.FromObject(operation.value);
+                else if (operation.OperationType == OperationType.Remove)
+                    initialObj.Permissions.Remove(key);
+                else throw new ArgumentException("Invalid operation");
             }
         }
 
@@ -82,7 +102,6 @@ namespace PaderConference.IntegrationTests._Helpers
         public async Task<T> WaitForSyncObj<T>(string syncObjId, TimeSpan? timeout = null) where T : class
         {
             var timeoutTimestamp = DateTimeOffset.UtcNow.Add(timeout ?? TimeSpan.FromSeconds(5));
-
             var autoResetEvent = new AsyncAutoResetEvent(false);
 
             lock (_lock)
