@@ -23,7 +23,7 @@ namespace JsonPatchGenerator.Tests
 
             // assert
             var op = Assert.Single(patch.Operations);
-            Assert.Equal(OperationType.Replace, op.OperationType);
+            Assert.Equal(OperationType.Add, op.OperationType);
             Assert.Equal("/Prop1", op.path);
             Assert.Equal("Hello World", op.value);
         }
@@ -41,12 +41,12 @@ namespace JsonPatchGenerator.Tests
             // assert
             Assert.Collection(patch.Operations.OrderBy(x => x.path), op =>
             {
-                Assert.Equal(OperationType.Replace, op.OperationType);
+                Assert.Equal(OperationType.Add, op.OperationType);
                 Assert.Equal("/Prop2", op.path);
                 Assert.Equal(43, op.value);
             }, op =>
             {
-                Assert.Equal(OperationType.Replace, op.OperationType);
+                Assert.Equal(OperationType.Add, op.OperationType);
                 Assert.Equal("/Prop3", op.path);
                 Assert.Equal(true, op.value);
             });
@@ -67,12 +67,12 @@ namespace JsonPatchGenerator.Tests
             // assert
             Assert.Collection(patch.Operations.OrderBy(x => x.path), op =>
             {
-                Assert.Equal(OperationType.Replace, op.OperationType);
+                Assert.Equal(OperationType.Add, op.OperationType);
                 Assert.Equal("/Prop1/Prop1", op.path);
                 Assert.Equal("Hello Welt", op.value);
             }, op =>
             {
-                Assert.Equal(OperationType.Replace, op.OperationType);
+                Assert.Equal(OperationType.Add, op.OperationType);
                 Assert.Equal("/Prop2", op.path);
                 Assert.Equal("das", op.value);
             });
@@ -209,9 +209,8 @@ namespace JsonPatchGenerator.Tests
         [Fact]
         public void TestPatchDictionaryAddItem()
         {
-            TestPatch(new Dictionary<string, string>(),
-                new Dictionary<string, string> {{"hello", "world"}},
-                patch => { patch.Replace("hello", "world"); });
+            TestPatch(new Dictionary<string, string>(), new Dictionary<string, string> {{"hello", "world"}},
+                patch => { patch.Add("hello", "world"); });
         }
 
         [Fact]
@@ -226,8 +225,7 @@ namespace JsonPatchGenerator.Tests
         public void TestPatchDictionaryChangeItem()
         {
             TestPatch(new Dictionary<string, string> {{"hello", "world"}},
-                new Dictionary<string, string> {{"hello", "welt"}},
-                patch => { patch.Replace("hello", "welt"); });
+                new Dictionary<string, string> {{"hello", "welt"}}, patch => { patch.Add("hello", "welt"); });
         }
 
         [Fact]
@@ -235,7 +233,7 @@ namespace JsonPatchGenerator.Tests
         {
             TestPatch(new Dictionary<string, int>(),
                 new Dictionary<string, int> {{"hello", 324}}.ToImmutableDictionary(),
-                document => document.Replace("/hello", "324"));
+                document => document.Add("/hello", "324"));
         }
 
         private void TestPatch(object obj, object update, Action<JsonPatchDocument> patchCreator)

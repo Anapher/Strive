@@ -38,7 +38,7 @@ namespace JsonPatchGenerator
 
             if (originalValue == null)
             {
-                patch.Replace(path, newValue);
+                patch.Add(path, newValue);
                 return;
             }
 
@@ -53,7 +53,7 @@ namespace JsonPatchGenerator
 
             if (originalObject.Type != newObject.Type)
             {
-                patch.Replace(path, newValue);
+                patch.Add(path, newValue);
             }
             else if (!string.Equals(originalObject.ToString(Formatting.None), newObject.ToString(Formatting.None)))
             {
@@ -76,11 +76,13 @@ namespace JsonPatchGenerator
 
                         // remove all items that were removed
                         for (var i = originalItems.Count - 1; i >= 0; i--)
+                        {
                             if (!newItems.Any(x => x.Item2.Equals(originalItems[i].Item2)))
                             {
                                 patch.Remove(path + $"/{i}");
                                 currentOriginal.RemoveAt(i);
                             }
+                        }
 
                         // either move or add items that changed
                         for (var i = 0; i < newItems.Count; i++)
@@ -140,7 +142,7 @@ namespace JsonPatchGenerator
                     }
 
                 // Replace values directly
-                patch.Replace(path, newValue);
+                patch.Add(path, newValue);
             }
         }
 
