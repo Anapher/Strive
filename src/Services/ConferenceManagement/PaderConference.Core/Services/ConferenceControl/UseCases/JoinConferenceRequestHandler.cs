@@ -45,8 +45,7 @@ namespace PaderConference.Core.Services.ConferenceControl.UseCases
             await _mediator.Publish(new ParticipantInitializedNotification(participant));
 
             // do not merge these together as handlers for ParticipantJoinedNotification may want to send messages to the participant
-            await _mediator.Send(new EnableParticipantMessagingRequest(participantId, conferenceId, connectionId),
-                cancellationToken);
+            await _mediator.Send(new EnableParticipantMessagingRequest(participant, connectionId), cancellationToken);
 
             await _mediator.Publish(new ParticipantJoinedNotification(participant, meta));
 

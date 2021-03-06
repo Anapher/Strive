@@ -1,10 +1,10 @@
-﻿namespace PaderConference.Contracts
+﻿using PaderConference.Core.Services;
+
+namespace PaderConference.Contracts
 {
     public interface ParticipantKicked
     {
-        string ParticipantId { get; }
-
-        string ConferenceId { get; }
+        Participant Participant { get; }
 
         string? ConnectionId { get; }
     }

@@ -1,4 +1,6 @@
-﻿namespace PaderConference.Hubs
+﻿using PaderConference.Core.Services;
+
+namespace PaderConference.Hubs
 {
     public static class CoreHubGroups
     {
@@ -7,9 +9,9 @@
             return $"Conference:{conferenceId}";
         }
 
-        public static string OfParticipant(string participantId)
+        public static string OfParticipant(Participant participant)
         {
-            return $"Participant:{participantId}";
+            return $"Participant:{participant.ConferenceId}/{participant.Id}";
         }
     }
 }

@@ -24,16 +24,16 @@ namespace PaderConference.Messaging.Consumers
             var connectionId = message.ConnectionId;
             if (connectionId == null)
             {
-                if (!_connections.TryGetParticipant(message.ParticipantId, out var connection))
+                if (!_connections.TryGetParticipant(message.Participant.Id, out var connection))
                     return;
 
                 connectionId = connection.ConnectionId;
             }
 
             await _hubContext.Groups.RemoveFromGroupAsync(connectionId,
-                CoreHubGroups.OfParticipant(message.ParticipantId), context.CancellationToken);
+                CoreHubGroups.OfParticipant(message.Participant), context.CancellationToken);
             await _hubContext.Groups.RemoveFromGroupAsync(connectionId,
-                CoreHubGroups.OfConference(message.ConferenceId), context.CancellationToken);
+                CoreHubGroups.OfConference(message.Participant.ConferenceId), context.CancellationToken);
         }
     }
 }

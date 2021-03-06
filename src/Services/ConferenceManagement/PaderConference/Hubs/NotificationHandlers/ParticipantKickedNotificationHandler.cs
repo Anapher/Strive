@@ -11,25 +11,22 @@ namespace PaderConference.Hubs.NotificationHandlers
 {
     public class ParticipantKickedNotificationHandler : INotificationHandler<ParticipantKickedNotification>
     {
-        private readonly ICoreHubConnections _connections;
         private readonly IHubContext<CoreHub> _hubContext;
         private readonly IPublishEndpoint _publishEndpoint;
 
-        public ParticipantKickedNotificationHandler(IPublishEndpoint publishEndpoint, IHubContext<CoreHub> hubContext,
-            ICoreHubConnections connections)
+        public ParticipantKickedNotificationHandler(IPublishEndpoint publishEndpoint, IHubContext<CoreHub> hubContext)
         {
             _publishEndpoint = publishEndpoint;
             _hubContext = hubContext;
-            _connections = connections;
         }
 
         public async Task Handle(ParticipantKickedNotification notification, CancellationToken cancellationToken)
         {
-            var ((_, participantId), connectionId, reason) = notification;
+            var (participant, connectionId, reason) = notification;
 
             var targetClient = connectionId != null
                 ? _hubContext.Clients.Client(connectionId)
-                : _hubContext.Clients.Group(CoreHubGroups.OfParticipant(participantId));
+                : _hubContext.Clients.Group(CoreHubGroups.OfParticipant(participant));
 
             await targetClient.OnRequestDisconnect(new RequestDisconnectDto(reason), cancellationToken);
             await _publishEndpoint.Publish<ParticipantKicked>(notification, cancellationToken);

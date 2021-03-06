@@ -20,7 +20,7 @@ namespace PaderConference.Hubs.NotificationHandlers
         {
             foreach (var (participant, permissions) in notification.UpdatedPermissions)
             {
-                await _hubContext.Clients.Group(CoreHubGroups.OfParticipant(participant.Id))
+                await _hubContext.Clients.Group(CoreHubGroups.OfParticipant(participant))
                     .OnPermissionsUpdated(permissions, cancellationToken);
             }
         }

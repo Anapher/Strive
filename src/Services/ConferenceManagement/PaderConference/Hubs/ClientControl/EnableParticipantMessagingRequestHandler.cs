@@ -17,11 +17,13 @@ namespace PaderConference.Hubs.ClientControl
 
         public async Task<Unit> Handle(EnableParticipantMessagingRequest request, CancellationToken cancellationToken)
         {
-            await _hubContext.Groups.AddToGroupAsync(request.ConnectionId,
-                CoreHubGroups.OfParticipant(request.ParticipantId), cancellationToken);
+            var (participant, connectionId) = request;
 
-            await _hubContext.Groups.AddToGroupAsync(request.ConnectionId,
-                CoreHubGroups.OfConference(request.ConferenceId), CancellationToken.None);
+            await _hubContext.Groups.AddToGroupAsync(connectionId, CoreHubGroups.OfParticipant(participant),
+                cancellationToken);
+
+            await _hubContext.Groups.AddToGroupAsync(connectionId, CoreHubGroups.OfConference(participant.ConferenceId),
+                CancellationToken.None);
 
             return Unit.Value;
         }
