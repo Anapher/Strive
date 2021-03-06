@@ -29,10 +29,10 @@ namespace PaderConference.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [Authorize(Roles = AppRoles.Moderator)]
-        public async Task<ActionResult<StartConferenceResponseDto>> Create([FromBody] ConferenceData data)
+        public async Task<ActionResult<ConferenceCreatedResponseDto>> Create([FromBody] ConferenceData data)
         {
             var conferenceId = await _mediator.Send(new CreateConferenceRequest(data), HttpContext.RequestAborted);
-            return new StartConferenceResponseDto(conferenceId);
+            return new ConferenceCreatedResponseDto(conferenceId);
         }
 
         // PATCH v1/conference/{id}

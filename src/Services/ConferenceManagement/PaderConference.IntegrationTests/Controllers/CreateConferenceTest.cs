@@ -41,7 +41,7 @@ namespace PaderConference.IntegrationTests.Controllers
             var response = await _client.PostAsync("/v1/conference", JsonContent.Create(GetValidConference()));
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            var result = await response.Content.ReadFromJsonAsync<StartConferenceResponseDto>();
+            var result = await response.Content.ReadFromJsonAsync<ConferenceCreatedResponseDto>();
 
             Assert.NotNull(result?.ConferenceId);
         }
@@ -75,7 +75,7 @@ namespace PaderConference.IntegrationTests.Controllers
 
             var error = await response.Content.ReadFromJsonAsync<Error>();
             Assert.NotNull(error);
-            Assert.Equal(ErrorType.BadRequest.ToString(), error.Type);
+            Assert.Equal(ErrorType.BadRequest.ToString(), error!.Type);
             Assert.Equal(ErrorCode.FieldValidation.ToString(), error.Code);
         }
     }

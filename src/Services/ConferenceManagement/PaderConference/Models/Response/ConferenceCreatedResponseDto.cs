@@ -1,8 +1,8 @@
 ﻿namespace PaderConference.Models.Response
 {
-    public class StartConferenceResponseDto
+    public class ConferenceCreatedResponseDto
     {
-        public StartConferenceResponseDto(string conferenceId)
+        public ConferenceCreatedResponseDto(string conferenceId)
         {
             ConferenceId = conferenceId;
         }
