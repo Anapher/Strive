@@ -31,7 +31,7 @@ namespace PaderConference.IntegrationTests._Helpers
         {
             Factory = factory;
             //Logger = testOutputHelper.CreateTestLogger();
-            //Client = factory.CreateClient();
+            Client = factory.CreateClient();
         }
 
         protected async Task<ConnectedUser> InitializeConferenceAndConnect(bool isModerator = false)
