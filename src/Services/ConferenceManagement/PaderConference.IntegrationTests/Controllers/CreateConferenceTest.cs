@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Net;
 using System.Net.Http;
@@ -12,23 +11,21 @@ using PaderConference.Core.Errors;
 using PaderConference.Models.Request;
 using PaderConference.Models.Response;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace PaderConference.IntegrationTests.Controllers
 {
-    public class CreateConferenceTest : IDisposable
+    [Collection(IntegrationTestCollection.Definition)]
+    public class CreateConferenceTest
     {
         private readonly CustomWebApplicationFactory _factory;
         private readonly HttpClient _client;
 
-        public CreateConferenceTest()
+        public CreateConferenceTest(MongoDbFixture mongoDb, ITestOutputHelper testOutputHelper)
         {
-            _factory = new CustomWebApplicationFactory();
+            var factory = new CustomWebApplicationFactory(mongoDb, testOutputHelper);
+            _factory = factory;
             _client = _factory.CreateClient();
-        }
-
-        public void Dispose()
-        {
-            _factory.Dispose();
         }
 
         private static CreateConferenceRequestDto GetValidConference()

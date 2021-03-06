@@ -7,9 +7,11 @@ using Xunit.Abstractions;
 
 namespace PaderConference.IntegrationTests.Controllers
 {
+    [Collection(IntegrationTestCollection.Definition)]
     public class ConferenceControlTests : ServiceIntegrationTest
     {
-        public ConferenceControlTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
+        public ConferenceControlTests(ITestOutputHelper testOutputHelper, MongoDbFixture mongoDb) : base(
+            testOutputHelper, mongoDb)
         {
         }
 

@@ -24,22 +24,17 @@ using Xunit.Abstractions;
 
 namespace PaderConference.IntegrationTests._Helpers
 {
-    public abstract class ServiceIntegrationTest : IDisposable
+    public abstract class ServiceIntegrationTest
     {
         protected readonly CustomWebApplicationFactory Factory;
         protected readonly Logger Logger;
         protected readonly HttpClient Client;
 
-        protected ServiceIntegrationTest(ITestOutputHelper testOutputHelper)
+        protected ServiceIntegrationTest(ITestOutputHelper testOutputHelper, MongoDbFixture mongoDb)
         {
-            Factory = new CustomWebApplicationFactory();
+            Factory = new CustomWebApplicationFactory(mongoDb, testOutputHelper);
             Logger = testOutputHelper.CreateTestLogger();
             Client = Factory.CreateClient();
-        }
-
-        public void Dispose()
-        {
-            Factory.Dispose();
         }
 
         protected async Task<ConnectedUser> InitializeConferenceAndConnect(bool isModerator = false)

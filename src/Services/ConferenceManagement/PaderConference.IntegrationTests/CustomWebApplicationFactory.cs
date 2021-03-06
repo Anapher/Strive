@@ -10,22 +10,23 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-using Mongo2Go;
 using PaderConference.IntegrationTests._Helpers;
+using Xunit.Abstractions;
 
 namespace PaderConference.IntegrationTests
 {
     public class CustomWebApplicationFactory : WebApplicationFactory<Startup>
     {
-        private static MongoDbRunner? _runner;
+        private readonly ITestOutputHelper _testOutputHelper;
+        private readonly MongoDbFixture? _mongoDb;
+
+        public CustomWebApplicationFactory(MongoDbFixture mongoDb, ITestOutputHelper testOutputHelper)
+        {
+            _testOutputHelper = testOutputHelper;
+            _mongoDb = mongoDb;
+        }
 
         public MockJwtTokens JwtTokens { get; } = new();
-
-        protected override void Dispose(bool disposing)
-        {
-            //_runner?.Dispose();
-            base.Dispose(disposing);
-        }
 
         public UserAccount CreateUser(string name, bool isModerator)
         {
@@ -60,13 +61,11 @@ namespace PaderConference.IntegrationTests
 
         private IConfiguration StartMongoDbAndGetConfiguration()
         {
-            _runner ??= MongoDbRunner.Start();
-
             var configuration = new ConfigurationBuilder()
                 .AddJsonFile(new EmbeddedFileProvider(typeof(CustomWebApplicationFactory).Assembly),
                     "appsettings.IntegrationTest.json", false, false).Build();
 
-            configuration["MongoDb:ConnectionString"] = _runner.ConnectionString;
+            configuration["MongoDb:ConnectionString"] = _mongoDb.Runner.ConnectionString;
             return configuration;
         }
     }
