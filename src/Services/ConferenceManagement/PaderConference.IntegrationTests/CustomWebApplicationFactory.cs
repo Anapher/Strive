@@ -19,6 +19,7 @@ namespace PaderConference.IntegrationTests
     {
         private MongoDbRunner? _runner;
         private readonly object _lock = new();
+        private HttpClient? _cachedClient;
 
         protected override void Dispose(bool disposing)
         {
@@ -32,7 +33,7 @@ namespace PaderConference.IntegrationTests
         {
             lock (_lock)
             {
-                return CreateClient();
+                return _cachedClient ??= CreateClient();
             }
         }
 

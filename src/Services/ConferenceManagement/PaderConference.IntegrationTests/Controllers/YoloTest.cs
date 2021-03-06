@@ -14,7 +14,7 @@ namespace PaderConference.IntegrationTests.Controllers
         [Fact]
         public void FooTest()
         {
-            //var client = _factory.GetClient();
+            var client = _factory.GetClient();
 
             Assert.Equal(4, 4);
         }
