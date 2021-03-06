@@ -87,6 +87,8 @@ namespace PaderConference.IntegrationTests.Controllers
             // assert
             Assert.True(result.Success);
 
+            await Task.Delay(2000);
+
             var syncObj = await testUserConnection.SyncObjects.WaitForSyncObj<SynchronizedParticipantPermissions>(
                 SynchronizedParticipantPermissionsProvider.GetObjIdOfParticipant(testUser.Sub));
 
