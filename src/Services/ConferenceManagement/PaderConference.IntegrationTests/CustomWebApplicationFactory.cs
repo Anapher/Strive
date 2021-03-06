@@ -17,15 +17,15 @@ namespace PaderConference.IntegrationTests
 {
     public class CustomWebApplicationFactory : WebApplicationFactory<Startup>
     {
-        private MongoDbRunner? _runner;
+        private static MongoDbRunner? _runner;
+
+        public MockJwtTokens JwtTokens { get; } = new();
 
         protected override void Dispose(bool disposing)
         {
-            _runner?.Dispose();
+            //_runner?.Dispose();
             base.Dispose(disposing);
         }
-
-        public MockJwtTokens JwtTokens { get; } = new();
 
         public UserAccount CreateUser(string name, bool isModerator)
         {
@@ -60,7 +60,7 @@ namespace PaderConference.IntegrationTests
 
         private IConfiguration StartMongoDbAndGetConfiguration()
         {
-            _runner = MongoDbRunner.Start();
+            _runner ??= MongoDbRunner.Start();
 
             var configuration = new ConfigurationBuilder()
                 .AddJsonFile(new EmbeddedFileProvider(typeof(CustomWebApplicationFactory).Assembly),
