@@ -15,7 +15,6 @@ using PaderConference.Core.Interfaces;
 using PaderConference.Core.Services;
 using PaderConference.Hubs;
 using PaderConference.Models.Request;
-using Serilog;
 using Serilog.Core;
 using Xunit;
 using Xunit.Abstractions;
@@ -31,8 +30,8 @@ namespace PaderConference.IntegrationTests._Helpers
         protected ServiceIntegrationTest(CustomWebApplicationFactory factory, ITestOutputHelper testOutputHelper)
         {
             Factory = factory;
-            Logger = testOutputHelper.CreateTestLogger();
-            Client = factory.CreateClient();
+            //Logger = testOutputHelper.CreateTestLogger();
+            //Client = factory.CreateClient();
         }
 
         protected async Task<ConnectedUser> InitializeConferenceAndConnect(bool isModerator = false)
