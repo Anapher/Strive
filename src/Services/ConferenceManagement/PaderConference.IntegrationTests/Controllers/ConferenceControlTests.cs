@@ -16,7 +16,7 @@ namespace PaderConference.IntegrationTests.Controllers
         public async Task OpenConference_UserNotModerator_PermissionDenied()
         {
             // arrange
-            var info = await InitializeConferenceAndConnect();
+            //var info = await InitializeConferenceAndConnect();
 
             // act
             //var result = await OpenConference(info);
