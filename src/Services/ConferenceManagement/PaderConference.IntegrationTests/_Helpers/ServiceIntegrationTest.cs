@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Json;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.SignalR.Client;
@@ -16,7 +15,6 @@ using PaderConference.Core.Interfaces;
 using PaderConference.Core.Services;
 using PaderConference.Hubs;
 using PaderConference.Models.Request;
-using PaderConference.Models.Response;
 using Serilog;
 using Serilog.Core;
 using Xunit;
@@ -52,14 +50,14 @@ namespace PaderConference.IntegrationTests._Helpers
                 Permissions = new Dictionary<PermissionType, Dictionary<string, JValue>>(),
             };
 
-            var response = await Client.PostAsJsonAsync("/v1/conference", creationDto);
-            response.EnsureSuccessStatusCode();
+            //var response = await Client.PostAsJsonAsync("/v1/conference", creationDto);
+            //response.EnsureSuccessStatusCode();
 
-            var createdConference = await response.Content.ReadFromJsonAsync<ConferenceCreatedResponseDto>();
-            Assert.NotNull(createdConference);
+            //var createdConference = await response.Content.ReadFromJsonAsync<ConferenceCreatedResponseDto>();
+            //Assert.NotNull(createdConference);
 
-            var conferenceId = createdConference!.ConferenceId;
-            Logger.Information("Created conference {conferenceId}", conferenceId);
+            //var conferenceId = createdConference!.ConferenceId;
+            //Logger.Information("Created conference {conferenceId}", conferenceId);
 
             //var connection = CreateHubConnection(user, conferenceId);
 
@@ -69,7 +67,7 @@ namespace PaderConference.IntegrationTests._Helpers
             //await connection.StartAsync();
             //Logger.Information("Connection to SignalR established.");
 
-            return new ConnectedUser(null!, conferenceId, user, null!);
+            return null;
         }
 
         protected async Task<SuccessOrError<Unit>> OpenConference(ConnectedUser connectedUser)
