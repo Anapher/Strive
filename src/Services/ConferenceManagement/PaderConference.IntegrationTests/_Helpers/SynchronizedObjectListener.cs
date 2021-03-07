@@ -18,8 +18,6 @@ namespace PaderConference.IntegrationTests._Helpers
 {
     public class SynchronizedObjectListener
     {
-        private static readonly TimeSpan DefaultTimeout = TimeSpan.FromSeconds(30);
-
         private readonly ILogger _logger;
         private readonly Dictionary<string, List<SyncObjEvent>> _cachedData = new();
         private readonly object _lock = new();
@@ -124,7 +122,7 @@ namespace PaderConference.IntegrationTests._Helpers
                 return false;
             }
 
-            await WaitForEventInternal(TryAssert, timeout ?? DefaultTimeout);
+            await WaitForEventInternal(TryAssert, timeout ?? WaitTimeoutExtensions.DefaultTimeout);
         }
 
         public Task<T> WaitForSyncObj<T>(SynchronizedObjectId syncObjId, TimeSpan? timeout = null) where T : class
@@ -134,7 +132,8 @@ namespace PaderConference.IntegrationTests._Helpers
 
         public async Task<T> WaitForSyncObj<T>(string syncObjId, TimeSpan? timeout = null) where T : class
         {
-            await WaitForEventInternal(() => _cachedData.ContainsKey(syncObjId), timeout ?? DefaultTimeout);
+            await WaitForEventInternal(() => _cachedData.ContainsKey(syncObjId),
+                timeout ?? WaitTimeoutExtensions.DefaultTimeout);
             return GetSynchronizedObject<T>(syncObjId);
         }
 

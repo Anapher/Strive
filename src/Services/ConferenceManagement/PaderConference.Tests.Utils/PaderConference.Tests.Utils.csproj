@@ -3,6 +3,7 @@
   <PropertyGroup>
 	  <TargetFramework>net50</TargetFramework>
 	  <IsTestProject>false</IsTestProject>
+	  <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>

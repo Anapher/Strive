@@ -45,7 +45,7 @@ namespace PaderConference.Core.Services.Chat.UseCases
                     privateChatChannel, participant.ConferenceId);
 
             await _mediator.Publish(new ChatMessageReceivedNotification(conferenceId, subscribedParticipants, message,
-                messagesCount));
+                channel, messagesCount));
 
             await _mediator.Send(new SetParticipantTypingRequest(participant, channel, false));
 
