@@ -1,21 +1,13 @@
-﻿using System.Collections.Generic;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.SignalR;
-using Newtonsoft.Json.Linq;
 using PaderConference.Hubs.Responses;
 
 namespace PaderConference.Hubs
 {
     public static class CoreHubClientProxyExtensions
     {
-        public static Task OnPermissionsUpdated(this IClientProxy clientProxy, Dictionary<string, JValue> payload,
-            CancellationToken token = default)
-        {
-            return clientProxy.SendAsync(CoreHubMessages.Response.OnPermissionsUpdated, payload, token);
-        }
-
         public static Task OnRequestDisconnect(this IClientProxy clientProxy, RequestDisconnectDto payload,
             CancellationToken token = default)
         {
@@ -32,6 +24,12 @@ namespace PaderConference.Hubs
             SyncObjPayload<JsonPatchDocument> payload, CancellationToken token = default)
         {
             return clientProxy.SendAsync(CoreHubMessages.Response.OnSynchronizedObjectUpdated, payload, token);
+        }
+
+        public static Task ChatMessage(this IClientProxy clientProxy, ChatMessageDto message,
+            CancellationToken token = default)
+        {
+            return clientProxy.SendAsync(CoreHubMessages.Response.ChatMessage, message, token);
         }
     }
 }

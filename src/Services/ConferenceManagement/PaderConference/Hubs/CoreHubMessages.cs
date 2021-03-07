@@ -4,8 +4,6 @@
     {
         public static class Response
         {
-            public const string OnError = "OnError";
-
             public const string OnConnectionError = "OnConnectionError";
 
             public const string OnSynchronizedObjectUpdated = "OnSynchronizedObjectUpdated";
@@ -13,7 +11,6 @@
 
             public const string ChatMessage = "ChatMessage";
 
-            public const string OnPermissionsUpdated = "OnPermissionsUpdated";
             public const string OnEquipmentUpdated = "OnEquipmentUpdated";
             public const string OnEquipmentCommand = "OnEquipmentCommand";
 
