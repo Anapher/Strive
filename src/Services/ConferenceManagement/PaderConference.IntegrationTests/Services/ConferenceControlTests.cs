@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.SignalR.Client;
+using Nito.AsyncEx;
 using PaderConference.Core.Interfaces;
 using PaderConference.Core.Services;
 using PaderConference.Core.Services.ConferenceControl;
@@ -104,9 +105,9 @@ namespace PaderConference.IntegrationTests.Services
             var userToBeKicked = CreateUser();
             var userToBeKickedConnection = await ConnectUserToConference(userToBeKicked, conference);
 
-            var disconnectRequested = false;
+            var autoResetEvent = new AsyncAutoResetEvent(false);
             userToBeKickedConnection.Hub.On(CoreHubMessages.Response.OnRequestDisconnect,
-                (RequestDisconnectDto _) => disconnectRequested = true);
+                (RequestDisconnectDto _) => autoResetEvent.Set());
 
             // act
             var request = new KickParticipantRequestDto(userToBeKicked.Sub);
@@ -115,7 +116,8 @@ namespace PaderConference.IntegrationTests.Services
 
             // assert
             Assert.True(result.Success);
-            Assert.True(disconnectRequested);
+
+            await autoResetEvent.WaitTimeoutAsync();
         }
     }
 }
