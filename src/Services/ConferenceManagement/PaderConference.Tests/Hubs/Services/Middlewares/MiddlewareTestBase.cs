@@ -30,12 +30,13 @@ namespace PaderConference.Tests.Hubs.Services.Middlewares
         {
             // arrange
             var builder = new Mock<IServiceRequestBuilder<string>>();
+            builder.Setup(x => x.AddMiddleware(It.IsAny<ServiceMiddleware>())).Returns(builder.Object);
 
             // act
             Execute(builder.Object);
 
             // assert
-            builder.Verify(x => x.AddMiddleware(It.IsAny<ServiceMiddleware>()), Times.Once);
+            builder.Verify(x => x.AddMiddleware(It.IsAny<ServiceMiddleware>()), Times.AtLeastOnce);
         }
 
         [Fact]
