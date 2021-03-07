@@ -5,7 +5,7 @@ using PaderConference.IntegrationTests._Helpers;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace PaderConference.IntegrationTests.Controllers
+namespace PaderConference.IntegrationTests.Services
 {
     [Collection(IntegrationTestCollection.Definition)]
     public class ParticipantsListTests : ServiceIntegrationTest

@@ -3,14 +3,16 @@ using MediatR;
 using Microsoft.AspNetCore.SignalR.Client;
 using Newtonsoft.Json.Linq;
 using PaderConference.Core.Interfaces;
+using PaderConference.Core.Services;
 using PaderConference.Core.Services.Permissions;
+using PaderConference.Core.Services.Permissions.Responses;
 using PaderConference.Hubs;
 using PaderConference.Hubs.Dtos;
 using PaderConference.IntegrationTests._Helpers;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace PaderConference.IntegrationTests.Controllers
+namespace PaderConference.IntegrationTests.Services
 {
     [Collection(IntegrationTestCollection.Definition)]
     public class PermissionTests : ServiceIntegrationTest
@@ -109,6 +111,65 @@ namespace PaderConference.IntegrationTests.Controllers
             var syncObjId = SynchronizedParticipantPermissionsProvider.GetObjIdOfParticipant(testUser.Sub);
             await testUserConnection.SyncObjects.AssertSyncObject<SynchronizedParticipantPermissions>(syncObjId,
                 value => Assert.DoesNotContain(value.Permissions, x => x.Key == permission.Key));
+        }
+
+        [Fact]
+        public async Task FetchPermissions_NotModeratorAndFetchOwnPermissions_ReturnMyPermissions()
+        {
+            // arrange
+            var (_, conference) = await ConnectToOpenedConference();
+
+            var testUser = CreateUser();
+            var testUserConnection = await ConnectUserToConference(testUser, conference);
+
+            // act
+            var result =
+                await testUserConnection.Hub.InvokeAsync<SuccessOrError<ParticipantPermissionResponse>>(
+                    nameof(CoreHub.FetchPermissions), null);
+
+            // assert
+            Assert.True(result.Success);
+
+            Assert.NotEmpty(result.Response!.Layers);
+            Assert.Equal(testUser.Sub, result.Response!.ParticipantId);
+        }
+
+        [Fact]
+        public async Task FetchPermissions_NotModeratorAndFetchOthersPermissions_ReturnError()
+        {
+            // arrange
+            var (_, conference) = await ConnectToOpenedConference();
+
+            var testUser = CreateUser();
+            var testUserConnection = await ConnectUserToConference(testUser, conference);
+
+            // act
+            var result =
+                await testUserConnection.Hub.InvokeAsync<SuccessOrError<ParticipantPermissionResponse>>(
+                    nameof(CoreHub.FetchPermissions), Moderator.Sub);
+
+            // assert
+            Assert.False(result.Success);
+            AssertErrorCode(ServiceErrorCode.PermissionDenied, result.Error!);
+        }
+
+        [Fact]
+        public async Task FetchPermissions_ModeratorAndFetchOthersPermissions_ReturnPermissions()
+        {
+            // arrange
+            var (connection, conference) = await ConnectToOpenedConference();
+
+            var testUser = CreateUser();
+            await ConnectUserToConference(testUser, conference);
+
+            // act
+            var result =
+                await connection.Hub.InvokeAsync<SuccessOrError<ParticipantPermissionResponse>>(
+                    nameof(CoreHub.FetchPermissions), testUser.Sub);
+
+            // assert
+            Assert.True(result.Success);
+            Assert.NotEmpty(result.Response!.Layers);
         }
     }
 }
