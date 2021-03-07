@@ -123,12 +123,12 @@ namespace PaderConference.Core.IntegrationTests.Services
             await JoinParticipantWithPermissions();
 
             // assert
-            NotificationCollector.AssertSingleNotificationIssued<SynchronizedObjectUpdatedNotification>(n =>
-            {
-                Assert.Equal(SyncObjId, n.SyncObjId);
-                Assert.Equal(_syncObjValue, n.Value);
-                Assert.Equal(ParticipantWithPermissions, Assert.Single(n.Participants));
-            });
+            NotificationCollector.AssertSingleNotificationIssued<SynchronizedObjectUpdatedNotification>(
+                x => x.SyncObjId == SyncObjId, n =>
+                {
+                    Assert.Equal(_syncObjValue, n.Value);
+                    Assert.Equal(ParticipantWithPermissions, Assert.Single(n.Participants));
+                });
 
             await AssertSyncObjectCached();
         }
@@ -140,6 +140,11 @@ namespace PaderConference.Core.IntegrationTests.Services
             await JoinParticipantWithoutPermissions();
 
             // assert
+            var subscriptionsObj = SynchronizedSubscriptionsProvider
+                .GetObjIdOfParticipant(ParticipantIdWithoutPermissions).ToString();
+            NotificationCollector.AssertSingleNotificationIssued<SynchronizedObjectUpdatedNotification>(x =>
+                x.SyncObjId == subscriptionsObj);
+
             NotificationCollector.AssertNoNotificationOfType<SynchronizedObjectUpdatedNotification>();
         }
 
@@ -279,7 +284,8 @@ namespace PaderConference.Core.IntegrationTests.Services
             await Mediator.Send(new UpdateSubscriptionsRequest(randomParticipant));
 
             // assert
-            NotificationCollector.AssertSingleNotificationIssued<SynchronizedObjectUpdatedNotification>();
+            NotificationCollector.AssertSingleNotificationIssued<SynchronizedObjectUpdatedNotification>(x =>
+                x.SyncObjId == SyncObjId);
         }
 
         [Fact]
@@ -303,7 +309,12 @@ namespace PaderConference.Core.IntegrationTests.Services
                 new UpdateSynchronizedObjectRequest(ConferenceId, SynchronizedObjectId.Parse(SyncObjId)));
 
             // assert
-            NotificationCollector.AssertSingleNotificationIssued<ParticipantSubscriptionsRemovedNotification>();
+            var subscriptionsObjId =
+                SynchronizedSubscriptionsProvider.GetObjIdOfParticipant(randomParticipant.Id).ToString();
+
+            NotificationCollector.AssertSingleNotificationIssued<ParticipantSubscriptionsUpdatedNotification>();
+            NotificationCollector.AssertSingleNotificationIssued<SynchronizedObjectUpdatedNotification>(x =>
+                x.SyncObjId == subscriptionsObjId);
             NotificationCollector.AssertNoMoreNotifications();
         }
 

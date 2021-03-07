@@ -177,7 +177,7 @@ namespace PaderConference.Core.Tests.Services.Synchronization.UseCases
             _subscriptionRepo.Setup(x => x.GetSet(_participant, It.IsAny<IReadOnlyList<string>>()))
                 .ReturnsAsync(new List<string> {oldSyncObjId.ToString()});
 
-            var capturedNotification = _mediator.CaptureNotification<ParticipantSubscriptionsRemovedNotification>();
+            var capturedNotification = _mediator.CaptureNotification<ParticipantSubscriptionsUpdatedNotification>();
 
             var useCase = Create();
 
@@ -191,7 +191,7 @@ namespace PaderConference.Core.Tests.Services.Synchronization.UseCases
 
             var notification = capturedNotification.GetNotification();
             Assert.Equal(_participant, notification.Participant);
-            Assert.Equal(oldSyncObjId.ToString(), Assert.Single(notification.RemovedSubscriptions));
+            Assert.Equal(oldSyncObjId.ToString(), Assert.Single(notification.Removed).ToString());
         }
 
         [Fact]

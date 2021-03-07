@@ -8,5 +8,6 @@
         public const string PARTICIPANTS = "participants";
         public const string PARTICIPANT_PERMISSIONS = "participantPermissions";
         public const string CHAT = "chat";
+        public const string SUBSCRIPTIONS = "subscriptions";
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Immutable;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
@@ -27,8 +28,9 @@ namespace PaderConference.Core.Services.Synchronization.NotificationHandlers
             var removedSubscriptions = await _subscriptionsRepository.Remove(participant);
             if (removedSubscriptions?.Any() == true)
                 await _mediator.Publish(
-                    new ParticipantSubscriptionsRemovedNotification(participant, removedSubscriptions),
-                    cancellationToken);
+                    new ParticipantSubscriptionsUpdatedNotification(participant,
+                        removedSubscriptions.Select(SynchronizedObjectId.Parse).ToList(),
+                        ImmutableList<SynchronizedObjectId>.Empty), cancellationToken);
         }
     }
 }

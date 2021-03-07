@@ -62,13 +62,14 @@ namespace PaderConference.Core.Services.Synchronization.UseCases
                 return Unit.Value;
             }
 
-            var newSubscriptions = subscriptions.Where(x => !oldSubscriptions.Contains(x.ToString()));
-            await SendCurrentSynchronizedObjectValues(participant, newSubscriptions);
+            var added = subscriptions.Where(x => !oldSubscriptions.Contains(x.ToString())).ToList();
+            await SendCurrentSynchronizedObjectValues(participant, added);
 
-            var removedSubscriptions = oldSubscriptions.Except(subscriptions.Select(x => x.ToString())).ToList();
-            if (removedSubscriptions.Any())
-                await _mediator.Publish(
-                    new ParticipantSubscriptionsRemovedNotification(participant, removedSubscriptions));
+            var removed = oldSubscriptions.Except(subscriptions.Select(x => x.ToString()))
+                .Select(SynchronizedObjectId.Parse).ToList();
+
+            if (removed.Any() || added.Any())
+                await _mediator.Publish(new ParticipantSubscriptionsUpdatedNotification(participant, removed, added));
 
             return Unit.Value;
         }
@@ -76,15 +77,28 @@ namespace PaderConference.Core.Services.Synchronization.UseCases
         private async ValueTask SendCurrentSynchronizedObjectValues(Participant participant,
             IEnumerable<SynchronizedObjectId> subscriptions)
         {
+            var syncSubscriptionsObjId =
+                SynchronizedSubscriptionsProvider.GetObjIdOfParticipant(participant.Id).ToString();
+
             foreach (var syncObjId in subscriptions)
             {
                 _logger.LogDebug("Send current value of {syncObId} to participant.", syncObjId);
 
-                var value = await GetCurrentValueOfSynchronizedObject(participant.ConferenceId, syncObjId);
+                // subscriptions are updated anyways after this handler completed
+                if (syncObjId.ToString() == syncSubscriptionsObjId)
+                    continue;
 
-                await _mediator.Publish(new SynchronizedObjectUpdatedNotification(participant.Yield().ToImmutableList(),
-                    syncObjId.ToString(), value, null));
+                await SendCurrentSynchronizedObjectValue(participant, syncObjId);
             }
+        }
+
+        private async ValueTask SendCurrentSynchronizedObjectValue(Participant participant,
+            SynchronizedObjectId syncObjId)
+        {
+            var value = await GetCurrentValueOfSynchronizedObject(participant.ConferenceId, syncObjId);
+
+            await _mediator.Publish(new SynchronizedObjectUpdatedNotification(participant.Yield().ToImmutableList(),
+                syncObjId.ToString(), value, null));
         }
 
         private async Task<object> GetCurrentValueOfSynchronizedObject(string conferenceId,
