@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
-using Microsoft.AspNetCore.JsonPatch;
-using Microsoft.AspNetCore.JsonPatch.Operations;
+﻿using System.Linq;
+using JsonPatchGenerator.Tests._Utils;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Xunit;
 
@@ -11,286 +8,49 @@ namespace JsonPatchGenerator.Tests
 {
     public class JsonPatchFactoryTests
     {
-        [Fact]
-        public void TestCreatePatchFlatObject()
+        public static TheoryData<string, string, string, string> TestData()
         {
-            // arrange
-            var obj = new TestClass1 {Prop1 = "Hallo Welt", Prop2 = 34, Prop3 = false};
-            var newObj = new TestClass1 {Prop1 = "Hello World", Prop2 = 34, Prop3 = false};
+            var testsString = EmbeddedResourceUtils.LoadResourceFile(typeof(JsonPatchFactoryTests).Assembly,
+                "JsonPatchGenerator.Tests.Resources.tests.json");
 
-            // act
-            var patch = JsonPatchFactory.CreatePatch(obj, newObj);
+            var tests = (JArray) JToken.Parse(testsString);
+            var result = new TheoryData<string, string, string, string>();
 
-            // assert
-            var op = Assert.Single(patch.Operations);
-            Assert.Equal(OperationType.Add, op.OperationType);
-            Assert.Equal("/Prop1", op.path);
-            Assert.Equal("Hello World", op.value);
-        }
-
-        [Fact]
-        public void TestCreatePatchFlatObjectMultipleValues()
-        {
-            // arrange
-            var obj = new TestClass1 {Prop1 = "Hallo Welt", Prop2 = 34, Prop3 = false};
-            var newObj = new TestClass1 {Prop1 = "Hallo Welt", Prop2 = 43, Prop3 = true};
-
-            // act
-            var patch = JsonPatchFactory.CreatePatch(obj, newObj);
-
-            // assert
-            Assert.Collection(patch.Operations.OrderBy(x => x.path), op =>
+            foreach (var test in tests.Cast<JObject>())
             {
-                Assert.Equal(OperationType.Add, op.OperationType);
-                Assert.Equal("/Prop2", op.path);
-                Assert.Equal(43, op.value);
-            }, op =>
-            {
-                Assert.Equal(OperationType.Add, op.OperationType);
-                Assert.Equal("/Prop3", op.path);
-                Assert.Equal(true, op.value);
-            });
-        }
+                if (test.Property("error") != null) continue;
+                if (test.Property("disabled") != null) continue;
 
-        [Fact]
-        public void TestCreatePatchDeepObjectMultipleValues()
-        {
-            // arrange
-            var obj = new TestClass2
-                {Prop1 = new TestClass1 {Prop1 = "Hallo Welt", Prop2 = 34, Prop3 = false}, Prop2 = "asd"};
-            var newObj = new TestClass2
-                {Prop1 = new TestClass1 {Prop1 = "Hello Welt", Prop2 = 34, Prop3 = false}, Prop2 = "das"};
+                var doc = test.Property("doc")!.Value;
+                var expected = test.Property("expected")!.Value;
+                var patch = test.Property("patch")!.Value;
+                var comment = test.Property("comment")?.Value.Value<string>() ?? string.Empty;
 
-            // act
-            var patch = JsonPatchFactory.CreatePatch(obj, newObj);
-
-            // assert
-            Assert.Collection(patch.Operations.OrderBy(x => x.path), op =>
-            {
-                Assert.Equal(OperationType.Add, op.OperationType);
-                Assert.Equal("/Prop1/Prop1", op.path);
-                Assert.Equal("Hello Welt", op.value);
-            }, op =>
-            {
-                Assert.Equal(OperationType.Add, op.OperationType);
-                Assert.Equal("/Prop2", op.path);
-                Assert.Equal("das", op.value);
-            });
-        }
-
-        [Fact]
-        public void TestCreatePatchFlatListAddItem()
-        {
-            TestPatch(new TestClass3 {Prop1 = new List<SimpleObj>()},
-                new TestClass3 {Prop1 = new List<SimpleObj> {new SimpleObj {Value = "Hello"}}},
-                patch => patch.Add("/Prop1/-", new SimpleObj {Value = "Hello"})
-            );
-        }
-
-        [Fact]
-        public void TestCreatePatchFlatListRemoveItem()
-        {
-            TestPatch(new TestClass3
-                {
-                    Prop1 = new List<SimpleObj>
-                    {
-                        new SimpleObj {Value = "Corona"},
-                        new SimpleObj {Value = "Pls dont kill me"} // remove
-                    }
-                },
-                new TestClass3
-                {
-                    Prop1 = new List<SimpleObj> {new SimpleObj {Value = "Corona"}}
-                }, patch => patch.Remove("/Prop1/1"));
-        }
-
-        [Fact]
-        public void TestCreatePatchFlatListPatchItem()
-        {
-            TestPatch(new TestClass3
-            {
-                Prop1 = new List<SimpleObj>
-                {
-                    new SimpleObj {Value = "Corona"},
-                    new SimpleObj {Value = "Pls dont kill me"}
-                }
-            }, new TestClass3
-            {
-                Prop1 = new List<SimpleObj>
-                {
-                    new SimpleObj {Value = "Corona"},
-                    new SimpleObj {Value = "Plx dont kill me"}
-                }
-            }, patch => patch.Replace("/Prop1/1", new SimpleObj {Value = "Plx dont kill me"}));
-        }
-
-        [Fact]
-        public void TestCreatePatchFlatListPatchItemAndChangeLast()
-        {
-            TestPatch(new TestClass3
-            {
-                Prop1 = new List<SimpleObj>
-                {
-                    new SimpleObj {Value = "Corona"},
-                    new SimpleObj {Value = "Pls dont kill me"}
-                }
-            }, new TestClass3
-            {
-                Prop1 = new List<SimpleObj>
-                {
-                    new SimpleObj {Value = "Corona"},
-                    new SimpleObj {Value = "Plx dont kill me"},
-                    new SimpleObj {Value = "it's me"}
-                }
-            }, patch =>
-            {
-                patch.Replace("/Prop1/1", new SimpleObj {Value = "Plx dont kill me"});
-                patch.Add("/Prop1/-", new SimpleObj {Value = "it's me"});
-            });
-        }
-
-        [Fact]
-        public void TestPatchStringListAddItemToEmptyList()
-        {
-            TestPatch(new List<string>(),
-                new List<string> {"Vincent"},
-                patch => patch.Add("/-", "Vincent"));
-        }
-
-        [Fact]
-        public void TestPatchStringListAddItemToEndOfList()
-        {
-            TestPatch(new List<string> {"Niklas", "Leo"},
-                new List<string> {"Niklas", "Leo", "Vincent"},
-                patch => patch.Add("/-", "Vincent"));
-        }
-
-        [Fact]
-        public void TestPatchStringListInsertItem()
-        {
-            TestPatch(new List<string> {"Adam", "Eva", "Vincent", "Covid"},
-                new List<string> {"Adam", "Eva", "Niklas", "Vincent", "Covid"},
-                patch => patch.Add("/2", "Niklas"));
-        }
-
-        [Fact]
-        public void TestPatchStringListRemoveItem()
-        {
-            TestPatch(new List<string> {"Adam", "Eva", "Vincent", "Covid"},
-                new List<string> {"Adam", "Vincent", "Covid"},
-                patch => patch.Remove("/1"));
-        }
-
-        [Fact]
-        public void TestPatchStringListMoveItem()
-        {
-            TestPatch(new List<string> {"Adam", "Eva", "Vincent", "Covid"},
-                new List<string> {"Eva", "Vincent", "Covid", "Adam"},
-                patch =>
-                {
-                    patch.Move("/1", "/0");
-                    patch.Move("/2", "/1");
-                    patch.Move("/3", "/2");
-                });
-        }
-
-        [Fact]
-        public void TestPatchStringListInsertAndRemoveItem()
-        {
-            TestPatch(new List<string> {"Adam", "Eva", "Vincent", "Covid"},
-                new List<string> {"Teufel", "Adam", "Vincent", "Covid"},
-                patch =>
-                {
-                    patch.Remove("/1");
-                    patch.Add("/0", "Teufel");
-                });
-        }
-
-        [Fact]
-        public void TestPatchDictionaryAddItem()
-        {
-            TestPatch(new Dictionary<string, string>(), new Dictionary<string, string> {{"hello", "world"}},
-                patch => { patch.Add("hello", "world"); });
-        }
-
-        [Fact]
-        public void TestPatchDictionaryRemoveItem()
-        {
-            TestPatch(new Dictionary<string, string> {{"hello", "world"}},
-                new Dictionary<string, string>(),
-                patch => { patch.Remove("hello"); });
-        }
-
-        [Fact]
-        public void TestPatchDictionaryChangeItem()
-        {
-            TestPatch(new Dictionary<string, string> {{"hello", "world"}},
-                new Dictionary<string, string> {{"hello", "welt"}}, patch => { patch.Add("hello", "welt"); });
-        }
-
-        [Fact]
-        public void TestPatchDifferentObjectTypesBothDictionary()
-        {
-            TestPatch(new Dictionary<string, int>(),
-                new Dictionary<string, int> {{"hello", 324}}.ToImmutableDictionary(),
-                document => document.Add("/hello", "324"));
-        }
-
-        private void TestPatch(object obj, object update, Action<JsonPatchDocument> patchCreator)
-        {
-            // act
-            var patch = JsonPatchFactory.CreatePatch(obj, update);
-
-            // assert
-            var expectedDoc = new JsonPatchDocument();
-            patchCreator(expectedDoc);
-
-            static IEnumerable<Operation> UnifyOpOrder(IEnumerable<Operation> operations)
-            {
-                return operations.OrderBy(x => x.path).ThenBy(x => x.op);
+                result.Add(doc.ToString(Formatting.None), expected.ToString(Formatting.None),
+                    patch.ToString(Formatting.None), comment);
             }
 
-            Assert.Collection(UnifyOpOrder(patch.Operations),
-                UnifyOpOrder(expectedDoc.Operations).Select(expected => new Action<Operation>(actual =>
-                {
-                    Assert.Equal(expected.OperationType, actual.OperationType);
-                    Assert.Equal(expected.path, actual.path);
-
-                    if (expected.value == null)
-                        Assert.Null(actual.value);
-                    else
-                        Assert.Equal(JToken.FromObject(expected.value)?.ToString(),
-                            JToken.FromObject(actual.value)?.ToString());
-                })).ToArray());
+            return result;
         }
 
-        public class SimpleObj
+        [Theory]
+        [MemberData(nameof(TestData))]
+        public void TestPatch(string original, string modified, string expectedPatch, string comment)
         {
-            public string Value { get; set; }
-        }
+            var originalToken = JToken.Parse(original);
+            var modifiedToken = JToken.Parse(modified);
 
-        public class TestClass1
-        {
-            public string Prop1 { get; set; }
-            public int Prop2 { get; set; }
-            public bool Prop3 { get; set; }
-        }
+            // generate patch
+            var actualPatch = JsonPatchFactory.Create(originalToken, modifiedToken, JsonPatchFactory.DefaultOptions);
 
-        public class TestClass2
-        {
-            public TestClass1 Prop1 { get; set; }
-            public string Prop2 { get; set; }
-        }
+            // assert
+            var originalObj = originalToken.ToObject<dynamic>();
+            actualPatch.ApplyTo(originalObj);
 
-        public class TestClass3
-        {
-            public List<SimpleObj> Prop1 { get; set; }
-            public string Prop2 { get; set; }
-        }
+            var resultingToken = JToken.FromObject(originalObj);
 
-        public class TestClass4
-        {
-            public List<TestClass1> Prop1 { get; set; }
+            Assert.True(JToken.DeepEquals(resultingToken, modifiedToken),
+                $"Comment: {comment}\r\nexpected patch: {expectedPatch}\r\nactual patch: {JToken.FromObject(actualPatch)}");
         }
     }
 }
