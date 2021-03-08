@@ -50,7 +50,6 @@ function App() {
                   configuration={ocidConfig}
                   loggerLevel={oidcLog.DEBUG}
                   isEnabled
-                  UserStore={InMemoryWebStorage}
                   callbackComponentOverride={AuthCallback}
                   notAuthenticated={NotAuthenticated}
                   customEvents={

@@ -1,6 +1,6 @@
 import { makeStyles } from '@material-ui/core';
 import React from 'react';
-import { ParticipantDto } from 'src/features/conference/types';
+import { Participant } from 'src/features/conference/types';
 
 const useStyles = makeStyles((theme) => ({
    participantText: {
@@ -9,7 +9,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 type Props = {
-   participants: ParticipantDto[];
+   participants: Participant[];
    participantColors: { [id: string]: string };
 };
 
@@ -21,9 +21,9 @@ export default function UsersTypingParticipants({ participants, participantColor
    return (
       <>
          {beginning.map((x, i) => (
-            <span key={x.participantId}>
+            <span key={x.id}>
                {i !== 0 && <span>{i === participants.length - 1 ? ' and ' : ', '}</span>}
-               <span className={classes.participantText} style={{ color: participantColors[x.participantId] }}>
+               <span className={classes.participantText} style={{ color: participantColors[x.id] }}>
                   {x.displayName}
                </span>
             </span>

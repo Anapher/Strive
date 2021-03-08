@@ -1,13 +1,14 @@
 import { Action, configureStore, Middleware, ThunkAction } from '@reduxjs/toolkit';
-import createMiddleware from './signal/create-middleware';
-import rootReducer from './root-reducer';
-import { loadState, persistState } from './storage';
 import createSagaMiddleware from 'redux-saga';
-import rootSaga from './root-saga';
+import appSettings from 'src/config';
 import notifierMiddleware from './notifier/create-middleware';
+import rootReducer from './root-reducer';
+import rootSaga from './root-saga';
+import createMiddleware from './signal/create-middleware';
+import { loadState } from './storage';
 
 const { middleware: signalrMiddleware } = createMiddleware({
-   signalUrl: '/signalr',
+   signalUrl: appSettings.signalrHubUrl,
 });
 
 const sagaMiddleware = createSagaMiddleware();
@@ -25,7 +26,7 @@ const store = configureStore({
    preloadedState: initialState,
 });
 // const store = createStore(rootReducer, initialState, enhancer);
-persistState(store, persistInLocalStorage, persistInSessionStorage);
+// persistState(store, persistInLocalStorage, persistInSessionStorage);
 
 // run redux saga
 sagaMiddleware.run(rootSaga);
@@ -38,10 +39,10 @@ export type RootState = ReturnType<typeof rootReducer>;
 export type AppDispatch = typeof store.dispatch;
 
 // Store persistence
-function persistInLocalStorage(state: RootState): Partial<RootState> {
-   return {};
-}
+// function persistInLocalStorage(_: RootState): Partial<RootState> {
+//    return {};
+// }
 
-function persistInSessionStorage(state: RootState): Partial<RootState> {
-   return {};
-}
+// function persistInSessionStorage(_: RootState): Partial<RootState> {
+//    return {};
+// }

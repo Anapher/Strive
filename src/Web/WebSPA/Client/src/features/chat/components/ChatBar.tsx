@@ -41,7 +41,9 @@ export default function ChatBar() {
 
    const dispatch = useDispatch();
 
-   const handleFetchChat = () => dispatch(coreHub.requestChat());
+   const handleFetchChat = () => {
+      // dispatch(coreHub.requestChat());
+   };
 
    useEffect(() => {
       if (connected) {
@@ -55,10 +57,7 @@ export default function ChatBar() {
    const participantId = useMyParticipantId();
 
    const participantColors = useMemo(
-      () =>
-         Object.fromEntries(
-            participants?.map((x) => [x.participantId, numberToColor(hashCode(x.participantId))]) ?? [],
-         ),
+      () => Object.fromEntries(participants.map((x) => [x.id, numberToColor(hashCode(x.id))]) ?? []),
       [participants],
    );
 

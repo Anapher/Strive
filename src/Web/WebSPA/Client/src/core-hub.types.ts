@@ -1,6 +1,8 @@
 import { UseMediaStateInfo } from './store/webrtc/hooks/useMedia';
 import { ProducerSource } from './store/webrtc/types';
 
+export type SyncStatePayload = { id: string; value: any };
+
 export type SendChatMessageDto = {
    message: string;
    mode: SendingMode | null;
@@ -22,7 +24,7 @@ export type ParticipantRef = {
    displayName?: string;
 };
 
-export type CreateRoomDto = {
+export type RoomCreationInfo = {
    displayName: string;
 };
 
@@ -74,6 +76,6 @@ export type SetTemporaryPermissionDto = {
    value?: PermissionValue;
 };
 
-export type KickParticipantRequest = {
+export type KickParticipantRequestDto = {
    participantId: string;
 };

@@ -2,11 +2,11 @@ import { makeStyles, Typography } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import React, { useMemo } from 'react';
 import { DateTime } from 'luxon';
-import { ParticipantDto } from 'src/features/conference/types';
 import emojiRegex from 'emoji-regex/RGI_Emoji';
 import clsx from 'classnames';
 import { ChatMessageDto } from '../types';
 import { hashCode, numberToColor } from '../color-utils';
+import { Participant } from 'src/features/conference/types';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -60,7 +60,7 @@ const onlyEmojisRegex = new RegExp('^(' + emojiRegex().toString().replace(/\/g$/
 
 type Props = {
    message?: ChatMessageDto;
-   participants?: ParticipantDto[] | null;
+   participants?: Participant[] | null;
    participantId?: string;
    participantColors: { [id: string]: string };
 };
@@ -68,7 +68,7 @@ type Props = {
 export default function ChatMessage({ message, participants, participantId, participantColors }: Props) {
    const classes = useStyles();
    const isEmoji = message && message.message.length <= 8 && onlyEmojisRegex.test(message.message);
-   const sender = message?.from && participants?.find((x) => x.participantId === message.from?.participantId);
+   const sender = message?.from && participants?.find((x) => x.id === message.from?.participantId);
 
    const isAnonymous = message && !message.from;
    const isDisconnected = message?.from && !sender;
@@ -113,7 +113,7 @@ export default function ChatMessage({ message, participants, participantId, part
    );
 }
 
-function renderSender(message?: ChatMessageDto, sender?: ParticipantDto, isAnonymous?: boolean) {
+function renderSender(message?: ChatMessageDto, sender?: Participant, isAnonymous?: boolean) {
    if (message?.from) {
       return sender?.displayName ?? message.from.displayName ?? message.from.participantId;
    }

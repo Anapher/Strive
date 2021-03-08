@@ -1,15 +1,15 @@
 import { Divider, IconButton, makeStyles, Tooltip, Typography } from '@material-ui/core';
+import clsx from 'classnames';
 import { Pin, PinOff } from 'mdi-material-ui';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import * as coreHub from 'src/core-hub';
 import ParticipantItem from 'src/features/conference/components/ParticipantItem';
+import { selectParticipants } from 'src/features/conference/selectors';
 import SceneManagement from 'src/features/scenes/components/SceneManagement';
-import { RootState } from 'src/store';
+import useMyParticipantId from 'src/hooks/useMyParticipantId';
 import { selectRoomViewModels } from '../selectors';
 import RoomHeader from './RoomHeader';
-import clsx from 'classnames';
-import useMyParticipantId from 'src/hooks/useMyParticipantId';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -53,7 +53,7 @@ export default function RoomsList({ pinned, onTogglePinned }: Props) {
    const classes = useStyles();
 
    const rooms = useSelector(selectRoomViewModels);
-   const participants = useSelector((state: RootState) => state.conference.participants);
+   const participants = useSelector(selectParticipants);
    const myId = useMyParticipantId();
 
    const dispatch = useDispatch();
@@ -70,20 +70,20 @@ export default function RoomsList({ pinned, onTogglePinned }: Props) {
             </Tooltip>
          </div>
          <div className={classes.rooms}>
-            {rooms?.map((x) => (
+            {rooms?.map((room) => (
                <div
-                  key={x.roomId}
-                  className={clsx(classes.room, x.participants.length > 0 && classes.roomWithParticipants)}
+                  key={room.roomId}
+                  className={clsx(classes.room, room.participants.length > 0 && classes.roomWithParticipants)}
                >
                   <RoomHeader
                      className={classes.roomHeader}
-                     room={x}
-                     selected={x.participants.includes(myId)}
-                     onClick={() => handleSwitchRoom(x.roomId)}
+                     room={room}
+                     selected={room.participants.includes(myId)}
+                     onClick={() => handleSwitchRoom(room.roomId)}
                   />
                   <div className={classes.participants}>
-                     {x.participants.map((id) => (
-                        <ParticipantItem key={id} participant={participants?.find((x) => id === x.participantId)} />
+                     {room.participants.map((id) => (
+                        <ParticipantItem key={id} participant={participants.find((x) => id === x.id)} />
                      ))}
                   </div>
                </div>

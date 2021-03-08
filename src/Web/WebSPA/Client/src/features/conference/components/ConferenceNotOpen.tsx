@@ -9,19 +9,19 @@ import {
    Typography,
    useTheme,
 } from '@material-ui/core';
+import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import _ from 'lodash';
 import { DateTime } from 'luxon';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import usePermission from 'src/hooks/usePermission';
-import { RootState } from 'src/store';
 import * as coreHub from 'src/core-hub';
-import { ConferenceInfo } from '../types';
 import { openSettings } from 'src/features/settings/reducer';
-import { CONFERENCE_CAN_OPEN_AND_CLOSE } from 'src/permissions';
-import ArrowBackIcon from '@material-ui/icons/ArrowBack';
-import to from 'src/utils/to';
 import useMyParticipantId from 'src/hooks/useMyParticipantId';
+import usePermission from 'src/hooks/usePermission';
+import { CONFERENCE_CAN_OPEN_AND_CLOSE } from 'src/permissions';
+import { SynchronizedConferenceInfo } from 'src/store/signal/synchronization/synchronized-object-ids';
+import to from 'src/utils/to';
+import { selectParticipants } from '../selectors';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -53,7 +53,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 type ConferenceStatusProps = {
-   conferenceInfo: ConferenceInfo;
+   conferenceInfo: SynchronizedConferenceInfo;
    isModeratorJoined: boolean;
 };
 
@@ -81,17 +81,16 @@ function ConferenceStatus({ conferenceInfo, isModeratorJoined }: ConferenceStatu
 }
 
 type Props = {
-   conferenceInfo: ConferenceInfo;
+   conferenceInfo: SynchronizedConferenceInfo;
 };
 
 export default function ConferenceNotOpen({ conferenceInfo }: Props) {
    const classes = useStyles();
-   const participants = useSelector((state: RootState) => state.conference.participants);
+   const participants = useSelector(selectParticipants);
    const myId = useMyParticipantId();
 
-   const isUserModerator = !!myId && conferenceInfo.moderators.includes(myId);
-   const isModeratorJoined =
-      !!participants && _.some(participants, (x) => conferenceInfo.moderators.includes(x.participantId));
+   const isUserModerator = conferenceInfo.moderators.includes(myId);
+   const isModeratorJoined = _.some(participants, (x) => conferenceInfo.moderators.includes(x.id));
 
    const theme = useTheme();
 
@@ -128,7 +127,7 @@ export default function ConferenceNotOpen({ conferenceInfo }: Props) {
                )}
             </div>
             <div className={classes.bottomContent}>
-               {participants && participants.length > 1 && (
+               {participants.length > 1 && (
                   <Typography color="textSecondary" variant="caption" align="center" gutterBottom>
                      {participants.length - 1}{' '}
                      {participants.length > 2 ? 'participants are waiting.' : 'participant is waiting.'}

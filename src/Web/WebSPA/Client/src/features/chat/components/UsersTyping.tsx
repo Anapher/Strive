@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { selectParticipants } from 'src/features/conference/selectors';
-import { ParticipantDto } from 'src/features/conference/types';
+import { Participant } from 'src/features/conference/types';
 import UsersTypingParticipants from './UsersTypingParticipants';
 
 const useStyles = makeStyles(() => ({
@@ -36,9 +36,9 @@ export default function UsersTyping({ participantsTyping, participantColors }: P
                   <UsersTypingParticipants
                      participantColors={participantColors}
                      participants={participantsTyping
-                        ?.map((x) => participants?.find((p) => p.participantId === x))
+                        ?.map((x) => participants.find((p) => p.id === x))
                         .filter((x) => x)
-                        .map((x) => x as ParticipantDto)}
+                        .map((x) => x as Participant)}
                   />
                </Typography>{' '}
             </motion.div>

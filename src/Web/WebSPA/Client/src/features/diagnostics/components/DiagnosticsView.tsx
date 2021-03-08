@@ -58,8 +58,8 @@ export default function DiagnosticsView() {
                </TableRow>
             </TableHead>
             <TableBody>
-               {_.orderBy(participants, (x) => participantsOfRoom.includes(x.participantId), 'desc').map(
-                  ({ participantId, displayName }) => (
+               {_.orderBy(participants, (x) => participantsOfRoom.includes(x.id), 'desc').map(
+                  ({ id: participantId, displayName }) => (
                      <TableRow
                         key={participantId}
                         style={{ backgroundColor: myId === participantId ? 'rgba(230, 126, 34, 0.15)' : undefined }}
@@ -88,14 +88,14 @@ export default function DiagnosticsView() {
                            ))}
                         </TableCell>
                         <TableCell>
-                           {Object.entries(streams?.[participantId]?.consumers ?? {}).map(([id, info]) => {
-                              const participant = participants?.find((x) => x.participantId === info.participantId);
-                              const consumer = consumers.find((x) => x.id === id);
+                           {Object.entries(streams?.[participantId]?.consumers ?? {}).map(([participantId, info]) => {
+                              const participant = participants?.find((x) => x.id === info.participantId);
+                              const consumer = consumers.find((x) => x.id === participantId);
 
                               return (
                                  <Tooltip
-                                    key={id}
-                                    title={`Id=${id}, participant id=${info.participantId}, remote paused=${info.paused}, local paused=${consumer?.paused}`}
+                                    key={participantId}
+                                    title={`Id=${participantId}, participant id=${info.participantId}, remote paused=${info.paused}, local paused=${consumer?.paused}`}
                                     PopperProps={{ disablePortal: true }}
                                  >
                                     <Chip

@@ -4,9 +4,9 @@ import { motion } from 'framer-motion';
 import _ from 'lodash';
 import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { ParticipantDto } from 'src/features/conference/types';
+import { selectParticipants } from 'src/features/conference/selectors';
+import { Participant } from 'src/features/conference/types';
 import { selectParticipantsOfCurrentRoom } from 'src/features/rooms/selectors';
-import { RootState } from 'src/store';
 import { Size } from 'src/types';
 import { generateGrid } from '../calculations';
 import { GridScene } from '../types';
@@ -45,10 +45,10 @@ export default function ParticipantsGrid({
    setShowWebcamUnderChat,
    setAutoHideControls,
 }: Props) {
-   const participants = useSelector((state: RootState) => state.conference.participants);
+   const participants = useSelector(selectParticipants);
    const participantsOfRoom = useSelector(selectParticipantsOfCurrentRoom)
-      .map((id) => participants?.find((x) => x.participantId === id))
-      .filter((x): x is ParticipantDto => Boolean(x));
+      .map((id) => participants.find((x) => x.id === id))
+      .filter((x): x is Participant => Boolean(x));
 
    const classes = useStyles();
 
@@ -74,8 +74,8 @@ export default function ParticipantsGrid({
                      .map((x, pi) => (
                         <motion.div
                            layout
-                           layoutId={x.participantId}
-                           key={x.participantId}
+                           layoutId={x.id}
+                           key={x.id}
                            style={{ ...grid.itemSize, marginLeft: pi === 0 ? 0 : spacing }}
                         >
                            <ParticipantTile participant={x} size={grid.itemSize} />

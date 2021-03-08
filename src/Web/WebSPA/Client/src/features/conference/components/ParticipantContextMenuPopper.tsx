@@ -1,6 +1,6 @@
 import { makeStyles, Menu } from '@material-ui/core';
 import React from 'react';
-import { ParticipantDto } from '../types';
+import { Participant } from '../types';
 import ParticipantContextMenu from './ParticipantContextMenu';
 
 const useStyles = makeStyles(() => ({
@@ -11,7 +11,7 @@ const useStyles = makeStyles(() => ({
 
 type Props = Omit<React.ComponentProps<typeof Menu>, 'children'> & {
    onClose: () => void;
-   participant: ParticipantDto;
+   participant: Participant;
 };
 
 export default function ParticipantContextMenuPopper({ participant, onClose, ...props }: Props) {

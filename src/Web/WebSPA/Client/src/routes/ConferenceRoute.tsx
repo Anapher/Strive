@@ -20,7 +20,6 @@ const defaultEvents: string[] = [
    coreHub.events.onSynchronizeObjectState,
    coreHub.events.onSynchronizedObjectUpdated,
    'OnError',
-   coreHub.events.onPermissionsUpdated,
    coreHub.events.onEquipmentUpdated,
    coreHub.events.onRequestDisconnect,
 ];

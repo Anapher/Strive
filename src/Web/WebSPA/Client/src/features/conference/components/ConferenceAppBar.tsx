@@ -117,7 +117,11 @@ export default function ConferenceAppBar({ chatWidth }: Props) {
                   />
                )}
                {participants && (
-                  <Chip className={classes.chip} label={`Participants: ${participants.length}`} size="small" />
+                  <Chip
+                     className={classes.chip}
+                     label={`Participants: ${Object.entries(participants).length}`}
+                     size="small"
+                  />
                )}
             </Box>
             <Box

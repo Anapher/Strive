@@ -163,8 +163,8 @@ export default function SendMessageForm({ onSendMessage, isTyping }: Props) {
                   participants &&
                   participants.length > 0 &&
                   [<ListSubheader key="separator">Send privately to</ListSubheader>].concat(
-                     sortedParticipants.map(({ participantId, displayName }) => (
-                        <MenuItem key={participantId} value={`to:${participantId}`}>
+                     sortedParticipants.map(({ id, displayName }) => (
+                        <MenuItem key={id} value={`to:${id}`}>
                            {displayName}
                         </MenuItem>
                      )),

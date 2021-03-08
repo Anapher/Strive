@@ -20,15 +20,15 @@ import AppsIcon from '@material-ui/icons/Apps';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import DesktopWindowsIcon from '@material-ui/icons/DesktopWindows';
 import StarIcon from '@material-ui/icons/Star';
+import _ from 'lodash';
 import React, { useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { ParticipantDto } from 'src/features/conference/types';
-import { RootState } from 'src/store';
+import breakoutRooms from 'src/features/breakout-rooms/active-scene';
+import { selectParticipants } from 'src/features/conference/selectors';
+import { Participant } from 'src/features/conference/types';
 import { setAppliedScene } from '../reducer';
 import { selectAvailableScenesViewModels, selectServerProvidedScene } from '../selectors';
 import { ActiveSceneInfo, Scene } from '../types';
-import breakoutRooms from 'src/features/breakout-rooms/active-scene';
-import _ from 'lodash';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -39,14 +39,14 @@ const useStyles = makeStyles((theme) => ({
    },
 }));
 
-const getSceneTitle = (scene: Scene, participants: ParticipantDto[] | null) => {
+const getSceneTitle = (scene: Scene, participants: Participant[]) => {
    switch (scene.type) {
       case 'automatic':
          return 'Automatic';
       case 'grid':
          return 'Grid';
       case 'screenshare':
-         return `Screen of ${participants?.find((x) => x.participantId === scene.participantId)?.displayName}`;
+         return `Screen of ${participants.find((x) => x.id === scene.participantId)?.displayName}`;
    }
 };
 
@@ -72,7 +72,7 @@ export default function SceneManagement() {
    const handleClose = () => setActionPopper(false);
    const handleOpen = () => setActionPopper(true);
 
-   const participants = useSelector((state: RootState) => state.conference.participants);
+   const participants = useSelector(selectParticipants);
    const availableScenes = useSelector(selectAvailableScenesViewModels);
    const theme = useTheme();
    const serverScene = useSelector(selectServerProvidedScene);

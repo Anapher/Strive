@@ -45,7 +45,7 @@ export const selectServerProvidedScene = createSelector(selectParticipantRoom, s
 export const selectAvailableScenes = createSelector(selectScreenSharingParticipants, (participants) => {
    return [
       ...ALWAYS_AVAILABLE_SCENES,
-      ...(participants?.map<Scene>((x) => ({ type: 'screenshare', participantId: x.participantId })) || []),
+      ...(participants?.map<Scene>((x) => ({ type: 'screenshare', participantId: x.id })) || []),
    ];
 });
 
@@ -70,7 +70,7 @@ export const selectSceneOverlayParticipants = createSelector(
    selectParticipants,
    (scene, participants) => {
       if (scene.type === 'screenshare') {
-         return participants?.filter((x) => x.participantId === scene.participantId) ?? [];
+         return participants?.filter((x) => x.id === scene.participantId) ?? [];
       }
 
       return [];

@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { createSynchronizeObjectReducer } from 'src/store/signal/synchronized-object';
-import { SynchronizedRooms } from './types';
+import { ROOMS, SynchronizedRooms } from 'src/store/signal/synchronization/synchronized-object-ids';
+import { synchronizeObjectState } from 'src/store/signal/synchronized-object';
 
 export type RoomsState = {
    synchronized: SynchronizedRooms | null;
@@ -15,7 +15,7 @@ const roomsSlice = createSlice({
    initialState,
    reducers: {},
    extraReducers: {
-      ...createSynchronizeObjectReducer({ name: 'rooms', stateName: 'synchronized' }),
+      ...synchronizeObjectState({ type: 'exactId', syncObjId: ROOMS, propertyName: 'synchronized' }),
    },
 });
 

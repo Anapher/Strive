@@ -1,14 +1,15 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from 'src/store';
-import { ConferenceInfo } from '../types';
+import { SynchronizedConferenceInfo } from 'src/store/signal/synchronization/synchronized-object-ids';
 import ClassConference from './ClassConference';
 import ConferenceNotOpen from './ConferenceNotOpen';
 import RequestUserInteractionView from './RequestUserInteractionView';
 
 type Props = {
-   conference: ConferenceInfo;
+   conference: SynchronizedConferenceInfo;
 };
+
 export default function index({ conference }: Props) {
    const userInteractionMade = useSelector((state: RootState) => state.media.userInteractionMade);
 

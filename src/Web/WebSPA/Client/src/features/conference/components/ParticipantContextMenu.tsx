@@ -21,7 +21,7 @@ import {
 } from 'src/permissions';
 import { RootState } from 'src/store';
 import { showMessage } from 'src/store/notifier/actions';
-import { ParticipantDto } from '../types';
+import { Participant } from '../types';
 import ParticipantContextMenuTempPermissions from './ParticipantContextMenuTempPermissions';
 
 const useStyles = makeStyles((theme) => ({
@@ -34,17 +34,17 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 type Props = {
-   participant: ParticipantDto;
+   participant: Participant;
    onClose: () => void;
 };
 
 const ParticipantContextMenu = React.forwardRef<HTMLElement, Props>(({ participant, onClose }) => {
-   const audioInfo = useSelector((state: RootState) => selectParticipantAudioInfo(state, participant.participantId));
+   const audioInfo = useSelector((state: RootState) => selectParticipantAudioInfo(state, participant.id));
    const dispatch = useDispatch();
    const classes = useStyles();
 
    const handleToggleMuted = () => {
-      dispatch(patchParticipantAudio({ participantId: participant.participantId, data: { muted: !audioInfo?.muted } }));
+      dispatch(patchParticipantAudio({ participantId: participant.id, data: { muted: !audioInfo?.muted } }));
    };
 
    // hold volume as state because we update the global state in throttle mode which
@@ -59,7 +59,7 @@ const ParticipantContextMenu = React.forwardRef<HTMLElement, Props>(({ participa
 
    const handlePatchVolume = useCallback(
       _.throttle((volume: number) => {
-         dispatch(patchParticipantAudio({ participantId: participant.participantId, data: { volume } }));
+         dispatch(patchParticipantAudio({ participantId: participant.id, data: { volume } }));
       }, 500),
       [participant],
    );
@@ -74,7 +74,7 @@ const ParticipantContextMenu = React.forwardRef<HTMLElement, Props>(({ participa
    };
 
    const handleShowPermissions = () => {
-      dispatch(coreHub.fetchPermissions(participant.participantId));
+      dispatch(coreHub.fetchPermissions(participant.id));
       onClose();
    };
 
@@ -82,7 +82,7 @@ const ParticipantContextMenu = React.forwardRef<HTMLElement, Props>(({ participa
       dispatch(
          setSendingMode({
             type: 'privately',
-            to: { participantId: participant.participantId, displayName: participant.displayName },
+            to: { participantId: participant.id, displayName: participant.displayName },
          }),
       );
       onClose();
@@ -99,7 +99,7 @@ const ParticipantContextMenu = React.forwardRef<HTMLElement, Props>(({ participa
             },
          }),
       );
-      dispatch(coreHub.kickParticipant({ participantId: participant.participantId }));
+      dispatch(coreHub.kickParticipant({ participantId: participant.id }));
       onClose();
    };
 
@@ -114,9 +114,7 @@ const ParticipantContextMenu = React.forwardRef<HTMLElement, Props>(({ participa
             },
          }),
       );
-      dispatch(
-         coreHub.changeProducerSource({ participantId: participant.participantId, source: 'mic', action: 'close' }),
-      );
+      dispatch(coreHub.changeProducerSource({ participantId: participant.id, source: 'mic', action: 'close' }));
       onClose();
    };
 
@@ -174,7 +172,7 @@ const ParticipantContextMenu = React.forwardRef<HTMLElement, Props>(({ participa
                Disable microphone for all
             </MenuItem>
          )}
-         {canSetTempPermission && <ParticipantContextMenuTempPermissions participantId={participant.participantId} />}
+         {canSetTempPermission && <ParticipantContextMenuTempPermissions participantId={participant.id} />}
          {canSeePermissions && <MenuItem onClick={handleShowPermissions}>Show Permissions</MenuItem>}
       </>
    );

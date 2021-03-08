@@ -1,4 +1,3 @@
-import { AuthenticationProvider, InMemoryWebStorage, oidcLog } from '@axa-fr/react-oidc-context';
 import 'fontsource-roboto';
 import React from 'react';
 import ReactDOM from 'react-dom';

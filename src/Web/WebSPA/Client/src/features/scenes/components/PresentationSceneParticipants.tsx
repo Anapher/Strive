@@ -41,12 +41,7 @@ export default function PresentationSceneParticipants({ location, tileWidth, til
    return (
       <div className={clsx({ [classes.rootBottom]: location === 'bottom', [classes.rootRight]: location === 'right' })}>
          {participants.map((x) => (
-            <motion.div
-               initial={{ scale: 0 }}
-               animate={{ scale: 1 }}
-               key={x.participantId}
-               style={{ ...tileSize, marginLeft: 0 }}
-            >
+            <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} key={x.id} style={{ ...tileSize, marginLeft: 0 }}>
                <ParticipantTile participant={x} size={tileSize} disableLayoutAnimation />
             </motion.div>
          ))}

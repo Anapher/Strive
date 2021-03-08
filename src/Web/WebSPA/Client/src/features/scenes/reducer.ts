@@ -1,5 +1,4 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { createSynchronizeObjectReducer } from 'src/store/signal/synchronized-object';
 import { ActiveParticipants, Scene, SynchronizedScenes, ViewableScene } from './types';
 
 export type RoomsState = {
@@ -57,7 +56,7 @@ const scenesSlice = createSlice({
       },
    },
    extraReducers: {
-      ...createSynchronizeObjectReducer({ name: 'scenes', stateName: 'synchronized' }),
+      // ...createSynchronizeObjectReducer({ name: 'scenes', stateName: 'synchronized' }),
    },
 });
 

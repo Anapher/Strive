@@ -5,11 +5,10 @@ import React, { useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import AnimatedMicIcon from 'src/assets/animated-icons/AnimatedMicIcon';
 import IconHide from 'src/components/IconHide';
-import { Roles } from 'src/consts';
 import { selectParticipantProducers } from 'src/features/media/selectors';
 import useMyParticipantId from 'src/hooks/useMyParticipantId';
 import { RootState } from 'src/store';
-import { ParticipantDto } from '../types';
+import { Participant } from '../types';
 import ParticipantContextMenuPopper from './ParticipantContextMenuPopper';
 
 const useStyles = makeStyles((theme) => ({
@@ -32,12 +31,12 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 type Props = {
-   participant?: ParticipantDto;
+   participant?: Participant;
 };
 
 export default function ParticipantItem({ participant }: Props) {
    const classes = useStyles();
-   const producers = useSelector((state: RootState) => selectParticipantProducers(state, participant?.participantId));
+   const producers = useSelector((state: RootState) => selectParticipantProducers(state, participant?.id));
    const myParticipantId = useMyParticipantId();
 
    const theme = useTheme();
@@ -56,14 +55,14 @@ export default function ParticipantItem({ participant }: Props) {
    return (
       <div className={classes.root}>
          <ButtonBase onClick={handleToggle} ref={buttonRef} component={motion.button} className={classes.button}>
-            <Typography color={participant?.role === Roles.Moderator ? 'secondary' : undefined} variant="subtitle1">
+            <Typography color={participant?.isModerator ? 'secondary' : undefined} variant="subtitle1">
                {participant ? participant?.displayName : <Skeleton />}
             </Typography>
             <IconHide hidden={!producers?.mic}>
                <AnimatedMicIcon activated={!producers?.mic?.paused} disabledColor={theme.palette.error.main} />
             </IconHide>
          </ButtonBase>
-         {participant && participant.participantId !== myParticipantId && (
+         {participant && participant.id !== myParticipantId && (
             <ParticipantContextMenuPopper
                open={popperOpen}
                onClose={handleClose}

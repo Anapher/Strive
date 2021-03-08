@@ -18,7 +18,7 @@ export default function PermissionDialog() {
    return (
       <Dialog open={open} onClose={handleCloseDialog} fullWidth maxWidth="md">
          <DialogTitle>
-            Permissions of {participants?.find((x) => x.participantId === data?.participantId)?.displayName}
+            Permissions of {participants?.find((x) => x.id === data?.participantId)?.displayName}
          </DialogTitle>
          <DialogContent>{data && <PermissionsView permissions={data} />}</DialogContent>
       </Dialog>

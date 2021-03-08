@@ -12,12 +12,12 @@ import {
    useTheme,
 } from '@material-ui/core';
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
-import { ParticipantDto } from 'src/features/conference/types';
 import React, { useEffect } from 'react';
 import clsx from 'classnames';
 import PersonIcon from '@material-ui/icons/Person';
 import _ from 'lodash';
 import useMyParticipantId from 'src/hooks/useMyParticipantId';
+import { Participant } from 'src/features/conference/types';
 
 const useStyles = makeStyles((theme) => ({
    roomListDragOver: {
@@ -29,7 +29,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 type Props = {
-   participants: ParticipantDto[];
+   participants: Participant[];
    createdRooms: number;
 
    data: string[][];
@@ -66,7 +66,7 @@ const formatDroppableId = (i: number) => `room-${i}`;
 const droppableIdToRoom = (s: string) => (s === 'defaultRoom' ? undefined : Number(s.substr(5)));
 
 export default function BreakoutRoomsAssignments({ data, participants, createdRooms, onChange }: Props) {
-   const unassignedParticipants = participants.filter((x) => !data.find((y) => y.includes(x.participantId)));
+   const unassignedParticipants = participants.filter((x) => !data.find((y) => y.includes(x.id)));
    const myParticipantId = useMyParticipantId();
 
    useEffect(() => {
@@ -116,8 +116,8 @@ export default function BreakoutRoomsAssignments({ data, participants, createdRo
 
    const handleRandomlyAssignParticipants = () => {
       const pool = _(participants)
-         .filter((x) => x.participantId !== myParticipantId)
-         .map((x) => x.participantId)
+         .filter((x) => x.id !== myParticipantId)
+         .map((x) => x.id)
          .shuffle()
          .value();
       const participantsPerRoom = Math.ceil(pool.length / createdRooms);
@@ -129,7 +129,7 @@ export default function BreakoutRoomsAssignments({ data, participants, createdRo
    };
 
    const selectParticipants = (ids: string[]) =>
-      ids?.map((x) => participants.find((y) => y.participantId === x)).filter((x): x is ParticipantDto => !!x) ?? [];
+      ids?.map((x) => participants.find((y) => y.id === x)).filter((x): x is Participant => !!x) ?? [];
 
    return (
       <div>
@@ -200,7 +200,7 @@ export default function BreakoutRoomsAssignments({ data, participants, createdRo
 type RoomListProps = {
    id: string;
    title: string;
-   participants: ParticipantDto[];
+   participants: Participant[];
    fullHeight?: boolean;
 };
 
@@ -220,7 +220,7 @@ function RoomList({ id, participants, title, fullHeight }: RoomListProps) {
                </Typography>
                <List disablePadding>
                   {participants.map((item, index) => (
-                     <Draggable key={item.participantId} draggableId={item.participantId} index={index}>
+                     <Draggable key={item.id} draggableId={item.id} index={index}>
                         {(provided, snapshot) => (
                            <ListItem
                               dense

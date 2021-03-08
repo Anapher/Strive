@@ -2,7 +2,7 @@ import { createSelector } from '@reduxjs/toolkit';
 import { RootState } from 'src/store';
 import { isProducerDevice, ProducerDevice } from 'src/store/webrtc/types';
 import { selectParticipants } from '../conference/selectors';
-import { ParticipantDto } from '../conference/types';
+import { Participant } from '../conference/types';
 import { ProducerInfo } from './types';
 
 const getId = (_: unknown, id: string | undefined) => id;
@@ -45,8 +45,8 @@ export const selectScreenSharingParticipants = createSelector(
             ([, pstreams]) =>
                pstreams && Object.values(pstreams.producers).find((x) => x.kind === 'screen' && !x.paused),
          )
-         .map(([participantId]) => participants?.find((x) => x.participantId === participantId))
-         .filter((x): x is ParticipantDto => !!x);
+         .map(([participantId]) => participants.find((x) => x.id === participantId))
+         .filter((x): x is Participant => !!x);
    },
 );
 

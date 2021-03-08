@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { DateTime } from 'luxon';
 import { cancel, delay, fork, put, select, take, takeEvery } from 'redux-saga/effects';
 import { takeEverySynchronizedObjectChange } from 'src/store/saga-utils';
-import { ParticipantDto } from '../conference/types';
+import { Participant } from '../conference/types';
 import { patchParticipantAudio, removeParticipantAudio, setParticipantAudio } from '../media/reducer';
 import { selectParticipantAudio, selectScreenSharingParticipants } from '../media/selectors';
 import { ParticipantAudioInfo } from '../media/types';
@@ -42,18 +42,18 @@ function* updateAutomaticScene() {
    const appliedScene: Scene = yield select(selectAppliedScene);
 
    if (appliedScene.type === 'automatic') {
-      const participants: ParticipantDto[] = yield select(selectScreenSharingParticipants);
+      const participants: Participant[] = yield select(selectScreenSharingParticipants);
       const currentScene: ViewableScene = yield select(selectCurrentScene);
 
       if (participants.length > 0) {
          // order to make it deterministic
          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
          const displayedScreenshare = _(participants)
-            .orderBy((x) => x.participantId)
+            .orderBy((x) => x.id)
             .first()!;
 
-         if (currentScene.type !== 'screenshare' || currentScene.participantId !== displayedScreenshare.participantId) {
-            yield put(setCurrentScene({ type: 'screenshare', participantId: displayedScreenshare.participantId }));
+         if (currentScene.type !== 'screenshare' || currentScene.participantId !== displayedScreenshare.id) {
+            yield put(setCurrentScene({ type: 'screenshare', participantId: displayedScreenshare.id }));
          }
       } else {
          if (currentScene.type !== 'grid') {
@@ -121,7 +121,7 @@ function getPresentors(scene: ViewableScene): string[] {
    }
 }
 
-function* main() {
+function* main(): any {
    let currentTask: any | undefined;
    while (
       yield take([

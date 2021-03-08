@@ -1,15 +1,6 @@
-export type RoomInfo = {
-   roomId: string;
-   displayName: string;
-};
+import { Room } from 'src/store/signal/synchronization/synchronized-object-ids';
 
-export type SynchronizedRooms = {
-   rooms: RoomInfo[];
-   defaultRoomId: string;
-   participants: { [participanId: string]: string };
-};
-
-export type RoomViewModel = RoomInfo & {
+export type RoomViewModel = Room & {
    participants: string[];
    isDefaultRoom: boolean;
 };

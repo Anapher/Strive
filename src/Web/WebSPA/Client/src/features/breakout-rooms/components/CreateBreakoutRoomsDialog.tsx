@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 import * as coreHub from 'src/core-hub';
 import { OpenBreakoutRoomsDto } from 'src/core-hub.types';
-import { RootState } from 'src/store';
+import { selectParticipants } from 'src/features/conference/selectors';
 import BreakoutRoomsForm from './BreakoutRoomsForm';
 
 type Props = {
@@ -15,7 +15,7 @@ type Props = {
 export default function CreateBreakoutRoomsDialog({ onClose }: Props) {
    const dispatch = useDispatch();
 
-   const participants = useSelector((state: RootState) => state.conference.participants);
+   const participants = useSelector(selectParticipants);
    // participants = [
    //    ...participants,
    //    ...Array.from({ length: 15 }).map((_, i) => ({

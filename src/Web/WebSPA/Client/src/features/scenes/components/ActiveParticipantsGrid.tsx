@@ -2,7 +2,7 @@ import { makeStyles, Typography } from '@material-ui/core';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { selectParticipants } from 'src/features/conference/selectors';
-import { ParticipantDto } from 'src/features/conference/types';
+import { Participant } from 'src/features/conference/types';
 import { Size } from 'src/types';
 import { selectActiveParticipantsWithWebcam } from '../selectors';
 import ParticipantTile from './ParticipantTile';
@@ -50,8 +50,8 @@ export default function ActiveParticipantsGrid({ width }: Props) {
    }
 
    const participantDtos = activeParticipants
-      .map((participantId) => participants.find((x) => x.participantId === participantId))
-      .filter((x): x is ParticipantDto => !!x);
+      .map((participantId) => participants.find((x) => x.id === participantId))
+      .filter((x): x is Participant => !!x);
 
    return (
       <div style={{ padding: ACTIVE_PARTICIPANTS_MARGIN, height: '100%' }}>

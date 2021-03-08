@@ -8,5 +8,5 @@ export default function usePermission<T extends Permission>(
    const permissions = useSelector((state: RootState) => state.conference.myPermissions);
    if (!permissions) return undefined;
 
-   return permissions[perm.key] as any;
+   return permissions.permissions[perm.key] as any;
 }

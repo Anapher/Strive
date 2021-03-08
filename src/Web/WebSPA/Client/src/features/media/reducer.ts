@@ -1,6 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { onEventOccurred } from 'src/store/signal/actions';
-import { createSynchronizeObjectReducer } from 'src/store/signal/synchronized-object';
 import { ConferenceParticipantStreamInfo, ConnectedEquipmentDto, ParticipantAudioInfo } from './types';
 import { events } from 'src/core-hub';
 import { ParticipantPayloadAction } from 'src/types';
@@ -41,7 +40,6 @@ const mediaSlice = createSlice({
       },
    },
    extraReducers: {
-      ...createSynchronizeObjectReducer([{ name: 'mediaStreams', stateName: 'streams' }]),
       [onEventOccurred(events.onEquipmentUpdated).type]: (
          state,
          { payload }: PayloadAction<ConnectedEquipmentDto[]>,

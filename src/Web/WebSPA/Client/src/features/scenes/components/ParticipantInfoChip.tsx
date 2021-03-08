@@ -3,18 +3,18 @@ import Chip from '@material-ui/core/Chip';
 import React from 'react';
 import { useSelector } from 'react-redux';
 import AnimatedMicIcon from 'src/assets/animated-icons/AnimatedMicIcon';
-import { ParticipantDto } from 'src/features/conference/types';
+import { Participant } from 'src/features/conference/types';
 import { selectParticipantProducers } from 'src/features/media/selectors';
 import { ParticipantAudioInfo } from 'src/features/media/types';
 import { RootState } from 'src/store';
 
 type Props = {
    participantId: string;
-   participantDto?: ParticipantDto;
+   participant?: Participant;
    audioInfo?: ParticipantAudioInfo;
 };
 
-export default function ParticipantInfoChip({ participantId, participantDto, audioInfo }: Props) {
+export default function ParticipantInfoChip({ participantId, participant, audioInfo }: Props) {
    const theme = useTheme();
    const producers = useSelector((state: RootState) => selectParticipantProducers(state, participantId));
    const micActivated = producers?.mic?.paused === false;
@@ -32,7 +32,7 @@ export default function ParticipantInfoChip({ participantId, participantDto, aud
                : theme.palette.error.main,
             transition: 'border 200ms ease-out',
          }}
-         label={participantDto?.displayName ?? participantId}
+         label={participant?.displayName ?? participantId}
          variant="outlined"
          icon={<AnimatedMicIcon activated={micActivated} disabledColor={theme.palette.error.main} />}
       />

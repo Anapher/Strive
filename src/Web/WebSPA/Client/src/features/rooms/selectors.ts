@@ -37,8 +37,8 @@ export const selectRoomViewModels = createSelector(selectRooms, (state) => {
          ...room,
          isDefaultRoom: defaultRoomId === room.roomId,
          participants: Object.entries(participants)
-            .filter((x) => x[1] === room.roomId)
-            .map((x) => x[0]),
+            .filter(([, roomId]) => roomId === room.roomId)
+            .map(([participantId]) => participantId),
       })),
       (x) => x.isDefaultRoom,
       (x) => x.displayName,

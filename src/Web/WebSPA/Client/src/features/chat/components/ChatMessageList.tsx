@@ -3,7 +3,7 @@ import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import _ from 'lodash';
 import React, { useEffect, useRef, useState } from 'react';
 import { DomainError } from 'src/communication-types';
-import { ParticipantDto } from 'src/features/conference/types';
+import { Participant } from 'src/features/conference/types';
 import useBottomScrollTrigger from 'src/hooks/useBottomScrollTrigger';
 import { getScrollbarWidth } from 'src/utils/browser-info';
 import { ChatMessageDto } from '../types';
@@ -28,7 +28,7 @@ const useStyles = makeStyles({
 
 type Props = {
    chat: ChatMessageDto[] | null;
-   participants: ParticipantDto[] | null;
+   participants: Participant[] | null;
    participantId?: string;
    participantColors: { [id: string]: string };
    error: DomainError | null;

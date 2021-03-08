@@ -1,19 +1,27 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { DomainError, SuccessOrError } from 'src/communication-types';
-import { events, fetchPermissions } from 'src/core-hub';
-import { ParticipantPermissionInfo, Permissions } from 'src/core-hub.types';
-import { connectSignal, onConnected, onConnectionError, onEventOccurred } from 'src/store/signal/actions';
-import { createSynchronizeObjectReducer } from 'src/store/signal/synchronized-object';
-import { serializeRequestError } from 'src/utils/error-result';
-import { ConferenceInfo, ConferenceLink, ParticipantDto, TemporaryPermissions } from './types';
+import { fetchPermissions } from 'src/core-hub';
+import { ParticipantPermissionInfo } from 'src/core-hub.types';
 import * as conferenceLinks from 'src/services/api/conference-link';
+import { connectSignal, onConnected, onConnectionError } from 'src/store/signal/actions';
+import {
+   CONFERENCE,
+   PARTICIPANTS,
+   PARTICIPANT_PERMISSIONS,
+   SynchronizedConferenceInfo,
+   SynchronizedParticipants,
+   SynchronizedParticipantsPermissions,
+} from 'src/store/signal/synchronization/synchronized-object-ids';
+import { synchronizeObjectState } from 'src/store/signal/synchronized-object';
+import { serializeRequestError } from 'src/utils/error-result';
+import { ConferenceLink, TemporaryPermissions } from './types';
 
 export type ConferenceState = {
    conferenceId: string | null;
    connectionError: DomainError | null;
-   participants: ParticipantDto[] | null;
-   conferenceState: ConferenceInfo | null;
-   myPermissions: Permissions | null;
+   participants: SynchronizedParticipants | null;
+   conferenceState: SynchronizedConferenceInfo | null;
+   myPermissions: SynchronizedParticipantsPermissions | null;
    participantsOpen: boolean;
    tempPermissions: TemporaryPermissions | null;
 
@@ -69,9 +77,6 @@ const conferenceSlice = createSlice({
       [onConnectionError.type]: (state, action) => {
          state.connectionError = action.payload.error;
       },
-      [onEventOccurred(events.onPermissionsUpdated).type]: (state, action: PayloadAction<Permissions>) => {
-         state.myPermissions = action.payload;
-      },
       [fetchPermissions.returnAction]: (
          state,
          { payload }: PayloadAction<SuccessOrError<ParticipantPermissionInfo>>,
@@ -84,7 +89,11 @@ const conferenceSlice = createSlice({
       [fetchConferenceLinks.fulfilled.type]: (state, { payload }: PayloadAction<ConferenceLink[]>) => {
          state.conferenceLinks = payload;
       },
-      ...createSynchronizeObjectReducer(['participants', 'conferenceState', 'tempPermissions']),
+      ...synchronizeObjectState([
+         { type: 'exactId', syncObjId: PARTICIPANTS, propertyName: 'participants' },
+         { type: 'exactId', syncObjId: CONFERENCE, propertyName: 'conferenceState' },
+         { type: 'single', baseId: PARTICIPANT_PERMISSIONS, propertyName: 'myPermissions' },
+      ]),
    },
 });
 

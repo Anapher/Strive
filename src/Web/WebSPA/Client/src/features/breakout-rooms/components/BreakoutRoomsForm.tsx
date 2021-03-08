@@ -2,7 +2,7 @@ import { Box, TextField } from '@material-ui/core';
 import React from 'react';
 import { Controller, UseFormMethods } from 'react-hook-form';
 import { OpenBreakoutRoomsDto } from 'src/core-hub.types';
-import { ParticipantDto } from 'src/features/conference/types';
+import { Participant } from 'src/features/conference/types';
 import OpenBreakoutRoomsAssignments from './BreakoutRoomsAssignments';
 
 const validateNumberInteger = (val: unknown) => {
@@ -14,7 +14,7 @@ const validateNumberInteger = (val: unknown) => {
 
 type Props = {
    form: UseFormMethods<OpenBreakoutRoomsDto>;
-   participants: ParticipantDto[] | null;
+   participants: Participant[] | null;
 };
 
 export default function BreakoutRoomsForm({ form: { register, errors, watch, control }, participants }: Props) {

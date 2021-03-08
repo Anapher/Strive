@@ -2,7 +2,8 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { DomainError, SuccessOrError } from 'src/communication-types';
 import * as coreHub from 'src/core-hub';
 import { SendingMode } from 'src/core-hub.types';
-import { createSynchronizeObjectReducer } from 'src/store/signal/synchronized-object';
+import { CHAT } from 'src/store/signal/synchronization/synchronized-object-ids';
+import { synchronizeObjectState } from 'src/store/signal/synchronized-object';
 import * as actions from './actions';
 import { ChatMessageDto, ChatSynchronizedObject } from './types';
 
@@ -42,7 +43,7 @@ const chatSlice = createSlice({
       [actions.onChatMessage.type]: (state, action: PayloadAction<ChatMessageDto>) => {
          state.messages?.push(action.payload);
       },
-      ...createSynchronizeObjectReducer('chatInfo'),
+      ...synchronizeObjectState({ type: 'multiple', baseId: CHAT, propertyName: 'chatInfo' }),
    },
 });
 

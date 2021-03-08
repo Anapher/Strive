@@ -1,10 +1,10 @@
 import { Operation } from 'fast-json-patch';
 import { DomainError } from './communication-types';
 import {
-   CreateRoomDto,
+   RoomCreationInfo,
    EquipmentCommand,
    EquipmentStatus,
-   KickParticipantRequest,
+   KickParticipantRequestDto,
    OpenBreakoutRoomsDto,
    SendChatMessageDto,
    SetTemporaryPermissionDto,
@@ -22,9 +22,9 @@ export const joinConferenceAsEquipment = (conferenceId: string, defaultEvents: s
 
 export const openConference = createHubFn('OpenConference');
 export const closeConference = createHubFn('CloseConference');
-export const kickParticipant = createHubFn<KickParticipantRequest>('KickParticipant');
+export const kickParticipant = createHubFn<KickParticipantRequestDto>('KickParticipant');
 
-export const createRooms = createHubFn<CreateRoomDto[]>('CreateRooms');
+export const createRooms = createHubFn<RoomCreationInfo[]>('CreateRooms');
 export const removeRooms = createHubFn<string[]>('RemoveRooms');
 export const switchRoom = createHubFn<SwitchRoomDto>('SwitchRoom');
 
@@ -45,6 +45,7 @@ export const equipmentUpdateStatus = createHubFn<EquipmentStatus>('EquipmentUpda
 
 export const changeStream = createHubFn<ChangeStreamDto>('ChangeStream');
 export const changeProducerSource = createHubFn<ChangeProducerSourceDto>('ChangeProducerSource');
+
 export const fetchPermissions = createHubFn<string | null>('FetchPermissions');
 export const setTemporaryPermission = createHubFn<SetTemporaryPermissionDto>('SetTemporaryPermission');
 
@@ -66,9 +67,7 @@ export const events = {
    onSynchronizedObjectUpdated: 'OnSynchronizedObjectUpdated',
 
    chatMessage: 'ChatMessage',
-   chat: 'Chat',
 
-   onPermissionsUpdated: 'OnPermissionsUpdated',
    onEquipmentUpdated: 'OnEquipmentUpdated',
    onEquipmentCommand: 'OnEquipmentCommand',
    onRequestDisconnect: 'OnRequestDisconnect',

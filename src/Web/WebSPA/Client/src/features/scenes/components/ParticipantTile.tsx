@@ -4,7 +4,6 @@ import { motion, MotionValue, useTransform } from 'framer-motion';
 import React, { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import AnimatedMicIcon from 'src/assets/animated-icons/AnimatedMicIcon';
-import { ParticipantDto } from 'src/features/conference/types';
 import { useParticipantAudio } from 'src/features/media/components/ParticipantMicManager';
 import { selectParticipantProducers } from 'src/features/media/selectors';
 import { RootState } from 'src/store';
@@ -13,6 +12,7 @@ import { Size } from 'src/types';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import ParticipantContextMenuPopper from 'src/features/conference/components/ParticipantContextMenuPopper';
 import useMyParticipantId from 'src/hooks/useMyParticipantId';
+import { Participant } from 'src/features/conference/types';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -82,22 +82,22 @@ const useStyles = makeStyles((theme) => ({
 
 type Props = {
    className?: string;
-   participant: ParticipantDto;
+   participant: Participant;
    size: Size;
    disableLayoutAnimation?: boolean;
 };
 
 export default function ParticipantTile({ className, participant, size, disableLayoutAnimation }: Props) {
    const classes = useStyles();
-   const consumer = useConsumer(participant.participantId, 'webcam');
+   const consumer = useConsumer(participant.id, 'webcam');
    const videoRef = useRef<HTMLVideoElement | null>(null);
-   const producers = useSelector((state: RootState) => selectParticipantProducers(state, participant?.participantId));
+   const producers = useSelector((state: RootState) => selectParticipantProducers(state, participant?.id));
    const isWebcamActive = consumer?.paused === false;
    const myParticipantId = useMyParticipantId();
 
-   const isMe = participant.participantId === myParticipantId;
+   const isMe = participant.id === myParticipantId;
 
-   const audioInfo = useParticipantAudio(participant.participantId);
+   const audioInfo = useParticipantAudio(participant.id);
 
    useEffect(() => {
       if (consumer?.track) {
@@ -141,7 +141,7 @@ export default function ParticipantTile({ className, participant, size, disableL
                   />
                   <Typography
                      component={motion.h4}
-                     layoutId={disableLayoutAnimation ? undefined : `name-${participant.participantId}`}
+                     layoutId={disableLayoutAnimation ? undefined : `name-${participant.id}`}
                      variant="h4"
                      style={{ fontSize, marginLeft: 8 }}
                   >
@@ -160,7 +160,7 @@ export default function ParticipantTile({ className, participant, size, disableL
                   <div className={classes.centerText}>
                      <Typography
                         component={motion.span}
-                        layoutId={disableLayoutAnimation ? undefined : `name-${participant.participantId}`}
+                        layoutId={disableLayoutAnimation ? undefined : `name-${participant.id}`}
                         variant="h4"
                         style={{ fontSize }}
                      >

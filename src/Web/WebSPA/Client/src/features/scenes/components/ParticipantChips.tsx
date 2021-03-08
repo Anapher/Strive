@@ -31,7 +31,7 @@ export default function ParticipantChips({ participantIds, className }: Props) {
                participantId={participantId}
                key={participantId}
                audioInfo={audioInfo[participantId]}
-               participantDto={participants?.find((x) => x.participantId === participantId)}
+               participant={participants.find((x) => x.id === participantId)}
             />
          ))}
       </div>

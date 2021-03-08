@@ -1,5 +1,4 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { createSynchronizeObjectReducer } from 'src/store/signal/synchronized-object';
 import { BreakoutRoomsInfo } from './types';
 
 export type BreakoutRoomsState = {
@@ -20,9 +19,7 @@ const breakoutRoomsSlice = createSlice({
          state.creationDialogOpen = payload;
       },
    },
-   extraReducers: {
-      ...createSynchronizeObjectReducer({ name: 'breakoutRooms', stateName: 'synchronized' }),
-   },
+   extraReducers: {},
 });
 
 export const { setCreationDialogOpen } = breakoutRoomsSlice.actions;
