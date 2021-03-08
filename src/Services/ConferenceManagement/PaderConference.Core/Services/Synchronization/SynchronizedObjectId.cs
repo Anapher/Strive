@@ -35,7 +35,7 @@ namespace PaderConference.Core.Services.Synchronization
 
         public override string ToString()
         {
-            var text = $"{Id}";
+            var text = Id;
             if (Parameters.Any()) text += "?" + BuildQueryString(Parameters);
 
             return text;
