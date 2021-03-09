@@ -8,7 +8,6 @@ import { AccountRemove } from 'mdi-material-ui';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import * as coreHub from 'src/core-hub';
-import { setSendingMode } from 'src/features/chat/reducer';
 import { patchParticipantAudio } from 'src/features/media/reducer';
 import { selectParticipantAudioInfo } from 'src/features/media/selectors';
 import usePermission from 'src/hooks/usePermission';
@@ -79,12 +78,7 @@ const ParticipantContextMenu = React.forwardRef<HTMLElement, Props>(({ participa
    };
 
    const handleSendPrivateMessage = () => {
-      dispatch(
-         setSendingMode({
-            type: 'privately',
-            to: { participantId: participant.id, displayName: participant.displayName },
-         }),
-      );
+      // TODO
       onClose();
    };
 

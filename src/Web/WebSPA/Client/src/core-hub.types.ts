@@ -3,25 +3,35 @@ import { ProducerSource } from './store/webrtc/types';
 
 export type SyncStatePayload = { id: string; value: any };
 
+export type FetchChatMessagesDto = { channel: string; start: number; end: number };
+
 export type SendChatMessageDto = {
    message: string;
-   mode: SendingMode | null;
+   channel: string;
+   options: ChatMessageOptions;
 };
 
-export type SendingMode = SendAnonymously | SendPrivately;
-
-export type SendAnonymously = {
-   type: 'anonymously';
+export type ChatMessageOptions = {
+   isHighlighted: boolean;
+   isAnonymous: boolean;
 };
 
-export type SendPrivately = {
-   type: 'privately';
-   to: ParticipantRef;
+export type ChatMessageDto = {
+   id: string;
+   channel: string;
+   sender?: ChatMessageSender;
+   message: string;
+   timestamp: string;
+   options: ChatMessageOptions;
 };
 
-export type ParticipantRef = {
+export type ChatMessageSender = {
    participantId: string;
-   displayName?: string;
+   meta: ParticipantMetadata;
+};
+
+export type ParticipantMetadata = {
+   displayName: string;
 };
 
 export type RoomCreationInfo = {

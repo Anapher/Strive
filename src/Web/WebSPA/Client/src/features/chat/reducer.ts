@@ -1,52 +1,67 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { DomainError, SuccessOrError } from 'src/communication-types';
+import _ from 'lodash';
+import { SuccessOrError } from 'src/communication-types';
 import * as coreHub from 'src/core-hub';
-import { SendingMode } from 'src/core-hub.types';
-import { CHAT } from 'src/store/signal/synchronization/synchronized-object-ids';
+import { ChatMessageDto, FetchChatMessagesDto } from 'src/core-hub.types';
+import { CHAT, ChatSynchronizedObject } from 'src/store/signal/synchronization/synchronized-object-ids';
 import { synchronizeObjectState } from 'src/store/signal/synchronized-object';
+import { InvokeMethodMeta } from 'src/store/signal/types';
 import * as actions from './actions';
-import { ChatMessageDto, ChatSynchronizedObject } from './types';
+import { ChatSynchronizedObjectViewModel } from './types';
+import { mergeChatMessages } from './utils';
 
 export type ChatState = Readonly<{
-   messages: ChatMessageDto[] | null;
-   chatInfo: ChatSynchronizedObject | null;
-   fetchChatError: DomainError | null;
-   sendingMode: SendingMode | null;
+   channels: { [channel: string]: ChatSynchronizedObject & ChatSynchronizedObjectViewModel } | null;
+   selectedChannel: string | null;
 }>;
 
 const initialState: ChatState = {
-   messages: null,
-   chatInfo: null,
-   fetchChatError: null,
-   sendingMode: null,
+   channels: null,
+   selectedChannel: null,
 };
 
 const chatSlice = createSlice({
    name: 'chat',
    initialState,
    reducers: {
-      setSendingMode(state, { payload }: PayloadAction<SendingMode | null>) {
-         state.sendingMode = payload;
+      setSelectedChannel(state, { payload }: PayloadAction<string | null>) {
+         state.selectedChannel = payload;
       },
    },
    extraReducers: {
-      [coreHub.requestChat.returnAction]: (state, { payload }: PayloadAction<SuccessOrError<ChatMessageDto[]>>) => {
+      [coreHub.fetchChatMessages.returnAction]: (
+         state,
+         {
+            payload,
+            meta,
+         }: PayloadAction<SuccessOrError<ChatMessageDto[]>, string, InvokeMethodMeta<FetchChatMessagesDto>>,
+      ) => {
          if (payload.success) {
-            state.messages = payload.response;
-         } else {
-            state.fetchChatError = payload.error;
+            if (!state.channels) return;
+
+            const channelId = meta.request.channel;
+            const channel = state.channels[channelId];
+
+            if (!channel) return;
+
+            if (!channel.viewModel) {
+               channel.viewModel = { messages: payload.response };
+            } else {
+               channel.viewModel.messages = mergeChatMessages(channel.viewModel.messages, payload.response);
+            }
          }
       },
-      [coreHub.requestChat.action]: (state) => {
-         state.fetchChatError = null;
+      [actions.onChatMessage.type]: (state, { payload }: PayloadAction<ChatMessageDto>) => {
+         const channel = state.channels?.[payload.channel];
+         if (!channel) return;
+
+         if (!channel.viewModel) channel.viewModel = { messages: [] };
+         channel.viewModel.messages.push(payload);
       },
-      [actions.onChatMessage.type]: (state, action: PayloadAction<ChatMessageDto>) => {
-         state.messages?.push(action.payload);
-      },
-      ...synchronizeObjectState({ type: 'multiple', baseId: CHAT, propertyName: 'chatInfo' }),
+      ...synchronizeObjectState({ type: 'multiple', baseId: CHAT, propertyName: 'channels' }),
    },
 });
 
-export const { setSendingMode } = chatSlice.actions;
+export const { setSelectedChannel } = chatSlice.actions;
 
 export default chatSlice.reducer;

@@ -1,13 +1,9 @@
-import { ParticipantRef, SendingMode } from 'src/core-hub.types';
+import { ChatMessageDto } from 'src/core-hub.types';
 
-export type ChatSynchronizedObject = {
-   participantsTyping: string[];
+export type ChatSynchronizedObjectViewModel = {
+   viewModel?: ChannelViewModel;
 };
 
-export type ChatMessageDto = {
-   messageId: number;
-   from?: ParticipantRef;
-   message: string;
-   mode?: SendingMode;
-   timestamp: string;
+export type ChannelViewModel = {
+   messages: ChatMessageDto[];
 };

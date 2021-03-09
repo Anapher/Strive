@@ -1,4 +1,4 @@
-import { AuthenticationProvider, InMemoryWebStorage, oidcLog, OidcSecure } from '@axa-fr/react-oidc-context';
+import { AuthenticationProvider, oidcLog, OidcSecure } from '@axa-fr/react-oidc-context';
 import LuxonUtils from '@date-io/luxon';
 import { createMuiTheme, CssBaseline, makeStyles } from '@material-ui/core';
 import { blue, pink } from '@material-ui/core/colors';
@@ -6,7 +6,6 @@ import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import { ThemeProvider } from '@material-ui/styles';
 import Axios from 'axios';
 import { User } from 'oidc-client';
-import React from 'react';
 import { Toaster } from 'react-hot-toast';
 import { BrowserRouter } from 'react-router-dom';
 import { ocidConfig } from './config';

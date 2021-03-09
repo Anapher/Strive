@@ -23,5 +23,6 @@ module.exports = {
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       'react/prop-types': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
+      'react/react-in-jsx-scope': 'off',
    },
 };

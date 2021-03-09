@@ -38,7 +38,7 @@ export const selectScreenSharingParticipants = createSelector(
    selectStreams,
    selectParticipants,
    (streams, participants) => {
-      if (!streams) return undefined;
+      if (!streams) return [];
 
       return Object.entries(streams)
          .filter(

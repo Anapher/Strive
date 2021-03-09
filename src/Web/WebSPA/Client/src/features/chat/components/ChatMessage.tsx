@@ -1,12 +1,12 @@
 import { makeStyles, Typography } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { DateTime } from 'luxon';
 import emojiRegex from 'emoji-regex/RGI_Emoji';
 import clsx from 'classnames';
-import { ChatMessageDto } from '../types';
 import { hashCode, numberToColor } from '../color-utils';
 import { Participant } from 'src/features/conference/types';
+import { ChatMessageDto } from 'src/core-hub.types';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -43,13 +43,6 @@ const useStyles = makeStyles((theme) => ({
    senderTextPrivate: {
       color: theme.palette.primary.main,
    },
-   privateBadge: {
-      backgroundColor: theme.palette.primary.main,
-      color: theme.palette.primary.contrastText,
-      padding: '2px 4px',
-      borderRadius: theme.shape.borderRadius,
-      marginRight: 8,
-   },
    disconnectedText: {
       color: theme.palette.text.secondary,
       marginLeft: theme.spacing(1),
@@ -61,24 +54,24 @@ const onlyEmojisRegex = new RegExp('^(' + emojiRegex().toString().replace(/\/g$/
 type Props = {
    message?: ChatMessageDto;
    participants?: Participant[] | null;
-   participantId?: string;
+   participantId?: string | null;
    participantColors: { [id: string]: string };
 };
 
 export default function ChatMessage({ message, participants, participantId, participantColors }: Props) {
    const classes = useStyles();
    const isEmoji = message && message.message.length <= 8 && onlyEmojisRegex.test(message.message);
-   const sender = message?.from && participants?.find((x) => x.id === message.from?.participantId);
+   const sender = message?.sender && participants?.find((x) => x.id === message.sender?.participantId);
 
-   const isAnonymous = message && !message.from;
-   const isDisconnected = message?.from && !sender;
-   const isFromMe = message?.from?.participantId === participantId;
+   const isAnonymous = message && !message.sender;
+   const isDisconnected = message?.sender && !sender;
+   const isFromMe = message?.sender?.participantId === participantId;
 
    const participantColor = useMemo(
       () =>
-         message?.from &&
-         (participantColors[message.from.participantId] ?? numberToColor(hashCode(message.from.participantId))), // numberToColor for participants that just disconnected
-      [message?.from?.participantId],
+         message?.sender &&
+         (participantColors[message.sender.participantId] ?? numberToColor(hashCode(message.sender.participantId))), // numberToColor for participants that just disconnected
+      [message?.sender?.participantId],
    );
 
    return (
@@ -89,12 +82,8 @@ export default function ChatMessage({ message, participants, participantId, part
                style={{ color: participantColor }}
                className={clsx(classes.senderText, {
                   [classes.senderTextAnonymous]: isAnonymous,
-                  [classes.senderTextPrivate]: message?.mode?.type === 'privately',
                })}
             >
-               {message?.mode?.type === 'privately' && (
-                  <span className={classes.privateBadge}>Private{isFromMe && ` ➔ ${message.mode.to.displayName}`}</span>
-               )}
                {renderSender(message, sender, isAnonymous)}
                {isDisconnected && <span className={classes.disconnectedText}>(Disconnected)</span>}
             </Typography>
@@ -114,8 +103,8 @@ export default function ChatMessage({ message, participants, participantId, part
 }
 
 function renderSender(message?: ChatMessageDto, sender?: Participant, isAnonymous?: boolean) {
-   if (message?.from) {
-      return sender?.displayName ?? message.from.displayName ?? message.from.participantId;
+   if (message?.sender) {
+      return sender?.displayName ?? message.sender.meta.displayName;
    }
 
    if (isAnonymous) {

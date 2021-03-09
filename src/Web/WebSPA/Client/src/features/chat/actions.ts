@@ -1,6 +1,6 @@
 import { events } from 'src/core-hub';
+import { ChatMessageDto } from 'src/core-hub.types';
 import { onEventOccurred, subscribeEvent } from 'src/store/signal/actions';
-import { ChatMessageDto } from './types';
 
 export const subscribeChatMessages = () => subscribeEvent(events.chatMessage);
 

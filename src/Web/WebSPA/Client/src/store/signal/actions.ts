@@ -1,4 +1,4 @@
-import { ActionCreatorWithPayload, createAction } from '@reduxjs/toolkit';
+import { ActionCreatorWithPayload, createAction, PayloadAction } from '@reduxjs/toolkit';
 import { DomainError, SuccessOrError } from 'src/communication-types';
 
 export const DEFAULT_PREFIX = 'SIGNALR';
@@ -60,8 +60,14 @@ export function onEventOccurred<T>(eventName: string): ActionCreatorWithPayload<
    }));
 }
 
-export function onInvokeReturn<T>(methodName: string): ActionCreatorWithPayload<SuccessOrError<T>, string> {
-   return createAction(`${DEFAULT_PREFIX}::RETURN_${methodName}`, (payload: SuccessOrError<T>) => ({
+export function onInvokeReturn<T>(methodName: string): InvokeReturnCreator<SuccessOrError<T>> {
+   return createAction(`${DEFAULT_PREFIX}::RETURN_${methodName}`, (payload: SuccessOrError<T>, request: any) => ({
       payload,
+      meta: { request },
    }));
+}
+
+interface InvokeReturnCreator<P> {
+   (payload: P, request: any): PayloadAction<P>;
+   type: string;
 }

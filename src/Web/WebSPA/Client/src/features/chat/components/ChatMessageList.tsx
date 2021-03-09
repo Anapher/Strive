@@ -1,12 +1,12 @@
 import { Badge, Box, Button, Fab, List, makeStyles, Typography, Zoom } from '@material-ui/core';
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import _ from 'lodash';
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { DomainError } from 'src/communication-types';
+import { ChatMessageDto } from 'src/core-hub.types';
 import { Participant } from 'src/features/conference/types';
 import useBottomScrollTrigger from 'src/hooks/useBottomScrollTrigger';
 import { getScrollbarWidth } from 'src/utils/browser-info';
-import { ChatMessageDto } from '../types';
 import ChatMessage from './ChatMessage';
 
 const useStyles = makeStyles({
@@ -27,16 +27,16 @@ const useStyles = makeStyles({
 });
 
 type Props = {
-   chat: ChatMessageDto[] | null;
+   messages: ChatMessageDto[] | undefined;
    participants: Participant[] | null;
-   participantId?: string;
+   participantId?: string | null;
    participantColors: { [id: string]: string };
    error: DomainError | null;
    onRetry: () => void;
 };
 
 export default function ChatMessageList({
-   chat,
+   messages,
    participants,
    participantId,
    participantColors,
@@ -64,7 +64,7 @@ export default function ChatMessageList({
       if (!atBottom) {
          setMissedMessages((x) => x + 1);
       }
-   }, [chat]);
+   }, [messages]);
 
    const handleScrollToBottom = (behavior: 'auto' | 'smooth' = 'smooth') => {
       if (bottomAnchor.current) {
@@ -76,7 +76,7 @@ export default function ChatMessageList({
       <div className={classes.root}>
          <List className={classes.list} ref={listRef}>
             <div ref={bottomAnchor} />
-            {chat == null ? (
+            {messages == null || messages == undefined ? (
                error ? (
                   <Box m={2} display="flex" flexDirection="column" alignItems="center">
                      <Typography
@@ -91,14 +91,14 @@ export default function ChatMessageList({
                   Array.from({ length: 8 }).map((_, i) => <ChatMessage key={i} participantColors={participantColors} />)
                )
             ) : (
-               _([...chat])
+               _([...messages])
                   .reverse()
-                  .map((x) => (
+                  .map((message) => (
                      <ChatMessage
-                        key={x.messageId}
+                        key={message.id}
                         participantColors={participantColors}
                         participants={participants}
-                        message={x}
+                        message={message}
                         participantId={participantId}
                      />
                   ))

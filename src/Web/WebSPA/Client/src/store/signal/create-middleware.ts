@@ -86,9 +86,9 @@ export default (options: Options): SignalRResult => {
       if (connection) {
          connection.invoke(name, ...(payload !== undefined ? [payload] : [])).then(
             (returnVal) => {
-               dispatch(actions.onInvokeReturn(name)(returnVal));
+               dispatch(actions.onInvokeReturn(name)(returnVal, payload));
             },
-            (error) => dispatch(actions.onInvokeReturn(name)({ success: false, error: signalrError(error) })),
+            (error) => dispatch(actions.onInvokeReturn(name)({ success: false, error: signalrError(error) }, payload)),
          );
       }
    };

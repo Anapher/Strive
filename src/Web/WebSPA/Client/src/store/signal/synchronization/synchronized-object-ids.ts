@@ -32,3 +32,7 @@ export type Room = {
    roomId: string;
    displayName: string;
 };
+
+export type ChatSynchronizedObject = {
+   participantsTyping: string[];
+};
