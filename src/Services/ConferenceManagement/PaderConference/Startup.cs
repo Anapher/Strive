@@ -174,10 +174,14 @@ namespace PaderConference
             services.AddMediatR(typeof(Startup), typeof(CoreModule));
 
             services.AddCors(options =>
-            {
-                options.AddPolicy("AllowAll",
-                    builder => { builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader(); });
-            });
+                {
+                    options.AddPolicy("AllowAll",
+                        builder =>
+                        {
+                            builder.WithOrigins("http://localhost:55103").AllowAnyMethod().AllowAnyHeader()
+                                .AllowCredentials();
+                        });
+                });
 
             // Now register our services with Autofac container.
             var builder = new ContainerBuilder();
