@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using Autofac;
 using MediatR;
@@ -103,7 +102,7 @@ namespace PaderConference.Hubs
         private ParticipantMetadata GetMetadata()
         {
             var httpContext = GetHttpContext();
-            var name = httpContext.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Name)?.Value ?? string.Empty;
+            var name = httpContext.User.Claims.FirstOrDefault(x => x.Type == "name")?.Value ?? string.Empty;
 
             return new ParticipantMetadata(name);
         }
@@ -241,7 +240,7 @@ namespace PaderConference.Hubs
             return await builder.Send();
         }
 
-        public async Task<SuccessOrError<IReadOnlyList<ChatMessageDto>>> RequestChat(FetchChatMessagesDto dto)
+        public async Task<SuccessOrError<IReadOnlyList<ChatMessageDto>>> FetchChatMessages(FetchChatMessagesDto dto)
         {
             if (!ChatValidationExtensions.TryParseChatChannel(dto.Channel, out var channel))
                 return new FieldValidationError(nameof(FetchChatMessagesDto.Channel), "Could not parse chat channel");

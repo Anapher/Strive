@@ -241,7 +241,7 @@ namespace PaderConference.IntegrationTests.Services
             // act
             var result =
                 await olafConnection.Hub.InvokeAsync<SuccessOrError<IReadOnlyList<ChatMessageDto>>>(
-                    nameof(CoreHub.RequestChat), new FetchChatMessagesDto(roomChannel, 0, -1));
+                    nameof(CoreHub.FetchChatMessages), new FetchChatMessagesDto(roomChannel, 0, -1));
 
             // assert
             Assert.False(result.Success);
@@ -258,7 +258,7 @@ namespace PaderConference.IntegrationTests.Services
             // act
             var result =
                 await connection.Hub.InvokeAsync<SuccessOrError<IReadOnlyList<ChatMessageDto>>>(
-                    nameof(CoreHub.RequestChat), new FetchChatMessagesDto(channel, 0, -1));
+                    nameof(CoreHub.FetchChatMessages), new FetchChatMessagesDto(channel, 0, -1));
 
             // assert
             Assert.True(result.Success);
@@ -286,7 +286,7 @@ namespace PaderConference.IntegrationTests.Services
             // act
             var result =
                 await connection.Hub.InvokeAsync<SuccessOrError<IReadOnlyList<ChatMessageDto>>>(
-                    nameof(CoreHub.RequestChat), new FetchChatMessagesDto(channel, 0, -1));
+                    nameof(CoreHub.FetchChatMessages), new FetchChatMessagesDto(channel, 0, -1));
 
             // assert
             Assert.True(result.Success);
