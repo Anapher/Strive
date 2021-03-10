@@ -12,10 +12,11 @@ using PaderConference.Core.Services.Chat;
 using PaderConference.Core.Services.Chat.Channels;
 using PaderConference.Core.Services.Chat.Gateways;
 using PaderConference.Core.Services.ConferenceManagement.Requests;
+using PaderConference.Core.Services.Rooms;
 using PaderConference.Core.Services.Rooms.Gateways;
 using Xunit;
 
-namespace PaderConference.Core.Tests.Services.Chat.Channels
+namespace PaderConference.Core.Tests.Services.Chat
 {
     public class ChatChannelSelectorTests
     {
@@ -38,10 +39,11 @@ namespace PaderConference.Core.Tests.Services.Chat.Channels
             var mediatorMock = new Mock<IMediator>();
             mediatorMock
                 .Setup(x => x.Send(
-                    It.Is<FindConferenceByIdRequest>(x => x.ConferenceId == TestParticipant.ConferenceId),
-                    It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new Conference(TestParticipant.ConferenceId)
-                    {Configuration = new ConferenceConfiguration() {Chat = _chatOptions}});
+                    It.Is<FindConferenceByIdRequest>(request => request.ConferenceId == TestParticipant.ConferenceId),
+                    It.IsAny<CancellationToken>())).ReturnsAsync(new Conference(TestParticipant.ConferenceId)
+                {
+                    Configuration = new ConferenceConfiguration {Chat = _chatOptions},
+                });
 
             return new ChatChannelSelector(mediatorMock.Object, _roomRepository.Object, _chatRepository.Object);
         }
@@ -116,7 +118,7 @@ namespace PaderConference.Core.Tests.Services.Chat.Channels
             // arrange
             _chatOptions = new ChatOptions
             {
-                IsPrivateChatEnabled = false, IsGlobalChatEnabled = false, IsRoomChatEnabled = true
+                IsPrivateChatEnabled = false, IsGlobalChatEnabled = false, IsRoomChatEnabled = true,
             };
 
             _roomRepository.Setup(x => x.GetRoomOfParticipant(TestParticipant)).ReturnsAsync(RoomId);
@@ -125,6 +127,24 @@ namespace PaderConference.Core.Tests.Services.Chat.Channels
 
             // assert
             await AssertChannels(selector, new[] {_roomChat});
+        }
+
+        [Fact]
+        public async Task ParticipantInDefaultRoomAndRoomChatEnabled_CannotSendToDefaultRoom()
+        {
+            // arrange
+            _chatOptions = new ChatOptions
+            {
+                IsPrivateChatEnabled = false, IsGlobalChatEnabled = false, IsRoomChatEnabled = true,
+            };
+
+            _roomRepository.Setup(x => x.GetRoomOfParticipant(TestParticipant))
+                .ReturnsAsync(RoomOptions.DEFAULT_ROOM_ID);
+
+            var selector = Create();
+
+            // assert
+            await AssertChannels(selector, Array.Empty<ChatChannel>());
         }
 
         [Fact]

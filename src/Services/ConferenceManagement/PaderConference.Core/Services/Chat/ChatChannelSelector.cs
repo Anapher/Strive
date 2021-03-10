@@ -6,6 +6,7 @@ using MediatR;
 using PaderConference.Core.Services.Chat.Channels;
 using PaderConference.Core.Services.Chat.Gateways;
 using PaderConference.Core.Services.ConferenceManagement.Requests;
+using PaderConference.Core.Services.Rooms;
 using PaderConference.Core.Services.Rooms.Gateways;
 using PaderConference.Core.Services.Synchronization;
 
@@ -73,10 +74,13 @@ namespace PaderConference.Core.Services.Chat
             if (!options.IsRoomChatEnabled) return null;
 
             var roomId = await _roomRepository.GetRoomOfParticipant(participant);
-            if (roomId != null)
-                return new RoomChatChannel(roomId);
+            if (roomId == null) return null;
 
-            return null;
+            // disable room chat for default room
+            if (roomId == RoomOptions.DEFAULT_ROOM_ID)
+                return null;
+
+            return new RoomChatChannel(roomId);
         }
 
         private bool CanParticipantSendPrivateChatInChannel(ChatOptions options, Participant participant,
