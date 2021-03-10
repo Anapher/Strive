@@ -34,7 +34,7 @@ namespace PaderConference.IntegrationTests
         {
             var sub = Guid.NewGuid().ToString("N");
 
-            var claims = new List<Claim> {new(ClaimTypes.NameIdentifier, sub), new(ClaimTypes.Name, name)};
+            var claims = new List<Claim> {new(ClaimTypes.NameIdentifier, sub), new("name", name)};
             if (isModerator)
                 claims.Add(new Claim(ClaimTypes.Role, AppRoles.Moderator));
 
