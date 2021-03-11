@@ -1,4 +1,4 @@
-import { Box, makeStyles } from '@material-ui/core';
+import { makeStyles, Paper } from '@material-ui/core';
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import * as coreHub from 'src/core-hub';
@@ -7,6 +7,7 @@ import { Participant } from 'src/features/conference/types';
 import { RootState } from 'src/store';
 import { selectMessages, selectParticipantsTyping } from '../selectors';
 import ChatMessageList from './ChatMessageList';
+import ParticipantsTyping from './ParticipantsTyping';
 import SendMessageForm from './SendMessageForm';
 
 const useStyles = makeStyles((theme) => ({
@@ -61,9 +62,13 @@ export default function Chat({ channel, participants, participantId, participant
                console.log('test');
             }}
          />
-         <Box>
+         <Paper>
+            <ParticipantsTyping
+               participantsTyping={participantsTyping.filter((x) => x !== participantId)}
+               participantColors={participantColors}
+            />
             <SendMessageForm channel={channel} isTyping={isMeTyping} onSendMessage={handleSendMessage} />
-         </Box>
+         </Paper>
       </div>
    );
 }

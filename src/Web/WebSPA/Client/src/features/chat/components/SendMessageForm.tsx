@@ -5,6 +5,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { setUserTyping } from 'src/core-hub';
 import { ChatMessageOptions, SendChatMessageDto } from 'src/core-hub.types';
+import useBooleanThrottle from '../useBooleanThrottle';
 import ChatMessageInput from './ChatMessageInput';
 import EmojisPopper from './EmojisPopper';
 import SendMessageOptions from './SendMessageOptions';
@@ -51,7 +52,7 @@ export default function SendMessageForm({ onSendMessage, isTyping, channel }: Pr
       }
    }, [watchUserTyping]);
 
-   const handleOnChangeIsTyping = useCallback(
+   const applyParticipantIsTyping = useCallback(
       (newValue: boolean) => {
          if (newValue) {
             if (!inputRef.current?.value) return;
@@ -61,6 +62,8 @@ export default function SendMessageForm({ onSendMessage, isTyping, channel }: Pr
       },
       [dispatch, inputRef.current],
    );
+
+   const handleSetIsTyping = useBooleanThrottle(isTyping, applyParticipantIsTyping);
 
    const handleChangeMessage = (s: string) => setMessage(s);
 
@@ -77,8 +80,7 @@ export default function SendMessageForm({ onSendMessage, isTyping, channel }: Pr
             <ChatMessageInput
                onSubmit={handleSubmit}
                ref={inputRef}
-               onChangeIsTyping={handleOnChangeIsTyping}
-               isTyping={isTyping}
+               onChangeIsTyping={handleSetIsTyping}
                value={message}
                onChange={handleChangeMessage}
                watchUserTyping={watchUserTyping}

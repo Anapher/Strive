@@ -7,6 +7,7 @@ import clsx from 'classnames';
 import { hashCode, numberToColor } from '../color-utils';
 import { Participant } from 'src/features/conference/types';
 import { ChatMessageDto } from 'src/core-hub.types';
+import { Bullhorn } from 'mdi-material-ui';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -22,6 +23,10 @@ const useStyles = makeStyles((theme) => ({
       display: 'flex',
       flexDirection: 'row',
       justifyContent: 'space-between',
+   },
+   nameWithIcons: {
+      display: 'flex',
+      alignItems: 'flex-end',
    },
    messageText: {
       whiteSpace: 'pre-wrap',
@@ -58,14 +63,13 @@ type Props = {
    participantColors: { [id: string]: string };
 };
 
-export default function ChatMessage({ message, participants, participantId, participantColors }: Props) {
+export default function ChatMessage({ message, participants, participantColors }: Props) {
    const classes = useStyles();
    const isEmoji = message && message.message.length <= 8 && onlyEmojisRegex.test(message.message);
    const sender = message?.sender && participants?.find((x) => x.id === message.sender?.participantId);
 
    const isAnonymous = message && !message.sender;
    const isDisconnected = message?.sender && !sender;
-   const isFromMe = message?.sender?.participantId === participantId;
 
    const participantColor = useMemo(
       () =>
@@ -77,16 +81,19 @@ export default function ChatMessage({ message, participants, participantId, part
    return (
       <li className={classes.root} style={{ opacity: isDisconnected ? 0.8 : undefined }}>
          <div className={classes.metaData}>
-            <Typography
-               variant="caption"
-               style={{ color: participantColor }}
-               className={clsx(classes.senderText, {
-                  [classes.senderTextAnonymous]: isAnonymous,
-               })}
-            >
-               {renderSender(message, sender, isAnonymous)}
-               {isDisconnected && <span className={classes.disconnectedText}>(Disconnected)</span>}
-            </Typography>
+            <div className={classes.nameWithIcons}>
+               <Typography
+                  variant="caption"
+                  style={{ color: participantColor }}
+                  className={clsx(classes.senderText, {
+                     [classes.senderTextAnonymous]: isAnonymous,
+                  })}
+               >
+                  {renderSender(message, sender, isAnonymous)}
+                  {isDisconnected && <span className={classes.disconnectedText}>(Disconnected)</span>}
+               </Typography>
+               {message?.options.isAnnouncement && <Bullhorn style={{ width: 16 }} />}
+            </div>
             <Typography variant="caption" color="textSecondary">
                {message ? (
                   DateTime.fromISO(message.timestamp).toLocaleString(DateTime.TIME_24_SIMPLE)

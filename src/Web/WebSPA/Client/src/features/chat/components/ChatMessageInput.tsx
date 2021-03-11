@@ -1,20 +1,17 @@
 import { TextField } from '@material-ui/core';
-import _ from 'lodash';
-import React, { useCallback } from 'react';
+import React from 'react';
 
 type Props = {
    value: string;
-   onChange: (s: string) => void;
-
    watchUserTyping: boolean;
-   isTyping: boolean;
-   onChangeIsTyping: (isTyping: boolean) => void;
 
+   onChange: (s: string) => void;
+   onChangeIsTyping: (isTyping: boolean) => void;
    onSubmit: () => void;
 };
 
 export default React.forwardRef<HTMLInputElement, Props>(function ChatMessageInput(
-   { value, onChange, watchUserTyping, isTyping, onChangeIsTyping, onSubmit },
+   { value, onChange, watchUserTyping, onChangeIsTyping, onSubmit },
    ref,
 ) {
    const handleTextFieldKeyPress = (event: React.KeyboardEvent<HTMLDivElement>) => {
@@ -28,21 +25,8 @@ export default React.forwardRef<HTMLInputElement, Props>(function ChatMessageInp
       if (!watchUserTyping) return; // only show if the participant is typing if sent to all
 
       const newValue = (event.target as any).value;
-      if (newValue) {
-         handleKeyPressNotEmpty();
-      } else {
-         if (isTyping) {
-            onChangeIsTyping(false);
-         }
-      }
+      onChangeIsTyping(!!newValue);
    };
-
-   const handleKeyPressNotEmpty = useCallback(
-      _.throttle(() => {
-         onChangeIsTyping(true);
-      }, 10000),
-      [onChangeIsTyping],
-   );
 
    return (
       <TextField

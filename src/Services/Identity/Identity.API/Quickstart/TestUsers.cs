@@ -42,6 +42,7 @@ namespace IdentityServerHost.Quickstart.UI
                             new Claim(JwtClaimTypes.WebSite, "http://alice.com"),
                             new Claim(JwtClaimTypes.Address, JsonSerializer.Serialize(address),
                                 IdentityServerConstants.ClaimValueTypes.Json),
+                            new Claim(JwtClaimTypes.Role, "pleb"),
                         },
                     },
                     new TestUser
