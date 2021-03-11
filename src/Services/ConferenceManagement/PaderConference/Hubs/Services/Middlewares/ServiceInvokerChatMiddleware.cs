@@ -27,12 +27,15 @@ namespace PaderConference.Hubs.Services.Middlewares
 
             if (!canSend) return ChatError.InvalidChannel;
 
-            var mediator = context.Context.Resolve<IMediator>();
-            var conference = await mediator.Send(new FindConferenceByIdRequest(context.Participant.ConferenceId));
-            var options = conference.Configuration.Chat;
+            if (channel is PrivateChatChannel)
+            {
+                var mediator = context.Context.Resolve<IMediator>();
+                var conference = await mediator.Send(new FindConferenceByIdRequest(context.Participant.ConferenceId));
+                var options = conference.Configuration.Chat;
 
-            if (!options.IsPrivateChatEnabled && channel is PrivateChatChannel)
-                return ChatError.PrivateMessagesDisabled;
+                if (!options.IsPrivateChatEnabled)
+                    return ChatError.PrivateMessagesDisabled;
+            }
 
             return SuccessOrError<Unit>.Succeeded(Unit.Value);
         }
@@ -40,15 +43,19 @@ namespace PaderConference.Hubs.Services.Middlewares
         public static IServiceRequestBuilder<TResponse> VerifyMessageConformsOptions<TResponse>(
             this IServiceRequestBuilder<TResponse> builder, SendChatMessageDto message)
         {
-            var neededPermissions = new List<PermissionDescriptor<bool>> {DefinedPermissions.Chat.CanSendChatMessage};
+            var neededPermissions = GetRequiredPermissions(message);
+            return builder.RequirePermissions(neededPermissions);
+        }
+
+        public static IEnumerable<PermissionDescriptor<bool>> GetRequiredPermissions(SendChatMessageDto message)
+        {
+            yield return DefinedPermissions.Chat.CanSendChatMessage;
 
             if (message.Options.IsAnonymous)
-                neededPermissions.Add(DefinedPermissions.Chat.CanSendAnonymously);
+                yield return DefinedPermissions.Chat.CanSendAnonymously;
 
             if (message.Options.IsAnnouncement)
-                neededPermissions.Add(DefinedPermissions.Chat.CanSendAnnouncement);
-
-            return builder.RequirePermissions(neededPermissions);
+                yield return DefinedPermissions.Chat.CanSendAnnouncement;
         }
     }
 }

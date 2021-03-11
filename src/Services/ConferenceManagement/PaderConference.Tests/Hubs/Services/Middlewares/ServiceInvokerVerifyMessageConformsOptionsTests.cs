@@ -1,14 +1,6 @@
-﻿using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using Autofac;
-using MediatR;
-using Moq;
-using PaderConference.Core.Domain.Entities;
-using PaderConference.Core.Services.Chat;
-using PaderConference.Core.Services.Chat.Channels;
+﻿using System.Linq;
 using PaderConference.Core.Services.Chat.Requests;
-using PaderConference.Core.Services.ConferenceManagement.Requests;
+using PaderConference.Core.Services.Permissions;
 using PaderConference.Hubs.Dtos;
 using PaderConference.Hubs.Services;
 using PaderConference.Hubs.Services.Middlewares;
@@ -21,79 +13,51 @@ namespace PaderConference.Tests.Hubs.Services.Middlewares
         protected override IServiceRequestBuilder<string> Execute(IServiceRequestBuilder<string> builder)
         {
             return builder.VerifyMessageConformsOptions(
-                new SendChatMessageDto("test", "test", new ChatMessageOptions()), new GlobalChatChannel());
-        }
-
-        private IMediator SetupMediatorWithConference(Conference conference)
-        {
-            var mediatorMock = new Mock<IMediator>();
-            mediatorMock.Setup(x => x.Send(It.IsAny<FindConferenceByIdRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(conference);
-
-            return mediatorMock.Object;
+                new SendChatMessageDto("test", "test", new ChatMessageOptions()));
         }
 
         [Fact]
-        public async Task VerifyMessageConformsOptions_AnonymousMessagesDisabled_ReturnError()
+        public void GetRequiredPermissions_NoOptionsConfigured_ReturnCanSendChatMessagePermission()
         {
             // arrange
-            var mediator =
-                SetupMediatorWithConference(new Conference("123")
-                {
-                    Configuration = {Chat = {CanSendAnonymousMessage = false}},
-                });
+            var messageDto = new SendChatMessageDto("Hello", "test", new ChatMessageOptions());
 
+            // act
+            var requiredPermissions = ServiceInvokerChatMiddleware.GetRequiredPermissions(messageDto);
+
+            // assert
+            var permission = Assert.Single(requiredPermissions);
+            Assert.Equal(DefinedPermissions.Chat.CanSendChatMessage.Key, permission!.Key);
+        }
+
+        [Fact]
+        public void GetRequiredPermissions_IsAnonymously_ReturnCanSendChatMessageAndCanSendAnonymouslyPermission()
+        {
+            // arrange
             var messageDto = new SendChatMessageDto("Hello", "test", new ChatMessageOptions {IsAnonymous = true});
 
-            var context = CreateContext(builder => builder.RegisterInstance(mediator).AsImplementedInterfaces());
-
             // act
-            var result = await ServiceInvokerChatMiddleware.VerifyMessageConformsOptions(context, messageDto,
-                GlobalChatChannel.Instance);
+            var requiredPermissions = ServiceInvokerChatMiddleware.GetRequiredPermissions(messageDto).ToList();
 
             // assert
-            Assert.False(result.Success);
-            Assert.Equal(ChatError.AnonymousMessagesDisabled.Code, result.Error!.Code);
+            Assert.Equal(2, requiredPermissions.Count);
+            Assert.Contains(requiredPermissions, x => x.Key == DefinedPermissions.Chat.CanSendChatMessage.Key);
+            Assert.Contains(requiredPermissions, x => x.Key == DefinedPermissions.Chat.CanSendAnonymously.Key);
         }
 
         [Fact]
-        public async Task VerifyMessageConformsOptions_PrivateChatDisabled_ReturnError()
+        public void GetRequiredPermissions_IsAnnouncement_ReturnCanSendChatMessageAndCanSendAnonymouslyPermission()
         {
             // arrange
-            var mediator =
-                SetupMediatorWithConference(new Conference("123")
-                {
-                    Configuration = {Chat = {IsPrivateChatEnabled = false}},
-                });
-
-            var messageDto = new SendChatMessageDto("Hello", "test", new ChatMessageOptions());
-            var context = CreateContext(builder => builder.RegisterInstance(mediator).AsImplementedInterfaces());
-            var channel = new PrivateChatChannel(new HashSet<string> {"asd", "asd2"});
+            var messageDto = new SendChatMessageDto("Hello", "test", new ChatMessageOptions {IsAnnouncement = true});
 
             // act
-            var result = await ServiceInvokerChatMiddleware.VerifyMessageConformsOptions(context, messageDto, channel);
+            var requiredPermissions = ServiceInvokerChatMiddleware.GetRequiredPermissions(messageDto).ToList();
 
             // assert
-            Assert.False(result.Success);
-            Assert.Equal(ChatError.PrivateMessagesDisabled.Code, result.Error!.Code);
-        }
-
-        [Fact]
-        public async Task VerifyMessageConformsOptions_EverythingOk_ReturnSuccess()
-        {
-            // arrange
-            var mediator = SetupMediatorWithConference(new Conference("123"));
-
-            var messageDto = new SendChatMessageDto("Hello", "test", new ChatMessageOptions());
-            var context = CreateContext(builder => builder.RegisterInstance(mediator).AsImplementedInterfaces());
-
-            // act
-            var result =
-                await ServiceInvokerChatMiddleware.VerifyMessageConformsOptions(context, messageDto,
-                    GlobalChatChannel.Instance);
-
-            // assert
-            Assert.True(result.Success);
+            Assert.Equal(2, requiredPermissions.Count);
+            Assert.Contains(requiredPermissions, x => x.Key == DefinedPermissions.Chat.CanSendChatMessage.Key);
+            Assert.Contains(requiredPermissions, x => x.Key == DefinedPermissions.Chat.CanSendAnnouncement.Key);
         }
     }
 }
