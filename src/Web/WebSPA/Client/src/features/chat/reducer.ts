@@ -13,11 +13,13 @@ import { mergeChatMessages } from './utils';
 export type ChatState = Readonly<{
    channels: { [channel: string]: ChatSynchronizedObject & ChatSynchronizedObjectViewModel } | null;
    selectedChannel: string | null;
+   announcements: ChatMessageDto[];
 }>;
 
 const initialState: ChatState = {
    channels: null,
    selectedChannel: null,
+   announcements: [],
 };
 
 const chatSlice = createSlice({
@@ -26,6 +28,12 @@ const chatSlice = createSlice({
    reducers: {
       setSelectedChannel(state, { payload }: PayloadAction<string | null>) {
          state.selectedChannel = payload;
+      },
+      addAnnouncement(state, { payload }: PayloadAction<ChatMessageDto>) {
+         state.announcements.push(payload);
+      },
+      removeAnnouncement(state, { payload }: PayloadAction<ChatMessageDto>) {
+         state.announcements = state.announcements.filter((x) => x.id !== payload.id || x.channel !== payload.channel);
       },
    },
    extraReducers: {
@@ -62,6 +70,6 @@ const chatSlice = createSlice({
    },
 });
 
-export const { setSelectedChannel } = chatSlice.actions;
+export const { setSelectedChannel, addAnnouncement, removeAnnouncement } = chatSlice.actions;
 
 export default chatSlice.reducer;

@@ -14,7 +14,7 @@ export default function ChatChannelTabs({ channels, selected, onSelectedChanged 
 
    return (
       <AppBar position="static" color="inherit">
-         <Tabs value={channels.findIndex((x) => x.id === selected)} onChange={handleChange}>
+         <Tabs value={channels.findIndex((x) => x.id === selected)} onChange={handleChange} variant="fullWidth">
             {channels.map((channel) => (
                <Tab key={channel.id} label={ChannelToString(channel)}></Tab>
             ))}

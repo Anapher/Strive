@@ -19,6 +19,7 @@ namespace PaderConference.Core.Services.Permissions.Options
                 new[]
                 {
                     DefinedPermissions.Chat.CanSendChatMessage.Configure(true),
+                    DefinedPermissions.Chat.CanSendAnonymously.Configure(true),
                     DefinedPermissions.Rooms.CanSwitchRoom.Configure(true),
                     DefinedPermissions.Conference.CanRaiseHand.Configure(true),
                 }.ToImmutableDictionary()
@@ -38,9 +39,11 @@ namespace PaderConference.Core.Services.Permissions.Options
                     DefinedPermissions.Media.CanChangeOtherParticipantsProducers.Configure(true),
                     DefinedPermissions.Rooms.CanCreateAndRemove.Configure(true),
                     DefinedPermissions.Scenes.CanSetScene.Configure(true),
+                    DefinedPermissions.Chat.CanSendAnnouncement.Configure(true),
+                    DefinedPermissions.Chat.CanSendAnonymously.Configure(false),
                 }.ToImmutableDictionary()
             },
-            // Moderator permissions
+            // Breakout room permissions
             {
                 PermissionType.BreakoutRoom,
                 new[]

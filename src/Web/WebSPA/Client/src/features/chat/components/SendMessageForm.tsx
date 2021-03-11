@@ -1,12 +1,13 @@
 import { Box, ClickAwayListener, Grow, IconButton, Paper, Popper } from '@material-ui/core';
 import EmojiEmotionsIcon from '@material-ui/icons/EmojiEmotions';
 import SendIcon from '@material-ui/icons/Send';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { setUserTyping } from 'src/core-hub';
 import { ChatMessageOptions, SendChatMessageDto } from 'src/core-hub.types';
 import ChatMessageInput from './ChatMessageInput';
 import EmojisPopper from './EmojisPopper';
+import SendMessageOptions from './SendMessageOptions';
 
 type Props = {
    onSendMessage: (msg: SendChatMessageDto) => void;
@@ -18,7 +19,7 @@ export default function SendMessageForm({ onSendMessage, isTyping, channel }: Pr
    const dispatch = useDispatch();
 
    const [message, setMessage] = useState('');
-   const [options, setOptions] = useState<ChatMessageOptions>({ isAnonymous: false, isHighlighted: false });
+   const [options, setOptions] = useState<ChatMessageOptions>({ isAnonymous: false, isAnnouncement: false });
 
    const inputRef = useRef<HTMLInputElement | null>(null);
    const focusMessageInput = () => inputRef.current?.focus();
@@ -33,7 +34,6 @@ export default function SendMessageForm({ onSendMessage, isTyping, channel }: Pr
       setMessage((msg) => msg + s);
       handleCloseEmojis();
       focusMessageInput();
-      console.log(inputRef.current);
    };
 
    const watchUserTyping = !options.isAnonymous;
@@ -47,17 +47,20 @@ export default function SendMessageForm({ onSendMessage, isTyping, channel }: Pr
    useEffect(() => {
       // display as not typing if the participant changed to anonymous
       if (isTyping && !watchUserTyping) {
-         dispatch(setUserTyping(false));
+         dispatch(setUserTyping({ isTyping: false, channel }));
       }
    }, [watchUserTyping]);
 
-   const handleOnChangeIsTyping = (isTyping: boolean) => {
-      if (isTyping) {
-         if (!inputRef.current?.value) return;
-      }
+   const handleOnChangeIsTyping = useCallback(
+      (newValue: boolean) => {
+         if (newValue) {
+            if (!inputRef.current?.value) return;
+         }
 
-      dispatch(setUserTyping(false));
-   };
+         dispatch(setUserTyping({ isTyping: newValue, channel }));
+      },
+      [dispatch, inputRef.current],
+   );
 
    const handleChangeMessage = (s: string) => setMessage(s);
 
@@ -65,23 +68,27 @@ export default function SendMessageForm({ onSendMessage, isTyping, channel }: Pr
       if (message) {
          onSendMessage({ message, options, channel });
          setMessage('');
-         dispatch(setUserTyping(false));
       }
    };
 
    return (
       <div>
-         <ChatMessageInput
-            onSubmit={handleSubmit}
-            ref={inputRef}
-            onChangeIsTyping={handleOnChangeIsTyping}
-            isTyping={isTyping}
-            value={message}
-            onChange={handleChangeMessage}
-            watchUserTyping={watchUserTyping}
-         />
+         <Box m={1}>
+            <ChatMessageInput
+               onSubmit={handleSubmit}
+               ref={inputRef}
+               onChangeIsTyping={handleOnChangeIsTyping}
+               isTyping={isTyping}
+               value={message}
+               onChange={handleChangeMessage}
+               watchUserTyping={watchUserTyping}
+            />
+         </Box>
          <Box display="flex" flexDirection="row" justifyContent="space-between" alignItems="center">
-            <Box display="flex" ml={1}>
+            <Box>
+               <SendMessageOptions value={options} onChange={setOptions} />
+            </Box>
+            <Box display="flex">
                <IconButton aria-label="emojis" ref={emojisButtonRef} onClick={handleOpenEmojis}>
                   <EmojiEmotionsIcon fontSize="small" />
                </IconButton>

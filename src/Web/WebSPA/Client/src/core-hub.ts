@@ -10,6 +10,7 @@ import {
    SetTemporaryPermissionDto,
    SwitchRoomDto,
    FetchChatMessagesDto,
+   SetUserIsTypingDto,
 } from './core-hub.types';
 import { RegisterEquipmentRequestDto } from './features/equipment/types';
 import { connectSignal, invoke, onInvokeReturn } from './store/signal/actions';
@@ -35,7 +36,7 @@ export const changeBreakoutRooms = createHubFn<Operation[] /** for BreakoutRooms
 
 export const fetchChatMessages = createHubFn<FetchChatMessagesDto>('FetchChatMessages');
 export const sendChatMessage = createHubFn<SendChatMessageDto>('SendChatMessage');
-export const setUserTyping = createHubFn<boolean>('SetUserIsTyping');
+export const setUserTyping = createHubFn<SetUserIsTypingDto>('SetUserIsTyping');
 
 export const getEquipmentToken = createHubFn('GetEquipmentToken');
 

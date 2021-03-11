@@ -34,5 +34,5 @@ export type Room = {
 };
 
 export type ChatSynchronizedObject = {
-   participantsTyping: string[];
+   participantsTyping: { [id: string]: boolean };
 };

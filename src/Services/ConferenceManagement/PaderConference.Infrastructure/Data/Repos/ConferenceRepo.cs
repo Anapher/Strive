@@ -5,6 +5,7 @@ using MongoDB.Concurrency;
 using MongoDB.Driver;
 using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Interfaces.Gateways;
+using PaderConference.Core.Services.Chat;
 using PaderConference.Core.Services.ConferenceManagement.Gateways;
 using PaderConference.Infrastructure.Utilities;
 
@@ -20,6 +21,12 @@ namespace PaderConference.Infrastructure.Data.Repos
             {
                 config.AutoMap();
                 config.MapIdMember(x => x.ConferenceId);
+                config.SetIgnoreExtraElements(true);
+            });
+            BsonClassMap.RegisterClassMap<ChatOptions>(config =>
+            {
+                config.AutoMap();
+                config.SetIgnoreExtraElements(true);
             });
         }
 

@@ -15,8 +15,8 @@ export const PERMISSIONS_CAN_SEE_ANY_PARTICIPANTS_PERMISSIONS: BoolPermission = 
 
 // Chat
 export const CHAT_CAN_SEND_CHAT_MESSAGE: BoolPermission = { key: 'chat/canSendMessage', type: 'bool' };
-export const CHAT_CAN_SEND_PRIVATE_CHAT_MESSAGE: BoolPermission = { key: 'chat/canSendPrivateMessage', type: 'bool' };
-export const CHAT_CAN_SEND_ANONYMOUS_MESSAGE: BoolPermission = { key: 'chat/canSendAnonymousMessage', type: 'bool' };
+export const CHAT_CAN_SEND_ANONYMOUSLY: BoolPermission = { key: 'chat/canSendAnonymously', type: 'bool' };
+export const CHAT_CAN_SEND_ANNOUNCEMENT: BoolPermission = { key: 'chat/canSendAnnouncement', type: 'bool' };
 
 // Media
 export const MEDIA_CAN_SHARE_AUDIO: BoolPermission = { key: 'media/canShareAudio', type: 'bool' };

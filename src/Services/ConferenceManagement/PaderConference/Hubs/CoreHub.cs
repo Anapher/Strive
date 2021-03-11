@@ -234,7 +234,7 @@ namespace PaderConference.Hubs
             var participant = GetContextParticipant();
             var builder = GetInvoker()
                 .Create(new SendChatMessageRequest(participant, dto.Message, channel, dto.Options))
-                .VerifyCanSendToChatChannel(channel).VerifyMessageConformsOptions(dto, channel).ValidateObject(dto)
+                .VerifyCanSendToChatChannel(channel).VerifyMessageConformsOptions(dto).ValidateObject(dto)
                 .ConferenceMustBeOpen();
 
             return await builder.Send();

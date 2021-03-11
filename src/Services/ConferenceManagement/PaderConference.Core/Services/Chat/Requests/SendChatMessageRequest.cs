@@ -9,7 +9,7 @@ namespace PaderConference.Core.Services.Chat.Requests
 
     public record ChatMessageOptions
     {
-        public bool IsHighlighted { get; init; }
+        public bool IsAnnouncement { get; init; }
         public bool IsAnonymous { get; init; }
     }
 }

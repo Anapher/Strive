@@ -1,7 +1,7 @@
 import { Badge, Box, Button, Fab, List, makeStyles, Typography, Zoom } from '@material-ui/core';
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import _ from 'lodash';
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { DomainError } from 'src/communication-types';
 import { ChatMessageDto } from 'src/core-hub.types';
 import { Participant } from 'src/features/conference/types';
@@ -11,15 +11,14 @@ import ChatMessage from './ChatMessage';
 
 const useStyles = makeStyles({
    root: {
+      height: '100%',
       position: 'relative',
-      flex: 1,
-      overflowY: 'hidden',
    },
    list: {
       overflowY: 'scroll',
+      height: '100%',
       display: 'flex',
       flexDirection: 'column-reverse',
-      height: '100%',
    },
    scrollDownFab: {
       position: 'absolute',
@@ -28,16 +27,16 @@ const useStyles = makeStyles({
 });
 
 type Props = {
-   messages: ChatMessageDto[] | undefined;
+   chat: ChatMessageDto[] | null;
    participants: Participant[] | null;
-   participantId?: string | null;
+   participantId?: string;
    participantColors: { [id: string]: string };
    error: DomainError | null;
    onRetry: () => void;
 };
 
 export default function ChatMessageList({
-   messages,
+   chat,
    participants,
    participantId,
    participantColors,
@@ -65,7 +64,7 @@ export default function ChatMessageList({
       if (!atBottom) {
          setMissedMessages((x) => x + 1);
       }
-   }, [messages]);
+   }, [chat]);
 
    const handleScrollToBottom = (behavior: 'auto' | 'smooth' = 'smooth') => {
       if (bottomAnchor.current) {
@@ -77,7 +76,7 @@ export default function ChatMessageList({
       <div className={classes.root}>
          <List className={classes.list} ref={listRef}>
             <div ref={bottomAnchor} />
-            {messages == null || messages == undefined ? (
+            {chat == null ? (
                error ? (
                   <Box m={2} display="flex" flexDirection="column" alignItems="center">
                      <Typography
@@ -92,7 +91,7 @@ export default function ChatMessageList({
                   Array.from({ length: 8 }).map((_, i) => <ChatMessage key={i} participantColors={participantColors} />)
                )
             ) : (
-               _([...messages])
+               _([...chat])
                   .reverse()
                   .map((message) => (
                      <ChatMessage

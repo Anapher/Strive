@@ -21,11 +21,7 @@ const useStyles = makeStyles((theme) => ({
       borderColor: theme.palette.divider,
       borderWidth: '0px 0px 0px 1px',
       borderStyle: 'solid',
-   },
-   chat: {
-      backgroundColor: theme.palette.type === 'dark' ? 'rgb(32, 32, 34)' : 'red',
-      flex: 1,
-      minHeight: 0,
+      height: '100%',
    },
 }));
 

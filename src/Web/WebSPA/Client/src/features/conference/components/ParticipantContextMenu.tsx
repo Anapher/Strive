@@ -12,7 +12,6 @@ import { patchParticipantAudio } from 'src/features/media/reducer';
 import { selectParticipantAudioInfo } from 'src/features/media/selectors';
 import usePermission from 'src/hooks/usePermission';
 import {
-   CHAT_CAN_SEND_PRIVATE_CHAT_MESSAGE,
    CONFERENCE_CAN_KICK_PARTICIPANT,
    MEDIA_CAN_CHANGE_PARTICIPANTS_PRODUCER,
    PERMISSIONS_CAN_GIVE_TEMPORARY_PERMISSION,
@@ -114,7 +113,7 @@ const ParticipantContextMenu = React.forwardRef<HTMLElement, Props>(({ participa
 
    const canSetTempPermission = usePermission(PERMISSIONS_CAN_GIVE_TEMPORARY_PERMISSION);
    const canSeePermissions = usePermission(PERMISSIONS_CAN_SEE_ANY_PARTICIPANTS_PERMISSIONS);
-   const canSendPrivateMessage = usePermission(CHAT_CAN_SEND_PRIVATE_CHAT_MESSAGE);
+   const canSendPrivateMessage = false; // TODO
    const canKick = usePermission(CONFERENCE_CAN_KICK_PARTICIPANT);
    const canChangeParticipantProducers = usePermission(MEDIA_CAN_CHANGE_PARTICIPANTS_PRODUCER);
 

@@ -12,7 +12,7 @@ export type SendChatMessageDto = {
 };
 
 export type ChatMessageOptions = {
-   isHighlighted: boolean;
+   isAnnouncement: boolean;
    isAnonymous: boolean;
 };
 
@@ -28,6 +28,11 @@ export type ChatMessageDto = {
 export type ChatMessageSender = {
    participantId: string;
    meta: ParticipantMetadata;
+};
+
+export type SetUserIsTypingDto = {
+   channel: string;
+   isTyping: boolean;
 };
 
 export type ParticipantMetadata = {

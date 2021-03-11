@@ -228,7 +228,7 @@ namespace PaderConference.IntegrationTests.Services
         }
 
         [Fact]
-        public async Task RequestChat_ParticipantNotSubscribed_ReturnError()
+        public async Task FetchChatMessages_ParticipantNotSubscribed_ReturnError()
         {
             // arrange
             var (connection, conference) = await ConnectToOpenedConference();
@@ -248,7 +248,7 @@ namespace PaderConference.IntegrationTests.Services
         }
 
         [Fact]
-        public async Task RequestChat_NoMessagesSent_ReturnEmptyList()
+        public async Task FetchChatMessages_NoMessagesSent_ReturnEmptyList()
         {
             // arrange
             var (connection, _) = await ConnectToOpenedConference();
@@ -266,7 +266,7 @@ namespace PaderConference.IntegrationTests.Services
         }
 
         [Fact]
-        public async Task RequestChat_SomeMessagesSent_ReturnMessages()
+        public async Task FetchChatMessages_SomeMessagesSent_ReturnMessages()
         {
             // arrange
             var (connection, _) = await ConnectToOpenedConference();

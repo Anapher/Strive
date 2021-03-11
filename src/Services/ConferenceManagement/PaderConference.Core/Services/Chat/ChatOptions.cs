@@ -16,6 +16,5 @@
         public bool IsRoomChatEnabled { get; set; } = true;
         public bool IsGlobalChatEnabled { get; set; } = true;
         public bool IsPrivateChatEnabled { get; set; } = true;
-        public bool CanSendAnonymousMessage { get; set; }
     }
 }

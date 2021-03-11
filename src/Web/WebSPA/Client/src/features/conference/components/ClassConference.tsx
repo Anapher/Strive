@@ -1,5 +1,6 @@
 import { makeStyles } from '@material-ui/core';
 import React, { useEffect, useState } from 'react';
+import AnnouncementOverlay from 'src/features/chat/components/AnnouncementOverlay';
 import ChatBar from 'src/features/chat/components/ChatBar';
 import ConferenceAppBar from 'src/features/conference/components/ConferenceAppBar';
 import DiagnosticsWindow from 'src/features/diagnostics/components/DiagnosticsWindow';
@@ -69,6 +70,7 @@ export default function ClassConference() {
    return (
       <ParticipantMicManager>
          <div className={classes.root}>
+            <AnnouncementOverlay />
             <ConferenceAppBar chatWidth={chatWidth} />
             <div className={classes.conferenceMain} ref={contentRef}>
                <PinnableSidebar pinned={roomsPinned} onTogglePinned={() => setRoomsPinned((x) => !x)} />

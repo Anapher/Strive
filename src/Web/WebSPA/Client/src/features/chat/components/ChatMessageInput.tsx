@@ -41,7 +41,7 @@ export default React.forwardRef<HTMLInputElement, Props>(function ChatMessageInp
       _.throttle(() => {
          onChangeIsTyping(true);
       }, 10000),
-      [onChangeIsTyping, isTyping],
+      [onChangeIsTyping],
    );
 
    return (
