@@ -338,5 +338,16 @@ namespace PaderConference.Core.IntegrationTests.Services
             await AssertParticipantNoSubscriptions(randomParticipant);
             NotificationCollector.AssertNoMoreNotifications();
         }
+
+        [Fact]
+        public async Task FetchSynchronizedObject_NotStored_FetchSyncObjectAndReturn()
+        {
+            // act
+            var result = await Mediator.Send(
+                new FetchSynchronizedObjectRequest(ConferenceId, SynchronizedObjectId.Parse(SyncObjId)));
+
+            // assert
+            Assert.Equal(_syncObjValue, result);
+        }
     }
 }

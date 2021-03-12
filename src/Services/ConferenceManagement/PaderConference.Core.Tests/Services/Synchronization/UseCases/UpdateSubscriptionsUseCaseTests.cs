@@ -27,7 +27,6 @@ namespace PaderConference.Core.Tests.Services.Synchronization.UseCases
         private static readonly Participant _participant = new(ConferenceId, ParticipantId);
 
         private readonly Mock<ISynchronizedObjectSubscriptionsRepository> _subscriptionRepo = new();
-        private readonly Mock<ISynchronizedObjectRepository> _syncObjRepo = new();
         private readonly Mock<IMediator> _mediator = new();
         private readonly List<ISynchronizedObjectProvider> _providers = new();
         private readonly Mock<IJoinedParticipantsRepository> _joinedParticipantsRepo = new();
@@ -40,13 +39,21 @@ namespace PaderConference.Core.Tests.Services.Synchronization.UseCases
 
         private UpdateSubscriptionsUseCase Create()
         {
-            return new(_subscriptionRepo.Object, _syncObjRepo.Object, _joinedParticipantsRepo.Object, _providers,
-                _mediator.Object, _logger);
+            return new(_subscriptionRepo.Object, _joinedParticipantsRepo.Object, _providers, _mediator.Object, _logger);
         }
 
         private void SetIsParticipantJoined()
         {
             _joinedParticipantsRepo.Setup(x => x.IsParticipantJoined(_participant)).ReturnsAsync(true);
+        }
+
+        private void RegisterSyncObj(SynchronizedObjectId syncObjId, object value)
+        {
+            _mediator.Setup(x =>
+                x.Send(
+                    It.Is<FetchSynchronizedObjectRequest>(request =>
+                        request.ConferenceId == ConferenceId && request.SyncObjId.Equals(syncObjId)),
+                    It.IsAny<CancellationToken>())).ReturnsAsync(value);
         }
 
         [Fact]
@@ -93,9 +100,10 @@ namespace PaderConference.Core.Tests.Services.Synchronization.UseCases
 
             var provider = new Mock<ISynchronizedObjectProvider>();
             provider.Setup(x => x.GetAvailableObjects(_participant)).ReturnsAsync(syncObjId.Yield());
-            provider.Setup(x => x.FetchValue(ConferenceId, syncObjId)).ReturnsAsync(syncObjValue);
             provider.SetupGet(x => x.Id).Returns(syncObjId.Id);
             _providers.Add(provider.Object);
+
+            RegisterSyncObj(syncObjId, syncObjValue);
 
             SetIsParticipantJoined();
 
