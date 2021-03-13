@@ -9,5 +9,6 @@
         public const string PARTICIPANT_PERMISSIONS = "participantPermissions";
         public const string CHAT = "chat";
         public const string SUBSCRIPTIONS = "subscriptions";
+        public const string BREAKOUT_ROOMS = "breakoutRooms";
     }
 }
