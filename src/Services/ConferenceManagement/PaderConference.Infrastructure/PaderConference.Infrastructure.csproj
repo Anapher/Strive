@@ -5,12 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Redis\Scripts\*.lua" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Remove="Redis\Scripts\JoinedParticipantsRepository_RemoveParticipantSafe.lua" />
-    <None Remove="Redis\Scripts\RoomRepository_SetParticipantRoom.lua" />
+    <EmbeddedResource Include="KeyValue\Redis\Scripts\*.lua" />
   </ItemGroup>
 
   <ItemGroup>
