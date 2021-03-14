@@ -72,6 +72,7 @@ namespace PaderConference.IntegrationTests.Services
 
             var testUser = CreateUser();
             var testUserConnection = await ConnectUserToConference(testUser, conference);
+            await EnsureClientJoinCompleted(testUserConnection);
 
             var result = await connection.Hub.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.SetTemporaryPermission),
                 new SetTemporaryPermissionDto(testUser.Sub, permission.Key, (JValue) JToken.FromObject(true)));
@@ -82,7 +83,7 @@ namespace PaderConference.IntegrationTests.Services
                 new SetTemporaryPermissionDto(testUser.Sub, permission.Key, null));
 
             // assert
-            Assert.True(result.Success);
+            Assert.True(result.Success, result.Error?.ToString());
 
             var syncObjId = SynchronizedParticipantPermissionsProvider.GetObjIdOfParticipant(testUser.Sub);
             await testUserConnection.SyncObjects.AssertSyncObject<SynchronizedParticipantPermissions>(syncObjId,

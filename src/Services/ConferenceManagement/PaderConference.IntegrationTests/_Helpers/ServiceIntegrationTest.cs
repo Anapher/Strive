@@ -99,6 +99,11 @@ namespace PaderConference.IntegrationTests._Helpers
                 .Build();
         }
 
+        protected async Task EnsureClientJoinCompleted(UserConnection connection)
+        {
+            await connection.Hub.InvokeAsync(nameof(CoreHub.FetchPermissions), null);
+        }
+
         protected void AssertErrorCode(ServiceErrorCode code, Error error)
         {
             Assert.Equal(code.ToString(), error.Code);
