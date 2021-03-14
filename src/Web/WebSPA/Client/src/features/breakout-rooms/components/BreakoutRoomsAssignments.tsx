@@ -36,20 +36,6 @@ type Props = {
    onChange: (data: string[][]) => void;
 };
 
-// const move = (data: string[][], droppableSource, droppableDestination) => {
-//    const sourceClone = Array.from(source);
-//    const destClone = Array.from(destination);
-//    const [removed] = sourceClone.splice(droppableSource.index, 1);
-
-//    destClone.splice(droppableDestination.index, 0, removed);
-
-//    const result = {};
-//    result[droppableSource.droppableId] = sourceClone;
-//    result[droppableDestination.droppableId] = destClone;
-
-//    return result;
-// };
-
 const copyInsert = (list: string[], i: number, item: string) => {
    const copy = [...list];
    copy.splice(i, 0, item);

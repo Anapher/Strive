@@ -1,5 +1,5 @@
-﻿using PaderConference.Infrastructure.Redis.InMemory;
-using PaderConference.Infrastructure.Tests.Redis.Scripts;
+﻿using PaderConference.Infrastructure.KeyValue.InMemory;
+using PaderConference.Infrastructure.Tests.KeyValue.Scripts.Base;
 
 namespace PaderConference.IntegrationTests.Infrastructure.Redis.Scripts
 {

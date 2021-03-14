@@ -1,7 +1,7 @@
-﻿using PaderConference.Infrastructure.Redis.Scripts;
+﻿using PaderConference.Infrastructure.KeyValue.Redis.Scripts;
 using Xunit;
 
-namespace PaderConference.Infrastructure.Tests.Redis.Scripts
+namespace PaderConference.Infrastructure.Tests.KeyValue.Scripts
 {
     public class RedisScriptLoaderTests
     {

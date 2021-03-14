@@ -6,6 +6,7 @@ using Autofac;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
@@ -14,6 +15,8 @@ using PaderConference.Core.Errors;
 using PaderConference.Core.Extensions;
 using PaderConference.Core.Interfaces;
 using PaderConference.Core.Services;
+using PaderConference.Core.Services.BreakoutRooms;
+using PaderConference.Core.Services.BreakoutRooms.Requests;
 using PaderConference.Core.Services.Chat;
 using PaderConference.Core.Services.Chat.Requests;
 using PaderConference.Core.Services.ConferenceControl;
@@ -204,27 +207,36 @@ namespace PaderConference.Hubs
                 .Send();
         }
 
-        //public Task<SuccessOrError> OpenBreakoutRooms(OpenBreakoutRoomsRequest request)
-        //{
-        //    return _invoker.InvokeService<BreakoutRoomService, OpenBreakoutRoomsRequest>(request,
-        //        service => service.OpenBreakoutRooms);
-        //}
+        public Task<SuccessOrError<Unit>> OpenBreakoutRooms(OpenBreakoutRoomsDto request)
+        {
+            var (conferenceId, _) = GetContextParticipant();
 
-        //public Task<SuccessOrError> CloseBreakoutRooms()
-        //{
-        //    return _invoker.InvokeService<BreakoutRoomService>(service => service.CloseBreakoutRooms);
-        //}
+            return GetInvoker()
+                .Create(new OpenBreakoutRoomsRequest(request.Amount, request.Deadline, request.Description,
+                    request.AssignedRooms, conferenceId))
+                .RequirePermissions(DefinedPermissions.Rooms.CanCreateAndRemove).ConferenceMustBeOpen().Send();
+        }
 
-        //public Task<SuccessOrError> ChangeBreakoutRooms(JsonPatchDocument<BreakoutRoomsOptions> dto)
-        //{
-        //    // convert timestamp value from string to actual timestamp
-        //    var timespanPatchOp = dto.Operations.FirstOrDefault(x => x.path == "/duration");
-        //    if (timespanPatchOp?.value != null)
-        //        timespanPatchOp.value = XmlConvert.ToTimeSpan((string) timespanPatchOp.value);
+        public Task<SuccessOrError<Unit>> CloseBreakoutRooms()
+        {
+            var (conferenceId, _) = GetContextParticipant();
 
-        //    return _invoker.InvokeService<BreakoutRoomService, JsonPatchDocument<BreakoutRoomsOptions>>(dto,
-        //        service => service.ChangeBreakoutRooms);
-        //}
+            return GetInvoker().Create(new CloseBreakoutRoomsRequest(conferenceId))
+                .RequirePermissions(DefinedPermissions.Rooms.CanCreateAndRemove).ConferenceMustBeOpen().Send();
+        }
+
+        public Task<SuccessOrError<Unit>> ChangeBreakoutRooms(JsonPatchDocument<BreakoutRoomsConfig> dto)
+        {
+            //// convert timestamp value from string to actual timestamp
+            //var timespanPatchOp = dto.Operations.FirstOrDefault(x => x.path == "/duration");
+            //if (timespanPatchOp?.value != null)
+            //    timespanPatchOp.value = XmlConvert.ToTimeSpan((string) timespanPatchOp.value);
+
+            var (conferenceId, _) = GetContextParticipant();
+
+            return GetInvoker().Create(new ChangeBreakoutRoomsRequest(conferenceId, dto))
+                .RequirePermissions(DefinedPermissions.Rooms.CanCreateAndRemove).ConferenceMustBeOpen().Send();
+        }
 
         public async Task<SuccessOrError<Unit>> SendChatMessage(SendChatMessageDto dto)
         {

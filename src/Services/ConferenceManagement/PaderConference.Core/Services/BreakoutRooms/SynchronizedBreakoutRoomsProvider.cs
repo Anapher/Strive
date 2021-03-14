@@ -6,9 +6,9 @@ namespace PaderConference.Core.Services.BreakoutRooms
 {
     public class SynchronizedBreakoutRoomsProvider : SynchronizedObjectProviderForAll<SynchronizedBreakoutRooms>
     {
-        private readonly IBreakoutRoomsRepository _repository;
+        private readonly IBreakoutRoomRepository _repository;
 
-        public SynchronizedBreakoutRoomsProvider(IBreakoutRoomsRepository repository)
+        public SynchronizedBreakoutRoomsProvider(IBreakoutRoomRepository repository)
         {
             _repository = repository;
         }
@@ -20,7 +20,7 @@ namespace PaderConference.Core.Services.BreakoutRooms
         protected override async ValueTask<SynchronizedBreakoutRooms> InternalFetchValue(string conferenceId)
         {
             var current = await _repository.Get(conferenceId);
-            return new SynchronizedBreakoutRooms(current?.State);
+            return new SynchronizedBreakoutRooms(current?.Config);
         }
     }
 }

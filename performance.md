@@ -1,0 +1,2 @@
+## Ideas for improvement
+- Wrap `UpdateSynchronizedObject` and execute it only once per object per request context. That way, e. g. when opening breakout rooms with room assigments, the synchronized object isn't updated **n** times which will reduce the stress on clients and on the application.

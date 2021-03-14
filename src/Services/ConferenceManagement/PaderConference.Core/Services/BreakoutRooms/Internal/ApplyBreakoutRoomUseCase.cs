@@ -19,12 +19,12 @@ namespace PaderConference.Core.Services.BreakoutRooms.Internal
 {
     public class ApplyBreakoutRoomUseCase : IRequestHandler<ApplyBreakoutRoomRequest, BreakoutRoomInternalState?>
     {
-        private readonly IBreakoutRoomsRepository _repository;
+        private readonly IBreakoutRoomRepository _repository;
         private readonly IMediator _mediator;
         private readonly IScheduledMediator _scheduledMediator;
         private readonly BreakoutRoomsOptions _options;
 
-        public ApplyBreakoutRoomUseCase(IBreakoutRoomsRepository repository, IMediator mediator,
+        public ApplyBreakoutRoomUseCase(IBreakoutRoomRepository repository, IMediator mediator,
             IScheduledMediator scheduledMediator, IOptions<BreakoutRoomsOptions> options)
         {
             _repository = repository;
@@ -51,8 +51,8 @@ namespace PaderConference.Core.Services.BreakoutRooms.Internal
             return internalState;
         }
 
-        private async Task<BreakoutRoomInternalState?> ApplyState(string conferenceId,
-            ActiveBreakoutRoomState? newState, bool createNew)
+        private async Task<BreakoutRoomInternalState?> ApplyState(string conferenceId, BreakoutRoomsConfig? newState,
+            bool createNew)
         {
             var internalState = await _repository.Get(conferenceId);
 
@@ -73,7 +73,7 @@ namespace PaderConference.Core.Services.BreakoutRooms.Internal
 
             var openedRooms = internalState?.OpenedRooms ?? ImmutableList<string>.Empty;
             openedRooms = await AdjustOpenedRooms(conferenceId, newState, openedRooms);
-            var timerToken = await CreateTimer(newState.Deadline);
+            var timerToken = await CreateTimer(newState.Deadline, conferenceId);
 
             internalState = new BreakoutRoomInternalState(newState, openedRooms, timerToken);
             await _repository.Set(conferenceId, internalState);
@@ -81,7 +81,7 @@ namespace PaderConference.Core.Services.BreakoutRooms.Internal
             return internalState;
         }
 
-        private async Task<IReadOnlyList<string>> AdjustOpenedRooms(string conferenceId, ActiveBreakoutRoomState state,
+        private async Task<IReadOnlyList<string>> AdjustOpenedRooms(string conferenceId, BreakoutRoomsConfig state,
             IReadOnlyList<string> openedRooms)
         {
             if (state.Amount > openedRooms.Count)
@@ -135,11 +135,12 @@ namespace PaderConference.Core.Services.BreakoutRooms.Internal
             return openedRooms.Except(removeRooms).ToList();
         }
 
-        private async Task<string?> CreateTimer(DateTimeOffset? deadline)
+        private async Task<string?> CreateTimer(DateTimeOffset? deadline, string conferenceId)
         {
             if (deadline == null) return null;
 
-            return await _scheduledMediator.Schedule(new BreakoutRoomTimerElapsedNotification(), deadline.Value);
+            return await _scheduledMediator.Schedule(new BreakoutRoomTimerElapsedNotification(conferenceId),
+                deadline.Value);
         }
     }
 }

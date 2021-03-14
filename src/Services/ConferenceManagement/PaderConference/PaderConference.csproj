@@ -16,6 +16,7 @@
     <PackageReference Include="JsonSubTypes" Version="1.8.0" />
     <PackageReference Include="MassTransit.AspNetCore" Version="7.1.6" />
     <PackageReference Include="MassTransit.Extensions.DependencyInjection" Version="7.1.6" />
+    <PackageReference Include="MassTransit.Quartz" Version="7.1.6" />
     <PackageReference Include="MassTransit.SignalR" Version="7.1.6" />
     <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
     <PackageReference Include="MicroElements.Swashbuckle.FluentValidation" Version="4.2.0" />

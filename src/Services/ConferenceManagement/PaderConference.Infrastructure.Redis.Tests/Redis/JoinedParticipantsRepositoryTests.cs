@@ -1,8 +1,8 @@
 ﻿using System.Threading.Tasks;
 using PaderConference.Core.Services;
 using PaderConference.Core.Services.ConferenceControl.Gateways;
-using PaderConference.Infrastructure.Redis.Impl;
-using PaderConference.Infrastructure.Redis.Repos;
+using PaderConference.Infrastructure.KeyValue.Redis;
+using PaderConference.Infrastructure.KeyValue.Repos;
 using PaderConference.IntegrationTests._Helpers;
 using StackExchange.Redis;
 using Xunit;

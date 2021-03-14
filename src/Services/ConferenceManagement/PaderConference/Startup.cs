@@ -15,6 +15,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using MongoDB.Bson;
@@ -29,9 +30,11 @@ using PaderConference.Extensions;
 using PaderConference.Hubs;
 using PaderConference.Infrastructure;
 using PaderConference.Infrastructure.Data;
-using PaderConference.Infrastructure.Redis.Abstractions;
-using PaderConference.Infrastructure.Redis.Impl;
-using PaderConference.Infrastructure.Redis.InMemory;
+using PaderConference.Infrastructure.KeyValue;
+using PaderConference.Infrastructure.KeyValue.Abstractions;
+using PaderConference.Infrastructure.KeyValue.InMemory;
+using PaderConference.Infrastructure.KeyValue.Redis;
+using PaderConference.Infrastructure.Scheduler;
 using PaderConference.Infrastructure.Serialization;
 using PaderConference.Messaging.Consumers;
 using PaderConference.Services;
@@ -101,11 +104,12 @@ namespace PaderConference
             var healthChecks = services.AddHealthChecks();
 
             // KeyValuDatabase
-            var keyValueOptions = Configuration.GetSection("KeyValueDatabase").Get<KeyValueDatabaseOptions>();
+            var keyValueOptions = Configuration.GetSection("KeyValueDatabase").Get<KeyValueDatabaseConfig>();
             if (keyValueOptions.UseInMemory)
             {
-                services.AddSingleton<IKeyValueDatabase, InMemoryKeyValueDatabase>(_ =>
-                    new InMemoryKeyValueDatabase(new InMemoryKeyValueData()));
+                services.AddSingleton<IKeyValueDatabase, InMemoryKeyValueDatabase>(services =>
+                    new InMemoryKeyValueDatabase(new InMemoryKeyValueData(),
+                        services.GetRequiredService<IOptions<KeyValueDatabaseOptions>>()));
             }
             else
             {
@@ -129,25 +133,33 @@ namespace PaderConference
                 options.Predicate = check => check.Tags.Contains("ready");
             });
 
-            // RabbitMq
+            // Masstransit / RabbitMQ
             var rabbitMqOptions = Configuration.GetSection("RabbitMq").Get<RabbitMqOptions>();
             services.AddMassTransit(x =>
             {
                 //x.AddSignalRHub<CoreHub>();
-
                 x.AddConsumersFromNamespaceContaining<ParticipantKickedConsumer>();
+                x.AddConsumer<MediatrNotificationConsumer>();
 
                 if (rabbitMqOptions.UseInMemory)
-                    x.UsingInMemory();
+                {
+                    x.AddMessageScheduler(new Uri("queue:schedule"));
+                    x.UsingInMemory((_, cfg) => { cfg.UseInMemoryScheduler("scheduler"); });
+                }
                 else
+                {
+                    x.AddRabbitMqMessageScheduler();
                     x.UsingRabbitMq((context, configurator) =>
                     {
                         if (rabbitMqOptions.RabbitMq != null)
                             configurator.ConfigureOptions(rabbitMqOptions.RabbitMq);
 
                         configurator.UseHealthCheck(context);
+                        configurator.UseDelayedExchangeMessageScheduler();
+
                         configurator.ConfigureEndpoints(context);
                     });
+                }
             });
             services.AddMassTransitHostedService();
 

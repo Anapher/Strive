@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace PaderConference.Core.Services.BreakoutRooms.Gateways
 {
-    public interface IBreakoutRoomsRepository
+    public interface IBreakoutRoomRepository
     {
         ValueTask<BreakoutRoomInternalState?> Get(string conferenceId);
 

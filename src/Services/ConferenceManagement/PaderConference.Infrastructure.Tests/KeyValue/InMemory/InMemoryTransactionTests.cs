@@ -1,9 +1,9 @@
 ﻿using System.Linq;
-using PaderConference.Infrastructure.Redis.Abstractions;
-using PaderConference.Infrastructure.Redis.InMemory;
+using PaderConference.Infrastructure.KeyValue.Abstractions;
+using PaderConference.Infrastructure.KeyValue.InMemory;
 using Xunit;
 
-namespace PaderConference.Infrastructure.Tests.Redis.InMemory
+namespace PaderConference.Infrastructure.Tests.KeyValue.InMemory
 {
     public class InMemoryTransactionTests
     {

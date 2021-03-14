@@ -18,8 +18,8 @@ using PaderConference.Core.Services.ConferenceManagement.Gateways;
 using PaderConference.Core.Services.ConferenceManagement.UseCases;
 using PaderConference.Core.Services.Synchronization;
 using PaderConference.Infrastructure;
-using PaderConference.Infrastructure.Redis;
-using PaderConference.Infrastructure.Redis.InMemory;
+using PaderConference.Infrastructure.KeyValue;
+using PaderConference.Infrastructure.KeyValue.InMemory;
 using PaderConference.Tests.Utils;
 using Xunit.Abstractions;
 
@@ -58,6 +58,8 @@ namespace PaderConference.Core.IntegrationTests.Services.Base
             builder.RegisterInstance(SynchronizedObjectListener).AsImplementedInterfaces();
 
             builder.RegisterInstance(Data).AsSelf();
+            builder.RegisterInstance(new OptionsWrapper<KeyValueDatabaseOptions>(new KeyValueDatabaseOptions()))
+                .AsImplementedInterfaces();
             builder.RegisterType<InMemoryKeyValueDatabase>().AsImplementedInterfaces();
 
             var loggerFactory = _testOutputHelper.CreateLoggerFactory();
@@ -76,7 +78,7 @@ namespace PaderConference.Core.IntegrationTests.Services.Base
             var serviceTypes = FetchServiceTypes().ToArray();
             builder.RegisterTypes(serviceTypes).AsImplementedInterfaces();
 
-            builder.RegisterAssemblyTypes(typeof(InfrastructureModule).Assembly).AssignableTo<IRedisRepo>()
+            builder.RegisterAssemblyTypes(typeof(InfrastructureModule).Assembly).AssignableTo<IKeyValueRepo>()
                 .AsImplementedInterfaces().SingleInstance();
         }
 

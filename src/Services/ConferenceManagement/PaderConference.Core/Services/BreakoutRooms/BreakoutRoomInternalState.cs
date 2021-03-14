@@ -2,6 +2,6 @@
 
 namespace PaderConference.Core.Services.BreakoutRooms
 {
-    public record BreakoutRoomInternalState(ActiveBreakoutRoomState State, IReadOnlyList<string> OpenedRooms,
+    public record BreakoutRoomInternalState(BreakoutRoomsConfig Config, IReadOnlyList<string> OpenedRooms,
         string? TimerTokenId);
 }

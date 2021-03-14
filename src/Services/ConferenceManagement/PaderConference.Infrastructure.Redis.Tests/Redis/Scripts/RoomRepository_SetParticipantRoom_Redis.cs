@@ -1,5 +1,5 @@
-﻿using PaderConference.Infrastructure.Redis.Impl;
-using PaderConference.Infrastructure.Tests.Redis.Scripts.Base;
+﻿using PaderConference.Infrastructure.KeyValue.Redis;
+using PaderConference.Infrastructure.Tests.KeyValue.Scripts.Base;
 using PaderConference.IntegrationTests._Helpers;
 using Xunit;
 

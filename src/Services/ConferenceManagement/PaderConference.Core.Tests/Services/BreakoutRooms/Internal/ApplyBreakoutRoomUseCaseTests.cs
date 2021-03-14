@@ -26,13 +26,13 @@ namespace PaderConference.Core.Tests.Services.BreakoutRooms.Internal
     {
         private const string ConferenceId = "test";
 
-        private readonly Mock<IBreakoutRoomsRepository> _repository = new();
+        private readonly Mock<IBreakoutRoomRepository> _repository = new();
         private readonly Mock<IMediator> _mediator = new();
         private readonly Mock<IScheduledMediator> _scheduledMediator = new();
         private readonly Mock<IAsyncDisposable> _lock = new();
 
         private readonly BreakoutRoomInternalState _sampleInternalState =
-            new(new ActiveBreakoutRoomState(1, null, null), new[] {"test"}, null);
+            new(new BreakoutRoomsConfig(1, null, null), new[] {"test"}, null);
 
         private BreakoutRoomInternalState? _capturedState;
 
@@ -160,7 +160,7 @@ namespace PaderConference.Core.Tests.Services.BreakoutRooms.Internal
         public async Task Handle_RemoveStateAndInternalStateExists_RemoveTimerRemoveRoomsRemoveStateUpdateSyncObj()
         {
             // arrange
-            var activeState = new ActiveBreakoutRoomState(2, DateTimeOffset.MinValue, "description");
+            var activeState = new BreakoutRoomsConfig(2, DateTimeOffset.MinValue, "description");
             var currentState = new BreakoutRoomInternalState(activeState, new[] {"test1", "test2"}, "123");
 
             var capturedRequest = _mediator.CaptureRequest<RemoveRoomsRequest, Unit>();
@@ -197,7 +197,7 @@ namespace PaderConference.Core.Tests.Services.BreakoutRooms.Internal
             SetupInternalState(null);
             CaptureNewInternalState();
 
-            var newState = new ActiveBreakoutRoomState(2, DateTimeOffset.MinValue, "description");
+            var newState = new BreakoutRoomsConfig(2, DateTimeOffset.MinValue, "description");
             SetupTimerTokenForDeadline(newState.Deadline!.Value, timerToken);
 
             var useCase = Create();
@@ -210,7 +210,7 @@ namespace PaderConference.Core.Tests.Services.BreakoutRooms.Internal
             Assert.NotNull(_capturedState);
             Assert.Equal(2, _capturedState!.OpenedRooms.Count);
             Assert.Equal(timerToken, _capturedState!.TimerTokenId);
-            Assert.Equal(newState, _capturedState.State);
+            Assert.Equal(newState, _capturedState.Config);
         }
 
         [Theory]
@@ -223,7 +223,7 @@ namespace PaderConference.Core.Tests.Services.BreakoutRooms.Internal
             // arrange
             SetupInternalState(null);
 
-            var newState = new ActiveBreakoutRoomState(2, DateTimeOffset.MinValue, "description");
+            var newState = new BreakoutRoomsConfig(2, DateTimeOffset.MinValue, "description");
             SetupTimerTokenForDeadline(newState.Deadline!.Value, timerToken);
 
             var useCase = Create();
@@ -247,7 +247,7 @@ namespace PaderConference.Core.Tests.Services.BreakoutRooms.Internal
             SetupInternalState(null);
             CaptureNewInternalState();
 
-            var newState = new ActiveBreakoutRoomState(2, null, "description");
+            var newState = new BreakoutRoomsConfig(2, null, "description");
 
             var useCase = Create();
             var request = new ApplyBreakoutRoomRequest(ConferenceId, newState, null, createNew);
@@ -266,7 +266,7 @@ namespace PaderConference.Core.Tests.Services.BreakoutRooms.Internal
             const string currentTimerToken = "123";
 
             // arrange
-            var activeState = new ActiveBreakoutRoomState(2, DateTimeOffset.MinValue, "description");
+            var activeState = new BreakoutRoomsConfig(2, DateTimeOffset.MinValue, "description");
             var currentState = new BreakoutRoomInternalState(activeState, new[] {"test1", "test2"}, "123");
 
             SetupInternalState(currentState);
@@ -294,7 +294,7 @@ namespace PaderConference.Core.Tests.Services.BreakoutRooms.Internal
             const string currentTimerToken = "123";
 
             // arrange
-            var activeState = new ActiveBreakoutRoomState(2, DateTimeOffset.MinValue, "description");
+            var activeState = new BreakoutRoomsConfig(2, DateTimeOffset.MinValue, "description");
             var currentState = new BreakoutRoomInternalState(activeState, new[] {"test1", "test2"}, "123");
 
             SetupInternalState(currentState);
@@ -319,7 +319,7 @@ namespace PaderConference.Core.Tests.Services.BreakoutRooms.Internal
         public async Task Handle_PatchStateCreateDeadline_ChangeTimer()
         {
             // arrange
-            var activeState = new ActiveBreakoutRoomState(2, null, "description");
+            var activeState = new BreakoutRoomsConfig(2, null, "description");
             var currentState = new BreakoutRoomInternalState(activeState, new[] {"test1", "test2"}, null);
 
             SetupInternalState(currentState);
@@ -346,7 +346,7 @@ namespace PaderConference.Core.Tests.Services.BreakoutRooms.Internal
             const string timerToken = "1234";
 
             // arrange
-            var activeState = new ActiveBreakoutRoomState(2, null, "description");
+            var activeState = new BreakoutRoomsConfig(2, null, "description");
             var currentState = new BreakoutRoomInternalState(activeState, new[] {"test1", "test2"}, null);
 
             SetupInternalState(currentState);
@@ -371,7 +371,7 @@ namespace PaderConference.Core.Tests.Services.BreakoutRooms.Internal
             const string newDescription = "giga yikes";
 
             // arrange
-            var activeState = new ActiveBreakoutRoomState(2, null, "description");
+            var activeState = new BreakoutRoomsConfig(2, null, "description");
             var currentState = new BreakoutRoomInternalState(activeState, new[] {"test1", "test2"}, null);
 
             SetupInternalState(currentState);
@@ -386,7 +386,7 @@ namespace PaderConference.Core.Tests.Services.BreakoutRooms.Internal
             await useCase.Handle(request, CancellationToken.None);
 
             // assert
-            Assert.Equal(newDescription, _capturedState?.State.Description);
+            Assert.Equal(newDescription, _capturedState?.Config.Description);
             VerifySyncObjUpdated();
         }
 
@@ -397,7 +397,7 @@ namespace PaderConference.Core.Tests.Services.BreakoutRooms.Internal
             SetupSynchronizedRooms(new SynchronizedRooms(rooms, "main",
                 roomOccupancy.ToDictionary(_ => counter++.ToString(), x => x)));
 
-            var activeState = new ActiveBreakoutRoomState(rooms.Count, null, null);
+            var activeState = new BreakoutRoomsConfig(rooms.Count, null, null);
             var currentState = new BreakoutRoomInternalState(activeState, rooms.Select(x => x.RoomId).ToList(), null);
 
             SetupInternalState(currentState);

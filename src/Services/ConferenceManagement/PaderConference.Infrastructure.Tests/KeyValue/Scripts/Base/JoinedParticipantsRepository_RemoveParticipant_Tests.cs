@@ -1,10 +1,10 @@
 ﻿using System.Threading.Tasks;
-using PaderConference.Infrastructure.Redis.Abstractions;
-using PaderConference.Infrastructure.Redis.Scripts;
+using PaderConference.Infrastructure.KeyValue.Abstractions;
+using PaderConference.Infrastructure.KeyValue.Redis.Scripts;
 using StackExchange.Redis;
 using Xunit;
 
-namespace PaderConference.Infrastructure.Tests.Redis.Scripts
+namespace PaderConference.Infrastructure.Tests.KeyValue.Scripts.Base
 {
     public abstract class JoinedParticipantsRepository_RemoveParticipant_Tests
     {

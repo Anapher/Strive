@@ -1,29 +1,36 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using PaderConference.Infrastructure.Redis.InMemory;
+using Microsoft.Extensions.Options;
+using PaderConference.Infrastructure.KeyValue;
+using PaderConference.Infrastructure.KeyValue.InMemory;
 using PaderConference.Tests.Utils;
 using Xunit;
 
-namespace PaderConference.Infrastructure.Tests.Redis.InMemory
+namespace PaderConference.Infrastructure.Tests.KeyValue.InMemory
 {
     public class InMemoryKeyValueDatabaseTests
     {
+        private readonly InMemoryKeyValueData _data = new();
+        private readonly InMemoryKeyValueDatabase _database;
+
+        public InMemoryKeyValueDatabaseTests()
+        {
+            _database = new InMemoryKeyValueDatabase(_data,
+                new OptionsWrapper<KeyValueDatabaseOptions>(new KeyValueDatabaseOptions()));
+        }
+
         [Fact]
         public async Task KeySetAsync_WithValidKey_KeyExistsInDictionary()
         {
             const string key = "test";
             const string value = "hello world";
 
-            // arrange
-            var data = new InMemoryKeyValueData();
-            var database = new InMemoryKeyValueDatabase(data);
-
             // act
-            await database.SetAsync(key, value);
+            await _database.SetAsync(key, value);
 
             // assert
-            var entry = Assert.Single(data.Data);
+            var entry = Assert.Single(_data.Data);
             Assert.Equal(key, entry.Key);
             Assert.Equal(value, entry.Value);
         }
@@ -34,13 +41,9 @@ namespace PaderConference.Infrastructure.Tests.Redis.InMemory
             const string key = "test";
             const string value = "hello world";
 
-            // arrange
-            var data = new InMemoryKeyValueData();
-            var database = new InMemoryKeyValueDatabase(data);
-
             // act
-            await database.SetAsync(key, value);
-            var result = await database.GetAsync(key);
+            await _database.SetAsync(key, value);
+            var result = await _database.GetAsync(key);
 
             // assert
             Assert.Equal(value, result);
@@ -51,12 +54,8 @@ namespace PaderConference.Infrastructure.Tests.Redis.InMemory
         {
             const string key = "test";
 
-            // arrange
-            var data = new InMemoryKeyValueData();
-            var database = new InMemoryKeyValueDatabase(data);
-
             // act
-            var result = await database.GetAsync(key);
+            var result = await _database.GetAsync(key);
 
             // assert
             Assert.Null(result);
@@ -67,12 +66,8 @@ namespace PaderConference.Infrastructure.Tests.Redis.InMemory
         {
             const string key = "test";
 
-            // arrange
-            var data = new InMemoryKeyValueData();
-            var database = new InMemoryKeyValueDatabase(data);
-
             // act
-            var result = await database.KeyDeleteAsync(key);
+            var result = await _database.KeyDeleteAsync(key);
 
             // assert
             Assert.False(result);
@@ -84,17 +79,13 @@ namespace PaderConference.Infrastructure.Tests.Redis.InMemory
             const string key = "test";
             const string value = "hello world";
 
-            // arrange
-            var data = new InMemoryKeyValueData();
-            var database = new InMemoryKeyValueDatabase(data);
-
             // act
-            await database.SetAsync(key, value);
+            await _database.SetAsync(key, value);
 
             // assert
-            var result = await database.KeyDeleteAsync(key);
+            var result = await _database.KeyDeleteAsync(key);
             Assert.True(result);
-            Assert.Empty(data.Data);
+            Assert.Empty(_data.Data);
         }
 
         [Fact]
@@ -103,12 +94,8 @@ namespace PaderConference.Infrastructure.Tests.Redis.InMemory
             const string key = "test";
             const string field = "field1";
 
-            // arrange
-            var data = new InMemoryKeyValueData();
-            var database = new InMemoryKeyValueDatabase(data);
-
             // act
-            var result = await database.HashGetAsync(key, field);
+            var result = await _database.HashGetAsync(key, field);
 
             // assert
             Assert.Null(result);
@@ -121,15 +108,11 @@ namespace PaderConference.Infrastructure.Tests.Redis.InMemory
             const string field = "field1";
             const string value = "hello world";
 
-            // arrange
-            var data = new InMemoryKeyValueData();
-            var database = new InMemoryKeyValueDatabase(data);
-
             // act
-            await database.HashSetAsync(key, field, value);
+            await _database.HashSetAsync(key, field, value);
 
             // assert
-            var result = await database.HashGetAsync(key, field);
+            var result = await _database.HashGetAsync(key, field);
             Assert.Equal(value, result);
         }
 
@@ -140,15 +123,11 @@ namespace PaderConference.Infrastructure.Tests.Redis.InMemory
             const string field = "field1";
             const string value = "hello world";
 
-            // arrange
-            var data = new InMemoryKeyValueData();
-            var database = new InMemoryKeyValueDatabase(data);
-
             // act
-            await database.HashSetAsync(key, field, value);
+            await _database.HashSetAsync(key, field, value);
 
             // assert
-            Assert.Single(data.Data);
+            Assert.Single(_data.Data);
         }
 
         [Fact]
@@ -160,17 +139,13 @@ namespace PaderConference.Infrastructure.Tests.Redis.InMemory
             const string value = "hello world";
             const string value2 = "hello world2";
 
-            // arrange
-            var data = new InMemoryKeyValueData();
-            var database = new InMemoryKeyValueDatabase(data);
-
             // act
-            await database.HashSetAsync(key, field, value);
-            await database.HashSetAsync(key, field2, value2);
+            await _database.HashSetAsync(key, field, value);
+            await _database.HashSetAsync(key, field2, value2);
 
             // assert
-            var result1 = await database.HashGetAsync(key, field);
-            var result2 = await database.HashGetAsync(key, field2);
+            var result1 = await _database.HashGetAsync(key, field);
+            var result2 = await _database.HashGetAsync(key, field2);
 
             Assert.Equal(value, result1);
             Assert.Equal(value2, result2);
@@ -183,15 +158,11 @@ namespace PaderConference.Infrastructure.Tests.Redis.InMemory
 
             var fields = new Dictionary<string, string> {{"field1", "test1"}, {"field2", "test2"}};
 
-            // arrange
-            var data = new InMemoryKeyValueData();
-            var database = new InMemoryKeyValueDatabase(data);
-
             // act
-            await database.HashSetAsync(key, fields);
+            await _database.HashSetAsync(key, fields);
 
             // assert
-            var result = await database.HashGetAllAsync(key);
+            var result = await _database.HashGetAllAsync(key);
             AssertKeyValuePairsMatchIgnoreOrder(fields, result);
         }
 
@@ -205,16 +176,13 @@ namespace PaderConference.Infrastructure.Tests.Redis.InMemory
             var fields = new Dictionary<string, string> {{"field1", "test1"}, {"field2", "test2"}};
 
             // arrange
-            var data = new InMemoryKeyValueData();
-            var database = new InMemoryKeyValueDatabase(data);
-
-            await database.HashSetAsync(key, existingField, existingFieldValue);
+            await _database.HashSetAsync(key, existingField, existingFieldValue);
 
             // act
-            await database.HashSetAsync(key, fields);
+            await _database.HashSetAsync(key, fields);
 
             // assert
-            var result = await database.HashGetAllAsync(key);
+            var result = await _database.HashGetAllAsync(key);
             var expectedFields =
                 fields.Concat(new[] {new KeyValuePair<string, string>(existingField, existingFieldValue)});
 
@@ -227,12 +195,8 @@ namespace PaderConference.Infrastructure.Tests.Redis.InMemory
             const string key = "test";
             const string field = "field";
 
-            // arrange
-            var data = new InMemoryKeyValueData();
-            var database = new InMemoryKeyValueDatabase(data);
-
             // act
-            var result = await database.HashExistsAsync(key, field);
+            var result = await _database.HashExistsAsync(key, field);
 
             // assert
             Assert.False(result);
@@ -244,14 +208,10 @@ namespace PaderConference.Infrastructure.Tests.Redis.InMemory
             const string key = "test";
             const string field = "field";
 
-            // arrange
-            var data = new InMemoryKeyValueData();
-            var database = new InMemoryKeyValueDatabase(data);
-
-            await database.HashSetAsync(key, "randomField", "test");
+            await _database.HashSetAsync(key, "randomField", "test");
 
             // act
-            var result = await database.HashExistsAsync(key, field);
+            var result = await _database.HashExistsAsync(key, field);
 
             // assert
             Assert.False(result);
@@ -263,16 +223,12 @@ namespace PaderConference.Infrastructure.Tests.Redis.InMemory
             const string key = "test";
             const string field = "field";
 
-            // arrange
-            var data = new InMemoryKeyValueData();
-            var database = new InMemoryKeyValueDatabase(data);
-
             // act
-            var result = await database.HashDeleteAsync(key, field);
+            var result = await _database.HashDeleteAsync(key, field);
 
             // assert
             Assert.False(result);
-            Assert.Empty(data.Data);
+            Assert.Empty(_data.Data);
         }
 
         [Fact]
@@ -281,14 +237,10 @@ namespace PaderConference.Infrastructure.Tests.Redis.InMemory
             const string key = "test";
             const string field = "field";
 
-            // arrange
-            var data = new InMemoryKeyValueData();
-            var database = new InMemoryKeyValueDatabase(data);
-
-            await database.HashSetAsync(key, "randomField", "test");
+            await _database.HashSetAsync(key, "randomField", "test");
 
             // act
-            var result = await database.HashDeleteAsync(key, field);
+            var result = await _database.HashDeleteAsync(key, field);
 
             // assert
             Assert.False(result);
@@ -300,18 +252,14 @@ namespace PaderConference.Infrastructure.Tests.Redis.InMemory
             const string key = "test";
             const string field = "field";
 
-            // arrange
-            var data = new InMemoryKeyValueData();
-            var database = new InMemoryKeyValueDatabase(data);
-
-            await database.HashSetAsync(key, field, "test");
+            await _database.HashSetAsync(key, field, "test");
 
             // act
-            var result = await database.HashDeleteAsync(key, field);
+            var result = await _database.HashDeleteAsync(key, field);
 
             // assert
             Assert.True(result);
-            Assert.Empty(data.Data);
+            Assert.Empty(_data.Data);
         }
 
         [Fact]
@@ -323,22 +271,19 @@ namespace PaderConference.Infrastructure.Tests.Redis.InMemory
             const string preservedFieldValue = "test";
 
             // arrange
-            var data = new InMemoryKeyValueData();
-            var database = new InMemoryKeyValueDatabase(data);
-
-            await database.HashSetAsync(key, fieldToDelete, "test");
-            await database.HashSetAsync(key, preservedField, preservedFieldValue);
+            await _database.HashSetAsync(key, fieldToDelete, "test");
+            await _database.HashSetAsync(key, preservedField, preservedFieldValue);
 
             // act
-            var result = await database.HashDeleteAsync(key, fieldToDelete);
+            var result = await _database.HashDeleteAsync(key, fieldToDelete);
 
             // assert
             Assert.True(result);
 
-            var preservedFieldExists = await database.HashExistsAsync(key, preservedField);
+            var preservedFieldExists = await _database.HashExistsAsync(key, preservedField);
             Assert.True(preservedFieldExists);
 
-            var fieldToDeleteExists = await database.HashExistsAsync(key, fieldToDelete);
+            var fieldToDeleteExists = await _database.HashExistsAsync(key, fieldToDelete);
             Assert.False(fieldToDeleteExists);
         }
 
@@ -347,12 +292,8 @@ namespace PaderConference.Infrastructure.Tests.Redis.InMemory
         {
             const string key = "test";
 
-            // arrange
-            var data = new InMemoryKeyValueData();
-            var database = new InMemoryKeyValueDatabase(data);
-
             // act
-            var result = await database.HashGetAllAsync(key);
+            var result = await _database.HashGetAllAsync(key);
 
             // assert
             Assert.NotNull(result);
@@ -367,13 +308,10 @@ namespace PaderConference.Infrastructure.Tests.Redis.InMemory
             const string fieldValue = "val";
 
             // arrange
-            var data = new InMemoryKeyValueData();
-            var database = new InMemoryKeyValueDatabase(data);
-
-            await database.HashSetAsync(key, field, fieldValue);
+            await _database.HashSetAsync(key, field, fieldValue);
 
             // act
-            var result = await database.HashGetAllAsync(key);
+            var result = await _database.HashGetAllAsync(key);
 
             // assert
             Assert.NotNull(result);
@@ -390,17 +328,13 @@ namespace PaderConference.Infrastructure.Tests.Redis.InMemory
             const string key = "test";
             const string value = "testValue";
 
-            // arrange
-            var data = new InMemoryKeyValueData();
-            var database = new InMemoryKeyValueDatabase(data);
-
             // act
-            var oldVal = await database.GetSetAsync(key, value);
+            var oldVal = await _database.GetSetAsync(key, value);
 
             // assert
             Assert.Null(oldVal);
 
-            var actualKeyValue = await database.GetAsync(key);
+            var actualKeyValue = await _database.GetAsync(key);
             Assert.Equal(value, actualKeyValue);
         }
 
@@ -412,18 +346,15 @@ namespace PaderConference.Infrastructure.Tests.Redis.InMemory
             const string value = "testValue";
 
             // arrange
-            var data = new InMemoryKeyValueData();
-            var database = new InMemoryKeyValueDatabase(data);
-
-            await database.SetAsync(key, oldValue);
+            await _database.SetAsync(key, oldValue);
 
             // act
-            var actualOldValue = await database.GetSetAsync(key, value);
+            var actualOldValue = await _database.GetSetAsync(key, value);
 
             // assert
             Assert.Equal(oldValue, actualOldValue);
 
-            var actualKeyValue = await database.GetAsync(key);
+            var actualKeyValue = await _database.GetAsync(key);
             Assert.Equal(value, actualKeyValue);
         }
 
@@ -433,15 +364,11 @@ namespace PaderConference.Infrastructure.Tests.Redis.InMemory
             const string key = "test";
             const string value = "testValue";
 
-            // arrange
-            var data = new InMemoryKeyValueData();
-            var database = new InMemoryKeyValueDatabase(data);
-
             // act
-            await database.ListRightPushAsync(key, value);
+            await _database.ListRightPushAsync(key, value);
 
             // assert
-            var entry = Assert.Single(data.Data);
+            var entry = Assert.Single(_data.Data);
             Assert.Equal(key, entry.Key);
             var list = Assert.IsType<List<string>>(entry.Value);
             Assert.Equal(value, Assert.Single(list));
@@ -455,16 +382,13 @@ namespace PaderConference.Infrastructure.Tests.Redis.InMemory
             const string value = "testValue";
 
             // arrange
-            var data = new InMemoryKeyValueData();
-            var database = new InMemoryKeyValueDatabase(data);
-
-            await database.ListRightPushAsync(key, initialValue);
+            await _database.ListRightPushAsync(key, initialValue);
 
             // act
-            await database.ListRightPushAsync(key, value);
+            await _database.ListRightPushAsync(key, value);
 
             // assert
-            var entry = Assert.Single(data.Data);
+            var entry = Assert.Single(_data.Data);
             var list = Assert.IsType<List<string>>(entry.Value);
             Assert.Equal(new[] {initialValue, value}, list);
         }
@@ -474,12 +398,8 @@ namespace PaderConference.Infrastructure.Tests.Redis.InMemory
         {
             const string key = "test";
 
-            // arrange
-            var data = new InMemoryKeyValueData();
-            var database = new InMemoryKeyValueDatabase(data);
-
             // act
-            var actual = await database.ListLenAsync(key);
+            var actual = await _database.ListLenAsync(key);
 
             // assert
             Assert.Equal(0, actual);
@@ -490,15 +410,11 @@ namespace PaderConference.Infrastructure.Tests.Redis.InMemory
         {
             const string key = "test";
 
-            // arrange
-            var data = new InMemoryKeyValueData();
-            var database = new InMemoryKeyValueDatabase(data);
-
-            await database.ListRightPushAsync(key, "test1");
-            await database.ListRightPushAsync(key, "test2");
+            await _database.ListRightPushAsync(key, "test1");
+            await _database.ListRightPushAsync(key, "test2");
 
             // act
-            var actual = await database.ListLenAsync(key);
+            var actual = await _database.ListLenAsync(key);
 
             // assert
             Assert.Equal(2, actual);
@@ -509,12 +425,8 @@ namespace PaderConference.Infrastructure.Tests.Redis.InMemory
         {
             const string key = "test";
 
-            // arrange
-            var data = new InMemoryKeyValueData();
-            var database = new InMemoryKeyValueDatabase(data);
-
             // act
-            var actual = await database.ListRangeAsync(key, 0, -1);
+            var actual = await _database.ListRangeAsync(key, 0, -1);
 
             // assert
             Assert.Empty(actual);
@@ -530,14 +442,10 @@ namespace PaderConference.Infrastructure.Tests.Redis.InMemory
             const string key = "test";
             const string item = "testItem";
 
-            // arrange
-            var data = new InMemoryKeyValueData();
-            var database = new InMemoryKeyValueDatabase(data);
-
-            await database.ListRightPushAsync(key, item);
+            await _database.ListRightPushAsync(key, item);
 
             // act
-            var actual = await database.ListRangeAsync(key, start, end);
+            var actual = await _database.ListRangeAsync(key, start, end);
 
             // assert
             Assert.Equal(item, Assert.Single(actual));
@@ -551,14 +459,10 @@ namespace PaderConference.Infrastructure.Tests.Redis.InMemory
             const string key = "test";
             const string item = "testItem";
 
-            // arrange
-            var data = new InMemoryKeyValueData();
-            var database = new InMemoryKeyValueDatabase(data);
-
-            await database.ListRightPushAsync(key, item);
+            await _database.ListRightPushAsync(key, item);
 
             // act
-            var actual = await database.ListRangeAsync(key, start, end);
+            var actual = await _database.ListRangeAsync(key, start, end);
 
             // assert
             Assert.Empty(actual);
@@ -576,17 +480,13 @@ namespace PaderConference.Infrastructure.Tests.Redis.InMemory
         {
             const string key = "test";
 
-            // arrange
-            var data = new InMemoryKeyValueData();
-            var database = new InMemoryKeyValueDatabase(data);
-
             for (var i = 0; i < 10; i++)
             {
-                await database.ListRightPushAsync(key, $"item{i}");
+                await _database.ListRightPushAsync(key, $"item{i}");
             }
 
             // act
-            var actual = await database.ListRangeAsync(key, start, end);
+            var actual = await _database.ListRangeAsync(key, start, end);
 
             // assert
             Assert.Equal(expected, actual);
@@ -598,16 +498,12 @@ namespace PaderConference.Infrastructure.Tests.Redis.InMemory
             const string key = "test";
             const string value = "test1";
 
-            // arrange
-            var data = new InMemoryKeyValueData();
-            var database = new InMemoryKeyValueDatabase(data);
-
             // act
-            var result = await database.SetAddAsync(key, value);
+            var result = await _database.SetAddAsync(key, value);
 
             // assert
             Assert.True(result);
-            Assert.NotEmpty(data.Data);
+            Assert.NotEmpty(_data.Data);
         }
 
         [Fact]
@@ -618,18 +514,15 @@ namespace PaderConference.Infrastructure.Tests.Redis.InMemory
             const string value2 = "test2";
 
             // arrange
-            var data = new InMemoryKeyValueData();
-            var database = new InMemoryKeyValueDatabase(data);
-
-            await database.SetAddAsync(key, value1);
+            await _database.SetAddAsync(key, value1);
 
             // act
-            var result = await database.SetAddAsync(key, value2);
+            var result = await _database.SetAddAsync(key, value2);
 
             // assert
             Assert.True(result);
 
-            var actualSet = await database.SetMembersAsync(key);
+            var actualSet = await _database.SetMembersAsync(key);
             AssertHelper.AssertScrambledEquals(new[] {value1, value2}, actualSet);
         }
 
@@ -639,19 +532,15 @@ namespace PaderConference.Infrastructure.Tests.Redis.InMemory
             const string key = "test";
             const string value1 = "test1";
 
-            // arrange
-            var data = new InMemoryKeyValueData();
-            var database = new InMemoryKeyValueDatabase(data);
-
-            await database.SetAddAsync(key, value1);
+            await _database.SetAddAsync(key, value1);
 
             // act
-            var result = await database.SetAddAsync(key, value1);
+            var result = await _database.SetAddAsync(key, value1);
 
             // assert
             Assert.False(result);
 
-            var actualSet = await database.SetMembersAsync(key);
+            var actualSet = await _database.SetMembersAsync(key);
             AssertHelper.AssertScrambledEquals(new[] {value1}, actualSet);
         }
 
@@ -660,16 +549,12 @@ namespace PaderConference.Infrastructure.Tests.Redis.InMemory
         {
             const string key = "test";
 
-            // arrange
-            var data = new InMemoryKeyValueData();
-            var database = new InMemoryKeyValueDatabase(data);
-
             // act
-            var result = await database.SetRemoveAsync(key, "test");
+            var result = await _database.SetRemoveAsync(key, "test");
 
             // assert
             Assert.False(result);
-            Assert.Empty(data.Data);
+            Assert.Empty(_data.Data);
         }
 
         [Fact]
@@ -678,18 +563,14 @@ namespace PaderConference.Infrastructure.Tests.Redis.InMemory
             const string key = "test";
             const string item = "item";
 
-            // arrange
-            var data = new InMemoryKeyValueData();
-            var database = new InMemoryKeyValueDatabase(data);
-
-            await database.SetAddAsync(key, item);
+            await _database.SetAddAsync(key, item);
 
             // act
-            var result = await database.SetRemoveAsync(key, item);
+            var result = await _database.SetRemoveAsync(key, item);
 
             // assert
             Assert.True(result);
-            Assert.Empty(data.Data);
+            Assert.Empty(_data.Data);
         }
 
         [Fact]
@@ -700,19 +581,16 @@ namespace PaderConference.Infrastructure.Tests.Redis.InMemory
             const string item2 = "item2";
 
             // arrange
-            var data = new InMemoryKeyValueData();
-            var database = new InMemoryKeyValueDatabase(data);
-
-            await database.SetAddAsync(key, item1);
-            await database.SetAddAsync(key, item2);
+            await _database.SetAddAsync(key, item1);
+            await _database.SetAddAsync(key, item2);
 
             // act
-            var result = await database.SetRemoveAsync(key, item1);
+            var result = await _database.SetRemoveAsync(key, item1);
 
             // assert
             Assert.True(result);
 
-            var items = await database.SetMembersAsync(key);
+            var items = await _database.SetMembersAsync(key);
             AssertHelper.AssertScrambledEquals(new[] {item2}, items);
         }
 
@@ -721,12 +599,8 @@ namespace PaderConference.Infrastructure.Tests.Redis.InMemory
         {
             const string key = "test";
 
-            // arrange
-            var data = new InMemoryKeyValueData();
-            var database = new InMemoryKeyValueDatabase(data);
-
             // act
-            var result = await database.SetMembersAsync(key);
+            var result = await _database.SetMembersAsync(key);
 
             // assert
             Assert.Empty(result);
@@ -738,14 +612,10 @@ namespace PaderConference.Infrastructure.Tests.Redis.InMemory
             const string key = "test";
             const string value = "value";
 
-            // arrange
-            var data = new InMemoryKeyValueData();
-            var database = new InMemoryKeyValueDatabase(data);
-
-            await database.SetAddAsync(key, value);
+            await _database.SetAddAsync(key, value);
 
             // act
-            var result = await database.SetMembersAsync(key);
+            var result = await _database.SetMembersAsync(key);
 
             // assert
             var actualValue = Assert.Single(result);
@@ -755,33 +625,25 @@ namespace PaderConference.Infrastructure.Tests.Redis.InMemory
         [Fact]
         public void CreateTransaction_ExecuteStatements_DontExecuteStatementsBeforeStatement()
         {
-            // arrange
-            var data = new InMemoryKeyValueData();
-            var database = new InMemoryKeyValueDatabase(data);
-
             // act
-            using var transaction = database.CreateTransaction();
+            using var transaction = _database.CreateTransaction();
             _ = transaction.SetAsync("hello", "world");
 
             // assert
-            Assert.Empty(data.Data);
+            Assert.Empty(_data.Data);
         }
 
         [Fact]
         public async Task CreateTransaction_ExecuteStatements_ExecuteStatementsOnExecuteAsync()
         {
-            // arrange
-            var data = new InMemoryKeyValueData();
-            var database = new InMemoryKeyValueDatabase(data);
-
             // act
-            using var transaction = database.CreateTransaction();
+            using var transaction = _database.CreateTransaction();
             _ = transaction.SetAsync("hello", "world");
 
             await transaction.ExecuteAsync();
 
             // assert
-            Assert.NotEmpty(data.Data);
+            Assert.NotEmpty(_data.Data);
         }
 
         private static void AssertKeyValuePairsMatchIgnoreOrder<T>(IEnumerable<KeyValuePair<string, T>> expected,

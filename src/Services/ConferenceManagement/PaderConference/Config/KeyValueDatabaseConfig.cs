@@ -2,7 +2,7 @@
 
 namespace PaderConference.Config
 {
-    public class KeyValueDatabaseOptions
+    public class KeyValueDatabaseConfig
     {
         public bool UseInMemory { get; set; }
 

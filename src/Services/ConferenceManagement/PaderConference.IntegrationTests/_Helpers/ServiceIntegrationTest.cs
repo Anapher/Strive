@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using MediatR;
@@ -15,26 +14,18 @@ using PaderConference.Core.Services;
 using PaderConference.Hubs;
 using PaderConference.Models.Request;
 using PaderConference.Models.Response;
-using Serilog;
-using Serilog.Core;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace PaderConference.IntegrationTests._Helpers
 {
-    public abstract class ServiceIntegrationTest
+    public abstract class ServiceIntegrationTest : IntegrationTestBase
     {
-        protected readonly CustomWebApplicationFactory Factory;
-        protected readonly Logger Logger;
-        protected readonly HttpClient Client;
         protected readonly UserAccount Moderator;
 
-        protected ServiceIntegrationTest(ITestOutputHelper testOutputHelper, MongoDbFixture mongoDb)
+        protected ServiceIntegrationTest(ITestOutputHelper testOutputHelper, MongoDbFixture mongoDb) : base(
+            testOutputHelper, mongoDb)
         {
-            Factory = new CustomWebApplicationFactory(mongoDb, testOutputHelper);
-            Logger = testOutputHelper.CreateTestLogger();
-            Client = Factory.CreateClient();
-
             Moderator = CreateUser(true, "Vincent");
         }
 

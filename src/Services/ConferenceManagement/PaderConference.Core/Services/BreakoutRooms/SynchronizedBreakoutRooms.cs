@@ -1,4 +1,4 @@
 ﻿namespace PaderConference.Core.Services.BreakoutRooms
 {
-    public record SynchronizedBreakoutRooms(ActiveBreakoutRoomState? Active);
+    public record SynchronizedBreakoutRooms(BreakoutRoomsConfig? Active);
 }
