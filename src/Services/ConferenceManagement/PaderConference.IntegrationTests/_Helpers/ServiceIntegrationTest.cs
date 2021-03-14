@@ -83,7 +83,10 @@ namespace PaderConference.IntegrationTests._Helpers
             await connection.StartAsync();
             Logger.Information("Connection to SignalR established.");
 
-            return new UserConnection(connection, conferenceId, user, syncObjListener);
+            var result = new UserConnection(connection, conferenceId, user, syncObjListener);
+            await EnsureClientJoinCompleted(result);
+
+            return result;
         }
 
         protected async Task<SuccessOrError<Unit>> OpenConference(UserConnection userConnection)
