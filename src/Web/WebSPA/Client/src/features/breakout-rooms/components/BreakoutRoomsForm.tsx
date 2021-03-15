@@ -48,11 +48,11 @@ export default function BreakoutRoomsForm({ form: { register, errors, watch, con
                      validate: validateNumberInteger,
                   })}
                   inputProps={{ min: 1, step: 1 }}
-                  name="duration"
+                  name="deadline"
                   type="number"
-                  error={!!errors.duration}
+                  error={!!errors.deadline}
                   style={{ maxWidth: 160, marginLeft: 16 }}
-                  helperText={errors.duration?.message}
+                  helperText={errors.deadline?.message}
                   fullWidth
                />
                <TextField

@@ -1,5 +1,5 @@
 import { Box, Button, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@material-ui/core';
-import { Duration } from 'luxon';
+import { DateTime } from 'luxon';
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
@@ -29,7 +29,7 @@ export default function CreateBreakoutRoomsDialog({ onClose }: Props) {
       defaultValues: {
          amount: participants != undefined ? Math.ceil(participants.length / 3) : 4,
          description: '',
-         duration: '15',
+         deadline: '15',
          assignedRooms: [],
       },
       mode: 'onChange',
@@ -38,10 +38,16 @@ export default function CreateBreakoutRoomsDialog({ onClose }: Props) {
    const { formState, handleSubmit } = form;
 
    const handleApplyForm = (dto: OpenBreakoutRoomsDto) => {
+      console.log('test');
+
       const action = coreHub.openBreakoutRooms({
          ...dto,
          amount: Number(dto.amount),
-         duration: dto.duration ? Duration.fromObject({ minutes: Number(dto.duration) }).toString() : undefined,
+         deadline: dto.deadline
+            ? DateTime.now()
+                 .plus({ minutes: Number(dto.deadline) })
+                 .toISO()
+            : undefined,
       });
 
       dispatch(action);

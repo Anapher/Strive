@@ -52,5 +52,10 @@ namespace PaderConference.Infrastructure.KeyValue.Repos
         {
             return DatabaseKeyBuilder.ForProperty(LOCK_KEY).ForConference(conferenceId).ToString();
         }
+
+        public ValueTask RemoveAllDataOfConference(string conferenceId)
+        {
+            return Remove(conferenceId);
+        }
     }
 }

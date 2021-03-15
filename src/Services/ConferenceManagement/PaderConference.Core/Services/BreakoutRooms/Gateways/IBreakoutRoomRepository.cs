@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Threading.Tasks;
+using PaderConference.Core.Interfaces.Gateways;
 
 namespace PaderConference.Core.Services.BreakoutRooms.Gateways
 {
-    public interface IBreakoutRoomRepository
+    public interface IBreakoutRoomRepository : IStateRepository
     {
         ValueTask<BreakoutRoomInternalState?> Get(string conferenceId);
 

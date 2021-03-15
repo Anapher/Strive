@@ -30,6 +30,7 @@ namespace PaderConference.Core.Services.ConferenceControl.UseCases
             if (await _openConferenceRepository.Delete(conferenceId))
             {
                 await _mediator.Publish(new ConferenceClosedNotification(conferenceId));
+                await _mediator.Publish(new FinalizeConferenceCleanupNotification(conferenceId));
                 _logger.LogDebug("Conference was closed successfully");
             }
             else

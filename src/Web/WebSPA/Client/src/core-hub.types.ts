@@ -60,12 +60,12 @@ export type EquipmentStatus = {
    [key in ProducerSource]: UseMediaStateInfo;
 };
 
-export type OpenBreakoutRoomsDto = BreakoutRoomsOptions & {
+export type OpenBreakoutRoomsDto = BreakoutRoomsConfig & {
    assignedRooms?: string[][];
 };
 
-export type BreakoutRoomsOptions = {
-   duration?: string;
+export type BreakoutRoomsConfig = {
+   deadline?: string;
    description?: string;
    amount: number;
 };

@@ -1,9 +1,5 @@
-export type ActiveBreakoutRoomState = {
-   amount: number;
-   deadline?: string;
-   description?: string;
-};
+import { BreakoutRoomsConfig } from 'src/core-hub.types';
 
 export type BreakoutRoomsInfo = {
-   active: ActiveBreakoutRoomState | null;
+   active: BreakoutRoomsConfig | null;
 };

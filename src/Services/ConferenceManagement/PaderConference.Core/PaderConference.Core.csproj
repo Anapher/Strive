@@ -23,9 +23,5 @@
 		<ProjectReference Include="..\..\..\Libs\JsonPatchGenerator\JsonPatchGenerator.csproj" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <Folder Include="Notifications\Handlers\" />
-	</ItemGroup>
-
 	<Import Project="../language.props" />
 </Project>

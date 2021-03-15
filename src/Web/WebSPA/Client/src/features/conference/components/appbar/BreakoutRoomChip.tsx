@@ -2,7 +2,7 @@ import { Chip, Divider, Grid } from '@material-ui/core';
 import { DateTime } from 'luxon';
 import React from 'react';
 import Countdown, { CountdownRenderProps } from 'react-countdown';
-import { ActiveBreakoutRoomState } from 'src/features/breakout-rooms/types';
+import { BreakoutRoomsConfig } from 'src/core-hub.types';
 
 const renderer = ({ hours, formatted }: CountdownRenderProps) => {
    let result = '';
@@ -13,7 +13,7 @@ const renderer = ({ hours, formatted }: CountdownRenderProps) => {
 };
 
 type Props = {
-   state: ActiveBreakoutRoomState;
+   state: BreakoutRoomsConfig;
    className?: string;
 };
 

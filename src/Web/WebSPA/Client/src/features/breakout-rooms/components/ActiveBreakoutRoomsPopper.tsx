@@ -27,8 +27,8 @@ export default function ActiveBreakoutRoomsPopper() {
 
    const handleAddMinutes = (minutes: number) => () => {
       if (!deadline) return;
-      const newDuration = deadline.diffNow().plus({ minutes }).toISO();
-      dispatch(changeBreakoutRooms([{ path: '/duration', op: 'replace', value: newDuration }]));
+      const newDeadline = deadline.plus({ minutes }).toISO();
+      dispatch(changeBreakoutRooms([{ path: '/deadline', op: 'add', value: newDeadline }]));
    };
 
    const handleCloseBreakoutRooms = () => {
