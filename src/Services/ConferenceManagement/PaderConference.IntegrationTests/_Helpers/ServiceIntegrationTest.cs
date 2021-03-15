@@ -116,6 +116,11 @@ namespace PaderConference.IntegrationTests._Helpers
         {
             Assert.True(successOrError.Success, $"Failed with error: {successOrError.Error?.Code}");
         }
+
+        protected void AssertFailed<T>(SuccessOrError<T> successOrError)
+        {
+            Assert.False(successOrError.Success);
+        }
     }
 
     public record UserConnection(HubConnection Hub, string ConferenceId, UserAccount User,

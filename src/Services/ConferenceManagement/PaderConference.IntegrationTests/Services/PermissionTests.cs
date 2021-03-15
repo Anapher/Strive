@@ -106,7 +106,7 @@ namespace PaderConference.IntegrationTests.Services
                 new SetTemporaryPermissionDto(testUser.Sub, permission.Key, (JValue) JToken.FromObject(true)));
 
             // assert
-            AssertSuccess(result);
+            AssertFailed(result);
 
             var syncObjId = SynchronizedParticipantPermissionsProvider.GetObjIdOfParticipant(testUser.Sub);
             await testUserConnection.SyncObjects.AssertSyncObject<SynchronizedParticipantPermissions>(syncObjId,
@@ -149,7 +149,7 @@ namespace PaderConference.IntegrationTests.Services
                     nameof(CoreHub.FetchPermissions), Moderator.Sub);
 
             // assert
-            AssertSuccess(result);
+            AssertFailed(result);
             AssertErrorCode(ServiceErrorCode.PermissionDenied, result.Error!);
         }
 
