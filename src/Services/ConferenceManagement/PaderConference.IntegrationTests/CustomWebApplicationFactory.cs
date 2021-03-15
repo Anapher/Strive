@@ -44,7 +44,13 @@ namespace PaderConference.IntegrationTests
 
         protected override IWebHostBuilder CreateWebHostBuilder()
         {
-            return base.CreateWebHostBuilder().UseSerilog(_testOutputHelper.CreateTestLogger(LogEventLevel.Debug));
+            return base.CreateWebHostBuilder().UseSerilog(GetLoggerConfig().CreateLogger());
+        }
+
+        private LoggerConfiguration GetLoggerConfig()
+        {
+            return new LoggerConfiguration().WriteTo.TestOutput(_testOutputHelper, LogEventLevel.Debug).MinimumLevel
+                .Debug();
         }
 
         protected override void ConfigureWebHost(IWebHostBuilder builder)
