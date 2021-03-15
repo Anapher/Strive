@@ -261,7 +261,7 @@ namespace PaderConference.IntegrationTests.Services
                     nameof(CoreHub.FetchChatMessages), new FetchChatMessagesDto(channel, 0, -1));
 
             // assert
-            Assert.True(result.Success);
+            AssertSuccess(result);
             Assert.Empty(result.Response!);
         }
 
@@ -289,7 +289,7 @@ namespace PaderConference.IntegrationTests.Services
                     nameof(CoreHub.FetchChatMessages), new FetchChatMessagesDto(channel, 0, -1));
 
             // assert
-            Assert.True(result.Success);
+            AssertSuccess(result);
             Assert.Equal(3, result.Response!.Count);
         }
     }

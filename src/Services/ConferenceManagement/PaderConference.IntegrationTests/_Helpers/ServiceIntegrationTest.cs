@@ -66,7 +66,7 @@ namespace PaderConference.IntegrationTests._Helpers
             var conference = await CreateConference(Moderator);
             var connection = await ConnectUserToConference(Moderator, conference);
             var result = await OpenConference(connection);
-            Assert.True(result.Success);
+            AssertSuccess(result);
 
             return (connection, conference);
         }
@@ -110,6 +110,11 @@ namespace PaderConference.IntegrationTests._Helpers
         protected void AssertErrorCode(ServiceErrorCode code, Error error)
         {
             Assert.Equal(code.ToString(), error.Code);
+        }
+
+        protected void AssertSuccess<T>(SuccessOrError<T> successOrError)
+        {
+            Assert.True(successOrError.Success, $"Failed with error: {successOrError.Error?.Code}");
         }
     }
 

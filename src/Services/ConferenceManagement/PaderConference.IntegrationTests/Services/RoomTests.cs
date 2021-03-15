@@ -61,7 +61,7 @@ namespace PaderConference.IntegrationTests.Services
                 nameof(CoreHub.CreateRooms), new List<RoomCreationInfo> {new("Test1"), new("Test2")});
 
             // assert
-            Assert.True(result.Success);
+            AssertSuccess(result);
             Assert.Equal(2, result.Response!.Count);
 
             await connection.SyncObjects.AssertSyncObject<SynchronizedRooms>(SyncObjId, value =>
@@ -87,7 +87,7 @@ namespace PaderConference.IntegrationTests.Services
                 new SwitchRoomDto(createdRoom!.RoomId));
 
             // assert
-            Assert.True(result.Success);
+            AssertSuccess(result);
 
             await connection.SyncObjects.AssertSyncObject<SynchronizedRooms>(SyncObjId, value =>
             {
@@ -112,7 +112,7 @@ namespace PaderConference.IntegrationTests.Services
                 new[] {createdRoom.RoomId});
 
             // assert
-            Assert.True(result.Success);
+            AssertSuccess(result);
 
             await connection.SyncObjects.AssertSyncObject<SynchronizedRooms>(SyncObjId,
                 value => { Assert.Single(value.Rooms); });

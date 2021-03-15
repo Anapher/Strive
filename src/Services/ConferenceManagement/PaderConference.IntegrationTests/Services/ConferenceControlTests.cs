@@ -57,7 +57,7 @@ namespace PaderConference.IntegrationTests.Services
             var result = await OpenConference(connection);
 
             // assert
-            Assert.True(result.Success);
+            AssertSuccess(result);
 
             await connection.SyncObjects.AssertSyncObject<SynchronizedConferenceInfo>(SyncObjId,
                 value => Assert.True(value.IsOpen));
@@ -73,7 +73,7 @@ namespace PaderConference.IntegrationTests.Services
             var result = await connection.Hub.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.CloseConference));
 
             // assert
-            Assert.True(result.Success);
+            AssertSuccess(result);
 
             await connection.SyncObjects.AssertSyncObject<SynchronizedConferenceInfo>(SyncObjId,
                 value => Assert.False(value.IsOpen));
@@ -115,7 +115,7 @@ namespace PaderConference.IntegrationTests.Services
                 await connection.Hub.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.KickParticipant), request);
 
             // assert
-            Assert.True(result.Success);
+            AssertSuccess(result);
 
             await autoResetEvent.WaitTimeoutAsync();
         }

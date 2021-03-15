@@ -56,7 +56,7 @@ namespace PaderConference.IntegrationTests.Services
                 new SetTemporaryPermissionDto(testUser.Sub, permission.Key, (JValue) JToken.FromObject(true)));
 
             // assert
-            Assert.True(result.Success);
+            AssertSuccess(result);
 
             await testUserConnection.SyncObjects.AssertSyncObject<SynchronizedParticipantPermissions>(syncObjId,
                 value => Assert.Contains(value.Permissions, x => x.Key == permission.Key));
@@ -75,14 +75,14 @@ namespace PaderConference.IntegrationTests.Services
 
             var result = await connection.Hub.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.SetTemporaryPermission),
                 new SetTemporaryPermissionDto(testUser.Sub, permission.Key, (JValue) JToken.FromObject(true)));
-            Assert.True(result.Success);
+            AssertSuccess(result);
 
             // act
             result = await connection.Hub.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.SetTemporaryPermission),
                 new SetTemporaryPermissionDto(testUser.Sub, permission.Key, null));
 
             // assert
-            Assert.True(result.Success, result.Error?.ToString());
+            AssertSuccess(result);
 
             var syncObjId = SynchronizedParticipantPermissionsProvider.GetObjIdOfParticipant(testUser.Sub);
             await testUserConnection.SyncObjects.AssertSyncObject<SynchronizedParticipantPermissions>(syncObjId,
@@ -106,7 +106,7 @@ namespace PaderConference.IntegrationTests.Services
                 new SetTemporaryPermissionDto(testUser.Sub, permission.Key, (JValue) JToken.FromObject(true)));
 
             // assert
-            Assert.False(result.Success);
+            AssertSuccess(result);
 
             var syncObjId = SynchronizedParticipantPermissionsProvider.GetObjIdOfParticipant(testUser.Sub);
             await testUserConnection.SyncObjects.AssertSyncObject<SynchronizedParticipantPermissions>(syncObjId,
@@ -128,7 +128,7 @@ namespace PaderConference.IntegrationTests.Services
                     nameof(CoreHub.FetchPermissions), null);
 
             // assert
-            Assert.True(result.Success);
+            AssertSuccess(result);
 
             Assert.NotEmpty(result.Response!.Layers);
             Assert.Equal(testUser.Sub, result.Response!.ParticipantId);
@@ -149,7 +149,7 @@ namespace PaderConference.IntegrationTests.Services
                     nameof(CoreHub.FetchPermissions), Moderator.Sub);
 
             // assert
-            Assert.False(result.Success);
+            AssertSuccess(result);
             AssertErrorCode(ServiceErrorCode.PermissionDenied, result.Error!);
         }
 
@@ -168,7 +168,7 @@ namespace PaderConference.IntegrationTests.Services
                     nameof(CoreHub.FetchPermissions), testUser.Sub);
 
             // assert
-            Assert.True(result.Success);
+            AssertSuccess(result);
             Assert.NotEmpty(result.Response!.Layers);
         }
     }
