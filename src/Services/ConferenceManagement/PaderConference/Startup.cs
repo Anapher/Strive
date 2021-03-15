@@ -135,21 +135,28 @@ namespace PaderConference
 
             // Masstransit / RabbitMQ
             var rabbitMqOptions = Configuration.GetSection("RabbitMq").Get<RabbitMqOptions>();
-            services.AddMassTransit(x =>
+            services.AddMassTransit(config =>
             {
                 //x.AddSignalRHub<CoreHub>();
-                x.AddConsumersFromNamespaceContaining<ParticipantKickedConsumer>();
-                x.AddConsumer<MediatrNotificationConsumer>();
+                config.AddConsumersFromNamespaceContaining<ParticipantKickedConsumer>();
+                config.AddConsumer<MediatrNotificationConsumer>();
 
                 if (rabbitMqOptions.UseInMemory)
                 {
-                    x.AddMessageScheduler(new Uri("queue:schedule"));
-                    x.UsingInMemory((_, cfg) => { cfg.UseInMemoryScheduler("scheduler"); });
+                    Uri schedulerEndpoint = new("queue:scheduler");
+                    config.AddMessageScheduler(schedulerEndpoint);
+                    config.UsingInMemory((context, configurator) =>
+                    {
+                        configurator.UseInMemoryScheduler("scheduler");
+                        configurator.ConfigureEndpoints(context);
+
+                        ScheduledMediator.Configure(configurator, context);
+                    });
                 }
                 else
                 {
-                    x.AddRabbitMqMessageScheduler();
-                    x.UsingRabbitMq((context, configurator) =>
+                    config.AddRabbitMqMessageScheduler();
+                    config.UsingRabbitMq((context, configurator) =>
                     {
                         if (rabbitMqOptions.RabbitMq != null)
                             configurator.ConfigureOptions(rabbitMqOptions.RabbitMq);
@@ -158,10 +165,13 @@ namespace PaderConference
                         configurator.UseDelayedExchangeMessageScheduler();
 
                         configurator.ConfigureEndpoints(context);
+
+                        ScheduledMediator.Configure(configurator, context);
                     });
                 }
             });
             services.AddMassTransitHostedService();
+            services.AddMediator();
 
             // Swagger
             services.AddSwaggerGen(c =>

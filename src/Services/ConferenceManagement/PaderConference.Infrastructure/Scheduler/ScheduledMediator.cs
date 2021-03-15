@@ -1,13 +1,17 @@
 ﻿using System;
 using System.Threading.Tasks;
 using MassTransit;
-using MediatR;
+using Newtonsoft.Json;
+using PaderConference.Core.Interfaces;
 using PaderConference.Core.Interfaces.Services;
 
 namespace PaderConference.Infrastructure.Scheduler
 {
     public class ScheduledMediator : IScheduledMediator
     {
+        private const string QueueName = "notification-scheduler";
+        private static readonly Uri Destination = new($"queue:{QueueName}");
+
         private readonly IMessageScheduler _messageScheduler;
 
         public ScheduledMediator(IMessageScheduler messageScheduler)
@@ -15,16 +19,26 @@ namespace PaderConference.Infrastructure.Scheduler
             _messageScheduler = messageScheduler;
         }
 
-        public async ValueTask<string> Schedule<T>(T notification, DateTimeOffset scheduleDate)
-            where T : class, INotification
+        public static void Configure(IReceiveConfigurator configurator, IServiceProvider context)
         {
-            var message = await _messageScheduler.SchedulePublish(scheduleDate.DateTime, notification);
+            configurator.ReceiveEndpoint(QueueName, e => e.Consumer<MediatrNotificationConsumer>(context));
+        }
+
+        public async ValueTask<string> Schedule<T>(T notification, DateTimeOffset scheduleDate)
+            where T : class, IScheduledNotification
+        {
+            var serialized = JsonConvert.SerializeObject(notification);
+            var typeName = typeof(T).AssemblyQualifiedName;
+
+            var message = await _messageScheduler.ScheduleSend<IScheduledNotificationWrapper>(Destination,
+                scheduleDate.UtcDateTime, new {JsonSerialized = serialized, TypeName = typeName});
+
             return message.TokenId.ToString("N");
         }
 
-        public async ValueTask Remove<T>(string id) where T : class, INotification
+        public async ValueTask Remove<T>(string id) where T : class, IScheduledNotification
         {
-            await _messageScheduler.CancelScheduledPublish<T>(Guid.ParseExact(id, "N"));
+            await _messageScheduler.CancelScheduledSend(Destination, Guid.ParseExact(id, "N"));
         }
     }
 }
