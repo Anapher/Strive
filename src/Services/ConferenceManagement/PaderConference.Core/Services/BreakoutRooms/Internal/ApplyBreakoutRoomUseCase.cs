@@ -86,7 +86,10 @@ namespace PaderConference.Core.Services.BreakoutRooms.Internal
         {
             if (state.Amount > openedRooms.Count)
             {
-                var roomsToCreate = FindMissingRoomsToCreate(state.Amount - openedRooms.Count, openedRooms);
+                var syncRooms = (SynchronizedRooms) await _mediator.Send(
+                    new FetchSynchronizedObjectRequest(conferenceId, SynchronizedRoomsProvider.SynchronizedObjectId));
+
+                var roomsToCreate = FindMissingRoomsToCreate(state.Amount - openedRooms.Count, syncRooms);
                 var createdRooms = await _mediator.Send(new CreateRoomsRequest(conferenceId, roomsToCreate));
 
                 return openedRooms.Concat(createdRooms.Select(x => x.RoomId)).ToList();
@@ -98,7 +101,7 @@ namespace PaderConference.Core.Services.BreakoutRooms.Internal
             return openedRooms;
         }
 
-        private IReadOnlyList<RoomCreationInfo> FindMissingRoomsToCreate(int amount, IReadOnlyList<string> openedRooms)
+        private IReadOnlyList<RoomCreationInfo> FindMissingRoomsToCreate(int amount, SynchronizedRooms rooms)
         {
             var createRooms = new List<RoomCreationInfo>();
 
@@ -110,7 +113,7 @@ namespace PaderConference.Core.Services.BreakoutRooms.Internal
                 do
                 {
                     name = _options.NamingStrategy.GetName(currentPos++);
-                } while (openedRooms.Contains(name));
+                } while (rooms.Rooms.Any(x => x.DisplayName == name));
 
                 createRooms.Add(new RoomCreationInfo(name));
             }
