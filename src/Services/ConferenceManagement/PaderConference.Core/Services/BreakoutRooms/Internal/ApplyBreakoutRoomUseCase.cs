@@ -6,7 +6,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.Options;
-using PaderConference.Core.Extensions;
 using PaderConference.Core.Interfaces.Gateways.Repositories;
 using PaderConference.Core.Interfaces.Services;
 using PaderConference.Core.Services.BreakoutRooms.Gateways;
@@ -86,10 +85,8 @@ namespace PaderConference.Core.Services.BreakoutRooms.Internal
         {
             if (state.Amount > openedRooms.Count)
             {
-                var syncRooms = (SynchronizedRooms) await _mediator.Send(
-                    new FetchSynchronizedObjectRequest(conferenceId, SynchronizedRoomsProvider.SynchronizedObjectId));
-
-                var roomsToCreate = FindMissingRoomsToCreate(state.Amount - openedRooms.Count, syncRooms);
+                var rooms = await GetRoomInformation(conferenceId, openedRooms);
+                var roomsToCreate = FindMissingRoomsToCreate(state.Amount - openedRooms.Count, rooms);
                 var createdRooms = await _mediator.Send(new CreateRoomsRequest(conferenceId, roomsToCreate));
 
                 return openedRooms.Concat(createdRooms.Select(x => x.RoomId)).ToList();
@@ -101,7 +98,23 @@ namespace PaderConference.Core.Services.BreakoutRooms.Internal
             return openedRooms;
         }
 
-        private IReadOnlyList<RoomCreationInfo> FindMissingRoomsToCreate(int amount, SynchronizedRooms rooms)
+        private async Task<IReadOnlyList<Room>> GetRoomInformation(string conferenceId,
+            IReadOnlyList<string> openedRooms)
+        {
+            if (!openedRooms.Any())
+                return ImmutableList<Room>.Empty;
+
+            var syncRooms = await FetchSynchronizedRooms(conferenceId);
+            return MapOpenedRooms(syncRooms, openedRooms).ToList();
+        }
+
+        private async Task<SynchronizedRooms> FetchSynchronizedRooms(string conferenceId)
+        {
+            return (SynchronizedRooms) await _mediator.Send(
+                new FetchSynchronizedObjectRequest(conferenceId, SynchronizedRoomsProvider.SynchronizedObjectId));
+        }
+
+        private IReadOnlyList<RoomCreationInfo> FindMissingRoomsToCreate(int amount, IReadOnlyList<Room> rooms)
         {
             var createRooms = new List<RoomCreationInfo>();
 
@@ -113,7 +126,7 @@ namespace PaderConference.Core.Services.BreakoutRooms.Internal
                 do
                 {
                     name = _options.NamingStrategy.GetName(currentPos++);
-                } while (rooms.Rooms.Any(x => x.DisplayName == name));
+                } while (rooms.Any(x => x.DisplayName == name));
 
                 createRooms.Add(new RoomCreationInfo(name));
             }
@@ -124,18 +137,21 @@ namespace PaderConference.Core.Services.BreakoutRooms.Internal
         private async Task<IReadOnlyList<string>> RemoveRooms(string conferenceId, int amount,
             IReadOnlyList<string> openedRooms)
         {
-            var syncRooms = (SynchronizedRooms) await _mediator.Send(
-                new FetchSynchronizedObjectRequest(conferenceId, SynchronizedRoomsProvider.SynchronizedObjectId));
+            var syncRooms = await FetchSynchronizedRooms(conferenceId);
 
             // order rooms by least participants, then by their naming index (desc)
-            var removeRooms = openedRooms.Select(roomId => syncRooms.Rooms.FirstOrDefault(x => x.RoomId == roomId))
-                .WhereNotNull()
+            var removeRooms = MapOpenedRooms(syncRooms, openedRooms)
                 .OrderBy(room => syncRooms.Participants.Count(participantMap => participantMap.Value == room.RoomId))
                 .ThenByDescending(room => _options.NamingStrategy.ParseIndex(room.DisplayName)).Take(amount)
                 .Select(x => x.RoomId).ToList();
 
             await _mediator.Send(new RemoveRoomsRequest(conferenceId, removeRooms));
             return openedRooms.Except(removeRooms).ToList();
+        }
+
+        private IEnumerable<Room> MapOpenedRooms(SynchronizedRooms syncRooms, IEnumerable<string> openedRooms)
+        {
+            return syncRooms.Rooms.Where(x => openedRooms.Contains(x.RoomId)).ToList();
         }
 
         private async Task<string?> CreateTimer(DateTimeOffset? deadline, string conferenceId)
