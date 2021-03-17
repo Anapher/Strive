@@ -22,8 +22,8 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/cache@v2
         with:
-          path: "./node_modules"
-          key: ${{ runner.os }}--sfu-modules-${{ hashFiles('./yarn.lock') }}
+          path: "src/Services/SFU/node_modules"
+          key: ${{ runner.os }}-sfu-modules-${{ hashFiles('src/Services/SFU/yarn.lock') }}
       - name: Install modules
         run: yarn
       - name: Run tests
