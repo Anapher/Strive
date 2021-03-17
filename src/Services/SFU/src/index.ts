@@ -21,18 +21,14 @@ async function main() {
 
    // try to connect
    await rabbitConn.getChannel();
-   rabbitConn.on('error', async () => {
-      try {
-         await rabbitConn.getChannel();
-      } catch (error) {
-         lightship.shutdown();
-      }
+   rabbitConn.on('fatal', async () => {
+      lightship.shutdown();
    });
 
    const workers = new MediaSoupWorkers();
    await workers.run(config.mediasoup.numWorkers, config.mediasoup.workerSettings);
 
-   const client = new ConferenceManagementClient(config.services.conferenceManagementUrl);
+   const client = new ConferenceManagementClient(config.services.conferenceInfoRequestUrl);
 
    const conferenceManager = new ConferenceManager(
       rabbitConn,

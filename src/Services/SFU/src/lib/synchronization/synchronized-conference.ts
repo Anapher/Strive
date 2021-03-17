@@ -1,44 +1,91 @@
 import { EventEmitter } from 'events';
-import { ConferenceInfo } from '../types';
+import { ConferenceInfo, ConferenceInfoUpdate, ConferenceInfoUpdateDto } from '../types';
 import { RabbitChannel } from '../../rabbitmq/rabbit-mq-conn';
+import { objectToMap } from '../../utils/map-utils';
 
 /**
  * Holds a conference info that is synchronized using rabbit mq
  */
 export class SynchronizedConference extends EventEmitter {
-   constructor(private channel: RabbitChannel, private queue: string, private info: ConferenceInfo) {
+   private info: ConferenceInfo | undefined;
+   private cachedUpdates = new Array<ConferenceInfoUpdate>();
+
+   constructor(private channel: RabbitChannel, private queue: string) {
       super();
    }
 
    /**
-    * Activate the synchronization through rabbit mq
+    * Activate the synchronization with rabbit mq
     */
-   public async init(): Promise<void> {
+   public async start(): Promise<void> {
       await this.channel.sub.consume(
          this.queue,
          (message) => {
             if (message) {
-               this.processMessage(message.content.toString());
+               const messageDeserialized = JSON.parse(message.content.toString());
+
+               const update: ConferenceInfoUpdateDto = messageDeserialized.message.update;
+               const fixed: ConferenceInfoUpdate = {
+                  participantPermissions: objectToMap(update.participantPermissions),
+                  participantToRoom: objectToMap(update.participantToRoom),
+                  removedParticipants: update.removedParticipants,
+               };
+
+               this.processUpdate(fixed);
             }
          },
          { noAck: true },
       );
    }
 
+   public initialize(value: ConferenceInfo): void {
+      if (this.info) throw new Error('Synchronized conference can only be initialized once');
+
+      const updated = this.cachedUpdates.reduce((previous, update) => applyUpdate(previous, update), value);
+      this.info = updated;
+
+      this.cachedUpdates = [];
+   }
+
    /**
     * Get a snapshot of the current conference info
     */
    public get conferenceInfo(): ConferenceInfo {
+      if (!this.info) throw new Error('The synchronized conference must first be initalized.');
       return this.info;
    }
 
-   private processMessage(message: string) {
-      console.log('message from rabbit', message);
+   private processUpdate(update: ConferenceInfoUpdate) {
+      if (!this.info) {
+         this.cachedUpdates.push(update);
+         return;
+      }
 
-      // todo
+      this.info = applyUpdate(this.info, update);
+      this.emit('message', update);
    }
 
    public async close(): Promise<void> {
       await this.channel.sub.deleteQueue(this.queue);
    }
+}
+
+export function applyUpdate(conference: ConferenceInfo, update: ConferenceInfoUpdate): ConferenceInfo {
+   const newPermissions = new Map(conference.participantPermissions);
+   const newParticipants = new Map(conference.participantToRoom);
+
+   for (const [participantId, permissions] of update.participantPermissions.entries()) {
+      newPermissions.set(participantId, permissions);
+   }
+
+   for (const [participantId, roomId] of update.participantToRoom) {
+      newParticipants.set(participantId, roomId);
+   }
+
+   for (const participantId of update.removedParticipants) {
+      newPermissions.delete(participantId);
+      newParticipants.delete(participantId);
+   }
+
+   return { participantPermissions: newPermissions, participantToRoom: newParticipants };
 }

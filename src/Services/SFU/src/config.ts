@@ -50,7 +50,8 @@ const config: Config = {
       port: Number(process.env.HTTP_PORT) || 3000,
    },
    services: {
-      conferenceManagementUrl: '',
+      conferenceInfoRequestUrl:
+         process.env.API_CONFERENCE_MANAGEMENT || 'http://localhost:55104/v1/sfu/{conferenceId}?apiKey=testApiKey',
       rabbitMq: process.env.AMQP_CONNECTION_STRING || 'amqp://localhost:5672',
    },
 };
@@ -71,7 +72,7 @@ type Config = {
       port: number;
    };
    services: {
-      conferenceManagementUrl: string;
+      conferenceInfoRequestUrl: string;
       rabbitMq: string;
    };
 };

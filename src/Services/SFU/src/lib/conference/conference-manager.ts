@@ -23,8 +23,7 @@ export default class ConferenceManager {
    ) {
       this.repository = new ConferenceRepository(client, rabbitConn);
 
-      rabbitConn.on('error', async () => {
-         await rabbitConn.getChannel(); // reconnect
+      rabbitConn.on('reset', async () => {
          for (const conference of this.conferences.keys()) {
             await this.registerConferenceEvents(conference);
          }

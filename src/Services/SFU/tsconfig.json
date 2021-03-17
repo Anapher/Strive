@@ -18,5 +18,5 @@
       "forceConsistentCasingInFileNames": true /* Disallow inconsistently-cased references to the same file. */,
       "downlevelIteration": true
    },
-   "include": ["src"]
+   "include": ["src", "test"]
 }

@@ -35,6 +35,7 @@ export default class RabbitMqConn extends EventEmitter {
                const onError = () => {
                   logger.error('Connection failed');
                   this.cachedChannel = undefined;
+                  this.getChannel(); // reconnect
                };
 
                const conn = await amqp.connect(this.url);
@@ -45,6 +46,8 @@ export default class RabbitMqConn extends EventEmitter {
 
                const sub = await conn.createChannel();
                sub.on('close', onError);
+
+               this.emit('reset');
 
                return { pub, sub };
             },
@@ -57,7 +60,7 @@ export default class RabbitMqConn extends EventEmitter {
             },
          );
       } catch (error) {
-         this.emit('error', error);
+         this.emit('fatal', error);
          throw error;
       }
 
