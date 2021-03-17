@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -29,8 +30,8 @@ namespace PaderConference.Core.Services.Rooms.UseCases
 
             _logger.LogDebug("Switch participant {participant} to room {roomId}", participant, roomId);
             await _roomRepository.SetParticipantRoom(participant, roomId);
-            await _mediator.Publish(
-                new ParticipantsRoomChangedNotification(participant.ConferenceId, participant.Yield(), false));
+            await _mediator.Publish(new ParticipantsRoomChangedNotification(participant.ConferenceId,
+                participant.Yield().ToList(), false));
 
             return Unit.Value;
         }

@@ -104,7 +104,7 @@ export default function configureEndpoints(app: Express, conferenceManager: Conf
          return;
       }
 
-      res.json(result.response);
+      res.json();
    });
 
    app.post('/:conferenceId/change-producer-source', async (req, res) => {
@@ -122,6 +122,6 @@ export default function configureEndpoints(app: Express, conferenceManager: Conf
          return;
       }
 
-      res.json(result.response);
+      res.json();
    });
 }

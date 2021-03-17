@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace PaderConference.Tests.Utils
@@ -24,6 +26,37 @@ namespace PaderConference.Tests.Utils
                     Assert.Contains(expectedItem, actualList);
                 }
             }
+        }
+
+        public static async Task WaitForAssert(Action assertAction, TimeSpan? timeout = null)
+        {
+            timeout ??= TimeSpan.FromSeconds(30);
+
+            try
+            {
+                using (var cancellationTokenSource = new CancellationTokenSource(timeout.Value))
+                {
+                    while (true)
+                    {
+                        try
+                        {
+                            assertAction();
+                            return;
+                        }
+                        catch (Exception)
+                        {
+                            // ignored
+                        }
+
+                        await Task.Delay(100, cancellationTokenSource.Token);
+                    }
+                }
+            }
+            catch (TaskCanceledException)
+            {
+            }
+
+            assertAction();
         }
     }
 }

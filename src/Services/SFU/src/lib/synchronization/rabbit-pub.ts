@@ -8,7 +8,7 @@ import {
    ConsumerLayersChanged,
    ConsumerScoreArgs,
 } from '../conference/pub-types';
-import RabbitMqConn from './rabbit-mq-conn';
+import RabbitMqConn from '../../rabbitmq/rabbit-mq-conn';
 
 export default class RabbitPub implements ConferenceMessenger {
    constructor(private conn: RabbitMqConn, private conferenceId: string) {}

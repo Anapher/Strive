@@ -2,7 +2,7 @@ import { RouterOptions, WebRtcTransportOptions } from 'mediasoup/lib/types';
 import MediaSoupWorkers from '../../media-soup-workers';
 import Logger from '../../utils/logger';
 import { ConferenceRepository } from '../synchronization/conference-repository';
-import RabbitMqConn from '../synchronization/rabbit-mq-conn';
+import RabbitMqConn from '../../rabbitmq/rabbit-mq-conn';
 import RabbitPub from '../synchronization/rabbit-pub';
 import { Conference } from './conference';
 

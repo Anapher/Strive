@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 import { ConferenceInfo } from '../types';
-import { RabbitChannel } from './rabbit-mq-conn';
+import { RabbitChannel } from '../../rabbitmq/rabbit-mq-conn';
 
 /**
  * Holds a conference info that is synchronized using rabbit mq
@@ -33,6 +33,8 @@ export class SynchronizedConference extends EventEmitter {
    }
 
    private processMessage(message: string) {
+      console.log('message from rabbit', message);
+
       // todo
    }
 

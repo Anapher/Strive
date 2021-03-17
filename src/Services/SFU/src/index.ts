@@ -4,7 +4,7 @@ import config from './config';
 import configureEndpoints from './controllers';
 import ConferenceManager from './lib/conference/conference-manager';
 import { ConferenceManagementClient } from './lib/synchronization/conference-management-client';
-import RabbitMqConn from './lib/synchronization/rabbit-mq-conn';
+import RabbitMqConn from './rabbitmq/rabbit-mq-conn';
 import MediaSoupWorkers from './media-soup-workers';
 import Logger from './utils/logger';
 import { sleep } from './utils/promise-utils';
@@ -16,7 +16,6 @@ main();
 
 async function main() {
    const lightship = createLightship({ detectKubernetes: false });
-   const minute = 60 * 1000;
 
    const rabbitConn = new RabbitMqConn(config.services.rabbitMq);
 
@@ -57,6 +56,7 @@ async function main() {
    lightship.registerShutdownHandler(async () => {
       // Allow sufficient amount of time to allow all of the existing
       // HTTP requests to finish before terminating the service.
+      const minute = 60 * 1000;
       await sleep(minute);
       server.close();
 

@@ -1,7 +1,7 @@
+import { EventEmitter } from 'events';
 import { retry } from '@lifeomic/attempt';
 import amqp, { Channel } from 'amqplib';
-import { EventEmitter } from 'events';
-import Logger from '../../utils/logger';
+import Logger from '../utils/logger';
 
 const logger = new Logger('RabbitMqConnection');
 

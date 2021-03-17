@@ -2,7 +2,7 @@ import Logger from '../../utils/logger';
 import { ConferenceInfo } from '../types';
 import { ConferenceManagementClient } from './conference-management-client';
 import PubSubMessenger from './pub-sub-messenger';
-import RabbitMqConn, { RabbitChannel } from './rabbit-mq-conn';
+import RabbitMqConn, { RabbitChannel } from '../../rabbitmq/rabbit-mq-conn';
 import { SynchronizedConference } from './synchronized-conference';
 
 const logger = new Logger();

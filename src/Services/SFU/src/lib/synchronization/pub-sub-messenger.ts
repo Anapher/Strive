@@ -1,5 +1,5 @@
 import { ConferenceInfo } from '../types';
-import RabbitMqConn, { RabbitChannel } from './rabbit-mq-conn';
+import RabbitMqConn, { RabbitChannel } from '../../rabbitmq/rabbit-mq-conn';
 import { SynchronizedConference } from './synchronized-conference';
 
 export type SynchronizedConferenceFactory = (info: ConferenceInfo) => Promise<SynchronizedConference>;

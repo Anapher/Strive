@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using PaderConference.Core.Extensions;
@@ -24,8 +25,8 @@ namespace PaderConference.Core.Services.Rooms.NotificationHandlers
             var (participant, _) = notification;
 
             await _roomRepository.UnsetParticipantRoom(participant);
-            await _mediator.Publish(
-                new ParticipantsRoomChangedNotification(participant.ConferenceId, participant.Yield(), true));
+            await _mediator.Publish(new ParticipantsRoomChangedNotification(participant.ConferenceId,
+                participant.Yield().ToList(), true));
         }
     }
 }

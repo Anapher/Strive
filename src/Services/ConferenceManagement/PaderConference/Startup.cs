@@ -37,7 +37,9 @@ using PaderConference.Infrastructure.KeyValue.Redis;
 using PaderConference.Infrastructure.Scheduler;
 using PaderConference.Infrastructure.Serialization;
 using PaderConference.Messaging.Consumers;
+using PaderConference.Messaging.Contracts;
 using PaderConference.Services;
+using RabbitMQ.Client;
 using StackExchange.Redis.Extensions.Core.Abstractions;
 using StackExchange.Redis.Extensions.Core.Configuration;
 using StackExchange.Redis.Extensions.Newtonsoft;
@@ -134,7 +136,12 @@ namespace PaderConference
             });
 
             // Masstransit / RabbitMQ
+            services.Configure<SfuOptions>(Configuration.GetSection("SFU"));
+            services.Configure<RabbitMqOptions>(Configuration.GetSection("RabbitMq"));
+
             var rabbitMqOptions = Configuration.GetSection("RabbitMq").Get<RabbitMqOptions>();
+            var sfuOptions = Configuration.GetSection("SFU").Get<SfuOptions>();
+
             services.AddMassTransit(config =>
             {
                 //x.AddSignalRHub<CoreHub>();
@@ -167,6 +174,16 @@ namespace PaderConference
                         configurator.ConfigureEndpoints(context);
 
                         ScheduledMediator.Configure(configurator, context);
+
+                        configurator.Message<MediaStateChanged>(topologyConfigurator =>
+                        {
+                            topologyConfigurator.SetEntityName(sfuOptions.SfuPublishExchange);
+                        });
+                        configurator.Publish<MediaStateChanged>(top =>
+                        {
+                            top.ExchangeType = ExchangeType.Direct;
+                            top.Durable = false;
+                        });
                     });
                 }
             });

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
+using PaderConference.Core.Extensions;
 
 namespace PaderConference.Core.Services.Permissions
 {
@@ -23,6 +24,15 @@ namespace PaderConference.Core.Services.Permissions
         public CachedPermissionStack(IReadOnlyList<IReadOnlyDictionary<string, JValue>> stack)
         {
             _stack = stack;
+        }
+
+        /// <summary>
+        ///     Initialize a new instance of <see cref="CachedPermissionStack" />
+        /// </summary>
+        /// <param name="singleLayer">The single layer of the stack</param>
+        public CachedPermissionStack(IReadOnlyDictionary<string, JValue> singleLayer)
+        {
+            _stack = singleLayer.Yield().ToList();
         }
 
         /// <summary>
