@@ -4,6 +4,8 @@ on:
     paths:
       - src/**
       - .github/workflows/asp-net-core-test.yml
+      - "!src/Services/SFU/**"
+      - "!src/Web/WebSPA/Client/**"
 
   pull_request:
     branches:
@@ -11,6 +13,8 @@ on:
     paths:
       - src/**
       - .github/workflows/asp-net-core-test.yml
+      - "!src/Services/SFU/**"
+      - "!src/Web/WebSPA/Client/**"
 
 jobs:
   test:
