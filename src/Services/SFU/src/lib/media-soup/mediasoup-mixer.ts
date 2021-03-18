@@ -34,8 +34,9 @@ export class MediasoupMixer {
       this.producers.set(producerInfo.producer.id, producerInfo);
 
       for (const receiver of this.receivers.values()) {
-         // if (receiver.participantId !== producerInfo.participantId) {
-         await this.createConsumer(receiver, producerInfo);
+         if (receiver.participantId !== producerInfo.participantId) {
+            await this.createConsumer(receiver, producerInfo);
+         }
       }
    }
 
@@ -97,7 +98,7 @@ export class MediasoupMixer {
       }
    }
 
-   private async createConsumer(connection: Connection, { producer, participantId }: ProducerInfo) {
+   private async createConsumer(connection: Connection, { producer, participantId }: ProducerInfo): Promise<void> {
       logger.debug(
          'createConsumer() from %s to %s (producer id: %s)',
          participantId,

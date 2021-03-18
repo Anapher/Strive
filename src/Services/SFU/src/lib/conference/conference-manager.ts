@@ -6,6 +6,12 @@ import RabbitMqConn from '../../rabbitmq/rabbit-mq-conn';
 import { Conference } from './conference';
 import conferenceFactory from './conference-factory';
 
+export type ConferenceManagerOptions = {
+   routerOptions: RouterOptions;
+   webrtcOptions: WebRtcTransportOptions;
+   maxIncomingBitrate?: number;
+};
+
 /**
  * Manages the local conferences this SFU handles
  */
@@ -17,31 +23,15 @@ export default class ConferenceManager {
       private rabbitConn: RabbitMqConn,
       private workers: MediaSoupWorkers,
       client: ConferenceManagementClient,
-      private routerOptions: RouterOptions,
-      private webrtcOptions: WebRtcTransportOptions,
-      private maxIncomingBitrate?: number,
+      private options: ConferenceManagerOptions,
    ) {
       this.repository = new ConferenceRepository(client, rabbitConn);
-
-      rabbitConn.on('reset', async () => {
-         for (const conference of this.conferences.keys()) {
-            await this.registerConferenceEvents(conference);
-         }
-      });
    }
 
-   public async getConference(id: string): Promise<Conference | undefined> {
+   public async getConference(id: string): Promise<Conference> {
       let localConference = this.conferences.get(id);
       if (!localConference) {
-         localConference = await conferenceFactory(
-            id,
-            this.workers,
-            this.repository,
-            this.rabbitConn,
-            this.routerOptions,
-            this.webrtcOptions,
-            this.maxIncomingBitrate,
-         );
+         localConference = await conferenceFactory(id, this.workers, this.repository, this.rabbitConn, this.options);
 
          this.conferences.set(id, localConference);
          await this.registerConferenceEvents(id);

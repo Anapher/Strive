@@ -2,7 +2,7 @@ import express from 'express';
 import { createLightship } from 'lightship';
 import config from './config';
 import configureEndpoints from './controllers';
-import ConferenceManager from './lib/conference/conference-manager';
+import ConferenceManager, { ConferenceManagerOptions } from './lib/conference/conference-manager';
 import { ConferenceManagementClient } from './lib/synchronization/conference-management-client';
 import RabbitMqConn from './rabbitmq/rabbit-mq-conn';
 import MediaSoupWorkers from './media-soup-workers';
@@ -30,14 +30,13 @@ async function main() {
 
    const client = new ConferenceManagementClient(config.services.conferenceInfoRequestUrl);
 
-   const conferenceManager = new ConferenceManager(
-      rabbitConn,
-      workers,
-      client,
-      config.router,
-      config.webRtcTransport.options,
-      config.webRtcTransport.maxIncomingBitrate,
-   );
+   const conferenceManagerOptions: ConferenceManagerOptions = {
+      routerOptions: config.router,
+      webrtcOptions: config.webRtcTransport.options,
+      maxIncomingBitrate: config.webRtcTransport.maxIncomingBitrate,
+   };
+
+   const conferenceManager = new ConferenceManager(rabbitConn, workers, client, conferenceManagerOptions);
 
    const app = express();
    configureEndpoints(app, conferenceManager);

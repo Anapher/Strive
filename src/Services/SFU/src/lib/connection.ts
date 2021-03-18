@@ -10,7 +10,7 @@ export default class Connection {
       /** participant id */
       public participantId: string,
 
-      /**  true if the client is joined so he can receive and produce media, false if it is still creating transports and currently joining */
+      /** true if the client is joined so he can receive and produce media, false if it is still creating transports and currently joining */
       public joined: boolean = false,
    ) {}
 

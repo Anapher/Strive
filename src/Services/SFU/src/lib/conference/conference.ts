@@ -150,25 +150,23 @@ export class Conference {
 
       if (action === 'pause') {
          await stream.pause();
+      } else if (action === 'resume') {
+         await stream.resume();
       } else if (action === 'close') {
          stream.close();
 
          if (type === 'consumer') {
             connection.consumers.delete(id);
          } else {
-            const producer = connection.producers.get(id);
-            if (producer) {
-               connection.producers.delete(id);
+            connection.producers.delete(id);
 
-               const participant = this.participants.get(connection.participantId);
-               if (participant) {
-                  this.removeProducer(producer, participant);
-                  await this.roomManager.updateParticipant(participant);
-               }
+            const producer = stream as Producer;
+            const participant = this.participants.get(connection.participantId);
+            if (participant) {
+               this.removeProducer(producer, participant);
+               await this.roomManager.updateParticipant(participant);
             }
          }
-      } else if (action === 'resume') {
-         await stream.resume();
       }
 
       // update streams
@@ -316,6 +314,8 @@ export class Conference {
       }
 
       await this.roomManager.updateParticipant(participant);
+
+      if (consuming) participant.receiveConnection = connection;
 
       return {
          success: true,

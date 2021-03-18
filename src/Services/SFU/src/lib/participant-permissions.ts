@@ -2,10 +2,10 @@ import { Permission } from './permissions';
 import { ConferenceInfo } from './types';
 
 export class ParticipantPermissions {
-   constructor(private participantId: string, private data: ConferenceInfo) {}
+   constructor(private participantId: string, private conferenceInfo: ConferenceInfo) {}
 
-   public async get<T>(perm: Permission<T>): Promise<T | undefined> {
-      const value = this.data.participantPermissions.get(this.participantId);
+   public get<T>(perm: Permission<T>): T | undefined {
+      const value = this.conferenceInfo.participantPermissions.get(this.participantId);
       if (!value) return undefined;
 
       return value[perm.key];

@@ -1,4 +1,5 @@
 import { Participant } from '../participant';
+import { ProducerSource } from '../types';
 import { ConferenceMessenger } from './conference-messenger';
 import { ConferenceParticipantStreamInfo, ParticipantStreams } from './pub-types';
 
@@ -23,30 +24,29 @@ export class StreamInfoRepo {
    }
 
    private createParticipantInfo(participant: Participant): ParticipantStreams {
-      const selectedEntries = Object.entries(participant.producers);
+      const streams: ParticipantStreams = {
+         consumers: {},
+         producers: {},
+      };
 
-      const info: ParticipantStreams = { consumers: {}, producers: {} };
+      for (const [type, info] of Object.entries(participant.producers)) {
+         if (!info) continue;
+
+         streams.producers[type as ProducerSource] = {
+            paused: info.producer.paused,
+         };
+      }
 
       for (const connection of participant.connections) {
          for (const [, consumer] of connection.consumers) {
-            info.consumers[consumer.id] = {
+            streams.consumers[consumer.id] = {
                paused: consumer.paused,
                participantId: consumer.appData.participantId,
                loopback: consumer.appData.loopback,
             };
          }
-
-         for (const [, producer] of connection.producers) {
-            const selected = selectedEntries.find(([, x]) => x?.producer.id === producer.id);
-
-            info.producers[producer.id] = {
-               paused: producer.paused,
-               selected: !!selected,
-               kind: producer.appData.source,
-            };
-         }
       }
 
-      return info;
+      return streams;
    }
 }

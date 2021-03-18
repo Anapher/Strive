@@ -189,3 +189,57 @@ test('should emit message event after rabbit mq connection changed with removed 
    await env.resetConnection();
    expect(received).toEqual(true);
 });
+
+test('should not emit any more messages to removed handler', async () => {
+   const conference: ConferenceInfo = {
+      participantToRoom: new Map().set('p1', 'room1'),
+      participantPermissions: new Map().set('p2', { audio: false }),
+   };
+   const env = new TestEnvironment(conference);
+
+   let received = false;
+   const handler = () => {
+      received = true;
+   };
+
+   const repository = env.repository;
+
+   await repository.addMessageHandler('123', handler);
+
+   env.callUpdate({ participantPermissions: {}, participantToRoom: {}, removedParticipants: [] });
+   expect(received).toEqual(true);
+
+   repository.removeMessageHandler('123', handler);
+
+   received = false;
+   env.callUpdate({ participantPermissions: {}, participantToRoom: {}, removedParticipants: [] });
+   expect(received).toEqual(false);
+});
+
+test('should not emit any more messages to removed handler even after reset', async () => {
+   const conference: ConferenceInfo = {
+      participantToRoom: new Map().set('p1', 'room1'),
+      participantPermissions: new Map().set('p2', { audio: false }),
+   };
+   const env = new TestEnvironment(conference);
+
+   let received = false;
+   const handler = () => {
+      received = true;
+   };
+
+   const repository = env.repository;
+
+   await repository.addMessageHandler('123', handler);
+
+   env.callUpdate({ participantPermissions: {}, participantToRoom: {}, removedParticipants: [] });
+   expect(received).toEqual(true);
+
+   repository.removeMessageHandler('123', handler);
+
+   await env.resetConnection();
+
+   received = false;
+   env.callUpdate({ participantPermissions: {}, participantToRoom: {}, removedParticipants: [] });
+   expect(received).toEqual(false);
+});

@@ -51,10 +51,28 @@ export class ConferenceRepository {
       if (!synchronizedConference) throw new Error('The conference is not cached, somehow getConference failed.');
 
       synchronizedConference.on('message', handler);
+
       let handlers = this.messageHandlers.get(conferenceId);
       if (!handlers) this.messageHandlers.set(conferenceId, (handlers = []));
-
       handlers.push(handler);
+   }
+
+   /**
+    * remove a handler for the conference update
+    */
+   public removeMessageHandler(conferenceId: string, handler: MessageHandler): void {
+      const synchronizedConference = this.cachedConferences.get(conferenceId);
+      if (synchronizedConference) {
+         synchronizedConference.off('message', handler);
+      }
+
+      const handlers = this.messageHandlers.get(conferenceId);
+      if (handlers) {
+         this.messageHandlers.set(
+            conferenceId,
+            handlers.filter((x) => x !== handler),
+         );
+      }
    }
 
    private async init(): Promise<void> {

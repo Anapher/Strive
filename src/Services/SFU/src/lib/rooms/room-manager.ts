@@ -30,8 +30,8 @@ export class RoomManager {
    private participantToRoom = new Map<string, string>();
 
    public async updateParticipant(participant: Participant): Promise<void> {
-      // loopback is independent from from the room
-      this.loopbackManager.updateParticipant(participant);
+      // loopback is independent from the room
+      await this.loopbackManager.updateParticipant(participant);
 
       const roomId = await this.getParticipantRoom(participant.participantId);
       if (!roomId) return;

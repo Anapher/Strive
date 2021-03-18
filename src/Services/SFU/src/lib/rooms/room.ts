@@ -1,35 +1,25 @@
-import { ProducerLink } from './../types';
 import { Producer, Router } from 'mediasoup/lib/types';
-import { MEDIA_CAN_SHARE_AUDIO, MEDIA_CAN_SHARE_SCREEN, MEDIA_CAN_SHARE_WEBCAM, Permission } from '../permissions';
 import Logger from '../../utils/logger';
 import { ConferenceMessenger } from '../conference/conference-messenger';
 import Connection from '../connection';
 import { MediasoupMixer } from '../media-soup/mediasoup-mixer';
 import { Participant } from '../participant';
-import { ProducerSource, producerSources } from '../types';
 import { ParticipantPermissions } from '../participant-permissions';
+import { MEDIA_CAN_SHARE_AUDIO, MEDIA_CAN_SHARE_SCREEN, MEDIA_CAN_SHARE_WEBCAM, Permission } from '../permissions';
 import { ConferenceRepository } from '../synchronization/conference-repository';
-
-type ProducerPermission = {
-   permission?: Permission<boolean>;
-   source: ProducerSource;
-};
+import { ProducerSource, producerSources } from '../types';
 
 type ParticipantStatus = {
    activeProducers: { [key in ProducerSource]?: Producer | undefined };
-   receivingConns: Connection[];
+   receivingConn: Connection | undefined;
 };
 
-const producerPermissions: ProducerPermission[] = [
-   { permission: MEDIA_CAN_SHARE_AUDIO, source: 'mic' },
-   { permission: MEDIA_CAN_SHARE_SCREEN, source: 'screen' },
-   { permission: MEDIA_CAN_SHARE_WEBCAM, source: 'webcam' },
-
+const producerPermission: { [key in ProducerSource]?: Permission<boolean> } = {
+   mic: MEDIA_CAN_SHARE_AUDIO,
+   webcam: MEDIA_CAN_SHARE_WEBCAM,
+   screen: MEDIA_CAN_SHARE_SCREEN,
    /** no permissions required to loopback device */
-   { permission: undefined, source: 'loopback-mic' },
-   { permission: undefined, source: 'loopback-webcam' },
-   { permission: undefined, source: 'loopback-screen' },
-];
+};
 
 const logger = new Logger('Room');
 
@@ -43,7 +33,7 @@ export default class Room {
       router: Router,
       private repo: ConferenceRepository,
       private conferenceId: string,
-      private producerSources: ProducerSource[],
+      private supportedProducerSources: ProducerSource[],
    ) {
       this.mixer = new MediasoupMixer(router, signal);
    }
@@ -60,16 +50,8 @@ export default class Room {
 
       const status: ParticipantStatus = {
          activeProducers: {},
-         receivingConns: [],
+         receivingConn: undefined,
       };
-
-      const receiveConn = participant.getReceiveConnection();
-      if (receiveConn) {
-         this.mixer.addReceiveTransport(receiveConn);
-         status.receivingConns.push(receiveConn);
-      } else {
-         logger.debug('No receive transport for %s', participant.participantId);
-      }
 
       this.participantStatus.set(participant.participantId, status);
       this.participants.set(participant.participantId, participant);
@@ -82,44 +64,42 @@ export default class Room {
       if (status) {
          logger.info('updateParticipant() | participantId: %s | roomId: %s', participant.participantId, this.id);
 
-         const receiveConn = participant.getReceiveConnection();
-         if (receiveConn && !status.receivingConns.includes(receiveConn)) {
-            await this.mixer.addReceiveTransport(receiveConn);
-            status.receivingConns.push(receiveConn);
+         const receiveConnectionChanged = status.receivingConn !== participant.receiveConnection;
+         if (receiveConnectionChanged) {
+            if (status.receivingConn) {
+               await this.mixer.removeReceiveTransport(status.receivingConn.connectionId);
+            }
+
+            if (participant.receiveConnection) {
+               await this.mixer.addReceiveTransport(participant.receiveConnection);
+               status.receivingConn = participant.receiveConnection;
+            }
          }
 
          const conferenceInfo = await this.repo.getConference(this.conferenceId);
          const permissions = new ParticipantPermissions(participant.participantId, conferenceInfo);
 
-         for (const { permission, source } of producerPermissions) {
-            if (!this.producerSources.includes(source)) continue;
+         for (const source of producerSources) {
+            if (!this.supportedProducerSources.includes(source)) continue;
 
             const activeProducer = status.activeProducers[source];
-            const currentProducer = participant.producers[source];
+            const newProducer = Room.getProducer(participant, source, permissions);
 
-            let newActiveProducer: ProducerLink | undefined;
-            if (currentProducer) {
-               if (!permission || permissions.get(permission)) {
-                  newActiveProducer = currentProducer;
-               } else {
-                  newActiveProducer = undefined;
+            const producerChanged = newProducer?.producer.id !== activeProducer?.id;
+            if (producerChanged) {
+               if (activeProducer) {
+                  // if a producer was active and changed
+                  this.mixer.removeProducer(activeProducer.id);
+                  status.activeProducers[source] = undefined;
                }
-            }
 
-            if (!this.producerSources.includes(source)) continue;
-
-            if (activeProducer && newActiveProducer?.producer.id !== activeProducer.id) {
-               // if a producer was active and changed
-               this.mixer.removeProducer(activeProducer.id);
-               status.activeProducers[source] = undefined;
-            }
-
-            if (newActiveProducer) {
-               await this.mixer.addProducer({
-                  participantId: participant.participantId,
-                  producer: newActiveProducer.producer,
-               });
-               status.activeProducers[source] = newActiveProducer.producer;
+               if (newProducer) {
+                  await this.mixer.addProducer({
+                     participantId: participant.participantId,
+                     producer: newProducer.producer,
+                  });
+                  status.activeProducers[source] = newProducer.producer;
+               }
             }
          }
       }
@@ -130,8 +110,8 @@ export default class Room {
 
       const status = this.participantStatus.get(participant.participantId);
       if (status) {
-         for (const receivingConn of status.receivingConns) {
-            await this.mixer.removeReceiveTransport(receivingConn.connectionId);
+         if (status.receivingConn) {
+            await this.mixer.removeReceiveTransport(status.receivingConn.connectionId);
          }
 
          for (const source of producerSources) {
@@ -144,5 +124,16 @@ export default class Room {
 
       this.participants.delete(participant.participantId);
       this.participantStatus.delete(participant.participantId);
+   }
+
+   private static getProducer(participant: Participant, source: ProducerSource, permissions: ParticipantPermissions) {
+      if (!participant.producers[source]) return;
+
+      const requiredPermission = producerPermission[source];
+
+      if (!requiredPermission) return participant.producers[source];
+      if (permissions.get(requiredPermission)) return participant.producers[source];
+
+      return undefined;
    }
 }

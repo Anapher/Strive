@@ -1,6 +1,5 @@
 import { ConsumerScore, ConsumerType, MediaKind, RtpParameters } from 'mediasoup/lib/types';
 import { ProducerSource } from '../types';
-import { ConnectionMessage } from './sub-types';
 
 export type ProducerChangedEventArgs = {
    source: ProducerSource;
@@ -42,15 +41,13 @@ export type ConsumerInfo = {
 
 export type ProducerInfo = {
    paused: boolean;
-   selected: boolean;
-   kind?: ProducerSource;
 };
 
 export type ParticipantStreams = {
    consumers: {
       [key: string]: ConsumerInfo;
    };
-   producers: { [key: string]: ProducerInfo };
+   producers: { [key in ProducerSource]?: ProducerInfo };
 };
 
 export type ConferenceParticipantStreamInfo = { [key: string]: ParticipantStreams };
