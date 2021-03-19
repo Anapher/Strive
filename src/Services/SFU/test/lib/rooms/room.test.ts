@@ -303,6 +303,81 @@ test('updateParticipant() | new receive transport | update old transport and sub
    expect(mixer.removeReceiveTransport.mock.calls[0][0]).toEqual('old');
 });
 
+test('leave() | not joined | no error', async () => {
+   const conferenceRepo = createConferenceRepoMock(emptyConference);
+   const mixer = createMediasoupMixerMock();
+
+   const room = new Room(roomId, undefined as any, undefined as any, conferenceRepo, conferenceId, ['mic']);
+   const participant: Participant = {
+      connections: [],
+      participantId: '1',
+      producers: {},
+      receiveConnection: undefined,
+   };
+
+   await room.leave(participant);
+});
+
+test('leave() | joined with receive connection | remove receive connection', async () => {
+   const conferenceRepo = createConferenceRepoMock(emptyConference);
+   const mixer = createMediasoupMixerMock();
+
+   const room = new Room(roomId, undefined as any, undefined as any, conferenceRepo, conferenceId, ['mic']);
+   const participant: Participant = {
+      connections: [],
+      participantId: '1',
+      producers: {},
+      receiveConnection: createConn('receiveConnId'),
+   };
+
+   await room.join(participant);
+   await room.leave(participant);
+
+   expect(mixer.removeReceiveTransport.mock.calls[0][0]).toEqual('receiveConnId');
+});
+
+test('leave() | joined with producer | remove producer', async () => {
+   const conference = conferenceWithPermissions('1', MEDIA_CAN_SHARE_AUDIO);
+   const conferenceRepo = createConferenceRepoMock(conference);
+   const mixer = createMediasoupMixerMock();
+
+   const room = new Room(roomId, undefined as any, undefined as any, conferenceRepo, conferenceId, ['mic']);
+   const participant: Participant = {
+      connections: [],
+      participantId: '1',
+      producers: {
+         mic: createProducer('producerId'),
+      },
+      receiveConnection: undefined,
+   };
+
+   await room.join(participant);
+   await room.leave(participant);
+
+   expect(mixer.removeProducer.mock.calls[0][0]).toEqual('producerId');
+});
+
+test('leave() | has producer but not activated | dont remove producer', async () => {
+   const conference = conferenceWithPermissions('1');
+   const conferenceRepo = createConferenceRepoMock(conference);
+   const mixer = createMediasoupMixerMock();
+
+   const room = new Room(roomId, undefined as any, undefined as any, conferenceRepo, conferenceId, ['mic']);
+   const participant: Participant = {
+      connections: [],
+      participantId: '1',
+      producers: {
+         mic: createProducer('producerId'),
+      },
+      receiveConnection: undefined,
+   };
+
+   await room.join(participant);
+   await room.leave(participant);
+
+   expect(mixer.removeProducer.mock.calls.length).toEqual(0);
+});
+
 // test('getIsParticipantJoined() should return false if participant is not joined', () => {
 //    const conferenceRepo = createConferenceRepoMock(emptyConference);
 //    const mixer = createMediasoupMixerMock();
