@@ -33,18 +33,22 @@ export class RoomManager {
       // loopback is independent from the room
       await this.loopbackManager.updateParticipant(participant);
 
-      const roomId = await this.getParticipantRoom(participant.participantId);
-      if (!roomId) return;
+      const newRoomId = await this.getParticipantRoom(participant.participantId);
+      const currentRoomId = this.participantToRoom.get(participant.participantId);
 
-      // get the room or create a new one
-      let room = this.roomMap.get(roomId);
-      if (!room) {
-         room = new Room(roomId, this.signal, this.router, this.repo, this.conferenceId, DEFAULT_ROOM_SOURCES);
-         this.roomMap.set(roomId, room);
+      if (newRoomId == currentRoomId) {
+         // no room change, just update the participant if it belongs to a room
+         if (currentRoomId) {
+            const room = this.roomMap.get(currentRoomId);
+            if (!room) throw new Error('The room is set but does not exist');
+
+            await room.updateParticipant(participant);
+         }
+
+         return;
       }
 
-      const currentRoomId = this.participantToRoom.get(participant.participantId);
-      if (currentRoomId && roomId !== currentRoomId) {
+      if (currentRoomId) {
          // room switch, remove from current room
          const currentRoom = this.roomMap.get(currentRoomId);
          if (currentRoom) {
@@ -56,13 +60,16 @@ export class RoomManager {
          }
       }
 
-      if (roomId !== currentRoomId) {
-         // join the new room
+      if (newRoomId) {
+         // get the room or create a new one
+         let room = this.roomMap.get(newRoomId);
+         if (!room) {
+            room = new Room(newRoomId, this.signal, this.router, this.repo, this.conferenceId, DEFAULT_ROOM_SOURCES);
+            this.roomMap.set(newRoomId, room);
+         }
+
          await room.join(participant);
-         this.participantToRoom.set(participant.participantId, roomId);
-      } else {
-         // just update the participant in the room
-         await room.updateParticipant(participant);
+         this.participantToRoom.set(participant.participantId, newRoomId);
       }
    }
 

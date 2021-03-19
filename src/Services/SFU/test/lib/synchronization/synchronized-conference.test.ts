@@ -1,7 +1,6 @@
 import { applyUpdate, SynchronizedConference } from '../../../src/lib/synchronization/synchronized-conference';
 import { ConferenceInfo, ConferenceInfoUpdate, ConferenceInfoUpdateDto } from '../../../src/lib/types';
 import { RabbitChannel } from '../../../src/rabbitmq/rabbit-mq-conn';
-import { mapToObject } from '../../../src/utils/map-utils';
 
 test('should applyUpdate() with empty update return initial value', () => {
    const conference: ConferenceInfo = {

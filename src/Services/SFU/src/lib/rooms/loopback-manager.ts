@@ -10,7 +10,7 @@ const LOOPBACK_PRODUCER_SOURCES: ProducerSource[] = ['loopback-mic', 'loopback-w
 
 const logger = new Logger('LoopbackManager');
 
-// bascially, this class created for every participant a single room that ignores permissions
+// bascially, this class creates for every participant a single room that ignores permissions
 // and adds the custom property 'loopback=true' to the appData of every consumer.
 // As the participant is the only one who can join the room, every room in the loopbackMap has
 // exactly one participant
@@ -32,27 +32,22 @@ export class LoopbackManager {
     * Update the participant, create or remove the looopback room depending whether the participant has active loopback sources
     * @param participant the participant
     */
-   async updateParticipant(participant: Participant): Promise<void> {
+   public async updateParticipant(participant: Participant): Promise<void> {
       // if the participant has no loopback sources
-      if (
-         !Object.entries(participant.producers).find(
-            ([source, producer]) =>
-               producer !== undefined && LOOPBACK_PRODUCER_SOURCES.includes(source as ProducerSource),
-         )
-      ) {
+      if (!LoopbackManager.participantHasLoopbackSources(participant)) {
          await this.disableLoopback(participant);
          return;
       }
 
       const room = await this.enableLoopback(participant);
-      room.updateParticipant(participant);
+      await room.updateParticipant(participant);
    }
 
    /**
     * Enable loopback streams for a participant
     * @param participant the participant
     */
-   async enableLoopback(participant: Participant): Promise<Room> {
+   private async enableLoopback(participant: Participant): Promise<Room> {
       let room = this.loopbackMap.get(participant.participantId);
       if (!room) {
          logger.info('Enable loopback for %s', participant.participantId);
@@ -71,7 +66,7 @@ export class LoopbackManager {
     * Disable loopback streams for a participant
     * @param participant the participant
     */
-   async disableLoopback(participant: Participant): Promise<void> {
+   private async disableLoopback(participant: Participant): Promise<void> {
       const room = this.loopbackMap.get(participant.participantId);
       if (room) {
          logger.info('Disable loopback for %s', participant.participantId);
@@ -79,5 +74,11 @@ export class LoopbackManager {
          await room.leave(participant);
          this.loopbackMap.delete(participant.participantId);
       }
+   }
+
+   private static participantHasLoopbackSources(participant: Participant) {
+      return Object.entries(participant.producers).find(
+         ([source, producer]) => producer !== undefined && LOOPBACK_PRODUCER_SOURCES.includes(source as ProducerSource),
+      );
    }
 }
