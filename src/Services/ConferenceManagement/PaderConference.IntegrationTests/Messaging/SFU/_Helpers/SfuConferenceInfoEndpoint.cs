@@ -2,8 +2,8 @@
 using System.Linq;
 using System.Threading.Tasks;
 using MassTransit;
-using PaderConference.Messaging.Contracts;
 using PaderConference.Messaging.SFU.Dto;
+using PaderConference.Messaging.SFU.SendContracts;
 
 namespace PaderConference.IntegrationTests.Messaging.SFU._Helpers
 {
@@ -27,7 +27,7 @@ namespace PaderConference.IntegrationTests.Messaging.SFU._Helpers
         public Task PostPublish<T>(PublishContext<T> context) where T : class
         {
             if (context.Message is MediaStateChanged message && message.ConferenceId == _conferenceId)
-                State = ApplyUpdate(State, message.Update);
+                State = ApplyUpdate(State, message.Payload);
 
             return Task.CompletedTask;
         }

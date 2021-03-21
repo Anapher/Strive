@@ -5,6 +5,7 @@ using PaderConference.Infrastructure.Data;
 using PaderConference.Infrastructure.Data.Repos;
 using PaderConference.Infrastructure.KeyValue;
 using PaderConference.Infrastructure.Scheduler;
+using PaderConference.Infrastructure.Sfu;
 
 namespace PaderConference.Infrastructure
 {
@@ -20,6 +21,7 @@ namespace PaderConference.Infrastructure
 
             builder.RegisterType<CachedConferenceRepo>().As<IConferenceRepo>().InstancePerLifetimeScope();
             builder.RegisterType<ScheduledMediator>().As<IScheduledMediator>();
+            builder.RegisterType<JwtSfuAuthTokenFactory>().AsImplementedInterfaces().SingleInstance();
         }
     }
 }

@@ -6,7 +6,6 @@ using MediatR;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json.Linq;
-using PaderConference.Config;
 using PaderConference.Core.Interfaces;
 using PaderConference.Core.Services.Permissions;
 using PaderConference.Core.Services.Rooms;
@@ -24,6 +23,8 @@ namespace PaderConference.IntegrationTests.Messaging.SFU
     [Collection(IntegrationTestCollection.Definition)]
     public class SfuMessagesTest : ServiceIntegrationTest
     {
+        private const string ApiKey = "testApiKey";
+
         public SfuMessagesTest(ITestOutputHelper testOutputHelper, MongoDbFixture mongoDb) : base(testOutputHelper,
             mongoDb)
         {
@@ -31,7 +32,7 @@ namespace PaderConference.IntegrationTests.Messaging.SFU
 
         private async Task<SfuConferenceInfo> GetCurrentConferenceInfo(string conferenceId)
         {
-            var response = await Client.GetAsync($"/v1/sfu/{conferenceId}?apiKey={new SfuOptions().ApiKey}");
+            var response = await Client.GetAsync($"/v1/sfu/{conferenceId}?apiKey={ApiKey}");
             response.EnsureSuccessStatusCode();
 
             var info = await response.Content.ReadFromJsonAsync<SfuConferenceInfo>();

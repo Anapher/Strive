@@ -13,14 +13,11 @@ namespace PaderConference.Messaging.SFU.NotificationHandlers
 {
     public class ParticipantsRoomChangedNotificationHandler : INotificationHandler<ParticipantsRoomChangedNotification>
     {
-        private readonly ISfuConferenceInfoProvider _provider;
         private readonly ISfuNotifier _notifier;
         private readonly IRoomRepository _roomRepository;
 
-        public ParticipantsRoomChangedNotificationHandler(ISfuConferenceInfoProvider provider, ISfuNotifier notifier,
-            IRoomRepository roomRepository)
+        public ParticipantsRoomChangedNotificationHandler(ISfuNotifier notifier, IRoomRepository roomRepository)
         {
-            _provider = provider;
             _notifier = notifier;
             _roomRepository = roomRepository;
         }

@@ -22,6 +22,8 @@ using PaderConference.Core.Services.Chat.Requests;
 using PaderConference.Core.Services.ConferenceControl;
 using PaderConference.Core.Services.ConferenceControl.Notifications;
 using PaderConference.Core.Services.ConferenceControl.Requests;
+using PaderConference.Core.Services.Media;
+using PaderConference.Core.Services.Media.Requests;
 using PaderConference.Core.Services.Permissions;
 using PaderConference.Core.Services.Permissions.Requests;
 using PaderConference.Core.Services.Permissions.Responses;
@@ -227,11 +229,6 @@ namespace PaderConference.Hubs
 
         public Task<SuccessOrError<Unit>> ChangeBreakoutRooms(JsonPatchDocument<BreakoutRoomsConfig> dto)
         {
-            //// convert timestamp value from string to actual timestamp
-            //var timespanPatchOp = dto.Operations.FirstOrDefault(x => x.path == "/duration");
-            //if (timespanPatchOp?.value != null)
-            //    timespanPatchOp.value = XmlConvert.ToTimeSpan((string) timespanPatchOp.value);
-
             var (conferenceId, _) = GetContextParticipant();
 
             return GetInvoker().Create(new ChangeBreakoutRoomsRequest(conferenceId, dto))
@@ -290,6 +287,13 @@ namespace PaderConference.Hubs
             var participant = GetContextParticipant();
             return await GetInvoker().Create(new SetParticipantTypingRequest(participant, channel, dto.IsTyping))
                 .VerifyCanSendToChatChannel(channel).ConferenceMustBeOpen().Send();
+        }
+
+        public async Task<SuccessOrError<SfuConnectionInfo>> FetchSfuConnectionInfo()
+        {
+            var participant = GetContextParticipant();
+            return await GetInvoker().Create(new FetchSfuConnectionInfoRequest(participant, Context.ConnectionId))
+                .Send();
         }
 
         //public Task<SuccessOrError<string>> GetEquipmentToken()

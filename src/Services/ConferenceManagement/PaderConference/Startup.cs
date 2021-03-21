@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Reflection;
+using System.Text;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using FluentValidation.AspNetCore;
@@ -26,6 +27,7 @@ using Newtonsoft.Json.Serialization;
 using PaderConference.Config;
 using PaderConference.Core;
 using PaderConference.Core.Domain.Entities;
+using PaderConference.Core.Services.Media;
 using PaderConference.Extensions;
 using PaderConference.Hubs;
 using PaderConference.Infrastructure;
@@ -36,10 +38,10 @@ using PaderConference.Infrastructure.KeyValue.InMemory;
 using PaderConference.Infrastructure.KeyValue.Redis;
 using PaderConference.Infrastructure.Scheduler;
 using PaderConference.Infrastructure.Serialization;
+using PaderConference.Infrastructure.Sfu;
 using PaderConference.Messaging.Consumers;
-using PaderConference.Messaging.Contracts;
+using PaderConference.Messaging.SFU.SendContracts;
 using PaderConference.Services;
-using RabbitMQ.Client;
 using StackExchange.Redis.Extensions.Core.Abstractions;
 using StackExchange.Redis.Extensions.Core.Configuration;
 using StackExchange.Redis.Extensions.Newtonsoft;
@@ -84,6 +86,23 @@ namespace PaderConference
 
                     options.AcceptTokenFromQuery();
                 });
+
+            var sfuOptions = Configuration.GetSection("SFU").Get<SfuOptions>();
+            var signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(sfuOptions.TokenSecret ??
+                                                                              throw new ArgumentException(
+                                                                                  "SFU token secret not set")));
+
+            services.AddSingleton<IOptions<SfuJwtOptions>>(new OptionsWrapper<SfuJwtOptions>(new SfuJwtOptions
+            {
+                Audience = sfuOptions.TokenAudience,
+                Issuer = sfuOptions.TokenIssuer,
+                SigningCredentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256),
+                ValidFor = sfuOptions.TokenExpiration,
+            }));
+
+            services.AddSingleton<IOptions<SfuConnectionOptions>>(new OptionsWrapper<SfuConnectionOptions>(
+                new SfuConnectionOptions(sfuOptions.UrlTemplate ??
+                                         throw new ArgumentException("SFU url template not set."))));
 
             // SignalR
             services.AddSignalR().AddNewtonsoftJsonProtocol(options =>
@@ -140,7 +159,6 @@ namespace PaderConference
             services.Configure<RabbitMqOptions>(Configuration.GetSection("RabbitMq"));
 
             var rabbitMqOptions = Configuration.GetSection("RabbitMq").Get<RabbitMqOptions>();
-            var sfuOptions = Configuration.GetSection("SFU").Get<SfuOptions>();
 
             services.AddMassTransit(config =>
             {
@@ -175,15 +193,8 @@ namespace PaderConference
 
                         ScheduledMediator.Configure(configurator, context);
 
-                        configurator.Message<MediaStateChanged>(topologyConfigurator =>
-                        {
-                            topologyConfigurator.SetEntityName(sfuOptions.SfuPublishExchange);
-                        });
-                        configurator.Publish<MediaStateChanged>(top =>
-                        {
-                            top.ExchangeType = ExchangeType.Direct;
-                            top.Durable = false;
-                        });
+                        configurator.ConfigureMessage<MediaStateChanged>(sfuOptions);
+                        configurator.ConfigureMessage<ChangeParticipantProducer>(sfuOptions);
                     });
                 }
             });
