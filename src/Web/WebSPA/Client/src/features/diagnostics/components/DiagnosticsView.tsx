@@ -1,23 +1,22 @@
 import { Box, Chip, Table, TableBody, TableCell, TableHead, TableRow, Tooltip, Typography } from '@material-ui/core';
+import PauseIcon from '@material-ui/icons/Pause';
+import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import _ from 'lodash';
+import { Consumer } from 'mediasoup-client/lib/Consumer';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { selectParticipants } from 'src/features/conference/selectors';
+import { selectParticipantAudio, selectStreams } from 'src/features/media/selectors';
 import { selectParticipantsOfCurrentRoom } from 'src/features/rooms/selectors';
-import { RootState } from 'src/store';
-import PauseIcon from '@material-ui/icons/Pause';
-import PlayArrowIcon from '@material-ui/icons/PlayArrow';
-import useWebRtc from 'src/store/webrtc/hooks/useWebRtc';
-import { Consumer } from 'mediasoup-client/lib/Consumer';
-import { selectParticipantAudio } from 'src/features/media/selectors';
 import useMyParticipantId from 'src/hooks/useMyParticipantId';
+import useWebRtc from 'src/store/webrtc/hooks/useWebRtc';
 
 export default function DiagnosticsView() {
    const participantsOfRoom = useSelector(selectParticipantsOfCurrentRoom);
    const participants = useSelector(selectParticipants);
    const myId = useMyParticipantId();
 
-   const streams = useSelector((state: RootState) => state.media.streams);
+   const streams = useSelector(selectStreams);
    const audio = useSelector(selectParticipantAudio);
 
    const connection = useWebRtc();
@@ -72,15 +71,11 @@ export default function DiagnosticsView() {
                         <TableCell>{Boolean(participantsOfRoom.includes(participantId)).toString()}</TableCell>
                         <TableCell>
                            {Object.entries(streams?.[participantId]?.producers ?? {}).map(([id, info]) => (
-                              <Tooltip
-                                 key={id}
-                                 title={`Id=${id}, selected=${info.selected}, paused=${info.paused}`}
-                                 PopperProps={{ disablePortal: true }}
-                              >
+                              <Tooltip key={id} title={`Paused=${info.paused}`} PopperProps={{ disablePortal: true }}>
                                  <Chip
                                     style={{ margin: 2 }}
-                                    label={info.kind}
-                                    color={info.selected ? 'primary' : 'secondary'}
+                                    label={id}
+                                    color="primary"
                                     icon={info.paused ? <PauseIcon /> : <PlayArrowIcon />}
                                     size="small"
                                  />

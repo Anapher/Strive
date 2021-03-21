@@ -7,22 +7,19 @@ import { InputDeviceDto } from '../settings/types';
 export type ConsumerInfo = {
    paused: boolean;
    participantId: string;
+   loopback: boolean;
 };
 
 export type ProducerInfo = {
    paused: boolean;
-   selected: boolean;
-   kind?: ProducerSource;
 };
 
 export type ParticipantStreams = {
-   consumers: {
-      [key: string]: ConsumerInfo;
-   };
-   producers: { [key: string]: ProducerInfo };
+   consumers: Record<string, ConsumerInfo>;
+   producers: Record<ProducerSource, ProducerInfo>;
 };
 
-export type ConferenceParticipantStreamInfo = { [key: string]: ParticipantStreams | undefined };
+export type SynchronizedMediaState = { streams: Record<string, ParticipantStreams | undefined> };
 
 export type ConnectedEquipmentDto = {
    equipmentId: string;

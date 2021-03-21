@@ -17,8 +17,8 @@ export type InitializeConnectionRequest = {
 };
 
 export type CreateTransportRequest = {
-   sctpCapabilities: SctpCapabilities;
-   forceTcp: boolean;
+   sctpCapabilities?: SctpCapabilities;
+   forceTcp?: boolean;
    producing: boolean;
    consuming: boolean;
 };

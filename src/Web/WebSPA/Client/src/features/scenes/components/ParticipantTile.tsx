@@ -5,7 +5,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import AnimatedMicIcon from 'src/assets/animated-icons/AnimatedMicIcon';
 import { useParticipantAudio } from 'src/features/media/components/ParticipantMicManager';
-import { selectParticipantProducers } from 'src/features/media/selectors';
+import { selectParticipantMicActivated } from 'src/features/media/selectors';
 import { RootState } from 'src/store';
 import useConsumer from 'src/store/webrtc/hooks/useConsumer';
 import { Size } from 'src/types';
@@ -91,7 +91,7 @@ export default function ParticipantTile({ className, participant, size, disableL
    const classes = useStyles();
    const consumer = useConsumer(participant.id, 'webcam');
    const videoRef = useRef<HTMLVideoElement | null>(null);
-   const producers = useSelector((state: RootState) => selectParticipantProducers(state, participant?.id));
+   const micActivated = useSelector((state: RootState) => selectParticipantMicActivated(state, participant?.id));
    const isWebcamActive = consumer?.paused === false;
    const myParticipantId = useMyParticipantId();
 
@@ -135,10 +135,7 @@ export default function ParticipantTile({ className, participant, size, disableL
 
             {isWebcamActive && (
                <motion.div className={classes.infoBox}>
-                  <AnimatedMicIcon
-                     activated={producers?.mic?.paused === false}
-                     disabledColor={theme.palette.error.main}
-                  />
+                  <AnimatedMicIcon activated={micActivated} disabledColor={theme.palette.error.main} />
                   <Typography
                      component={motion.h4}
                      layoutId={disableLayoutAnimation ? undefined : `name-${participant.id}`}
@@ -153,7 +150,7 @@ export default function ParticipantTile({ className, participant, size, disableL
             {!isWebcamActive && (
                <>
                   <AnimatedMicIcon
-                     activated={producers?.mic?.paused === false}
+                     activated={micActivated}
                      disabledColor={theme.palette.error.main}
                      className={classes.micIconWithoutWebcam}
                   />

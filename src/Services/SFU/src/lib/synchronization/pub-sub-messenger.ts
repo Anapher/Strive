@@ -23,7 +23,7 @@ export default class PubSubMessenger {
       if (this.cachedChannel === channel) return channel;
 
       await channel.sub.assertExchange('toSfu', 'direct', { durable: false });
-      await channel.pub.assertExchange('fromSfu', 'direct', { durable: false });
+      await channel.pub.assertQueue('fromSfu', { durable: false });
 
       this.cachedChannel = channel;
       return channel;

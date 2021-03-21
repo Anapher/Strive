@@ -39,10 +39,10 @@ namespace PaderConference.IntegrationTests.Messaging.SFU._Helpers
 
         private static SfuConferenceInfo ApplyUpdate(SfuConferenceInfo current, SfuConferenceInfoUpdate update)
         {
-            var newPermissions = current.Permissions.ToDictionary(x => x.Key, x => x.Value);
+            var newPermissions = current.ParticipantPermissions.ToDictionary(x => x.Key, x => x.Value);
             var newParticipants = current.ParticipantToRoom.ToDictionary(x => x.Key, x => x.Value);
 
-            foreach (var updatePermission in update.Permissions)
+            foreach (var updatePermission in update.ParticipantPermissions)
             {
                 newPermissions[updatePermission.Key] = updatePermission.Value;
             }

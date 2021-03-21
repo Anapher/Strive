@@ -11,42 +11,69 @@ import {
 import RabbitMqConn from '../../rabbitmq/rabbit-mq-conn';
 
 export default class RabbitPub implements ConferenceMessenger {
-   constructor(private conn: RabbitMqConn, private conferenceId: string) {}
+   constructor(private conn: RabbitMqConn) {}
+
    notifyConsumerClosed(connectionId: string, args: ConsumerArgs): Promise<void> {
-      throw new Error('Method not implemented.');
+      return this.notifyConnection({ connectionId, methodName: 'consumerClosed', payload: args });
    }
+
    notifyConsumerPaused(connectionId: string, args: ConsumerArgs): Promise<void> {
-      throw new Error('Method not implemented.');
+      return this.notifyConnection({ connectionId, methodName: 'consumerPaused', payload: args });
    }
+
    notifyConsumerResumed(connectionId: string, args: ConsumerArgs): Promise<void> {
-      throw new Error('Method not implemented.');
+      return this.notifyConnection({ connectionId, methodName: 'consumerResumed', payload: args });
    }
+
    notifyConsumerScore(connectionId: string, args: ConsumerScoreArgs): Promise<void> {
-      throw new Error('Method not implemented.');
+      return this.notifyConnection({ connectionId, methodName: 'consumerScore', payload: args });
    }
+
    notifyConsumerCreated(connectionId: string, args: ConsumerCreatedArgs): Promise<void> {
-      throw new Error('Method not implemented.');
+      return this.notifyConnection({ connectionId, methodName: 'newConsumer', payload: args });
    }
+
    notifyConsumerLayersChanged(connectionId: string, args: ConsumerLayersChanged): Promise<void> {
-      throw new Error('Method not implemented.');
+      return this.notifyConnection({ connectionId, methodName: 'layersChanged', payload: args });
    }
 
    notifyProducerChanged(connectionId: string, args: ProducerChangedEventArgs): Promise<void> {
-      throw new Error('Method not implemented.');
+      return this.notifyConnection({ connectionId, methodName: 'producerChanged', payload: args });
    }
 
    notifyProducerScore(connectionId: string, args: ProducerScoreInfo): Promise<void> {
-      throw new Error('Method not implemented.');
+      return this.notifyConnection({ connectionId, methodName: 'producerScore', payload: args });
    }
 
-   updateStreams(arg: ConferenceParticipantStreamInfo): Promise<void> {
-      throw new Error('Method not implemented.');
+   updateStreams(streams: ConferenceParticipantStreamInfo, conferenceId: string): Promise<void> {
+      const message = RabbitPub.buildMassTransitMessage(
+         ['urn:message:PaderConference.Messaging.SFU.ReceiveContracts:StreamsUpdated'],
+         { conferenceId, streams },
+      );
+
+      return this.internalPub(message);
    }
 
-   private async internalPub(message: any): Promise<void> {
+   private async internalPub(message: MassTransitMessage): Promise<void> {
       const blob = JSON.stringify(message);
       const channel = await this.conn.getChannel();
 
-      channel.pub.publish('fromSfu', this.conferenceId, Buffer.from(blob), { contentType: 'application/json' });
+      channel.pub.sendToQueue('fromSfu', Buffer.from(blob), { contentType: 'application/vnd.masstransit+json' });
+   }
+
+   private static buildMassTransitMessage(messageType: string[], message: any): MassTransitMessage {
+      return { messageType, message };
+   }
+
+   private async notifyConnection(payload: SendMessageToConnection): Promise<void> {
+      const message = RabbitPub.buildMassTransitMessage(
+         ['urn:message:PaderConference.Messaging.SFU.ReceiveContracts:SendMessageToConnection'],
+         payload,
+      );
+
+      return this.internalPub(message);
    }
 }
+
+type MassTransitMessage = { message: any; messageType: string[] };
+type SendMessageToConnection = { connectionId: string; methodName: string; payload: any };

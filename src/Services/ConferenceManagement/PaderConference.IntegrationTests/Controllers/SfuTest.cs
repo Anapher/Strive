@@ -49,7 +49,7 @@ namespace PaderConference.IntegrationTests.Controllers
             var result = await response.Content.ReadFromJsonAsync<SfuConferenceInfo>();
             Assert.NotNull(result);
 
-            Assert.Empty(result!.Permissions);
+            Assert.Empty(result!.ParticipantPermissions);
             Assert.Empty(result!.ParticipantToRoom);
         }
 
@@ -67,7 +67,7 @@ namespace PaderConference.IntegrationTests.Controllers
             var result = await response.Content.ReadFromJsonAsync<SfuConferenceInfo>();
             Assert.NotNull(result);
 
-            Assert.NotEmpty(result!.Permissions);
+            Assert.NotEmpty(result!.ParticipantPermissions);
             Assert.NotEmpty(result!.ParticipantToRoom);
         }
     }

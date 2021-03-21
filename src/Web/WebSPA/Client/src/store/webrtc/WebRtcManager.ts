@@ -1,8 +1,9 @@
 import { EventEmitter } from 'events';
-import { RtpCapabilities } from 'mediasoup-client/lib/types';
 import { SuccessOrError } from 'src/communication-types';
+import { SfuConnectionInfo } from 'src/core-hub.types';
 import { sleep } from 'src/utils/promise-utils';
 import appHubConn from '../signal/app-hub-connection';
+import SfuClient from './sfu-client';
 import { WebRtcConnection } from './WebRtcConnection';
 
 const RECONNECT_DELAY = 2000;
@@ -74,15 +75,19 @@ export class WebRtcManager extends EventEmitter {
          throw new Error('SignalR connection is not available.');
       }
 
-      const connection = new WebRtcConnection(signalr);
+      const connectionInfo = await signalr.invoke<SuccessOrError<SfuConnectionInfo>>('FetchSfuConnectionInfo');
+      if (!connectionInfo?.success) throw new Error('Unable to fetch SFU connection info');
+      const client = new SfuClient(connectionInfo.response);
+
+      const connection = new WebRtcConnection(signalr, client);
       const device = connection.device;
 
-      const rtpResult = await signalr.invoke<SuccessOrError<RtpCapabilities>>('RequestRouterCapabilities');
+      const rtpResult = await client.getRouterCapabilities();
       if (!rtpResult?.success) throw new Error('Router capabilities could not be retrived from server.');
 
       await device.load({ routerRtpCapabilities: rtpResult.response });
 
-      const result = await signalr.invoke<SuccessOrError>('InitializeConnection', {
+      const result = await client.initializeConnection({
          sctpCapabilities: device.sctpCapabilities,
          rtpCapabilities: device.rtpCapabilities,
       });

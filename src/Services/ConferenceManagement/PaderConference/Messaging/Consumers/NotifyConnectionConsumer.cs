@@ -17,8 +17,8 @@ namespace PaderConference.Messaging.Consumers
 
         public async Task Consume(ConsumeContext<SendMessageToConnection> context)
         {
-            var (connectionId, methodName, payload) = context.Message.Payload;
-            await _hubContext.Clients.Client(connectionId).SendAsync(methodName, payload);
+            var message = context.Message;
+            await _hubContext.Clients.Client(message.ConnectionId).SendAsync(message.MethodName, message.Payload);
         }
     }
 }

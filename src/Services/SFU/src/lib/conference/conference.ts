@@ -42,7 +42,7 @@ export class Conference {
       private maxIncomingBitrate?: number,
    ) {
       this.roomManager = new RoomManager(conferenceId, messenger, router, repo);
-      this.streamInfoRepo = new StreamInfoRepo(messenger);
+      this.streamInfoRepo = new StreamInfoRepo(messenger, conferenceId);
    }
 
    get routerCapabilities(): RtpCapabilities {

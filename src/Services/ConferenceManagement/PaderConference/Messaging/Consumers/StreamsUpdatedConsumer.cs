@@ -18,7 +18,7 @@ namespace PaderConference.Messaging.Consumers
         public async Task Consume(ConsumeContext<StreamsUpdated> context)
         {
             var message = context.Message;
-            await _mediator.Send(new ApplyMediaStateRequest(message.ConferenceId, message.Payload));
+            await _mediator.Send(new ApplyMediaStateRequest(message.ConferenceId, message.Streams));
         }
     }
 }

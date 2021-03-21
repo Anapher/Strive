@@ -1,9 +1,13 @@
-﻿using PaderConference.Messaging.SFU.Contracts;
-using PaderConference.Messaging.SFU.Dto;
+﻿using Newtonsoft.Json.Linq;
 
 namespace PaderConference.Messaging.SFU.ReceiveContracts
 {
-    public interface SendMessageToConnection : SfuMessage<SendHubMessageDto>
+    public interface SendMessageToConnection
     {
+        string ConnectionId { get; }
+
+        string MethodName { get; }
+
+        JToken Payload { get; }
     }
 }

@@ -94,3 +94,8 @@ export type SetTemporaryPermissionDto = {
 export type KickParticipantRequestDto = {
    participantId: string;
 };
+
+export type SfuConnectionInfo = {
+   url: string;
+   authToken: string;
+};

@@ -6,7 +6,9 @@ namespace PaderConference.Config
     {
         public string? ApiKey { get; set; }
 
-        public string SfuPublishExchange { get; set; } = "toSfu";
+        public string PublishExchange { get; set; } = "toSfu";
+
+        public string ReceiveQueue { get; set; } = "fromSfu";
 
         public string? UrlTemplate { get; set; }
 

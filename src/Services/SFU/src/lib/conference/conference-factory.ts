@@ -24,6 +24,6 @@ export default async function conferenceFactory(
    const assignedWorker = workers.getNextWorker();
    const mediasoupRouter = await assignedWorker.createRouter(routerOptions);
 
-   const messenger = new RabbitPub(rabbit, id);
+   const messenger = new RabbitPub(rabbit);
    return new Conference(mediasoupRouter, id, messenger, repository, webrtcOptions, maxIncomingBitrate);
 }

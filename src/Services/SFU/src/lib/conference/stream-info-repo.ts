@@ -7,7 +7,7 @@ import { ConferenceParticipantStreamInfo, ParticipantStreams } from './pub-types
  * A repository for updating information about streams of the participants
  */
 export class StreamInfoRepo {
-   constructor(private messenger: ConferenceMessenger) {}
+   constructor(private messenger: ConferenceMessenger, private conferenceId: string) {}
 
    /**
     * Update all streams, overwrite old info
@@ -20,7 +20,7 @@ export class StreamInfoRepo {
          result[participant.participantId] = this.createParticipantInfo(participant);
       }
 
-      await this.messenger.updateStreams(result);
+      await this.messenger.updateStreams(result, this.conferenceId);
    }
 
    private createParticipantInfo(participant: Participant): ParticipantStreams {

@@ -8,6 +8,7 @@ export const PARTICIPANT_PERMISSIONS = 'participantPermissions';
 export const CHAT = 'chat';
 export const SUBSCRIPTIONS = 'subscriptions';
 export const BREAKOUT_ROOMS = 'breakoutRooms';
+export const MEDIA = 'media';
 
 export type SynchronizedParticipants = {
    participants: { [participantId: string]: ParticipantData };

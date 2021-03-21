@@ -1,11 +1,13 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { onEventOccurred } from 'src/store/signal/actions';
-import { ConferenceParticipantStreamInfo, ConnectedEquipmentDto, ParticipantAudioInfo } from './types';
 import { events } from 'src/core-hub';
+import { onEventOccurred } from 'src/store/signal/actions';
+import { MEDIA } from 'src/store/signal/synchronization/synchronized-object-ids';
+import { synchronizeObjectState } from 'src/store/signal/synchronized-object';
 import { ParticipantPayloadAction } from 'src/types';
+import { ConnectedEquipmentDto, ParticipantAudioInfo, SynchronizedMediaState } from './types';
 
 export type MediaState = {
-   streams: ConferenceParticipantStreamInfo | null;
+   synchronized: SynchronizedMediaState | null;
    equipment: ConnectedEquipmentDto[] | null;
    participantAudio: { [id: string]: ParticipantAudioInfo | undefined };
    userInteractionMade: boolean;
@@ -13,7 +15,7 @@ export type MediaState = {
 
 const initialState: MediaState = {
    userInteractionMade: false,
-   streams: null,
+   synchronized: null,
    equipment: null,
    participantAudio: {},
 };
@@ -46,6 +48,7 @@ const mediaSlice = createSlice({
       ) => {
          state.equipment = payload;
       },
+      ...synchronizeObjectState({ type: 'exactId', syncObjId: MEDIA, propertyName: 'synchronized' }),
    },
 });
 

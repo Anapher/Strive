@@ -6,13 +6,13 @@ namespace PaderConference.Extensions
 {
     public static class RabbitMqConfiguratorExtensions
     {
-        public static void ConfigureMessage<T>(this IRabbitMqBusFactoryConfigurator configurator, SfuOptions options)
-            where T : class
+        public static void ConfigurePublishMessage<T>(this IRabbitMqBusFactoryConfigurator configurator,
+            SfuOptions options) where T : class
         {
             configurator.Message<T>(topologyConfigurator =>
-                {
-                    topologyConfigurator.SetEntityName(options.SfuPublishExchange);
-                });
+            {
+                topologyConfigurator.SetEntityName(options.PublishExchange);
+            });
             configurator.Publish<T>(top =>
             {
                 top.ExchangeType = ExchangeType.Direct;

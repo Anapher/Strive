@@ -4,7 +4,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import AnimatedMicIcon from 'src/assets/animated-icons/AnimatedMicIcon';
 import { Participant } from 'src/features/conference/types';
-import { selectParticipantProducers } from 'src/features/media/selectors';
+import { selectParticipantMicActivated } from 'src/features/media/selectors';
 import { ParticipantAudioInfo } from 'src/features/media/types';
 import { RootState } from 'src/store';
 
@@ -16,8 +16,7 @@ type Props = {
 
 export default function ParticipantInfoChip({ participantId, participant, audioInfo }: Props) {
    const theme = useTheme();
-   const producers = useSelector((state: RootState) => selectParticipantProducers(state, participantId));
-   const micActivated = producers?.mic?.paused === false;
+   const micActivated = useSelector((state: RootState) => selectParticipantMicActivated(state, participantId));
 
    return (
       <Chip

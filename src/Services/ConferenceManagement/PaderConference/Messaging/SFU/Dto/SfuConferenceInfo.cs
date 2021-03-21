@@ -3,5 +3,5 @@
 namespace PaderConference.Messaging.SFU.Dto
 {
     public record SfuConferenceInfo(IReadOnlyDictionary<string, string> ParticipantToRoom,
-        IReadOnlyDictionary<string, SfuParticipantPermissions> Permissions);
+        IReadOnlyDictionary<string, SfuParticipantPermissions> ParticipantPermissions);
 }

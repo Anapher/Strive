@@ -70,7 +70,7 @@ namespace PaderConference.IntegrationTests.Messaging.SFU
                 var participantMap = Assert.Single(endpoint.State.ParticipantToRoom);
                 Assert.Equal(Moderator.Sub, participantMap.Key);
 
-                var permissions = Assert.Single(endpoint.State.Permissions);
+                var permissions = Assert.Single(endpoint.State.ParticipantPermissions);
                 Assert.Equal(Moderator.Sub, permissions.Key);
                 Assert.True(permissions.Value.Audio);
             });
@@ -91,7 +91,7 @@ namespace PaderConference.IntegrationTests.Messaging.SFU
             {
                 Assert.Empty(endpoint.State.ParticipantToRoom);
 
-                var permissions = Assert.Single(endpoint.State.Permissions);
+                var permissions = Assert.Single(endpoint.State.ParticipantPermissions);
                 Assert.Equal(Moderator.Sub, permissions.Key);
                 Assert.True(permissions.Value.Audio);
             });
@@ -109,7 +109,7 @@ namespace PaderConference.IntegrationTests.Messaging.SFU
             AssertSuccess(result);
 
             Assert.NotEmpty(endpoint.State.ParticipantToRoom);
-            Assert.NotEmpty(endpoint.State.Permissions);
+            Assert.NotEmpty(endpoint.State.ParticipantPermissions);
 
             // act
             await connection.Hub.DisposeAsync();
@@ -118,7 +118,7 @@ namespace PaderConference.IntegrationTests.Messaging.SFU
             await AssertHelper.WaitForAssert(() =>
             {
                 Assert.Empty(endpoint.State.ParticipantToRoom);
-                Assert.Empty(endpoint.State.Permissions);
+                Assert.Empty(endpoint.State.ParticipantPermissions);
             });
         }
 
@@ -168,7 +168,7 @@ namespace PaderConference.IntegrationTests.Messaging.SFU
             await ConnectUserToConference(pleb, conference);
 
             await AssertHelper.WaitForAssert(() =>
-                Assert.Contains(endpoint.State.Permissions, x => x.Key == pleb.Sub && !x.Value.Screen));
+                Assert.Contains(endpoint.State.ParticipantPermissions, x => x.Key == pleb.Sub && !x.Value.Screen));
 
             // act
             var permissionResponse = await connection.Hub.InvokeAsync<SuccessOrError<Unit>>(
@@ -181,8 +181,8 @@ namespace PaderConference.IntegrationTests.Messaging.SFU
             await AssertHelper.WaitForAssert(() =>
             {
                 Assert.Equal(2, endpoint.State.ParticipantToRoom.Count);
-                Assert.Equal(2, endpoint.State.Permissions.Count);
-                Assert.Contains(endpoint.State.Permissions, x => x.Key == pleb.Sub && x.Value.Screen);
+                Assert.Equal(2, endpoint.State.ParticipantPermissions.Count);
+                Assert.Contains(endpoint.State.ParticipantPermissions, x => x.Key == pleb.Sub && x.Value.Screen);
             });
         }
     }

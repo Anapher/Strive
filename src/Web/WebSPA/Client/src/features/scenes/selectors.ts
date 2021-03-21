@@ -25,9 +25,7 @@ export const selectActiveParticipantsWithWebcam = createSelector(
             const participantStreams = streams[participantId];
             if (!participantStreams) return false;
 
-            return (
-               Object.values(participantStreams.producers).find((x) => x.kind === 'webcam' && !x.paused) !== undefined
-            );
+            return participantStreams.producers.webcam?.paused === false;
          })
          .orderBy(([, info]) => info.orderNumber, 'asc')
          .map(([participantId]) => participantId)

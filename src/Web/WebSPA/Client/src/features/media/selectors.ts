@@ -1,12 +1,12 @@
 import { createSelector } from '@reduxjs/toolkit';
 import { RootState } from 'src/store';
-import { isProducerDevice, ProducerDevice } from 'src/store/webrtc/types';
+import { ProducerDevice } from 'src/store/webrtc/types';
 import { selectParticipants } from '../conference/selectors';
 import { Participant } from '../conference/types';
 import { ProducerInfo } from './types';
 
 const getId = (_: unknown, id: string | undefined) => id;
-export const selectStreams = (state: RootState) => state.media.streams;
+export const selectStreams = (state: RootState) => state.media.synchronized?.streams;
 
 export const selectParticipantAudio = (state: RootState) => state.media.participantAudio;
 
@@ -17,15 +17,17 @@ export const selectParticipantProducers = createSelector(selectStreams, getId, (
    const participantStreams = streams[participantId];
    if (!participantStreams) return undefined;
 
-   const result: ParticipantProducerViewModels = {};
+   return participantStreams.producers;
+});
 
-   for (const [id, producer] of Object.entries(participantStreams.producers)) {
-      if (producer.selected && producer?.kind && isProducerDevice(producer.kind)) {
-         result[producer.kind] = { ...producer, id };
-      }
-   }
+export const selectParticipantMicActivated = createSelector(selectStreams, getId, (streams, participantId) => {
+   if (!streams) return false;
+   if (!participantId) return false;
 
-   return result;
+   const participantStreams = streams[participantId];
+   if (!participantStreams) return false;
+
+   return participantStreams.producers?.mic?.paused === false;
 });
 
 export const selectParticipantAudioInfo = createSelector(selectParticipantAudio, getId, (audios, participantId) => {
@@ -41,10 +43,7 @@ export const selectScreenSharingParticipants = createSelector(
       if (!streams) return [];
 
       return Object.entries(streams)
-         .filter(
-            ([, pstreams]) =>
-               pstreams && Object.values(pstreams.producers).find((x) => x.kind === 'screen' && !x.paused),
-         )
+         .filter(([, pstreams]) => pstreams?.producers.screen?.paused === false)
          .map(([participantId]) => participants.find((x) => x.id === participantId))
          .filter((x): x is Participant => !!x);
    },

@@ -1,9 +1,10 @@
-import express, { Express, Request } from 'express';
+import express, { Express, Request, RequestHandler } from 'express';
 import * as errors from './errors';
 import ConferenceManager from './lib/conference/conference-manager';
 import Logger from './utils/logger';
 import jwt from 'express-jwt';
 import config from './config';
+import cors from 'cors';
 
 const logger = new Logger('Controllers');
 
@@ -13,9 +14,16 @@ type RequestInfo = { participantId: string; conferenceId: string; connectionId: 
 export default function configureEndpoints(app: Express, conferenceManager: ConferenceManager): void {
    app.use(express.json());
    app.use(jwt({ algorithms: ['HS256'], secret: config.services.tokenSecret }));
-   app.use((req, res, next) => {
+   app.use(cors());
+
+   const conferenceMatchMiddleware: RequestHandler = (req, res, next) => {
+      console.log(req.url);
+
       const conferenceId: string = req.params.conferenceId;
       const tokenConference = (req.user as JwtProperties).conference;
+
+      console.log('conferenceId', conferenceId);
+      console.log('tokenConference', tokenConference);
 
       if (conferenceId !== tokenConference) {
          res.status(400).end();
@@ -23,14 +31,14 @@ export default function configureEndpoints(app: Express, conferenceManager: Conf
       }
 
       next();
-   });
+   };
 
    const getJwtProps = (req: Request): RequestInfo => {
       const jwt = req.user as JwtProperties;
       return { conferenceId: jwt.conference, participantId: jwt.sub, connectionId: jwt.connection };
    };
 
-   app.post('/:conferenceId/init-connection', async (req, res) => {
+   app.post('/:conferenceId/init-connection', conferenceMatchMiddleware, async (req, res) => {
       const { conferenceId, connectionId, participantId } = getJwtProps(req);
 
       const conference = await conferenceManager.getConference(conferenceId);
@@ -49,7 +57,7 @@ export default function configureEndpoints(app: Express, conferenceManager: Conf
       res.status(200).end();
    });
 
-   app.get('/:conferenceId/router-capabilities', async (req, res) => {
+   app.get('/:conferenceId/router-capabilities', conferenceMatchMiddleware, async (req, res) => {
       const { conferenceId } = getJwtProps(req);
 
       const conference = await conferenceManager.getConference(conferenceId);
@@ -61,8 +69,8 @@ export default function configureEndpoints(app: Express, conferenceManager: Conf
       res.json(conference.routerCapabilities);
    });
 
-   app.post('/:conferenceId/create-transport', async (req, res) => {
-      const { conferenceId, connectionId, participantId } = getJwtProps(req);
+   app.post('/:conferenceId/create-transport', conferenceMatchMiddleware, async (req, res) => {
+      const { conferenceId, connectionId } = getJwtProps(req);
 
       const conference = await conferenceManager.getConference(conferenceId);
       if (!conference) {
@@ -79,7 +87,7 @@ export default function configureEndpoints(app: Express, conferenceManager: Conf
       res.json(result.response);
    });
 
-   app.post('/:conferenceId/connect-transport', async (req, res) => {
+   app.post('/:conferenceId/connect-transport', conferenceMatchMiddleware, async (req, res) => {
       const { conferenceId, connectionId } = getJwtProps(req);
 
       const conference = await conferenceManager.getConference(conferenceId);
@@ -97,7 +105,7 @@ export default function configureEndpoints(app: Express, conferenceManager: Conf
       res.status(200).end();
    });
 
-   app.post('/:conferenceId/transport-produce', async (req, res) => {
+   app.post('/:conferenceId/transport-produce', conferenceMatchMiddleware, async (req, res) => {
       const { conferenceId, connectionId } = getJwtProps(req);
 
       const conference = await conferenceManager.getConference(conferenceId);
@@ -115,7 +123,7 @@ export default function configureEndpoints(app: Express, conferenceManager: Conf
       res.json(result.response);
    });
 
-   app.post('/:conferenceId/change-stream', async (req, res) => {
+   app.post('/:conferenceId/change-stream', conferenceMatchMiddleware, async (req, res) => {
       const { conferenceId, connectionId } = getJwtProps(req);
 
       const conference = await conferenceManager.getConference(conferenceId);

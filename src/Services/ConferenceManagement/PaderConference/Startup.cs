@@ -193,8 +193,16 @@ namespace PaderConference
 
                         ScheduledMediator.Configure(configurator, context);
 
-                        configurator.ConfigureMessage<MediaStateChanged>(sfuOptions);
-                        configurator.ConfigureMessage<ChangeParticipantProducer>(sfuOptions);
+                        configurator.ConfigurePublishMessage<MediaStateChanged>(sfuOptions);
+                        configurator.ConfigurePublishMessage<ChangeParticipantProducer>(sfuOptions);
+
+                        configurator.ReceiveEndpoint(sfuOptions.ReceiveQueue, e =>
+                        {
+                            e.Durable = false;
+
+                            e.Consumer<StreamsUpdatedConsumer>(context);
+                            e.Consumer<NotifyConnectionConsumer>(context);
+                        });
                     });
                 }
             });

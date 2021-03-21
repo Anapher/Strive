@@ -34,9 +34,9 @@ export class MediasoupMixer {
       this.producers.set(producerInfo.producer.id, producerInfo);
 
       for (const receiver of this.receivers.values()) {
-         if (receiver.participantId !== producerInfo.participantId) {
-            await this.createConsumer(receiver, producerInfo);
-         }
+         // if (receiver.participantId !== producerInfo.participantId) { for loopback
+         await this.createConsumer(receiver, producerInfo);
+         // }
       }
    }
 

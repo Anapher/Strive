@@ -19,5 +19,5 @@ export interface ConferenceMessenger {
    notifyConsumerCreated(connectionId: string, args: ConsumerCreatedArgs): Promise<void>;
    notifyConsumerLayersChanged(connectionId: string, args: ConsumerLayersChanged): Promise<void>;
 
-   updateStreams(arg: ConferenceParticipantStreamInfo): Promise<void>;
+   updateStreams(arg: ConferenceParticipantStreamInfo, conferenceId: string): Promise<void>;
 }

@@ -107,7 +107,7 @@ const ParticipantContextMenu = React.forwardRef<HTMLElement, Props>(({ participa
             },
          }),
       );
-      dispatch(coreHub.changeProducerSource({ participantId: participant.id, source: 'mic', action: 'close' }));
+      // dispatch(coreHub.changeProducerSource({ participantId: participant.id, source: 'mic', action: 'close' }));
       onClose();
    };
 

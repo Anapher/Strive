@@ -1,11 +1,10 @@
 import { HubConnection } from '@microsoft/signalr';
 import { EventEmitter } from 'events';
 import { Device } from 'mediasoup-client';
-import { Consumer, MediaKind, RtpParameters, Transport, TransportOptions } from 'mediasoup-client/lib/types';
-import { ChangeStreamDto, ProducerSource } from './types';
-import * as coreHub from 'src/core-hub';
+import { Consumer, MediaKind, RtpParameters, Transport } from 'mediasoup-client/lib/types';
 import { HubSubscription, subscribeEvent, unsubscribeAll } from 'src/utils/signalr-utils';
-import { SuccessOrError } from 'src/communication-types';
+import SfuClient from './sfu-client';
+import { ChangeStreamRequest, ProducerSource } from './types';
 
 const PC_PROPRIETARY_CONSTRAINTS = {
    optional: [{ googDscp: true }],
@@ -47,7 +46,7 @@ export class WebRtcConnection {
    /** SignalR methods that were subscribed. Must be memorized for unsubscription in close() */
    private signalrSubscription = new Array<HubSubscription>();
 
-   constructor(private connection: HubConnection) {
+   constructor(private connection: HubConnection, private client: SfuClient) {
       this.device = new Device();
 
       this.signalrSubscription.push(
@@ -157,15 +156,12 @@ export class WebRtcConnection {
    }
 
    public async createSendTransport(): Promise<Transport> {
-      const request = {
+      const transportOptions = await this.client.createTransport({
          sctpCapabilities: this.device.sctpCapabilities,
          producing: true,
          consuming: false,
-      };
-      const transportOptions = await this.connection.invoke<SuccessOrError<TransportOptions>>(
-         'CreateWebRtcTransport',
-         request,
-      );
+      });
+
       if (!transportOptions.success) {
          console.error('Error creating send transport: ', transportOptions.error);
          throw new Error('Error creating send transport.');
@@ -178,8 +174,8 @@ export class WebRtcConnection {
       });
 
       transport.on('connect', async ({ dtlsParameters }, callback, errback) =>
-         this.connection
-            .invoke<SuccessOrError<any>>('ConnectWebRtcTransport', { transportId: transport.id, dtlsParameters })
+         this.client
+            .connectTransport({ transportId: transport.id, dtlsParameters })
             .then((response) => {
                console.log('connect response', response);
                if (response.success) callback();
@@ -190,7 +186,7 @@ export class WebRtcConnection {
 
       transport.on('produce', async ({ kind, rtpParameters, appData }, callback, errback) => {
          try {
-            const result = await this.connection.invoke<SuccessOrError<any>>('ProduceWebRtcTransport', {
+            const result = await this.client.transportProduce({
                transportId: transport.id,
                kind,
                rtpParameters,
@@ -212,10 +208,7 @@ export class WebRtcConnection {
    }
 
    public async createReceiveTransport(): Promise<Transport> {
-      const transportOptions = await this.connection.invoke<SuccessOrError<TransportOptions>>('CreateWebRtcTransport', {
-         producing: false,
-         consuming: true,
-      });
+      const transportOptions = await this.client.createTransport({ producing: false, consuming: true });
 
       if (!transportOptions.success) {
          console.error('Error creating receive transport: ', transportOptions.error);
@@ -225,10 +218,11 @@ export class WebRtcConnection {
       const transport = this.device.createRecvTransport(transportOptions.response);
 
       transport.on('connect', ({ dtlsParameters }, callback, errback) => {
-         this.connection
-            .invoke<SuccessOrError<any>>('ConnectWebRtcTransport', { transportId: transport.id, dtlsParameters })
+         this.client
+            .connectTransport({ transportId: transport.id, dtlsParameters })
             .then((response) => {
-               if (response.success) callback(response.response);
+               // TODO: maybe this will be an error
+               if (response.success) callback();
                else errback(response.error);
             })
             .catch(errback);
@@ -238,8 +232,8 @@ export class WebRtcConnection {
       return transport;
    }
 
-   public async changeStream(dto: ChangeStreamDto): Promise<void> {
-      const result = await this.connection.invoke<SuccessOrError<void>>(coreHub.changeStream.hubName, dto);
+   public async changeStream(request: ChangeStreamRequest): Promise<void> {
+      const result = await this.client.changeStream(request);
       if (!result.success) {
          throw new Error(result.error.message);
       }

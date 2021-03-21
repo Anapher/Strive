@@ -1,20 +1,20 @@
 import { Operation } from 'fast-json-patch';
 import { DomainError } from './communication-types';
 import {
-   RoomCreationInfo,
    EquipmentCommand,
    EquipmentStatus,
+   FetchChatMessagesDto,
    KickParticipantRequestDto,
    OpenBreakoutRoomsDto,
+   RoomCreationInfo,
    SendChatMessageDto,
    SetTemporaryPermissionDto,
-   SwitchRoomDto,
-   FetchChatMessagesDto,
    SetUserIsTypingDto,
+   SwitchRoomDto,
 } from './core-hub.types';
 import { RegisterEquipmentRequestDto } from './features/equipment/types';
 import { connectSignal, invoke, onInvokeReturn } from './store/signal/actions';
-import { ChangeProducerSourceDto, ChangeStreamDto } from './store/webrtc/types';
+import { ChangeProducerSourceRequest } from './store/webrtc/types';
 
 export const joinConference = (conferenceId: string, defaultEvents: string[], accessToken: string) =>
    connectSignal({ conferenceId, access_token: accessToken }, defaultEvents, { conferenceId });
@@ -45,8 +45,7 @@ export const sendEquipmentCommand = createHubFn<EquipmentCommand>('SendEquipment
 export const equipmentErrorOccurred = createHubFn<DomainError>('EquipmentErrorOccurred');
 export const equipmentUpdateStatus = createHubFn<EquipmentStatus>('EquipmentUpdateStatus');
 
-export const changeStream = createHubFn<ChangeStreamDto>('ChangeStream');
-export const changeProducerSource = createHubFn<ChangeProducerSourceDto>('ChangeProducerSource');
+export const changeProducerSource = createHubFn<ChangeProducerSourceRequest>('ChangeProducerSource');
 
 export const fetchPermissions = createHubFn<string | null>('FetchPermissions');
 export const setTemporaryPermission = createHubFn<SetTemporaryPermissionDto>('SetTemporaryPermission');
