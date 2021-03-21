@@ -1,3 +1,4 @@
+import { ReceivedSfuMessage } from '../../../src/lib/synchronization/message-types';
 import { applyUpdate, SynchronizedConference } from '../../../src/lib/synchronization/synchronized-conference';
 import { ConferenceInfo, ConferenceInfoUpdate, ConferenceInfoUpdateDto } from '../../../src/lib/types';
 import { RabbitChannel } from '../../../src/rabbitmq/rabbit-mq-conn';
@@ -80,13 +81,11 @@ function mockChannel(): [RabbitChannel, jest.Mock] {
    return [channelMock as any, consumeFn];
 }
 
-function callMockConsume(consumeFn: jest.Mock, update: ConferenceInfoUpdateDto) {
+function callMockConsume(consumeFn: jest.Mock, sfuMessage: ReceivedSfuMessage) {
    const call = consumeFn.mock.calls[0][1] as any;
 
    const message = JSON.stringify({
-      message: {
-         update,
-      },
+      message: sfuMessage,
    });
 
    call({ content: message });
@@ -106,9 +105,13 @@ test('should apply received messages after initialization', async () => {
    await syncConference.start();
 
    callMockConsume(consumeFn, {
-      participantPermissions: {},
-      participantToRoom: { p1: 'room1' },
-      removedParticipants: [],
+      type: 'Update',
+      conferenceId: '123',
+      payload: {
+         participantPermissions: {},
+         participantToRoom: { p1: 'room1' },
+         removedParticipants: [],
+      },
    });
 
    syncConference.initialize({ participantPermissions: new Map(), participantToRoom: new Map() });
@@ -123,15 +126,23 @@ test('should apply received messages in order of receiving after initialization'
    await syncConference.start();
 
    callMockConsume(consumeFn, {
-      participantPermissions: {},
-      participantToRoom: { p1: 'room1' },
-      removedParticipants: [],
+      type: 'Update',
+      conferenceId: '123',
+      payload: {
+         participantPermissions: {},
+         participantToRoom: { p1: 'room1' },
+         removedParticipants: [],
+      },
    });
 
    callMockConsume(consumeFn, {
-      participantPermissions: {},
-      participantToRoom: { p1: 'room2' },
-      removedParticipants: [],
+      type: 'Update',
+      conferenceId: '123',
+      payload: {
+         participantPermissions: {},
+         participantToRoom: { p1: 'room2' },
+         removedParticipants: [],
+      },
    });
 
    syncConference.initialize({ participantPermissions: new Map(), participantToRoom: new Map() });
@@ -159,9 +170,13 @@ test('should immediatly update current value after initialization', async () => 
    syncConference.initialize({ participantPermissions: new Map(), participantToRoom: new Map() });
 
    callMockConsume(consumeFn, {
-      participantPermissions: {},
-      participantToRoom: { p1: 'room1' },
-      removedParticipants: [],
+      type: 'Update',
+      conferenceId: '123',
+      payload: {
+         participantPermissions: {},
+         participantToRoom: { p1: 'room1' },
+         removedParticipants: [],
+      },
    });
 
    const result = syncConference.conferenceInfo;

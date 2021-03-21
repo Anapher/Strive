@@ -2,6 +2,7 @@ import { EventEmitter } from 'events';
 import { ConferenceInfo, ConferenceInfoUpdate, ConferenceInfoUpdateDto } from '../types';
 import { RabbitChannel } from '../../rabbitmq/rabbit-mq-conn';
 import { objectToMap } from '../../utils/map-utils';
+import { ReceivedSfuMessage } from './message-types';
 
 /**
  * Holds a conference info that is synchronized using rabbit mq
@@ -24,14 +25,8 @@ export class SynchronizedConference extends EventEmitter {
             if (message) {
                const messageDeserialized = JSON.parse(message.content.toString());
 
-               const update: ConferenceInfoUpdateDto = messageDeserialized.message.update;
-               const fixed: ConferenceInfoUpdate = {
-                  participantPermissions: objectToMap(update.participantPermissions),
-                  participantToRoom: objectToMap(update.participantToRoom),
-                  removedParticipants: update.removedParticipants,
-               };
-
-               this.processUpdate(fixed);
+               const sfuMessage = messageDeserialized.message as ReceivedSfuMessage;
+               this.processMessage(sfuMessage);
             }
          },
          { noAck: true },
@@ -53,6 +48,26 @@ export class SynchronizedConference extends EventEmitter {
    public get conferenceInfo(): ConferenceInfo {
       if (!this.info) throw new Error('The synchronized conference must first be initalized.');
       return this.info;
+   }
+
+   private processMessage(message: ReceivedSfuMessage) {
+      switch (message.type) {
+         case 'Update':
+            const update = message.payload;
+            const fixed: ConferenceInfoUpdate = {
+               participantPermissions: objectToMap(update.participantPermissions),
+               participantToRoom: objectToMap(update.participantToRoom),
+               removedParticipants: update.removedParticipants,
+            };
+
+            this.processUpdate(fixed);
+            break;
+         case 'ChangeProducer':
+            this.emit('changeProducer');
+            break;
+         default:
+            break;
+      }
    }
 
    private processUpdate(update: ConferenceInfoUpdate) {

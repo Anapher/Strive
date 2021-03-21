@@ -1,5 +1,6 @@
 import { Channel } from 'amqplib';
 import { ConferenceRepository } from '../../../src/lib/synchronization/conference-repository';
+import { ReceivedSfuMessage } from '../../../src/lib/synchronization/message-types';
 import { ConferenceInfoUpdateDto } from '../../../src/lib/types';
 import { RabbitChannel } from '../../../src/rabbitmq/rabbit-mq-conn';
 import { ConferenceInfo } from './../../../src/lib/types';
@@ -52,10 +53,10 @@ class TestEnvironment {
    public callUpdate(update: ConferenceInfoUpdateDto) {
       const call = this.consumeFn!.mock.calls[0][1] as any;
 
+      const sfuMessage: ReceivedSfuMessage = { type: 'Update', conferenceId: '123', payload: update };
+
       const message = JSON.stringify({
-         message: {
-            update,
-         },
+         message: sfuMessage,
       });
 
       call({ content: message });

@@ -53,6 +53,7 @@ const config: Config = {
       conferenceInfoRequestUrl:
          process.env.API_CONFERENCE_MANAGEMENT || 'http://localhost:55104/v1/sfu/{conferenceId}?apiKey=testApiKey',
       rabbitMq: process.env.AMQP_CONNECTION_STRING || 'amqp://localhost:5672',
+      tokenSecret: process.env.API_TOKEN_SECRET || 'ae2c687f875a47c99e3a05096badbac6',
    },
 };
 
@@ -74,5 +75,6 @@ type Config = {
    services: {
       conferenceInfoRequestUrl: string;
       rabbitMq: string;
+      tokenSecret: string;
    };
 };
