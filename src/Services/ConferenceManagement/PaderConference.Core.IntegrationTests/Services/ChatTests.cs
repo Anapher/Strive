@@ -113,9 +113,9 @@ namespace PaderConference.Core.IntegrationTests.Services
 
             // assert
             NotificationCollector.AssertSingleNotificationIssued<ChatMessageReceivedNotification>(notification =>
-                {
-                    Assert.Equal(TestParticipant1, Assert.Single(notification.Participants));
-                });
+            {
+                Assert.Equal(TestParticipant1, Assert.Single(notification.Participants));
+            });
         }
 
         [Fact]

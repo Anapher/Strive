@@ -37,6 +37,7 @@ using PaderConference.Hubs.Services;
 using PaderConference.Hubs.Services.Middlewares;
 using PaderConference.Hubs.Validators.Extensions;
 using PaderConference.Infrastructure.Extensions;
+using PaderConference.Messaging.SFU.Dto;
 
 namespace PaderConference.Hubs
 {
@@ -294,6 +295,16 @@ namespace PaderConference.Hubs
             var participant = GetContextParticipant();
             return await GetInvoker().Create(new FetchSfuConnectionInfoRequest(participant, Context.ConnectionId))
                 .Send();
+        }
+
+        public async Task<SuccessOrError<Unit>> ChangeParticipantProducer(ChangeParticipantProducerDto dto)
+        {
+            var (conferenceId, _) = GetContextParticipant();
+
+            return await GetInvoker()
+                .Create(new ChangeParticipantProducerRequest(new Participant(conferenceId, dto.ParticipantId),
+                    dto.Source, dto.Action))
+                .RequirePermissions(DefinedPermissions.Media.CanChangeOtherParticipantsProducers).Send();
         }
 
         //public Task<SuccessOrError<string>> GetEquipmentToken()

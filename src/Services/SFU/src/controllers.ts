@@ -17,15 +17,13 @@ export default function configureEndpoints(app: Express, conferenceManager: Conf
    app.use(cors());
 
    const conferenceMatchMiddleware: RequestHandler = (req, res, next) => {
-      console.log(req.url);
-
       const conferenceId: string = req.params.conferenceId;
       const tokenConference = (req.user as JwtProperties).conference;
 
-      console.log('conferenceId', conferenceId);
-      console.log('tokenConference', tokenConference);
+      logger.debug('REQUEST %s', req.url);
 
       if (conferenceId !== tokenConference) {
+         logger.warn("Url conference (%s) doesn't match token conference (%s)", conferenceId, tokenConference);
          res.status(400).end();
          return;
       }

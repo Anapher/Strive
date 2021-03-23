@@ -136,6 +136,7 @@ export class MediasoupMixer {
       }
 
       consumer.appData.participantId = participantId;
+      consumer.appData.source = producer.appData.source;
 
       // Store the Consumer
       connection.consumers.set(consumer.id, consumer);

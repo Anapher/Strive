@@ -7,7 +7,7 @@ import { InputDeviceDto } from '../settings/types';
 export type ConsumerInfo = {
    paused: boolean;
    participantId: string;
-   loopback: boolean;
+   source: ProducerSource;
 };
 
 export type ProducerInfo = {

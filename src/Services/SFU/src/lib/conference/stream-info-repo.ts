@@ -69,7 +69,7 @@ export class StreamInfoRepo {
             streams.consumers[consumer.id] = {
                paused: consumer.paused,
                participantId: consumer.appData.participantId,
-               loopback: consumer.appData.loopback,
+               source: consumer.appData.source as ProducerSource,
             };
          }
       }
