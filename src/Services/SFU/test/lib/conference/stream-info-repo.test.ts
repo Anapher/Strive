@@ -41,7 +41,7 @@ test('should update streams', async () => {
                consumers: new Map<string, Consumer>().set('43', {
                   id: '43',
                   paused: true,
-                  appData: { participantId: '56', loopback: false },
+                  appData: { participantId: '56', source: 'mic' },
                } as any),
                ...({} as any),
             },
@@ -57,7 +57,7 @@ test('should update streams', async () => {
    const expected: ConferenceParticipantStreamInfo = {
       '123': {
          consumers: {
-            '43': { paused: true, participantId: '56', loopback: false },
+            '43': { paused: true, participantId: '56', source: 'mic' },
          },
          producers: {
             mic: {
