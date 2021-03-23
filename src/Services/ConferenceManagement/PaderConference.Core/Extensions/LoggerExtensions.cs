@@ -6,11 +6,6 @@ namespace PaderConference.Core.Extensions
 {
     public static class LoggerExtensions
     {
-        public static IDisposable BeginMethodScope(this ILogger logger, [CallerMemberName] string method = "Default")
-        {
-            return logger.BeginScope($"{method}()");
-        }
-
         public static IDisposable BeginMethodScope(this ILogger logger, object state,
             [CallerMemberName] string method = "Default")
         {

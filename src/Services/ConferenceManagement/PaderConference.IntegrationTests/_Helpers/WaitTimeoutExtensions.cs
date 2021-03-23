@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Nito.AsyncEx;
-using PaderConference.Core.Extensions;
+using PaderConference.IntegrationTests.Extensions;
 
 namespace PaderConference.IntegrationTests._Helpers
 {
