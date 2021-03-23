@@ -4,6 +4,7 @@ on:
     paths:
       - src/**
       - .github/workflows/asp-net-core-test.yml
+      - codecov.yml
       - "!src/Services/SFU/**"
       - "!src/Web/WebSPA/Client/**"
 
@@ -13,6 +14,7 @@ on:
     paths:
       - src/**
       - .github/workflows/asp-net-core-test.yml
+      - codecov.yml
       - "!src/Services/SFU/**"
       - "!src/Web/WebSPA/Client/**"
 
