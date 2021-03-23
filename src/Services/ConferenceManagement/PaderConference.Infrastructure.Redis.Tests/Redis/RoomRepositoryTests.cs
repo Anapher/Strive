@@ -1,12 +1,10 @@
 ﻿using System.Threading.Tasks;
-using Microsoft.Extensions.Options;
 using PaderConference.Core.Interfaces.Gateways.Repositories;
 using PaderConference.Core.Services;
 using PaderConference.Core.Services.Rooms;
 using PaderConference.Core.Services.Rooms.Gateways;
-using PaderConference.Infrastructure.KeyValue;
-using PaderConference.Infrastructure.KeyValue.Redis;
 using PaderConference.Infrastructure.KeyValue.Repos;
+using PaderConference.Infrastructure.Redis.Tests.Redis;
 using PaderConference.IntegrationTests._Helpers;
 using StackExchange.Redis;
 using Xunit;
@@ -21,8 +19,7 @@ namespace PaderConference.IntegrationTests.Infrastructure.Redis
         public RoomRepositoryTests(RedisDbConnector connector)
         {
             var database = connector.CreateConnection();
-            _repository = new RoomRepository(new RedisKeyValueDatabase(database,
-                new OptionsWrapper<KeyValueDatabaseOptions>(new KeyValueDatabaseOptions())));
+            _repository = new RoomRepository(KeyValueDatabaseFactory.Create(database));
             _database = database;
         }
 
