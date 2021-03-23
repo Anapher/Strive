@@ -31,7 +31,7 @@ export class Conference {
 
    /** participantId -> Participant */
    private participants: Map<string, Participant> = new Map();
-   private streamInfoRepo: StreamInfoRepo;
+   public streamInfoRepo: StreamInfoRepo;
 
    constructor(
       private router: Router,
@@ -115,7 +115,32 @@ export class Conference {
       return { success: true };
    }
 
-   public async roomSwitched({ meta: { participantId } }: ConnectionMessage<void>): Promise<SuccessOrError> {
+   public async removeParticipant(participantId: string): Promise<SuccessOrError> {
+      const participant = this.participants.get(participantId);
+      if (!participant) return { success: false, error: errors.participantNotFound(participantId) };
+
+      for (const connection of participant.connections) {
+         for (const [, producer] of connection.producers) {
+            producer.close();
+         }
+         for (const [, consumer] of connection.consumers) {
+            consumer.close();
+         }
+         for (const [, transport] of connection.transport) {
+            transport.close();
+         }
+      }
+
+      await this.roomManager.removeParticipant(participant);
+      this.participants.delete(participant.participantId);
+
+      // update streams
+      await this.streamInfoRepo.updateStreams(this.participants.values());
+
+      return { success: true };
+   }
+
+   public async updateParticipant(participantId: string): Promise<SuccessOrError> {
       const participant = this.participants.get(participantId);
       if (!participant) return { success: false, error: errors.participantNotFound(participantId) };
 
@@ -313,9 +338,9 @@ export class Conference {
          } catch (error) {}
       }
 
-      await this.roomManager.updateParticipant(participant);
-
       if (consuming) participant.receiveConnection = connection;
+
+      await this.roomManager.updateParticipant(participant);
 
       return {
          success: true,

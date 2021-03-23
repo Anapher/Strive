@@ -31,12 +31,12 @@ export class MediasoupMixer {
    public async addProducer(producerInfo: ProducerInfo): Promise<void> {
       if (this.producers.has(producerInfo.producer.id)) return;
 
+      logger.info('add producer from %s', producerInfo.participantId);
+
       this.producers.set(producerInfo.producer.id, producerInfo);
 
       for (const receiver of this.receivers.values()) {
-         // if (receiver.participantId !== producerInfo.participantId) { for loopback
          await this.createConsumer(receiver, producerInfo);
-         // }
       }
    }
 
@@ -73,8 +73,7 @@ export class MediasoupMixer {
       this.receivers.set(connection.connectionId, connection);
 
       for (const producerInfo of this.producers.values()) {
-         if (producerInfo.participantId !== connection.participantId)
-            await this.createConsumer(connection, producerInfo);
+         await this.createConsumer(connection, producerInfo);
       }
    }
 

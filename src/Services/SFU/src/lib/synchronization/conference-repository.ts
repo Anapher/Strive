@@ -3,12 +3,12 @@ import { ConferenceInfo, ConferenceInfoUpdate } from '../types';
 import { ConferenceManagementClient } from './conference-management-client';
 import PubSubMessenger from './pub-sub-messenger';
 import RabbitMqConn, { RabbitChannel } from '../../rabbitmq/rabbit-mq-conn';
-import { SynchronizedConference } from './synchronized-conference';
+import { SyncConferenceEventMessage, SynchronizedConference } from './synchronized-conference';
 import _ from 'lodash';
 
 const logger = new Logger();
 
-type MessageHandler = (conferenceUpdate: ConferenceInfoUpdate) => void;
+type MessageHandler = (message: SyncConferenceEventMessage) => void;
 
 export class ConferenceRepository {
    private cachedConferences = new Map<string, SynchronizedConference>();
@@ -112,7 +112,7 @@ export class ConferenceRepository {
          const removedParticipants = oldParticipants.filter((x) => !newParticipants.includes(x));
 
          for (const handler of handlers) {
-            handler({ ...currentValue, removedParticipants });
+            handler({ type: 'conferenceInfoUpdated', update: { ...currentValue, removedParticipants } });
             syncConference.on('message', handler);
          }
       }

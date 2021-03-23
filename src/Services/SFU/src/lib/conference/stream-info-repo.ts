@@ -7,7 +7,29 @@ import { ConferenceParticipantStreamInfo, ParticipantStreams } from './pub-types
  * A repository for updating information about streams of the participants
  */
 export class StreamInfoRepo {
+   private isFrozen = false;
+   private latestValue: ConferenceParticipantStreamInfo | undefined;
+
    constructor(private messenger: ConferenceMessenger, private conferenceId: string) {}
+
+   /**
+    * Freeze the stream repo, meaning that any new values will be cached instead of being sent.
+    * If the return value callback is invoked, the latest value will be sent.
+    * @returns Release the frozen state
+    */
+   public freeze(): () => Promise<void> {
+      this.isFrozen = true;
+
+      return async () => {
+         if (!this.isFrozen) return;
+
+         this.isFrozen = false;
+         if (this.latestValue) {
+            await this.messenger.updateStreams(this.latestValue, this.conferenceId);
+            this.latestValue = undefined;
+         }
+      };
+   }
 
    /**
     * Update all streams, overwrite old info
@@ -18,6 +40,11 @@ export class StreamInfoRepo {
 
       for (const participant of participants) {
          result[participant.participantId] = this.createParticipantInfo(participant);
+      }
+
+      if (this.isFrozen) {
+         this.latestValue = result;
+         return;
       }
 
       await this.messenger.updateStreams(result, this.conferenceId);

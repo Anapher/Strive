@@ -74,6 +74,8 @@ export class RoomManager {
    }
 
    public async removeParticipant(participant: Participant): Promise<void> {
+      await this.loopbackManager.disableLoopback(participant);
+
       const roomId = await this.getParticipantRoom(participant.participantId);
       if (!roomId) return;
 

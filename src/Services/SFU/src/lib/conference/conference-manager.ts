@@ -5,6 +5,7 @@ import { ConferenceRepository } from '../synchronization/conference-repository';
 import RabbitMqConn from '../../rabbitmq/rabbit-mq-conn';
 import { Conference } from './conference';
 import conferenceFactory from './conference-factory';
+import _ from 'lodash';
 
 export type ConferenceManagerOptions = {
    routerOptions: RouterOptions;
@@ -34,7 +35,7 @@ export default class ConferenceManager {
          localConference = await conferenceFactory(id, this.workers, this.repository, this.rabbitConn, this.options);
 
          this.conferences.set(id, localConference);
-         await this.registerConferenceEvents(id);
+         await this.registerConferenceEvents(id, localConference);
       }
 
       return localConference;
@@ -44,9 +45,35 @@ export default class ConferenceManager {
       return this.conferences.has(id);
    }
 
-   private async registerConferenceEvents(id: string): Promise<void> {
-      await this.repository.addMessageHandler(id, (message) => {
-         // todo
+   private async registerConferenceEvents(id: string, conference: Conference): Promise<void> {
+      await this.repository.addMessageHandler(id, async (message) => {
+         switch (message.type) {
+            case 'conferenceInfoUpdated':
+               const unfreezeCallback = conference.streamInfoRepo.freeze();
+               try {
+                  for (const participantId of message.update.removedParticipants) {
+                     await conference.removeParticipant(participantId);
+                  }
+
+                  const updatedParticipants = _.uniq(
+                     Array.from(message.update.participantToRoom.keys()).concat(
+                        Array.from(message.update.participantPermissions.keys()),
+                     ),
+                  );
+
+                  for (const participantId of updatedParticipants) {
+                     await conference.updateParticipant(participantId);
+                  }
+               } finally {
+                  await unfreezeCallback();
+               }
+               break;
+            case 'producerChanged':
+               await conference.changeProducerSource(message.dto, message.dto.participantId);
+               break;
+            default:
+               break;
+         }
       });
    }
 }

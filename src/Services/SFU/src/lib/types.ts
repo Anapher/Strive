@@ -1,4 +1,5 @@
 import { Producer } from 'mediasoup/lib/types';
+import { StreamAction } from './conference/request-types';
 
 export type ConferenceInfoDto = {
    participantToRoom: { [key: string]: string };
@@ -16,6 +17,12 @@ export type ConferenceInfo = {
 
 export type ConferenceInfoUpdate = ConferenceInfo & {
    removedParticipants: string[];
+};
+
+export type ChangeParticipantProducerDto = {
+   participantId: string;
+   source: ProducerSource;
+   action: StreamAction;
 };
 
 export const producerSources = [

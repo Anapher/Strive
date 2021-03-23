@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using MassTransit;
 using Microsoft.Extensions.Options;
 using PaderConference.Config;
@@ -29,16 +28,21 @@ namespace PaderConference.Messaging.SFU
         public async Task Update(string conferenceId, SfuConferenceInfoUpdate value)
         {
             await _publishEndpoint.Publish<MediaStateChanged>(
-                new {ConferenceId = conferenceId, Type = "Update", Payload = value}, context =>
-                {
-                    if (!_options.UseInMemory)
-                        context.SetRoutingKey(conferenceId);
-                });
+                new {ConferenceId = conferenceId, Type = "Update", Payload = value},
+                context => SetupContext(context, conferenceId));
         }
 
-        public Task ChangeProducer(string conferenceId, ChangeParticipantProducerDto value)
+        public async Task ChangeProducer(string conferenceId, ChangeParticipantProducerDto value)
         {
-            throw new NotImplementedException();
+            await _publishEndpoint.Publish<ChangeParticipantProducer>(
+                new {ConferenceId = conferenceId, Type = "ChangeProducer", Payload = value},
+                context => SetupContext(context, conferenceId));
+        }
+
+        private void SetupContext(PublishContext context, string conferenceId)
+        {
+            if (!_options.UseInMemory)
+                context.SetRoutingKey(conferenceId);
         }
     }
 }

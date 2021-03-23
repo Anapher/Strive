@@ -66,7 +66,7 @@ export class LoopbackManager {
     * Disable loopback streams for a participant
     * @param participant the participant
     */
-   private async disableLoopback(participant: Participant): Promise<void> {
+   public async disableLoopback(participant: Participant): Promise<void> {
       const room = this.loopbackMap.get(participant.participantId);
       if (room) {
          logger.info('Disable loopback for %s', participant.participantId);

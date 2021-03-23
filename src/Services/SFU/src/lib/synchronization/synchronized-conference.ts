@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
-import { ConferenceInfo, ConferenceInfoUpdate, ConferenceInfoUpdateDto } from '../types';
 import { RabbitChannel } from '../../rabbitmq/rabbit-mq-conn';
 import { objectToMap } from '../../utils/map-utils';
+import { ChangeParticipantProducerDto, ConferenceInfo, ConferenceInfoUpdate } from '../types';
 import { ReceivedSfuMessage } from './message-types';
 
 /**
@@ -63,7 +63,8 @@ export class SynchronizedConference extends EventEmitter {
             this.processUpdate(fixed);
             break;
          case 'ChangeProducer':
-            this.emit('changeProducer');
+            const eventMessage: ProducerChangedEvent = { type: 'producerChanged', dto: message.payload };
+            this.emit('message', eventMessage);
             break;
          default:
             break;
@@ -77,7 +78,12 @@ export class SynchronizedConference extends EventEmitter {
       }
 
       this.info = applyUpdate(this.info, update);
-      this.emit('message', update);
+
+      const message: ConferenceInfoUpdatedEvent = {
+         type: 'conferenceInfoUpdated',
+         update,
+      };
+      this.emit('message', message);
    }
 
    public async close(): Promise<void> {
@@ -104,3 +110,15 @@ export function applyUpdate(conference: ConferenceInfo, update: ConferenceInfoUp
 
    return { participantPermissions: newPermissions, participantToRoom: newParticipants };
 }
+
+export type ConferenceInfoUpdatedEvent = {
+   type: 'conferenceInfoUpdated';
+   update: ConferenceInfoUpdate;
+};
+
+export type ProducerChangedEvent = {
+   type: 'producerChanged';
+   dto: ChangeParticipantProducerDto;
+};
+
+export type SyncConferenceEventMessage = ConferenceInfoUpdatedEvent | ProducerChangedEvent;

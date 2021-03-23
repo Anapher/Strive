@@ -45,14 +45,15 @@ export type TransportProduceResponse = {
 };
 
 export type StreamType = 'producer' | 'consumer';
+export type StreamAction = 'pause' | 'resume' | 'close';
 
 export type ChangeStreamRequest = {
    id: string;
    type: 'producer' | 'consumer';
-   action: 'pause' | 'resume' | 'close';
+   action: StreamAction;
 };
 
 export type ChangeProducerSourceRequest = {
    source: ProducerSource;
-   action: 'pause' | 'resume' | 'close';
+   action: StreamAction;
 };
