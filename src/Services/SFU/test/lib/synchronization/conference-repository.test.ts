@@ -157,11 +157,14 @@ test('should emit message event after rabbit mq connection changed with new api 
    const env = new TestEnvironment(conference);
 
    let received = false;
-   await env.repository.addMessageHandler('123', (update) => {
-      received = true;
-      expect(update.removedParticipants).toEqual([]);
-      expect(update.participantToRoom).toEqual(new Map().set('p1', 'room1'));
-      expect(update.participantPermissions).toEqual(new Map());
+   await env.repository.addMessageHandler('123', (msg) => {
+      if (msg.type === 'conferenceInfoUpdated') {
+         const { update } = msg;
+         received = true;
+         expect(update.removedParticipants).toEqual([]);
+         expect(update.participantToRoom).toEqual(new Map().set('p1', 'room1'));
+         expect(update.participantPermissions).toEqual(new Map());
+      }
    });
 
    env.apiConference = { participantToRoom: new Map().set('p1', 'room1'), participantPermissions: new Map() };
@@ -178,11 +181,14 @@ test('should emit message event after rabbit mq connection changed with removed 
    const env = new TestEnvironment(conference);
 
    let received = false;
-   await env.repository.addMessageHandler('123', (update) => {
-      received = true;
-      expect(update.removedParticipants.sort()).toEqual(['p1', 'p2'].sort());
-      expect(update.participantToRoom).toEqual(new Map());
-      expect(update.participantPermissions).toEqual(new Map());
+   await env.repository.addMessageHandler('123', (msg) => {
+      if (msg.type === 'conferenceInfoUpdated') {
+         const { update } = msg;
+         received = true;
+         expect(update.removedParticipants.sort()).toEqual(['p1', 'p2'].sort());
+         expect(update.participantToRoom).toEqual(new Map());
+         expect(update.participantPermissions).toEqual(new Map());
+      }
    });
 
    env.apiConference = { participantToRoom: new Map(), participantPermissions: new Map() };
