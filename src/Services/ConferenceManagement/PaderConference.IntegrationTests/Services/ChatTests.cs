@@ -10,9 +10,9 @@ using PaderConference.Core.Services.Chat.Channels;
 using PaderConference.Core.Services.Chat.Requests;
 using PaderConference.Core.Services.Rooms;
 using PaderConference.Core.Services.Synchronization;
-using PaderConference.Hubs;
-using PaderConference.Hubs.Dtos;
-using PaderConference.Hubs.Responses;
+using PaderConference.Hubs.Core;
+using PaderConference.Hubs.Core.Dtos;
+using PaderConference.Hubs.Core.Responses;
 using PaderConference.IntegrationTests._Helpers;
 using Xunit;
 using Xunit.Abstractions;
@@ -140,7 +140,7 @@ namespace PaderConference.IntegrationTests.Services
             var channel = (await WaitForGlobalChat(connection)).ToString();
 
             var chatMessageNotification = new TaskCompletionSource<ChatMessageDto>();
-            connection.Hub.On(CoreHubMessages.Response.ChatMessage,
+            connection.Hub.On(CoreHubMessages.ChatMessage,
                 (ChatMessageDto dto) => chatMessageNotification.SetResult(dto));
 
             // act
@@ -172,7 +172,7 @@ namespace PaderConference.IntegrationTests.Services
                 .Encode(new PrivateChatChannel(new HashSet<string> {olaf.Sub, Moderator.Sub})).ToString();
 
             var chatMessageNotification = new TaskCompletionSource<ChatMessageDto>();
-            olafConnection.Hub.On(CoreHubMessages.Response.ChatMessage,
+            olafConnection.Hub.On(CoreHubMessages.ChatMessage,
                 (ChatMessageDto dto) => chatMessageNotification.SetResult(dto));
 
             // act

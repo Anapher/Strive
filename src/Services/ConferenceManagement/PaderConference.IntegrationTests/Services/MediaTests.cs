@@ -7,7 +7,7 @@ using Moq;
 using PaderConference.Core.Interfaces;
 using PaderConference.Core.Services.Media;
 using PaderConference.Core.Services.Media.Dtos;
-using PaderConference.Hubs;
+using PaderConference.Hubs.Core;
 using PaderConference.IntegrationTests._Helpers;
 using PaderConference.Messaging.SFU.Dto;
 using PaderConference.Messaging.SFU.SendContracts;

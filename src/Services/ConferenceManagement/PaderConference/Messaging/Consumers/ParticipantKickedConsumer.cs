@@ -2,7 +2,7 @@
 using MassTransit;
 using Microsoft.AspNetCore.SignalR;
 using PaderConference.Contracts;
-using PaderConference.Hubs;
+using PaderConference.Hubs.Core;
 
 namespace PaderConference.Messaging.Consumers
 {

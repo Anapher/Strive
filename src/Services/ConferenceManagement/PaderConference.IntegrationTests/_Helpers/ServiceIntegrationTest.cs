@@ -11,7 +11,7 @@ using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Dto;
 using PaderConference.Core.Interfaces;
 using PaderConference.Core.Services;
-using PaderConference.Hubs;
+using PaderConference.Hubs.Core;
 using PaderConference.Models.Request;
 using PaderConference.Models.Response;
 using Xunit;

@@ -6,9 +6,9 @@ using PaderConference.Core.Interfaces;
 using PaderConference.Core.Services;
 using PaderConference.Core.Services.ConferenceControl;
 using PaderConference.Core.Services.Synchronization;
-using PaderConference.Hubs;
-using PaderConference.Hubs.Dtos;
-using PaderConference.Hubs.Responses;
+using PaderConference.Hubs.Core;
+using PaderConference.Hubs.Core.Dtos;
+using PaderConference.Hubs.Core.Responses;
 using PaderConference.IntegrationTests._Helpers;
 using Xunit;
 using Xunit.Abstractions;
@@ -106,7 +106,7 @@ namespace PaderConference.IntegrationTests.Services
             var userToBeKickedConnection = await ConnectUserToConference(userToBeKicked, conference);
 
             var autoResetEvent = new AsyncAutoResetEvent(false);
-            userToBeKickedConnection.Hub.On(CoreHubMessages.Response.OnRequestDisconnect,
+            userToBeKickedConnection.Hub.On(CoreHubMessages.OnRequestDisconnect,
                 (RequestDisconnectDto _) => autoResetEvent.Set());
 
             // act

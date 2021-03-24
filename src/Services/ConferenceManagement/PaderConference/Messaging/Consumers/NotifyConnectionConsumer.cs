@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using MassTransit;
 using Microsoft.AspNetCore.SignalR;
-using PaderConference.Hubs;
+using PaderConference.Hubs.Core;
 using PaderConference.Messaging.SFU.ReceiveContracts;
 
 namespace PaderConference.Messaging.Consumers

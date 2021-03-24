@@ -1,5 +1,5 @@
 ﻿using Autofac;
-using PaderConference.Hubs;
+using PaderConference.Hubs.Core;
 using PaderConference.Messaging.SFU;
 using PaderConference.Presenters;
 

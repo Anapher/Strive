@@ -29,7 +29,8 @@ using PaderConference.Core;
 using PaderConference.Core.Domain.Entities;
 using PaderConference.Core.Services.Media;
 using PaderConference.Extensions;
-using PaderConference.Hubs;
+using PaderConference.Hubs.Core;
+using PaderConference.Hubs.Equipment;
 using PaderConference.Infrastructure;
 using PaderConference.Infrastructure.Data;
 using PaderConference.Infrastructure.KeyValue;
@@ -279,6 +280,7 @@ namespace PaderConference
             {
                 endpoints.MapControllerRoute("default", "{controller}/{action=Index}/{id?}");
                 endpoints.MapHub<CoreHub>("/signalr");
+                endpoints.MapHub<EquipmentHub>("/equipment-signalr");
             });
 
             app.UseEndpoints(endpoints =>

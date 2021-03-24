@@ -11,7 +11,7 @@ using Newtonsoft.Json.Linq;
 using Nito.AsyncEx;
 using PaderConference.Core.Services.Permissions;
 using PaderConference.Core.Services.Synchronization;
-using PaderConference.Hubs;
+using PaderConference.Hubs.Core;
 using Serilog;
 
 namespace PaderConference.IntegrationTests._Helpers
@@ -27,9 +27,9 @@ namespace PaderConference.IntegrationTests._Helpers
         {
             _logger = logger;
 
-            connection.On<SyncObjPayload<JToken>>(CoreHubMessages.Response.OnSynchronizedObjectUpdated,
+            connection.On<SyncObjPayload<JToken>>(CoreHubMessages.OnSynchronizedObjectUpdated,
                 HandleSynchronizedObjectUpdated);
-            connection.On<SyncObjPayload<JToken>>(CoreHubMessages.Response.OnSynchronizeObjectState,
+            connection.On<SyncObjPayload<JToken>>(CoreHubMessages.OnSynchronizeObjectState,
                 HandleSynchronizeObjectState);
         }
 

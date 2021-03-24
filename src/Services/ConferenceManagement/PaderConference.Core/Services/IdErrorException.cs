@@ -11,5 +11,10 @@ namespace PaderConference.Core.Services
         {
             Error = error;
         }
+
+        public override string ToString()
+        {
+            return Error.ToString();
+        }
     }
 }

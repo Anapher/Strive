@@ -37,6 +37,9 @@ namespace PaderConference.Core.Services
 
         // Equipment
         Equipment_NotFound,
+        Equipment_InvalidToken,
+        Equipment_NotInitialized,
+        Equipment_ParticipantNotJoined,
 
         // Scenes
         Scenes_RoomNotFound,
