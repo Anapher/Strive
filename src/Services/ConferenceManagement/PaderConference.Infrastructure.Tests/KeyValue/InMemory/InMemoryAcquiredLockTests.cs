@@ -66,7 +66,7 @@ namespace PaderConference.Infrastructure.Tests.KeyValue.InMemory
         {
             // arrange
             var readerWriterLock = new AsyncReaderWriterLock();
-            var writerLock = readerWriterLock.WriterLock();
+            var writerLockHandle = readerWriterLock.WriterLock();
 
             var finished = false;
 
@@ -85,11 +85,11 @@ namespace PaderConference.Infrastructure.Tests.KeyValue.InMemory
             var tasks = Enumerable.Range(0, 3).Select(_ => Task.Run(TestLock)).ToList();
             for (var i = 0; i < 50; i++)
             {
-                writerLock.Dispose();
+                writerLockHandle.Dispose();
                 await Task.Delay(1);
-                writerLock = readerWriterLock.WriterLock();
+                writerLockHandle = readerWriterLock.WriterLock();
 
-                memoryLock.Verify(x => x.Unlock(TestLockKey), Times.Once);
+                memoryLock.Verify(x => x.Unlock(TestLockKey), Times.AtMostOnce);
 
                 memoryLock = new Mock<IInMemoryKeyLock>();
                 acquired = new InMemoryAcquiredLock(TestLockKey, memoryLock.Object, DefaultExpiry);
@@ -97,7 +97,7 @@ namespace PaderConference.Infrastructure.Tests.KeyValue.InMemory
 
             // assert
             finished = true;
-            writerLock.Dispose();
+            writerLockHandle.Dispose();
         }
     }
 }
