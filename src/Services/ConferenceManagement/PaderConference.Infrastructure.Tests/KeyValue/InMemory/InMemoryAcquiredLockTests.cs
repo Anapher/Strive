@@ -55,7 +55,7 @@ namespace PaderConference.Infrastructure.Tests.KeyValue.InMemory
             var acquired = new InMemoryAcquiredLock(TestLockKey, memoryLock.Object, TimeSpan.FromMilliseconds(10));
 
             await Assert.ThrowsAsync<TaskCanceledException>(async () =>
-                await Task.Delay(100, acquired.HandleLostToken));
+                await Task.Delay(TimeSpan.FromMinutes(2), acquired.HandleLostToken));
 
             // assert
             memoryLock.Verify(x => x.Unlock(TestLockKey), Times.Once);
