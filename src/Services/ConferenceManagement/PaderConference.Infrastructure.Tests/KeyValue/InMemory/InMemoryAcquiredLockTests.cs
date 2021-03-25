@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Moq;
 using Nito.AsyncEx;
 using PaderConference.Infrastructure.KeyValue.InMemory;
+using PaderConference.Tests.Utils;
 using Xunit;
 
 namespace PaderConference.Infrastructure.Tests.KeyValue.InMemory
@@ -58,7 +59,7 @@ namespace PaderConference.Infrastructure.Tests.KeyValue.InMemory
                 await Task.Delay(TimeSpan.FromMinutes(2), acquired.HandleLostToken));
 
             // assert
-            memoryLock.Verify(x => x.Unlock(TestLockKey), Times.Once);
+            await AssertHelper.WaitForAssert(() => { memoryLock.Verify(x => x.Unlock(TestLockKey), Times.Once); });
         }
 
         [Fact]
