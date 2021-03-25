@@ -23,7 +23,7 @@ using PaderConference.Hubs.Equipment.Dtos;
 namespace PaderConference.Hubs.Equipment
 {
     [AllowAnonymous]
-    public class EquipmentHub : ScopedHub
+    public class EquipmentHub : ScopedHub, ISfuConnectionHub
     {
         private readonly ILogger<EquipmentHub> _logger;
         private readonly IMediator _mediator;

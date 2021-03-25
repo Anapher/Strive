@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { events } from 'src/core-hub';
-import { EquipmentCommand } from 'src/core-hub.types';
+import { events } from 'src/equipment-hub';
+import { EquipmentCommand } from 'src/equipment-hub.types';
 import { onEventOccurred } from 'src/store/signal/actions';
 
 type EquipmentState = {

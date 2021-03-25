@@ -1,5 +1,6 @@
 import { Permissions } from 'src/core-hub.types';
 import { ParticipantData } from 'src/features/conference/types';
+import { EquipmentConnection } from 'src/features/media/types';
 
 export const ROOMS = 'rooms';
 export const CONFERENCE = 'conference';
@@ -9,6 +10,7 @@ export const CHAT = 'chat';
 export const SUBSCRIPTIONS = 'subscriptions';
 export const BREAKOUT_ROOMS = 'breakoutRooms';
 export const MEDIA = 'media';
+export const EQUIPMENT = 'equipment';
 
 export type SynchronizedParticipants = {
    participants: { [participantId: string]: ParticipantData };
@@ -37,4 +39,8 @@ export type Room = {
 
 export type ChatSynchronizedObject = {
    participantsTyping: { [id: string]: boolean };
+};
+
+export type SynchronizedEquipment = {
+   connections: Record<string, EquipmentConnection>;
 };

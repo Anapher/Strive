@@ -4,12 +4,12 @@ import { ProducerSource } from 'src/store/webrtc/types';
 import { AnyInputDevice } from './types';
 
 const getSource = (_: unknown, source: ProducerSource | undefined) => source;
-const getLocalDevices = (state: RootState) => state.settings.availableDevices;
-const getEquipment = (state: RootState) => state.media.equipment;
+const selectLocalDevices = (state: RootState) => state.settings.availableDevices;
+export const selectEquipmentConnections = (state: RootState) => state.media.equipment?.connections;
 
 export const selectAvailableInputDevices = createSelector(
-   getLocalDevices,
-   getEquipment,
+   selectLocalDevices,
+   selectEquipmentConnections,
    getSource,
    (devices, equipment, source) => {
       const result = new Array<DeviceGroup>();
@@ -24,17 +24,17 @@ export const selectAvailableInputDevices = createSelector(
       }
 
       if (equipment) {
-         for (const connected of equipment) {
+         for (const connected of Object.values(equipment)) {
             if (connected.devices)
                result.push({
                   type: 'equipment',
                   equipmentName: connected.name,
-                  equipmentId: connected.equipmentId,
-                  devices: connected.devices
-                     ?.filter((x) => x.source === source)
+                  connectionId: connected.connectionId,
+                  devices: Object.values(connected.devices)
+                     .filter((x) => x.source === source)
                      .map((x) => ({
                         label: x.label,
-                        device: { type: 'equipment', deviceId: x.deviceId, equipmentId: connected.equipmentId },
+                        device: { type: 'equipment', deviceId: x.deviceId, connectionId: connected.connectionId },
                      })),
                });
          }
@@ -48,7 +48,7 @@ export type DeviceGroup = EquipmentDeviceGroup | LocalDeviceGroup;
 
 export type EquipmentDeviceGroup = {
    type: 'equipment';
-   equipmentId: string;
+   connectionId: string;
    equipmentName?: string;
    devices: DeviceViewModel[];
 };

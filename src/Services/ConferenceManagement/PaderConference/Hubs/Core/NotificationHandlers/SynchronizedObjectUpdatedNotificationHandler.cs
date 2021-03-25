@@ -6,6 +6,7 @@ using MediatR;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using PaderConference.Core.Services.Synchronization.Notifications;
 
@@ -14,8 +15,11 @@ namespace PaderConference.Hubs.Core.NotificationHandlers
     public class
         SynchronizedObjectUpdatedNotificationHandler : INotificationHandler<SynchronizedObjectUpdatedNotification>
     {
-        private static readonly JsonSerializerSettings SyncObjPatchSettings =
-            new() {ContractResolver = new CamelCasePropertyNamesContractResolver()};
+        private static readonly JsonSerializerSettings SyncObjPatchSettings = new()
+        {
+            ContractResolver = new CamelCasePropertyNamesContractResolver(),
+            Converters = {new StringEnumConverter(new CamelCaseNamingStrategy())},
+        };
 
         private readonly IHubContext<CoreHub> _hubContext;
 

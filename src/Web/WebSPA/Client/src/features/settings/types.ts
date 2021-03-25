@@ -1,9 +1,9 @@
-import { ProducerSource } from 'src/store/webrtc/types';
+import { ProducerDevice } from 'src/store/webrtc/types';
 
 export type InputDeviceDto = {
    deviceId: string;
    label?: string;
-   source: ProducerSource;
+   source: ProducerDevice;
 };
 
 export type AnyInputDevice = LocalInputDevice | EquipmentInputDevice;
@@ -15,6 +15,6 @@ export type LocalInputDevice = {
 
 export type EquipmentInputDevice = {
    deviceId: string;
-   equipmentId: string;
+   connectionId: string;
    type: 'equipment';
 };

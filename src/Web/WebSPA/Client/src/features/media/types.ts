@@ -1,8 +1,8 @@
 import { MotionValue } from 'framer-motion';
 import { Harker } from 'hark';
+import { EquipmentDevice } from 'src/equipment-hub.types';
 import { UseMediaStateInfo } from 'src/store/webrtc/hooks/useMedia';
 import { ProducerSource } from 'src/store/webrtc/types';
-import { InputDeviceDto } from '../settings/types';
 
 export type ConsumerInfo = {
    paused: boolean;
@@ -21,12 +21,11 @@ export type ParticipantStreams = {
 
 export type SynchronizedMediaState = { streams: Record<string, ParticipantStreams | undefined> };
 
-export type ConnectedEquipmentDto = {
-   equipmentId: string;
-   name?: string;
-   devices?: InputDeviceDto[];
-
-   status?: { [key in ProducerSource]: UseMediaStateInfo };
+export type EquipmentConnection = {
+   connectionId: string;
+   name: string;
+   devices: Record<string, EquipmentDevice>;
+   status: Record<ProducerSource, UseMediaStateInfo>;
 };
 
 export type ParticipantAudioInfo = {

@@ -2,36 +2,36 @@ import { HubConnection, HubConnectionBuilder, LogLevel } from '@microsoft/signal
 import { PayloadAction } from '@reduxjs/toolkit';
 import { Middleware, MiddlewareAPI } from 'redux';
 import { events } from 'src/core-hub';
+import * as errors from 'src/errors';
 import { signalrError } from 'src/ui-errors';
 import * as actions from './actions';
 import appHubConn from './app-hub-connection';
-import { Options } from './types';
-import * as errors from 'src/errors';
 
 type SignalRResult = {
    middleware: Middleware;
    getConnection: () => HubConnection | undefined;
 };
 
-export default (options: Options): SignalRResult => {
-   const { signalUrl } = options;
-
+export default (): SignalRResult => {
    let connection: HubConnection | undefined;
 
    // Define the list of handlers, now that we have an instance of ReduxWebSocket.
    const handlers: {
       [s: string]: (middleware: MiddlewareAPI, action: any) => void;
    } = {
-      [actions.connectSignal.type]: async ({ dispatch }, { payload: { appData, urlParams, defaultEvents } }) => {
+      [actions.connectSignal.type]: async (
+         { dispatch },
+         { payload: { signalUrl, appData, urlParams, defaultEvents } },
+      ) => {
          if (!connection) {
             const queryString = Object.keys(urlParams)
                .map((key) => key + '=' + urlParams[key])
                .join('&');
 
-            const conferenceUrl = signalUrl + '?' + queryString;
+            const url = signalUrl + '?' + queryString;
 
             connection = new HubConnectionBuilder()
-               .withUrl(conferenceUrl)
+               .withUrl(url)
                .withAutomaticReconnect()
                .configureLogging(LogLevel.Information)
                .build();

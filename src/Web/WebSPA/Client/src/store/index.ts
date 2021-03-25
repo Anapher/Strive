@@ -1,15 +1,12 @@
 import { Action, configureStore, Middleware, ThunkAction } from '@reduxjs/toolkit';
 import createSagaMiddleware from 'redux-saga';
-import appSettings from 'src/config';
 import notifierMiddleware from './notifier/create-middleware';
 import rootReducer from './root-reducer';
 import rootSaga from './root-saga';
 import createMiddleware from './signal/create-middleware';
 import { loadState } from './storage';
 
-const { middleware: signalrMiddleware } = createMiddleware({
-   signalUrl: appSettings.signalrHubUrl,
-});
+const { middleware: signalrMiddleware } = createMiddleware();
 
 const sagaMiddleware = createSagaMiddleware();
 

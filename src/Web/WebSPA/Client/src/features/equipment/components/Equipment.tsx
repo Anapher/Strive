@@ -5,7 +5,7 @@ import { RootState } from 'src/store';
 import { fetchDevices } from '../../settings/thunks';
 import { getDeviceName } from '../ua-utils';
 import AvailableEquipmentTable from './AvailableEquipmentTable';
-import * as coreHub from 'src/core-hub';
+import * as equipmentHub from 'src/equipment-hub';
 import useMicrophone from 'src/store/webrtc/hooks/useMicrophone';
 import { ProducerSource } from 'src/store/webrtc/types';
 import { UseMediaState } from 'src/store/webrtc/hooks/useMedia';
@@ -25,7 +25,7 @@ export default function Equipment() {
 
    useEffect(() => {
       if (availableEquipment) {
-         dispatch(coreHub.registerEquipment({ name: deviceName, devices: availableEquipment }));
+         dispatch(equipmentHub.initialize({ name: deviceName, devices: availableEquipment }));
       }
    }, [availableEquipment]);
 
@@ -66,7 +66,7 @@ export default function Equipment() {
                      break;
                }
             } catch (error) {
-               dispatch(coreHub.equipmentErrorOccurred(errors.equipmentError(error.toString())));
+               dispatch(equipmentHub.errorOccurred(errors.equipmentError(error.toString())));
             }
          };
 
@@ -84,7 +84,7 @@ export default function Equipment() {
             streamInfo,
          }));
 
-         dispatch(coreHub.equipmentUpdateStatus(status));
+         dispatch(equipmentHub.updateStatus(status));
       },
       Object.values(controllers).reduce<Array<any>>(
          (prev, curr) => [...prev, curr.connected, curr.enabled, curr.paused, curr.streamInfo],

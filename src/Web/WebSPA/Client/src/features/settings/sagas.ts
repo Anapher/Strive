@@ -1,11 +1,10 @@
 import { PayloadAction } from '@reduxjs/toolkit';
 import { put, select, takeEvery } from 'redux-saga/effects';
-import { events } from 'src/core-hub';
 import { RootState } from 'src/store';
 import { showMessage } from 'src/store/notifier/actions';
-import { onEventOccurred } from 'src/store/signal/actions';
+import { takeEverySynchronizedObjectChange } from 'src/store/saga-utils';
+import { EQUIPMENT, SynchronizedEquipment } from 'src/store/signal/synchronization/synchronized-object-ids';
 import { ProducerDevices } from 'src/store/webrtc/types';
-import { ConnectedEquipmentDto } from '../media/types';
 import { PaderConferenceSettings, setCurrentDevice } from './reducer';
 import { fetchDevices } from './thunks';
 import { InputDeviceDto } from './types';
@@ -38,7 +37,8 @@ function* updateLocalDevices({ payload }: PayloadAction<InputDeviceDto[]>) {
 /**
  * Executed when equipment changed. Check if the selected devices are still available
  */
-function* updateEquipment({ payload }: PayloadAction<ConnectedEquipmentDto[]>) {
+function* updateEquipment() {
+   const equipment: SynchronizedEquipment | null = yield select((state: RootState) => state.media.equipment);
    const deviceSettings: PaderConferenceSettings = yield select((state: RootState) => state.settings.obj);
 
    for (const producerDevice of ProducerDevices) {
@@ -46,11 +46,7 @@ function* updateEquipment({ payload }: PayloadAction<ConnectedEquipmentDto[]>) {
       if (!device) continue;
 
       if (device.type === 'equipment') {
-         if (
-            !payload
-               .find((x) => x.equipmentId === device.equipmentId)
-               ?.devices?.find((x) => x.deviceId === device.deviceId)
-         ) {
+         if (!equipment?.connections[device.connectionId]?.devices[device.deviceId]) {
             yield put(setCurrentDevice({ source: producerDevice, device: undefined }));
 
             yield put(
@@ -66,7 +62,7 @@ function* updateEquipment({ payload }: PayloadAction<ConnectedEquipmentDto[]>) {
 
 function* mySaga() {
    yield takeEvery(fetchDevices.fulfilled, updateLocalDevices);
-   yield takeEvery(onEventOccurred(events.onEquipmentUpdated).type, updateEquipment);
+   yield takeEverySynchronizedObjectChange(EQUIPMENT, updateEquipment);
 }
 
 export default mySaga;

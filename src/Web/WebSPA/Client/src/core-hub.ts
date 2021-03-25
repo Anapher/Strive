@@ -1,26 +1,23 @@
 import { Operation } from 'fast-json-patch';
-import { DomainError } from './communication-types';
+import appSettings from './config';
 import {
-   EquipmentCommand,
-   EquipmentStatus,
    FetchChatMessagesDto,
    KickParticipantRequestDto,
    OpenBreakoutRoomsDto,
    RoomCreationInfo,
    SendChatMessageDto,
+   SendEquipmentCommandDto,
    SetTemporaryPermissionDto,
    SetUserIsTypingDto,
    SwitchRoomDto,
 } from './core-hub.types';
-import { RegisterEquipmentRequestDto } from './features/equipment/types';
 import { connectSignal, invoke, onInvokeReturn } from './store/signal/actions';
 import { ChangeProducerSourceRequest } from './store/webrtc/types';
 
 export const joinConference = (conferenceId: string, defaultEvents: string[], accessToken: string) =>
-   connectSignal({ conferenceId, access_token: accessToken }, defaultEvents, { conferenceId });
-
-export const joinConferenceAsEquipment = (conferenceId: string, defaultEvents: string[], token: string) =>
-   connectSignal({ conferenceId, token }, defaultEvents, { conferenceId });
+   connectSignal(appSettings.signalrHubUrl, { conferenceId, access_token: accessToken }, defaultEvents, {
+      conferenceId,
+   });
 
 export const openConference = createHubFn('OpenConference');
 export const closeConference = createHubFn('CloseConference');
@@ -40,10 +37,7 @@ export const setUserTyping = createHubFn<SetUserIsTypingDto>('SetUserIsTyping');
 
 export const getEquipmentToken = createHubFn('GetEquipmentToken');
 
-export const registerEquipment = createHubFn<RegisterEquipmentRequestDto>('RegisterEquipment');
-export const sendEquipmentCommand = createHubFn<EquipmentCommand>('SendEquipmentCommand');
-export const equipmentErrorOccurred = createHubFn<DomainError>('EquipmentErrorOccurred');
-export const equipmentUpdateStatus = createHubFn<EquipmentStatus>('EquipmentUpdateStatus');
+export const sendEquipmentCommand = createHubFn<SendEquipmentCommandDto>('SendEquipmentCommand');
 
 export const changeProducerSource = createHubFn<ChangeProducerSourceRequest>('ChangeProducerSource');
 
@@ -63,13 +57,9 @@ export function createHubFn<TArg = void>(name: string) {
 
 export const events = {
    onConnectionError: 'OnConnectionError',
-
    onSynchronizeObjectState: 'OnSynchronizeObjectState',
    onSynchronizedObjectUpdated: 'OnSynchronizedObjectUpdated',
-
    chatMessage: 'ChatMessage',
-
-   onEquipmentUpdated: 'OnEquipmentUpdated',
-   onEquipmentCommand: 'OnEquipmentCommand',
    onRequestDisconnect: 'OnRequestDisconnect',
+   onEquipmentError: 'OnEquipmentError',
 };

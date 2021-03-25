@@ -8,11 +8,15 @@ import { getEquipmentToken } from 'src/core-hub';
 import { ConferenceRouteParams } from 'src/routes/types';
 import { RootState } from 'src/store';
 import CheckIcon from '@material-ui/icons/Check';
+import { selectEquipmentConnections } from '../selectors';
+import { selectMyParticipantId } from 'src/features/auth/selectors';
 
 export default function EquipmentSettings() {
    const token = useSelector((state: RootState) => state.settings.equipmentToken);
    const error = useSelector((state: RootState) => state.settings.equipmentTokenError);
-   const equipment = useSelector((state: RootState) => state.media.equipment);
+   const equipment = useSelector(selectEquipmentConnections);
+   const participantId = useSelector(selectMyParticipantId);
+
    const {
       params: { id },
    } = useRouteMatch<ConferenceRouteParams>();
@@ -26,7 +30,7 @@ export default function EquipmentSettings() {
       }
    }, [token, dispatch]);
 
-   const url = new URL(`/c/${id}/as-equipment?token=${token}`, document.baseURI).href;
+   const url = new URL(`/c/${id}/as-equipment?participantId=${participantId}&token=${token}`, document.baseURI).href;
 
    return (
       <Box p={2} pt={0}>
@@ -66,8 +70,8 @@ export default function EquipmentSettings() {
          {equipment && (
             <Box mt={2}>
                <Grid container>
-                  {equipment.map((x) => (
-                     <Grid item key={x.equipmentId}>
+                  {Object.values(equipment).map((x) => (
+                     <Grid item key={x.connectionId}>
                         <Chip color="secondary" label={x.name} icon={<CheckIcon />} />
                      </Grid>
                   ))}

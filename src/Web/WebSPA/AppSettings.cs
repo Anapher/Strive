@@ -8,6 +8,8 @@
 
         public string SignalrHubUrl { get; set; } = "http://localhost:55104/signalr";
 
+        public string EquipmentSignalrHubUrl { get; set; } = "http://localhost:55104/equipment-signalr";
+
         public string FrontendUrl { get; set; } = "http://localhost:55103/";
     }
 }

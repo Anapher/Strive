@@ -19,8 +19,6 @@ import { ConferenceRouteParams } from './types';
 const defaultEvents: string[] = [
    coreHub.events.onSynchronizeObjectState,
    coreHub.events.onSynchronizedObjectUpdated,
-   'OnError',
-   coreHub.events.onEquipmentUpdated,
    coreHub.events.onRequestDisconnect,
 ];
 

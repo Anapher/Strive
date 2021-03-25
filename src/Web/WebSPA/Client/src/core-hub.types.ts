@@ -1,3 +1,6 @@
+import { EquipmentCommandAction } from './equipment-hub.types';
+import { ProducerSource } from './store/webrtc/types';
+
 export type SyncStatePayload = { id: string; value: any };
 
 export type FetchChatMessagesDto = { channel: string; start: number; end: number };
@@ -82,4 +85,11 @@ export type KickParticipantRequestDto = {
 export type SfuConnectionInfo = {
    url: string;
    authToken: string;
+};
+
+export type SendEquipmentCommandDto = {
+   connectionId: string;
+   source: ProducerSource;
+   deviceId?: string;
+   action: EquipmentCommandAction;
 };

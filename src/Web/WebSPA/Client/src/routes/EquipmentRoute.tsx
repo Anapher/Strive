@@ -4,19 +4,18 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RouteComponentProps } from 'react-router-dom';
 import { ConferenceRouteParams } from 'src/routes/types';
 import { RootState } from 'src/store';
-import * as coreHub from 'src/core-hub';
+import * as equipmentHub from 'src/equipment-hub';
 import ConferenceConnecting from 'src/features/conference/components/ConferenceConnecting';
 import { WebRtcContext } from 'src/store/webrtc/WebRtcContext';
-import Equipment from './Equipment';
+import Equipment from '../features/equipment/components/Equipment';
 import { WebRtcManager } from 'src/store/webrtc/WebRtcManager';
 import FullScreenError from 'src/components/FullscreenError';
-import RequestPermissions from './RequestPermissions';
+import RequestPermissions from '../features/equipment/components/RequestPermissions';
 
 const defaultEvents: string[] = [
-   coreHub.events.onSynchronizeObjectState,
-   coreHub.events.onSynchronizedObjectUpdated,
-   'OnError',
-   coreHub.events.onEquipmentCommand,
+   equipmentHub.events.onRequestDisconnect,
+   equipmentHub.events.onConnectionError,
+   equipmentHub.events.onEquipmentCommand,
 ];
 
 type Props = RouteComponentProps<ConferenceRouteParams>;
@@ -34,24 +33,25 @@ export default function EquipmentRoute({
    const webRtc = useRef(new WebRtcManager({ sendMedia: true, receiveMedia: false })).current;
 
    let token: string | null = null;
+   let participantId: string | null = null;
 
    if (location.search) {
       const params = new URLSearchParams(location.search);
       token = params.get('token');
+      participantId = params.get('participantId');
    }
 
    useEffect(() => {
       if (!token) return;
+      if (!participantId) return;
 
-      dispatch(coreHub.joinConferenceAsEquipment(id, defaultEvents, token));
+      dispatch(equipmentHub.joinConference(id, participantId, token, defaultEvents));
+      webRtc.beginConnecting();
+
       return () => {
          dispatch(close());
       };
-   }, [id, close, token]);
-
-   useEffect(() => {
-      webRtc.beginConnecting();
-   }, [webRtc]);
+   }, [id, close, token, participantId, webRtc]);
 
    const [hasPermissions, setHasPermissions] = useState(false);
 

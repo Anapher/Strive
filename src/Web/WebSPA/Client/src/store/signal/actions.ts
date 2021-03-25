@@ -8,8 +8,8 @@ export const DEFAULT_PREFIX = 'SIGNALR';
 
 export const connectSignal = createAction(
    `${DEFAULT_PREFIX}::CONNECT`,
-   (urlParams: any, defaultEvents: string[], appData?: any) => ({
-      payload: { appData, urlParams, defaultEvents },
+   (signalUrl: string, urlParams: Record<string, any>, defaultEvents: string[], appData?: any) => ({
+      payload: { signalUrl, appData, urlParams, defaultEvents },
    }),
 );
 

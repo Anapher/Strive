@@ -43,7 +43,7 @@ using PaderConference.Messaging.SFU.Dto;
 namespace PaderConference.Hubs.Core
 {
     [Authorize]
-    public class CoreHub : ScopedHub
+    public class CoreHub : ScopedHub, ISfuConnectionHub
     {
         private readonly ICoreHubConnections _connections;
         private readonly ILogger<CoreHub> _logger;

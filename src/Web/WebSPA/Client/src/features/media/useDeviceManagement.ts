@@ -1,31 +1,33 @@
 import { Dispatch, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { sendEquipmentCommand } from 'src/core-hub';
-import { EquipmentCommandAction } from 'src/core-hub.types';
+import { EquipmentCommandAction } from 'src/equipment-hub.types';
 import { RootState } from 'src/store';
 import { UseMediaState } from 'src/store/webrtc/hooks/useMedia';
 import { ProducerSource } from 'src/store/webrtc/types';
 import { AnyInputDevice } from '../settings/types';
-import { ConnectedEquipmentDto } from './types';
+import { EquipmentConnection } from './types';
 
 function wrapControl(
    source: ProducerSource,
    device: AnyInputDevice | undefined,
    local: UseMediaState,
-   equipment: ConnectedEquipmentDto[] | null,
+   equipment: Record<string, EquipmentConnection> | undefined,
    dispatch: Dispatch<any>,
 ): UseMediaState {
    if (!device || device.type === 'local') {
       return local;
    } else {
-      const equipmentInfo = equipment?.find((x) => x.equipmentId === device.equipmentId)?.status?.[source] ?? {
+      const equipmentInfo = equipment?.[device.connectionId]?.status?.[source] ?? {
          connected: false,
          enabled: false,
          paused: false,
       };
 
       const executeEquipmentCommand = (action: EquipmentCommandAction) => {
-         dispatch(sendEquipmentCommand({ action, equipmentId: device.equipmentId, source, deviceId: device.deviceId }));
+         dispatch(
+            sendEquipmentCommand({ action, connectionId: device.connectionId, source, deviceId: device.deviceId }),
+         );
       };
 
       return {
@@ -37,7 +39,7 @@ function wrapControl(
             dispatch(
                sendEquipmentCommand({
                   action: 'switchDevice',
-                  equipmentId: device.equipmentId,
+                  connectionId: device.connectionId,
                   source,
                   deviceId,
                }),
@@ -55,7 +57,7 @@ export default function useDeviceManagement(
 ): UseMediaState {
    const previousDevice = useRef<AnyInputDevice | undefined>();
    const dispatch = useDispatch();
-   const equipment = useSelector((state: RootState) => state.media.equipment);
+   const equipment = useSelector((state: RootState) => state.media.equipment?.connections);
 
    useEffect(() => {
       if (previousDevice.current?.deviceId === device?.deviceId) return;
@@ -72,7 +74,7 @@ export default function useDeviceManagement(
                dispatch(
                   sendEquipmentCommand({
                      action: 'disable',
-                     equipmentId: previousDevice.current.equipmentId,
+                     connectionId: previousDevice.current.connectionId,
                      source,
                      deviceId: previousDevice.current.deviceId,
                   }),
@@ -85,7 +87,7 @@ export default function useDeviceManagement(
          dispatch(
             sendEquipmentCommand({
                action: 'switchDevice',
-               equipmentId: device.equipmentId,
+               connectionId: device.connectionId,
                source,
                deviceId: device.deviceId,
             }),

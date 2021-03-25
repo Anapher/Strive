@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import { setParticipantId } from 'src/features/auth/reducer';
-import EquipmentRoute from 'src/features/equipment/components/EquipmentRoute';
 import useMyParticipantId from 'src/hooks/useMyParticipantId';
 import ConferenceRoute from './ConferenceRoute';
 import MainRoute from './MainRoute';
@@ -18,7 +17,6 @@ export default function AuthenticatedRoutes() {
    return (
       <Switch>
          <Route exact path="/" component={MainRoute} />
-         <Route path="/c/:id/as-equipment" component={EquipmentRoute} />
          <Route path="/c/:id" component={ConferenceRoute} />
          <Route
             path="/"

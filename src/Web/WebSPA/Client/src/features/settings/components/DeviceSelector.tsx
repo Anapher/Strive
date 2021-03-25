@@ -26,7 +26,7 @@ type Props = {
 };
 
 const getId = (device: AnyInputDevice) =>
-   device.type === 'local' ? `local/${device.deviceId}` : `${device.equipmentId}/${device.deviceId}`;
+   device.type === 'local' ? `local/${device.deviceId}` : `${device.connectionId}/${device.deviceId}`;
 
 export default function DeviceSelector({ devices, defaultName, className, selectedDevice, onChange, label }: Props) {
    const selectId = defaultName.toLowerCase() + '-select';
@@ -35,6 +35,8 @@ export default function DeviceSelector({ devices, defaultName, className, select
 
    const handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
       const value = event.target.value as string;
+      if (!value) return;
+
       let deviceId: string | undefined;
       let possibleDevices: Collection<DeviceGroup> | undefined;
 
@@ -43,7 +45,7 @@ export default function DeviceSelector({ devices, defaultName, className, select
          deviceId = value.split('/')[1];
       } else {
          const split = value.split('/');
-         possibleDevices = _(devices).filter((x) => x.type === 'equipment' && x.equipmentId === split[0]);
+         possibleDevices = _(devices).filter((x) => x.type === 'equipment' && x.connectionId === split[0]);
          deviceId = split[1];
       }
 
@@ -88,7 +90,7 @@ export default function DeviceSelector({ devices, defaultName, className, select
                   .filter((x) => x.type !== 'local')
                   .map((x) => x as EquipmentDeviceGroup)
                   .map((x, i) => [
-                     <ListSubheader key={x.equipmentId}>{x.equipmentName || 'Unnamed device'}</ListSubheader>,
+                     <ListSubheader key={x.connectionId}>{x.equipmentName || 'Unnamed device'}</ListSubheader>,
                      x.devices.map((x) => (
                         <MenuItem key={getId(x.device)} value={getId(x.device)}>
                            {x.label || `${defaultName} #${i}`}

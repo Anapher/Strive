@@ -1,11 +1,11 @@
-import { takeEvery } from 'redux-saga/effects';
+import { put, takeEvery } from 'redux-saga/effects';
 import * as coreHub from 'src/core-hub';
 import { closeConference, openConference } from 'src/core-hub';
 import { showErrorOn, showLoadingHubAction } from 'src/store/notifier/utils';
-import { onEventOccurred } from 'src/store/signal/actions';
+import { close, onEventOccurred } from 'src/store/signal/actions';
 
 function* onRequestDisconnect() {
-   // yield put(signOut());
+   yield put(close());
 }
 
 export default function* mySaga() {

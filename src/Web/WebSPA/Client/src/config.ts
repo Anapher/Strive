@@ -4,6 +4,7 @@ export type AppSettings = {
    identityUrl: string;
    conferenceUrl: string;
    signalrHubUrl: string;
+   equipmentSignalrHubUrl: string;
    frontendUrl: string;
 };
 

@@ -22,7 +22,7 @@ namespace WebSPA
         {
             services.AddHealthChecks().AddCheck("self", () => HealthCheckResult.Healthy());
 
-            services.Configure<AppSettings>(Configuration);
+            services.Configure<AppSettings>(Configuration.GetSection("App"));
 
             services.AddControllers();
 
