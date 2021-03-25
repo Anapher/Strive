@@ -75,7 +75,8 @@ namespace PaderConference.IntegrationTests._Helpers
             ConferenceCreatedResponseDto conference)
         {
             var conferenceId = conference.ConferenceId;
-            var connection = CreateHubConnection(user, conferenceId);
+            var signalrUrl = BuildSignalRUrl(user, conferenceId);
+            var connection = CreateHubConnection(signalrUrl);
 
             var syncObjListener = SynchronizedObjectListener.Initialize(connection, Logger);
 
@@ -94,12 +95,16 @@ namespace PaderConference.IntegrationTests._Helpers
             return await userConnection.Hub.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.OpenConference));
         }
 
-        protected HubConnection CreateHubConnection(UserAccount user, string conferenceId)
+        protected HubConnection CreateHubConnection(string url)
         {
             return new HubConnectionBuilder()
-                .WithUrl($"http://localhost/signalr?access_token={user.Token}&conferenceId={conferenceId}",
-                    o => o.HttpMessageHandlerFactory = _ => Factory.Server.CreateHandler()).AddNewtonsoftJsonProtocol()
-                .Build();
+                .WithUrl(url, o => o.HttpMessageHandlerFactory = _ => Factory.Server.CreateHandler())
+                .AddNewtonsoftJsonProtocol().Build();
+        }
+
+        private string BuildSignalRUrl(UserAccount user, string conferenceId)
+        {
+            return $"http://localhost/signalr?access_token={user.Token}&conferenceId={conferenceId}";
         }
 
         protected async Task EnsureClientJoinCompleted(UserConnection connection)

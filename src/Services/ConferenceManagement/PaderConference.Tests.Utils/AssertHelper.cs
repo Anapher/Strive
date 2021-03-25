@@ -58,5 +58,36 @@ namespace PaderConference.Tests.Utils
 
             assertAction();
         }
+
+        public static async Task WaitForAssertAsync(Func<Task> assertAction, TimeSpan? timeout = null)
+        {
+            timeout ??= TimeSpan.FromSeconds(30);
+
+            try
+            {
+                using (var cancellationTokenSource = new CancellationTokenSource(timeout.Value))
+                {
+                    while (true)
+                    {
+                        try
+                        {
+                            await assertAction();
+                            return;
+                        }
+                        catch (Exception)
+                        {
+                            // ignored
+                        }
+
+                        await Task.Delay(100, cancellationTokenSource.Token);
+                    }
+                }
+            }
+            catch (TaskCanceledException)
+            {
+            }
+
+            await assertAction();
+        }
     }
 }

@@ -15,6 +15,8 @@ using PaderConference.Core.Services;
 using PaderConference.Core.Services.Equipment;
 using PaderConference.Core.Services.Equipment.Notifications;
 using PaderConference.Core.Services.Equipment.Requests;
+using PaderConference.Core.Services.Media;
+using PaderConference.Core.Services.Media.Requests;
 using PaderConference.Extensions;
 using PaderConference.Hubs.Equipment.Dtos;
 
@@ -51,6 +53,15 @@ namespace PaderConference.Hubs.Equipment
                     Context.Abort();
                 }
             }
+        }
+
+        public override async Task OnDisconnectedAsync(Exception? exception)
+        {
+            _logger.LogDebug("Equipment {connectionId} disconnected.", Context.ConnectionId);
+
+            var (participant, _) = GetContextParticipantWithToken();
+
+            await _mediator.Publish(new EquipmentDisconnectedNotification(participant, Context.ConnectionId));
         }
 
         private async Task HandleJoin()
@@ -112,6 +123,20 @@ namespace PaderConference.Hubs.Equipment
 
                 await _mediator.Publish(new EquipmentErrorNotification(participant, Context.ConnectionId, dto));
                 return SuccessOrError<Unit>.Succeeded(Unit.Value);
+            }
+            catch (Exception e)
+            {
+                return e.ToError();
+            }
+        }
+
+        public async Task<SuccessOrError<SfuConnectionInfo>> FetchSfuConnectionInfo()
+        {
+            try
+            {
+                var (participant, _) = GetContextParticipantWithToken();
+                var result = await _mediator.Send(new FetchSfuConnectionInfoRequest(participant, Context.ConnectionId));
+                return new SuccessOrError<SfuConnectionInfo>(result);
             }
             catch (Exception e)
             {

@@ -23,6 +23,11 @@ namespace PaderConference.IntegrationTests._Helpers
         private readonly object _lock = new();
         private readonly List<AsyncAutoResetEvent> _waiters = new();
 
+        private static readonly JsonSerializerSettings JsonSettings = new()
+        {
+            Converters = new List<JsonConverter> {new ReadOnlyListConverter(), new ReadOnlyDictionaryConverter()},
+        };
+
         private SynchronizedObjectListener(HubConnection connection, ILogger logger)
         {
             _logger = logger;
@@ -51,32 +56,42 @@ namespace PaderConference.IntegrationTests._Helpers
                 if (!_cachedData.TryGetValue(syncObjId, out var events))
                     throw new InvalidOperationException("The synchronized object was never received.");
 
+                var serializer = JsonSerializer.Create(JsonSettings);
+
                 var initialEvent = events.Last(x => !x.IsPatch);
                 var patches = events.Skip(events.IndexOf(initialEvent) + 1);
 
-                var initialObj = initialEvent.Payload.ToObject<T>(JsonSerializer.Create(new JsonSerializerSettings
-                {
-                    Converters = new List<JsonConverter>
-                    {
-                        new ReadOnlyListConverter(), new ReadOnlyDictionaryConverter(),
-                    },
-                }));
-
+                var initialObj = initialEvent.Payload.ToObject<T>(serializer);
                 if (initialObj == null) throw new NullReferenceException("The initial object must not be null");
 
                 foreach (var patch in patches.Select(x => x.Payload))
                 {
-                    var jsonPatch = patch.ToObject<JsonPatchDocument<T>>();
+                    var jsonPatch = patch.ToObject<JsonPatchDocument<T>>(serializer);
                     if (jsonPatch == null) throw new NullReferenceException("A patch must never be null.");
 
                     if (initialObj is SynchronizedParticipantPermissions syncPermissions)
+                    {
                         PatchPermissionsDictionary(syncPermissions, jsonPatch);
+                    }
                     else
+                    {
+                        // ApplyTo does not care about our settings, so it deserializes IReadOnlyDictionary
+                        // to ReadOnlyDictionary, which leads to errors on oncoming json patches that want to
+                        // modify this dictionary. We just serialize and deserialize the current value with
+                        // our json settings to ensure that we don't have any read only Lists/Dictionaries
                         jsonPatch.ApplyTo(initialObj);
+                        initialObj = FixObjectTypes(initialObj);
+                    }
                 }
 
                 return initialObj;
             }
+        }
+
+        private static T FixObjectTypes<T>(T value)
+        {
+            var temp = JsonConvert.SerializeObject(value, JsonSettings);
+            return JsonConvert.DeserializeObject<T>(temp, JsonSettings)!;
         }
 
         private void PatchPermissionsDictionary(SynchronizedParticipantPermissions initialObj,
