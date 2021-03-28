@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace PaderConference.Config
+﻿namespace PaderConference.Config
 {
     public class RabbitMqOptions
     {
@@ -11,7 +9,7 @@ namespace PaderConference.Config
 
     public class RabbitMqHostOptions
     {
-        public Uri? Host { get; set; }
+        public string? Host { get; set; }
 
         public string? Username { get; set; }
 

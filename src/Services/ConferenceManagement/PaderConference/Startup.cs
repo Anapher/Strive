@@ -52,9 +52,10 @@ namespace PaderConference
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IWebHostEnvironment environment)
         {
             Configuration = configuration;
+            Environment = environment;
         }
 
         static Startup()
@@ -68,6 +69,7 @@ namespace PaderConference
         }
 
         public IConfiguration Configuration { get; }
+        public IWebHostEnvironment Environment { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public IServiceProvider ConfigureServices(IServiceCollection services)
@@ -81,9 +83,8 @@ namespace PaderConference
                 {
                     options.Authority = authOptions.Authority;
                     options.TokenValidationParameters = new TokenValidationParameters {ValidateAudience = false};
-#if DEBUG
-                    options.RequireHttpsMetadata = false;
-#endif
+
+                    options.RequireHttpsMetadata = !authOptions.NoSslRequired;
 
                     options.AcceptTokenFromQuery();
                 });
@@ -232,7 +233,8 @@ namespace PaderConference
 
             services.AddMediatR(typeof(Startup), typeof(CoreModule));
 
-            services.AddCors(options =>
+            if (Environment.IsDevelopment())
+                services.AddCors(options =>
                 {
                     options.AddPolicy("AllowAll",
                         builder =>
@@ -263,7 +265,7 @@ namespace PaderConference
             else
                 app.UseHsts();
 
-            app.UseCors("AllowAll");
+            if (env.IsDevelopment()) app.UseCors("AllowAll");
 
             // Enable middleware to serve generated Swagger as a JSON endpoint.
             app.UseSwagger();
