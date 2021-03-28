@@ -3,14 +3,15 @@ ARG NODE_IMAGE=node:12.0
 FROM mcr.microsoft.com/dotnet/aspnet:5.0-buster-slim AS base
 WORKDIR /app
 EXPOSE 80
+ENV ASPNETCORE_URLS=http://0.0.0.0:80
 
 FROM ${NODE_IMAGE} as node-build
 WORKDIR /web
 COPY Client/package.json .
 COPY Client/yarn.lock .
 RUN yarn install
-Copy Client/ .
-Run yarn build
+COPY Client/ .
+RUN yarn build
 
 FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS publish
 WORKDIR /src

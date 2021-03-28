@@ -1,25 +1,51 @@
-version: '3.4'
+version: "3.4"
 
 services:
+  nosqldata:
+    ports:
+      - "27017:27017"
+
+  rabbitmq:
+    ports:
+      - "5672:5672"
+
   identity-api:
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=Production
     ports:
-      - "80"
+      - "5105:80"
 
-  webspa:
+  sfu:
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - API_CONFERENCE_MANAGEMENT=http://paderconference/v1/sfu/{conferenceId}?apiKey=${PADERCONFERENCE_API_KEY}
+      - AMQP_CONNECTION_STRING=amqp://rabbitmq
+      - API_TOKEN_SECRET=${PADERCONFERENCE_TOKEN_SECRET}
+      - MEDIASOUP_ANNOUNCED_IP=${DNS_NAME_OR_IP}
     ports:
-      - "80"
-
+      - "5102:3000"
+      - "40000:49999"
 
   paderconference:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=https://+:443;http://+:80
+      - Authentication__Authority=http://identity-api
+      - KeyValueDatabase__UseInMemory=true
+      - RabbitMq__UseInMemory=false
+      - RabbitMq__RabbitMq__Host=amqp://rabbitmq
+      - MongoDb__ConnectionString=mongodb://nosqldata
+      - SFU__UrlTemplate=http://${DNS_NAME_OR_IP}:5102/{0}
+      - SFU__TokenSecret=${PADERCONFERENCE_TOKEN_SECRET}
+      - SFU__ApiKey=${PADERCONFERENCE_API_KEY}
     ports:
-      - "80"
-      - "443"
-    volumes:
-      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+      - "5101:80"
+
+  webspa:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - App__IdentityUrl=http://${DNS_NAME_OR_IP}:5105/
+      - App__ConferenceUrl=http://${DNS_NAME_OR_IP}:5101/
+      - App__SignalrHubUrl=http://${DNS_NAME_OR_IP}:5101/signalr
+      - App__EquipmentSignalrHubUrl=http://${DNS_NAME_OR_IP}:5101/equipment-signalr
+      - App__FrontendUrl=http://${DNS_NAME_OR_IP}:5100/
+    ports:
+      - "5100:80"

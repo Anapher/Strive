@@ -3,7 +3,7 @@
 FROM mcr.microsoft.com/dotnet/aspnet:5.0-buster-slim AS base
 WORKDIR /app
 EXPOSE 80
-EXPOSE 443
+ENV ASPNETCORE_URLS=http://0.0.0.0:80
 
 FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS build
 WORKDIR /src
@@ -12,7 +12,8 @@ COPY ["Services/ConferenceManagement/PaderConference.Core/PaderConference.Core.c
 COPY ["Libs/JsonPatchGenerator/JsonPatchGenerator.csproj", "Libs/JsonPatchGenerator/"]
 COPY ["Services/ConferenceManagement/PaderConference.Infrastructure/PaderConference.Infrastructure.csproj", "Services/ConferenceManagement/PaderConference.Infrastructure/"]
 RUN dotnet restore "Services/ConferenceManagement/PaderConference/PaderConference.csproj"
-COPY . .
+COPY ["Services/ConferenceManagement/", "Services/ConferenceManagement/"]
+COPY ["Libs/", "Libs/"]
 WORKDIR "/src/Services/ConferenceManagement/PaderConference"
 RUN dotnet build "PaderConference.csproj" -c Release -o /app/build
 

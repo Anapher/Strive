@@ -23,3 +23,15 @@
 **/values.dev.yaml
 LICENSE
 README.md
+
+**/bin/
+**/obj/
+**/node_modules/
+**/bower_components/
+**/wwwroot/lib/
+global.json
+**/appsettings.localhost.json
+packages/
+test-results/
+TestResults/
+Web/WebSPA/Client/build

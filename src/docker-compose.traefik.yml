@@ -1,0 +1,58 @@
+version: "3.4"
+
+services:
+  traefik:
+    image: "traefik:v2.4"
+    container_name: "traefik"
+    command:
+      #- "--log.level=DEBUG"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - "//var/run/docker.sock:/var/run/docker.sock:ro"
+
+  identity-api:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.identity-api.rule=Host(`identity.${DNS_NAME_OR_IP}`)"
+      - "traefik.http.routers.identity-api.entrypoints=web"
+
+  paderconference:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.rule=Host(`api.${DNS_NAME_OR_IP}`)"
+      - "traefik.http.routers.api.entrypoints=web"
+      - "traefik.http.services.paderconference.loadbalancer.healthcheck.path=/health/ready"
+    environment:
+      - SFU__UrlTemplate=http://sfu.${DNS_NAME_OR_IP}/{0}
+      - Authentication__NoSslRequired=true
+
+  webspa:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.spa.rule=Host(`${DNS_NAME_OR_IP}`)"
+      - "traefik.http.routers.spa.entrypoints=web"
+      - "traefik.http.services.webspa.loadbalancer.healthcheck.path=/health"
+    environment:
+      - App__IdentityUrl=http://identity.${DNS_NAME_OR_IP}/
+      - App__ConferenceUrl=http://api.${DNS_NAME_OR_IP}/
+      - App__SignalrHubUrl=http://api.${DNS_NAME_OR_IP}/signalr
+      - App__EquipmentSignalrHubUrl=http://api.${DNS_NAME_OR_IP}/equipment-signalr
+      - App__FrontendUrl=http://${DNS_NAME_OR_IP}/
+
+  sfu:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.sfu.rule=Host(`sfu.${DNS_NAME_OR_IP}`)"
+      - "traefik.http.routers.sfu.entrypoints=web"
+      - "traefik.http.services.sfu.loadbalancer.healthcheck.path=/health"
+      - "traefik.http.services.sfu.loadbalancer.healthcheck.port=9000"
+    ports:
+      - "9000:9000" # lightship
+    environment:
+      - API_CONFERENCE_MANAGEMENT=http://api.${DNS_NAME_OR_IP}/v1/sfu/{conferenceId}?apiKey=${PADERCONFERENCE_API_KEY}

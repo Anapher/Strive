@@ -5,20 +5,17 @@ services:
     image: mongo
 
   rabbitmq:
-    image: rabbitmq:3-management-alpine
-
-  sfu:
-    image: ${DOCKER_REGISTRY-}sfu
-    build:
-      dockerfile: Services/SFU/Dockerfile
-    depends_on:
-      - sfu-cache
+    image: masstransit/rabbitmq
 
   identity-api:
     image: ${DOCKER_REGISTRY-}identityapi
-    build:
-      context: .
-      dockerfile: Services/Identity/Identity.API/Dockerfile
+    build: ./Services/Identity/Identity.API
+
+  sfu:
+    image: ${DOCKER_REGISTRY-}sfu
+    build: "./Services/SFU"
+    depends_on:
+      - rabbitmq
 
   paderconference:
     image: ${DOCKER_REGISTRY-}paderconference
@@ -27,12 +24,12 @@ services:
       dockerfile: Services/ConferenceManagement/PaderConference/Dockerfile
     depends_on:
       - nosqldata
+      - rabbitmq
+      - identity-api
 
   webspa:
     image: ${DOCKER_REGISTRY-}webspa
-    build:
-      context: .
-      dockerfile: Web/WebSPA/Dockerfile
+    build: "./Web/WebSPA"
     depends_on:
       - identity-api
       - sfu

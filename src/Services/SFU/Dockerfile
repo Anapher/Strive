@@ -15,6 +15,8 @@ ENV MEDIASOUP_LISTEN_IP=0.0.0.0
 # MEDIASOUP_ANNOUNCED_IP=???
 
 EXPOSE 3000
+# for lightship
+EXPOSE 9000
 EXPOSE 40000-49999
 
 CMD [ "node", "build/index.js" ]
