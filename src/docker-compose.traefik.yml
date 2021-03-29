@@ -17,10 +17,18 @@ services:
       - "//var/run/docker.sock:/var/run/docker.sock:ro"
 
   identity-api:
+    environment:
+      - FrontendHost=http://${DNS_NAME_OR_IP}
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.identity-api.rule=Host(`identity.${DNS_NAME_OR_IP}`)"
       - "traefik.http.routers.identity-api.entrypoints=web"
+      - "traefik.http.routers.identity-api.middlewares=cors@docker"
+      # Cors Middleware
+      - "traefik.http.middlewares.cors.headers.accessControlAllowOriginList=http://${DNS_NAME_OR_IP}"
+      - "traefik.http.middlewares.cors.headers.accessControlAllowMethods=*"
+      - "traefik.http.middlewares.cors.headers.accessControlAllowHeaders=*"
+      - "traefik.http.middlewares.cors.headers.accessControlAllowCredentials=true"
 
   paderconference:
     labels:
@@ -28,9 +36,11 @@ services:
       - "traefik.http.routers.api.rule=Host(`api.${DNS_NAME_OR_IP}`)"
       - "traefik.http.routers.api.entrypoints=web"
       - "traefik.http.services.paderconference.loadbalancer.healthcheck.path=/health/ready"
+      - "traefik.http.routers.api.middlewares=cors@docker"
     environment:
       - SFU__UrlTemplate=http://sfu.${DNS_NAME_OR_IP}/{0}
       - Authentication__NoSslRequired=true
+      - Authentication__Issuer=http://identity.${DNS_NAME_OR_IP}
 
   webspa:
     labels:
@@ -52,7 +62,4 @@ services:
       - "traefik.http.routers.sfu.entrypoints=web"
       - "traefik.http.services.sfu.loadbalancer.healthcheck.path=/health"
       - "traefik.http.services.sfu.loadbalancer.healthcheck.port=9000"
-    ports:
-      - "9000:9000" # lightship
-    environment:
-      - API_CONFERENCE_MANAGEMENT=http://api.${DNS_NAME_OR_IP}/v1/sfu/{conferenceId}?apiKey=${PADERCONFERENCE_API_KEY}
+      - "traefik.http.routers.sfu.middlewares=cors@docker"

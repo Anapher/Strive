@@ -15,7 +15,6 @@ RUN dotnet restore "Services/ConferenceManagement/PaderConference/PaderConferenc
 COPY ["Services/ConferenceManagement/", "Services/ConferenceManagement/"]
 COPY ["Libs/", "Libs/"]
 WORKDIR "/src/Services/ConferenceManagement/PaderConference"
-RUN dotnet build "PaderConference.csproj" -c Release -o /app/build
 
 FROM build AS publish
 RUN dotnet publish "PaderConference.csproj" -c Release -o /app/publish

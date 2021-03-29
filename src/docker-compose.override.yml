@@ -11,12 +11,30 @@ services:
 
   identity-api:
     environment:
-      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_ENVIRONMENT=${APP_ENVIRONMENT}
     ports:
       - "5105:80"
 
+  paderconference:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${APP_ENVIRONMENT}
+      - Authentication__Authority=http://identity-api
+      - KeyValueDatabase__UseInMemory=true
+      - RabbitMq__UseInMemory=false
+      - RabbitMq__RabbitMq__Host=amqp://rabbitmq
+      - MongoDb__ConnectionString=mongodb://nosqldata
+      - SFU__TokenSecret=${PADERCONFERENCE_TOKEN_SECRET}
+      - SFU__ApiKey=${PADERCONFERENCE_API_KEY}
+    ports:
+      - "5101:80"
+
+  webspa:
+    ports:
+      - "5100:80"
+
   sfu:
     environment:
+      - SERVER_ENVIRONMENT=${APP_ENVIRONMENT}
       - API_CONFERENCE_MANAGEMENT=http://paderconference/v1/sfu/{conferenceId}?apiKey=${PADERCONFERENCE_API_KEY}
       - AMQP_CONNECTION_STRING=amqp://rabbitmq
       - API_TOKEN_SECRET=${PADERCONFERENCE_TOKEN_SECRET}
@@ -24,28 +42,4 @@ services:
     ports:
       - "5102:3000"
       - "40000:49999"
-
-  paderconference:
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - Authentication__Authority=http://identity-api
-      - KeyValueDatabase__UseInMemory=true
-      - RabbitMq__UseInMemory=false
-      - RabbitMq__RabbitMq__Host=amqp://rabbitmq
-      - MongoDb__ConnectionString=mongodb://nosqldata
-      - SFU__UrlTemplate=http://${DNS_NAME_OR_IP}:5102/{0}
-      - SFU__TokenSecret=${PADERCONFERENCE_TOKEN_SECRET}
-      - SFU__ApiKey=${PADERCONFERENCE_API_KEY}
-    ports:
-      - "5101:80"
-
-  webspa:
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Production
-      - App__IdentityUrl=http://${DNS_NAME_OR_IP}:5105/
-      - App__ConferenceUrl=http://${DNS_NAME_OR_IP}:5101/
-      - App__SignalrHubUrl=http://${DNS_NAME_OR_IP}:5101/signalr
-      - App__EquipmentSignalrHubUrl=http://${DNS_NAME_OR_IP}:5101/equipment-signalr
-      - App__FrontendUrl=http://${DNS_NAME_OR_IP}:5100/
-    ports:
-      - "5100:80"
+      - "9000:9000"

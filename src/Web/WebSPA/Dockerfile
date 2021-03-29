@@ -19,7 +19,7 @@ COPY WebSPA.csproj .
 COPY language.props .
 RUN dotnet restore "WebSPA.csproj"
 COPY . .
-COPY --from=node-build /web/build /Client/build
+COPY --from=node-build /web/build /src/Client/build
 RUN dotnet publish "WebSPA.csproj" --no-restore -c Release -o /app
 
 FROM base AS final

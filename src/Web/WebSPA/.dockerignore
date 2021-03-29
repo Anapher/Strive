@@ -23,3 +23,8 @@
 **/values.dev.yaml
 LICENSE
 README.md
+
+**/packages/
+**/test-results/
+**/TestResults/
+Client/build
