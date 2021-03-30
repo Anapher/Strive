@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -82,7 +83,8 @@ namespace PaderConference
                 JwtBearerDefaults.AuthenticationScheme, options =>
                 {
                     options.Authority = authOptions.Authority;
-                    options.TokenValidationParameters = new TokenValidationParameters {ValidateAudience = false};
+                    options.TokenValidationParameters =
+                        new TokenValidationParameters {ValidateAudience = false, ValidIssuer = authOptions.Issuer};
 
                     options.RequireHttpsMetadata = !authOptions.NoSslRequired;
 
@@ -244,6 +246,11 @@ namespace PaderConference
                         });
                 });
 
+            services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+            });
+
             // Now register our services with Autofac container.
             var builder = new ContainerBuilder();
 
@@ -260,6 +267,8 @@ namespace PaderConference
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseForwardedHeaders();
+
             if (env.IsDevelopment())
                 app.UseDeveloperExceptionPage();
             else

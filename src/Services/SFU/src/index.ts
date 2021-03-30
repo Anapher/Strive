@@ -49,12 +49,14 @@ async function main() {
       .on('error', () => lightship.shutdown());
 
    lightship.registerShutdownHandler(async () => {
-      // Allow sufficient amount of time to allow all of the existing
-      // HTTP requests to finish before terminating the service.
-      const minute = 60 * 1000;
-      await sleep(minute);
-      server.close();
+      if (process.env.SERVER_ENVIRONMENT !== 'Development') {
+         // Allow sufficient amount of time to allow all of the existing
+         // HTTP requests to finish before terminating the service.
+         const minute = 60 * 1000;
+         await sleep(minute);
+      }
 
+      server.close();
       workers.close();
    });
 

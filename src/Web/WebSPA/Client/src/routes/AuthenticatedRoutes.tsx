@@ -1,18 +1,23 @@
+import { useReactOidc } from '@axa-fr/react-oidc-context';
 import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import { setParticipantId } from 'src/features/auth/reducer';
-import useMyParticipantId from 'src/hooks/useMyParticipantId';
 import ConferenceRoute from './ConferenceRoute';
 import MainRoute from './MainRoute';
+import Axios from 'axios';
 
 export default function AuthenticatedRoutes() {
-   const userId = useMyParticipantId();
+   const { oidcUser } = useReactOidc();
    const dispatch = useDispatch();
 
    useEffect(() => {
-      dispatch(setParticipantId(userId));
-   }, [userId]);
+      dispatch(setParticipantId(oidcUser.profile.sub));
+      Axios.defaults.headers.common = {
+         Authorization: `Bearer ${oidcUser.access_token}`,
+      };
+      console.log('Bearer token loaded', oidcUser.access_token);
+   }, [oidcUser]);
 
    return (
       <Switch>

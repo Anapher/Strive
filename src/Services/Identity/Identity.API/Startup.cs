@@ -2,11 +2,13 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 
+using System;
 using IdentityServer4;
 using IdentityServerHost.Quickstart.UI;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -28,6 +30,12 @@ namespace Identity.API
         {
             services.AddControllersWithViews();
 
+            var frontendHost = Configuration["IDENTITY_FRONTENDHOST"];
+            if (string.IsNullOrEmpty(frontendHost))
+                frontendHost = "http://localhost";
+
+            var issuer = Configuration["IDENTITY_ISSUER"];
+
             var builder = services.AddIdentityServer(options =>
             {
                 options.Events.RaiseErrorEvents = true;
@@ -35,22 +43,27 @@ namespace Identity.API
                 options.Events.RaiseFailureEvents = true;
                 options.Events.RaiseSuccessEvents = true;
 
+                options.Authentication.CookieLifetime = TimeSpan.FromDays(30);
+                options.Authentication.CookieSlidingExpiration = true;
+
+                options.IssuerUri = issuer;
+
                 // see https://identityserver4.readthedocs.io/en/latest/topics/resources.html
                 options.EmitStaticAudienceClaim = true;
-            })
-                .AddTestUsers(TestUsers.Users);
+            }).AddTestUsers(TestUsers.Users);
 
             // in-memory, code config
             builder.AddInMemoryIdentityResources(Config.IdentityResources);
             builder.AddInMemoryApiScopes(Config.ApiScopes);
-            builder.AddInMemoryClients(Config.Clients);
+            builder.AddInMemoryClients(Config.Clients(frontendHost));
             builder.AddProfileService<ProfileService>();
 
             // not recommended for production - you need to store your key material somewhere secure
             builder.AddDeveloperSigningCredential();
 
-            services.AddAuthentication()
-                .AddGoogle(options =>
+            services.AddAuthentication(x =>
+                x.DefaultAuthenticateScheme = IdentityServerConstants.DefaultCookieAuthenticationScheme).AddGoogle(
+                options =>
                 {
                     options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
 
@@ -66,10 +79,17 @@ namespace Identity.API
                 options.AddPolicy("AllowAll",
                     builder => { builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader(); });
             });
+
+            services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+            });
         }
 
         public void Configure(IApplicationBuilder app)
         {
+            app.UseForwardedHeaders();
+
             if (Environment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

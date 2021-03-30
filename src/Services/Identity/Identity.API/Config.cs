@@ -19,8 +19,9 @@ namespace Identity.API
 
         public static IEnumerable<ApiScope> ApiScopes => new[] {new ApiScope("conference-management")};
 
-        public static IEnumerable<Client> Clients =>
-            new[]
+        public static IEnumerable<Client> Clients(string host)
+        {
+            return new[]
             {
                 // m2m client credentials flow client
                 new Client
@@ -38,18 +39,15 @@ namespace Identity.API
                     ClientId = "spa",
                     ClientSecrets = {new Secret("49C1A7E1-0C79-4A89-A3D6-A37998FB86B0".Sha256())},
                     AllowedGrantTypes = GrantTypes.Code,
-                    RedirectUris =
-                    {
-                        "http://localhost:55103/authentication/callback",
-                        "http://localhost:55103/authentication/silent_callback",
-                    },
-                    PostLogoutRedirectUris = {"http://localhost:55103/"},
+                    RedirectUris = {$"{host}/authentication/callback", $"{host}/authentication/silent_callback"},
+                    PostLogoutRedirectUris = {$"{host}/"},
                     AllowOfflineAccess = true,
                     AllowedScopes = {"openid", "profile", "user.info"},
-                    AllowedCorsOrigins = {"http://localhost:55103"},
+                    AllowedCorsOrigins = {$"{host}"},
                     RequireClientSecret = false,
                     AlwaysIncludeUserClaimsInIdToken = true,
                 },
             };
+        }
     }
 }

@@ -22,12 +22,12 @@ namespace IdentityServerHost.Quickstart.UI
                     street_address = "One Hacker Way",
                     locality = "Heidelberg",
                     postal_code = 69118,
-                    country = "Germany"
+                    country = "Germany",
                 };
 
                 return new List<TestUser>
                 {
-                    new TestUser
+                    new()
                     {
                         SubjectId = "818727",
                         Username = "alice",
@@ -45,7 +45,7 @@ namespace IdentityServerHost.Quickstart.UI
                             new Claim(JwtClaimTypes.Role, "pleb"),
                         },
                     },
-                    new TestUser
+                    new()
                     {
                         SubjectId = "88421113",
                         Username = "bob",

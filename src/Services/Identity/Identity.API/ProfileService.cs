@@ -11,7 +11,7 @@ namespace Identity.API
 {
     public class ProfileService : IProfileService
     {
-        public async Task GetProfileDataAsync(ProfileDataRequestContext context)
+        public Task GetProfileDataAsync(ProfileDataRequestContext context)
         {
             //>Processing
             var user = TestUsers.Users.First(x =>
@@ -24,12 +24,15 @@ namespace Identity.API
             };
 
             context.IssuedClaims.AddRange(claims);
+
+            return Task.CompletedTask;
         }
 
-        public async Task IsActiveAsync(IsActiveContext context)
+        public Task IsActiveAsync(IsActiveContext context)
         {
             //>Processing
             context.IsActive = true;
+            return Task.CompletedTask;
         }
     }
 }

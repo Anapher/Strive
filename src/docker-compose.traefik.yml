@@ -18,17 +18,13 @@ services:
 
   identity-api:
     environment:
-      - FrontendHost=http://${DNS_NAME_OR_IP}
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.identity-api.rule=Host(`identity.${DNS_NAME_OR_IP}`)"
-      - "traefik.http.routers.identity-api.entrypoints=web"
-      - "traefik.http.routers.identity-api.middlewares=cors@docker"
-      # Cors Middleware
-      - "traefik.http.middlewares.cors.headers.accessControlAllowOriginList=http://${DNS_NAME_OR_IP}"
-      - "traefik.http.middlewares.cors.headers.accessControlAllowMethods=*"
-      - "traefik.http.middlewares.cors.headers.accessControlAllowHeaders=*"
-      - "traefik.http.middlewares.cors.headers.accessControlAllowCredentials=true"
+      - IDENTITY_FRONTENDHOST=http://${DNS_NAME_OR_IP}
+      - IDENTITY_ISSUER=http://localhost:5105
+    # labels:
+    #   - "traefik.enable=true"
+    #   - "traefik.http.routers.identity-api.rule=Host(`identity.${DNS_NAME_OR_IP}`)"
+    #   - "traefik.http.routers.identity-api.entrypoints=web"
+    #   - "traefik.http.routers.identity-api.middlewares=cors@docker"
 
   paderconference:
     labels:
@@ -37,10 +33,16 @@ services:
       - "traefik.http.routers.api.entrypoints=web"
       - "traefik.http.services.paderconference.loadbalancer.healthcheck.path=/health/ready"
       - "traefik.http.routers.api.middlewares=cors@docker"
+      # Cors Middleware
+      - "traefik.http.middlewares.cors.headers.accessControlAllowOriginList=http://${DNS_NAME_OR_IP}"
+      - "traefik.http.middlewares.cors.headers.accessControlAllowMethods=*"
+      - "traefik.http.middlewares.cors.headers.accessControlAllowHeaders=*,X-Requested-With,X-SignalR-User-Agent"
+      - "traefik.http.middlewares.cors.headers.accessControlAllowCredentials=true"
     environment:
       - SFU__UrlTemplate=http://sfu.${DNS_NAME_OR_IP}/{0}
       - Authentication__NoSslRequired=true
-      - Authentication__Issuer=http://identity.${DNS_NAME_OR_IP}
+      - Authentication__Issuer=http://localhost:5105
+      - Authentication__Authority=http://host.docker.internal:5105
 
   webspa:
     labels:
@@ -49,7 +51,7 @@ services:
       - "traefik.http.routers.spa.entrypoints=web"
       - "traefik.http.services.webspa.loadbalancer.healthcheck.path=/health"
     environment:
-      - App__IdentityUrl=http://identity.${DNS_NAME_OR_IP}/
+      - App__IdentityUrl=http://localhost:5105/
       - App__ConferenceUrl=http://api.${DNS_NAME_OR_IP}/
       - App__SignalrHubUrl=http://api.${DNS_NAME_OR_IP}/signalr
       - App__EquipmentSignalrHubUrl=http://api.${DNS_NAME_OR_IP}/equipment-signalr
