@@ -71,8 +71,8 @@ export class LoopbackManager {
       if (room) {
          logger.info('Disable loopback for %s', participant.participantId);
 
-         await room.leave(participant);
          this.loopbackMap.delete(participant.participantId);
+         await room.leave(participant);
       }
    }
 

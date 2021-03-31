@@ -1191,6 +1191,11 @@
     "@types/bluebird" "*"
     "@types/node" "*"
 
+"@types/async-lock@^1.1.2":
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/@types/async-lock/-/async-lock-1.1.2.tgz#cbc26a34b11b83b28f7783a843c393b443ef8bef"
+  integrity sha512-j9n4bb6RhgFIydBe0+kpjnBPYumDaDyU8zvbWykyVMkku+c2CSu31MZkLeaBfqIwU+XCxlDpYDfyMQRkM0AkeQ==
+
 "@types/babel__core@^7.0.0", "@types/babel__core@^7.1.7":
   version "7.1.14"
   resolved "https://registry.yarnpkg.com/@types/babel__core/-/babel__core-7.1.14.tgz#faaeefc4185ec71c389f4501ee5ec84b170cc402"
@@ -1678,6 +1683,11 @@ async-each@^1.0.1:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/async-each/-/async-each-1.0.3.tgz#b727dbf87d7651602f06f4d4ac387f47d91b0cbf"
   integrity sha512-z/WhQ5FPySLdvREByI2vZiTWwCnF0moMJ1hK9YQwDTHKh6I7/uSckMetoRGb5UBZPC1z0jlw+n/XCgjeH7y1AQ==
+
+async-lock@^1.2.8:
+  version "1.2.8"
+  resolved "https://registry.yarnpkg.com/async-lock/-/async-lock-1.2.8.tgz#7b02bdfa2de603c0713acecd11184cf97bbc7c4c"
+  integrity sha512-G+26B2jc0Gw0EG/WN2M6IczuGepBsfR1+DtqLnyFSH4p2C668qkOCtEkGNVEaaNAVlYwEMazy1+/jnLxltBkIQ==
 
 async@^1.5.0:
   version "1.5.2"
