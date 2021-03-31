@@ -27,11 +27,9 @@ namespace PaderConference.Messaging.SFU.NotificationHandlers
             var synchronizedRooms = await _roomRepository.GetParticipantRooms(notification.ConferenceId);
 
             var updatedParticipants = FilterParticipants(synchronizedRooms, notification.Participants);
-            var participantsLeft = notification.Participants.Where(x => !synchronizedRooms.ContainsKey(x.Id))
-                .Select(x => x.Id).ToList();
 
             var update = new SfuConferenceInfoUpdate(updatedParticipants,
-                ImmutableDictionary<string, SfuParticipantPermissions>.Empty, participantsLeft);
+                ImmutableDictionary<string, SfuParticipantPermissions>.Empty, ImmutableList<string>.Empty);
 
             await _notifier.Update(notification.ConferenceId, update);
         }

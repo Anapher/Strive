@@ -2,9 +2,12 @@ import _ from 'lodash';
 import { Router } from 'mediasoup/lib/Router';
 import { Consumer, MediaKind, Producer, RtpCapabilities, WebRtcTransportOptions } from 'mediasoup/lib/types';
 import { SuccessOrError } from '../../common-types';
+import * as errors from '../../errors';
 import Logger from '../../utils/logger';
 import Connection from '../connection';
 import { Participant } from '../participant';
+import { RoomManager } from '../rooms/room-manager';
+import { ConferenceRepository } from '../synchronization/conference-repository';
 import { ProducerSource } from '../types';
 import { ConferenceMessenger } from './conference-messenger';
 import {
@@ -17,11 +20,7 @@ import {
    TransportProduceRequest,
    TransportProduceResponse,
 } from './request-types';
-import { ConnectionMessage } from './sub-types';
-import * as errors from '../../errors';
-import { ConferenceRepository } from '../synchronization/conference-repository';
 import { StreamInfoRepo } from './stream-info-repo';
-import { RoomManager } from '../rooms/room-manager';
 
 const logger = new Logger('Conference');
 

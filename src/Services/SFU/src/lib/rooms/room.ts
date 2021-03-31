@@ -134,6 +134,12 @@ export default class Room {
       if (!requiredPermission) return participant.producers[source];
       if (permissions.get(requiredPermission)) return participant.producers[source];
 
+      logger.debug(
+         'getProducer() | participantId: %s | Permission denied for producer %s',
+         participant.participantId,
+         source,
+      );
+
       return undefined;
    }
 }

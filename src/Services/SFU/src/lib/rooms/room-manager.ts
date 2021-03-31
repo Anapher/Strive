@@ -56,6 +56,7 @@ export class RoomManager {
             // room switch, remove from current room
             const currentRoom = this.roomMap.get(currentRoomId);
             if (currentRoom) {
+               this.participantToRoom.delete(participant.participantId);
                await currentRoom.leave(participant);
 
                if (currentRoom.participants.size === 0) {
