@@ -51,14 +51,10 @@ export default class ConferenceManager {
             case 'conferenceInfoUpdated':
                const unfreezeCallback = conference.streamInfoRepo.freeze();
                try {
-                  for (const participantId of message.update.removedParticipants) {
-                     await conference.removeParticipant(participantId);
-                  }
-
                   const updatedParticipants = _.uniq(
-                     Array.from(message.update.participantToRoom.keys()).concat(
-                        Array.from(message.update.participantPermissions.keys()),
-                     ),
+                     Array.from(message.update.participantToRoom.keys())
+                        .concat(Array.from(message.update.participantPermissions.keys()))
+                        .concat(message.update.removedParticipants),
                   );
 
                   for (const participantId of updatedParticipants) {

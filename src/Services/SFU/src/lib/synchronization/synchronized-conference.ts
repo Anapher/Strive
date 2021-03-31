@@ -1,8 +1,11 @@
 import { EventEmitter } from 'events';
 import { RabbitChannel } from '../../rabbitmq/rabbit-mq-conn';
+import Logger from '../../utils/logger';
 import { objectToMap } from '../../utils/map-utils';
 import { ChangeParticipantProducerDto, ConferenceInfo, ConferenceInfoUpdate } from '../types';
 import { ReceivedSfuMessage } from './message-types';
+
+const logger = new Logger('SynchronizedConference');
 
 /**
  * Holds a conference info that is synchronized using rabbit mq
@@ -51,6 +54,7 @@ export class SynchronizedConference extends EventEmitter {
    }
 
    private processMessage(message: ReceivedSfuMessage) {
+      logger.debug('Message received %O', message);
       switch (message.type) {
          case 'Update':
             const update = message.payload;
