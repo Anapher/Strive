@@ -64,4 +64,5 @@ services:
       - "traefik.http.routers.sfu.entrypoints=web"
       - "traefik.http.services.sfu.loadbalancer.healthcheck.path=/health"
       - "traefik.http.services.sfu.loadbalancer.healthcheck.port=9000"
+      - "traefik.http.services.sfu.loadbalancer.server.port=3000"
       - "traefik.http.routers.sfu.middlewares=cors@docker"

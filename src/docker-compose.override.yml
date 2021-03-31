@@ -38,8 +38,11 @@ services:
       - API_CONFERENCE_MANAGEMENT=http://paderconference/v1/sfu/{conferenceId}?apiKey=${PADERCONFERENCE_API_KEY}
       - AMQP_CONNECTION_STRING=amqp://rabbitmq
       - API_TOKEN_SECRET=${PADERCONFERENCE_TOKEN_SECRET}
-      - MEDIASOUP_ANNOUNCED_IP=${DNS_NAME_OR_IP}
+      - MEDIASOUP_ANNOUNCED_IP=${DNS_NAME_OR_IP} # this will not work with firefox if it's localhost. to make it work for firefox, use your local ipv4 here
     ports:
       - "5102:3000"
-      - "40000:49999"
+      - "2000-2020:2000-2020/udp"
+      - "2000-2020:2000-2020/tcp"
       - "9000:9000"
+
+    # network_mode: "host" # we need to export a port range https://docs.docker.com/network/host/
