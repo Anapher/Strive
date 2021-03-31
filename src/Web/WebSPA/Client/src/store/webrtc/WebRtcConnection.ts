@@ -1,4 +1,5 @@
 import { HubConnection } from '@microsoft/signalr';
+import debug from 'debug';
 import { EventEmitter } from 'events';
 import { Device } from 'mediasoup-client';
 import { Consumer, MediaKind, RtpParameters, Transport } from 'mediasoup-client/lib/types';
@@ -9,6 +10,8 @@ import { ChangeStreamRequest, ProducerSource } from './types';
 const PC_PROPRIETARY_CONSTRAINTS = {
    optional: [{ googDscp: true }],
 };
+
+const log = debug('webrtc:connection');
 
 type OnNewConsumerPayload = {
    participantId: string;
@@ -79,6 +82,8 @@ export class WebRtcConnection {
    }
 
    public close(): void {
+      log('Close connection');
+
       this.sendTransport?.close();
       this.receiveTransport?.close();
 
@@ -94,9 +99,11 @@ export class WebRtcConnection {
 
    private async onNewConsumer({ id, producerId, kind, rtpParameters, appData, participantId }: OnNewConsumerPayload) {
       if (!this.receiveTransport) {
-         console.warn('received new consumer, but receive transport is not initialized');
+         log('received new consumer, but receive transport is not initialized');
          return;
       }
+
+      log('[Consumer: %s] Received new consumer event, try to process...', id);
 
       try {
          const consumer = await this.receiveTransport.consume({
@@ -108,24 +115,27 @@ export class WebRtcConnection {
          });
 
          this.consumers.set(consumer.id, consumer);
-
          consumer.on('transportclose', () => this.consumers.delete(consumer.id));
 
          this.eventEmitter.emit('onConsumersChanged');
+         log('[Consumer: %s] Consumer added successfully', id);
       } catch (error) {
-         console.log(error);
-
-         // TODO: Handle
+         log('[Consumer: %s] Error on adding consumer %O', id, error);
       }
    }
 
    private onConsumerClosed({ consumerId }: ConsumerInfoPayload) {
       const consumer = this.consumers.get(consumerId);
+
       if (consumer) {
          consumer.close();
          this.consumers.delete(consumerId);
          this.consumerScores.delete(consumerId);
          this.eventEmitter.emit('onConsumerUpdated', { consumerId });
+
+         log('[Consumer: %s] Removed', consumerId);
+      } else {
+         log('[Consumer: %s] Received consumer closed event, but consumer was not found', consumerId);
       }
    }
 
@@ -135,6 +145,10 @@ export class WebRtcConnection {
          consumer.pause();
          this.consumerScores.delete(consumerId);
          this.eventEmitter.emit('onConsumerUpdated', { consumerId });
+
+         log('[Consumer: %s] Paused', consumerId);
+      } else {
+         log('[Consumer: %s] Received consumer paused event, but consumer was not found', consumerId);
       }
    }
 
@@ -143,6 +157,10 @@ export class WebRtcConnection {
       if (consumer) {
          consumer.resume();
          this.eventEmitter.emit('onConsumerUpdated', { consumerId });
+
+         log('[Consumer: %s] Resumed', consumerId);
+      } else {
+         log('[Consumer: %s] Received consumer resumed event, but consumer was not found', consumerId);
       }
    }
 
@@ -153,6 +171,8 @@ export class WebRtcConnection {
    private onConsumerScore({ consumerId, score }: ConsumerScorePayload) {
       this.consumerScores.set(consumerId, score);
       this.eventEmitter.emit('onConsumerScoreUpdated', { consumerId });
+
+      log('[Consumer: %s] Receive consumer score: %d', consumerId, score);
    }
 
    public async createSendTransport(): Promise<Transport> {
@@ -163,9 +183,11 @@ export class WebRtcConnection {
       });
 
       if (!transportOptions.success) {
-         console.error('Error creating send transport: ', transportOptions.error);
+         log('Error creating send transport: ', transportOptions.error);
          throw new Error('Error creating send transport.');
       }
+
+      log('Created send transport successfully, initialize now...');
 
       const transport = this.device.createSendTransport({
          ...transportOptions.response,
@@ -173,19 +195,26 @@ export class WebRtcConnection {
          proprietaryConstraints: PC_PROPRIETARY_CONSTRAINTS,
       });
 
-      transport.on('connect', async ({ dtlsParameters }, callback, errback) =>
+      transport.on('connect', async ({ dtlsParameters }, callback, errback) => {
+         log('[Transport: %s] Attempt to connect local transport...', transport.id);
+
          this.client
             .connectTransport({ transportId: transport.id, dtlsParameters })
             .then((response) => {
-               console.log('connect response', response);
+               log('[Transport: %s] Remote transport connection response, success: %s', transport.id, response.success);
+
                if (response.success) callback();
                else errback();
             })
-            .catch(errback),
-      );
+            .catch((err) => {
+               log('[Transport: %s] Remote transport connection failed: %O', transport.id, err);
+               errback();
+            });
+      });
 
       transport.on('produce', async ({ kind, rtpParameters, appData }, callback, errback) => {
          try {
+            log('[Transport: %s] Local transport send attempt to produce...', transport.id);
             const result = await this.client.transportProduce({
                transportId: transport.id,
                kind,
@@ -194,11 +223,14 @@ export class WebRtcConnection {
             });
 
             if (result.success) {
+               log('[Transport: %s] Response was successful, producer id: %s', transport.id, result.response.id);
                callback({ id: result.response.id });
             } else {
+               log('[Transport: %s] Response failure: %O', transport.id, result.error);
                errback(result.error);
             }
          } catch (error) {
+            log('[Transport: %s] Request failure: %O', transport.id, error);
             errback(error);
          }
       });
@@ -218,14 +250,24 @@ export class WebRtcConnection {
       const transport = this.device.createRecvTransport(transportOptions.response);
 
       transport.on('connect', ({ dtlsParameters }, callback, errback) => {
+         log('[Transport: %s] Attempt to connect local receive transport...', transport.id);
+
          this.client
             .connectTransport({ transportId: transport.id, dtlsParameters })
             .then((response) => {
-               // TODO: maybe this will be an error
+               log(
+                  '[Transport: %s] Remote receive transport connection response, success: %s',
+                  transport.id,
+                  response.success,
+               );
+
                if (response.success) callback();
                else errback(response.error);
             })
-            .catch(errback);
+            .catch((err) => {
+               log('[Transport: %s] Remote receive transport connection failed: %O', transport.id, err);
+               errback();
+            });
       });
 
       this.receiveTransport = transport;
@@ -235,6 +277,7 @@ export class WebRtcConnection {
    public async changeStream(request: ChangeStreamRequest): Promise<void> {
       const result = await this.client.changeStream(request);
       if (!result.success) {
+         log('Change stream %O failure: %O', request, result.error);
          throw new Error(result.error.message);
       }
    }

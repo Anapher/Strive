@@ -1,3 +1,4 @@
+import debug from 'debug';
 import { EventEmitter } from 'events';
 import { SuccessOrError } from 'src/communication-types';
 import { SfuConnectionInfo } from 'src/core-hub.types';
@@ -7,6 +8,7 @@ import SfuClient from './sfu-client';
 import { WebRtcConnection } from './WebRtcConnection';
 
 const RECONNECT_DELAY = 2000;
+const log = debug('webrtc:manager');
 
 export type WebRtcOptions = {
    sendMedia?: boolean;
@@ -54,7 +56,7 @@ export class WebRtcManager extends EventEmitter {
             this.onStatusChanged();
             break;
          } catch (error) {
-            console.error('Error initializing WebRtc connection', error);
+            log('Error initializing WebRtc connection: %O', error);
          }
 
          await sleep(RECONNECT_DELAY);
@@ -77,6 +79,8 @@ export class WebRtcManager extends EventEmitter {
 
       const connectionInfo = await signalr.invoke<SuccessOrError<SfuConnectionInfo>>('FetchSfuConnectionInfo');
       if (!connectionInfo?.success) throw new Error('Unable to fetch SFU connection info');
+      log('Received connection info %O', connectionInfo);
+
       const client = new SfuClient(connectionInfo.response);
 
       const connection = new WebRtcConnection(signalr, client);
@@ -84,6 +88,7 @@ export class WebRtcManager extends EventEmitter {
 
       const rtpResult = await client.getRouterCapabilities();
       if (!rtpResult?.success) throw new Error('Router capabilities could not be retrived from server.');
+      log('Received router capabilities %O', rtpResult);
 
       await device.load({ routerRtpCapabilities: rtpResult.response });
 
@@ -96,6 +101,8 @@ export class WebRtcManager extends EventEmitter {
          throw new Error('Initialize connection failed, empty result.');
       }
 
+      log('Initialized device');
+
       const canProduceAudio = device.canProduce('audio');
       const canProduceVideo = device.canProduce('video');
 
@@ -103,16 +110,19 @@ export class WebRtcManager extends EventEmitter {
 
       if (sendMedia && (canProduceAudio || canProduceVideo)) {
          await connection.createSendTransport();
+         log('Send transport created');
       }
 
       if (receiveMedia) {
          const transport = await connection.createReceiveTransport();
          transport.on('connectionstatechange', (state: RTCPeerConnectionState) => {
             if (state === 'disconnected') {
-               console.log('WebRTC transport disconnected, attempt to reconnect...');
+               log('WebRTC transport disconnected, attempt to reconnect...');
                this.onDisconnected();
             }
          });
+
+         log('Receive transport created');
       }
 
       this._current = connection;
@@ -125,5 +135,6 @@ export class WebRtcManager extends EventEmitter {
 
    private onStatusChanged() {
       this.emit('statuschanged');
+      log('Set status to %s', this.status);
    }
 }
