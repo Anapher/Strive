@@ -16,7 +16,8 @@ namespace PaderConference
             }
             catch (Exception e)
             {
-                Log.Fatal(e, "Host terminated unexpectedly");
+                var logger = new LoggerConfiguration().WriteTo.Console().CreateLogger();
+                logger.Fatal(e, "Host terminated unexpectedly");
                 return 1;
             }
             finally
