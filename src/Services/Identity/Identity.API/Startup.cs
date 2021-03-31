@@ -32,7 +32,7 @@ namespace Identity.API
 
             var frontendHost = Configuration["IDENTITY_FRONTENDHOST"];
             if (string.IsNullOrEmpty(frontendHost))
-                frontendHost = "http://localhost";
+                frontendHost = "http://localhost:55103";
 
             var issuer = Configuration["IDENTITY_ISSUER"];
 
