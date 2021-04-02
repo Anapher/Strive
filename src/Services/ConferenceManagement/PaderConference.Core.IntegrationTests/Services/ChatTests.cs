@@ -134,7 +134,7 @@ namespace PaderConference.Core.IntegrationTests.Services
                 GlobalChatChannel.Instance, new ChatMessageOptions()));
 
             // assert
-            var syncObjId = SynchronizedChatProvider.GetSyncObjId(GlobalChatChannel.Instance);
+            var syncObjId = SynchronizedChat.SyncObjId(GlobalChatChannel.Instance);
             var syncObj =
                 SynchronizedObjectListener.GetSynchronizedObject<SynchronizedChat>(TestParticipant1, syncObjId);
             Assert.Empty(syncObj.ParticipantsTyping);
@@ -151,7 +151,7 @@ namespace PaderConference.Core.IntegrationTests.Services
             await Mediator.Send(new SetParticipantTypingRequest(TestParticipant1, channel, true));
 
             // assert
-            var syncObjId = SynchronizedChatProvider.GetSyncObjId(channel);
+            var syncObjId = SynchronizedChat.SyncObjId(channel);
             var synchronizedObject =
                 SynchronizedObjectListener.GetSynchronizedObject<SynchronizedChat>(TestParticipant1, syncObjId);
 
@@ -171,7 +171,7 @@ namespace PaderConference.Core.IntegrationTests.Services
             await Mediator.Send(new SetParticipantTypingRequest(TestParticipant1, channel, false));
 
             // assert
-            var syncObjId = SynchronizedChatProvider.GetSyncObjId(channel);
+            var syncObjId = SynchronizedChat.SyncObjId(channel);
             var synchronizedObject =
                 SynchronizedObjectListener.GetSynchronizedObject<SynchronizedChat>(TestParticipant1, syncObjId);
 
@@ -229,7 +229,7 @@ namespace PaderConference.Core.IntegrationTests.Services
                 TestParticipantConnection2.ConnectionId));
 
             // assert
-            var syncObjId = SynchronizedChatProvider.GetSyncObjId(channel);
+            var syncObjId = SynchronizedChat.SyncObjId(channel);
             var syncObj =
                 SynchronizedObjectListener.GetSynchronizedObject<SynchronizedChat>(TestParticipant1, syncObjId);
 
@@ -257,7 +257,7 @@ namespace PaderConference.Core.IntegrationTests.Services
             await Mediator.Send(new SetParticipantRoomRequest(TestParticipant2, rooms[1].RoomId));
 
             // assert
-            var syncObjId = SynchronizedChatProvider.GetSyncObjId(channel);
+            var syncObjId = SynchronizedChat.SyncObjId(channel);
             var syncObj =
                 SynchronizedObjectListener.GetSynchronizedObject<SynchronizedChat>(TestParticipant1, syncObjId);
 

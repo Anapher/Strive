@@ -48,7 +48,7 @@ namespace PaderConference.Core.IntegrationTests.Services
 
             // assert
             var syncObj = (SynchronizedMediaState) await Mediator.Send(
-                new FetchSynchronizedObjectRequest(ConferenceId, SynchronizedMediaStateProvider.SyncObjId));
+                new FetchSynchronizedObjectRequest(ConferenceId, SynchronizedMediaState.SyncObjId));
 
             Assert.NotEmpty(syncObj.Streams);
             TestEqualityHelper.AssertJsonConvertedEqual(testData, syncObj.Streams);

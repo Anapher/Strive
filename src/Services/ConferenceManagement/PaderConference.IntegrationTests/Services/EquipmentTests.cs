@@ -68,7 +68,7 @@ namespace PaderConference.IntegrationTests.Services
 
             // assert
             await user.SyncObjects.AssertSyncObject<SynchronizedEquipment>(
-                SynchronizedEquipmentProvider.GetObjIdOfParticipant(user.User.Sub), syncEquipment =>
+                SynchronizedEquipment.SyncObjId(user.User.Sub), syncEquipment =>
                 {
                     var connection = Assert.Single(syncEquipment.Connections);
                     Assert.Equal(EquipmentName, connection.Value.Name);
@@ -110,7 +110,7 @@ namespace PaderConference.IntegrationTests.Services
 
             // assert
             await user.SyncObjects.AssertSyncObject<SynchronizedEquipment>(
-                SynchronizedEquipmentProvider.GetObjIdOfParticipant(user.User.Sub), syncObj =>
+                SynchronizedEquipment.SyncObjId(user.User.Sub), syncObj =>
                 {
                     var connection = Assert.Single(syncObj.Connections).Value;
                     Assert.Equal(update, connection.Status);
@@ -125,7 +125,7 @@ namespace PaderConference.IntegrationTests.Services
 
             var (user, equipmentHub) = await ConnectEquipment(testDevices);
             await user.SyncObjects.AssertSyncObject<SynchronizedEquipment>(
-                SynchronizedEquipmentProvider.GetObjIdOfParticipant(user.User.Sub),
+                SynchronizedEquipment.SyncObjId(user.User.Sub),
                 syncEquipment => { Assert.Single(syncEquipment.Connections); });
 
             // act
@@ -133,7 +133,7 @@ namespace PaderConference.IntegrationTests.Services
 
             // assert
             await user.SyncObjects.AssertSyncObject<SynchronizedEquipment>(
-                SynchronizedEquipmentProvider.GetObjIdOfParticipant(user.User.Sub),
+                SynchronizedEquipment.SyncObjId(user.User.Sub),
                 syncEquipment => { Assert.Empty(syncEquipment.Connections); });
         }
 

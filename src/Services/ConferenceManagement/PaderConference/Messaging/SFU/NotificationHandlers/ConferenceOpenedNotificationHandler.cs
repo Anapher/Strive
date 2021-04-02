@@ -26,8 +26,7 @@ namespace PaderConference.Messaging.SFU.NotificationHandlers
         public async Task Handle(ConferenceOpenedNotification notification, CancellationToken cancellationToken)
         {
             var syncObj = (SynchronizedParticipants) await _mediator.Send(
-                new FetchSynchronizedObjectRequest(notification.ConferenceId,
-                    SynchronizedParticipantsProvider.SynchronizedObjectId));
+                new FetchSynchronizedObjectRequest(notification.ConferenceId, SynchronizedParticipants.SyncObjId));
 
             var permissions = await _infoProvider.GetPermissions(notification.ConferenceId, syncObj.Participants.Keys);
             await _sfuNotifier.Update(notification.ConferenceId,

@@ -14,9 +14,7 @@ namespace PaderConference.Core.Services.Rooms
             _roomRepository = roomRepository;
         }
 
-        public static SynchronizedObjectId SynchronizedObjectId { get; } = new(SynchronizedObjectIds.ROOMS);
-
-        public override string Id { get; } = SynchronizedObjectIds.ROOMS;
+        public override string Id { get; } = SynchronizedRooms.SyncObjId.Id;
 
         protected override async ValueTask<SynchronizedRooms> InternalFetchValue(string conferenceId)
         {

@@ -38,7 +38,7 @@ namespace PaderConference.Core.IntegrationTests.Services
         private SynchronizedParticipants GetSyncObj(Participant participant)
         {
             return SynchronizedObjectListener.GetSynchronizedObject<SynchronizedParticipants>(participant,
-                SynchronizedParticipantsProvider.SynchronizedObjectId);
+                SynchronizedParticipants.SyncObjId);
         }
 
         private void AddParticipantToConferenceModerators(Participant participant)

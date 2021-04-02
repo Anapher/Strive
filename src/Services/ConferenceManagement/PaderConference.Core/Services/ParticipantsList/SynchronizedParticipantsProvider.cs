@@ -22,9 +22,8 @@ namespace PaderConference.Core.Services.ParticipantsList
             _participantMetadataRepository = participantMetadataRepository;
         }
 
-        public static SynchronizedObjectId SynchronizedObjectId = new(SynchronizedObjectIds.PARTICIPANTS);
 
-        public override string Id { get; } = SynchronizedObjectId.Id;
+        public override string Id { get; } = SynchronizedParticipants.SyncObjId.Id;
 
         protected override async ValueTask<SynchronizedParticipants> InternalFetchValue(string conferenceId)
         {

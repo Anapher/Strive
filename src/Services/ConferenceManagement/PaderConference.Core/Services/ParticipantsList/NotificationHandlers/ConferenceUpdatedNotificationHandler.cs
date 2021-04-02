@@ -19,7 +19,7 @@ namespace PaderConference.Core.Services.ParticipantsList.NotificationHandlers
         {
             return _mediator.Send(
                 new UpdateSynchronizedObjectRequest(notification.Conference.ConferenceId,
-                    SynchronizedParticipantsProvider.SynchronizedObjectId), cancellationToken);
+                    SynchronizedParticipants.SyncObjId), cancellationToken);
         }
     }
 }

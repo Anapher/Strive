@@ -22,7 +22,7 @@ namespace PaderConference.Core.Services.Permissions.NotificationHandlers
         {
             foreach (var participant in notification.UpdatedPermissions.Keys)
             {
-                var syncObjId = SynchronizedParticipantPermissionsProvider.GetObjIdOfParticipant(participant.Id);
+                var syncObjId = SynchronizedParticipantPermissions.SyncObjId(participant.Id);
                 await _mediator.Send(new UpdateSynchronizedObjectRequest(participant.ConferenceId, syncObjId),
                     cancellationToken);
             }

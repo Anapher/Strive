@@ -74,8 +74,7 @@ namespace PaderConference.Core.Services.Synchronization.UseCases
         private async ValueTask SendCurrentSynchronizedObjectValues(Participant participant,
             IEnumerable<SynchronizedObjectId> subscriptions)
         {
-            var syncSubscriptionsObjId =
-                SynchronizedSubscriptionsProvider.GetObjIdOfParticipant(participant.Id).ToString();
+            var syncSubscriptionsObjId = SynchronizedSubscriptions.SyncObjId(participant.Id).ToString();
 
             foreach (var syncObjId in subscriptions)
             {

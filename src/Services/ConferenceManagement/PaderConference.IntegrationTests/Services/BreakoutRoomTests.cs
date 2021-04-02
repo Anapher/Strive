@@ -38,7 +38,7 @@ namespace PaderConference.IntegrationTests.Services
 
             // assert
             await connection.SyncObjects.AssertSyncObject<SynchronizedBreakoutRooms>(
-                SynchronizedBreakoutRoomsProvider.SyncObjId, value =>
+                SynchronizedBreakoutRooms.SyncObjId, value =>
                 {
                     Assert.NotNull(value.Active);
 
@@ -47,11 +47,8 @@ namespace PaderConference.IntegrationTests.Services
                     Assert.Equal(amount, value.Active?.Amount);
                 });
 
-            await connection.SyncObjects.AssertSyncObject<SynchronizedRooms>(
-                SynchronizedRoomsProvider.SynchronizedObjectId, value =>
-                {
-                    Assert.Equal(amount + 1, value.Rooms.Count);
-                });
+            await connection.SyncObjects.AssertSyncObject<SynchronizedRooms>(SynchronizedRooms.SyncObjId,
+                value => { Assert.Equal(amount + 1, value.Rooms.Count); });
         }
 
         [Fact]
@@ -76,14 +73,11 @@ namespace PaderConference.IntegrationTests.Services
                 new OpenBreakoutRoomsDto(amount, null, description, assignments));
 
             // assert
-            await connection.SyncObjects.AssertSyncObject<SynchronizedRooms>(
-                SynchronizedRoomsProvider.SynchronizedObjectId, value =>
-                {
-                    Assert.Equal(value.Participants[user1.Sub],
-                        value.Rooms.First(x => x.DisplayName == "Alpha").RoomId);
-                    Assert.Equal(value.Participants[user2.Sub],
-                        value.Rooms.First(x => x.DisplayName == "Bravo").RoomId);
-                });
+            await connection.SyncObjects.AssertSyncObject<SynchronizedRooms>(SynchronizedRooms.SyncObjId, value =>
+            {
+                Assert.Equal(value.Participants[user1.Sub], value.Rooms.First(x => x.DisplayName == "Alpha").RoomId);
+                Assert.Equal(value.Participants[user2.Sub], value.Rooms.First(x => x.DisplayName == "Bravo").RoomId);
+            });
         }
 
         [Fact]
@@ -102,9 +96,9 @@ namespace PaderConference.IntegrationTests.Services
 
             // assert
             await connection.SyncObjects.AssertSyncObject<SynchronizedBreakoutRooms>(
-                SynchronizedBreakoutRoomsProvider.SyncObjId, value => { Assert.NotNull(value.Active); });
+                SynchronizedBreakoutRooms.SyncObjId, value => { Assert.NotNull(value.Active); });
             await connection.SyncObjects.AssertSyncObject<SynchronizedBreakoutRooms>(
-                SynchronizedBreakoutRoomsProvider.SyncObjId, value => { Assert.Null(value.Active); });
+                SynchronizedBreakoutRooms.SyncObjId, value => { Assert.Null(value.Active); });
         }
 
         [Fact]
@@ -129,7 +123,7 @@ namespace PaderConference.IntegrationTests.Services
             await connection.Hub.InvokeAsync(nameof(CoreHub.OpenBreakoutRooms),
                 new OpenBreakoutRoomsDto(5, null, "hello world", null));
             await connection.SyncObjects.AssertSyncObject<SynchronizedBreakoutRooms>(
-                SynchronizedBreakoutRoomsProvider.SyncObjId, value => { Assert.NotNull(value.Active); });
+                SynchronizedBreakoutRooms.SyncObjId, value => { Assert.NotNull(value.Active); });
 
             // act
             var result = await connection.Hub.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.CloseBreakoutRooms));
@@ -138,7 +132,7 @@ namespace PaderConference.IntegrationTests.Services
             AssertSuccess(result);
 
             await connection.SyncObjects.AssertSyncObject<SynchronizedBreakoutRooms>(
-                SynchronizedBreakoutRoomsProvider.SyncObjId, value => { Assert.Null(value.Active); });
+                SynchronizedBreakoutRooms.SyncObjId, value => { Assert.Null(value.Active); });
         }
 
         [Fact]
@@ -148,8 +142,8 @@ namespace PaderConference.IntegrationTests.Services
             var (connection, _) = await ConnectToOpenedConference();
 
             await connection.Hub.InvokeAsync(nameof(CoreHub.OpenBreakoutRooms), DefaultConfig);
-            await connection.SyncObjects.AssertSyncObject<SynchronizedRooms>(
-                SynchronizedRoomsProvider.SynchronizedObjectId, value => { Assert.True(value.Rooms.Count > 1); });
+            await connection.SyncObjects.AssertSyncObject<SynchronizedRooms>(SynchronizedRooms.SyncObjId,
+                value => { Assert.True(value.Rooms.Count > 1); });
 
             // act
             var result = await connection.Hub.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.CloseBreakoutRooms));
@@ -157,8 +151,8 @@ namespace PaderConference.IntegrationTests.Services
             // assert
             AssertSuccess(result);
 
-            await connection.SyncObjects.AssertSyncObject<SynchronizedRooms>(
-                SynchronizedRoomsProvider.SynchronizedObjectId, value => { Assert.Equal(1, value.Rooms.Count); });
+            await connection.SyncObjects.AssertSyncObject<SynchronizedRooms>(SynchronizedRooms.SyncObjId,
+                value => { Assert.Equal(1, value.Rooms.Count); });
         }
 
         private static readonly OpenBreakoutRoomsDto DefaultConfig = new(4, null, null, null);
@@ -183,8 +177,7 @@ namespace PaderConference.IntegrationTests.Services
             // assert
             AssertSuccess(result);
 
-            await connection.SyncObjects.AssertSyncObject<SynchronizedRooms>(
-                SynchronizedRoomsProvider.SynchronizedObjectId,
+            await connection.SyncObjects.AssertSyncObject<SynchronizedRooms>(SynchronizedRooms.SyncObjId,
                 value => { Assert.Equal(DefaultConfig.Amount + 3, value.Rooms.Count); });
         }
 
@@ -208,8 +201,7 @@ namespace PaderConference.IntegrationTests.Services
             // assert
             AssertSuccess(result);
 
-            await connection.SyncObjects.AssertSyncObject<SynchronizedRooms>(
-                SynchronizedRoomsProvider.SynchronizedObjectId,
+            await connection.SyncObjects.AssertSyncObject<SynchronizedRooms>(SynchronizedRooms.SyncObjId,
                 value => { Assert.Equal(DefaultConfig.Amount - 1, value.Rooms.Count); });
         }
 
@@ -236,7 +228,7 @@ namespace PaderConference.IntegrationTests.Services
             AssertSuccess(result);
 
             await connection.SyncObjects.AssertSyncObject<SynchronizedBreakoutRooms>(
-                SynchronizedBreakoutRoomsProvider.SyncObjId,
+                SynchronizedBreakoutRooms.SyncObjId,
                 value => { Assert.Equal(description, value.Active?.Description); });
         }
 
@@ -252,7 +244,7 @@ namespace PaderConference.IntegrationTests.Services
             AssertSuccess(result);
 
             await connection.SyncObjects.AssertSyncObject<SynchronizedBreakoutRooms>(
-                SynchronizedBreakoutRoomsProvider.SyncObjId, value => { Assert.NotNull(value.Active); });
+                SynchronizedBreakoutRooms.SyncObjId, value => { Assert.NotNull(value.Active); });
 
             var patch = new JsonPatchDocument<BreakoutRoomsConfig>();
             patch.Add(x => x.Deadline, DateTimeOffset.UtcNow.AddMilliseconds(200));
@@ -264,7 +256,7 @@ namespace PaderConference.IntegrationTests.Services
             AssertSuccess(result);
 
             await connection.SyncObjects.AssertSyncObject<SynchronizedBreakoutRooms>(
-                SynchronizedBreakoutRoomsProvider.SyncObjId, value => { Assert.Null(value.Active); });
+                SynchronizedBreakoutRooms.SyncObjId, value => { Assert.Null(value.Active); });
         }
     }
 }

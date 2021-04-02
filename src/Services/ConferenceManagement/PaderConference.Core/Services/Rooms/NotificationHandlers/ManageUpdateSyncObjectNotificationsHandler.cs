@@ -29,8 +29,7 @@ namespace PaderConference.Core.Services.Rooms.NotificationHandlers
 
         private async Task UpdateSynchronizedObject(string conferenceId)
         {
-            await _mediator.Send(new UpdateSynchronizedObjectRequest(conferenceId,
-                SynchronizedRoomsProvider.SynchronizedObjectId));
+            await _mediator.Send(new UpdateSynchronizedObjectRequest(conferenceId, SynchronizedRooms.SyncObjId));
         }
     }
 }

@@ -41,7 +41,7 @@ namespace PaderConference.Messaging.SFU
         public async ValueTask<SynchronizedRooms> GetSynchronizedRooms(string conferenceId)
         {
             return (SynchronizedRooms) await _mediator.Send(new FetchSynchronizedObjectRequest(conferenceId,
-                SynchronizedRoomsProvider.SynchronizedObjectId));
+                SynchronizedRooms.SyncObjId));
         }
 
         public async ValueTask<Dictionary<string, SfuParticipantPermissions>> GetPermissions(string conferenceId,
@@ -65,7 +65,7 @@ namespace PaderConference.Messaging.SFU
         {
             return (SynchronizedParticipantPermissions) await _mediator.Send(
                 new FetchSynchronizedObjectRequest(participant.ConferenceId,
-                    SynchronizedParticipantPermissionsProvider.GetObjIdOfParticipant(participant.Id)));
+                    SynchronizedParticipantPermissions.SyncObjId(participant.Id)));
         }
     }
 }

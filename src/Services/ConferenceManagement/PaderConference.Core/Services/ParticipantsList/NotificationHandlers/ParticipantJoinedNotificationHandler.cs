@@ -25,8 +25,8 @@ namespace PaderConference.Core.Services.ParticipantsList.NotificationHandlers
 
             await _participantMetadataRepository.AddParticipant(participant, meta);
             await _mediator.Send(
-                new UpdateSynchronizedObjectRequest(participant.ConferenceId,
-                    SynchronizedParticipantsProvider.SynchronizedObjectId), cancellationToken);
+                new UpdateSynchronizedObjectRequest(participant.ConferenceId, SynchronizedParticipants.SyncObjId),
+                cancellationToken);
         }
     }
 }

@@ -23,7 +23,7 @@ namespace PaderConference.Core.Services.Media.UseCases
             await _repository.Set(request.ConferenceId, request.Payload);
 
             await _mediator.Send(new UpdateSynchronizedObjectRequest(request.ConferenceId,
-                SynchronizedMediaStateProvider.SyncObjId));
+                SynchronizedMediaState.SyncObjId));
 
             return Unit.Value;
         }

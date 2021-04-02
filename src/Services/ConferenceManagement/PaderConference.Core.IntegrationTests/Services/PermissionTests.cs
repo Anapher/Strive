@@ -32,7 +32,7 @@ namespace PaderConference.Core.IntegrationTests.Services
         private const string Username = "Vincent";
 
         private readonly SynchronizedObjectId _participantSyncObj =
-            SynchronizedParticipantPermissionsProvider.GetObjIdOfParticipant(ParticipantId);
+            SynchronizedParticipantPermissions.SyncObjId(ParticipantId);
 
         private static readonly PermissionDescriptor<bool> TestPermission = new("test");
 

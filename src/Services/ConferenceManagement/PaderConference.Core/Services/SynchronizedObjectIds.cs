@@ -14,5 +14,8 @@
         public const string EQUIPMENT = "equipment";
         public const string SUBSCRIPTIONS = "subscriptions";
         public const string PARTICIPANT_PERMISSIONS = "participantPermissions";
+
+        // room
+        public const string SCENE = "scene";
     }
 }

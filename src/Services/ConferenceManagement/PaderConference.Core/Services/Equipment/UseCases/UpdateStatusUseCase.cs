@@ -31,7 +31,7 @@ namespace PaderConference.Core.Services.Equipment.UseCases
             await _repository.SetConnection(participant, updatedConnection);
 
             await _mediator.Send(new UpdateSynchronizedObjectRequest(participant.ConferenceId,
-                SynchronizedEquipmentProvider.GetObjIdOfParticipant(participant.Id)));
+                SynchronizedEquipment.SyncObjId(participant.Id)));
 
             return Unit.Value;
         }

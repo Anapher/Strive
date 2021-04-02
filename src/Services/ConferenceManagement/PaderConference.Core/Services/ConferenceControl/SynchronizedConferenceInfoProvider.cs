@@ -20,9 +20,8 @@ namespace PaderConference.Core.Services.ConferenceControl
             _openConferenceRepository = openConferenceRepository;
         }
 
-        public static SynchronizedObjectId SynchronizedObjectId { get; } = new(SynchronizedObjectIds.CONFERENCE);
 
-        public override string Id { get; } = SynchronizedObjectIds.CONFERENCE;
+        public override string Id { get; } = SynchronizedConferenceInfo.SyncObjId.Id;
 
         protected override async ValueTask<SynchronizedConferenceInfo> InternalFetchValue(string conferenceId)
         {

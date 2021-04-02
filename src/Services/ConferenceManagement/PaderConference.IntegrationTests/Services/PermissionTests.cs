@@ -30,7 +30,7 @@ namespace PaderConference.IntegrationTests.Services
 
             // assert
             var syncObj = await connection.SyncObjects.WaitForSyncObj<SynchronizedParticipantPermissions>(
-                SynchronizedParticipantPermissionsProvider.GetObjIdOfParticipant(connection.User.Sub));
+                SynchronizedParticipantPermissions.SyncObjId(connection.User.Sub));
 
             Assert.NotEmpty(syncObj.Permissions);
         }
@@ -46,7 +46,7 @@ namespace PaderConference.IntegrationTests.Services
             var testUser = CreateUser();
             var testUserConnection = await ConnectUserToConference(testUser, conference);
 
-            var syncObjId = SynchronizedParticipantPermissionsProvider.GetObjIdOfParticipant(testUser.Sub);
+            var syncObjId = SynchronizedParticipantPermissions.SyncObjId(testUser.Sub);
 
             await testUserConnection.SyncObjects.AssertSyncObject<SynchronizedParticipantPermissions>(syncObjId,
                 value => Assert.DoesNotContain(value.Permissions, x => x.Key == permission.Key));
@@ -84,7 +84,7 @@ namespace PaderConference.IntegrationTests.Services
             // assert
             AssertSuccess(result);
 
-            var syncObjId = SynchronizedParticipantPermissionsProvider.GetObjIdOfParticipant(testUser.Sub);
+            var syncObjId = SynchronizedParticipantPermissions.SyncObjId(testUser.Sub);
             await testUserConnection.SyncObjects.AssertSyncObject<SynchronizedParticipantPermissions>(syncObjId,
                 value => Assert.DoesNotContain(value.Permissions, x => x.Key == permission.Key));
         }
@@ -108,7 +108,7 @@ namespace PaderConference.IntegrationTests.Services
             // assert
             AssertFailed(result);
 
-            var syncObjId = SynchronizedParticipantPermissionsProvider.GetObjIdOfParticipant(testUser.Sub);
+            var syncObjId = SynchronizedParticipantPermissions.SyncObjId(testUser.Sub);
             await testUserConnection.SyncObjects.AssertSyncObject<SynchronizedParticipantPermissions>(syncObjId,
                 value => Assert.DoesNotContain(value.Permissions, x => x.Key == permission.Key));
         }

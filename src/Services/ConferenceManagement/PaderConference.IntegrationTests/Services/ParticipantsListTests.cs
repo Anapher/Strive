@@ -10,7 +10,7 @@ namespace PaderConference.IntegrationTests.Services
     [Collection(IntegrationTestCollection.Definition)]
     public class ParticipantsListTests : ServiceIntegrationTest
     {
-        private static readonly SynchronizedObjectId SyncObjId = SynchronizedParticipantsProvider.SynchronizedObjectId;
+        private static readonly SynchronizedObjectId SyncObjId = SynchronizedParticipants.SyncObjId;
 
         public ParticipantsListTests(ITestOutputHelper testOutputHelper, MongoDbFixture mongoDb) : base(
             testOutputHelper, mongoDb)

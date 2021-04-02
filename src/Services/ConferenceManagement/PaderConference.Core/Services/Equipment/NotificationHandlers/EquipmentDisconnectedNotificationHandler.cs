@@ -22,7 +22,7 @@ namespace PaderConference.Core.Services.Equipment.NotificationHandlers
         {
             await _repository.RemoveConnection(notification.Participant, notification.ConnectionId);
             await _mediator.Send(new UpdateSynchronizedObjectRequest(notification.Participant.ConferenceId,
-                SynchronizedEquipmentProvider.GetObjIdOfParticipant(notification.Participant.Id)));
+                SynchronizedEquipment.SyncObjId(notification.Participant.Id)));
         }
     }
 }

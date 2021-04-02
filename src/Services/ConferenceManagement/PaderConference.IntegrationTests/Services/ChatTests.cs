@@ -42,7 +42,7 @@ namespace PaderConference.IntegrationTests.Services
 
         private async Task<IEnumerable<SynchronizedObjectId>> WaitForSubscriptions(UserConnection connection)
         {
-            var syncSubscriptionsId = SynchronizedSubscriptionsProvider.GetObjIdOfParticipant(connection.User.Sub);
+            var syncSubscriptionsId = SynchronizedSubscriptions.SyncObjId(connection.User.Sub);
 
             await connection.SyncObjects.AssertSyncObject<SynchronizedSubscriptions>(syncSubscriptionsId,
                 value => Assert.Contains(value.Subscriptions.Keys.Select(SynchronizedObjectId.Parse),
@@ -182,14 +182,14 @@ namespace PaderConference.IntegrationTests.Services
             // assert
             await chatMessageNotification.Task.WithDefaultTimeout();
 
-            var syncSubscriptionsId = SynchronizedSubscriptionsProvider.GetObjIdOfParticipant(connection.User.Sub);
+            var syncSubscriptionsId = SynchronizedSubscriptions.SyncObjId(connection.User.Sub);
             await connection.SyncObjects.AssertSyncObject<SynchronizedSubscriptions>(syncSubscriptionsId,
                 value => Assert.Contains(value.Subscriptions.Keys, x => x == channel));
         }
 
         private async Task<string> SetupTestRoomChannelAndMoveToRoom(UserConnection connection)
         {
-            var subscriptionsId = SynchronizedSubscriptionsProvider.GetObjIdOfParticipant(connection.User.Sub);
+            var subscriptionsId = SynchronizedSubscriptions.SyncObjId(connection.User.Sub);
 
             // create room
             var testRoom = (await connection.Hub.InvokeAsync<SuccessOrError<IReadOnlyList<Room>>>(

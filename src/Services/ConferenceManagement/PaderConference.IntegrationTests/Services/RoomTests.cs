@@ -16,7 +16,7 @@ namespace PaderConference.IntegrationTests.Services
     [Collection(IntegrationTestCollection.Definition)]
     public class RoomTests : ServiceIntegrationTest
     {
-        private static readonly SynchronizedObjectId SyncObjId = SynchronizedRoomsProvider.SynchronizedObjectId;
+        private static readonly SynchronizedObjectId SyncObjId = SynchronizedRooms.SyncObjId;
 
         public RoomTests(ITestOutputHelper testOutputHelper, MongoDbFixture mongoDb) : base(testOutputHelper, mongoDb)
         {

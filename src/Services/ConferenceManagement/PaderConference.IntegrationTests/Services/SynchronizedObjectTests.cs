@@ -17,7 +17,7 @@ namespace PaderConference.IntegrationTests.Services
         [Fact]
         public async Task Join_ConferenceOpen_ReceiveSubscriptions()
         {
-            var syncObjId = SynchronizedSubscriptionsProvider.GetObjIdOfParticipant(Moderator.Sub);
+            var syncObjId = SynchronizedSubscriptions.SyncObjId(Moderator.Sub);
 
             // arrange
             var (connection, _) = await ConnectToOpenedConference();

@@ -26,7 +26,7 @@ namespace PaderConference.Core.IntegrationTests.Services
         private const string ConnectionId = "connId";
 
         private readonly Participant _testParticipant = new(ConferenceId, "af");
-        private readonly SynchronizedObjectId _synchronizedRoomsId = SynchronizedRoomsProvider.SynchronizedObjectId;
+        private readonly SynchronizedObjectId _synchronizedRoomsId = SynchronizedRooms.SyncObjId;
 
         public RoomTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
         {

@@ -26,8 +26,8 @@ namespace PaderConference.Core.Services.ConferenceControl.NotificationHandlers
             _logger.LogDebug("Conference {conferenceId} state updated, update synchronized object", conferenceId);
 
             await _mediator.Send(
-                new UpdateSynchronizedObjectRequest(conferenceId,
-                    SynchronizedConferenceInfoProvider.SynchronizedObjectId), cancellationToken);
+                new UpdateSynchronizedObjectRequest(conferenceId, SynchronizedConferenceInfo.SyncObjId),
+                cancellationToken);
         }
     }
 }

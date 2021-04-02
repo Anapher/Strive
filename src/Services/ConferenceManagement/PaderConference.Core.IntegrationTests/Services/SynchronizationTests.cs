@@ -140,8 +140,7 @@ namespace PaderConference.Core.IntegrationTests.Services
             await JoinParticipantWithoutPermissions();
 
             // assert
-            var subscriptionsObj = SynchronizedSubscriptionsProvider
-                .GetObjIdOfParticipant(ParticipantIdWithoutPermissions).ToString();
+            var subscriptionsObj = SynchronizedSubscriptions.SyncObjId(ParticipantIdWithoutPermissions).ToString();
             NotificationCollector.AssertSingleNotificationIssued<SynchronizedObjectUpdatedNotification>(x =>
                 x.SyncObjId == subscriptionsObj);
 
@@ -309,8 +308,7 @@ namespace PaderConference.Core.IntegrationTests.Services
                 new UpdateSynchronizedObjectRequest(ConferenceId, SynchronizedObjectId.Parse(SyncObjId)));
 
             // assert
-            var subscriptionsObjId =
-                SynchronizedSubscriptionsProvider.GetObjIdOfParticipant(randomParticipant.Id).ToString();
+            var subscriptionsObjId = SynchronizedSubscriptions.SyncObjId(randomParticipant.Id).ToString();
 
             NotificationCollector.AssertSingleNotificationIssued<ParticipantSubscriptionsUpdatedNotification>();
             NotificationCollector.AssertSingleNotificationIssued<SynchronizedObjectUpdatedNotification>(x =>

@@ -3,7 +3,6 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using MediatR;
-using PaderConference.Core.Services.Chat.Channels;
 using PaderConference.Core.Services.Chat.Gateways;
 using PaderConference.Core.Services.ConferenceManagement.Requests;
 using PaderConference.Core.Services.Synchronization;
@@ -29,12 +28,7 @@ namespace PaderConference.Core.Services.Chat
         public override async ValueTask<IEnumerable<SynchronizedObjectId>> GetAvailableObjects(Participant participant)
         {
             var result = await _chatChannelSelector.GetAvailableChannels(participant);
-            return result.Select(GetSyncObjId).ToList();
-        }
-
-        public static SynchronizedObjectId GetSyncObjId(ChatChannel channel)
-        {
-            return ChannelSerializer.Encode(channel);
+            return result.Select(SynchronizedChat.SyncObjId).ToList();
         }
 
         protected override async ValueTask<SynchronizedChat> InternalFetchValue(string conferenceId,

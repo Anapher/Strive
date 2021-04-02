@@ -13,9 +13,7 @@ namespace PaderConference.Core.Services.BreakoutRooms
             _repository = repository;
         }
 
-        public static SynchronizedObjectId SyncObjId { get; } = new(SynchronizedObjectIds.BREAKOUT_ROOMS);
-
-        public override string Id { get; } = SynchronizedObjectIds.BREAKOUT_ROOMS;
+        public override string Id { get; } = SynchronizedBreakoutRooms.SyncObjId.Id;
 
         protected override async ValueTask<SynchronizedBreakoutRooms> InternalFetchValue(string conferenceId)
         {

@@ -21,8 +21,7 @@ namespace PaderConference.Core.Services.Synchronization.NotificationHandlers
         {
             return _mediator.Send(
                 new UpdateSynchronizedObjectRequest(notification.Participant.ConferenceId,
-                    SynchronizedSubscriptionsProvider.GetObjIdOfParticipant(notification.Participant.Id)),
-                cancellationToken);
+                    SynchronizedSubscriptions.SyncObjId(notification.Participant.Id)), cancellationToken);
         }
     }
 }

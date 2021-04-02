@@ -13,9 +13,8 @@ namespace PaderConference.Core.Services.Media
             _repository = repository;
         }
 
-        public static SynchronizedObjectId SyncObjId = new(SynchronizedObjectIds.MEDIA);
 
-        public override string Id { get; } = SynchronizedObjectIds.MEDIA;
+        public override string Id { get; } = SynchronizedMediaState.SyncObjId.Id;
 
         protected override async ValueTask<SynchronizedMediaState> InternalFetchValue(string conferenceId)
         {

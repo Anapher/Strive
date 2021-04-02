@@ -43,8 +43,7 @@ namespace PaderConference.Core.Services.BreakoutRooms.Internal
                 internalState = await ApplyState(conferenceId, newState, createNew);
             }
 
-            await _mediator.Send(
-                new UpdateSynchronizedObjectRequest(conferenceId, SynchronizedBreakoutRoomsProvider.SyncObjId),
+            await _mediator.Send(new UpdateSynchronizedObjectRequest(conferenceId, SynchronizedBreakoutRooms.SyncObjId),
                 cancellationToken);
 
             return internalState;
@@ -111,7 +110,7 @@ namespace PaderConference.Core.Services.BreakoutRooms.Internal
         private async Task<SynchronizedRooms> FetchSynchronizedRooms(string conferenceId)
         {
             return (SynchronizedRooms) await _mediator.Send(
-                new FetchSynchronizedObjectRequest(conferenceId, SynchronizedRoomsProvider.SynchronizedObjectId));
+                new FetchSynchronizedObjectRequest(conferenceId, SynchronizedRooms.SyncObjId));
         }
 
         private IReadOnlyList<RoomCreationInfo> FindMissingRoomsToCreate(int amount, IReadOnlyList<Room> rooms)
