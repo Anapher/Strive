@@ -14,5 +14,16 @@ namespace PaderConference.Infrastructure.Tests.Extensions
             var actualUrlBase64 = base64.ToUrlBase64();
             Assert.Equal(expectedUrlBase64, actualUrlBase64);
         }
+
+        [Theory]
+        [InlineData("", "")]
+        [InlineData("asd", "asd")]
+        [InlineData("HelloWorld", "helloWorld")]
+        [InlineData("?Why", "?Why")]
+        public void ToCamelCase_TestValues_IsCorrect(string original, string expected)
+        {
+            var actual = original.ToCamelCase();
+            Assert.Equal(expected, actual);
+        }
     }
 }

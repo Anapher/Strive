@@ -43,6 +43,7 @@ namespace PaderConference.Core.Services
 
         // Scenes
         Scenes_RoomNotFound,
+        Scenes_Invalid,
 
         // Breakout Rooms
         BreakoutRoom_AlreadyOpen,

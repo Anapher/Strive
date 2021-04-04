@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using PaderConference.Core.Dto;
 using PaderConference.Core.Errors;
 using PaderConference.Core.Interfaces;
+using PaderConference.Infrastructure.Extensions;
 
 namespace PaderConference.Extensions
 {

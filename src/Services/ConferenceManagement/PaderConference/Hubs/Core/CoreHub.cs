@@ -30,6 +30,7 @@ using PaderConference.Core.Services.Permissions.Requests;
 using PaderConference.Core.Services.Permissions.Responses;
 using PaderConference.Core.Services.Rooms;
 using PaderConference.Core.Services.Rooms.Requests;
+using PaderConference.Core.Services.Scenes.Requests;
 using PaderConference.Core.Utilities;
 using PaderConference.Extensions;
 using PaderConference.Hubs.Core.Dtos;
@@ -320,6 +321,13 @@ namespace PaderConference.Hubs.Core
             return await GetInvoker()
                 .Create(new SendEquipmentCommandRequest(participant, dto.ConnectionId, dto.Source, dto.DeviceId,
                     dto.Action)).Send();
+        }
+
+        public async Task<SuccessOrError<Unit>> SetScene(SetSceneDto dto)
+        {
+            var participant = GetContextParticipant();
+            return await GetInvoker().Create(new SetSceneRequest(participant.ConferenceId, dto.RoomId, dto.Active))
+                .RequirePermissions(DefinedPermissions.Scenes.CanSetScene).Send();
         }
     }
 }

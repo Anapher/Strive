@@ -1,17 +1,12 @@
 ﻿using System;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-using Newtonsoft.Json.Serialization;
+using PaderConference.Infrastructure.Serialization;
 
 namespace PaderConference.Infrastructure.KeyValue
 {
     public static class KeyValueSerializer
     {
-        private static readonly JsonSerializerSettings Settings = new()
-        {
-            ContractResolver = new CamelCasePropertyNamesContractResolver(),
-            Converters = {new StringEnumConverter(new CamelCaseNamingStrategy())},
-        };
+        private static readonly JsonSerializerSettings Settings = JsonConfig.Default;
 
         public static string SerializeValue(object? value)
         {

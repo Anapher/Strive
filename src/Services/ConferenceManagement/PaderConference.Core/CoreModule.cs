@@ -1,10 +1,10 @@
 using Autofac;
-using Autofac.Features.Variance;
 using FluentValidation;
 using PaderConference.Core.Services;
 using PaderConference.Core.Services.Chat;
 using PaderConference.Core.Services.ConferenceControl;
 using PaderConference.Core.Services.Permissions;
+using PaderConference.Core.Services.Scenes;
 using PaderConference.Core.Services.Synchronization;
 
 namespace PaderConference.Core
@@ -13,9 +13,6 @@ namespace PaderConference.Core
     {
         protected override void Load(ContainerBuilder builder)
         {
-            // so we can use bases class in mediator
-            builder.RegisterSource(new ContravariantRegistrationSource());
-
             builder.RegisterAssemblyTypes(ThisAssembly).AsClosedTypesOf(typeof(AbstractValidator<>))
                 .AsImplementedInterfaces().SingleInstance();
 
@@ -33,6 +30,8 @@ namespace PaderConference.Core
             builder.RegisterType<TaskDelay>().As<ITaskDelay>().SingleInstance();
             builder.RegisterType<ChatChannelSelector>().As<IChatChannelSelector>();
             builder.RegisterType<ParticipantTypingTimer>().As<IParticipantTypingTimer>().SingleInstance();
+            builder.RegisterAssemblyTypes(ThisAssembly).AssignableTo<ISceneProvider>().As<ISceneProvider>()
+                .SingleInstance();
         }
     }
 }

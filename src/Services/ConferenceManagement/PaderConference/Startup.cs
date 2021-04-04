@@ -23,8 +23,6 @@ using Microsoft.OpenApi.Models;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
-using Newtonsoft.Json.Converters;
-using Newtonsoft.Json.Serialization;
 using PaderConference.Config;
 using PaderConference.Core;
 using PaderConference.Core.Domain.Entities;
@@ -44,6 +42,7 @@ using PaderConference.Infrastructure.Sfu;
 using PaderConference.Messaging.Consumers;
 using PaderConference.Messaging.SFU.SendContracts;
 using PaderConference.Services;
+using PaderConference.Utilities;
 using StackExchange.Redis.Extensions.Core.Abstractions;
 using StackExchange.Redis.Extensions.Core.Configuration;
 using StackExchange.Redis.Extensions.Newtonsoft;
@@ -110,25 +109,23 @@ namespace PaderConference
 
             // SignalR
             services.AddSignalR().AddNewtonsoftJsonProtocol(options =>
-            {
-                options.PayloadSerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
-                options.PayloadSerializerSettings.Converters.Add(
-                    new StringEnumConverter(new CamelCaseNamingStrategy()));
-            });
+                {
+                    JsonConfig.Apply(options.PayloadSerializerSettings);
+                });
 
             services.AddMvc().ConfigureApiBehaviorOptions(options => options.UseInvalidModelStateToError())
                 .AddFluentValidation(fv =>
                     fv.RegisterValidatorsFromAssemblyContaining<Startup>()
                         .RegisterValidatorsFromAssemblyContaining<CoreModule>()).AddNewtonsoftJson(options =>
-                {
-                    options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
-                });
+                    {
+                        JsonConfig.Apply(options.SerializerSettings);
+                    });
 
             services.AddAutoMapper(Assembly.GetExecutingAssembly(), typeof(CoreModule).Assembly);
 
             var healthChecks = services.AddHealthChecks();
 
-            // KeyValuDatabase
+            // KeyValueDatabase
             var keyValueOptions = Configuration.GetSection("KeyValueDatabase").Get<KeyValueDatabaseConfig>();
             if (keyValueOptions.UseInMemory)
             {
@@ -257,6 +254,12 @@ namespace PaderConference
             builder.RegisterModule(new CoreModule());
             builder.RegisterModule(new InfrastructureModule());
             builder.RegisterModule(new PresentationModule());
+
+            if (Environment.IsDevelopment())
+            {
+                builder.RegisterGeneric(typeof(LoggingBehavior<,>)).As(typeof(IPipelineBehavior<,>));
+                builder.RegisterSource(new ScopedContravariantRegistrationSource(typeof(LoggingBehavior<,>)));
+            }
 
             builder.Populate(services);
             var container = builder.Build();

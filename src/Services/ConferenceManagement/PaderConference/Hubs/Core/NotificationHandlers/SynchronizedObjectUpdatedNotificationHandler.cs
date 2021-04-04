@@ -5,22 +5,14 @@ using JsonPatchGenerator;
 using MediatR;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.SignalR;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-using Newtonsoft.Json.Serialization;
 using PaderConference.Core.Services.Synchronization.Notifications;
+using PaderConference.Infrastructure.Serialization;
 
 namespace PaderConference.Hubs.Core.NotificationHandlers
 {
     public class
         SynchronizedObjectUpdatedNotificationHandler : INotificationHandler<SynchronizedObjectUpdatedNotification>
     {
-        private static readonly JsonSerializerSettings SyncObjPatchSettings = new()
-        {
-            ContractResolver = new CamelCasePropertyNamesContractResolver(),
-            Converters = {new StringEnumConverter(new CamelCaseNamingStrategy())},
-        };
-
         private readonly IHubContext<CoreHub> _hubContext;
 
         public SynchronizedObjectUpdatedNotificationHandler(IHubContext<CoreHub> hubContext)
@@ -41,8 +33,8 @@ namespace PaderConference.Hubs.Core.NotificationHandlers
             }
             else
             {
-                var patch = JsonPatchFactory.Create(notification.PreviousValue, notification.Value,
-                    SyncObjPatchSettings, JsonPatchFactory.DefaultOptions);
+                var patch = JsonPatchFactory.Create(notification.PreviousValue, notification.Value, JsonConfig.Default,
+                    JsonPatchFactory.DefaultOptions);
 
                 var payload = new SyncObjPayload<JsonPatchDocument>(notification.SyncObjId, patch);
 

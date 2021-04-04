@@ -12,6 +12,7 @@ using PaderConference.Core.Dto;
 using PaderConference.Core.Interfaces;
 using PaderConference.Core.Services;
 using PaderConference.Hubs.Core;
+using PaderConference.Infrastructure.Serialization;
 using PaderConference.Models.Request;
 using PaderConference.Models.Response;
 using Xunit;
@@ -99,7 +100,7 @@ namespace PaderConference.IntegrationTests._Helpers
         {
             return new HubConnectionBuilder()
                 .WithUrl(url, o => o.HttpMessageHandlerFactory = _ => Factory.Server.CreateHandler())
-                .AddNewtonsoftJsonProtocol().Build();
+                .AddNewtonsoftJsonProtocol(settings => JsonConfig.Apply(settings.PayloadSerializerSettings)).Build();
         }
 
         private string BuildSignalRUrl(UserAccount user, string conferenceId)
