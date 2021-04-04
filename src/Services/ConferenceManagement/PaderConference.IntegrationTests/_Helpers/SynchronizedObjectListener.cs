@@ -12,6 +12,7 @@ using Nito.AsyncEx;
 using PaderConference.Core.Services.Permissions;
 using PaderConference.Core.Services.Synchronization;
 using PaderConference.Hubs.Core;
+using PaderConference.Infrastructure.Serialization;
 using Serilog;
 
 namespace PaderConference.IntegrationTests._Helpers
@@ -23,10 +24,7 @@ namespace PaderConference.IntegrationTests._Helpers
         private readonly object _lock = new();
         private readonly List<AsyncAutoResetEvent> _waiters = new();
 
-        private static readonly JsonSerializerSettings JsonSettings = new()
-        {
-            Converters = new List<JsonConverter> {new ReadOnlyListConverter(), new ReadOnlyDictionaryConverter()},
-        };
+        private static readonly JsonSerializerSettings JsonSettings = JsonConfig.Default;
 
         private SynchronizedObjectListener(HubConnection connection, ILogger logger)
         {
@@ -61,50 +59,34 @@ namespace PaderConference.IntegrationTests._Helpers
                 var initialEvent = events.Last(x => !x.IsPatch);
                 var patches = events.Skip(events.IndexOf(initialEvent) + 1);
 
-                var initialObj = initialEvent.Payload.ToObject<T>(serializer);
-                if (initialObj == null) throw new NullReferenceException("The initial object must not be null");
-
+                var initialObj = initialEvent.Payload.DeepClone();
                 foreach (var patch in patches.Select(x => x.Payload))
                 {
-                    var jsonPatch = patch.ToObject<JsonPatchDocument<T>>(serializer);
+                    var jsonPatch = patch.DeepClone().ToObject<JsonPatchDocument<JToken>>(serializer);
                     if (jsonPatch == null) throw new NullReferenceException("A patch must never be null.");
 
-                    if (initialObj is SynchronizedParticipantPermissions syncPermissions)
-                    {
-                        PatchPermissionsDictionary(syncPermissions, jsonPatch);
-                    }
+                    if (typeof(T) == typeof(SynchronizedParticipantPermissions))
+                        PatchPermissionsDictionary(initialObj, jsonPatch);
                     else
-                    {
-                        // ApplyTo does not care about our settings, so it deserializes IReadOnlyDictionary
-                        // to ReadOnlyDictionary, which leads to errors on oncoming json patches that want to
-                        // modify this dictionary. We just serialize and deserialize the current value with
-                        // our json settings to ensure that we don't have any read only Lists/Dictionaries
                         jsonPatch.ApplyTo(initialObj);
-                        initialObj = FixObjectTypes(initialObj);
-                    }
                 }
 
-                return initialObj;
+                var result = initialObj.ToObject<T>(serializer);
+                if (result == null) throw new NullReferenceException("The sync object must not be null.");
+                return result;
             }
         }
 
-        private static T FixObjectTypes<T>(T value)
-        {
-            var temp = JsonConvert.SerializeObject(value, JsonSettings);
-            return JsonConvert.DeserializeObject<T>(temp, JsonSettings)!;
-        }
-
-        private void PatchPermissionsDictionary(SynchronizedParticipantPermissions initialObj,
-            IJsonPatchDocument document)
+        private void PatchPermissionsDictionary(JToken jToken, IJsonPatchDocument document)
         {
             foreach (var operation in document.GetOperations())
             {
                 var key = operation.path.Substring("/Permissions/".Length);
 
                 if (operation.OperationType == OperationType.Add)
-                    initialObj.Permissions[key] = (JValue) JToken.FromObject(operation.value);
+                    jToken["permissions"]![key] = (JValue) JToken.FromObject(operation.value);
                 else if (operation.OperationType == OperationType.Remove)
-                    initialObj.Permissions.Remove(key);
+                    jToken["permissions"]![key]!.Parent!.Remove();
                 else throw new ArgumentException("Invalid operation");
             }
         }
