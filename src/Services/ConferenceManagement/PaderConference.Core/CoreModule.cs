@@ -1,4 +1,5 @@
 using Autofac;
+using Autofac.Features.Variance;
 using FluentValidation;
 using PaderConference.Core.Services;
 using PaderConference.Core.Services.Chat;
@@ -13,6 +14,8 @@ namespace PaderConference.Core
     {
         protected override void Load(ContainerBuilder builder)
         {
+            builder.RegisterSource(new ContravariantRegistrationSource());
+
             builder.RegisterAssemblyTypes(ThisAssembly).AsClosedTypesOf(typeof(AbstractValidator<>))
                 .AsImplementedInterfaces().SingleInstance();
 
