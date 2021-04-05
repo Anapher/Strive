@@ -148,7 +148,8 @@ namespace PaderConference.Core.Tests.Services.Scenes.NotificationHandlers
                 CancellationToken.None);
 
             // assert
-            _repository.Verify(x => x.RemoveScene(ConferenceId, RoomId), Times.Once);
+            _repository.Verify(x => x.SetScene(ConferenceId, RoomId, It.Is<ActiveScene>(x => x.Scene == null)),
+                Times.Once);
         }
     }
 }

@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
+using PaderConference.Core.Extensions;
 using PaderConference.Core.Services.Rooms;
 using PaderConference.Core.Services.Scenes.Gateways;
 using PaderConference.Core.Services.Synchronization.Notifications;
@@ -48,7 +49,7 @@ namespace PaderConference.Core.Services.Scenes.NotificationHandlers
                 if (updates.Any())
                 {
                     var availableScenes = await _sceneRepository.GetAvailableScenes(conferenceId, room.RoomId);
-                    if (availableScenes == null) return;
+                    if (availableScenes == null) continue;
 
                     IEnumerable<IScene> updatedScenes = availableScenes;
                     foreach (var (update, provider) in updates)
@@ -57,8 +58,9 @@ namespace PaderConference.Core.Services.Scenes.NotificationHandlers
                     }
 
                     var newScenes = updatedScenes.ToList();
-                    await _sceneRepository.SetAvailableScenes(conferenceId, room.RoomId, newScenes);
+                    if (newScenes.ScrambledEquals(availableScenes)) continue;
 
+                    await _sceneRepository.SetAvailableScenes(conferenceId, room.RoomId, newScenes);
                     await OnAvailableScenesUpdated(conferenceId, room.RoomId, newScenes);
 
                     await _mediator.Send(new UpdateSynchronizedObjectRequest(conferenceId,
@@ -74,7 +76,7 @@ namespace PaderConference.Core.Services.Scenes.NotificationHandlers
             if (scene == null) return;
             if (scenes.Contains(scene.Scene)) return;
 
-            await _sceneRepository.RemoveScene(conferenceId, roomId);
+            await _sceneRepository.SetScene(conferenceId, roomId, scene with {Scene = null});
         }
 
         private async ValueTask<SynchronizedRooms> FetchSynchronizedRooms(string conferenceId)

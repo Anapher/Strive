@@ -36,7 +36,7 @@ namespace PaderConference.IntegrationTests.Services
         }
 
         [Fact]
-        public async Task JoinToRoom_DoNothing_SynchronizedAvailableScenes()
+        public async Task JoinToRoom_DoNothing_SynchronizeAvailableScenes()
         {
             // arrange
             var (conn, _) = await ConnectToOpenedConference();
@@ -48,7 +48,7 @@ namespace PaderConference.IntegrationTests.Services
         }
 
         [Fact]
-        public async Task SetScene_RoomDoesExist_UpdateSynchronizedObject()
+        public async Task SetScene_SceneIsAvailable_UpdateSynchronizedObject()
         {
             // arrange
             var (conn, _) = await ConnectToOpenedConference();
@@ -65,6 +65,97 @@ namespace PaderConference.IntegrationTests.Services
             await conn.SyncObjects.AssertSyncObject<SynchronizedScene>(
                 SynchronizedScene.SyncObjId(RoomOptions.DEFAULT_ROOM_ID),
                 syncObj => { Assert.Equal(newScene, syncObj.Active); });
+        }
+
+        [Fact]
+        public async Task SetScene_SceneIsNotAvailable_ReturnErrorAndDontChangeCurrentScene()
+        {
+            // arrange
+            var (conn, _) = await ConnectToOpenedConference();
+
+            var current =
+                await conn.SyncObjects.WaitForSyncObj<SynchronizedScene>(
+                    SynchronizedScene.SyncObjId(RoomOptions.DEFAULT_ROOM_ID));
+
+            // act
+            var newScene = new ActiveScene(true, new ScreenShareScene("5342"), SceneConfig.Default);
+
+            var result = await conn.Hub.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.SetScene),
+                new SetSceneDto(RoomOptions.DEFAULT_ROOM_ID, newScene));
+
+            // assert
+            AssertFailed(result);
+
+            await conn.SyncObjects.AssertSyncObject<SynchronizedScene>(
+                SynchronizedScene.SyncObjId(RoomOptions.DEFAULT_ROOM_ID),
+                syncObj => { Assert.Equal(current.Active, syncObj.Active); });
+        }
+
+        [Fact]
+        public async Task OpenBreakoutRooms_Joined_BreakoutRoomSceneBecomesAvailable()
+        {
+            // arrange
+            var (conn, _) = await ConnectToOpenedConference();
+
+            await conn.SyncObjects.AssertSyncObject(SynchronizedScene.SyncObjId(RoomOptions.DEFAULT_ROOM_ID),
+                (SynchronizedScene syncObj) =>
+                    Assert.DoesNotContain(syncObj.AvailableScenes, x => x is BreakoutRoomScene));
+
+            // act
+            AssertSuccess(await conn.Hub.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.OpenBreakoutRooms),
+                new OpenBreakoutRoomsDto(5, null, null, null)));
+
+            // assert
+            await conn.SyncObjects.AssertSyncObject<SynchronizedScene>(
+                SynchronizedScene.SyncObjId(RoomOptions.DEFAULT_ROOM_ID),
+                syncObj => Assert.Contains(syncObj.AvailableScenes, x => x is BreakoutRoomScene));
+        }
+
+        [Fact]
+        public async Task CloseBreakoutRooms_Joined_BreakoutRoomSceneBecomesUnavailable()
+        {
+            // arrange
+            var (conn, _) = await ConnectToOpenedConference();
+
+            // act
+            AssertSuccess(await conn.Hub.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.OpenBreakoutRooms),
+                new OpenBreakoutRoomsDto(5, null, null, null)));
+
+            await conn.SyncObjects.AssertSyncObject<SynchronizedScene>(
+                SynchronizedScene.SyncObjId(RoomOptions.DEFAULT_ROOM_ID),
+                syncObj => Assert.Contains(syncObj.AvailableScenes, x => x is BreakoutRoomScene));
+
+            AssertSuccess(await conn.Hub.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.CloseBreakoutRooms)));
+
+            // assert
+            await conn.SyncObjects.AssertSyncObject(SynchronizedScene.SyncObjId(RoomOptions.DEFAULT_ROOM_ID),
+                (SynchronizedScene syncObj) =>
+                    Assert.DoesNotContain(syncObj.AvailableScenes, x => x is BreakoutRoomScene));
+        }
+
+        [Fact]
+        public async Task CloseBreakoutRooms_BreakoutRoomIsCurrentScene_RemoveCurrentScene()
+        {
+            // arrange
+            var (conn, _) = await ConnectToOpenedConference();
+
+            // act
+            AssertSuccess(await conn.Hub.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.OpenBreakoutRooms),
+                new OpenBreakoutRoomsDto(5, null, null, null)));
+
+            AssertSuccess(await conn.Hub.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.SetScene),
+                new SetSceneDto(RoomOptions.DEFAULT_ROOM_ID,
+                    new ActiveScene(true, new BreakoutRoomScene(), SceneConfig.Default))));
+
+            await conn.SyncObjects.AssertSyncObject<SynchronizedScene>(
+                SynchronizedScene.SyncObjId(RoomOptions.DEFAULT_ROOM_ID),
+                syncObj => Assert.IsType<BreakoutRoomScene>(syncObj.Active.Scene));
+
+            AssertSuccess(await conn.Hub.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.CloseBreakoutRooms)));
+
+            // assert
+            await conn.SyncObjects.AssertSyncObject<SynchronizedScene>(
+                SynchronizedScene.SyncObjId(RoomOptions.DEFAULT_ROOM_ID), syncObj => Assert.Null(syncObj.Active.Scene));
         }
     }
 }
