@@ -36,6 +36,8 @@ namespace PaderConference.Hubs.Core.NotificationHandlers
                 var patch = JsonPatchFactory.Create(notification.PreviousValue, notification.Value, JsonConfig.Default,
                     JsonPatchFactory.DefaultOptions);
 
+                if (!patch.Operations.Any()) return;
+
                 var payload = new SyncObjPayload<JsonPatchDocument>(notification.SyncObjId, patch);
 
                 await _hubContext.Clients.Groups(participantGroups)
