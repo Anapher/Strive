@@ -1,6 +1,5 @@
-import { Divider, IconButton, makeStyles, Tooltip, Typography } from '@material-ui/core';
+import { Divider, makeStyles } from '@material-ui/core';
 import clsx from 'classnames';
-import { Pin, PinOff } from 'mdi-material-ui';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import * as coreHub from 'src/core-hub';
@@ -29,18 +28,13 @@ const useStyles = makeStyles((theme) => ({
    },
    rooms: {
       flex: 1,
+      marginTop: theme.spacing(1),
    },
    roomHeader: {
       marginBottom: theme.spacing(0.5),
    },
    roomManagement: {
       marginTop: theme.spacing(1),
-   },
-   header: {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      margin: theme.spacing(1, 1, 0, 1),
    },
 }));
 
@@ -61,14 +55,6 @@ export default function RoomsList({ pinned, onTogglePinned }: Props) {
 
    return (
       <div className={classes.root}>
-         <div className={classes.header}>
-            <Typography variant="subtitle2">Participants</Typography>
-            <Tooltip title={pinned ? 'Auto hide sidebar' : 'Pin sidebar'}>
-               <IconButton size="small" onClick={onTogglePinned}>
-                  {pinned ? <Pin fontSize="small" /> : <PinOff fontSize="small" />}
-               </IconButton>
-            </Tooltip>
-         </div>
          <div className={classes.rooms}>
             {rooms?.map((room) => (
                <div

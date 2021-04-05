@@ -133,7 +133,7 @@ export default function ConferenceAppBar({ chatWidth }: Props) {
                {oidcUser && (
                   <Box mr={2}>
                      <Typography variant="caption">
-                        Signed in as <b>{oidcUser.profile.given_name}</b>
+                        Signed in as <b>{oidcUser.profile.name}</b>
                      </Typography>
                   </Box>
                )}
