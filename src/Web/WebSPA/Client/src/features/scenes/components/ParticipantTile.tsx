@@ -114,7 +114,7 @@ export default function ParticipantTile({ className, participant, size, disableL
    const audioBorder = useTransform(audioInfo?.audioLevel ?? new MotionValue(0), [0, 1], [0, 10]);
 
    const isSmall = size.width < 400;
-   const fontSize = isSmall ? 16 : 26;
+   const fontSize = isWebcamActive ? (isSmall ? 14 : 18) : isSmall ? 16 : 24;
 
    const [contextMenuOpen, setContextMenuOpen] = useState(false);
    const moreIconRef = useRef(null);
