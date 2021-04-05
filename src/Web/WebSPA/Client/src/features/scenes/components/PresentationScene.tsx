@@ -1,10 +1,8 @@
 import { makeStyles } from '@material-ui/core';
 import React, { useEffect } from 'react';
-import { useSelector } from 'react-redux';
 import { Size } from 'src/types';
 import { expandToBox, maxWidth } from '../calculations';
-import { selectActiveParticipants } from '../selectors';
-import ParticipantChips from './ParticipantChips';
+import ActiveParticipantsChips from './ActiveParticipantsChips';
 import PresentationSceneParticipants from './PresentationSceneParticipants';
 
 const useStyles = makeStyles(() => ({
@@ -99,12 +97,10 @@ export default function PresentationScene({
       if (maxContentWidth) computedSize = maxWidth(computedSize, maxContentWidth);
    }
 
-   const activeParticipants = useSelector(selectActiveParticipants);
-
    return (
       <div className={className}>
          <div className={classes.container}>
-            <ParticipantChips className={classes.chips} participantIds={Object.keys(activeParticipants)} />
+            <ActiveParticipantsChips className={classes.chips} />
             {render(computedSize)}
             {showParticipants && (
                <PresentationSceneParticipants
