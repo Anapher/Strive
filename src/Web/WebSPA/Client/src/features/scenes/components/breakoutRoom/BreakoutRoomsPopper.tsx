@@ -1,27 +1,21 @@
 import { Box, Button, ButtonGroup, Typography } from '@material-ui/core';
 import { DateTime } from 'luxon';
 import React from 'react';
-import Countdown, { CountdownRenderProps } from 'react-countdown';
+import Countdown from 'react-countdown';
 import { useDispatch, useSelector } from 'react-redux';
+import CountdownRenderer from 'src/components/CountdownRenderer';
 import { changeBreakoutRooms, closeBreakoutRooms } from 'src/core-hub';
 import usePermission from 'src/hooks/usePermission';
 import { ROOMS_CAN_CREATE_REMOVE } from 'src/permissions';
-import { setCreationDialogOpen } from '../reducer';
-import { selectBreakoutRoomState } from '../selectors';
+import { setCreationDialogOpen } from '../../../breakout-rooms/reducer';
+import { selectBreakoutRoomState } from '../../../breakout-rooms/selectors';
 
-const renderer = ({ hours, formatted }: CountdownRenderProps) => {
-   let result = '';
-   if (hours > 0) result = `${formatted.hours}:${formatted.minutes}:${formatted.seconds}`;
-   else result = `${formatted.minutes}:${formatted.seconds}`;
-
-   return <span>{result}</span>;
-};
-
-export default function ActiveBreakoutRoomsPopper() {
+export default function BreakoutRoomsPopper() {
    const state = useSelector(selectBreakoutRoomState);
    const dispatch = useDispatch();
+   const canModify = usePermission(ROOMS_CAN_CREATE_REMOVE);
 
-   if (!state) return <div />;
+   if (!state) return null;
 
    const deadline = state.deadline ? DateTime.fromISO(state.deadline) : undefined;
 
@@ -39,8 +33,6 @@ export default function ActiveBreakoutRoomsPopper() {
       dispatch(setCreationDialogOpen(true));
    };
 
-   const canModify = usePermission(ROOMS_CAN_CREATE_REMOVE);
-
    return (
       <div>
          <Box display="flex" justifyContent="space-between" alignItems="center">
@@ -55,7 +47,7 @@ export default function ActiveBreakoutRoomsPopper() {
             <Box mt={2}>
                <Typography gutterBottom>
                   Deadline at {deadline.toLocaleString(DateTime.TIME_24_SIMPLE)} (
-                  <Countdown date={deadline.toJSDate()} renderer={renderer} />)
+                  <Countdown date={deadline.toJSDate()} renderer={CountdownRenderer} />)
                </Typography>
                {canModify && (
                   <ButtonGroup variant="contained" aria-label="add time button group" size="small">

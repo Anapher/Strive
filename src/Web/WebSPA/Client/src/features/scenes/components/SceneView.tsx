@@ -1,15 +1,13 @@
 import { makeStyles } from '@material-ui/core';
 import { AnimateSharedLayout } from 'framer-motion';
+import _ from 'lodash';
 import React, { useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import MediaControls from 'src/features/media/components/MediaControls';
-import ParticipantsGrid from './ParticipantsGrid';
-import ScreenShare from './ScreenShare';
 import useThrottledResizeObserver from 'src/hooks/useThrottledResizeObserver';
 import { Size } from 'src/types';
 import { selectCurrentScene } from '../selectors';
-import { ViewableScene } from '../types';
-import _ from 'lodash';
+import SceneSelector from './SceneSelector';
 
 const AUTO_HIDE_CONTROLS_DELAY_MS = 8000;
 
@@ -46,7 +44,7 @@ export default function SceneView({ setShowWebcamUnderChat }: Props) {
    if (dimensions && dimensions.width !== undefined && dimensions.height !== undefined)
       fixedDimensions = { width: dimensions.width, height: dimensions.height };
 
-   const currentScene = useSelector(selectCurrentScene);
+   const appliedScene = useSelector(selectCurrentScene);
 
    const [showControls, setShowControls] = useState(true);
    const autoHideControls = useRef<boolean>(false);
@@ -81,56 +79,17 @@ export default function SceneView({ setShowWebcamUnderChat }: Props) {
    return (
       <div className={classes.root} ref={contentRef} onMouseMove={handleMouseMove}>
          <AnimateSharedLayout>
-            <SceneSelector
-               className={classes.currentScene}
-               dimensions={fixedDimensions}
-               scene={currentScene}
-               setShowWebcamUnderChat={setShowWebcamUnderChat}
-               setAutoHideControls={handleSetAutoHideControls}
-            />
+            {fixedDimensions?.width !== undefined && fixedDimensions?.height !== undefined ? (
+               <SceneSelector
+                  className={classes.currentScene}
+                  dimensions={fixedDimensions}
+                  scene={appliedScene}
+                  setShowWebcamUnderChat={setShowWebcamUnderChat}
+                  setAutoHideControls={handleSetAutoHideControls}
+               />
+            ) : null}
          </AnimateSharedLayout>
          <MediaControls className={classes.mediaControls} show={showControls} />
       </div>
    );
-}
-
-type SceneSelectorProps = {
-   scene: ViewableScene;
-   className?: string;
-   dimensions?: Size;
-   setShowWebcamUnderChat: (show: boolean) => void;
-   setAutoHideControls: (autoHide: boolean) => void;
-};
-
-function SceneSelector({
-   scene,
-   className,
-   dimensions,
-   setShowWebcamUnderChat,
-   setAutoHideControls,
-}: SceneSelectorProps) {
-   if (!dimensions) return <div />;
-
-   switch (scene.type) {
-      case 'grid':
-         return (
-            <ParticipantsGrid
-               className={className}
-               dimensions={dimensions}
-               options={scene}
-               setShowWebcamUnderChat={setShowWebcamUnderChat}
-               setAutoHideControls={setAutoHideControls}
-            />
-         );
-      case 'screenshare':
-         return (
-            <ScreenShare
-               className={className}
-               dimensions={dimensions}
-               options={scene}
-               setShowWebcamUnderChat={setShowWebcamUnderChat}
-               setAutoHideControls={setAutoHideControls}
-            />
-         );
-   }
 }

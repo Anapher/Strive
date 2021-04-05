@@ -3,32 +3,26 @@ import {
    ClickAwayListener,
    Grow,
    List,
-   ListItem,
-   ListItemIcon,
-   ListItemSecondaryAction,
-   ListItemText,
    makeStyles,
    MenuList,
    Paper,
    Popper,
-   Radio,
-   SvgIconProps,
    Typography,
-   useTheme,
 } from '@material-ui/core';
-import AppsIcon from '@material-ui/icons/Apps';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
-import DesktopWindowsIcon from '@material-ui/icons/DesktopWindows';
-import StarIcon from '@material-ui/icons/Star';
-import _ from 'lodash';
 import React, { useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import breakoutRooms from 'src/features/breakout-rooms/active-scene';
-import { selectParticipants } from 'src/features/conference/selectors';
-import { Participant } from 'src/features/conference/types';
+import usePermission from 'src/hooks/usePermission';
+import { SCENES_CAN_SET_SCENE } from 'src/permissions';
 import { setAppliedScene } from '../reducer';
-import { selectAvailableScenesViewModels, selectServerProvidedScene } from '../selectors';
-import { ActiveSceneInfo, Scene } from '../types';
+import scenePresenters from '../scene-presenter-registry';
+import { selectAvailableScenesViewModels, selectServerScene } from '../selectors';
+import { Scene } from '../types';
+import * as coreHub from 'src/core-hub';
+import { selectParticipantRoom } from 'src/features/rooms/selectors';
+import _ from 'lodash';
+
+const sceneDisplayOrder: Scene['type'][] = ['autonomous', 'grid', 'activeSpeaker', 'screenShare', 'breakoutRoom'];
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -39,54 +33,47 @@ const useStyles = makeStyles((theme) => ({
    },
 }));
 
-const getSceneTitle = (scene: Scene, participants: Participant[]) => {
-   switch (scene.type) {
-      case 'automatic':
-         return 'Automatic';
-      case 'grid':
-         return 'Grid';
-      case 'screenshare':
-         return `Screen of ${participants.find((x) => x.id === scene.participantId)?.displayName}`;
-   }
-};
-
-const getSceneIcon = (scene: Scene, color?: string) => {
-   const props: SvgIconProps = { style: { color } };
-
-   switch (scene.type) {
-      case 'grid':
-         return <AppsIcon {...props} />;
-      case 'screenshare':
-         return <DesktopWindowsIcon {...props} />;
-      case 'automatic':
-         return <StarIcon {...props} />;
-   }
-};
-
-const activeScenes: ActiveSceneInfo[] = [breakoutRooms];
-
 export default function SceneManagement() {
    const classes = useStyles();
+
    const [actionPopper, setActionPopper] = useState(false);
    const actionButton = useRef<HTMLButtonElement>(null);
    const handleClose = () => setActionPopper(false);
    const handleOpen = () => setActionPopper(true);
 
-   const participants = useSelector(selectParticipants);
    const availableScenes = useSelector(selectAvailableScenesViewModels);
-   const theme = useTheme();
-   const serverScene = useSelector(selectServerProvidedScene);
-   console.log('serverScene: ', serverScene);
-
    const dispatch = useDispatch();
 
-   const handleChangeScene = (checked: boolean, scene: Scene) => {
-      if (checked) {
+   const serverScene = useSelector(selectServerScene);
+   const canSetScene = usePermission(SCENES_CAN_SET_SCENE);
+   const myRoomId = useSelector(selectParticipantRoom);
+
+   const handleChangeScene = (scene: Scene) => {
+      if (canSetScene) {
+         dispatch(
+            coreHub.setScene({
+               roomId: myRoomId as string,
+               active: { scene, config: serverScene?.config ?? {}, isControlled: true },
+            }),
+         );
+      } else if (serverScene && !serverScene.isControlled) {
          dispatch(setAppliedScene(scene));
       }
    };
 
-   const activeState = activeScenes.map<[ActiveSceneInfo, boolean]>((x) => [x, x.useIsActive()]);
+   const availableScenePresenters = _.orderBy(
+      availableScenes.map((viewModel) => {
+         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+         const presenter = scenePresenters.find((x) => x.type === viewModel.scene.type)!;
+         if (!presenter) console.error('Presenter not found', viewModel.scene);
+
+         return {
+            viewModel,
+            presenter,
+         };
+      }),
+      (x) => sceneDisplayOrder.indexOf(x.viewModel.scene.type),
+   );
 
    return (
       <div>
@@ -96,43 +83,15 @@ export default function SceneManagement() {
                   Scenes
                </Typography>
             </li>
-            {availableScenes.map(({ id, scene, isApplied, isCurrent }) => (
-               <ListItem button style={{ paddingRight: 8, paddingLeft: 0 }} key={id}>
-                  <div
-                     style={{
-                        backgroundColor: isCurrent ? theme.palette.primary.main : undefined,
-                        width: 4,
-                        alignSelf: 'stretch',
-                        marginRight: 12,
-                     }}
-                  />
-                  <ListItemIcon style={{ minWidth: 32 }}>
-                     {getSceneIcon(scene, isCurrent ? theme.palette.primary.light : undefined)}
-                  </ListItemIcon>
-                  <ListItemText primary={getSceneTitle(scene, participants)} />
-                  <ListItemSecondaryAction>
-                     <Radio
-                        edge="end"
-                        checked={isApplied}
-                        onChange={(_, checked) => handleChangeScene(checked, scene)}
-                     />
-                  </ListItemSecondaryAction>
-               </ListItem>
+            {availableScenePresenters.map(({ presenter, viewModel }) => (
+               <presenter.ListItem
+                  key={viewModel.id}
+                  applied={viewModel.isApplied}
+                  current={viewModel.isCurrent}
+                  scene={viewModel.scene}
+                  onChangeScene={handleChangeScene}
+               />
             ))}
-            {_.some(activeState, ([, active]) => active) && (
-               <>
-                  <li style={{ paddingLeft: 16, marginTop: 16 }}>
-                     <Typography variant="subtitle2" color="textSecondary">
-                        Active
-                     </Typography>
-                  </li>
-                  {activeState
-                     .filter(([, active]) => active)
-                     .map(([{ ActiveMenuItem }], i) => (
-                        <ActiveMenuItem key={i} />
-                     ))}
-               </>
-            )}
          </List>
          <Paper elevation={4} className={classes.root}>
             <Button variant="contained" color="primary" size="small" fullWidth ref={actionButton} onClick={handleOpen}>
@@ -150,16 +109,17 @@ export default function SceneManagement() {
                   <Paper>
                      <ClickAwayListener onClickAway={handleClose}>
                         <MenuList id="action list">
-                           {activeScenes.map(({ OpenMenuItem }, i) => (
-                              <OpenMenuItem key={i} onClose={handleClose} />
-                           ))}
+                           {scenePresenters.map(({ type, OpenMenuItem }) => {
+                              if (!OpenMenuItem) return null;
+                              return <OpenMenuItem key={type} onClose={handleClose} />;
+                           })}
                         </MenuList>
                      </ClickAwayListener>
                   </Paper>
                </Grow>
             )}
          </Popper>
-         {activeScenes.map(({ AlwaysRender }, i) => AlwaysRender && <AlwaysRender key={i} />)}
+         {scenePresenters.map(({ AlwaysRender, type }) => AlwaysRender && <AlwaysRender key={type} />)}
       </div>
    );
 }

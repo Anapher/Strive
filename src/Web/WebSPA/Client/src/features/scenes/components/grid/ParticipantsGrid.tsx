@@ -7,10 +7,9 @@ import { useSelector } from 'react-redux';
 import { selectParticipants } from 'src/features/conference/selectors';
 import { Participant } from 'src/features/conference/types';
 import { selectParticipantsOfCurrentRoom } from 'src/features/rooms/selectors';
-import { Size } from 'src/types';
-import { generateGrid } from '../calculations';
-import { GridScene } from '../types';
-import ParticipantTile from './ParticipantTile';
+import { generateGrid } from '../../calculations';
+import { RenderSceneProps } from '../../types';
+import ParticipantTile from '../ParticipantTile';
 
 const useStyles = makeStyles(() => ({
    center: {
@@ -31,20 +30,12 @@ const useStyles = makeStyles(() => ({
    },
 }));
 
-type Props = {
-   className?: string;
-   dimensions: Size;
-   options: GridScene;
-   setShowWebcamUnderChat: (show: boolean) => void;
-   setAutoHideControls: (autoHide: boolean) => void;
-};
-
 export default function ParticipantsGrid({
    dimensions,
    className,
    setShowWebcamUnderChat,
    setAutoHideControls,
-}: Props) {
+}: RenderSceneProps) {
    const participants = useSelector(selectParticipants);
    const participantsOfRoom = useSelector(selectParticipantsOfCurrentRoom)
       .map((id) => participants.find((x) => x.id === id))

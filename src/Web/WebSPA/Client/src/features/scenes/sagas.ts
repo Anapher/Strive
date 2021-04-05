@@ -2,9 +2,9 @@ import _ from 'lodash';
 import { DateTime } from 'luxon';
 import { cancel, delay, fork, put, select, take, takeEvery } from 'redux-saga/effects';
 import { takeEverySynchronizedObjectChange } from 'src/store/saga-utils';
-import { Participant } from '../conference/types';
+import { SCENE } from 'src/store/signal/synchronization/synchronized-object-ids';
 import { patchParticipantAudio, removeParticipantAudio, setParticipantAudio } from '../media/reducer';
-import { selectParticipantAudio, selectScreenSharingParticipants } from '../media/selectors';
+import { selectParticipantAudio } from '../media/selectors';
 import { ParticipantAudioInfo } from '../media/types';
 import {
    addActiveParticipant,
@@ -13,54 +13,38 @@ import {
    setCurrentScene,
    updateActiveParticipantDeleted,
 } from './reducer';
-import {
-   selectActiveParticipants,
-   selectAppliedScene,
-   selectCurrentScene,
-   selectServerProvidedScene,
-} from './selectors';
-import { ActiveParticipantData, ActiveParticipants, RoomSceneState, Scene, ViewableScene } from './types';
+import { selectActiveParticipants, selectAppliedScene, selectAvailableScenes, selectCurrentScene } from './selectors';
+import { ActiveParticipantData, ActiveParticipants, Scene, ViewableScene } from './types';
 import { applyPatch, generateActiveParticipantsPatch } from './utils';
 
 function* updateScene() {
-   const scene: RoomSceneState | undefined = yield select(selectServerProvidedScene);
-   if (!scene) return;
+   const appliedScene: Scene = yield select(selectAppliedScene);
+   const availableScenes: Scene[] = yield select(selectAvailableScenes);
+   const currentScene: ViewableScene = yield select(selectCurrentScene);
 
-   if (scene.isControlled) {
-      const appliedScene: Scene = yield select(selectAppliedScene);
+   const viewableScene = translateScene(appliedScene, availableScenes, currentScene);
+   if (_.isEqual(viewableScene, currentScene)) return;
 
-      if (appliedScene.type !== scene.scene.type) {
-         yield put(setAppliedScene(scene.scene));
-      }
-   }
+   yield put(setCurrentScene(viewableScene));
 }
 
-/**
- * If automatic sceen selection is enabled, react to changes and update current scene
- */
-function* updateAutomaticScene() {
-   const appliedScene: Scene = yield select(selectAppliedScene);
+function translateScene(scene: Scene, availableScenes: Scene[], currentScene: ViewableScene): ViewableScene {
+   if (scene.type === 'autonomous') {
+      const prefferedScene = getPrefferedScene(availableScenes);
+      if (currentScene.type === prefferedScene.type) return currentScene;
 
-   if (appliedScene.type === 'automatic') {
-      const participants: Participant[] = yield select(selectScreenSharingParticipants);
-      const currentScene: ViewableScene = yield select(selectCurrentScene);
-
-      if (participants.length > 0) {
-         // order to make it deterministic
-         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-         const displayedScreenshare = _(participants)
-            .orderBy((x) => x.id)
-            .first()!;
-
-         if (currentScene.type !== 'screenshare' || currentScene.participantId !== displayedScreenshare.id) {
-            yield put(setCurrentScene({ type: 'screenshare', participantId: displayedScreenshare.id }));
-         }
-      } else {
-         if (currentScene.type !== 'grid') {
-            yield put(setCurrentScene({ type: 'grid' }));
-         }
-      }
+      return prefferedScene;
    }
+
+   return scene;
+}
+
+const sceneOrder: Scene['type'][] = ['screenShare', 'breakoutRoom', 'grid'];
+
+function getPrefferedScene(availableScenes: Scene[]): ViewableScene {
+   return _.orderBy(availableScenes, (x) =>
+      sceneOrder.indexOf(x.type) === -1 ? Number.MAX_VALUE : sceneOrder.indexOf(x.type),
+   )[0] as ViewableScene;
 }
 
 let orderNumberCounter = 1;
@@ -114,7 +98,7 @@ function* updateActiveParticipants(): any {
 
 function getPresentors(scene: ViewableScene): string[] {
    switch (scene.type) {
-      case 'screenshare':
+      case 'screenShare':
          return [scene.participantId];
       default:
          return [];
@@ -140,12 +124,8 @@ function* main(): any {
 }
 
 function* mySaga() {
-   yield* takeEverySynchronizedObjectChange('scenes', updateScene);
-   yield* takeEverySynchronizedObjectChange('rooms', updateScene);
-
-   yield takeEvery(setAppliedScene.type, updateAutomaticScene);
-   yield* takeEverySynchronizedObjectChange('mediaStreams', updateAutomaticScene);
-
+   yield* takeEverySynchronizedObjectChange(SCENE, updateScene);
+   yield takeEvery(setAppliedScene.type, updateScene);
    yield fork(main);
 }
 

@@ -1,36 +1,44 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { ActiveParticipants, Scene, SynchronizedScenes, ViewableScene } from './types';
+import { SCENE } from 'src/store/signal/synchronization/synchronized-object-ids';
+import { synchronizeObjectState } from 'src/store/signal/synchronized-object';
+import { ActiveParticipants, FollowServer, Scene, SceneConfig, SynchronizedScene, ViewableScene } from './types';
 
-export type RoomsState = {
-   synchronized: SynchronizedScenes | null;
+export type SceneState = {
+   synchronized: SynchronizedScene | null;
 
-   appliedScene: Scene;
+   appliedScene: Scene | FollowServer;
    currentScene: ViewableScene;
+   sceneConfig: SceneConfig;
 
    /** participants that should currently be shown, because they are speaking or because they are presentator. The value is the last activity time. */
    activeParticipants: ActiveParticipants;
 };
 
-const initialState: RoomsState = {
+const initialState: SceneState = {
    synchronized: null,
 
    /** the scene that is selected. can be changed by the user */
-   appliedScene: { type: 'automatic' },
+   appliedScene: { type: 'followServer' },
 
    /** the scene that is displayed. can not be changed by the user */
    currentScene: { type: 'grid' },
 
+   sceneConfig: { hideParticipantsWithoutWebcam: false },
+
    activeParticipants: {},
 };
 
+const isViewableScene = (scene: Scene | FollowServer): scene is ViewableScene =>
+   scene.type !== 'autonomous' && scene.type !== 'followServer';
+
 const scenesSlice = createSlice({
-   name: 'rooms',
+   name: 'scenes',
    initialState,
    reducers: {
       setAppliedScene(state, { payload }: PayloadAction<Scene>) {
          state.appliedScene = payload;
 
-         if (payload.type !== 'automatic') {
+         if (isViewableScene(payload)) {
             state.currentScene = payload;
          }
       },
@@ -56,7 +64,7 @@ const scenesSlice = createSlice({
       },
    },
    extraReducers: {
-      // ...createSynchronizeObjectReducer({ name: 'scenes', stateName: 'synchronized' }),
+      ...synchronizeObjectState({ type: 'single', baseId: SCENE, propertyName: 'synchronized' }),
    },
 });
 

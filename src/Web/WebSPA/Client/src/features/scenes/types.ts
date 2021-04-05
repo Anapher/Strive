@@ -1,26 +1,52 @@
+import { Size } from 'src/types';
+
 export type GridScene = {
    type: 'grid';
-   hideParticipantsWithoutWebcam?: boolean;
+};
+
+export type ActiveSpeakerScene = {
+   type: 'activeSpeaker';
 };
 
 export type ScreenShareScene = {
-   type: 'screenshare';
+   type: 'screenShare';
    participantId: string;
 };
 
-export type AutomaticScene = {
-   type: 'automatic';
+export type BreakoutRoomScene = {
+   type: 'breakoutRoom';
 };
 
-export type ViewableScene = GridScene | ScreenShareScene;
-export type Scene = ViewableScene | AutomaticScene;
+export type AutonomousScene = {
+   type: 'autonomous';
+};
 
-export type RoomSceneState = {
+export type FollowServer = {
+   type: 'followServer';
+};
+
+export type ViewableScene = GridScene | ActiveSpeakerScene | BreakoutRoomScene | ScreenShareScene;
+export type Scene = ViewableScene | AutonomousScene;
+
+export type SceneConfig = {
+   hideParticipantsWithoutWebcam?: boolean;
+};
+
+export type ActiveScene = {
    isControlled: boolean;
-   scene: Scene;
+   scene?: Scene;
+   config: SceneConfig;
 };
 
-export type SynchronizedScenes = { [roomId: string]: RoomSceneState };
+export type ConfiguredScene = {
+   scene?: Scene;
+   config: SceneConfig;
+};
+
+export type SynchronizedScene = {
+   availableScenes: Scene[];
+   active: ActiveScene;
+};
 
 export type SceneViewModel = {
    scene: Scene;
@@ -29,15 +55,34 @@ export type SceneViewModel = {
    id: string;
 };
 
+export type SceneListItemProps = {
+   scene: Scene;
+   applied: boolean;
+   current: boolean;
+
+   onChangeScene: (newScene: Scene) => void;
+};
+
 export type ActiveSceneMenuItemProps = {
    onClose: () => void;
 };
 
-export type ActiveSceneInfo = {
-   useIsActive: () => boolean;
-   ActiveMenuItem: React.ComponentType;
-   OpenMenuItem: React.ComponentType<ActiveSceneMenuItemProps>;
+export type RenderSceneProps = {
+   className?: string;
+   dimensions: Size;
+   scene: Scene;
+   setShowWebcamUnderChat: (show: boolean) => void;
+   setAutoHideControls: (autoHide: boolean) => void;
+};
+
+export type ScenePresenter = {
+   type: Scene['type'];
+
+   ListItem: React.ComponentType<SceneListItemProps>;
    AlwaysRender?: React.ComponentType;
+   OpenMenuItem?: React.ComponentType<ActiveSceneMenuItemProps>;
+
+   RenderScene: React.ComponentType<RenderSceneProps>;
 };
 
 export type ActiveParticipantData = {

@@ -1,16 +1,9 @@
 import { Chip, Divider, Grid } from '@material-ui/core';
 import { DateTime } from 'luxon';
 import React from 'react';
-import Countdown, { CountdownRenderProps } from 'react-countdown';
+import Countdown from 'react-countdown';
+import CountdownRenderer from 'src/components/CountdownRenderer';
 import { BreakoutRoomsConfig } from 'src/core-hub.types';
-
-const renderer = ({ hours, formatted }: CountdownRenderProps) => {
-   let result = '';
-   if (hours > 0) result = `${formatted.hours}:${formatted.minutes}:${formatted.seconds}`;
-   else result = `${formatted.minutes}:${formatted.seconds}`;
-
-   return <span>{result}</span>;
-};
 
 type Props = {
    state: BreakoutRoomsConfig;
@@ -37,7 +30,7 @@ export default function BreakoutRoomChip({ state, className }: Props) {
                      <span>
                         {' '}
                         until {deadline.toLocaleString(DateTime.TIME_24_SIMPLE)} (
-                        <Countdown date={deadline.toJSDate()} renderer={renderer} />)
+                        <Countdown date={deadline.toJSDate()} renderer={CountdownRenderer} />)
                      </span>
                   )}
                </span>

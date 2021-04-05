@@ -2,17 +2,25 @@ import { createSelector } from '@reduxjs/toolkit';
 import _ from 'lodash';
 import { RootState } from 'src/store';
 import { selectParticipants } from '../conference/selectors';
-import { selectScreenSharingParticipants, selectStreams } from '../media/selectors';
-import { selectParticipantRoom } from '../rooms/selectors';
+import { selectStreams } from '../media/selectors';
 import { Scene, SceneViewModel } from './types';
 
-export const ALWAYS_AVAILABLE_SCENES: Scene[] = [{ type: 'automatic' }, { type: 'grid' }];
+export const selectAppliedScene = (state: RootState) => {
+   const appScene = state.scenes.appliedScene;
+   if (appScene.type === 'followServer') {
+      const serverScene = state.scenes.synchronized?.active.scene;
+      return serverScene ?? { type: 'autonomous' };
+   }
 
-export const selectAppliedScene = (state: RootState) => state.scenes.appliedScene;
-export const selectScenes = (state: RootState) => state.scenes.synchronized;
+   return appScene;
+};
+
 export const selectCurrentScene = (state: RootState) => state.scenes.currentScene;
 
 export const selectActiveParticipants = (state: RootState) => state.scenes.activeParticipants;
+export const selectAvailableScenes = (state: RootState) => state.scenes.synchronized?.availableScenes ?? [];
+
+export const selectServerScene = (state: RootState) => state.scenes.synchronized?.active;
 
 export const selectActiveParticipantsWithWebcam = createSelector(
    selectActiveParticipants,
@@ -21,31 +29,12 @@ export const selectActiveParticipantsWithWebcam = createSelector(
       if (!streams) return [];
 
       return _(Object.entries(participants))
-         .filter(([participantId]) => {
-            const participantStreams = streams[participantId];
-            if (!participantStreams) return false;
-
-            return participantStreams.producers.webcam?.paused === false;
-         })
+         .filter(([participantId]) => streams[participantId]?.producers.webcam?.paused === false)
          .orderBy(([, info]) => info.orderNumber, 'asc')
          .map(([participantId]) => participantId)
          .value();
    },
 );
-
-export const selectServerProvidedScene = createSelector(selectParticipantRoom, selectScenes, (room, scenes) => {
-   if (!room) return undefined;
-   if (!scenes) return undefined;
-
-   return scenes[room];
-});
-
-export const selectAvailableScenes = createSelector(selectScreenSharingParticipants, (participants) => {
-   return [
-      ...ALWAYS_AVAILABLE_SCENES,
-      ...(participants?.map<Scene>((x) => ({ type: 'screenshare', participantId: x.id })) || []),
-   ];
-});
 
 export const selectAvailableScenesViewModels = createSelector(
    selectAvailableScenes,
@@ -67,7 +56,7 @@ export const selectSceneOverlayParticipants = createSelector(
    selectCurrentScene,
    selectParticipants,
    (scene, participants) => {
-      if (scene.type === 'screenshare') {
+      if (scene.type === 'screenShare') {
          return participants?.filter((x) => x.id === scene.participantId) ?? [];
       }
 
@@ -77,11 +66,9 @@ export const selectSceneOverlayParticipants = createSelector(
 
 export const getSceneId = (scene: Scene) => {
    switch (scene.type) {
-      case 'grid':
-         return scene.type;
-      case 'automatic':
-         return scene.type;
-      case 'screenshare':
+      case 'screenShare':
          return `${scene.type}::${scene.participantId}`;
+      default:
+         return scene.type;
    }
 };

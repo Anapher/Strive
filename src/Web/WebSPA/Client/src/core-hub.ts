@@ -7,6 +7,7 @@ import {
    RoomCreationInfo,
    SendChatMessageDto,
    SendEquipmentCommandDto,
+   SetSceneDto,
    SetTemporaryPermissionDto,
    SetUserIsTypingDto,
    SwitchRoomDto,
@@ -43,6 +44,8 @@ export const changeProducerSource = createHubFn<ChangeProducerSourceRequest>('Ch
 
 export const fetchPermissions = createHubFn<string | null>('FetchPermissions');
 export const setTemporaryPermission = createHubFn<SetTemporaryPermissionDto>('SetTemporaryPermission');
+
+export const setScene = createHubFn<SetSceneDto>('SetScene');
 
 export function createHubFn<TArg = void>(name: string) {
    const actionCreator = function (arg: TArg) {

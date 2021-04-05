@@ -1,4 +1,5 @@
 import { EquipmentCommandAction } from './equipment-hub.types';
+import { ActiveScene } from './features/scenes/types';
 import { ProducerSource } from './store/webrtc/types';
 
 export type SyncStatePayload = { id: string; value: any };
@@ -92,4 +93,9 @@ export type SendEquipmentCommandDto = {
    source: ProducerSource;
    deviceId?: string;
    action: EquipmentCommandAction;
+};
+
+export type SetSceneDto = {
+   roomId: string;
+   active: ActiveScene;
 };

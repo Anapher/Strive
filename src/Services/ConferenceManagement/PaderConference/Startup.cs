@@ -256,10 +256,7 @@ namespace PaderConference
             builder.RegisterModule(new PresentationModule());
 
             if (Environment.IsDevelopment())
-            {
                 builder.RegisterGeneric(typeof(LoggingBehavior<,>)).As(typeof(IPipelineBehavior<,>));
-                builder.RegisterSource(new ScopedContravariantRegistrationSource(typeof(LoggingBehavior<,>)));
-            }
 
             builder.Populate(services);
             var container = builder.Build();

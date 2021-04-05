@@ -54,7 +54,7 @@ class SynchronizedSingle implements ISynchronizedProperty {
    }
 
    remove(id: string, state: any): void {
-      state[this.descriptor.propertyName] = undefined;
+      // dont remove the object as we might have a new default object with just a different id
    }
 }
 

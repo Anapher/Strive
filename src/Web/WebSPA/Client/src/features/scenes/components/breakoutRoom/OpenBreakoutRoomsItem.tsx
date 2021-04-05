@@ -3,8 +3,8 @@ import GroupWorkIcon from '@material-ui/icons/GroupWork';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { ActiveSceneMenuItemProps } from 'src/features/scenes/types';
-import { setCreationDialogOpen } from '../reducer';
-import { selectIsBreakoutRoomsOpen } from '../selectors';
+import { setCreationDialogOpen } from '../../../breakout-rooms/reducer';
+import { selectIsBreakoutRoomsOpen } from '../../../breakout-rooms/selectors';
 
 export function OpenBreakoutRoomsItem({ onClose }: ActiveSceneMenuItemProps) {
    const dispatch = useDispatch();

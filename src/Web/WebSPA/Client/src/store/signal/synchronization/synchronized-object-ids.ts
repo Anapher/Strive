@@ -11,6 +11,7 @@ export const SUBSCRIPTIONS = 'subscriptions';
 export const BREAKOUT_ROOMS = 'breakoutRooms';
 export const MEDIA = 'media';
 export const EQUIPMENT = 'equipment';
+export const SCENE = 'scene';
 
 export type SynchronizedParticipants = {
    participants: { [participantId: string]: ParticipantData };
