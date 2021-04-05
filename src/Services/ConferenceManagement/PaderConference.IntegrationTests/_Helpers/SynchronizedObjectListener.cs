@@ -4,12 +4,10 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.JsonPatch;
-using Microsoft.AspNetCore.JsonPatch.Operations;
 using Microsoft.AspNetCore.SignalR.Client;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Nito.AsyncEx;
-using PaderConference.Core.Services.Permissions;
 using PaderConference.Core.Services.Synchronization;
 using PaderConference.Hubs.Core;
 using PaderConference.Infrastructure.Serialization;
@@ -64,30 +62,12 @@ namespace PaderConference.IntegrationTests._Helpers
                 {
                     var jsonPatch = patch.DeepClone().ToObject<JsonPatchDocument<JToken>>(serializer);
                     if (jsonPatch == null) throw new NullReferenceException("A patch must never be null.");
-
-                    if (typeof(T) == typeof(SynchronizedParticipantPermissions))
-                        PatchPermissionsDictionary(initialObj, jsonPatch);
-                    else
-                        jsonPatch.ApplyTo(initialObj);
+                    jsonPatch.ApplyTo(initialObj);
                 }
 
                 var result = initialObj.ToObject<T>(serializer);
                 if (result == null) throw new NullReferenceException("The sync object must not be null.");
                 return result;
-            }
-        }
-
-        private void PatchPermissionsDictionary(JToken jToken, IJsonPatchDocument document)
-        {
-            foreach (var operation in document.GetOperations())
-            {
-                var key = operation.path.Substring("/Permissions/".Length);
-
-                if (operation.OperationType == OperationType.Add)
-                    jToken["permissions"]![key] = (JValue) JToken.FromObject(operation.value);
-                else if (operation.OperationType == OperationType.Remove)
-                    jToken["permissions"]![key]!.Parent!.Remove();
-                else throw new ArgumentException("Invalid operation");
             }
         }
 
