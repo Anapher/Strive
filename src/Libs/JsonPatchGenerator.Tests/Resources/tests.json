@@ -1266,6 +1266,19 @@
       "foo": "bar",
       "FOO": "BAR"
     }
+  },
+  {
+    "comment": "Can handle slashs",
+    "doc": {},
+    "patch": [
+      {
+        "op": "add",
+        "path": "/media~1audio",
+        "value": true
+      }
+    ],
+    "expected": {
+      "media/audio": true 
+    } 
   }
-
 ]

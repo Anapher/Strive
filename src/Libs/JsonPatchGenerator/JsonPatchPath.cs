@@ -18,7 +18,7 @@ namespace JsonPatchGenerator
         public JsonPatchPath AddSegment(string s)
         {
             var newSegments = _segments.ToList();
-            newSegments.Add(s);
+            newSegments.Add(EscapeJsonPath(s));
 
             return new JsonPatchPath(newSegments);
         }
@@ -36,6 +36,11 @@ namespace JsonPatchGenerator
             result += string.Join("/", _segments);
 
             return result;
+        }
+
+        private static string EscapeJsonPath(string s)
+        {
+            return s.Replace("~", "~0").Replace("/", "~1");
         }
     }
 }
