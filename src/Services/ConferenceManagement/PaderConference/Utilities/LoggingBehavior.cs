@@ -19,6 +19,8 @@ namespace PaderConference.Utilities
         public async Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken,
             RequestHandlerDelegate<TResponse> next)
         {
+            if (!IsActualRequest<TRequest>()) return await next();
+
             var requestName = request.GetType().Name;
             var requestGuid = Guid.NewGuid().ToString();
 
@@ -41,6 +43,12 @@ namespace PaderConference.Utilities
             _logger.LogTrace("[RETURN] {requestName} [{guid}] {@response}", requestName, requestGuid, response);
 
             return response;
+        }
+
+        private static bool IsActualRequest<T>()
+        {
+            var type = typeof(T);
+            return type.IsClass && !type.IsAbstract && type != typeof(object);
         }
     }
 }
