@@ -12,6 +12,7 @@ import NotAuthenticated from 'src/features/auth/components/NotAuthenticated';
 import AuthenticatingComponent from './features/auth/components/AuthenticatingComponent';
 import SessionLostComponent from './features/auth/components/SessionLostComponent';
 import UserInteractionListener from './features/media/components/UserInteractionListener';
+import RedirectToConference from './RedirectToConference';
 import AuthenticatedRoutes from './routes/AuthenticatedRoutes';
 import EquipmentRoute from './routes/EquipmentRoute';
 
@@ -48,24 +49,22 @@ function App() {
             <BrowserRouter>
                <Switch>
                   <Route path="/c/:id/as-equipment" exact component={EquipmentRoute} />
-                  <Route
-                     path="/"
-                     render={() => (
-                        <AuthenticationProvider
-                           configuration={ocidConfig}
-                           loggerLevel={oidcLog.DEBUG}
-                           isEnabled
-                           callbackComponentOverride={AuthCallback}
-                           notAuthenticated={NotAuthenticated}
-                           sessionLostComponent={SessionLostComponent}
-                           authenticating={AuthenticatingComponent}
-                        >
-                           <OidcSecure>
-                              <AuthenticatedRoutes />
-                           </OidcSecure>
-                        </AuthenticationProvider>
-                     )}
-                  />
+                  <Route path="/">
+                     <AuthenticationProvider
+                        configuration={ocidConfig}
+                        loggerLevel={oidcLog.DEBUG}
+                        isEnabled
+                        callbackComponentOverride={AuthCallback}
+                        notAuthenticated={NotAuthenticated}
+                        sessionLostComponent={SessionLostComponent}
+                        authenticating={AuthenticatingComponent}
+                     >
+                        <OidcSecure>
+                           <AuthenticatedRoutes />
+                           <RedirectToConference />
+                        </OidcSecure>
+                     </AuthenticationProvider>
+                  </Route>
                </Switch>
             </BrowserRouter>
          </ThemeProvider>
