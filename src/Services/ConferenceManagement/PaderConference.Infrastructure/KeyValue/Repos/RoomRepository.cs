@@ -41,7 +41,7 @@ namespace PaderConference.Infrastructure.KeyValue.Repos
             var key = GetRoomMappingKey(conferenceId);
             var hashValues = await _database.HashGetAllAsync(key);
 
-            return hashValues.Where(x => x.Key == roomId).Select(x => new Participant(conferenceId, x.Value)).ToList();
+            return hashValues.Where(x => x.Value == roomId).Select(x => new Participant(conferenceId, x.Key)).ToList();
         }
 
         public async ValueTask<IEnumerable<Room>> GetRooms(string conferenceId)

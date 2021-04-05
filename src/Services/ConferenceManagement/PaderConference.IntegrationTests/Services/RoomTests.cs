@@ -117,5 +117,33 @@ namespace PaderConference.IntegrationTests.Services
             await connection.SyncObjects.AssertSyncObject<SynchronizedRooms>(SyncObjId,
                 value => { Assert.Single(value.Rooms); });
         }
+
+        [Fact]
+        public async Task RemoveRooms_ParticipantIsInRoom_AutomaticallyMoveBackToDefaultRoom()
+        {
+            // arrange
+            var (connection, _) = await ConnectToOpenedConference();
+
+            var roomCreationResponse = await connection.Hub.InvokeAsync<SuccessOrError<IReadOnlyList<Room>>>(
+                nameof(CoreHub.CreateRooms), new List<RoomCreationInfo> {new("Test1")});
+            var createdRoom = Assert.Single(roomCreationResponse.Response!)!;
+
+            AssertSuccess(await connection.Hub.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.SwitchRoom),
+                new SwitchRoomDto(createdRoom.RoomId)));
+
+            // act
+            var result = await connection.Hub.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.RemoveRooms),
+                new[] {createdRoom.RoomId});
+
+            // assert
+            AssertSuccess(result);
+
+            await connection.SyncObjects.AssertSyncObject<SynchronizedRooms>(SyncObjId, value =>
+            {
+                var mapping = Assert.Single(value.Participants);
+                Assert.Equal(connection.User.Sub, mapping.Key);
+                Assert.Equal(RoomOptions.DEFAULT_ROOM_ID, mapping.Value);
+            });
+        }
     }
 }
