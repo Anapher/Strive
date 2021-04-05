@@ -9,6 +9,7 @@ export type ChangeStreamRequest = {
 };
 
 export type ChangeProducerSourceRequest = {
+   participantId: string;
    source: ProducerSource;
    action: 'pause' | 'resume' | 'close';
 };

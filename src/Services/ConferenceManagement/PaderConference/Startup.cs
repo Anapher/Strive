@@ -23,6 +23,7 @@ using Microsoft.OpenApi.Models;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
+using Newtonsoft.Json;
 using PaderConference.Config;
 using PaderConference.Core;
 using PaderConference.Core.Domain.Entities;
@@ -203,6 +204,13 @@ namespace PaderConference
 
                             e.Consumer<StreamsUpdatedConsumer>(context);
                             e.Consumer<NotifyConnectionConsumer>(context);
+                        });
+
+                        configurator.ConfigureJsonSerializer(jsonConfig =>
+                        {
+                            jsonConfig.DefaultValueHandling = DefaultValueHandling.Include;
+                            JsonConfig.Apply(jsonConfig);
+                            return jsonConfig;
                         });
                     });
                 }

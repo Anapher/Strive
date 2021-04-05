@@ -40,7 +40,7 @@ export const getEquipmentToken = createHubFn('GetEquipmentToken');
 
 export const sendEquipmentCommand = createHubFn<SendEquipmentCommandDto>('SendEquipmentCommand');
 
-export const changeProducerSource = createHubFn<ChangeProducerSourceRequest>('ChangeProducerSource');
+export const changeProducerSource = createHubFn<ChangeProducerSourceRequest>('ChangeParticipantProducer');
 
 export const fetchPermissions = createHubFn<string | null>('FetchPermissions');
 export const setTemporaryPermission = createHubFn<SetTemporaryPermissionDto>('SetTemporaryPermission');
