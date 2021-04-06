@@ -38,12 +38,7 @@ const useStyles = makeStyles((theme) => ({
    },
 }));
 
-type Props = {
-   pinned: boolean;
-   onTogglePinned: () => void;
-};
-
-export default function RoomsList({ pinned, onTogglePinned }: Props) {
+export default function RoomsList() {
    const classes = useStyles();
 
    const rooms = useSelector(selectRoomViewModels);

@@ -1,5 +1,4 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import _ from 'lodash';
 import { SuccessOrError } from 'src/communication-types';
 import * as coreHub from 'src/core-hub';
 import { ChatMessageDto, FetchChatMessagesDto } from 'src/core-hub.types';

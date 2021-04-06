@@ -1,5 +1,5 @@
 import { useReactOidc } from '@axa-fr/react-oidc-context';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 
 export default function RedirectToConference() {

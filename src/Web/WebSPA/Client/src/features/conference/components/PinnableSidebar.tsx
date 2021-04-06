@@ -83,7 +83,7 @@ export default function PinnableSidebar({ pinned, onTogglePinned }: Props) {
                })}
                elevation={1}
             >
-               <RoomsList pinned={pinned} onTogglePinned={onTogglePinned} />
+               <RoomsList />
             </Paper>
             <div className={classes.backArrowButton}>
                <IconButton aria-label="toggle room list" size="small" onClick={handleToggle}>
