@@ -1,8 +1,9 @@
 import { Box, TextField } from '@material-ui/core';
 import React from 'react';
-import { Controller, UseFormMethods } from 'react-hook-form';
+import { Controller, UseFormReturn } from 'react-hook-form';
 import { OpenBreakoutRoomsDto } from 'src/core-hub.types';
 import { Participant } from 'src/features/conference/types';
+import { wrapForInputRef } from 'src/utils/reat-hook-form-utils';
 import OpenBreakoutRoomsAssignments from './BreakoutRoomsAssignments';
 
 const validateNumberInteger = (val: unknown) => {
@@ -13,11 +14,19 @@ const validateNumberInteger = (val: unknown) => {
 };
 
 type Props = {
-   form: UseFormMethods<OpenBreakoutRoomsDto>;
+   form: UseFormReturn<OpenBreakoutRoomsDto>;
    participants: Participant[] | null;
 };
 
-export default function BreakoutRoomsForm({ form: { register, errors, watch, control }, participants }: Props) {
+export default function BreakoutRoomsForm({
+   form: {
+      register,
+      formState: { errors },
+      watch,
+      control,
+   },
+   participants,
+}: Props) {
    const amount = watch('amount');
 
    return (
@@ -25,16 +34,17 @@ export default function BreakoutRoomsForm({ form: { register, errors, watch, con
          <Box mt={4}>
             <Box display="flex">
                <TextField
+                  {...wrapForInputRef(
+                     register('amount', {
+                        min: { value: 1, message: 'Must at least create one breakout room.' },
+                        required: true,
+                        validate: validateNumberInteger,
+                     }),
+                  )}
                   required
                   label="Amount"
-                  inputRef={register({
-                     min: { value: 1, message: 'Must at least create one breakout room.' },
-                     required: true,
-                     validate: validateNumberInteger,
-                  })}
                   autoFocus
                   inputProps={{ min: 1, step: 1 }}
-                  name="amount"
                   type="number"
                   error={!!errors.amount}
                   style={{ maxWidth: 80 }}
@@ -42,13 +52,14 @@ export default function BreakoutRoomsForm({ form: { register, errors, watch, con
                   fullWidth
                />
                <TextField
+                  {...wrapForInputRef(
+                     register('deadline', {
+                        min: { value: 1, message: 'Must at least give one minute.' },
+                        validate: validateNumberInteger,
+                     }),
+                  )}
                   label="Duration in minutes"
-                  inputRef={register({
-                     min: { value: 1, message: 'Must at least give one minute.' },
-                     validate: validateNumberInteger,
-                  })}
                   inputProps={{ min: 1, step: 1 }}
-                  name="deadline"
                   type="number"
                   error={!!errors.deadline}
                   style={{ maxWidth: 160, marginLeft: 16 }}
@@ -57,8 +68,7 @@ export default function BreakoutRoomsForm({ form: { register, errors, watch, con
                />
                <TextField
                   label="Description"
-                  name="description"
-                  inputRef={register}
+                  {...wrapForInputRef(register('description'))}
                   placeholder="Optionally define the task the participants should do."
                   fullWidth
                   style={{ marginLeft: 16 }}
@@ -70,7 +80,7 @@ export default function BreakoutRoomsForm({ form: { register, errors, watch, con
                <Controller
                   control={control}
                   name="assignedRooms"
-                  render={({ value, onChange }) => (
+                  render={({ field: { value, onChange } }) => (
                      <OpenBreakoutRoomsAssignments
                         data={value ?? []}
                         participants={participants}

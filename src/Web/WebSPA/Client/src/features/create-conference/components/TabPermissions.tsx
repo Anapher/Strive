@@ -1,12 +1,12 @@
 import { Box, Divider, FormControlLabel, Radio, RadioGroup } from '@material-ui/core';
 import React, { useState } from 'react';
-import { Controller, UseFormMethods } from 'react-hook-form';
+import { Controller, UseFormReturn } from 'react-hook-form';
 import { ConferenceDataForm } from '../form';
 import { PermissionType } from '../types';
 import PermissionList from './PermissionList';
 
 type Props = {
-   form: UseFormMethods<ConferenceDataForm>;
+   form: UseFormReturn<ConferenceDataForm>;
 };
 
 type PermissionTypeButton = {
@@ -40,10 +40,10 @@ export default function TabPermissions({ form: { control } }: Props) {
          <Controller
             control={control}
             name="permissions"
-            render={({ value, onChange }) => (
+            render={({ field: { value, onChange } }) => (
                <PermissionList
-                  inherited={permissionType === 'conference' ? {} : value['conference']}
-                  value={value[permissionType]}
+                  inherited={permissionType === 'conference' ? {} : value['conference']!}
+                  value={value[permissionType]!}
                   onChange={(newValue) => onChange({ ...value, [permissionType]: newValue })}
                />
             )}

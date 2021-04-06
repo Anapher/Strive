@@ -5,10 +5,11 @@ export type CreateConferenceResponse = {
 };
 
 export type ChatOptions = {
-   maxChatMessageHistory: number;
    cancelParticipantIsTypingAfter: number;
-   cancelParticipantIsTypingInterval: number;
    showTyping: boolean;
+   isRoomChatEnabled: boolean;
+   isGlobalChatEnabled: boolean;
+   isPrivateChatEnabled: boolean;
 };
 
 export type PermissionType = 'conference' | 'moderator' | 'breakoutRoom';

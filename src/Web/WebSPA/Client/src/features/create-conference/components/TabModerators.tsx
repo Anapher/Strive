@@ -11,35 +11,45 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import PersonIcon from '@material-ui/icons/Person';
 import { Skeleton } from '@material-ui/lab';
 import React, { useEffect } from 'react';
-import { UseFormMethods } from 'react-hook-form';
+import { Controller, ControllerRenderProps, UseFormReturn } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from 'src/store';
 import { ConferenceDataForm } from '../form';
 import { loadUserInfo } from '../reducer';
 
 type Props = {
-   form: UseFormMethods<ConferenceDataForm>;
+   form: UseFormReturn<ConferenceDataForm>;
 };
 
-export default function TabModerators({ form: { watch, setValue } }: Props) {
-   const moderators: string[] = watch('configuration.moderators');
+export default function TabModerators({ form: { control } }: Props) {
+   return (
+      <Controller
+         control={control}
+         name="configuration.moderators"
+         render={({ field }) => <ModeratorList field={field} />}
+      />
+   );
+}
+
+type ModeratorListProps = {
+   field: ControllerRenderProps<ConferenceDataForm, 'configuration.moderators'>;
+};
+
+function ModeratorList({ field: { value, onChange } }: ModeratorListProps) {
    const userInfos = useSelector((state: RootState) => state.createConference.userInfo);
    const dispatch = useDispatch();
 
    useEffect(() => {
-      dispatch(loadUserInfo(moderators));
-   }, [JSON.stringify(moderators)]);
+      dispatch(loadUserInfo(value));
+   }, [JSON.stringify(value)]);
 
    const handeDeleteUser = (id: string) => {
-      setValue(
-         'configuration.moderators',
-         moderators.filter((x) => x !== id),
-      );
+      onChange(value.filter((x) => x !== id));
    };
 
    return (
       <List>
-         {moderators.map((id) => {
+         {value.map((id) => {
             const info = userInfos.find((x) => x.id === id);
             if (!info)
                return (

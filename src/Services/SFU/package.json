@@ -70,7 +70,7 @@
     "express-jwt": "^6.0.0",
     "lightship": "^6.6.1",
     "lodash": "^4.17.20",
-    "mediasoup": "3.6.37",
+    "mediasoup": "3.7.1",
     "object.fromentries": "^2.0.4"
   }
 }

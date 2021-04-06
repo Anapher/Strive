@@ -16,6 +16,7 @@ import { useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 import * as coreHub from 'src/core-hub';
 import { selectParticipants } from 'src/features/conference/selectors';
+import { wrapForInputRef } from 'src/utils/reat-hook-form-utils';
 import { selectRoomViewModels } from '../selectors';
 
 const NATO_ALPHA = [
@@ -74,7 +75,7 @@ export default function BreakoutRoomDialog({ open, onClose }: Props) {
    const hasBreakoutRooms = rooms.length > 1;
    const openedBreakoutRoomsLen = Math.max(rooms.length - 1, 0);
 
-   const { register, errors, formState, handleSubmit } = useForm<CreateBreakoutRoomsForm>({
+   const { register, formState, handleSubmit } = useForm<CreateBreakoutRoomsForm>({
       defaultValues: {
          amount: hasBreakoutRooms
             ? openedBreakoutRoomsLen
@@ -140,23 +141,24 @@ export default function BreakoutRoomDialog({ open, onClose }: Props) {
                <Box display="flex" flexDirection="row" alignItems="center" mt={4}>
                   <Typography style={{ marginRight: 16 }}>Amount:</Typography>
                   <Input
-                     inputRef={register({
-                        min: { value: 1, message: 'Must at least create one breakout room.' },
-                        required: true,
-                        validate: validateNumberInteger,
-                     })}
+                     {...wrapForInputRef(
+                        register('amount', {
+                           min: { value: 1, message: 'Must at least create one breakout room.' },
+                           required: true,
+                           validate: validateNumberInteger,
+                        }),
+                     )}
                      autoFocus
                      inputProps={{ min: 1, step: 1 }}
                      margin="dense"
-                     name="amount"
                      type="number"
-                     error={!!errors.amount}
+                     error={!!formState.errors.amount}
                      style={{ maxWidth: 80 }}
                      fullWidth
                   />
-                  <Fade in={!!errors.amount} style={{ marginLeft: 16 }}>
+                  <Fade in={!!formState.errors.amount} style={{ marginLeft: 16 }}>
                      <Typography color="error" variant="caption">
-                        {errors.amount?.message}
+                        {formState.errors.amount?.message}
                      </Typography>
                   </Fade>
                </Box>

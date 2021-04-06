@@ -38,8 +38,6 @@ export default function CreateBreakoutRoomsDialog({ onClose }: Props) {
    const { formState, handleSubmit } = form;
 
    const handleApplyForm = (dto: OpenBreakoutRoomsDto) => {
-      console.log('test');
-
       const action = coreHub.openBreakoutRooms({
          ...dto,
          amount: Number(dto.amount),

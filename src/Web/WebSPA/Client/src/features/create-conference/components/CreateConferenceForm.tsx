@@ -20,6 +20,7 @@ import TabCommon from './TabCommon';
 import TabModerators from './TabModerators';
 import TabPermissions from './TabPermissions';
 import AddIcon from '@material-ui/icons/Add';
+import { wrapForInputRef } from 'src/utils/reat-hook-form-utils';
 
 const useStyles = makeStyles((theme) => ({
    header: {
@@ -46,8 +47,7 @@ type Props = {
 export default function CreateConferenceForm({ defaultValues, onSubmit, isSubmitting, onClose }: Props) {
    const form = useForm<ConferenceDataForm>({
       mode: 'onChange',
-      shouldUnregister: false,
-      defaultValues: defaultValues,
+      defaultValues,
    });
 
    const [currentTab, setCurrentTab] = useState('1');
@@ -77,7 +77,12 @@ export default function CreateConferenceForm({ defaultValues, onSubmit, isSubmit
       <form onSubmit={handleSubmit(onSubmit)}>
          <Box display="flex" flexDirection="column">
             <Box mb={2} px={3}>
-               <TextField fullWidth label="Name" name="name" inputRef={register} placeholder="Unnamed conference" />
+               <TextField
+                  fullWidth
+                  label="Name"
+                  {...wrapForInputRef(register('configuration.name'))}
+                  placeholder="Unnamed conference"
+               />
             </Box>
             <TabContext value={currentTab}>
                <Paper square className={classes.header}>

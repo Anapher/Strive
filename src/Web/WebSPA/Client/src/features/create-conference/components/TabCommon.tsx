@@ -13,9 +13,10 @@ import {
 import cronstrue from 'cronstrue';
 import { DateTime } from 'luxon';
 import React, { useEffect, useState } from 'react';
-import { Controller, UseFormMethods } from 'react-hook-form';
+import { Controller, UseFormReturn } from 'react-hook-form';
 import ScheduleIcon from '@material-ui/icons/Schedule';
 import { ConferenceDataForm } from '../form';
+import { wrapForInputRef } from 'src/utils/reat-hook-form-utils';
 
 const checkBoxWidth = 150;
 
@@ -29,25 +30,36 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 type Props = {
-   form: UseFormMethods<ConferenceDataForm>;
+   form: UseFormReturn<ConferenceDataForm>;
 };
 
-export default function TabCommon({ form: { control, watch, register, errors, getValues } }: Props) {
+export default function TabCommon({
+   form: {
+      control,
+      watch,
+      register,
+      formState: { errors },
+      getValues,
+   },
+}: Props) {
    const classes = useStyles();
    const startTime: boolean = watch('additionalFormData.enableStartTime');
    const scheduleCron: boolean = watch('additionalFormData.enableSchedule');
 
    const [cronDesc, setCronDesc] = useState<string | undefined>();
 
-   const validateSchedulerCron = (s: string) => {
+   const validateSchedulerCron = (s: string | undefined | null) => {
       if (!scheduleCron) return true;
+      if (!s) {
+         return 'Cannot be empty.';
+      }
 
       try {
          const desc = cronstrue.toString(s);
          setCronDesc(desc);
          return true;
       } catch (error) {
-         return error.toString();
+         return error.toString() as string;
       }
    };
 
@@ -63,7 +75,7 @@ export default function TabCommon({ form: { control, watch, register, errors, ge
                   className={classes.checkBoxLabel}
                   control={
                      <Controller
-                        render={({ onChange, value }) => (
+                        render={({ field: { onChange, value } }) => (
                            <Checkbox onChange={(e) => onChange(e.target.checked)} checked={value} />
                         )}
                         control={control}
@@ -73,11 +85,10 @@ export default function TabCommon({ form: { control, watch, register, errors, ge
                   label="Start"
                />
                <input
-                  ref={register}
+                  {...register('configuration.startTime')}
                   disabled={!startTime}
                   type="datetime-local"
                   id="meeting-time"
-                  name="configuration.startTime"
                   min={DateTime.local().toFormat("yyyy-MM-dd'T'HH:mm")}
                />
             </Box>
@@ -89,7 +100,7 @@ export default function TabCommon({ form: { control, watch, register, errors, ge
                      className={classes.checkBoxLabel}
                      control={
                         <Controller
-                           render={({ onChange, value }) => (
+                           render={({ field: { onChange, value } }) => (
                               <Checkbox onChange={(e) => onChange(e.target.checked)} checked={value} />
                            )}
                            control={control}
@@ -102,9 +113,12 @@ export default function TabCommon({ form: { control, watch, register, errors, ge
                      style={{ flex: 1 }}
                      disabled={!scheduleCron}
                      placeholder="Cron"
-                     name="configuration.scheduleCron"
                      error={!!errors.configuration?.scheduleCron}
-                     inputRef={register({ validate: validateSchedulerCron })}
+                     {...wrapForInputRef(
+                        register('configuration.scheduleCron', {
+                           validate: validateSchedulerCron,
+                        }),
+                     )}
                      InputProps={{
                         endAdornment: (
                            <InputAdornment position="end">
@@ -141,7 +155,7 @@ export default function TabCommon({ form: { control, watch, register, errors, ge
                   <FormControlLabel
                      control={
                         <Controller
-                           render={({ onChange, value }) => (
+                           render={({ field: { onChange, value } }) => (
                               <Checkbox onChange={(e) => onChange(e.target.checked)} checked={value} />
                            )}
                            control={control}
