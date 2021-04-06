@@ -34,7 +34,7 @@
       "eslint-plugin-react": "7.23.1",
       "fast-json-patch": "^3.0.0-1",
       "fontsource-roboto": "4.0.0",
-      "framer-motion": "4.1.2",
+      "framer-motion": "4.0.1",
       "hark": "^1.2.3",
       "history": "^5.0.0",
       "lodash": "^4.17.15",
