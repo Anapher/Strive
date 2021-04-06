@@ -39,7 +39,7 @@ function translateScene(scene: Scene, availableScenes: Scene[], currentScene: Vi
    return scene;
 }
 
-const sceneOrder: Scene['type'][] = ['screenShare', 'breakoutRoom', 'grid'];
+const sceneOrder: Scene['type'][] = ['screenShare', 'grid'];
 
 function getPrefferedScene(availableScenes: Scene[]): ViewableScene {
    return _.orderBy(availableScenes, (x) =>
