@@ -97,7 +97,7 @@ export default function ConferenceAppBar({ chatWidth }: Props) {
       <AppBar position="static">
          <Toolbar variant="dense" className={classes.toolbar}>
             <Box flex={1}>
-               <Typography variant="h6">PaderConference</Typography>
+               <Typography variant="h6">Strive</Typography>
             </Box>
             <Box>
                {breakoutRoomState && (

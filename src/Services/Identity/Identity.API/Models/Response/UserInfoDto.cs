@@ -1,4 +1,4 @@
-﻿namespace Identity.API.Models.Response
+namespace Identity.API.Models.Response
 {
     public class UserInfoDto
     {

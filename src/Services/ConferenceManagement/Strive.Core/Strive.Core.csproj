@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>net5.0</TargetFramework>
+		<NoWarn>1701;1702;1998</NoWarn>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="autofac" Version="6.1.0" />
+		<PackageReference Include="FluentValidation" Version="9.5.1" />
+		<PackageReference Include="Hashids.net" Version="1.3.0" />
+		<PackageReference Include="MediatR" Version="9.0.0" />
+		<PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+		<PackageReference Include="Nito.AsyncEx.Coordination" Version="5.1.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
+		<PackageReference Include="automapper" Version="10.1.1" />
+		<PackageReference Include="Microsoft.Extensions.Options" Version="5.0.0" />
+		<PackageReference Include="Cronos" Version="0.7.0" />
+		<PackageReference Include="Polly" Version="7.2.1" />
+		<PackageReference Include="SpeciVacation" Version="1.0.2" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\..\Libs\JsonPatchGenerator\JsonPatchGenerator.csproj" />
+	</ItemGroup>
+
+	<Import Project="../language.props" />
+</Project>

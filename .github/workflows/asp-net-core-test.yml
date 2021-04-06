@@ -31,7 +31,7 @@ jobs:
         with:
           dotnet-version: 5.0.x
       - name: Install dependencies
-        run: dotnet restore PaderConference.Temp.Tests.sln
+        run: dotnet restore Strive.Temp.Tests.sln
       - name: Test
-        run: dotnet test PaderConference.Temp.Tests.sln --no-restore --verbosity normal --collect:"XPlat Code Coverage"
+        run: dotnet test Strive.Temp.Tests.sln --no-restore --verbosity normal --collect:"XPlat Code Coverage"
       - uses: codecov/codecov-action@v1

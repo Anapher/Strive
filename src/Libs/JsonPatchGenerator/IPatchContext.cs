@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.JsonPatch;
 using Newtonsoft.Json.Linq;
 
 namespace JsonPatchGenerator

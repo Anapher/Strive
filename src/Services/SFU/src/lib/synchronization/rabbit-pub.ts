@@ -47,7 +47,7 @@ export default class RabbitPub implements ConferenceMessenger {
 
    updateStreams(streams: ConferenceParticipantStreamInfo, conferenceId: string): Promise<void> {
       const message = RabbitPub.buildMassTransitMessage(
-         ['urn:message:PaderConference.Messaging.SFU.ReceiveContracts:StreamsUpdated'],
+         ['urn:message:Strive.Messaging.SFU.ReceiveContracts:StreamsUpdated'],
          { conferenceId, streams },
       );
 
@@ -67,7 +67,7 @@ export default class RabbitPub implements ConferenceMessenger {
 
    private async notifyConnection(payload: SendMessageToConnection): Promise<void> {
       const message = RabbitPub.buildMassTransitMessage(
-         ['urn:message:PaderConference.Messaging.SFU.ReceiveContracts:SendMessageToConnection'],
+         ['urn:message:Strive.Messaging.SFU.ReceiveContracts:SendMessageToConnection'],
          payload,
       );
 

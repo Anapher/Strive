@@ -5,7 +5,7 @@ import { showMessage } from 'src/store/notifier/actions';
 import { takeEverySynchronizedObjectChange } from 'src/store/saga-utils';
 import { EQUIPMENT, SynchronizedEquipment } from 'src/store/signal/synchronization/synchronized-object-ids';
 import { ProducerDevices } from 'src/store/webrtc/types';
-import { PaderConferenceSettings, setCurrentDevice } from './reducer';
+import { StriveSettings, setCurrentDevice } from './reducer';
 import { fetchDevices } from './thunks';
 import { InputDeviceDto } from './types';
 
@@ -13,7 +13,7 @@ import { InputDeviceDto } from './types';
  * Executed when local devices changed. Check if the selected devices are still available
  */
 function* updateLocalDevices({ payload }: PayloadAction<InputDeviceDto[]>) {
-   const deviceSettings: PaderConferenceSettings = yield select((state: RootState) => state.settings.obj);
+   const deviceSettings: StriveSettings = yield select((state: RootState) => state.settings.obj);
 
    for (const producerDevice of ProducerDevices) {
       const device = deviceSettings[producerDevice].device;
@@ -39,7 +39,7 @@ function* updateLocalDevices({ payload }: PayloadAction<InputDeviceDto[]>) {
  */
 function* updateEquipment() {
    const equipment: SynchronizedEquipment | null = yield select((state: RootState) => state.media.equipment);
-   const deviceSettings: PaderConferenceSettings = yield select((state: RootState) => state.settings.obj);
+   const deviceSettings: StriveSettings = yield select((state: RootState) => state.settings.obj);
 
    for (const producerDevice of ProducerDevices) {
       const device = deviceSettings[producerDevice].device;

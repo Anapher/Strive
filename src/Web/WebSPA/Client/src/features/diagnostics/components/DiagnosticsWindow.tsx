@@ -21,7 +21,7 @@ export default function DiagnosticsWindow() {
          {open && (
             <NewWindow
                center="screen"
-               title={`Diagnostics of PaderConference (${oidcUser.profile.given_name})`}
+               title={`Diagnostics of Strive (${oidcUser.profile.given_name})`}
                onUnload={handleUnload}
                features={{ width: 1000, height: 500 }}
             >

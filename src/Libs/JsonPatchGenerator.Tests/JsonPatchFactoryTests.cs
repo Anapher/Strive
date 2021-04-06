@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using JsonPatchGenerator.Tests._Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;

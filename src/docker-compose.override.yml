@@ -15,7 +15,7 @@ services:
     ports:
       - "5105:80"
 
-  paderconference:
+  strive:
     environment:
       - ASPNETCORE_ENVIRONMENT=${APP_ENVIRONMENT}
       - Authentication__Authority=http://identity-api
@@ -23,8 +23,8 @@ services:
       - RabbitMq__UseInMemory=false
       - RabbitMq__RabbitMq__Host=amqp://rabbitmq
       - MongoDb__ConnectionString=mongodb://nosqldata
-      - SFU__TokenSecret=${PADERCONFERENCE_TOKEN_SECRET}
-      - SFU__ApiKey=${PADERCONFERENCE_API_KEY}
+      - SFU__TokenSecret=${STRIVE_TOKEN_SECRET}
+      - SFU__ApiKey=${STRIVE_API_KEY}
     ports:
       - "5101:80"
 
@@ -35,9 +35,9 @@ services:
   sfu:
     environment:
       - SERVER_ENVIRONMENT=${APP_ENVIRONMENT}
-      - API_CONFERENCE_MANAGEMENT=http://paderconference/v1/sfu/{conferenceId}?apiKey=${PADERCONFERENCE_API_KEY}
+      - API_CONFERENCE_MANAGEMENT=http://strive/v1/sfu/{conferenceId}?apiKey=${STRIVE_API_KEY}
       - AMQP_CONNECTION_STRING=amqp://rabbitmq
-      - API_TOKEN_SECRET=${PADERCONFERENCE_TOKEN_SECRET}
+      - API_TOKEN_SECRET=${STRIVE_TOKEN_SECRET}
       - MEDIASOUP_ANNOUNCED_IP=${DNS_NAME_OR_IP} # this will not work with firefox if it's localhost. to make it work for firefox, use your local ipv4 here
     ports:
       - "5102:3000"

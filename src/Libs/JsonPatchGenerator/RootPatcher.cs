@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.AspNetCore.JsonPatch;
 using Newtonsoft.Json.Linq;
 

@@ -17,11 +17,11 @@ services:
     depends_on:
       - rabbitmq
 
-  paderconference:
-    image: ${DOCKER_REGISTRY-}paderconference
+  strive:
+    image: ${DOCKER_REGISTRY-}strive
     build:
       context: .
-      dockerfile: Services/ConferenceManagement/PaderConference/Dockerfile
+      dockerfile: Services/ConferenceManagement/Strive/Dockerfile
     depends_on:
       - nosqldata
       - rabbitmq
@@ -33,4 +33,4 @@ services:
     depends_on:
       - identity-api
       - sfu
-      - paderconference
+      - strive

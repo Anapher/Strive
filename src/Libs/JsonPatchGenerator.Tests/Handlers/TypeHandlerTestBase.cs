@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.JsonPatch;
 using Moq;
 using Newtonsoft.Json.Linq;

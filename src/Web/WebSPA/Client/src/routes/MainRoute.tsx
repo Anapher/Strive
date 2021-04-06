@@ -94,7 +94,7 @@ export default function MainRoute() {
          <div className={classes.container}>
             <div className={classes.contentContainer}>
                <Typography variant="h2" className={classes.title} align="center">
-                  Welcome to PaderConference
+                  Welcome to Strive
                </Typography>
                <div className={classes.buttonContainer}>
                   <ConferenceControls />

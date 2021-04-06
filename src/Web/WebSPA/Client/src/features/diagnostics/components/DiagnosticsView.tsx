@@ -43,7 +43,7 @@ export default function DiagnosticsView() {
    return (
       <div>
          <Box pt={3} pl={3} pr={3}>
-            <Typography variant="h6">Diagnostics of PaderConference</Typography>
+            <Typography variant="h6">Diagnostics of Strive</Typography>
          </Box>
          <Table>
             <TableHead>

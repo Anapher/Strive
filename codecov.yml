@@ -1,3 +1,3 @@
 ignore:
-  - "src/Services/ConferenceManagement/PaderConference.Tests.Utils"
-  - "src/Services/ConferenceManagement/PaderConference.Infrastructure.Tests"
+  - "src/Services/ConferenceManagement/Strive.Tests.Utils"
+  - "src/Services/ConferenceManagement/Strive.Infrastructure.Tests"

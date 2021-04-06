@@ -1,6 +1,6 @@
 import debug, { Debugger } from 'debug';
 
-const APP_NAME = 'paderconference-mediasoup';
+const APP_NAME = 'strive-mediasoup';
 
 export default class Logger {
    constructor(prefix?: string) {

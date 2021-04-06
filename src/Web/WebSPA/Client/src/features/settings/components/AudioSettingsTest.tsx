@@ -176,7 +176,7 @@ export default function AudioSettingsTest() {
                   </Button>
                   <Box ml={2}>
                      <Typography variant="caption">Something to say:</Typography>
-                     <Typography variant="subtitle2">{`"PaderConference is much better than other video conference services"`}</Typography>
+                     <Typography variant="subtitle2">{`"Strive is much better than other video conference services"`}</Typography>
                   </Box>
                </Box>
             </Box>

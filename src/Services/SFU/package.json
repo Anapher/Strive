@@ -1,5 +1,5 @@
 {
-  "name": "paderconference-sfu",
+  "name": "strive-sfu",
   "version": "1.0.0",
   "main": "index.ts",
   "author": "Vincent",
@@ -7,7 +7,7 @@
   "type": "commonjs",
   "scripts": {
     "debug": "ts-node-dev --inspect --respawn --transpileOnly src/index.ts",
-    "dev": "@powershell -Command $env:DEBUG='paderconference-mediasoup**'; tsnd --respawn --files -r @babel/register --inspect -- src/index.ts",
+    "dev": "@powershell -Command $env:DEBUG='strive-mediasoup**'; tsnd --respawn --files -r @babel/register --inspect -- src/index.ts",
     "build": "tsc",
     "typecheck": "tsc",
     "start": "node dist/index.js",

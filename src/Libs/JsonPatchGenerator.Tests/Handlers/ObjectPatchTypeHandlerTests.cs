@@ -1,4 +1,4 @@
-﻿using JsonPatchGenerator.Handlers;
+using JsonPatchGenerator.Handlers;
 using Newtonsoft.Json.Linq;
 using Xunit;
 

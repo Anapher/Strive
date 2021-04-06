@@ -5,7 +5,7 @@ import { ProducerDevice } from 'src/store/webrtc/types';
 import { fetchDevices } from './thunks';
 import { AnyInputDevice, InputDeviceDto } from './types';
 
-export type PaderConferenceSettings = {
+export type StriveSettings = {
    mic: {
       device?: AnyInputDevice;
       audioGain: number;
@@ -20,7 +20,7 @@ export type PaderConferenceSettings = {
 
 type SettingsState = {
    open: boolean;
-   obj: PaderConferenceSettings;
+   obj: StriveSettings;
    equipmentToken: string | null;
    equipmentTokenError: DomainError | null;
    availableDevices: InputDeviceDto[] | null;

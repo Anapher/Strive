@@ -1,4 +1,4 @@
-﻿namespace WebSPA
+namespace WebSPA
 {
     public class AppSettings
     {
