@@ -70,6 +70,10 @@ export class SynchronizedConference extends EventEmitter {
             const eventMessage: ProducerChangedEvent = { type: 'producerChanged', dto: message.payload };
             this.emit('message', eventMessage);
             break;
+         case 'ParticipantLeft':
+            const participantLeft: ParticipantLeftEvent = { type: 'participantLeft', participantId: message.payload };
+            this.emit('message', participantLeft);
+            break;
          default:
             break;
       }
@@ -125,4 +129,9 @@ export type ProducerChangedEvent = {
    dto: ChangeParticipantProducerDto;
 };
 
-export type SyncConferenceEventMessage = ConferenceInfoUpdatedEvent | ProducerChangedEvent;
+export type ParticipantLeftEvent = {
+   type: 'participantLeft';
+   participantId: string;
+};
+
+export type SyncConferenceEventMessage = ConferenceInfoUpdatedEvent | ProducerChangedEvent | ParticipantLeftEvent;

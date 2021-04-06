@@ -1,4 +1,4 @@
-import { Consumer, Producer, Router } from 'mediasoup/lib/types';
+import { Consumer, ConsumerLayers, Producer, Router } from 'mediasoup/lib/types';
 import Logger from '../../utils/logger';
 import { ConferenceMessenger } from '../conference/conference-messenger';
 import Connection from '../connection';
@@ -166,11 +166,12 @@ export class MediasoupMixer {
          this.signal.notifyConsumerScore(connection.connectionId, { consumerId: consumer.id, score });
       });
 
-      consumer.on('layerschange', (layers) => {
+      consumer.on('layerschange', (layers: ConsumerLayers | undefined) => {
+         if (!layers) return;
+
          this.signal.notifyConsumerLayersChanged(connection.connectionId, {
             consumerId: consumer.id,
-            spatialLayer: layers ? layers.spatialLayer : null,
-            temporalLayer: layers ? layers.temporalLayer : null,
+            layers,
          });
       });
 

@@ -17,6 +17,7 @@ import {
    CreateTransportRequest,
    CreateTransportResponse,
    InitializeConnectionRequest,
+   SetPreferredLayersRequest,
    TransportProduceRequest,
    TransportProduceResponse,
 } from './request-types';
@@ -115,6 +116,8 @@ export class Conference {
    }
 
    public async removeParticipant(participantId: string): Promise<SuccessOrError> {
+      logger.info('removeParticipant() | participantId: %s', participantId);
+
       const participant = this.participants.get(participantId);
       if (!participant) return { success: false, error: errors.participantNotFound(participantId) };
 
@@ -199,6 +202,24 @@ export class Conference {
       return { success: true };
    }
 
+   public async setConsumerLayers(
+      { consumerId, layers }: SetPreferredLayersRequest,
+      connectionId: string,
+   ): Promise<SuccessOrError> {
+      const connection = this.connections.get(connectionId);
+      if (!connection) {
+         return { success: false, error: errors.connectionNotFound(connectionId) };
+      }
+
+      const consumer = connection.consumers.get(consumerId);
+      if (!consumer) {
+         return { success: false, error: errors.streamNotFound('consumer', consumerId) };
+      }
+
+      await consumer.setPreferredLayers(layers);
+      return { success: true };
+   }
+
    /**
     * Change a specific selected producer source of the participant. This may specifically be used by moderators to disable
     * the microphone on certain participants. They can not use changeStream directly as they don't know which connection a
@@ -261,7 +282,6 @@ export class Conference {
          ...producerOptions,
          kind,
          appData,
-         // keyFrameRequestDelay: 5000
       });
 
       if (participant.producers[source]) {

@@ -1,4 +1,4 @@
-namespace Strive.Messaging.SFU.Contracts
+namespace Strive.Messaging.SFU
 {
     public interface SfuMessage<out T>
     {

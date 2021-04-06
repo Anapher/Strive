@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using MassTransit;
 using Microsoft.Extensions.Options;
 using Strive.Config;
+using Strive.Core.Services;
 using Strive.Messaging.SFU.Dto;
 using Strive.Messaging.SFU.SendContracts;
 
@@ -12,6 +13,8 @@ namespace Strive.Messaging.SFU
         Task Update(string conferenceId, SfuConferenceInfoUpdate value);
 
         Task ChangeProducer(string conferenceId, ChangeParticipantProducerDto value);
+
+        Task ParticipantLeft(Participant participant);
     }
 
     public class SfuNotifier : ISfuNotifier
@@ -37,6 +40,13 @@ namespace Strive.Messaging.SFU
             await _publishEndpoint.Publish<ChangeParticipantProducer>(
                 new {ConferenceId = conferenceId, Type = "ChangeProducer", Payload = value},
                 context => SetupContext(context, conferenceId));
+        }
+
+        public async Task ParticipantLeft(Participant participant)
+        {
+            await _publishEndpoint.Publish<ParticipantLeft>(
+                new {participant.ConferenceId, Type = "ParticipantLeft", Payload = participant.Id},
+                context => SetupContext(context, participant.ConferenceId));
         }
 
         private void SetupContext(PublishContext context, string conferenceId)

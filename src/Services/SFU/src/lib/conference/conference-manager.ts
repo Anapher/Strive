@@ -67,6 +67,9 @@ export default class ConferenceManager {
             case 'producerChanged':
                await conference.changeProducerSource(message.dto, message.dto.participantId);
                break;
+            case 'participantLeft':
+               await conference.removeParticipant(message.participantId);
+               break;
             default:
                break;
          }

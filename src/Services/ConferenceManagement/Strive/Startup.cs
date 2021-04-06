@@ -24,6 +24,9 @@ using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
 using Newtonsoft.Json;
+using StackExchange.Redis.Extensions.Core.Abstractions;
+using StackExchange.Redis.Extensions.Core.Configuration;
+using StackExchange.Redis.Extensions.Newtonsoft;
 using Strive.Config;
 using Strive.Core;
 using Strive.Core.Domain.Entities;
@@ -44,9 +47,6 @@ using Strive.Messaging.Consumers;
 using Strive.Messaging.SFU.SendContracts;
 using Strive.Services;
 using Strive.Utilities;
-using StackExchange.Redis.Extensions.Core.Abstractions;
-using StackExchange.Redis.Extensions.Core.Configuration;
-using StackExchange.Redis.Extensions.Newtonsoft;
 using Swashbuckle.AspNetCore.Swagger;
 
 namespace Strive
@@ -197,6 +197,7 @@ namespace Strive
 
                         configurator.ConfigurePublishMessage<MediaStateChanged>(sfuOptions);
                         configurator.ConfigurePublishMessage<ChangeParticipantProducer>(sfuOptions);
+                        configurator.ConfigurePublishMessage<ParticipantLeft>(sfuOptions);
 
                         configurator.ReceiveEndpoint(sfuOptions.ReceiveQueue, e =>
                         {

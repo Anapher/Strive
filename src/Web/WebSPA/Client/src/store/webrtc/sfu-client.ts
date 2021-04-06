@@ -10,6 +10,7 @@ import {
    TransportProduceRequest,
    TransportProduceResponse,
    ChangeStreamRequest,
+   SetPreferredLayersRequest,
 } from './types';
 
 export default class SfuClient {
@@ -42,6 +43,11 @@ export default class SfuClient {
 
    public async changeStream(request: ChangeStreamRequest): Promise<SuccessOrError> {
       const response = await axios.post('/change-stream', request, this.getConfig());
+      return SfuClient.wrapResponse(response);
+   }
+
+   public async setConsumerLayers(request: SetPreferredLayersRequest): Promise<SuccessOrError> {
+      const response = await axios.post('/set-preffered-layers', request, this.getConfig());
       return SfuClient.wrapResponse(response);
    }
 

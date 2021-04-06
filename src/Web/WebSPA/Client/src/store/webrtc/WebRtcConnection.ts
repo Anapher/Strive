@@ -5,7 +5,7 @@ import { Device } from 'mediasoup-client';
 import { Consumer, MediaKind, RtpParameters, Transport } from 'mediasoup-client/lib/types';
 import { HubSubscription, subscribeEvent, unsubscribeAll } from 'src/utils/signalr-utils';
 import SfuClient from './sfu-client';
-import { ChangeStreamRequest, ProducerSource } from './types';
+import { ChangeStreamRequest, ConsumerLayers, ConsumerScore, ProducerSource, SetPreferredLayersRequest } from './types';
 
 const PC_PROPRIETARY_CONSTRAINTS = {
    optional: [{ googDscp: true }],
@@ -30,7 +30,11 @@ type ConsumerInfoPayload = {
 
 type ConsumerScorePayload = ConsumerInfoPayload & {
    consumerId: string;
-   score: number;
+   score: ConsumerScore;
+};
+
+type LayersChangedPayload = ConsumerInfoPayload & {
+   layers: ConsumerLayers;
 };
 
 export type ProducerChangedEventArgs = {
@@ -39,12 +43,18 @@ export type ProducerChangedEventArgs = {
    producerId: string;
 };
 
+export type ConsumerStatusInfo = {
+   score?: ConsumerScore;
+   currentLayers?: ConsumerLayers;
+   prefferredLayers?: ConsumerLayers;
+};
+
 export class WebRtcConnection {
    /** all current consumers */
    private consumers = new Map<string, Consumer>();
 
    /** the latest received score for all consumers */
-   private consumerScores = new Map<string, number>();
+   private consumerInfo = new Map<string, ConsumerStatusInfo>();
 
    /** SignalR methods that were subscribed. Must be memorized for unsubscription in close() */
    private signalrSubscription = new Array<HubSubscription>();
@@ -56,6 +66,7 @@ export class WebRtcConnection {
          subscribeEvent(connection, 'newConsumer', this.onNewConsumer.bind(this)),
          subscribeEvent(connection, 'consumerClosed', this.onConsumerClosed.bind(this)),
          subscribeEvent(connection, 'consumerScore', this.onConsumerScore.bind(this)),
+         subscribeEvent(connection, 'layersChanged', this.onLayersChanged.bind(this)),
 
          subscribeEvent(connection, 'consumerPaused', this.onConsumerPaused.bind(this)),
          subscribeEvent(connection, 'consumerResumed', this.onConsumerResumed.bind(this)),
@@ -79,6 +90,10 @@ export class WebRtcConnection {
 
    public getConsumers(): IterableIterator<Consumer> {
       return this.consumers.values();
+   }
+
+   public getConsumerInfo(consumerId: string): ConsumerStatusInfo | undefined {
+      return this.consumerInfo.get(consumerId);
    }
 
    public close(): void {
@@ -130,7 +145,7 @@ export class WebRtcConnection {
       if (consumer) {
          consumer.close();
          this.consumers.delete(consumerId);
-         this.consumerScores.delete(consumerId);
+         this.consumerInfo.delete(consumerId);
          this.eventEmitter.emit('onConsumerUpdated', { consumerId });
 
          log('[Consumer: %s] Removed', consumerId);
@@ -143,7 +158,7 @@ export class WebRtcConnection {
       const consumer = this.consumers.get(consumerId);
       if (consumer) {
          consumer.pause();
-         this.consumerScores.delete(consumerId);
+         this.consumerInfo.delete(consumerId);
          this.eventEmitter.emit('onConsumerUpdated', { consumerId });
 
          log('[Consumer: %s] Paused', consumerId);
@@ -169,10 +184,13 @@ export class WebRtcConnection {
    }
 
    private onConsumerScore({ consumerId, score }: ConsumerScorePayload) {
-      this.consumerScores.set(consumerId, score);
-      this.eventEmitter.emit('onConsumerScoreUpdated', { consumerId });
-
+      this.updateConsumerInfo(consumerId, { score });
       log('[Consumer: %s] Receive consumer score: %d', consumerId, score);
+   }
+
+   private onLayersChanged({ consumerId, layers }: LayersChangedPayload) {
+      this.updateConsumerInfo(consumerId, { currentLayers: layers });
+      log('[Consumer: %s] Receive consumer layers: %O', consumerId, layers);
    }
 
    public async createSendTransport(): Promise<Transport> {
@@ -280,5 +298,30 @@ export class WebRtcConnection {
          log('Change stream %O failure: %O', request, result.error);
          throw new Error(result.error.message);
       }
+   }
+
+   public async setConsumerLayers(request: SetPreferredLayersRequest): Promise<void> {
+      const currentInfo = this.consumerInfo.get(request.consumerId);
+      if (
+         currentInfo?.prefferredLayers?.spatialLayer === request.layers.spatialLayer &&
+         currentInfo?.prefferredLayers?.temporalLayer === request.layers.temporalLayer
+      )
+         return;
+
+      const result = await this.client.setConsumerLayers(request);
+      if (!result.success) {
+         log('Set prefferred layers %O failure: %O', request, result.error);
+         throw new Error(result.error.message);
+      }
+
+      this.updateConsumerInfo(request.consumerId, { prefferredLayers: request.layers });
+   }
+
+   private updateConsumerInfo(consumerId: string, update: Partial<ConsumerStatusInfo>) {
+      this.consumerInfo.set(consumerId, {
+         ...this.consumerInfo.get(consumerId),
+         ...update,
+      });
+      this.eventEmitter.emit('onConsumerStatusInfoUpdated', { consumerId });
    }
 }

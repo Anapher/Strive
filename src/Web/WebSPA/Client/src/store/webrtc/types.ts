@@ -8,6 +8,23 @@ export type ChangeStreamRequest = {
    action: 'pause' | 'resume' | 'close';
 };
 
+export type ConsumerLayers = {
+   /**
+    * The spatial layer index (from 0 to N).
+    */
+   spatialLayer: number;
+
+   /**
+    * The temporal layer index (from 0 to N).
+    */
+   temporalLayer?: number;
+};
+
+export type SetPreferredLayersRequest = {
+   consumerId: string;
+   layers: ConsumerLayers;
+};
+
 export type ChangeProducerSourceRequest = {
    participantId: string;
    source: ProducerSource;
@@ -86,4 +103,22 @@ export type TransportProduceRequest = {
 
 export type TransportProduceResponse = {
    id: string;
+};
+
+export type ConsumerScore = {
+   /**
+    * The score of the RTP stream of the consumer.
+    */
+   score: number;
+
+   /**
+    * The score of the currently selected RTP stream of the producer.
+    */
+   producerScore: number;
+
+   /**
+    * The scores of all RTP streams in the producer ordered by encoding (just
+    * useful when the producer uses simulcast).
+    */
+   producerScores: number[];
 };

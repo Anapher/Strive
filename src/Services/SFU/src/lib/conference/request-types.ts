@@ -1,4 +1,5 @@
 import {
+   ConsumerLayers,
    DtlsParameters,
    IceCandidate,
    IceParameters,
@@ -51,6 +52,11 @@ export type ChangeStreamRequest = {
    id: string;
    type: 'producer' | 'consumer';
    action: StreamAction;
+};
+
+export type SetPreferredLayersRequest = {
+   consumerId: string;
+   layers: ConsumerLayers;
 };
 
 export type ChangeProducerSourceRequest = {

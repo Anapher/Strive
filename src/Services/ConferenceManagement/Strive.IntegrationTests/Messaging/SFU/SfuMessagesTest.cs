@@ -5,6 +5,7 @@ using MassTransit;
 using MediatR;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.DependencyInjection;
+using Moq;
 using Newtonsoft.Json.Linq;
 using Strive.Core.Interfaces;
 using Strive.Core.Services.Permissions;
@@ -14,6 +15,7 @@ using Strive.Hubs.Core.Dtos;
 using Strive.IntegrationTests._Helpers;
 using Strive.IntegrationTests.Messaging.SFU._Helpers;
 using Strive.Messaging.SFU.Dto;
+using Strive.Messaging.SFU.SendContracts;
 using Strive.Tests.Utils;
 using Xunit;
 using Xunit.Abstractions;
@@ -46,10 +48,15 @@ namespace Strive.IntegrationTests.Messaging.SFU
             var state = await GetCurrentConferenceInfo(conferenceId);
             var endpoint = new SfuConferenceInfoEndpoint(state, conferenceId);
 
-            var busControl = Factory.Services.GetRequiredService<IBusControl>();
-            busControl.ConnectPublishObserver(endpoint);
+            ConnectPublishObserver(endpoint);
 
             return endpoint;
+        }
+
+        private void ConnectPublishObserver(IPublishObserver endpoint)
+        {
+            var busControl = Factory.Services.GetRequiredService<IBusControl>();
+            busControl.ConnectPublishObserver(endpoint);
         }
 
         [Fact]
@@ -183,6 +190,29 @@ namespace Strive.IntegrationTests.Messaging.SFU
                 Assert.Equal(2, endpoint.State.ParticipantToRoom.Count);
                 Assert.Equal(2, endpoint.State.ParticipantPermissions.Count);
                 Assert.Contains(endpoint.State.ParticipantPermissions, x => x.Key == pleb.Sub && x.Value.Screen);
+            });
+        }
+
+        [Fact]
+        public async Task DisconnectUser_AnyState_SendParticipantLeft()
+        {
+            // arrange
+            var conference = await CreateConference(Moderator);
+            var publishObserver = new Mock<IPublishObserver>();
+            ConnectPublishObserver(publishObserver.Object);
+
+            var connection = await ConnectUserToConference(Moderator, conference);
+
+            // act
+            await connection.Hub.DisposeAsync();
+
+            // assert
+            await AssertHelper.WaitForAssert(() =>
+            {
+                publishObserver.Verify(
+                    x => x.PostPublish(
+                        It.Is<PublishContext<ParticipantLeft>>(x => x.Message.Payload == connection.User.Sub)),
+                    Times.Once);
             });
         }
     }

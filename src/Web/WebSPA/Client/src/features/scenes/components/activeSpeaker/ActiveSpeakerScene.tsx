@@ -18,10 +18,11 @@ const useStyles = makeStyles({
 });
 
 const getListeningParticipantsWidth = (width: number) => {
-   if (width <= 400) return 80;
-   if (width <= 800) return 160;
+   if (width <= 400) return 100;
+   if (width <= 800) return 180;
+   if (width <= 1200) return 260;
 
-   return 200;
+   return 340;
 };
 
 export default function ActiveSpeakerScene({ className, dimensions, setAutoHideControls }: RenderSceneProps) {

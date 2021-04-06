@@ -138,4 +138,22 @@ export default function configureEndpoints(app: Express, conferenceManager: Conf
 
       res.status(200).end();
    });
+
+   app.post('/:conferenceId/set-preffered-layers', conferenceMatchMiddleware, async (req, res) => {
+      const { conferenceId, connectionId } = getJwtProps(req);
+
+      const conference = await conferenceManager.getConference(conferenceId);
+      if (!conference) {
+         res.status(404).json(errors.conferenceNotFound(conferenceId));
+         return;
+      }
+
+      const result = await conference.setConsumerLayers(req.body, connectionId);
+      if (!result.success) {
+         res.status(400).json(result.error);
+         return;
+      }
+
+      res.status(200).end();
+   });
 }

@@ -13,6 +13,8 @@ import MoreVertIcon from '@material-ui/icons/MoreVert';
 import ParticipantContextMenuPopper from 'src/features/conference/components/ParticipantContextMenuPopper';
 import useMyParticipantId from 'src/hooks/useMyParticipantId';
 import { Participant } from 'src/features/conference/types';
+import ConsumerDiagnosticInfo from './ConsumerDiagnosticInfo';
+import useWebRtc from 'src/store/webrtc/hooks/useWebRtc';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -78,6 +80,11 @@ const useStyles = makeStyles((theme) => ({
       right: theme.spacing(1),
       top: theme.spacing(1),
    },
+   consumerInfo: {
+      position: 'absolute',
+      right: 0,
+      bottom: 0,
+   },
 }));
 
 type Props = {
@@ -85,6 +92,14 @@ type Props = {
    participant: Participant;
    size: Size;
    disableLayoutAnimation?: boolean;
+};
+
+const getBestLayer = (width: number) => {
+   if (width <= 320) return 0;
+
+   if (width <= 800) return 1;
+
+   return 2;
 };
 
 export default function ParticipantTile({ className, participant, size, disableLayoutAnimation }: Props) {
@@ -98,17 +113,29 @@ export default function ParticipantTile({ className, participant, size, disableL
    const isMe = participant.id === myParticipantId;
 
    const audioInfo = useParticipantAudio(participant.id);
+   const connection = useWebRtc();
 
    useEffect(() => {
       if (consumer?.track) {
          const stream = new MediaStream();
          stream.addTrack(consumer.track);
 
+         console.log(consumer);
+
          if (videoRef.current) {
             videoRef.current.srcObject = stream;
          }
       }
    }, [consumer]);
+
+   useEffect(() => {
+      if (connection && consumer) {
+         connection.setConsumerLayers({
+            consumerId: consumer.id,
+            layers: { spatialLayer: getBestLayer(size.width) },
+         });
+      }
+   }, [size.width, connection, consumer]);
 
    const theme = useTheme();
    const audioBorder = useTransform(audioInfo?.audioLevel ?? new MotionValue(0), [0, 1], [0, 10]);
@@ -132,6 +159,12 @@ export default function ParticipantTile({ className, participant, size, disableL
          <motion.div className={clsx(classes.root, className)}>
             <video ref={videoRef} className={classes.video} hidden={!isWebcamActive} autoPlay />
             <motion.div style={{ borderWidth: audioBorder }} className={classes.volumeBorder} />
+
+            {consumer && (
+               <div className={classes.consumerInfo}>
+                  <ConsumerDiagnosticInfo consumer={consumer} tileSize={size} />
+               </div>
+            )}
 
             {isWebcamActive && (
                <motion.div className={classes.infoBox}>
