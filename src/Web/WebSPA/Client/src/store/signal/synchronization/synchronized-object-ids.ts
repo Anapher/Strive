@@ -12,6 +12,7 @@ export const BREAKOUT_ROOMS = 'breakoutRooms';
 export const MEDIA = 'media';
 export const EQUIPMENT = 'equipment';
 export const SCENE = 'scene';
+export const TEMPORARY_PERMISSIONS = 'temporaryPermissions';
 
 export type SynchronizedParticipants = {
    participants: { [participantId: string]: ParticipantData };

@@ -20,4 +20,4 @@ export const selectOtherParticipants = createSelector(
 );
 
 export const selectParticipantTempPermissions = (state: RootState, participantId: string) =>
-   state.conference.tempPermissions?.[participantId];
+   state.conference.temporaryPermissions?.assigned[participantId];

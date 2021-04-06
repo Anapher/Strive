@@ -7,6 +7,7 @@ using Strive.Core.Interfaces;
 using Strive.Core.Services.ConferenceControl.Gateways;
 using Strive.Core.Services.Permissions.Gateways;
 using Strive.Core.Services.Permissions.Requests;
+using Strive.Core.Services.Synchronization.Requests;
 
 namespace Strive.Core.Services.Permissions.UseCases
 {
@@ -35,10 +36,6 @@ namespace Strive.Core.Services.Permissions.UseCases
         {
             var (participant, permissionKey, value) = request;
 
-            _logger.LogDebug("Set temporary permission {permissionKey} of participant {participantId} to {value}",
-                permissionKey, participant,
-                value?.ToString()); // serilog serialized JValue as an empty enumerable... {$value} does sadly not work for some reason
-
             if (!_permissionValidator.TryGetDescriptor(permissionKey, out var descriptor))
                 return PermissionsError.PermissionKeyNotFound(permissionKey);
 
@@ -65,6 +62,9 @@ namespace Strive.Core.Services.Permissions.UseCases
             }
 
             await _mediator.Send(new UpdateParticipantsPermissionsRequest(participant.Yield()));
+            await _mediator.Send(new UpdateSynchronizedObjectRequest(participant.ConferenceId,
+                SynchronizedTemporaryPermissions.SyncObjId));
+
             return Unit.Value;
         }
     }

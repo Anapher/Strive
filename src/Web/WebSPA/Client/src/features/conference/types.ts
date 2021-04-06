@@ -19,4 +19,4 @@ export type ConferenceLink = {
    scheduled?: string;
 };
 
-export type TemporaryPermissions = { [participantId: string]: Permissions };
+export type TemporaryPermissions = { assigned: { [participantId: string]: Permissions } };

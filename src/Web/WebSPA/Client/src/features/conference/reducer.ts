@@ -11,6 +11,7 @@ import {
    SynchronizedConferenceInfo,
    SynchronizedParticipants,
    SynchronizedParticipantsPermissions,
+   TEMPORARY_PERMISSIONS,
 } from 'src/store/signal/synchronization/synchronized-object-ids';
 import { synchronizeObjectState } from 'src/store/signal/synchronized-object';
 import { serializeRequestError } from 'src/utils/error-result';
@@ -23,7 +24,7 @@ export type ConferenceState = {
    conferenceState: SynchronizedConferenceInfo | null;
    myPermissions: SynchronizedParticipantsPermissions | null;
    participantsOpen: boolean;
-   tempPermissions: TemporaryPermissions | null;
+   temporaryPermissions: TemporaryPermissions | null;
 
    conferenceLinks: ConferenceLink[] | null;
 
@@ -40,7 +41,7 @@ const initialState: ConferenceState = {
    participantsOpen: true,
    permissionDialogData: null,
    permissionDialogOpen: false,
-   tempPermissions: null,
+   temporaryPermissions: null,
    conferenceLinks: null,
 };
 
@@ -93,6 +94,7 @@ const conferenceSlice = createSlice({
          { type: 'exactId', syncObjId: PARTICIPANTS, propertyName: 'participants' },
          { type: 'exactId', syncObjId: CONFERENCE, propertyName: 'conferenceState' },
          { type: 'single', baseId: PARTICIPANT_PERMISSIONS, propertyName: 'myPermissions' },
+         { type: 'exactId', syncObjId: TEMPORARY_PERMISSIONS, propertyName: 'temporaryPermissions' },
       ]),
    },
 });

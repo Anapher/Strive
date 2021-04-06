@@ -60,6 +60,17 @@ namespace Strive.IntegrationTests.Services
 
             await testUserConnection.SyncObjects.AssertSyncObject<SynchronizedParticipantPermissions>(syncObjId,
                 value => Assert.Contains(value.Permissions, x => x.Key == permission.Key));
+
+            await testUserConnection.SyncObjects.AssertSyncObject<SynchronizedTemporaryPermissions>(
+                SynchronizedTemporaryPermissions.SyncObjId, permissions =>
+                {
+                    var mappingEntry = Assert.Single(permissions.Assigned);
+                    Assert.Equal(testUserConnection.User.Sub, mappingEntry.Key);
+                    var tempPermission = Assert.Single(mappingEntry.Value);
+
+                    Assert.Equal(permission.Key, tempPermission.Key);
+                    Assert.Equal(JToken.FromObject(true), tempPermission.Value);
+                });
         }
 
         [Fact]
@@ -87,6 +98,9 @@ namespace Strive.IntegrationTests.Services
             var syncObjId = SynchronizedParticipantPermissions.SyncObjId(testUser.Sub);
             await testUserConnection.SyncObjects.AssertSyncObject<SynchronizedParticipantPermissions>(syncObjId,
                 value => Assert.DoesNotContain(value.Permissions, x => x.Key == permission.Key));
+
+            await testUserConnection.SyncObjects.AssertSyncObject<SynchronizedTemporaryPermissions>(
+                SynchronizedTemporaryPermissions.SyncObjId, permissions => Assert.Empty(permissions.Assigned));
         }
 
         [Fact]
@@ -170,6 +184,33 @@ namespace Strive.IntegrationTests.Services
             // assert
             AssertSuccess(result);
             Assert.NotEmpty(result.Response!.Layers);
+        }
+
+        [Fact]
+        public async Task Leave_UserHadTemporaryPermissions_RemoveTemporaryPermissions()
+        {
+            var permission = DefinedPermissions.Permissions.CanGiveTemporaryPermission;
+
+            // arrange
+            var (connection, conference) = await ConnectToOpenedConference();
+
+            var testUser = CreateUser();
+            var testUserConnection = await ConnectUserToConference(testUser, conference);
+
+            // act
+            var result = await connection.Hub.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.SetTemporaryPermission),
+                new SetTemporaryPermissionDto(testUser.Sub, permission.Key, (JValue) JToken.FromObject(true)));
+
+            // assert
+            AssertSuccess(result);
+
+            await connection.SyncObjects.AssertSyncObject<SynchronizedTemporaryPermissions>(
+                SynchronizedTemporaryPermissions.SyncObjId, permissions => Assert.NotEmpty(permissions.Assigned));
+
+            await testUserConnection.Hub.DisposeAsync();
+
+            await connection.SyncObjects.AssertSyncObject<SynchronizedTemporaryPermissions>(
+                SynchronizedTemporaryPermissions.SyncObjId, permissions => Assert.Empty(permissions.Assigned));
         }
     }
 }
