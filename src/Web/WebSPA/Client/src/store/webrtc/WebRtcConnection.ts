@@ -185,7 +185,7 @@ export class WebRtcConnection {
 
    private onConsumerScore({ consumerId, score }: ConsumerScorePayload) {
       this.updateConsumerInfo(consumerId, { score });
-      log('[Consumer: %s] Receive consumer score: %d', consumerId, score);
+      log('[Consumer: %s] Receive consumer score: %O', consumerId, score);
    }
 
    private onLayersChanged({ consumerId, layers }: LayersChangedPayload) {

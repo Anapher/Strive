@@ -8,6 +8,7 @@ const useStyles = makeStyles({
    root: {
       backgroundColor: 'rgba(0,0,0,0.4)',
       fontSize: 11,
+      padding: 4,
    },
 });
 

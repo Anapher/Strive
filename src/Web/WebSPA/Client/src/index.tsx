@@ -5,6 +5,9 @@ import { Provider } from 'react-redux';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 import store from './store';
+import debug from 'debug';
+
+debug.log = console.info.bind(console);
 
 ReactDOM.render(
    <Provider store={store}>

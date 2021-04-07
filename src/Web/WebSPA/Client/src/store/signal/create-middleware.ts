@@ -6,11 +6,15 @@ import * as errors from 'src/errors';
 import { signalrError } from 'src/ui-errors';
 import * as actions from './actions';
 import appHubConn from './app-hub-connection';
+import debug from 'debug';
 
 type SignalRResult = {
    middleware: Middleware;
    getConnection: () => HubConnection | undefined;
 };
+
+const log = debug('signalr:middleware');
+const logLibrary = debug('signalr:library');
 
 export default (): SignalRResult => {
    let connection: HubConnection | undefined;
@@ -33,33 +37,48 @@ export default (): SignalRResult => {
             connection = new HubConnectionBuilder()
                .withUrl(url)
                .withAutomaticReconnect()
-               .configureLogging(LogLevel.Information)
+               .configureLogging({ log: (level, message) => logLibrary('[%s]: %s', LogLevel[level], message) })
                .build();
 
             connection.on(events.onConnectionError, (err) => {
+               log('onConnectionError() | %O', err);
+
                dispatch(actions.onConnectionError(err));
                dispatch(actions.close());
             });
 
             for (const eventName of defaultEvents) {
+               log('subscribe event %s', eventName);
                connection.on(eventName, (args) => dispatch(actions.onEventOccurred(eventName)(args)));
             }
 
             try {
+               log('connect to %s', url);
                await connection.start();
                connection.onclose((error) => {
+                  log('connection | onclose %O', error);
+
                   connection = undefined;
                   appHubConn.remove();
 
                   dispatch(actions.onConnectionClosed(appData, error));
                });
-               connection.onreconnected(() => dispatch(actions.onReconnected(appData)));
-               connection.onreconnecting((error) => dispatch(actions.onReconnecting(appData, error)));
+               connection.onreconnected(() => {
+                  log('connection | onreconnected');
+                  dispatch(actions.onReconnected(appData));
+               });
+               connection.onreconnecting((error) => {
+                  log('connection | onreconnecting');
+                  dispatch(actions.onReconnecting(appData, error));
+               });
 
                appHubConn.register(connection);
 
+               log('connected successfully');
                dispatch(actions.onConnected(appData));
             } catch (error) {
+               log('an error occurred on connecting %O', error);
+
                dispatch(actions.onConnectionError(errors.signalRConnectionUnavailable(error.toString())));
 
                await connection.stop();
@@ -69,12 +88,14 @@ export default (): SignalRResult => {
       },
       [actions.subscribeEvent.type]: ({ dispatch }, { payload: { name } }) => {
          if (connection) {
-            console.log('subscribe ' + name);
+            log('subscribe event %s', name);
             connection.on(name, (args) => dispatch(actions.onEventOccurred(name)(args)));
          }
       },
       [actions.close.type]: async () => {
          if (connection) {
+            log('request close connection');
+
             await connection.stop();
             connection = undefined;
             appHubConn.remove();
@@ -84,6 +105,7 @@ export default (): SignalRResult => {
 
    const invokeMethodHandler = ({ dispatch }: MiddlewareAPI, { payload: { payload, name } }: any) => {
       if (connection) {
+         log('Invoke method %s with payload %O', name, payload);
          connection.invoke(name, ...(payload !== undefined ? [payload] : [])).then(
             (returnVal) => {
                dispatch(actions.onInvokeReturn(name)(returnVal, payload));
@@ -105,7 +127,7 @@ export default (): SignalRResult => {
             if (handler) handler(store, action);
          }
       } catch (err) {
-         console.error(err);
+         log('Error on executing middleware function %O', err);
       }
 
       return next(action);

@@ -16,6 +16,9 @@ export type StriveSettings = {
    screen: {
       device?: AnyInputDevice;
    };
+   diagnostics: {
+      enableVideoOverlay: boolean;
+   };
 };
 
 type SettingsState = {
@@ -34,6 +37,9 @@ const initialState: SettingsState = {
       },
       webcam: {},
       screen: {},
+      diagnostics: {
+         enableVideoOverlay: false,
+      },
    },
    equipmentToken: null,
    equipmentTokenError: null,
@@ -59,6 +65,9 @@ const settingsSlice = createSlice({
       ) {
          state.obj[source].device = device;
       },
+      setEnableVideoOverlay(state, { payload }: PayloadAction<boolean>) {
+         state.obj.diagnostics.enableVideoOverlay = payload;
+      },
    },
    extraReducers: {
       [getEquipmentToken.returnAction]: (state, action: PayloadAction<SuccessOrError<string>>) => {
@@ -77,6 +86,12 @@ const settingsSlice = createSlice({
    },
 });
 
-export const { closeSettings, openSettings, setAudioGain, setCurrentDevice } = settingsSlice.actions;
+export const {
+   closeSettings,
+   openSettings,
+   setAudioGain,
+   setCurrentDevice,
+   setEnableVideoOverlay,
+} = settingsSlice.actions;
 
 export default settingsSlice.reducer;

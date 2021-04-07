@@ -15,6 +15,7 @@ import useMyParticipantId from 'src/hooks/useMyParticipantId';
 import { Participant } from 'src/features/conference/types';
 import ConsumerDiagnosticInfo from './ConsumerDiagnosticInfo';
 import useWebRtc from 'src/store/webrtc/hooks/useWebRtc';
+import { selectEnableVideoOverlay } from 'src/features/settings/selectors';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -120,8 +121,6 @@ export default function ParticipantTile({ className, participant, size, disableL
          const stream = new MediaStream();
          stream.addTrack(consumer.track);
 
-         console.log(consumer);
-
          if (videoRef.current) {
             videoRef.current.srcObject = stream;
          }
@@ -146,6 +145,8 @@ export default function ParticipantTile({ className, participant, size, disableL
    const [contextMenuOpen, setContextMenuOpen] = useState(false);
    const moreIconRef = useRef(null);
 
+   const showDiagnostics = useSelector(selectEnableVideoOverlay);
+
    const handleOpenContextMenu = () => {
       setContextMenuOpen(true);
    };
@@ -160,7 +161,7 @@ export default function ParticipantTile({ className, participant, size, disableL
             <video ref={videoRef} className={classes.video} hidden={!isWebcamActive} autoPlay />
             <motion.div style={{ borderWidth: audioBorder }} className={classes.volumeBorder} />
 
-            {consumer && (
+            {consumer && showDiagnostics && (
                <div className={classes.consumerInfo}>
                   <ConsumerDiagnosticInfo consumer={consumer} tileSize={size} />
                </div>

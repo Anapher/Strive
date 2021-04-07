@@ -1,6 +1,7 @@
 import { makeStyles, Tab, Tabs } from '@material-ui/core';
 import React from 'react';
 import AudioSettings from './AudioSettings';
+import DiagnosticsSettings from './DiagnosticsSettings';
 import EquipmentSettings from './EquipmentSettings';
 import WebcamSettings from './WebcamSettings';
 
@@ -72,6 +73,7 @@ export default function Settings() {
             <Tab label="Audio" {...a11yProps(1)} />
             <Tab label="Webcam" {...a11yProps(2)} />
             <Tab label="Equipment" {...a11yProps(3)} />
+            <Tab label="Diagnostics" {...a11yProps(4)} />
          </Tabs>
          <TabPanel value={value} index={0} className={classes.tab}>
             Item One
@@ -84,6 +86,9 @@ export default function Settings() {
          </TabPanel>
          <TabPanel value={value} index={3} className={classes.tab}>
             <EquipmentSettings />
+         </TabPanel>
+         <TabPanel value={value} index={4} className={classes.tab}>
+            <DiagnosticsSettings />
          </TabPanel>
       </div>
    );

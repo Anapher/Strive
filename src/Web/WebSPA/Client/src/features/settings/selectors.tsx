@@ -44,6 +44,8 @@ export const selectAvailableInputDevices = createSelector(
    },
 );
 
+export const selectEnableVideoOverlay = (state: RootState) => state.settings.obj.diagnostics.enableVideoOverlay;
+
 export type DeviceGroup = EquipmentDeviceGroup | LocalDeviceGroup;
 
 export type EquipmentDeviceGroup = {

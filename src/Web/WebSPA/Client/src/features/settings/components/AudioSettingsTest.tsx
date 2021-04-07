@@ -46,10 +46,10 @@ export default function AudioSettingsTest() {
       try {
          await micController.enable();
       } catch (error) {
-         if (error.toString().startsWith('NotAllowedError')) {
+         if (error && error.toString().startsWith('NotAllowedError')) {
             setError('Permission denied: Please allow the use of your microphone in your browser');
          } else {
-            setError(error.toString());
+            setError(error?.toString() ?? 'Unknown error');
          }
       }
    };
@@ -176,7 +176,7 @@ export default function AudioSettingsTest() {
                   </Button>
                   <Box ml={2}>
                      <Typography variant="caption">Something to say:</Typography>
-                     <Typography variant="subtitle2">{`"Strive is much better than other video conference services"`}</Typography>
+                     <Typography variant="subtitle2">{`"Strive is much better than other video conference systems"`}</Typography>
                   </Box>
                </Box>
             </Box>
