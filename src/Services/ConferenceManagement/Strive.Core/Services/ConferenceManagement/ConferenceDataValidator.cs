@@ -1,10 +1,10 @@
 using System;
 using FluentValidation;
-using Strive.Core.Dto.Services;
 using Strive.Core.Extensions;
 using Strive.Core.Services.Permissions;
+using Strive.Core.Utilities;
 
-namespace Strive.Core.Dto.Validation
+namespace Strive.Core.Services.ConferenceManagement
 {
     public class ConferenceDataValidator : AbstractValidator<ConferenceData>
     {

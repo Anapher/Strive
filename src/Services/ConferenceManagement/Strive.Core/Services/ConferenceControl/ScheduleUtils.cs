@@ -1,6 +1,6 @@
 using System;
 using Strive.Core.Domain;
-using Strive.Core.Extensions;
+using Strive.Core.Utilities;
 
 namespace Strive.Core.Services.ConferenceControl
 {

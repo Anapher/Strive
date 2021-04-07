@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.Threading.Tasks;
 using MediatR;
 using Strive.Core.Services.ConferenceControl.Gateways;
@@ -29,7 +30,8 @@ namespace Strive.Core.Services.ConferenceControl
 
             var nextDate = _scheduler.GetNextExecution(conference.Configuration);
             var isOpen = await _openConferenceRepository.IsOpen(conferenceId);
-            return new SynchronizedConferenceInfo(isOpen, conference.Configuration.Moderators, nextDate);
+            return new SynchronizedConferenceInfo(isOpen, conference.Configuration.Moderators.ToImmutableList(),
+                nextDate);
         }
     }
 }

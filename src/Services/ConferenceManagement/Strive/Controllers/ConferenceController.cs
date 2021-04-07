@@ -6,9 +6,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using Strive.Core.Dto.Services;
+using Strive.Core;
+using Strive.Core.Services.ConferenceManagement;
 using Strive.Core.Services.ConferenceManagement.Requests;
 using Strive.Core.Services.Permissions.Options;
+using Strive.Extensions;
 using Strive.Models.Response;
 
 namespace Strive.Controllers
@@ -18,10 +20,12 @@ namespace Strive.Controllers
     public class ConferenceController : Controller
     {
         private readonly IMediator _mediator;
+        private readonly ConcurrencyOptions _concurrencyOptions;
 
-        public ConferenceController(IMediator mediator)
+        public ConferenceController(IMediator mediator, IOptions<ConcurrencyOptions> concurrencyOptions)
         {
             _mediator = mediator;
+            _concurrencyOptions = concurrencyOptions.Value;
         }
 
         // POST v1/conference
@@ -42,8 +46,8 @@ namespace Strive.Controllers
         [Authorize(Roles = AppRoles.Moderator)]
         public async Task<ActionResult> Patch(string conferenceId, [FromBody] JsonPatchDocument<ConferenceData> patch)
         {
-            await _mediator.Send(new PatchConferenceRequest(conferenceId, patch));
-            return Ok();
+            var result = await _mediator.Send(new PatchConferenceRequest(conferenceId, patch));
+            return result.ToActionResult();
         }
 
         // GET v1/conference/default-data

@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Immutable;
+using System.Collections.Generic;
 using Strive.Core.Services.Chat;
 
 namespace Strive.Core.Domain.Entities
@@ -14,7 +14,7 @@ namespace Strive.Core.Domain.Entities
         /// <summary>
         ///     Participant ids of moderators
         /// </summary>
-        public IImmutableList<string> Moderators { get; set; } = ImmutableList<string>.Empty;
+        public IList<string> Moderators { get; set; } = new List<string>();
 
         /// <summary>
         ///     The starting time of this conference. If <see cref="ScheduleCron" /> is not null, this is the first time the

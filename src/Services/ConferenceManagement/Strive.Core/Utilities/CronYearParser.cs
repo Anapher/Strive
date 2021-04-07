@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using Cronos;
 
-namespace Strive.Core.Extensions
+namespace Strive.Core.Utilities
 {
     public static class CronYearParser
     {

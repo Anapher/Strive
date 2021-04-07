@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 using Strive.Core.Domain.Entities;
 
-namespace Strive.Core.Dto.Services
+namespace Strive.Core.Services.ConferenceManagement
 {
     /// <summary>
     ///     The object contains the mutable data the conference has and that may be changed by the user
