@@ -31,7 +31,7 @@ export type CurrentStreamInfo = {
 export default function useMedia(
    source: ProducerSource,
    getMediaTrack: (deviceId?: string) => Promise<MediaStreamTrack>,
-   options?: Partial<ProducerOptions>,
+   options?: Partial<ProducerOptions> | ((track: MediaStreamTrack) => Partial<ProducerOptions>),
 ): UseMediaState {
    const producerRef = useRef<Producer | null>(null);
    const [enabled, setEnabled] = useState(false);
@@ -67,7 +67,13 @@ export default function useMedia(
       }
 
       const track = await getMediaTrack(appliedDeviceId.current);
-      const producer = await connection.sendTransport.produce({ ...(options ?? {}), track, appData: { source } });
+      const producerOptions = typeof options === 'function' ? options(track) : options;
+
+      const producer = await connection.sendTransport.produce({
+         ...producerOptions,
+         track,
+         appData: { ...producerOptions?.appData, source },
+      });
       producerRef.current = producer;
 
       producer.on('transportclose', () => {

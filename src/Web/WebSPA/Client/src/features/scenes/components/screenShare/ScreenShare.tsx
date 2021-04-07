@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import RenderConsumerVideo from 'src/components/RenderConsumerVideo';
 import useConsumer from 'src/store/webrtc/hooks/useConsumer';
 import { Size } from 'src/types';
 import { RenderSceneProps, ScreenShareScene } from '../../types';
@@ -14,8 +15,6 @@ export default function ScreenShare({
    const { participantId } = scene as ScreenShareScene;
 
    const videoSize: Size = { width: 1920, height: 1080 };
-
-   const videoRef = useRef<HTMLVideoElement | null>(null);
    const consumer = useConsumer(participantId, 'screen');
 
    const [showParticipantOverlay, setShowParticipantOverlay] = useState(false);
@@ -23,16 +22,6 @@ export default function ScreenShare({
    useEffect(() => {
       setAutoHideControls(true);
    }, [setAutoHideControls]);
-
-   useEffect(() => {
-      if (consumer && videoRef.current) {
-         const stream = new MediaStream();
-         stream.addTrack(consumer.track);
-
-         videoRef.current.srcObject = stream;
-         videoRef.current.play();
-      }
-   }, [consumer, videoRef.current]);
 
    const handleCanShowParticipantsWithoutResize = (canShow: boolean) => {
       setShowParticipantOverlay(canShow);
@@ -47,7 +36,16 @@ export default function ScreenShare({
          dimensions={dimensions}
          contentRatio={videoSize}
          maxContentWidth={videoSize.width}
-         render={(size) => <video ref={videoRef} style={{ ...size }} />}
+         render={(size) => (
+            <div style={{ position: 'relative', ...size }}>
+               <RenderConsumerVideo
+                  consumer={consumer}
+                  height={size.height}
+                  width={size.width}
+                  diagnosticsLocation="top-right"
+               />
+            </div>
+         )}
       />
    );
 }

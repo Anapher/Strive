@@ -2,7 +2,6 @@ import { makeStyles } from '@material-ui/core';
 import { Consumer } from 'mediasoup-client/lib/Consumer';
 import React, { useEffect, useState } from 'react';
 import useConsumerStatusInfo from 'src/store/webrtc/hooks/useConsumerStatusInfo';
-import { Size } from 'src/types';
 
 const useStyles = makeStyles({
    root: {
@@ -14,10 +13,11 @@ const useStyles = makeStyles({
 
 type Props = {
    consumer: Consumer;
-   tileSize: Size;
+   tileWidth: number;
+   tileHeight: number;
 };
 
-export default function ConsumerDiagnosticInfo({ consumer, tileSize }: Props) {
+export default function ConsumerDiagnosticInfo({ consumer, tileWidth, tileHeight }: Props) {
    const classes = useStyles();
 
    const [videoWidth, setVideoWidth] = useState<number | undefined>();
@@ -58,7 +58,7 @@ export default function ConsumerDiagnosticInfo({ consumer, tileSize }: Props) {
          </span>
          <br />
          <span>
-            Tile Size: {Math.round(tileSize.width)}x{Math.round(tileSize.height)}
+            Tile Size: {Math.round(tileWidth)}x{Math.round(tileHeight)}
          </span>
       </div>
    );

@@ -1,7 +1,8 @@
 import { makeStyles, Typography } from '@material-ui/core';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import ErrorWrapper from 'src/components/ErrorWrapper';
+import RenderConsumerVideo from 'src/components/RenderConsumerVideo';
 import useDeviceManagement from 'src/features/media/useDeviceManagement';
 import useMyParticipantId from 'src/hooks/useMyParticipantId';
 import { RootState } from 'src/store';
@@ -59,18 +60,6 @@ export default function WebcamSettingsTest() {
       handleEnableWebcam();
    }, []);
 
-   const videoElem = useRef<HTMLVideoElement>(null);
-
-   useEffect(() => {
-      if (consumer && videoElem.current) {
-         const stream = new MediaStream();
-         stream.addTrack(consumer.track);
-
-         videoElem.current.srcObject = stream;
-         videoElem.current.play();
-      }
-   }, [consumer, videoElem.current]);
-
    return (
       <div>
          <Typography variant="h6" gutterBottom>
@@ -82,7 +71,7 @@ export default function WebcamSettingsTest() {
                check what other participants actually receive and you also get a taste of the actual delay.
             </Typography>
             <div className={classes.videoContainer}>
-               <video ref={videoElem} className={classes.video} />
+               <RenderConsumerVideo consumer={consumer} height={360} width={640} />
             </div>
          </ErrorWrapper>
       </div>

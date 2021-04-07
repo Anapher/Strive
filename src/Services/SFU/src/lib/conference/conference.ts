@@ -216,6 +216,7 @@ export class Conference {
          return { success: false, error: errors.streamNotFound('consumer', consumerId) };
       }
 
+      logger.debug('Set prefferred layers to %O', layers);
       await consumer.setPreferredLayers(layers);
       return { success: true };
    }

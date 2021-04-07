@@ -1,21 +1,19 @@
 import { fade, IconButton, makeStyles, Typography, useTheme } from '@material-ui/core';
+import MoreVertIcon from '@material-ui/icons/MoreVert';
 import clsx from 'classnames';
 import { motion, MotionValue, useTransform } from 'framer-motion';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import AnimatedMicIcon from 'src/assets/animated-icons/AnimatedMicIcon';
+import RenderConsumerVideo from 'src/components/RenderConsumerVideo';
+import ParticipantContextMenuPopper from 'src/features/conference/components/ParticipantContextMenuPopper';
+import { Participant } from 'src/features/conference/types';
 import { useParticipantAudio } from 'src/features/media/components/ParticipantMicManager';
 import { selectParticipantMicActivated } from 'src/features/media/selectors';
+import useMyParticipantId from 'src/hooks/useMyParticipantId';
 import { RootState } from 'src/store';
 import useConsumer from 'src/store/webrtc/hooks/useConsumer';
 import { Size } from 'src/types';
-import MoreVertIcon from '@material-ui/icons/MoreVert';
-import ParticipantContextMenuPopper from 'src/features/conference/components/ParticipantContextMenuPopper';
-import useMyParticipantId from 'src/hooks/useMyParticipantId';
-import { Participant } from 'src/features/conference/types';
-import ConsumerDiagnosticInfo from './ConsumerDiagnosticInfo';
-import useWebRtc from 'src/store/webrtc/hooks/useWebRtc';
-import { selectEnableVideoOverlay } from 'src/features/settings/selectors';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -27,15 +25,7 @@ const useStyles = makeStyles((theme) => ({
       boxShadow: theme.shadows[6],
    },
    video: {
-      position: 'absolute',
-      top: 0,
-      bottom: 0,
-      left: 0,
-      right: 0,
-      width: '100%',
-      height: '100%',
       borderRadius: theme.shape.borderRadius,
-      objectFit: 'cover',
    },
    infoBox: {
       position: 'absolute',
@@ -81,11 +71,6 @@ const useStyles = makeStyles((theme) => ({
       right: theme.spacing(1),
       top: theme.spacing(1),
    },
-   consumerInfo: {
-      position: 'absolute',
-      right: 0,
-      bottom: 0,
-   },
 }));
 
 type Props = {
@@ -95,18 +80,9 @@ type Props = {
    disableLayoutAnimation?: boolean;
 };
 
-const getBestLayer = (width: number) => {
-   if (width <= 320) return 0;
-
-   if (width <= 800) return 1;
-
-   return 2;
-};
-
 export default function ParticipantTile({ className, participant, size, disableLayoutAnimation }: Props) {
    const classes = useStyles();
    const consumer = useConsumer(participant.id, 'webcam');
-   const videoRef = useRef<HTMLVideoElement | null>(null);
    const micActivated = useSelector((state: RootState) => selectParticipantMicActivated(state, participant?.id));
    const isWebcamActive = consumer?.paused === false;
    const myParticipantId = useMyParticipantId();
@@ -114,27 +90,6 @@ export default function ParticipantTile({ className, participant, size, disableL
    const isMe = participant.id === myParticipantId;
 
    const audioInfo = useParticipantAudio(participant.id);
-   const connection = useWebRtc();
-
-   useEffect(() => {
-      if (consumer?.track) {
-         const stream = new MediaStream();
-         stream.addTrack(consumer.track);
-
-         if (videoRef.current) {
-            videoRef.current.srcObject = stream;
-         }
-      }
-   }, [consumer]);
-
-   useEffect(() => {
-      if (connection && consumer) {
-         connection.setConsumerLayers({
-            consumerId: consumer.id,
-            layers: { spatialLayer: getBestLayer(size.width) },
-         });
-      }
-   }, [size.width, connection, consumer]);
 
    const theme = useTheme();
    const audioBorder = useTransform(audioInfo?.audioLevel ?? new MotionValue(0), [0, 1], [0, 10]);
@@ -144,8 +99,6 @@ export default function ParticipantTile({ className, participant, size, disableL
 
    const [contextMenuOpen, setContextMenuOpen] = useState(false);
    const moreIconRef = useRef(null);
-
-   const showDiagnostics = useSelector(selectEnableVideoOverlay);
 
    const handleOpenContextMenu = () => {
       setContextMenuOpen(true);
@@ -158,14 +111,13 @@ export default function ParticipantTile({ className, participant, size, disableL
    return (
       <>
          <motion.div className={clsx(classes.root, className)}>
-            <video ref={videoRef} className={classes.video} hidden={!isWebcamActive} autoPlay />
+            <RenderConsumerVideo
+               consumer={consumer}
+               height={size.height}
+               width={size.width}
+               className={classes.video}
+            />
             <motion.div style={{ borderWidth: audioBorder }} className={classes.volumeBorder} />
-
-            {consumer && showDiagnostics && (
-               <div className={classes.consumerInfo}>
-                  <ConsumerDiagnosticInfo consumer={consumer} tileSize={size} />
-               </div>
-            )}
 
             {isWebcamActive && (
                <motion.div className={classes.infoBox}>
