@@ -21,6 +21,7 @@ import TabModerators from './TabModerators';
 import TabPermissions from './TabPermissions';
 import AddIcon from '@material-ui/icons/Add';
 import { wrapForInputRef } from 'src/utils/reat-hook-form-utils';
+import { mergeDeep } from 'src/utils/object-merge';
 
 const useStyles = makeStyles((theme) => ({
    header: {
@@ -44,6 +45,10 @@ type Props = {
    onClose: () => void;
 };
 
+const patchConferenceData = (callback: (data: ConferenceDataForm) => void, defaultValues: ConferenceDataForm) => (
+   data: ConferenceDataForm,
+) => callback(mergeDeep(data, { configuration: defaultValues.configuration }));
+
 export default function CreateConferenceForm({ defaultValues, onSubmit, isSubmitting, onClose }: Props) {
    const form = useForm<ConferenceDataForm>({
       mode: 'onChange',
@@ -52,7 +57,7 @@ export default function CreateConferenceForm({ defaultValues, onSubmit, isSubmit
 
    const [currentTab, setCurrentTab] = useState('1');
 
-   const handleChange = (_: unknown, newValue: string) => {
+   const handleChangeTab = (_: unknown, newValue: string) => {
       setCurrentTab(newValue);
    };
 
@@ -74,7 +79,7 @@ export default function CreateConferenceForm({ defaultValues, onSubmit, isSubmit
    };
 
    return (
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(patchConferenceData(onSubmit, defaultValues))}>
          <Box display="flex" flexDirection="column">
             <Box mb={2} px={3}>
                <TextField
@@ -90,7 +95,7 @@ export default function CreateConferenceForm({ defaultValues, onSubmit, isSubmit
                      value={currentTab}
                      indicatorColor="primary"
                      textColor="primary"
-                     onChange={handleChange}
+                     onChange={handleChangeTab}
                      aria-label="options tabs"
                   >
                      <Tab label="Common" value="1" />
