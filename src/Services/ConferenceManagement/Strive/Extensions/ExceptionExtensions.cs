@@ -12,6 +12,9 @@ namespace Strive.Extensions
             if (e is IdErrorException idError)
                 return idError.Error;
 
+            if (e is ConferenceNotFoundException)
+                return ConferenceError.ConferenceNotFound;
+
             return ConferenceError.UnexpectedError("An unexpected error occurred");
         }
     }
