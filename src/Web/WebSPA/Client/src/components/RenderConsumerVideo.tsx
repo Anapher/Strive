@@ -43,8 +43,7 @@ const computePrefferredLayerForResolutions = (
    for (let i = 0; i < Math.min(scalabilityMode.spatialLayers, resolutions.length); i++) {
       const resolution = resolutions[i];
 
-      if (resolution < height) continue;
-
+      if (resolution * 1.1 < height) continue; // allow scaling to a maximum of 10%
       return i;
    }
 
