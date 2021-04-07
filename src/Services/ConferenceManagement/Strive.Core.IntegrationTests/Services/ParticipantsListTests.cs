@@ -43,7 +43,7 @@ namespace Strive.Core.IntegrationTests.Services
 
         private void AddParticipantToConferenceModerators(Participant participant)
         {
-            _conference.Configuration.Moderators = _conference.Configuration.Moderators.Add(participant.Id);
+            _conference.Configuration.Moderators.Add(participant.Id);
         }
 
         [Fact]
