@@ -57,21 +57,17 @@ export default function ActiveParticipantsGrid({ width }: Props) {
       <div style={{ padding: ACTIVE_PARTICIPANTS_MARGIN, height: '100%' }}>
          {participantDtos.length > 0 && (
             <div style={{ ...mainTileSize }}>
-               <ParticipantTile disableLayoutAnimation size={mainTileSize} participant={participantDtos[0]} />
+               <ParticipantTile disableLayoutAnimation {...mainTileSize} participant={participantDtos[0]} />
             </div>
          )}
          {participantDtos.length > 1 && (
             <div className={classes.secondaryTiles}>
                <div style={{ ...secondaryTileSize }}>
-                  <ParticipantTile disableLayoutAnimation size={secondaryTileSize} participant={participantDtos[1]} />
+                  <ParticipantTile disableLayoutAnimation {...secondaryTileSize} participant={participantDtos[1]} />
                </div>
                {participantDtos.length > 2 && (
                   <div style={{ ...secondaryTileSize }}>
-                     <ParticipantTile
-                        disableLayoutAnimation
-                        size={secondaryTileSize}
-                        participant={participantDtos[2]}
-                     />
+                     <ParticipantTile disableLayoutAnimation {...secondaryTileSize} participant={participantDtos[2]} />
                   </div>
                )}
             </div>

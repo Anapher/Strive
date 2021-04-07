@@ -13,7 +13,6 @@ import { selectParticipantMicActivated } from 'src/features/media/selectors';
 import useMyParticipantId from 'src/hooks/useMyParticipantId';
 import { RootState } from 'src/store';
 import useConsumer from 'src/store/webrtc/hooks/useConsumer';
-import { Size } from 'src/types';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -76,11 +75,12 @@ const useStyles = makeStyles((theme) => ({
 type Props = {
    className?: string;
    participant: Participant;
-   size: Size;
    disableLayoutAnimation?: boolean;
+   width: number;
+   height: number;
 };
 
-export default function ParticipantTile({ className, participant, size, disableLayoutAnimation }: Props) {
+export default function ParticipantTile({ className, participant, width, height, disableLayoutAnimation }: Props) {
    const classes = useStyles();
    const consumer = useConsumer(participant.id, 'webcam');
    const micActivated = useSelector((state: RootState) => selectParticipantMicActivated(state, participant?.id));
@@ -94,7 +94,7 @@ export default function ParticipantTile({ className, participant, size, disableL
    const theme = useTheme();
    const audioBorder = useTransform(audioInfo?.audioLevel ?? new MotionValue(0), [0, 1], [0, 10]);
 
-   const isSmall = size.width < 400;
+   const isSmall = width < 400;
    const fontSize = isWebcamActive ? (isSmall ? 14 : 18) : isSmall ? 16 : 24;
 
    const [contextMenuOpen, setContextMenuOpen] = useState(false);
@@ -111,12 +111,7 @@ export default function ParticipantTile({ className, participant, size, disableL
    return (
       <>
          <motion.div className={clsx(classes.root, className)}>
-            <RenderConsumerVideo
-               consumer={consumer}
-               height={size.height}
-               width={size.width}
-               className={classes.video}
-            />
+            <RenderConsumerVideo consumer={consumer} height={height} width={width} className={classes.video} />
             <motion.div style={{ borderWidth: audioBorder }} className={classes.volumeBorder} />
 
             {isWebcamActive && (

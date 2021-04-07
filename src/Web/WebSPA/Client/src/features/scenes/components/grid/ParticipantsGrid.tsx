@@ -69,7 +69,7 @@ export default function ParticipantsGrid({
                            key={x.id}
                            style={{ ...grid.itemSize, marginLeft: pi === 0 ? 0 : spacing }}
                         >
-                           <ParticipantTile participant={x} size={grid.itemSize} />
+                           <ParticipantTile participant={x} {...grid.itemSize} />
                         </motion.div>
                      ))}
                </div>

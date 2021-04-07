@@ -42,10 +42,9 @@ export default function ActiveParticipantsGridSizer({ width, show }: Props) {
       <motion.div
          animate={{
             height: show ? height : 0,
-            marginBottom: show && height > 0 ? 8 : 0,
          }}
          transition={{ type: 'tween' }}
-         initial={{ height: 0, marginBottom: 0 }}
+         initial={{ height: 0 }}
       >
          {show && height > 0 && <ActiveParticipantsGrid width={width} />}
       </motion.div>

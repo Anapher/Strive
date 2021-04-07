@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { useSelector } from 'react-redux';
 import { selectSceneOverlayParticipants } from '../selectors';
 import ParticipantTile from './ParticipantTile';
+import useSomeParticipants from '../useSomeParticipants';
 
 const useStyles = makeStyles({
    rootBottom: {
@@ -34,15 +35,19 @@ type Props = {
 export default function PresentationSceneParticipants({ location, tileWidth, tileHeight }: Props) {
    const classes = useStyles();
    const sceneParticipants = useSelector(selectSceneOverlayParticipants);
-   const participants = [...sceneParticipants];
 
-   const tileSize = { width: tileWidth, height: tileHeight };
+   const participants = useSomeParticipants(4, sceneParticipants).reverse();
 
    return (
       <div className={clsx({ [classes.rootBottom]: location === 'bottom', [classes.rootRight]: location === 'right' })}>
-         {participants.map((x) => (
-            <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} key={x.id} style={{ ...tileSize, marginLeft: 0 }}>
-               <ParticipantTile participant={x} size={tileSize} disableLayoutAnimation />
+         {participants.map((x, i) => (
+            <motion.div
+               initial={{ scale: 0 }}
+               animate={{ scale: 1 }}
+               key={x.id}
+               style={{ width: tileWidth, height: tileHeight, marginLeft: i === 0 ? 8 : 0 }}
+            >
+               <ParticipantTile participant={x} width={tileWidth} height={tileHeight} disableLayoutAnimation />
             </motion.div>
          ))}
       </div>

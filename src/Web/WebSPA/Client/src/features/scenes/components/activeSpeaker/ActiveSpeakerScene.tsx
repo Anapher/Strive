@@ -1,13 +1,13 @@
 import { makeStyles } from '@material-ui/core';
+import clsx from 'classnames';
 import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { selectParticipants } from 'src/features/conference/selectors';
-import { selectActiveParticipants } from '../../selectors';
-import { RenderSceneProps } from '../../types';
-import ParticipantTile from '../ParticipantTile';
-import clsx from 'classnames';
-import { expandToBox } from '../../calculations';
 import { Size } from 'src/types';
+import { expandToBox } from '../../calculations';
+import { RenderSceneProps } from '../../types';
+import useSomeParticipants from '../../useSomeParticipants';
+import ParticipantTile from '../ParticipantTile';
 
 const useStyles = makeStyles({
    root: {
@@ -28,14 +28,9 @@ const getListeningParticipantsWidth = (width: number) => {
 export default function ActiveSpeakerScene({ className, dimensions, setAutoHideControls }: RenderSceneProps) {
    const classes = useStyles();
 
-   const activeParticipants = useSelector(selectActiveParticipants);
-   const participants = useSelector(selectParticipants);
-
    useEffect(() => {
       setAutoHideControls(true);
    }, []);
-
-   if (participants.length === 0) return null;
 
    const tileWidth = getListeningParticipantsWidth(dimensions.width);
    const tileHeight = (tileWidth / 16) * 9;
@@ -48,14 +43,26 @@ export default function ActiveSpeakerScene({ className, dimensions, setAutoHideC
    const size = expandToBox({ height: 9, width: 16 }, activeParticipantDimensions);
    const smallTileCount = (dimensions.width - 8) / (tileWidth + 8);
 
+   const activeParticipants = useSomeParticipants(smallTileCount);
+   const participants = useSelector(selectParticipants);
+
+   if (participants.length === 0) return null;
+
    return (
       <div className={clsx(className, classes.root)}>
          <div style={{ margin: 8, ...size }}>
-            <ParticipantTile size={size} participant={participants[0]} />
+            <ParticipantTile {...size} participant={activeParticipants[0]} disableLayoutAnimation />
          </div>
          <div style={{ display: 'flex', marginTop: 8 }}>
-            {Array.from({ length: smallTileCount }).map((_, i) => (
-               <div key={i} style={{ backgroundColor: 'red', width: tileWidth, height: tileHeight, marginLeft: 8 }} />
+            {activeParticipants.slice(1).map((participant, i) => (
+               <div style={{ width: tileWidth, height: tileHeight, marginLeft: i === 0 ? 8 : 0 }} key={participant.id}>
+                  <ParticipantTile
+                     width={tileWidth}
+                     height={tileHeight}
+                     participant={participant}
+                     disableLayoutAnimation
+                  />
+               </div>
             ))}
          </div>
       </div>
