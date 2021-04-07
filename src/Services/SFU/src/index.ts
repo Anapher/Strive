@@ -20,9 +20,17 @@ async function main() {
    const rabbitConn = new RabbitMqConn(config.services.rabbitMq);
 
    // try to connect
-   await rabbitConn.getChannel();
+   try {
+      await rabbitConn.getChannel();
+   } catch (error) {
+      logger.error('Connection to rabbit mq failed, shutdown');
+      process.exit(1);
+   }
+
+   logger.info('Connection to rabbit mq established successfully');
+
    rabbitConn.on('fatal', async () => {
-      lightship.shutdown();
+      await lightship.shutdown();
    });
 
    const workers = new MediaSoupWorkers();

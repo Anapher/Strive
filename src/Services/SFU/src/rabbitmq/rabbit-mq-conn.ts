@@ -52,10 +52,11 @@ export default class RabbitMqConn extends EventEmitter {
                return { pub, sub };
             },
             {
-               maxAttempts: 10,
+               maxAttempts: 20,
                factor: 2,
                jitter: true,
                maxDelay: 5000,
+               delay: 200,
                handleError: (err) => logger.warn('Creating rabbit mq channel failed: %s', err),
             },
          );
