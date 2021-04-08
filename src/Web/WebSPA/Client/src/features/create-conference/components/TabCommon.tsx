@@ -12,11 +12,12 @@ import {
 } from '@material-ui/core';
 import cronstrue from 'cronstrue';
 import { DateTime } from 'luxon';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Controller, UseFormReturn } from 'react-hook-form';
 import ScheduleIcon from '@material-ui/icons/Schedule';
 import { ConferenceDataForm } from '../form';
 import { wrapForInputRef } from 'src/utils/reat-hook-form-utils';
+import NativeIsoDateInput from 'src/components/NativeIsoDateInput';
 
 const checkBoxWidth = 150;
 
@@ -47,6 +48,7 @@ export default function TabCommon({
    const scheduleCron: boolean = watch('additionalFormData.enableSchedule');
 
    const [cronDesc, setCronDesc] = useState<string | undefined>();
+   const currentTimeIso = useRef(DateTime.local().toISO());
 
    const validateSchedulerCron = (s: string | undefined | null) => {
       if (!scheduleCron) return true;
@@ -84,12 +86,17 @@ export default function TabCommon({
                   }
                   label="Start"
                />
-               <input
-                  {...register('configuration.startTime')}
-                  disabled={!startTime}
-                  type="datetime-local"
-                  id="meeting-time"
-                  min={DateTime.local().toFormat("yyyy-MM-dd'T'HH:mm")}
+               <Controller
+                  control={control}
+                  name="configuration.startTime"
+                  render={({ field }) => (
+                     <NativeIsoDateInput
+                        disabled={!startTime}
+                        id="meeting-time"
+                        {...field}
+                        min={currentTimeIso.current}
+                     />
+                  )}
                />
             </Box>
          </Grid>

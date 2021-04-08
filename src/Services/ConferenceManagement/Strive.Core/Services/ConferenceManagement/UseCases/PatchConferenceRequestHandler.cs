@@ -10,6 +10,7 @@ using Strive.Core.Extensions;
 using Strive.Core.Interfaces;
 using Strive.Core.Interfaces.Gateways;
 using Strive.Core.Services.ConferenceManagement.Gateways;
+using Strive.Core.Services.ConferenceManagement.Notifications;
 using Strive.Core.Services.ConferenceManagement.Requests;
 
 namespace Strive.Core.Services.ConferenceManagement.UseCases
@@ -17,13 +18,15 @@ namespace Strive.Core.Services.ConferenceManagement.UseCases
     public class PatchConferenceRequestHandler : IRequestHandler<PatchConferenceRequest, SuccessOrError<Unit>>
     {
         private readonly IConferenceRepo _conferenceRepo;
+        private readonly IMediator _mediator;
         private readonly ConcurrencyOptions _options;
         private readonly ILogger<PatchConferenceRequestHandler> _logger;
 
-        public PatchConferenceRequestHandler(IConferenceRepo conferenceRepo, IOptions<ConcurrencyOptions> options,
-            ILogger<PatchConferenceRequestHandler> logger)
+        public PatchConferenceRequestHandler(IConferenceRepo conferenceRepo, IMediator mediator,
+            IOptions<ConcurrencyOptions> options, ILogger<PatchConferenceRequestHandler> logger)
         {
             _conferenceRepo = conferenceRepo;
+            _mediator = mediator;
             _options = options.Value;
             _logger = logger;
         }
@@ -73,6 +76,9 @@ namespace Strive.Core.Services.ConferenceManagement.UseCases
                 conference.ConferenceId);
 
             var result = await _conferenceRepo.Update(conference);
+            if (result == OptimisticUpdateResult.Ok)
+                await _mediator.Publish(new ConferencePatchedNotification(conferenceId));
+
             return result switch
             {
                 OptimisticUpdateResult.ConcurrencyException => CommonError.ConcurrencyError,

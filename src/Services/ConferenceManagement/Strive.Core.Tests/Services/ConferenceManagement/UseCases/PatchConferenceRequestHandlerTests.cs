@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using FluentValidation;
+using MediatR;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Operations;
 using Microsoft.Extensions.Logging;
@@ -12,6 +13,7 @@ using Strive.Core.Errors;
 using Strive.Core.Interfaces.Gateways;
 using Strive.Core.Services.ConferenceManagement;
 using Strive.Core.Services.ConferenceManagement.Gateways;
+using Strive.Core.Services.ConferenceManagement.Notifications;
 using Strive.Core.Services.ConferenceManagement.Requests;
 using Strive.Core.Services.ConferenceManagement.UseCases;
 using Strive.Tests.Utils;
@@ -27,6 +29,7 @@ namespace Strive.Core.Tests.Services.ConferenceManagement.UseCases
         private readonly Mock<IConferenceRepo> _repo = new();
         private readonly ConcurrencyOptions _options = new();
         private readonly ILogger<PatchConferenceRequestHandler> _logger;
+        private readonly Mock<IMediator> _mediator = new();
 
         public PatchConferenceRequestHandlerTests(ITestOutputHelper testOutputHelper)
         {
@@ -35,7 +38,7 @@ namespace Strive.Core.Tests.Services.ConferenceManagement.UseCases
 
         private PatchConferenceRequestHandler Create()
         {
-            return new(_repo.Object, new OptionsWrapper<ConcurrencyOptions>(_options), _logger);
+            return new(_repo.Object, _mediator.Object, new OptionsWrapper<ConcurrencyOptions>(_options), _logger);
         }
 
         private void SetupConference(ConferenceData conferenceData)
@@ -141,6 +144,34 @@ namespace Strive.Core.Tests.Services.ConferenceManagement.UseCases
                 x => x.Update(
                     It.Is<Conference>(conference => conference.Configuration.Moderators.Contains(newModerator))),
                 Times.Once);
+        }
+
+        [Fact]
+        public async Task Handle_ValidPatch_PublishNotification()
+        {
+            const string newModerator = "test123";
+
+            // arrange
+            var capturedNotification = _mediator.CaptureNotification<ConferencePatchedNotification>();
+
+            var invalidPatch = new JsonPatchDocument<ConferenceData>();
+            invalidPatch.Add(x => x.Configuration.Moderators, newModerator);
+
+            _repo.Setup(x => x.Update(It.IsAny<Conference>())).ReturnsAsync(OptimisticUpdateResult.Ok);
+
+            SetupConference(GetValidConferenceData());
+
+            var useCase = Create();
+
+            // act
+            var result = await useCase.Handle(new PatchConferenceRequest(ConferenceId, invalidPatch),
+                CancellationToken.None);
+
+            // assert
+            Assert.True(result.Success);
+
+            capturedNotification.AssertReceived();
+            Assert.Equal(ConferenceId, capturedNotification.GetNotification().ConferenceId);
         }
 
         [Fact]

@@ -22,6 +22,7 @@ export type SynchronizedConferenceInfo = {
    isOpen: boolean;
    moderators: string[];
    scheduledDate?: string | null;
+   name: string | null;
 };
 
 export type SynchronizedParticipantsPermissions = {

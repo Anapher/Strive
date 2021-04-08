@@ -1,3 +1,4 @@
+import { useReactOidc } from '@axa-fr/react-oidc-context';
 import {
    AppBar,
    Box,
@@ -13,19 +14,21 @@ import {
 } from '@material-ui/core';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import SettingsIcon from '@material-ui/icons/Settings';
+import clsx from 'classnames';
 import React, { useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useParams } from 'react-router';
 import * as coreHub from 'src/core-hub';
+import { openDialogToPatchAsync } from 'src/features/create-conference/reducer';
 import { setOpen } from 'src/features/diagnostics/reducer';
 import { openSettings } from 'src/features/settings/reducer';
 import usePermission from 'src/hooks/usePermission';
+import { CONFERENCE_CAN_OPEN_AND_CLOSE } from 'src/permissions';
+import { ConferenceRouteParams } from 'src/routes/types';
 import { RootState } from 'src/store';
 import useWebRtcStatus from 'src/store/webrtc/hooks/useWebRtcStatus';
 import { selectParticipants } from '../selectors';
 import BreakoutRoomChips from './appbar/BreakoutRoomChip';
-import clsx from 'classnames';
-import { CONFERENCE_CAN_OPEN_AND_CLOSE } from 'src/permissions';
-import { useReactOidc } from '@axa-fr/react-oidc-context';
 
 const useStyles = makeStyles((theme) =>
    createStyles({
@@ -66,6 +69,7 @@ export default function ConferenceAppBar({ chatWidth }: Props) {
    const dispatch = useDispatch();
 
    const diagnosticsOpen = useSelector((state: RootState) => state.diagnostics.open);
+   const { id: conferenceId } = useParams<ConferenceRouteParams>();
 
    const canCloseConference = usePermission(CONFERENCE_CAN_OPEN_AND_CLOSE);
    const handleCloseConference = () => dispatch(coreHub.closeConference());
@@ -90,6 +94,15 @@ export default function ConferenceAppBar({ chatWidth }: Props) {
 
    const handleShowDiagnostics = () => {
       dispatch(setOpen(true));
+      handleCloseMenu();
+   };
+
+   const handlePatchConference = () => {
+      if (!conferenceId) {
+         console.error('Conference id must not be null');
+         return;
+      }
+      dispatch(openDialogToPatchAsync(conferenceId));
       handleCloseMenu();
    };
 
@@ -148,10 +161,11 @@ export default function ConferenceAppBar({ chatWidth }: Props) {
             </Box>
 
             <Menu open={isMenuOpen} onClose={handleCloseMenu} anchorEl={moreIconButtonRef.current}>
-               <MenuItem onClick={handleShowPermissions}>Show my permissions</MenuItem>
+               <MenuItem onClick={handleShowPermissions}>Show my Permissions</MenuItem>
                <MenuItem onClick={handleShowDiagnostics} disabled={diagnosticsOpen}>
                   Diagnostics
                </MenuItem>
+               <MenuItem onClick={handlePatchConference}>Change Conference Settings</MenuItem>
                {canCloseConference && <MenuItem onClick={handleCloseConference}>Close Conference</MenuItem>}
                <MenuItem onClick={logout as any}>Sign out</MenuItem>
             </Menu>

@@ -1,4 +1,5 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { Operation } from 'fast-json-patch';
 import { DomainError } from 'src/communication-types';
 import * as conferenceServices from 'src/services/api/conference';
 import * as userServices from 'src/services/api/user';
@@ -12,7 +13,7 @@ export type CreateConferenceState = {
    conferenceData: ConferenceData | null;
 
    dialogOpen: boolean;
-   mode: 'create' | 'edit';
+   mode: 'create' | 'patch';
 
    isCreating: boolean;
    createdConferenceId: string | null;
@@ -33,6 +34,16 @@ export const createConferenceAsync = createAsyncThunk(
    'createConference/create',
    async (dto: ConferenceData) => {
       return await conferenceServices.create(dto);
+   },
+   {
+      serializeError: serializeRequestError,
+   },
+);
+
+export const patchConferenceAsync = createAsyncThunk(
+   'createConference/patch',
+   async ({ patch, conferenceId }: { conferenceId: string; patch: Operation[] }) => {
+      await conferenceServices.patch(conferenceId, patch);
    },
    {
       serializeError: serializeRequestError,
@@ -60,6 +71,11 @@ export const openDialogToCreateAsync = createAsyncThunk('createConference/openFo
    return result;
 });
 
+export const openDialogToPatchAsync = createAsyncThunk('createConference/openToPatch', async (conferenceId: string) => {
+   const conferenceData = await conferenceServices.get(conferenceId);
+   return { conferenceData, conferenceId };
+});
+
 const createConference = createSlice({
    name: 'createConference',
    initialState,
@@ -79,6 +95,17 @@ const createConference = createSlice({
          state.isCreating = false;
          state.createdConferenceId = action.payload.conferenceId;
       },
+      [patchConferenceAsync.pending.type]: (state) => {
+         state.isCreating = true;
+      },
+      [patchConferenceAsync.rejected.type]: (state) => {
+         state.isCreating = false;
+      },
+      [patchConferenceAsync.fulfilled.type]: (state) => {
+         state.isCreating = false;
+         state.createdConferenceId = null;
+         state.dialogOpen = false;
+      },
       [openDialogToCreateAsync.pending.type]: (state) => {
          state.conferenceData = null;
          state.dialogOpen = true;
@@ -90,6 +117,25 @@ const createConference = createSlice({
          state.conferenceData = action.payload;
       },
       [openDialogToCreateAsync.rejected.type]: (state, action: PayloadAction<void, string, never, DomainError>) => {
+         state.loadingConferenceDataError = action.error;
+      },
+      [openDialogToPatchAsync.pending.type]: (state) => {
+         state.conferenceData = null;
+         state.dialogOpen = true;
+         state.createdConferenceId = null;
+         state.loadingConferenceDataError = null;
+         state.mode = 'patch';
+      },
+      [openDialogToPatchAsync.fulfilled.type]: (
+         state,
+         {
+            payload: { conferenceData, conferenceId },
+         }: PayloadAction<{ conferenceData: ConferenceData; conferenceId: string }>,
+      ) => {
+         state.conferenceData = conferenceData;
+         state.createdConferenceId = conferenceId;
+      },
+      [openDialogToPatchAsync.rejected.type]: (state, action: PayloadAction<void, string, never, DomainError>) => {
          state.loadingConferenceDataError = action.error;
       },
       [loadUserInfo.fulfilled.type]: (state, action: PayloadAction<UserInfo[]>) => {

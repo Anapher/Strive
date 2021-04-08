@@ -31,7 +31,7 @@ namespace Strive.Core.Services.ConferenceControl
             var nextDate = _scheduler.GetNextExecution(conference.Configuration);
             var isOpen = await _openConferenceRepository.IsOpen(conferenceId);
             return new SynchronizedConferenceInfo(isOpen, conference.Configuration.Moderators.ToImmutableList(),
-                nextDate);
+                nextDate, conference.Configuration.Name);
         }
     }
 }

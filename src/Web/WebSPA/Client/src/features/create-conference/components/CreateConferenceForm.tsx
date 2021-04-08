@@ -43,13 +43,15 @@ type Props = {
    onSubmit: (data: ConferenceDataForm) => void;
    isSubmitting: boolean;
    onClose: () => void;
+
+   mode: 'create' | 'patch';
 };
 
 const patchConferenceData = (callback: (data: ConferenceDataForm) => void, defaultValues: ConferenceDataForm) => (
    data: ConferenceDataForm,
 ) => callback(mergeDeep(data, { configuration: defaultValues.configuration }));
 
-export default function CreateConferenceForm({ defaultValues, onSubmit, isSubmitting, onClose }: Props) {
+export default function CreateConferenceForm({ defaultValues, onSubmit, isSubmitting, onClose, mode }: Props) {
    const form = useForm<ConferenceDataForm>({
       mode: 'onChange',
       defaultValues,
@@ -137,7 +139,7 @@ export default function CreateConferenceForm({ defaultValues, onSubmit, isSubmit
                Cancel
             </Button>
             <Button type="submit" color="primary" autoFocus disabled={isSubmitting || !formState.isValid}>
-               Create
+               {mode === 'patch' ? 'Update' : 'Create'}
             </Button>
          </DialogActions>
          {isSubmitting && <LinearProgress />}

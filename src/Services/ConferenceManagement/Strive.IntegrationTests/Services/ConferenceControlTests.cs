@@ -1,10 +1,12 @@
 using System.Threading.Tasks;
 using MediatR;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.SignalR.Client;
 using Nito.AsyncEx;
 using Strive.Core.Interfaces;
 using Strive.Core.Services;
 using Strive.Core.Services.ConferenceControl;
+using Strive.Core.Services.ConferenceManagement;
 using Strive.Core.Services.Synchronization;
 using Strive.Hubs.Core;
 using Strive.Hubs.Core.Dtos;
@@ -117,6 +119,31 @@ namespace Strive.IntegrationTests.Services
             AssertSuccess(result);
 
             await autoResetEvent.WaitTimeoutAsync();
+        }
+
+        [Fact]
+        public async Task PatchConference_ChangeName_UpdateSynchronizedConferenceInfo()
+        {
+            const string newName = "Hello World";
+
+            // arrange
+            var conference = await CreateConference();
+            var connection = await ConnectUserToConference(Moderator, conference);
+
+            // act
+            var client = Factory.CreateClient();
+            connection.User.SetupHttpClient(client);
+
+            var patch = new JsonPatchDocument<ConferenceData>();
+            patch.Add(x => x.Configuration.Name, newName);
+
+            var response = await client.PatchAsync($"/v1/conference/{conference.ConferenceId}",
+                JsonNetContent.Create(patch));
+            response.EnsureSuccessStatusCode();
+
+            // assert
+            await connection.SyncObjects.AssertSyncObject<SynchronizedConferenceInfo>(SyncObjId,
+                value => Assert.Equal(newName, value.Name));
         }
     }
 }

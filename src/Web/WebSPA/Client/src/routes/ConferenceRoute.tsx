@@ -7,8 +7,10 @@ import FullscreenError from 'src/components/FullscreenError';
 import * as coreHub from 'src/core-hub';
 import ConferenceIndex from 'src/features/conference/components';
 import ConferenceConnecting from 'src/features/conference/components/ConferenceConnecting';
+import CreateConferenceDialog from 'src/features/create-conference/components/CreateConferenceDialog';
 import SettingsDialog from 'src/features/settings/components/SettingsDialog';
 import { fetchDevices } from 'src/features/settings/thunks';
+import usePageTitle from 'src/hooks/usePageTitle';
 import { RootState } from 'src/store';
 import { close } from 'src/store/signal/actions';
 import { WebRtcContext } from 'src/store/webrtc/WebRtcContext';
@@ -53,6 +55,8 @@ function ConferenceRoute({
       webRtc.beginConnecting();
    }, [webRtc]);
 
+   usePageTitle(conferenceState?.name);
+
    if (error) {
       return (
          <FullscreenError message={error.message}>
@@ -69,6 +73,7 @@ function ConferenceRoute({
       <WebRtcContext.Provider value={webRtc}>
          <ConferenceIndex conference={conferenceState} />
          <SettingsDialog />
+         <CreateConferenceDialog />
       </WebRtcContext.Provider>
    );
 }
