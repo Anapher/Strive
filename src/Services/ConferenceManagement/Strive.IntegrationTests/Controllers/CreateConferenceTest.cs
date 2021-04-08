@@ -31,7 +31,7 @@ namespace Strive.IntegrationTests.Controllers
         {
             return new()
             {
-                Configuration = new ConferenceConfiguration {Moderators = new[] {"0"}.ToImmutableList()},
+                Configuration = new ConferenceConfiguration {Moderators = new List<string> {"0"}},
                 Permissions = new Dictionary<PermissionType, Dictionary<string, JValue>>(),
             };
         }
@@ -76,9 +76,8 @@ namespace Strive.IntegrationTests.Controllers
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
 
             var error = await response.Content.ReadFromJsonAsync<Error>();
-            Assert.NotNull(error);
-            Assert.Equal(ErrorType.BadRequest.ToString(), error!.Type);
-            Assert.Equal(ErrorCode.FieldValidation.ToString(), error.Code);
+            Assert.Equal(ErrorType.BadRequest.ToString(), error?.Type);
+            Assert.Equal(ErrorCode.FieldValidation.ToString(), error?.Code);
         }
     }
 }

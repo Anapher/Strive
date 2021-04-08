@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Reflection;
 using System.Text;
 using Autofac;
@@ -61,10 +60,6 @@ namespace Strive
 
         static Startup()
         {
-            BsonSerializer.RegisterGenericSerializerDefinition(typeof(IImmutableList<>),
-                typeof(ImmutableListSerializer<>));
-            BsonSerializer.RegisterGenericSerializerDefinition(typeof(IImmutableDictionary<,>),
-                typeof(ImmutableDictionarySerializer<,>));
             BsonSerializer.RegisterSerializer(new JTokenBsonSerializer());
             BsonSerializer.RegisterSerializer(new EnumSerializer<PermissionType>(BsonType.String));
         }

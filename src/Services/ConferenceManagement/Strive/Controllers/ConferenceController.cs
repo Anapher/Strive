@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Strive.Core;
 using Strive.Core.Services.ConferenceManagement;
+using Strive.Core.Services.ConferenceManagement.Gateways;
 using Strive.Core.Services.ConferenceManagement.Requests;
 using Strive.Core.Services.Permissions.Options;
 using Strive.Extensions;
@@ -20,12 +21,12 @@ namespace Strive.Controllers
     public class ConferenceController : Controller
     {
         private readonly IMediator _mediator;
-        private readonly ConcurrencyOptions _concurrencyOptions;
+        private readonly IConferenceRepo _conferenceRepo;
 
-        public ConferenceController(IMediator mediator, IOptions<ConcurrencyOptions> concurrencyOptions)
+        public ConferenceController(IMediator mediator, IConferenceRepo conferenceRepo)
         {
             _mediator = mediator;
-            _concurrencyOptions = concurrencyOptions.Value;
+            _conferenceRepo = conferenceRepo;
         }
 
         // POST v1/conference
@@ -43,11 +44,25 @@ namespace Strive.Controllers
         [HttpPatch("{conferenceId}")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [Authorize(Roles = AppRoles.Moderator)]
         public async Task<ActionResult> Patch(string conferenceId, [FromBody] JsonPatchDocument<ConferenceData> patch)
         {
             var result = await _mediator.Send(new PatchConferenceRequest(conferenceId, patch));
             return result.ToActionResult();
+        }
+
+        // GET v1/conference/{id}
+        [HttpGet("{conferenceId}")]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [Authorize(Roles = AppRoles.Moderator)]
+        public async Task<ActionResult<ConferenceData>> Get(string conferenceId)
+        {
+            var conference = await _conferenceRepo.FindById(conferenceId);
+            if (conference == null) return ConferenceError.ConferenceNotFound.ToActionResult();
+
+            return Ok(ConferenceData.FromConference(conference));
         }
 
         // GET v1/conference/default-data

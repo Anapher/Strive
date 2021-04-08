@@ -4,6 +4,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Strive.Core.Domain.Entities;
 using Strive.Core.Interfaces.Gateways;
 using Strive.Core.Services.ConferenceManagement.Gateways;
+using Strive.Infrastructure.Utilities;
 
 namespace Strive.Infrastructure.Data.Repos
 {
@@ -23,11 +24,14 @@ namespace Strive.Infrastructure.Data.Repos
         public async Task<Conference?> FindById(string conferenceId)
         {
             var key = GetConferenceKey(conferenceId);
-            return await _memoryCache.GetOrCreateAsync(key, async entry =>
+            var result = await _memoryCache.GetOrCreateAsync(key, async entry =>
             {
                 entry.SetSlidingExpiration(TimeSpan.FromMinutes(1));
                 return await _conferenceRepo.FindById(conferenceId);
             });
+
+            if (result == null) return null;
+            return CopyUtils.DeepClone(result); // important as we cache the conference and the object is mutable
         }
 
         public Task Create(Conference conference)
