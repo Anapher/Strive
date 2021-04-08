@@ -156,9 +156,9 @@ export default function TabCommon({
             </div>
          </Grid>
          <Grid item xs={12}>
-            <div>
-               <Box mt={4}>
-                  <Typography variant="subtitle1">Chat</Typography>
+            <Box mt={4}>
+               <Typography variant="h6">Chat</Typography>
+               <Box>
                   <FormControlLabel
                      control={
                         <Controller
@@ -166,13 +166,61 @@ export default function TabCommon({
                               <Checkbox onChange={(e) => onChange(e.target.checked)} checked={value} />
                            )}
                            control={control}
-                           name="configuration.chat.showTyping"
+                           name="configuration.chat.isGlobalChatEnabled"
                         />
                      }
-                     label="Show participants that are currently typing below chat"
+                     label="Global Chat"
+                  />
+                  <FormControlLabel
+                     control={
+                        <Controller
+                           render={({ field: { onChange, value } }) => (
+                              <Checkbox onChange={(e) => onChange(e.target.checked)} checked={value} />
+                           )}
+                           control={control}
+                           name="configuration.chat.isRoomChatEnabled"
+                        />
+                     }
+                     label="Room Chat"
+                  />
+                  <FormControlLabel
+                     control={
+                        <Controller
+                           render={({ field: { onChange, value } }) => (
+                              <Checkbox onChange={(e) => onChange(e.target.checked)} checked={value} />
+                           )}
+                           control={control}
+                           name="configuration.chat.isPrivateChatEnabled"
+                        />
+                     }
+                     label="Private Chat"
                   />
                </Box>
-            </div>
+               <FormControlLabel
+                  control={
+                     <Controller
+                        render={({ field: { onChange, value } }) => (
+                           <Checkbox onChange={(e) => onChange(e.target.checked)} checked={value} />
+                        )}
+                        control={control}
+                        name="configuration.chat.isDefaultRoomChatDisabled"
+                     />
+                  }
+                  label="Disable room chat for master room"
+               />
+               <FormControlLabel
+                  control={
+                     <Controller
+                        render={({ field: { onChange, value } }) => (
+                           <Checkbox onChange={(e) => onChange(e.target.checked)} checked={value} />
+                        )}
+                        control={control}
+                        name="configuration.chat.showTyping"
+                     />
+                  }
+                  label="Show participants that are currently typing below chat"
+               />
+            </Box>
          </Grid>
       </Grid>
    );

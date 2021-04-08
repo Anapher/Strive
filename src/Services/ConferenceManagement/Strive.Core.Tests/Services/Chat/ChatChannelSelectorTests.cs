@@ -130,7 +130,7 @@ namespace Strive.Core.Tests.Services.Chat
         }
 
         [Fact]
-        public async Task ParticipantInDefaultRoomAndRoomChatEnabled_CannotSendToDefaultRoom()
+        public async Task ParticipantInDefaultRoomAndDefaultRoomChatDisabled_CannotSendToDefaultRoom()
         {
             // arrange
             _chatOptions = new ChatOptions
@@ -145,6 +145,27 @@ namespace Strive.Core.Tests.Services.Chat
 
             // assert
             await AssertChannels(selector, Array.Empty<ChatChannel>());
+        }
+
+        [Fact]
+        public async Task ParticipantInDefaultRoomAndDefaultRoomChatEnabled_CanSendToDefaultRoom()
+        {
+            // arrange
+            _chatOptions = new ChatOptions
+            {
+                IsPrivateChatEnabled = false,
+                IsGlobalChatEnabled = false,
+                IsRoomChatEnabled = true,
+                IsDefaultRoomChatDisabled = false,
+            };
+
+            _roomRepository.Setup(x => x.GetRoomOfParticipant(TestParticipant))
+                .ReturnsAsync(RoomOptions.DEFAULT_ROOM_ID);
+
+            var selector = Create();
+
+            // assert
+            await AssertChannels(selector, new[] {new RoomChatChannel(RoomOptions.DEFAULT_ROOM_ID)});
         }
 
         [Fact]

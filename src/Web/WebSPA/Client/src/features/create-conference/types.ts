@@ -8,6 +8,7 @@ export type ChatOptions = {
    cancelParticipantIsTypingAfter: number;
    showTyping: boolean;
    isRoomChatEnabled: boolean;
+   isDefaultRoomChatDisabled: boolean;
    isGlobalChatEnabled: boolean;
    isPrivateChatEnabled: boolean;
 };

@@ -1,7 +1,9 @@
 import { makeStyles } from '@material-ui/core';
 import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import AnnouncementOverlay from 'src/features/chat/components/AnnouncementOverlay';
 import ChatBar from 'src/features/chat/components/ChatBar';
+import { selectShowChat } from 'src/features/chat/selectors';
 import ConferenceAppBar from 'src/features/conference/components/ConferenceAppBar';
 import DiagnosticsWindow from 'src/features/diagnostics/components/DiagnosticsWindow';
 import ParticipantMicManager from 'src/features/media/components/ParticipantMicManager';
@@ -45,6 +47,8 @@ export default function ClassConference() {
    const [roomsPinned, setRoomsPinned] = useState(true);
    const [showUnderChat, setShowUnderChat] = useState(false);
 
+   const showChat = useSelector(selectShowChat);
+
    const [contentRef, dimensions] = useThrottledResizeObserver(100);
    const [chatWidth, setChatWidth] = useState(CHAT_DEFAULT_WIDTH);
 
@@ -77,10 +81,12 @@ export default function ClassConference() {
                <div className={classes.scene}>
                   <SceneView setShowWebcamUnderChat={(show) => setShowUnderChat(show)} />
                </div>
-               <div style={{ width: chatWidth, display: 'flex', flexDirection: 'column', height: '100%' }}>
-                  <ActiveParticipantsGridSizer show={showUnderChat} width={chatWidth} />
-                  <ChatBar />
-               </div>
+               {showChat && (
+                  <div style={{ width: chatWidth, display: 'flex', flexDirection: 'column', height: '100%' }}>
+                     <ActiveParticipantsGridSizer show={showUnderChat} width={chatWidth} />
+                     <ChatBar />
+                  </div>
+               )}
             </div>
             <PermissionDialog />
             <DiagnosticsWindow />

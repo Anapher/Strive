@@ -76,8 +76,7 @@ namespace Strive.Core.Services.Chat
             var roomId = await _roomRepository.GetRoomOfParticipant(participant);
             if (roomId == null) return null;
 
-            // disable room chat for default room
-            if (roomId == RoomOptions.DEFAULT_ROOM_ID)
+            if (options.IsDefaultRoomChatDisabled && roomId == RoomOptions.DEFAULT_ROOM_ID)
                 return null;
 
             return new RoomChatChannel(roomId);

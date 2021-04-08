@@ -44,7 +44,7 @@ export default function Chat({ channel, participants, participantId, participant
       if (!messages) {
          handleFetchChat();
       }
-   }, [messages]);
+   }, [messages, channel]);
 
    const handleSendMessage = (message: SendChatMessageDto) => {
       dispatch(coreHub.sendChatMessage(message));
