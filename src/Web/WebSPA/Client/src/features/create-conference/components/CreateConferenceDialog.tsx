@@ -1,4 +1,5 @@
-import { Dialog, DialogTitle, makeStyles, Typography } from '@material-ui/core';
+import { Dialog, DialogTitle, makeStyles } from '@material-ui/core';
+import { compare } from 'fast-json-patch';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from 'src/store';
@@ -6,7 +7,6 @@ import { ConferenceDataForm, mapDataToForm, mapFormToData } from '../form';
 import { closeDialog, createConferenceAsync, patchConferenceAsync } from '../reducer';
 import ConferenceCreatedView from './ConferenceCreatedView';
 import CreateConferenceForm from './CreateConferenceForm';
-import { compare } from 'fast-json-patch';
 import CreateConferenceFormSkeleton from './CreateConferenceFormSkeleton';
 
 const useStyles = makeStyles({

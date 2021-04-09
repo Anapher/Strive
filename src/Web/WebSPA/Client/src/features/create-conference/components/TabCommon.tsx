@@ -169,7 +169,7 @@ export default function TabCommon({
                            name="configuration.chat.isGlobalChatEnabled"
                         />
                      }
-                     label="Global Chat"
+                     label="All Chat"
                   />
                   <FormControlLabel
                      control={
