@@ -87,7 +87,7 @@ export default function CreateConferenceForm({ defaultValues, onSubmit, isSubmit
 
    return (
       <form onSubmit={handleSubmit(patchConferenceData(onSubmit, defaultValues))} className={classes.form}>
-         <Box display="flex" flexDirection="column" flex={1}>
+         <Box display="flex" flexDirection="column" flex={1} minHeight={0}>
             <Box mb={2} px={3}>
                <TextField
                   fullWidth
@@ -110,7 +110,7 @@ export default function CreateConferenceForm({ defaultValues, onSubmit, isSubmit
                      <Tab label="Permissions" value="3" />
                   </Tabs>
                </Paper>
-               <Box position="relative">
+               <Box position="relative" flex={1} minHeight={0}>
                   <TabPanel value="1" className={classes.tabPanel}>
                      <TabCommon form={form} />
                   </TabPanel>
