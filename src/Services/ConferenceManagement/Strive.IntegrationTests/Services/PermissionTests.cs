@@ -1,9 +1,14 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using MediatR;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.SignalR.Client;
 using Newtonsoft.Json.Linq;
+using Strive.Core.Domain.Entities;
+using Strive.Core.Extensions;
 using Strive.Core.Interfaces;
 using Strive.Core.Services;
+using Strive.Core.Services.ConferenceManagement;
 using Strive.Core.Services.Permissions;
 using Strive.Core.Services.Permissions.Responses;
 using Strive.Hubs.Core;
@@ -211,6 +216,40 @@ namespace Strive.IntegrationTests.Services
 
             await connection.SyncObjects.AssertSyncObject<SynchronizedTemporaryPermissions>(
                 SynchronizedTemporaryPermissions.SyncObjId, permissions => Assert.Empty(permissions.Assigned));
+        }
+
+        [Fact]
+        public async Task PatchConference_ChangePermissions_UpdateSynchronizedPermissions()
+        {
+            var permission = DefinedPermissions.Conference.CanOpenAndClose;
+
+            // arrange
+            var conference = await CreateConference(Moderator);
+            var connection = await ConnectUserToConference(Moderator, conference);
+
+            var syncObjId = SynchronizedParticipantPermissions.SyncObjId(connection.User.Sub);
+
+            await connection.SyncObjects.AssertSyncObject<SynchronizedParticipantPermissions>(syncObjId,
+                value => Assert.Contains(value.Permissions, x => x.Key == permission.Key));
+
+            // act
+            var client = Factory.CreateClient();
+            connection.User.SetupHttpClient(client);
+
+            var patch = new JsonPatchDocument<ConferenceData>();
+            patch.Add(x => x.Permissions[PermissionType.Moderator],
+                new Dictionary<string, JValue>(permission.Configure(false).Yield()));
+
+            var response = await client.PatchAsync($"/v1/conference/{conference.ConferenceId}",
+                JsonNetContent.Create(patch));
+            response.EnsureSuccessStatusCode();
+
+            // assert
+            await connection.SyncObjects.AssertSyncObject<SynchronizedParticipantPermissions>(syncObjId,
+                value =>
+                {
+                    Assert.False(new CachedPermissionStack(value.Permissions).GetPermissionValue(permission).Result);
+                });
         }
     }
 }
