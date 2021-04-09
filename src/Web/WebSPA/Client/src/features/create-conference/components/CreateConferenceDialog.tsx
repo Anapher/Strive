@@ -1,4 +1,4 @@
-import { Dialog, DialogTitle, Typography } from '@material-ui/core';
+import { Dialog, DialogTitle, makeStyles, Typography } from '@material-ui/core';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from 'src/store';
@@ -7,9 +7,17 @@ import { closeDialog, createConferenceAsync, patchConferenceAsync } from '../red
 import ConferenceCreatedView from './ConferenceCreatedView';
 import CreateConferenceForm from './CreateConferenceForm';
 import { compare } from 'fast-json-patch';
+import CreateConferenceFormSkeleton from './CreateConferenceFormSkeleton';
+
+const useStyles = makeStyles({
+   dialogContent: {
+      height: 496,
+   },
+});
 
 function CreateConferenceDialog() {
    const dispatch = useDispatch();
+   const classes = useStyles();
 
    const { dialogOpen, createdConferenceId, isCreating, conferenceData, mode } = useSelector(
       (state: RootState) => state.createConference,
@@ -46,7 +54,7 @@ function CreateConferenceDialog() {
          {createdConferenceId && mode !== 'patch' ? (
             <ConferenceCreatedView conferenceId={createdConferenceId} />
          ) : (
-            <>
+            <div className={classes.dialogContent}>
                {conferenceData ? (
                   <CreateConferenceForm
                      onClose={handleClose}
@@ -56,11 +64,9 @@ function CreateConferenceDialog() {
                      mode={mode}
                   />
                ) : (
-                  <div>
-                     <Typography>Loading...</Typography>
-                  </div>
+                  <CreateConferenceFormSkeleton />
                )}
-            </>
+            </div>
          )}
       </Dialog>
    );

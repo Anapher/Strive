@@ -24,6 +24,11 @@ import { wrapForInputRef } from 'src/utils/reat-hook-form-utils';
 import { mergeDeep } from 'src/utils/object-merge';
 
 const useStyles = makeStyles((theme) => ({
+   form: {
+      height: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+   },
    header: {
       backgroundColor: theme.palette.grey[800],
    },
@@ -81,8 +86,8 @@ export default function CreateConferenceForm({ defaultValues, onSubmit, isSubmit
    };
 
    return (
-      <form onSubmit={handleSubmit(patchConferenceData(onSubmit, defaultValues))}>
-         <Box display="flex" flexDirection="column">
+      <form onSubmit={handleSubmit(patchConferenceData(onSubmit, defaultValues))} className={classes.form}>
+         <Box display="flex" flexDirection="column" flex={1}>
             <Box mb={2} px={3}>
                <TextField
                   fullWidth
@@ -105,7 +110,7 @@ export default function CreateConferenceForm({ defaultValues, onSubmit, isSubmit
                      <Tab label="Permissions" value="3" />
                   </Tabs>
                </Paper>
-               <Box height={400} position="relative">
+               <Box position="relative">
                   <TabPanel value="1" className={classes.tabPanel}>
                      <TabCommon form={form} />
                   </TabPanel>
