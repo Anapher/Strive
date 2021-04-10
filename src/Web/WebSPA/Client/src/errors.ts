@@ -1,4 +1,5 @@
 import { DomainError } from './communication-types';
+import { ParticipantKickedReason } from './core-hub.types';
 
 export const unknownRequestError: (info: string) => DomainError = (info) => ({
    code: 'UI/Request_Error',
@@ -22,4 +23,10 @@ export const equipmentError: (message: string) => DomainError = (message) => ({
    code: 'UI/Equipment_Error',
    message,
    type: 'InternalServerError',
+});
+
+export const connectionRequestExecutedError: (reason: ParticipantKickedReason) => DomainError = (reason) => ({
+   code: 'UI/RequestDisconnectExecuted',
+   message: reason,
+   type: 'Conflict',
 });

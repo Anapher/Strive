@@ -99,3 +99,8 @@ export type SetSceneDto = {
    roomId: string;
    active: ActiveScene;
 };
+
+export type ParticipantKickedReason = 'byModerator' | 'newSessionConnected';
+export type RequestDisconnectDto = {
+   reason: ParticipantKickedReason;
+};

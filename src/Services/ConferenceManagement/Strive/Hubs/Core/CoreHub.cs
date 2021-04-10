@@ -67,7 +67,7 @@ namespace Strive.Hubs.Core
         {
             using (_logger.BeginMethodScope(new Dictionary<string, object> {{"connectionId", Context.ConnectionId}}))
             {
-                _logger.LogDebug("Client tries to connect");
+                _logger.LogDebug("Client {connectionId} tries to connect", Context.ConnectionId);
 
                 try
                 {

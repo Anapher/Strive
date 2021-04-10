@@ -65,6 +65,9 @@ const conferenceSlice = createSlice({
       closePermissionDialog(state) {
          state.permissionDialogOpen = false;
       },
+      setConnectionError(state, { payload }: PayloadAction<DomainError>) {
+         state.connectionError = payload;
+      },
    },
    extraReducers: {
       [connectSignal.type]: (state) => {
@@ -99,6 +102,6 @@ const conferenceSlice = createSlice({
    },
 });
 
-export const { setParticipantsOpen, closePermissionDialog } = conferenceSlice.actions;
+export const { setParticipantsOpen, closePermissionDialog, setConnectionError } = conferenceSlice.actions;
 
 export default conferenceSlice.reducer;
