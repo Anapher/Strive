@@ -151,7 +151,7 @@ namespace Strive.IntegrationTests.Services
             var messageDto = await chatMessageNotification.Task.WithDefaultTimeout();
             Assert.Equal(message, messageDto.Message);
             Assert.Equal(channel, messageDto.Channel);
-            Assert.Equal(1, messageDto.Id);
+            Assert.Equal(0, messageDto.Id);
             Assert.NotNull(messageDto.Sender);
             Assert.Equal(Moderator.Sub, messageDto.Sender!.ParticipantId);
             Assert.Equal(Moderator.Name, messageDto.Sender.Meta.DisplayName);
@@ -290,7 +290,9 @@ namespace Strive.IntegrationTests.Services
 
             // assert
             AssertSuccess(result);
-            Assert.Equal(3, result.Response!.Count);
+            Assert.Equal(3, result.Response?.Count);
+
+            Assert.Equal(0, result.Response?[0].Id);
         }
     }
 }

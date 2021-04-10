@@ -21,7 +21,7 @@ namespace Strive.Hubs.Core.NotificationHandlers
 
         public async Task Handle(ChatMessageReceivedNotification notification, CancellationToken cancellationToken)
         {
-            var (_, participants, message, channel, id) = notification;
+            var (_, participants, message, channel, messagesCount) = notification;
 
             ChatMessageSender? sender = null;
             if (!message.Options.IsAnonymous)
@@ -29,8 +29,8 @@ namespace Strive.Hubs.Core.NotificationHandlers
 
             var channelId = ChannelSerializer.Encode(channel).ToString();
 
-            var messageDto = new ChatMessageDto(id, channelId, sender, message.Message, message.Timestamp,
-                message.Options);
+            var messageDto = new ChatMessageDto(messagesCount - 1, channelId, sender, message.Message,
+                message.Timestamp, message.Options);
 
             var participantGroups = participants.Select(CoreHubGroups.OfParticipant);
             await _hubContext.Clients.Groups(participantGroups).ChatMessage(messageDto, cancellationToken);
