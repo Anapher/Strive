@@ -35,3 +35,9 @@ here you can [find a comparison](https://webrtchacks.com/sfu-load-testing/). I f
 A huge problem I faced in the class I supervised were very few asked questions by the participants, not because they all were highly intelligent but they did not dare to ask them.
 In Strive, it is possible to permit all participants to send chat messages anonymously. This is really nice for asking trivial questions, as the questioner can stay anonymous.
 Of course this feature can be disabled at any time to counter misuse but I think it's worth a try.
+
+### Load balancing
+Strive is load balancable by design, meaning you can scale the application over as many servers as you want and it will just work.
+
+### Equipment
+Everyone has a smartphone with a good camera but not everyone has a webcam. In Strive, you can add your devices by scanning a qr code and access the microphone, camera or screen - without rejoining with a second account.
