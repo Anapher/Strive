@@ -13,12 +13,16 @@ export type ChatState = Readonly<{
    channels: { [channel: string]: ChatSynchronizedObject & ChatSynchronizedObjectViewModel } | null;
    selectedChannel: string | null;
    announcements: ChatMessageDto[];
+
+   openedPrivateChats: string[];
 }>;
 
 const initialState: ChatState = {
    channels: null,
    selectedChannel: null,
    announcements: [],
+
+   openedPrivateChats: [],
 };
 
 const chatSlice = createSlice({
@@ -27,12 +31,26 @@ const chatSlice = createSlice({
    reducers: {
       setSelectedChannel(state, { payload }: PayloadAction<string | null>) {
          state.selectedChannel = payload;
+
+         if (payload) {
+            const channel = state.channels?.[payload];
+            if (channel?.viewModel) channel.viewModel.newMessages = false;
+         }
       },
       addAnnouncement(state, { payload }: PayloadAction<ChatMessageDto>) {
          state.announcements.push(payload);
       },
       removeAnnouncement(state, { payload }: PayloadAction<ChatMessageDto>) {
          state.announcements = state.announcements.filter((x) => x.id !== payload.id || x.channel !== payload.channel);
+      },
+      openPrivateChat(state, { payload }: PayloadAction<string>) {
+         if (!state.openedPrivateChats.includes(payload)) state.openedPrivateChats.push(payload);
+      },
+      closePrivateChat(state, { payload }: PayloadAction<string>) {
+         state.openedPrivateChats = state.openedPrivateChats.filter((x) => x !== payload);
+         if (state.selectedChannel === payload) {
+            state.selectedChannel = Object.keys(state.channels ?? {})[0];
+         }
       },
    },
    extraReducers: {
@@ -52,7 +70,7 @@ const chatSlice = createSlice({
             if (!channel) return;
 
             if (!channel.viewModel) {
-               channel.viewModel = { messages: payload.response };
+               channel.viewModel = { messages: payload.response, newMessages: false };
             } else {
                channel.viewModel.messages = mergeChatMessages(channel.viewModel.messages, payload.response);
             }
@@ -62,13 +80,21 @@ const chatSlice = createSlice({
          const channel = state.channels?.[payload.channel];
          if (!channel) return;
 
-         if (!channel.viewModel) channel.viewModel = { messages: [] };
+         if (!channel.viewModel) channel.viewModel = { messages: [], newMessages: false };
          channel.viewModel.messages.push(payload);
+
+         if (state.selectedChannel !== payload.channel) channel.viewModel.newMessages = true;
       },
       ...synchronizeObjectState({ type: 'multiple', baseId: CHAT, propertyName: 'channels' }),
    },
 });
 
-export const { setSelectedChannel, addAnnouncement, removeAnnouncement } = chatSlice.actions;
+export const {
+   setSelectedChannel,
+   addAnnouncement,
+   removeAnnouncement,
+   openPrivateChat,
+   closePrivateChat,
+} = chatSlice.actions;
 
 export default chatSlice.reducer;

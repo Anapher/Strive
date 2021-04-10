@@ -1,8 +1,8 @@
 import { makeStyles, Paper } from '@material-ui/core';
 import React, { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectMyParticipantId } from 'src/features/auth/selectors';
 import { selectParticipants } from 'src/features/conference/selectors';
+import useMyParticipantId from 'src/hooks/useMyParticipantId';
 import { RootState } from 'src/store';
 import * as actions from '../actions';
 import { ChatChannelWithId } from '../channel-serializer';
@@ -31,7 +31,7 @@ export default function ChatBar() {
    const connected = useSelector((state: RootState) => state.signalr.isConnected);
    const channels = useSelector(selectChannels);
    const selectedChannelId = useSelector(selectSelectedChannel);
-   const myParticipantId = useSelector(selectMyParticipantId);
+   const myParticipantId = useMyParticipantId();
 
    const dispatch = useDispatch();
 
@@ -56,6 +56,8 @@ export default function ChatBar() {
             channels={channels}
             selected={selectedChannelId}
             onSelectedChanged={handleChangeSelectedChannel}
+            participants={participants}
+            myParticipantId={myParticipantId}
          />
          {selectedChannelId && (
             <Chat

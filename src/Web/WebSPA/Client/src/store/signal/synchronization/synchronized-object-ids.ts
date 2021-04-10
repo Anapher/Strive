@@ -23,6 +23,7 @@ export type SynchronizedConferenceInfo = {
    moderators: string[];
    scheduledDate?: string | null;
    name: string | null;
+   isPrivateChatEnabled: boolean;
 };
 
 export type SynchronizedParticipantsPermissions = {

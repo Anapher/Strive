@@ -6,4 +6,5 @@ export type ChatSynchronizedObjectViewModel = {
 
 export type ChannelViewModel = {
    messages: ChatMessageDto[];
+   newMessages: boolean;
 };

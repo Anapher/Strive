@@ -5,8 +5,9 @@ import * as coreHub from 'src/core-hub';
 import { SendChatMessageDto } from 'src/core-hub.types';
 import { Participant } from 'src/features/conference/types';
 import { RootState } from 'src/store';
-import { selectMessages, selectParticipantsTyping } from '../selectors';
+import { selectIsNewChannel, selectMessages, selectParticipantsTyping } from '../selectors';
 import ChatMessageList from './ChatMessageList';
+import NewChat from './NewChat';
 import ParticipantsTyping from './ParticipantsTyping';
 import SendMessageForm from './SendMessageForm';
 
@@ -33,6 +34,8 @@ export default function Chat({ channel, participants, participantId, participant
    const dispatch = useDispatch();
    const classes = useStyles();
 
+   const isNewChannel = useSelector((state: RootState) => selectIsNewChannel(state, channel));
+
    const participantsTyping = useSelector((state: RootState) => selectParticipantsTyping(state, channel));
    const isMeTyping = !!participantId && participantsTyping.includes(participantId);
 
@@ -41,10 +44,10 @@ export default function Chat({ channel, participants, participantId, participant
    };
 
    useEffect(() => {
-      if (!messages) {
+      if (!messages && !isNewChannel) {
          handleFetchChat();
       }
-   }, [messages, channel]);
+   }, [messages, channel, isNewChannel]);
 
    const handleSendMessage = (message: SendChatMessageDto) => {
       dispatch(coreHub.sendChatMessage(message));
@@ -52,16 +55,21 @@ export default function Chat({ channel, participants, participantId, participant
 
    return (
       <div className={classes.chat}>
-         <ChatMessageList
-            messages={messages}
-            participantColors={participantColors}
-            participants={participants}
-            participantId={participantId}
-            error={null}
-            onRetry={() => {
-               console.log('test');
-            }}
-         />
+         {isNewChannel ? (
+            <NewChat />
+         ) : (
+            <ChatMessageList
+               messages={messages}
+               participantColors={participantColors}
+               participants={participants}
+               participantId={participantId}
+               error={null}
+               onRetry={() => {
+                  console.log('test');
+               }}
+            />
+         )}
+
          <Paper>
             <ParticipantsTyping
                participantsTyping={participantsTyping.filter((x) => x !== participantId)}

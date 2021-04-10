@@ -38,5 +38,19 @@ namespace Strive.Core.Tests.Services.Chat.Channels
             else
                 Assert.Equal(expected, channel);
         }
+
+        [Fact]
+        public void TestSortParameterKeys()
+        {
+            // arrange
+            var syncObjId = new SynchronizedObjectId("test",
+                new Dictionary<string, string> {{"c", "1"}, {"a", "5"}, {"b", "3"}});
+
+            // act
+            var result = syncObjId.ToString();
+
+            // assert
+            Assert.Equal("test?a=5&b=3&c=1", result);
+        }
     }
 }

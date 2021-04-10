@@ -8,8 +8,12 @@ import { AccountRemove } from 'mdi-material-ui';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import * as coreHub from 'src/core-hub';
+import { openPrivateChat, setSelectedChannel } from 'src/features/chat/reducer';
+import { selectPrivateMessageEnabled } from 'src/features/chat/selectors';
+import { createPrivatChatChannel } from 'src/features/chat/utils';
 import { patchParticipantAudio } from 'src/features/media/reducer';
 import { selectParticipantAudioInfo } from 'src/features/media/selectors';
+import useMyParticipantId from 'src/hooks/useMyParticipantId';
 import usePermission from 'src/hooks/usePermission';
 import {
    CONFERENCE_CAN_KICK_PARTICIPANT,
@@ -40,6 +44,7 @@ const ParticipantContextMenu = React.forwardRef<HTMLElement, Props>(({ participa
    const audioInfo = useSelector((state: RootState) => selectParticipantAudioInfo(state, participant.id));
    const dispatch = useDispatch();
    const classes = useStyles();
+   const myId = useMyParticipantId();
 
    const handleToggleMuted = () => {
       dispatch(patchParticipantAudio({ participantId: participant.id, data: { muted: !audioInfo?.muted } }));
@@ -77,7 +82,10 @@ const ParticipantContextMenu = React.forwardRef<HTMLElement, Props>(({ participa
    };
 
    const handleSendPrivateMessage = () => {
-      // TODO
+      const privateChatId = createPrivatChatChannel(participant.id, myId);
+
+      dispatch(openPrivateChat(privateChatId));
+      dispatch(setSelectedChannel(privateChatId));
       onClose();
    };
 
@@ -113,7 +121,7 @@ const ParticipantContextMenu = React.forwardRef<HTMLElement, Props>(({ participa
 
    const canSetTempPermission = usePermission(PERMISSIONS_CAN_GIVE_TEMPORARY_PERMISSION);
    const canSeePermissions = usePermission(PERMISSIONS_CAN_SEE_ANY_PARTICIPANTS_PERMISSIONS);
-   const canSendPrivateMessage = false; // TODO
+   const canSendPrivateMessage = useSelector(selectPrivateMessageEnabled);
    const canKick = usePermission(CONFERENCE_CAN_KICK_PARTICIPANT);
    const canChangeParticipantProducers = usePermission(MEDIA_CAN_CHANGE_PARTICIPANTS_PRODUCER);
 
@@ -146,7 +154,7 @@ const ParticipantContextMenu = React.forwardRef<HTMLElement, Props>(({ participa
                <ListItemIcon className={classes.menuIcon}>
                   <SendIcon fontSize="small" />
                </ListItemIcon>
-               Send private message
+               Open private chat
             </MenuItem>
          )}
          {canKick && (

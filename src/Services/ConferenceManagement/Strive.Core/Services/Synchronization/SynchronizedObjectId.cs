@@ -49,7 +49,7 @@ namespace Strive.Core.Services.Synchronization
 
         private static string BuildQueryString(IReadOnlyDictionary<string, string> parameters)
         {
-            return string.Join('&', parameters.Select(x => $"{x.Key}={x.Value}"));
+            return string.Join('&', parameters.OrderBy(x => x.Key).Select(x => $"{x.Key}={x.Value}"));
         }
     }
 }

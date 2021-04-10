@@ -5,7 +5,7 @@ using Strive.Core.Services.Synchronization;
 namespace Strive.Core.Services.ConferenceControl
 {
     public record SynchronizedConferenceInfo(bool IsOpen, IImmutableList<string> Moderators,
-        DateTimeOffset? ScheduledDate, string? Name)
+        DateTimeOffset? ScheduledDate, string? Name, bool IsPrivateChatEnabled)
     {
         public static SynchronizedObjectId SyncObjId { get; } = new(SynchronizedObjectIds.CONFERENCE);
     }

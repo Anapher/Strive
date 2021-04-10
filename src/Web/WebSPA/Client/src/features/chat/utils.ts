@@ -8,3 +8,10 @@ export function mergeChatMessages(a: ChatMessageDto[], b: ChatMessageDto[]) {
       .uniqBy((x) => x.id)
       .value();
 }
+
+export function createPrivatChatChannel(p1: string, p2: string) {
+   const arr = [p1, p2];
+   arr.sort();
+
+   return `chat?p1=${arr[0]}&p2=${arr[1]}&type=private`;
+}

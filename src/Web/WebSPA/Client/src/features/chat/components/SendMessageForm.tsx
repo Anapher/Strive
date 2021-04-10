@@ -50,7 +50,7 @@ export default function SendMessageForm({ onSendMessage, isTyping, channel }: Pr
       if (isTyping && !watchUserTyping) {
          dispatch(setUserTyping({ isTyping: false, channel }));
       }
-   }, [watchUserTyping]);
+   }, [watchUserTyping, channel]);
 
    const applyParticipantIsTyping = useCallback(
       (newValue: boolean) => {
@@ -60,7 +60,7 @@ export default function SendMessageForm({ onSendMessage, isTyping, channel }: Pr
 
          dispatch(setUserTyping({ isTyping: newValue, channel }));
       },
-      [dispatch, inputRef.current],
+      [dispatch, inputRef.current, channel],
    );
 
    const handleSetIsTyping = useBooleanThrottle(isTyping, applyParticipantIsTyping);
@@ -88,7 +88,7 @@ export default function SendMessageForm({ onSendMessage, isTyping, channel }: Pr
          </Box>
          <Box display="flex" flexDirection="row" justifyContent="space-between" alignItems="center">
             <Box>
-               <SendMessageOptions value={options} onChange={setOptions} />
+               <SendMessageOptions value={options} onChange={setOptions} channel={channel} />
             </Box>
             <Box display="flex">
                <IconButton aria-label="emojis" ref={emojisButtonRef} onClick={handleOpenEmojis}>
