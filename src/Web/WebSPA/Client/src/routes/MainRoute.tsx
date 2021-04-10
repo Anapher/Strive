@@ -40,7 +40,6 @@ const useStyles = makeStyles((theme) => ({
    },
    contentContainer: {
       display: 'flex',
-      alignItems: 'center',
       flexDirection: 'column',
    },
    title: {
@@ -56,7 +55,10 @@ const useStyles = makeStyles((theme) => ({
    buttonContainer: {
       display: 'flex',
       flexDirection: 'column',
-      width: 400,
+      [theme.breakpoints.up('sm')]: {
+         marginLeft: theme.spacing(2),
+         marginRight: theme.spacing(2),
+      },
    },
    signOutButton: {
       right: theme.spacing(2),

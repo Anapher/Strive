@@ -1,4 +1,4 @@
-import { Dialog, DialogTitle, makeStyles } from '@material-ui/core';
+import { Dialog, DialogTitle, makeStyles, useMediaQuery, useTheme } from '@material-ui/core';
 import { compare } from 'fast-json-patch';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -9,15 +9,32 @@ import ConferenceCreatedView from './ConferenceCreatedView';
 import CreateConferenceForm from './CreateConferenceForm';
 import CreateConferenceFormSkeleton from './CreateConferenceFormSkeleton';
 
-const useStyles = makeStyles({
-   dialogContent: {
-      height: 496,
+const useStyles = makeStyles((theme) => ({
+   dialog: {
+      display: 'flex',
+      flexDirection: 'column',
+
+      height: '100%',
+
+      [theme.breakpoints.up('sm')]: {
+         height: 'auto',
+      },
    },
-});
+   dialogContent: {
+      flex: 1,
+      minHeight: 0,
+      [theme.breakpoints.up('sm')]: {
+         height: 496,
+      },
+   },
+}));
 
 function CreateConferenceDialog() {
    const dispatch = useDispatch();
    const classes = useStyles();
+
+   const theme = useTheme();
+   const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
    const { dialogOpen, createdConferenceId, isCreating, conferenceData, mode } = useSelector(
       (state: RootState) => state.createConference,
@@ -47,6 +64,8 @@ function CreateConferenceDialog() {
          fullWidth
          maxWidth="sm"
          scroll="paper"
+         fullScreen={fullScreen}
+         className={classes.dialog}
       >
          <DialogTitle id="create-conference-dialog-title">
             {mode === 'patch' ? 'Change conference settings' : 'Create a new conference'}
