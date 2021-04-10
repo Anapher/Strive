@@ -1,6 +1,6 @@
 import { makeStyles, Typography } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import { DateTime } from 'luxon';
 import emojiRegex from 'emoji-regex/RGI_Emoji';
 import clsx from 'classnames';
@@ -8,6 +8,8 @@ import { hashCode, numberToColor } from '../color-utils';
 import { Participant } from 'src/features/conference/types';
 import { ChatMessageDto } from 'src/core-hub.types';
 import { Bullhorn } from 'mdi-material-ui';
+import Linkify from 'linkifyjs/react';
+import { Options } from 'linkifyjs';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -52,6 +54,9 @@ const useStyles = makeStyles((theme) => ({
       color: theme.palette.text.secondary,
       marginLeft: theme.spacing(1),
    },
+   anchor: {
+      color: theme.palette.primary.light,
+   },
 }));
 
 const onlyEmojisRegex = new RegExp('^(' + emojiRegex().toString().replace(/\/g$/, '') + '|\\s)+$');
@@ -70,6 +75,8 @@ export default function ChatMessage({ message, participants, participantColors }
 
    const isAnonymous = message && !message.sender;
    const isDisconnected = message?.sender && !sender;
+
+   const linifyOptions = useRef<Options>({ className: classes.anchor, target: '_blank' });
 
    const participantColor = useMemo(
       () =>
@@ -103,7 +110,7 @@ export default function ChatMessage({ message, participants, participantColors }
             </Typography>
          </div>
          <Typography variant="body1" className={clsx(classes.messageText, isEmoji && classes.emojiText)}>
-            {message ? message.message : <Skeleton />}
+            <Linkify options={linifyOptions.current}>{message ? message.message : <Skeleton />}</Linkify>
          </Typography>
       </li>
    );
