@@ -8,7 +8,7 @@ import { useSelector } from 'react-redux';
 import AnimatedCamIcon from 'src/assets/animated-icons/AnimatedCamIcon';
 import AnimatedMicIcon from 'src/assets/animated-icons/AnimatedMicIcon';
 import AnimatedScreenIcon from 'src/assets/animated-icons/AnimatedScreenIcon';
-import Debug from 'src/features/conference/components/Troubleshooting';
+import Debug from 'src/features/conference/components/troubleshoot/Troubleshooting';
 import usePermission from 'src/hooks/usePermission';
 import {
    CONFERENCE_CAN_RAISE_HAND,
