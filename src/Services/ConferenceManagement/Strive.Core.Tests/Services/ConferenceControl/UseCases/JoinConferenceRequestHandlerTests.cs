@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Strive.Core.Interfaces.Gateways.Repositories;
 using Strive.Core.Services;
 using Strive.Core.Services.ConferenceControl;
 using Strive.Core.Services.ConferenceControl.ClientControl;
@@ -51,6 +52,8 @@ namespace Strive.Core.Tests.Services.ConferenceControl.UseCases
             // arrange
             var request = CreateDefaultRequest();
             var handler = Create();
+            _joinedParticipantsRepositoryMock.Setup(x => x.IsParticipantJoined(Participant, ConnectionId))
+                .ReturnsAsync(true);
 
             // act
             await handler.Handle(request, CancellationToken.None);
@@ -68,6 +71,9 @@ namespace Strive.Core.Tests.Services.ConferenceControl.UseCases
             // arrange
             var request = CreateDefaultRequest();
             var handler = Create();
+
+            _joinedParticipantsRepositoryMock.Setup(x => x.IsParticipantJoined(Participant, ConnectionId))
+                .ReturnsAsync(true);
 
             var counter = 0;
             var timeEnableParticipantMessagingRequest = 0;
@@ -98,6 +104,8 @@ namespace Strive.Core.Tests.Services.ConferenceControl.UseCases
 
             _joinedParticipantsRepositoryMock.Setup(x => x.AddParticipant(Participant, ConnectionId))
                 .ReturnsAsync(new PreviousParticipantState(participantToKick.ConferenceId, connectedConnectionId));
+            _joinedParticipantsRepositoryMock.Setup(x => x.IsParticipantJoined(Participant, ConnectionId))
+                .ReturnsAsync(true);
 
             var request = CreateDefaultRequest();
             var handler = Create();
@@ -111,6 +119,20 @@ namespace Strive.Core.Tests.Services.ConferenceControl.UseCases
             var notification = capturedNotification.GetNotification();
             Assert.Equal(participantToKick, notification.Participant);
             Assert.Equal(connectedConnectionId, notification.ConnectionId);
+        }
+
+        [Fact]
+        public async Task Handle_ParticipantJoinRaceCondition_ThrowConcurrencyException()
+        {
+            // arrange
+            var request = CreateDefaultRequest();
+            var handler = Create();
+            _joinedParticipantsRepositoryMock.Setup(x => x.IsParticipantJoined(Participant, ConnectionId))
+                .ReturnsAsync(false);
+
+            // act
+            await Assert.ThrowsAsync<ConcurrencyException>(async () =>
+                await handler.Handle(request, CancellationToken.None));
         }
     }
 }
