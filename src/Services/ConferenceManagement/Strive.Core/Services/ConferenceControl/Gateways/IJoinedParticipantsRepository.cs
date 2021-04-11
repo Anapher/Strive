@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Strive.Infrastructure.KeyValue.Abstractions;
 
 namespace Strive.Core.Services.ConferenceControl.Gateways
 {
@@ -9,7 +10,7 @@ namespace Strive.Core.Services.ConferenceControl.Gateways
         ///     Register a participant in the mapping
         /// </summary>
         /// <returns>Return the conference id that was previously set or null if the participant did not belong to a conference</returns>
-        Task<PreviousParticipantState?> AddParticipant(Participant participant, string connectionId);
+        ValueTask<PreviousParticipantState?> AddParticipant(Participant participant, string connectionId);
 
 
         /// <summary>
@@ -18,12 +19,16 @@ namespace Strive.Core.Services.ConferenceControl.Gateways
         ///     to remove the mapping on leave
         /// </summary>
         /// <returns>Return false if the participant was not joined or if he belongs to a different conference</returns>
-        Task<bool> RemoveParticipant(string participantId, string connectionId);
+        ValueTask<bool> RemoveParticipant(string participantId, string connectionId);
 
-        Task<string?> GetConferenceIdOfParticipant(string participantId);
+        ValueTask<string?> GetConferenceIdOfParticipant(string participantId);
 
-        Task<IEnumerable<Participant>> GetParticipantsOfConference(string conferenceId);
+        ValueTask<IEnumerable<Participant>> GetParticipantsOfConference(string conferenceId);
 
-        Task<bool> IsParticipantJoined(Participant participant);
+        ValueTask<bool> IsParticipantJoined(Participant participant);
+
+        ValueTask<bool> IsParticipantJoined(Participant participant, string connectionId);
+
+        ValueTask<IAcquiredLock> LockParticipantJoin(Participant participant);
     }
 }

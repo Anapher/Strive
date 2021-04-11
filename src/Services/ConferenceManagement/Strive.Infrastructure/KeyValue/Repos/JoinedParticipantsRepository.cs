@@ -12,6 +12,7 @@ namespace Strive.Infrastructure.KeyValue.Repos
     {
         private const string PARTICIPANT_TO_CONFERENCE_KEY = "ParticipantToConference";
         private const string CONFERENCE_TO_PARTICIPANTS_KEY = "ConferenceParticipants";
+        private const string PARTICIPANT_LOCK = "participantJoinLock";
 
         private readonly IKeyValueDatabase _database;
 
@@ -20,7 +21,7 @@ namespace Strive.Infrastructure.KeyValue.Repos
             _database = database;
         }
 
-        public async Task<PreviousParticipantState?> AddParticipant(Participant participant, string connectionId)
+        public async ValueTask<PreviousParticipantState?> AddParticipant(Participant participant, string connectionId)
         {
             var participantToConferenceKey = GetParticipantToConferenceKey(participant.Id);
             var conferenceToParticipantsKey = GetConferenceToParticipantsKey(participant.ConferenceId);
@@ -39,12 +40,12 @@ namespace Strive.Infrastructure.KeyValue.Repos
             }
         }
 
-        public async Task<bool> RemoveParticipant(string participantId, string connectionId)
+        public async ValueTask<bool> RemoveParticipant(string participantId, string connectionId)
         {
             return await RemoveParticipantSafe(_database, participantId, connectionId) == true;
         }
 
-        private static async Task<PreviousParticipantState?> RemoveParticipant(IKeyValueDatabaseActions database,
+        private static async ValueTask<PreviousParticipantState?> RemoveParticipant(IKeyValueDatabaseActions database,
             string participantId)
         {
             var participantToConferenceKey = GetParticipantToConferenceKey(participantId);
@@ -59,8 +60,8 @@ namespace Strive.Infrastructure.KeyValue.Repos
             return new PreviousParticipantState(arr[0], arr[1]);
         }
 
-        private static async Task<bool?> RemoveParticipantSafe(IKeyValueDatabaseActions database, string participantId,
-            string connectionId)
+        private static async ValueTask<bool?> RemoveParticipantSafe(IKeyValueDatabaseActions database,
+            string participantId, string connectionId)
         {
             var participantToConferenceKey = GetParticipantToConferenceKey(participantId);
             var conferenceToParticipantsKey = GetConferenceToParticipantsKey("*");
@@ -73,13 +74,13 @@ namespace Strive.Infrastructure.KeyValue.Repos
             return (bool) result;
         }
 
-        public async Task<string?> GetConferenceIdOfParticipant(string participantId)
+        public async ValueTask<string?> GetConferenceIdOfParticipant(string participantId)
         {
             var key = GetParticipantToConferenceKey(participantId);
             return await _database.GetAsync(key);
         }
 
-        public async Task<IEnumerable<Participant>> GetParticipantsOfConference(string conferenceId)
+        public async ValueTask<IEnumerable<Participant>> GetParticipantsOfConference(string conferenceId)
         {
             var conferenceToParticipantsKey = DatabaseKeyBuilder.ForProperty(CONFERENCE_TO_PARTICIPANTS_KEY)
                 .ForConference(conferenceId).ToString();
@@ -88,9 +89,21 @@ namespace Strive.Infrastructure.KeyValue.Repos
                 new Participant(conferenceId, participantId));
         }
 
-        public async Task<bool> IsParticipantJoined(Participant participant)
+        public async ValueTask<bool> IsParticipantJoined(Participant participant)
         {
             return await GetConferenceIdOfParticipant(participant.Id) == participant.ConferenceId;
+        }
+
+        public async ValueTask<bool> IsParticipantJoined(Participant participant, string connectionId)
+        {
+            var conferenceToParticipantsKey = GetConferenceToParticipantsKey(participant.ConferenceId);
+            return await _database.HashGetAsync(conferenceToParticipantsKey, participant.Id) == connectionId;
+        }
+
+        public async ValueTask<IAcquiredLock> LockParticipantJoin(Participant participant)
+        {
+            var key = GetParticipantJoinLockKey(participant);
+            return await _database.AcquireLock(key);
         }
 
         private static string GetParticipantToConferenceKey(string participantId)
@@ -102,6 +115,12 @@ namespace Strive.Infrastructure.KeyValue.Repos
         {
             return DatabaseKeyBuilder.ForProperty(CONFERENCE_TO_PARTICIPANTS_KEY).ForConference(conferenceId)
                 .ToString();
+        }
+
+        private static string GetParticipantJoinLockKey(Participant participant)
+        {
+            return DatabaseKeyBuilder.ForProperty(PARTICIPANT_LOCK).ForConference(participant.ConferenceId)
+                .ForSecondary(participant.Id).ToString();
         }
     }
 }

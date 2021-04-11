@@ -2,6 +2,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using Strive.Core.Interfaces.Gateways.Repositories;
 using Strive.Core.Services.ConferenceControl.ClientControl;
 using Strive.Core.Services.ConferenceControl.Gateways;
 using Strive.Core.Services.ConferenceControl.Notifications;
@@ -40,6 +41,13 @@ namespace Strive.Core.Services.ConferenceControl.UseCases
                     new Participant(previousSession.ConferenceId, participantId), previousSession.ConnectionId,
                     ParticipantKickedReason.NewSessionConnected));
             }
+
+            await using var @lock = await _joinedParticipantsRepository.LockParticipantJoin(participant);
+
+            if (!await _joinedParticipantsRepository.IsParticipantJoined(participant, connectionId))
+                throw new ConcurrencyException("Race condition on participant join.");
+
+            _logger.LogDebug("Begin joining of participant {participant}", participant);
 
             // enable messaging just after kicking client
             await _mediator.Publish(new ParticipantInitializedNotification(participant));

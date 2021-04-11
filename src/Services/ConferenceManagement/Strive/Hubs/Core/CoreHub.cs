@@ -20,6 +20,7 @@ using Strive.Core.Services.BreakoutRooms.Requests;
 using Strive.Core.Services.Chat;
 using Strive.Core.Services.Chat.Requests;
 using Strive.Core.Services.ConferenceControl;
+using Strive.Core.Services.ConferenceControl.Gateways;
 using Strive.Core.Services.ConferenceControl.Notifications;
 using Strive.Core.Services.ConferenceControl.Requests;
 using Strive.Core.Services.Equipment.Requests;
@@ -132,8 +133,21 @@ namespace Strive.Hubs.Core
             var participant = GetContextParticipant();
             var connectionId = Context.ConnectionId;
 
-            await _mediator.Publish(new ParticipantLeftNotification(participant, connectionId));
-            _connections.RemoveParticipant(participant.Id);
+            var repo = HubScope.Resolve<IJoinedParticipantsRepository>();
+
+            await using var @lock = await repo.LockParticipantJoin(participant);
+
+            if (_connections.TryRemoveParticipant(participant.Id,
+                new ParticipantConnection(participant.ConferenceId, connectionId)))
+            {
+                _logger.LogDebug("Participant connection exists, publish ParticipantLeftNotification");
+                await _mediator.Publish(new ParticipantLeftNotification(participant, connectionId),
+                    @lock.HandleLostToken);
+            }
+            else
+            {
+                _logger.LogDebug("OnDisconnectedAsync() | Connection does not exist, dont publish notification");
+            }
         }
 
         public Task<SuccessOrError<Unit>> OpenConference()

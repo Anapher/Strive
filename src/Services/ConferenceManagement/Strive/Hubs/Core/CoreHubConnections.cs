@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Strive.Hubs.Core
@@ -15,6 +16,11 @@ namespace Strive.Hubs.Core
         public void RemoveParticipant(string participantId)
         {
             _connections.TryRemove(participantId, out _);
+        }
+
+        public bool TryRemoveParticipant(string participantId, ParticipantConnection connection)
+        {
+            return _connections.TryRemove(new KeyValuePair<string, ParticipantConnection>(participantId, connection));
         }
 
         public bool TryGetParticipant(string participantId, [NotNullWhen(true)] out ParticipantConnection? connection)

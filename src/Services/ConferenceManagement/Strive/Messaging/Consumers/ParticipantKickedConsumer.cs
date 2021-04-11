@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using Strive.Contracts;
 using Strive.Core.Services;
+using Strive.Core.Services.ConferenceControl.Gateways;
 using Strive.Core.Services.ConferenceControl.Notifications;
 using Strive.Hubs.Core;
 
@@ -16,14 +17,16 @@ namespace Strive.Messaging.Consumers
         private readonly IHubContext<CoreHub> _hubContext;
         private readonly ICoreHubConnections _connections;
         private readonly IMediator _mediator;
+        private readonly IJoinedParticipantsRepository _repository;
         private readonly ILogger<ParticipantKickedConsumer> _logger;
 
         public ParticipantKickedConsumer(IHubContext<CoreHub> hubContext, ICoreHubConnections connections,
-            IMediator mediator, ILogger<ParticipantKickedConsumer> logger)
+            IMediator mediator, IJoinedParticipantsRepository repository, ILogger<ParticipantKickedConsumer> logger)
         {
             _hubContext = hubContext;
             _connections = connections;
             _mediator = mediator;
+            _repository = repository;
             _logger = logger;
         }
 
@@ -40,6 +43,8 @@ namespace Strive.Messaging.Consumers
             _logger.LogDebug("RemoveParticipant() | {participant}, connectionId:{connectionId}", participant,
                 connectionId);
 
+            await using var @lock = await _repository.LockParticipantJoin(participant);
+
             if (connectionId == null)
             {
                 if (!_connections.TryGetParticipant(participant.Id, out var connection))
@@ -48,12 +53,23 @@ namespace Strive.Messaging.Consumers
                 connectionId = connection.ConnectionId;
             }
 
-            await _hubContext.Groups.RemoveFromGroupAsync(connectionId, CoreHubGroups.OfParticipant(participant),
-                cancellationToken);
-            await _hubContext.Groups.RemoveFromGroupAsync(connectionId,
-                CoreHubGroups.OfConference(participant.ConferenceId), cancellationToken);
+            if (_connections.TryRemoveParticipant(participant.Id,
+                new ParticipantConnection(participant.ConferenceId, connectionId)))
+            {
+                _logger.LogDebug("Remove participant connection");
 
-            await _mediator.Publish(new ParticipantLeftNotification(participant, connectionId));
+                await _hubContext.Groups.RemoveFromGroupAsync(connectionId, CoreHubGroups.OfParticipant(participant),
+                    cancellationToken);
+                await _hubContext.Groups.RemoveFromGroupAsync(connectionId,
+                    CoreHubGroups.OfConference(participant.ConferenceId), cancellationToken);
+
+                await _mediator.Publish(new ParticipantLeftNotification(participant, connectionId),
+                    @lock.HandleLostToken);
+            }
+            else
+            {
+                _logger.LogDebug("Participant connection was already removed");
+            }
         }
     }
 }
