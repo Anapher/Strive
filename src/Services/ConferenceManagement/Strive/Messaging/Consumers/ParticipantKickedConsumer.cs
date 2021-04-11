@@ -37,13 +37,11 @@ namespace Strive.Messaging.Consumers
             await RemoveParticipant(message.Participant, message.ConnectionId, context.CancellationToken);
         }
 
-        public async Task RemoveParticipant(Participant participant, string? connectionId,
+        private async Task RemoveParticipant(Participant participant, string? connectionId,
             CancellationToken cancellationToken)
         {
             _logger.LogDebug("RemoveParticipant() | {participant}, connectionId:{connectionId}", participant,
                 connectionId);
-
-            await using var @lock = await _repository.LockParticipantJoin(participant);
 
             if (connectionId == null)
             {
@@ -63,8 +61,18 @@ namespace Strive.Messaging.Consumers
                 await _hubContext.Groups.RemoveFromGroupAsync(connectionId,
                     CoreHubGroups.OfConference(participant.ConferenceId), cancellationToken);
 
-                await _mediator.Publish(new ParticipantLeftNotification(participant, connectionId),
-                    @lock.HandleLostToken);
+                if (await _repository.IsParticipantJoined(participant, connectionId))
+                {
+                    await using var @lock = await _repository.LockParticipantJoin(participant);
+
+                    if (await _repository.IsParticipantJoined(participant, connectionId))
+                        await _mediator.Publish(new ParticipantLeftNotification(participant, connectionId),
+                            @lock.HandleLostToken);
+                }
+                else
+                {
+                    _logger.LogDebug("Participant is not joined");
+                }
             }
             else
             {
