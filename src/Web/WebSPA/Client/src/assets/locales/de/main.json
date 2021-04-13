@@ -1,70 +1,286 @@
 {
-    "auth": {
-        "AuthCallback": {
-            "title": "Authentifizierung erfolgreich",
-            "text": "Sie werden jetzt zu unserer Anwendung weitergeleitet."
-        },
-        "AuthenticatingComponent": {
-            "title": "Authentifiziere",
-            "text": "Sie werden jetzt zur Login Seite weitergeleitet."
-        },
-        "NotAuthenticated": {
-            "title": "Authentifizierung fehlgeschlagen",
-            "text": "Sie sind nicht authentifiziert."
-        },
-        "SessionLostComponent": {
-            "title": "Session Lost",
-            "text": "Sie sind nicht authentifiziert."
-        }
+  "auth": {
+    "AuthCallback": {
+      "title": "Authentifizierung erfolgreich",
+      "text": "Sie werden jetzt zu unserer Anwendung weitergeleitet."
     },
-    "view_main": {
-        "welcome_message": "Willkomen bei Strive",
-        "start_new_conference": "Neue Konferenz öffnen"
+    "AuthenticatingComponent": {
+      "title": "Authentifiziere",
+      "text": "Sie werden jetzt zur Login Seite weitergeleitet."
     },
-    "dialog_create_conference": {
-        "title_mode_create": "Neue Konferenz erstellen",
-        "title_mode_patch": "Konferenz ändern",
-        "unnamed_conference": "Unbenannte Konfernenz",
-        "enter_moderator_id": "Geben Sie die Id des Benutzers ein, der zu den Moderatoren hinzugefügt werden soll",
-        "tabs": {
-            "common": {
-                "start": "Start",
-                "schedule": "Planen",
-                "open_cron_expression_generator": "Cron expression generator öffnen",
-                "disable_room_chat_master": "Room Chat für den master Raum deaktivieren",
-                "show_participants_typing": "Teilnehmer anzeigen, die gerade in den Chat tippen"
-            },
-            "moderators": {
-                "error_user_not_found": "Benutzer mit Id \"{{id}}\" wurde nicht gefunden"
-            },
-            "permissions": {
-                "all": "Alle",
-                "breakout_room": "Breakout Room"
-            }
-        },
-        "created": {
-            "join": "Beitreten",
-            "conference_url": "Konferenz Url"
-        }
+    "NotAuthenticated": {
+      "title": "Authentifizierung fehlgeschlagen",
+      "text": "Sie sind nicht authentifiziert."
     },
-    "conference_not_open": {
-        "connecting_to_conference": "Verbinde zu Konferenz...",
-        "reconnecting_to_conference": "Versuche, erneut zur Konferenz zu verbinden...",
-        "play_sound_on_conference_open": "Einen Ton abspielen wenn die Konferenz öffnet",
-        "open_conference": "Konferenz öffnen",
-        "change_conference_settings": "Konferenzeinstellungen ändern",
-        "you_are_moderator": "Sie sind ein Moderator der Konferenz.",
-        "conference_scheduled_for": "Die Konferenz ist geplant für",
-        "n_participants_waiting": "1 Teilnehmer wartet.",
-        "n_participants_waiting_plural": "{{count}} Teilnehmer warten.",
-        "waiting_for_moderator_to_join": "Konferenz wurde noch nicht geöffnet. Warte, dass ein Moderator beitritt...",
-        "waiting_for_moderator_to_open": "Konferenz wurde noch nicht geöffnet. Warte auf einen Moderator, der die Konferenz öffnet...",
-        "moderator_joined": "Moderator ist beigetreten.",
-        "you_dont_need_to_refresh": "Sie müssen diese Seite nicht aktualisieren"
-    },
-    "request_user_interaction": {
-        "title": "Bitte tuen Sie etwas",
-        "request": "Klicken Sie irgendwo hin | Drücken Sie eine Taste | Tippen Sie irgendwo hin",
-        "description": "Wir können aufgrund der Autoplay Policy Ihres Browsers keinen Ton abspielen, bevor Sie nicht mit der Website interagiert haben."
+    "SessionLostComponent": {
+      "title": "Session Lost",
+      "text": "Sie sind nicht authentifiziert."
     }
+  },
+  "view_main": {
+    "welcome_message": "Willkomen bei Strive",
+    "start_new_conference": "Neue Konferenz öffnen"
+  },
+  "dialog_create_conference": {
+    "title_mode_create": "Neue Konferenz erstellen",
+    "title_mode_patch": "Konferenz ändern",
+    "unnamed_conference": "Unbenannte Konfernenz",
+    "enter_moderator_id": "Geben Sie die Id des Benutzers ein, der zu den Moderatoren hinzugefügt werden soll",
+    "tabs": {
+      "common": {
+        "start": "Start",
+        "schedule": "Planen",
+        "open_cron_expression_generator": "Cron expression generator öffnen",
+        "disable_room_chat_master": "Room Chat für den master Raum deaktivieren",
+        "show_participants_typing": "Teilnehmer anzeigen, die gerade in den Chat tippen"
+      },
+      "moderators": {
+        "error_user_not_found": "Benutzer mit Id \"{{id}}\" wurde nicht gefunden"
+      },
+      "permissions": {
+        "all": "Alle",
+        "breakout_room": "Breakout Room"
+      }
+    },
+    "created": {
+      "join": "Beitreten",
+      "conference_url": "Konferenz Url"
+    }
+  },
+  "conference_not_open": {
+    "connecting_to_conference": "Verbinde zu Konferenz...",
+    "reconnecting_to_conference": "Versuche, erneut zur Konferenz zu verbinden...",
+    "play_sound_on_conference_open": "Einen Ton abspielen wenn die Konferenz öffnet",
+    "open_conference": "Konferenz öffnen",
+    "change_conference_settings": "Konferenzeinstellungen ändern",
+    "you_are_moderator": "Sie sind ein Moderator der Konferenz.",
+    "conference_scheduled_for": "Die Konferenz ist geplant für",
+    "n_participants_waiting": "1 Teilnehmer wartet.",
+    "n_participants_waiting_plural": "{{count}} Teilnehmer warten.",
+    "waiting_for_moderator_to_join": "Konferenz wurde noch nicht geöffnet. Warte, dass ein Moderator beitritt...",
+    "waiting_for_moderator_to_open": "Konferenz wurde noch nicht geöffnet. Warte auf einen Moderator, der die Konferenz öffnet...",
+    "moderator_joined": "Moderator ist beigetreten.",
+    "you_dont_need_to_refresh": "Sie müssen diese Seite nicht aktualisieren"
+  },
+  "request_user_interaction": {
+    "title": "Bitte tuen Sie etwas",
+    "request": "Klicken Sie irgendwo hin | Drücken Sie eine Taste | Tippen Sie irgendwo hin",
+    "description": "Wir können aufgrund der Autoplay Policy Ihres Browsers keinen Ton abspielen, bevor Sie nicht mit der Website interagiert haben."
+  },
+  "conference": {
+    "appbar": {
+      "change_conference_settings": "Konferenzeinstellungen ändern",
+      "close_conference": "Konferenz schließen",
+      "diagnostics": "Diagnose",
+      "participants": "Teilnehmer: {{count}}",
+      "show_my_permissions": "Meine Berechtigungen anzeigen",
+      "signed_in_as": "Eingeloggt als",
+      "webrtc_not_initialized": "WebRTC nicht initialisiert",
+      "webrtc_reconnecting": "Verbindung zum WebRTC-Server wiederherstellen..."
+    },
+    "chat": {
+      "new_chat_info": "Sag Hallo!",
+      "open_emojis": "Emojis öffnen",
+      "private_chat_disconnected": "@Unbekannt",
+      "send": "Senden",
+      "type_your_message": "Geben Sie Ihre Nachricht ein...",
+      "options": {
+        "close_private_chat": "Privaten Chat schließen",
+        "send_announcement": "Ankündigung senden",
+        "send_anonymously": "Anonym senden"
+      },
+      "typing": {
+        "and": "und",
+        "tail_more_typing": "{{list}} und <1>{{count}}</1> weitere sind am Schreiben",
+        "tail_more_typing_plural": "{{list}} und <1>{{count}}</1> weitere sind am Schreiben",
+        "tail_typing": "ist am Schreiben",
+        "tail_typing_plural": "sind am Schreiben"
+      }
+    },
+    "diagnostics": {
+      "title": "Diagnose von Strive ({{name}})"
+    },
+    "dialog_breakout_rooms": {
+      "assign_participants_to_rooms": "Teilnehmer den Räumen zuteilen",
+      "create_description": "Lassen Sie die Teilnehmer in kleineren Gruppen zusammenarbeiten. Hier können Sie die Anzahl der zu erstellenden Räume festlegen. Nach dem Anlegen können die Teilnehmer ihnen selbständig beitreten. Sie können eine Dauer für die Breakout-Phase vergeben, welche dann allen Teilnehmern angezeigt wird.",
+      "create_title": "Breakout Räume erstellen",
+      "description_description": "Legen Sie optional die Aufgabe fest, die die Teilnehmer erledigen sollen.",
+      "duration_in_minutes": "Dauer in Minuten",
+      "open_breakout_rooms": "Breakout Räume öffnen",
+      "randomly_assign_rooms": "Zufällig den Räumen zuteilen",
+      "room#": "Raum #{{n}}",
+      "unassigned": "Nicht zugewiesen",
+      "update_breakout_rooms": "Breakout Räume aktualisieren",
+      "update_description": "Hier können Sie den aktuellen Zustand der Breakout-Räume ändern.",
+      "update_title": "Breakout Räume ändern",
+      "validation_must_at_least_one_minute": "Es muss mindestens eine Minute sein.",
+      "validation_must_create_at_least_one": "Es muss mindestens ein Raum erstellt werden."
+    },
+    "dialog_permissions": {
+      "description": "Hier können Sie die genauen Berechtigungen einsehen und woher diese kommen. Eine Berechtigung besteht aus einem Schlüssel und einem Wert, der überall in der Anwendung verwendet werden kann. Die Berechtigungen sind in Ebenen gruppiert, je nach Status des Teilnehmers kann es verschiedene Ebenen geben. Die oberen Schichten überschreiben die unten definierten Berechtigungen, wenn sie denselben Schlüssel haben. Die Standardwerte sind false.",
+      "notice_overwritten": "Diese Berechtigung wird in {{layer}} überschrieben",
+      "title": "Berechtigung von {{name}}"
+    },
+    "equipment": {
+      "available_devices": "Verfügbare Geräte",
+      "request_permissions": {
+        "error": "Bitte akzeptieren Sie die Anfrage von Ihrem Browser nach den Berechtigungen.",
+        "grant_permissions": "Berechtigungen erteilen",
+        "title": "Verwenden Sie dieses Gerät als Equipment"
+      }
+    },
+    "media": {
+      "controls": {
+        "mic": {
+          "active": "Mikrofon ist aktiv",
+          "disabled": "Mikrofon ist deaktiviert",
+          "label_disable": "Mikrofon deaktivieren",
+          "label_enable": "Mikrofon aktivieren",
+          "paused": "Mikrofon ist pausiert"
+        },
+        "screen": {
+          "active": "Bildschirm wird geteilt",
+          "disabled": "Bildschirm wird nicht geteilt",
+          "label_disable": "Bildschirm nicht mehr teilen",
+          "label_enable": "Bildschirm teilen",
+          "paused": "Bildschirm teilen ist pausiert"
+        },
+        "webcam": {
+          "active": "Webcam ist aktiv",
+          "disabled": "Webcam ist deaktiviert",
+          "label_disable": "Webcam deaktivieren",
+          "label_enable": "Webcam aktivieren",
+          "paused": "Webcam ist pausiert"
+        }
+      },
+      "troubleshooting": {
+        "speakers": {
+          "button_play": "Testaudio abspielen",
+          "button_stop": "Stopp",
+          "desc": "Um zu prüfen, ob Ihre Lautsprecher funktionieren, spielen Sie bitte das Testaudio ab. Wenn Sie während der Tonwiedergabe nichts hören, überprüfen Sie bitte Ihre Tonausgabe in den Einstellungen Ihres Betriebssystems.",
+          "title": "Lautsprecher"
+        },
+        "title": "Fehlersuche",
+        "webrtc": {
+          "status": {
+            "connected": {
+              "message": "verbunden"
+            },
+            "connecting": {
+              "desc": "Es wird versucht, eine Verbindung zum WebRTC-Server (Selective Forwarding Unit) herzustellen. Bitte stellen Sie sicher, dass die SFU gestartet wurde und erreichbar ist.",
+              "message": "Verbinde zu Server..."
+            },
+            "invalid_connection_state": {
+              "desc": "Die WebRTC-Verbindung scheint Probleme zu haben. Bitte überprüfen Sie Ihren Browser oder aktualisieren Sie diese Seite."
+            },
+            "new": {
+              "desc": "Die Verbindung wurde erstellt und initialisiert, aber noch nicht aufgebaut.",
+              "message": "Neu"
+            },
+            "send_transport_connecting": {
+              "desc": "WebRTC versucht gerade, den Sendetransport zu verbinden, bitte warten Sie kurz.",
+              "message": "Verbinde..."
+            },
+            "send_transport_missing": {
+              "desc": "Der Sendetransport wurde nicht erstellt. Bitte aktualisieren Sie diese Seite und kontaktieren Sie den Support, wenn der Fehler weiterhin auftritt.",
+              "message": "Sendetransport nicht erstellt"
+            }
+          },
+          "table": {
+            "id": "ID",
+            "recevied": "Empfangen",
+            "sent": "Gesendet",
+            "state": "Status"
+          },
+          "title": "WebRTC Verbindung"
+        }
+      }
+    },
+    "notifications": {
+      "device_disconnected_equipment": "Das Equipment Gerät für die Quelle {{name}} wurde getrennt, es wird nun das Standardgerät verwendet.",
+      "device_disconnected_local": "Das lokale Gerät für die Quelle {{name}} wurde getrennt, es wird nun das Standardgerät verwendet.",
+      "disable_mic": {
+        "loading": "Mikrofon von {{name}} deaktivieren...",
+        "success": "Mikrofon wurde deaktiviert"
+      },
+      "fetch_devices": {
+        "error": "Geräte abrufen fehlgeschlagen",
+        "loading": "Geräte abrufen...",
+        "success": "Geräte wurden aktualisiert"
+      },
+      "kick": {
+        "loading": "Kick {{name}}...",
+        "success": "{{name}} wurde von der Konferenz entfernt"
+      },
+      "update_permissions": {
+        "loading": "Berechtigungen werden aktualisiert...",
+        "success_granted": "Berechtigungen erteilt",
+        "success_revoked": "Berechtigungen zurückgezogen"
+      }
+    },
+    "participant_context_menu": {
+      "allow_mic": "Mikrofon erlauben",
+      "allow_screen": "Bildschirm teilen erlauben",
+      "allow_webcam": "Webcam erlauben",
+      "disable_mic_for_all": "Mikrofon für alle deaktivieren",
+      "kick": "Kick",
+      "mute": "Stummschalten",
+      "open_private_chat": "Privaten Chat öffnen",
+      "show_permissions": "Berechtigungen anzeigen",
+      "unmute": "Stummschaltung aufheben"
+    },
+    "scenes": {
+      "actions": "Aktionen",
+      "actions_description": "Verfügbare Szenen-Aktionen öffnen",
+      "active_speaker": "Aktiver Sprecher",
+      "autonomous": "Autonom",
+      "grid": "Raster",
+      "screen_share": "{{name}}s Bildschirm",
+      "breakout_rooms": {
+        "add_time_button_group": "Zeit hinzufügen Schaltflächengruppe",
+        "change_breakout_rooms": "Breakout Räume verändern...",
+        "deadline_description": "Deadline um {{date}}",
+        "label": "Breakout Räume",
+        "title": "{{count}} Breakout Raum ist offen",
+        "title_plural": "{{count}} Breakout Räume sind offen"
+      }
+    },
+    "settings": {
+      "audio": {
+        "audio_input_level": "Ihr Mikrofon Pegel",
+        "gain": "Verstärken",
+        "permission_denied": "Erlaubnis verweigert: Bitte erlauben Sie die Verwendung des Mikrofons in Ihrem Browser",
+        "repeat_audio_description": "Klicken Sie auf die Schaltfläche unten und sagen Sie etwas. Klicken Sie erneut darauf und wir geben wieder, was Sie gerade gesagt haben.",
+        "repeat_idle": "Ich will mich selbst hören",
+        "repeat_playing": "Abspielen...",
+        "repeat_recording": "Aufnahme...",
+        "something_to_say": "Etwas zu sagen",
+        "something_to_say_text": "Strive ist viel besser als andere Videokonferenzsysteme",
+        "test_description": "Wir werden Ihren aktuellen Audioeingang zu Ihnen zurücksenden und die Ergebnisse hier anzeigen. Auf diese Weise können Sie überprüfen, wie andere Teilnehmer Ihr Audiosignal empfangen.",
+        "title": "Audio"
+      },
+      "diagnostics": {
+        "enable_video_overlay": "Video-Overlay einschalten",
+        "logging": "Logging",
+        "refresh_notice": "Bitte beachten Sie: Sie müssen diese Seite möglicherweise aktualisieren, um die Änderungen zu übernehmen",
+        "title": "Diagnose"
+      },
+      "equipment": {
+        "description": "Sie haben keine Webcam, aber ein Smartphone mit einer Kamera? Sie haben kein gutes Mikrofon, aber ein Tablet, das eines hat? Kein Problem, Sie können mehrere externe Geräte als Mikrofon oder Webcam verwenden oder deren Bildschirm teilen.",
+        "error_fetch_token": "Beim Versuch, das Gerätetoken anzufordern, ist ein Fehler aufgetreten: {{error}}",
+        "step_1": "1. Scannen Sie den QR-Code oder öffnen Sie diese URL manuell auf Ihrem Gerät:",
+        "step_2": "2. Lassen Sie den Zugriff auf Ihrem Gerät zu",
+        "step_3": "3. Ändern Sie das Standardgerät hier in den Einstellungen",
+        "title": "Equipment"
+      },
+      "test": "Test",
+      "unnamed_device": "Unbenanntes Gerät",
+      "webcam": {
+        "permission_denied": "Erlaubnis verweigert: Bitte erlauben Sie die Verwendung Ihrer Webcam in Ihrem Browser",
+        "test_description": "Wir werden Ihren aktuellen Webcameingang zu Ihnen zurücksenden und die Ergebnisse hier anzeigen. Auf diese Weise können Sie überprüfen, wie andere Teilnehmer Ihr Videosignal empfangen und Sie sehen, wie andere Teilnehmer die Verzögerung wahrnehmen.",
+        "title": "Webcam"
+      },
+      "webrtc_not_connected_error": "WebRTC nicht verbunden, daher können Sie Ihr Audiogerät nicht testen. Bitte aktualisieren Sie die Seite oder wenden Sie sich an den Server-Administrator."
+    }
+  }
 }

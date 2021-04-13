@@ -1,6 +1,8 @@
 {
-    "chat": "Chat",
-    "all_chat": "All Chat",
-    "room_chat": "Room Chat",
-    "private_chat": "Private Chat"
+  "chat": "Chat",
+  "all_chat": "All Chat",
+  "room_chat": "Room Chat",
+  "private_chat": "Private Chat",
+  "scene_plural": "Szenen",
+  "temporary_permissions": "Temporäre Berechtigungen"
 }
