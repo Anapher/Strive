@@ -2,6 +2,7 @@ import { Box, makeStyles, Typography, useTheme } from '@material-ui/core';
 import _ from 'lodash';
 import { DateTime } from 'luxon';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { SynchronizedConferenceInfo } from 'src/store/signal/synchronization/synchronized-object-ids';
 import { selectParticipants } from '../../selectors';
@@ -42,11 +43,14 @@ type ConferenceStatusProps = {
 };
 
 function ConferenceStatus({ conferenceInfo, isModeratorJoined }: ConferenceStatusProps) {
+   const { t } = useTranslation();
+
    if (conferenceInfo.scheduledDate) {
       const date = DateTime.fromISO(conferenceInfo.scheduledDate);
+
       return (
          <Typography variant="h4" align="center">
-            The conference is scheduled for <b>{date.toLocaleString(DateTime.DATETIME_FULL)}</b>
+            {t('conference_not_open.conference_scheduled_for')} <b>{date.toLocaleString(DateTime.DATETIME_FULL)}</b>
          </Typography>
       );
    }
@@ -55,8 +59,8 @@ function ConferenceStatus({ conferenceInfo, isModeratorJoined }: ConferenceStatu
       <div>
          <Typography variant="h4" align="center">
             {isModeratorJoined
-               ? 'Conference is not yet open. Waiting for moderator to open this conference...'
-               : 'Conference is not yet open. Waiting for moderator to join...'}
+               ? t('conference_not_open.waiting_for_moderator_to_open')
+               : t('conference_not_open.waiting_for_moderator_to_join')}
          </Typography>
       </div>
    );
@@ -68,11 +72,11 @@ type Props = {
 
 export default function ConferenceNotOpen({ conferenceInfo }: Props) {
    const classes = useStyles();
+   const theme = useTheme();
+   const { t } = useTranslation();
    const participants = useSelector(selectParticipants);
 
    const isModeratorJoined = _.some(participants, (x) => conferenceInfo.moderators.includes(x.id));
-
-   const theme = useTheme();
 
    return (
       <ConferenceNotOpenLayout>
@@ -83,14 +87,18 @@ export default function ConferenceNotOpen({ conferenceInfo }: Props) {
          <div className={classes.bottomContent}>
             {participants.length > 1 && (
                <Typography color="textSecondary" variant="caption" align="center" gutterBottom>
-                  {participants.length - 1}{' '}
-                  {participants.length > 2 ? 'participants are waiting.' : 'participant is waiting.'}
-                  {isModeratorJoined && <span style={{ color: theme.palette.secondary.main }}> Moderator joined.</span>}
+                  {t('conference_not_open.n_participants_waiting', { count: participants.length - 1 })}
+                  {isModeratorJoined && (
+                     <span style={{ color: theme.palette.secondary.main }}>
+                        {' '}
+                        {t('conference_not_open.moderator_joined')}.
+                     </span>
+                  )}
                </Typography>
             )}
             <Box mt={6}>
                <Typography color="textSecondary" align="center">
-                  {"You don't need to refresh this page"}
+                  {t('conference_not_open.you_dont_need_to_refresh')}
                </Typography>
             </Box>
          </div>

@@ -10,7 +10,7 @@ import {
    TextField,
    Typography,
 } from '@material-ui/core';
-import cronstrue from 'cronstrue';
+import cronstrue from 'cronstrue/i18n';
 import { DateTime } from 'luxon';
 import React, { useEffect, useRef, useState } from 'react';
 import { Controller, UseFormReturn } from 'react-hook-form';
@@ -18,6 +18,7 @@ import ScheduleIcon from '@material-ui/icons/Schedule';
 import { ConferenceDataForm } from '../form';
 import { wrapForInputRef } from 'src/utils/reat-hook-form-utils';
 import NativeIsoDateInput from 'src/components/NativeIsoDateInput';
+import { useTranslation } from 'react-i18next';
 
 const checkBoxWidth = 150;
 
@@ -46,6 +47,7 @@ export default function TabCommon({
    const classes = useStyles();
    const startTime: boolean = watch('additionalFormData.enableStartTime');
    const scheduleCron: boolean = watch('additionalFormData.enableSchedule');
+   const { t, i18n } = useTranslation();
 
    const [cronDesc, setCronDesc] = useState<string | undefined>();
    const currentTimeIso = useRef(DateTime.local().toISO());
@@ -57,7 +59,7 @@ export default function TabCommon({
       }
 
       try {
-         const desc = cronstrue.toString(s);
+         const desc = cronstrue.toString(s, { locale: i18n.language.split('-')[0] });
          setCronDesc(desc);
          return true;
       } catch (error) {
@@ -84,7 +86,7 @@ export default function TabCommon({
                         name="additionalFormData.enableStartTime"
                      />
                   }
-                  label="Start"
+                  label={t('dialog_create_conference.tabs.common.start')}
                />
                <Controller
                   control={control}
@@ -114,7 +116,7 @@ export default function TabCommon({
                            name="additionalFormData.enableSchedule"
                         />
                      }
-                     label="Schedule"
+                     label={t('dialog_create_conference.tabs.common.schedule')}
                   />
                   <TextField
                      style={{ flex: 1 }}
@@ -131,8 +133,7 @@ export default function TabCommon({
                            <InputAdornment position="end">
                               <IconButton
                                  disabled={!scheduleCron}
-                                 aria-label="open cron expression generator"
-                                 title="Cron Expression Generator"
+                                 title={t('dialog_create_conference.tabs.common.open_cron_expression_generator')}
                                  href="https://www.freeformatter.com/cron-expression-generator-quartz.html"
                                  target="_blank"
                               >
@@ -141,11 +142,13 @@ export default function TabCommon({
                            </InputAdornment>
                         ),
                      }}
+                     aria-describedby="schedule-error-text"
                   />
                </Box>
                <Collapse in={scheduleCron}>
-                  <div style={{ marginLeft: checkBoxWidth }}>
+                  <div style={{ marginLeft: checkBoxWidth + 4 }}>
                      <Typography
+                        id="schedule-error-text"
                         variant="caption"
                         color={errors.configuration?.scheduleCron ? 'error' : 'textSecondary'}
                      >
@@ -157,7 +160,7 @@ export default function TabCommon({
          </Grid>
          <Grid item xs={12}>
             <Box mt={4}>
-               <Typography variant="h6">Chat</Typography>
+               <Typography variant="h6">{t('glossary:chat')}</Typography>
                <Box>
                   <FormControlLabel
                      control={
@@ -169,7 +172,7 @@ export default function TabCommon({
                            name="configuration.chat.isGlobalChatEnabled"
                         />
                      }
-                     label="All Chat"
+                     label={t('glossary:all_chat')}
                   />
                   <FormControlLabel
                      control={
@@ -181,7 +184,7 @@ export default function TabCommon({
                            name="configuration.chat.isRoomChatEnabled"
                         />
                      }
-                     label="Room Chat"
+                     label={t('glossary:room_chat')}
                   />
                   <FormControlLabel
                      control={
@@ -193,7 +196,7 @@ export default function TabCommon({
                            name="configuration.chat.isPrivateChatEnabled"
                         />
                      }
-                     label="Private Chat"
+                     label={t('glossary:private_chat')}
                   />
                </Box>
                <FormControlLabel
@@ -206,7 +209,7 @@ export default function TabCommon({
                         name="configuration.chat.isDefaultRoomChatDisabled"
                      />
                   }
-                  label="Disable room chat for master room"
+                  label={t('dialog_create_conference.tabs.common.disable_room_chat_master')}
                />
                <FormControlLabel
                   control={
@@ -218,7 +221,7 @@ export default function TabCommon({
                         name="configuration.chat.showTyping"
                      />
                   }
-                  label="Show participants that are currently typing below chat"
+                  label={t('dialog_create_conference.tabs.common.show_participants_typing')}
                />
             </Box>
          </Grid>

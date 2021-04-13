@@ -1,5 +1,6 @@
 import { Button, makeStyles, Typography } from '@material-ui/core';
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 const useStyles = makeStyles({
    root: {
@@ -23,6 +24,7 @@ type Props = {
 
 export default function RequestPermissions({ onPermissionsGranted }: Props) {
    const classes = useStyles();
+   const { t } = useTranslation();
    const [error, setError] = useState(false);
 
    const onRequestPermissions = async () => {
@@ -47,12 +49,12 @@ export default function RequestPermissions({ onPermissionsGranted }: Props) {
       <div className={classes.root}>
          <div className={classes.container}>
             <Typography variant="h4" gutterBottom>
-               Use this device as equipment
+               {t('conference.equipment.request_permissions.title')}
             </Typography>
             <Button variant="contained" color="primary" onClick={onRequestPermissions}>
-               Grant Permissions
+               {t('conference.equipment.request_permissions.grant_permissions')}
             </Button>
-            {error && <Typography color="error">Please accept the permission request for media.</Typography>}
+            {error && <Typography color="error">{t('conference.equipment.request_permissions.error')}</Typography>}
          </div>
       </div>
    );

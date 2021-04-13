@@ -11,13 +11,16 @@ import {
    TableRow,
    Typography,
 } from '@material-ui/core';
-import React, { useEffect, useState } from 'react';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import clsx from 'classnames';
-import { formatBytes } from 'src/utils/string-utils';
 import { Skeleton } from '@material-ui/lab';
+import clsx from 'classnames';
+import React, { useEffect, useState } from 'react';
+import { TFunction, useTranslation } from 'react-i18next';
 import useWebRtc from 'src/store/webrtc/hooks/useWebRtc';
+import useWebRtcStatus from 'src/store/webrtc/hooks/useWebRtcStatus';
 import { WebRtcConnection } from 'src/store/webrtc/WebRtcConnection';
+import { WebRtcStatus } from 'src/store/webrtc/WebRtcManager';
+import { formatBytes } from 'src/utils/string-utils';
 
 type StatusType = 'ok' | 'warn' | 'error' | 'none';
 
@@ -38,49 +41,53 @@ const useStyles = makeStyles((theme) => ({
    statusChipOk: {
       backgroundColor: '#27ae60',
    },
+   statusChipError: {
+      backgroundColor: theme.palette.error.main,
+   },
    table: {
       width: '100%',
    },
 }));
 
 type StatusMonitor = {
-   getCurrentStatus: (soup?: WebRtcConnection) => StatusInfo;
+   getCurrentStatus: (t: TFunction<'translation'>, status: WebRtcStatus, soup?: WebRtcConnection) => StatusInfo;
 };
 
 const connectionStatusMonitor: StatusMonitor = {
-   getCurrentStatus: (soup) => {
-      if (!soup)
+   getCurrentStatus: (t, status, soup) => {
+      const getTranslations = (key: string, includeDesc = true) => ({
+         message: t<string>(`conference.media.troubleshooting.webrtc.status.${key}.message`),
+         desc: includeDesc ? t<string>(`conference.media.troubleshooting.webrtc.status.${key}.desc`) : undefined,
+      });
+
+      if (status === 'connecting' || !soup) {
          return {
             type: 'error',
-            message: 'WebRTC not initialized',
-            desc:
-               'The WebRTC module was not initialized. Please refresh this page and if you continue to have this error, please contact the support.',
+            ...getTranslations('connecting'),
          };
+      }
       if (!soup.sendTransport)
          return {
             type: 'error',
-            message: 'send transport not created',
-            desc:
-               'The send transport was not created. Please refresh this page and if you continue to have this error, please contact the support.',
+            ...getTranslations('connecting'),
          };
-      if (soup.sendTransport.connectionState === 'connected') return { type: 'ok', message: 'connected' };
+      if (soup.sendTransport.connectionState === 'connected')
+         return { type: 'ok', ...getTranslations('connected', false) };
       if (soup.sendTransport.connectionState === 'connecting')
          return {
             type: 'warn',
-            message: 'connecting...',
-            desc: 'WebRTC is currently trying to connect, please stand by.',
+            ...getTranslations('send_transport_connecting'),
          };
       if (soup.sendTransport.connectionState === 'new')
          return {
             type: 'none',
-            message: 'new',
-            desc: 'The connection was created and initialized, but not yet established.',
+            ...getTranslations('new'),
          };
 
       return {
          type: 'error',
          message: soup.sendTransport.connectionState,
-         desc: 'The WebRTC connection seems to have problems. Please check your browser or refresh this page.',
+         desc: t<string>('conference.media.troubleshooting.webrtc.status.invalid_connection_state.desc'),
       };
    },
 };
@@ -91,22 +98,26 @@ type Props = {
 };
 
 export default function TroubleshootConnection({ expanded, onChange }: Props) {
-   const connection = useWebRtc();
    const classes = useStyles();
+   const { t } = useTranslation();
+
+   const connection = useWebRtc();
+   const webRtcStatus = useWebRtcStatus();
 
    const [status, setStatus] = useState<StatusInfo | null>(null);
 
    useEffect(() => {
       const sendTransport = connection?.sendTransport;
 
-      const changeHandler = () => setStatus(connectionStatusMonitor.getCurrentStatus(connection ?? undefined));
+      const changeHandler = () =>
+         setStatus(connectionStatusMonitor.getCurrentStatus(t, webRtcStatus, connection ?? undefined));
       sendTransport?.on('connectionstatechange', changeHandler);
       changeHandler();
 
       return () => {
          sendTransport?.off('connectionstatechange', changeHandler);
       };
-   }, [connection]);
+   }, [connection, webRtcStatus, t]);
 
    const [transports, setTransports] = useState<any[]>([]);
 
@@ -139,10 +150,13 @@ export default function TroubleshootConnection({ expanded, onChange }: Props) {
             aria-controls="troubleshoot-connection-content"
             id="troubleshoot-connection-header"
          >
-            <Typography className={classes.heading}>WebRTC Connection</Typography>
+            <Typography className={classes.heading}>{t('conference.media.troubleshooting.webrtc.title')}</Typography>
             <Chip
                size="small"
-               className={clsx(classes.statusChip, { [classes.statusChipOk]: status?.type === 'ok' })}
+               className={clsx(classes.statusChip, {
+                  [classes.statusChipOk]: status?.type === 'ok',
+                  [classes.statusChipError]: status?.type === 'error',
+               })}
                label={status?.message}
             />
          </AccordionSummary>
@@ -154,16 +168,16 @@ export default function TroubleshootConnection({ expanded, onChange }: Props) {
                      <TableHead>
                         <TableRow>
                            <TableCell>
-                              <b>Id</b>
+                              <b>{t('onference.media.troubleshooting.webrtc.table.id')}</b>
                            </TableCell>
                            <TableCell>
-                              <b>State</b>
+                              <b>{t('onference.media.troubleshooting.webrtc.table.state')}</b>
                            </TableCell>
                            <TableCell>
-                              <b>Received</b>
+                              <b>{t('onference.media.troubleshooting.webrtc.table.received')}</b>
                            </TableCell>
                            <TableCell>
-                              <b>Sent</b>
+                              <b>{t('onference.media.troubleshooting.webrtc.table.sent')}</b>
                            </TableCell>
                         </TableRow>
                      </TableHead>

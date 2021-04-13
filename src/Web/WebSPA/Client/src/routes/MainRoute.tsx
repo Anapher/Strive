@@ -1,6 +1,7 @@
 import { AuthenticationContext } from '@axa-fr/react-oidc-context';
 import { Button, makeStyles, Typography } from '@material-ui/core';
 import React, { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import MyConferencesList from 'src/features/conference/components/MyConferencesList';
 import { fetchConferenceLinks } from 'src/features/conference/reducer';
@@ -69,8 +70,8 @@ const useStyles = makeStyles((theme) => ({
 
 export default function MainRoute() {
    const classes = useStyles();
-
    const dispatch = useDispatch();
+   const { t } = useTranslation();
 
    useEffect(() => {
       dispatch(fetchConferenceLinks());
@@ -83,7 +84,7 @@ export default function MainRoute() {
          <AuthenticationContext.Consumer>
             {({ logout }) => (
                <Button className={classes.signOutButton} onClick={() => logout()}>
-                  Sign out
+                  {t('common:sign_out')}
                </Button>
             )}
          </AuthenticationContext.Consumer>
@@ -96,7 +97,7 @@ export default function MainRoute() {
          <div className={classes.container}>
             <div className={classes.contentContainer}>
                <Typography variant="h2" className={classes.title} align="center">
-                  Welcome to Strive
+                  {t('view_main.welcome_message')}
                </Typography>
                <div className={classes.buttonContainer}>
                   <ConferenceControls />

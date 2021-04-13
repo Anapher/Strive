@@ -3,6 +3,7 @@ import React from 'react';
 import { useDispatch } from 'react-redux';
 import { closeDialog } from '../reducer';
 import to from 'src/utils/to';
+import { useTranslation } from 'react-i18next';
 
 const useStyles = makeStyles((theme) => ({
    conferenceUrlField: {
@@ -18,6 +19,7 @@ type Props = {
 export default function ConferenceCreatedView({ conferenceId }: Props) {
    const classes = useStyles();
    const dispatch = useDispatch();
+   const { t } = useTranslation();
 
    const handleClose = () => dispatch(closeDialog());
 
@@ -26,18 +28,18 @@ export default function ConferenceCreatedView({ conferenceId }: Props) {
          <Box display="flex" flexDirection="row" alignItems="center">
             <TextField
                variant="outlined"
-               label="Conference Url"
+               label={t('dialog_create_conference.created.conference_url')}
                InputProps={{ readOnly: true }}
                value={new URL('/c/' + conferenceId, document.baseURI).href}
                className={classes.conferenceUrlField}
             />
             <Button variant="contained" {...to('/c/' + conferenceId)} onClick={handleClose} color="primary">
-               Join
+               {t('dialog_create_conference.created.join')}
             </Button>
          </Box>
          <DialogActions>
             <Button onClick={handleClose} color="primary">
-               Close
+               {t('common:close')}
             </Button>
          </DialogActions>
       </DialogContent>

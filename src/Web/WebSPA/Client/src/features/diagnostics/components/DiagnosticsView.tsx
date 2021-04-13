@@ -1,4 +1,4 @@
-import { Box, Chip, Table, TableBody, TableCell, TableHead, TableRow, Tooltip, Typography } from '@material-ui/core';
+import { Chip, Table, TableBody, TableCell, TableHead, TableRow, Tooltip, Typography } from '@material-ui/core';
 import PauseIcon from '@material-ui/icons/Pause';
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import _ from 'lodash';
@@ -42,9 +42,6 @@ export default function DiagnosticsView() {
 
    return (
       <div>
-         <Box pt={3} pl={3} pr={3}>
-            <Typography variant="h6">Diagnostics of Strive</Typography>
-         </Box>
          <Table>
             <TableHead>
                <TableRow>

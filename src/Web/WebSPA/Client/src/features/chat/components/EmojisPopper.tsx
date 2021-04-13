@@ -22,7 +22,7 @@ export default function EmojisPopper({ onEmojiSelected }: Props) {
       <Grid container className={classes.container}>
          {emojis.map((x) => (
             <Grid item xs={3} key={x}>
-               <IconButton onClick={() => onEmojiSelected(x)}>
+               <IconButton onClick={() => onEmojiSelected(x)} aria-label={`Insert emoji ${x}`}>
                   <Typography className={classes.emojiIcon}>{x}</Typography>
                </IconButton>
             </Grid>

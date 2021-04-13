@@ -14,7 +14,7 @@ const initialState: BreakoutRoomsState = {
 };
 
 const breakoutRoomsSlice = createSlice({
-   name: 'conference',
+   name: 'breakoutRooms',
    initialState,
    reducers: {
       setCreationDialogOpen(state, { payload }: PayloadAction<boolean>) {

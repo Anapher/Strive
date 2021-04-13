@@ -1,6 +1,7 @@
 import { useReactOidc } from '@axa-fr/react-oidc-context';
 import { Link } from '@material-ui/core';
 import React, { useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { RouteComponentProps } from 'react-router-dom';
 import FullscreenError from 'src/components/FullscreenError';
@@ -35,6 +36,7 @@ function ConferenceRoute({
    const conferenceState = useSelector((state: RootState) => state.conference.conferenceState);
    const { isConnected, isReconnecting } = useSelector((state: RootState) => state.signalr);
    const webRtc = useRef(new WebRtcManager({ sendMedia: true, receiveMedia: true })).current;
+   const { t } = useTranslation();
 
    const { oidcUser } = useReactOidc();
 
@@ -60,7 +62,7 @@ function ConferenceRoute({
    if (error) {
       return (
          <FullscreenError message={error.message}>
-            <Link {...to('/')}>Back to start</Link>
+            <Link {...to('/')}>{t('common:back_to_start')}</Link>
          </FullscreenError>
       );
    }

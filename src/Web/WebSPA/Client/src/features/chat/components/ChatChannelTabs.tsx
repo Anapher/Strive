@@ -1,5 +1,7 @@
 import { AppBar, Tab, Tabs } from '@material-ui/core';
+import { TFunction } from 'i18next';
 import _ from 'lodash';
+import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { Participant } from 'src/features/conference/types';
 import { RootState } from 'src/store';
@@ -21,13 +23,14 @@ export default function ChatChannelTabs({
    myParticipantId,
    participants,
 }: Props) {
+   const { t } = useTranslation();
+   const viewModels = useSelector((state: RootState) => state.chat.channels);
+
    const handleChange = (_: React.ChangeEvent<unknown>, newValue: number) => {
       onSelectedChanged(channels[newValue]);
    };
 
    const selectedIndex = channels.findIndex((x) => x.id === selected);
-
-   const viewModels = useSelector((state: RootState) => state.chat.channels);
 
    return (
       <AppBar position="static" color="inherit">
@@ -41,7 +44,7 @@ export default function ChatChannelTabs({
                   key={channel.id}
                   label={
                      <div style={{ display: 'flex', alignItems: 'center' }}>
-                        {ChannelToString(channel, myParticipantId, participants)}
+                        {ChannelToString(channel, myParticipantId, participants, t)}
                         {viewModels?.[channel.id]?.viewModel?.newMessages && <NewMessagesIndicator />}
                      </div>
                   }
@@ -52,17 +55,22 @@ export default function ChatChannelTabs({
    );
 }
 
-function ChannelToString(channel: ChatChannel, myParticipantId: string, participants: Participant[]): string {
+function ChannelToString(
+   channel: ChatChannel,
+   myParticipantId: string,
+   participants: Participant[],
+   t: TFunction,
+): string {
    switch (channel.type) {
       case 'global':
-         return 'All Chat';
+         return t('glossary:all_chat');
       case 'room':
-         return 'Room';
+         return t('common:room');
       case 'private': {
          const otherParticipantId =
             channel.participants[0] === myParticipantId ? channel.participants[1] : channel.participants[0];
          const otherParticipant = participants.find((x) => x.id === otherParticipantId);
-         return otherParticipant ? `@${otherParticipant?.displayName}` : '@Unknown';
+         return otherParticipant ? `@${otherParticipant?.displayName}` : t('conference.chat.private_chat_disconnected');
       }
    }
 }

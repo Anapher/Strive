@@ -5,16 +5,18 @@ import { RootState } from 'src/store';
 import VideocamIcon from '@material-ui/icons/Videocam';
 import MicIcon from '@material-ui/icons/Mic';
 import DesktopWindowsIcon from '@material-ui/icons/DesktopWindows';
+import { useTranslation } from 'react-i18next';
 
 export default function AvailableEquipmentTable() {
    const devices = useSelector((state: RootState) => state.settings.availableDevices);
+   const { t } = useTranslation();
 
    return (
       <List
          aria-labelledby="available-devices-subheader"
          subheader={
             <ListSubheader component="div" id="available-devices-subheader">
-               Available Devices
+               {t('conference.equipment.available_devices')}
             </ListSubheader>
          }
       >

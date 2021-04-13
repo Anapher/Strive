@@ -1,4 +1,4 @@
-import { makeStyles, Typography } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { selectParticipants } from 'src/features/conference/selectors';
@@ -15,6 +15,10 @@ const useStyles = makeStyles({
    secondaryTiles: {
       display: 'flex',
       justifyContent: 'space-between',
+   },
+   root: {
+      padding: ACTIVE_PARTICIPANTS_MARGIN,
+      height: '100%',
    },
 });
 
@@ -46,7 +50,7 @@ export default function ActiveParticipantsGrid({ width }: Props) {
    }, [width]);
 
    if (!participants) {
-      return <Typography>Yikes</Typography>;
+      return null;
    }
 
    const participantDtos = activeParticipants
@@ -54,7 +58,7 @@ export default function ActiveParticipantsGrid({ width }: Props) {
       .filter((x): x is Participant => !!x);
 
    return (
-      <div style={{ padding: ACTIVE_PARTICIPANTS_MARGIN, height: '100%' }}>
+      <div className={classes.root}>
          {participantDtos.length > 0 && (
             <div style={{ ...mainTileSize }}>
                <ParticipantTile disableLayoutAnimation {...mainTileSize} participant={participantDtos[0]} />

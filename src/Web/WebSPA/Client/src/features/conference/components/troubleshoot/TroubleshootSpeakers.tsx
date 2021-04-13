@@ -3,6 +3,7 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import StopIcon from '@material-ui/icons/Stop';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import testAudioFile from 'src/assets/audio/test_audio_file.mp3';
 import useSound from 'use-sound';
 
@@ -30,6 +31,7 @@ type Props = {
 
 export default function TroubleshootSpeakers({ expanded, onChange }: Props) {
    const classes = useStyles();
+   const { t } = useTranslation();
    const [play, { isPlaying, stop }] = useSound(testAudioFile, { volume: 0.75 });
 
    const handleChange = (_: React.ChangeEvent<unknown>, isExpanded: boolean) => {
@@ -51,7 +53,9 @@ export default function TroubleshootSpeakers({ expanded, onChange }: Props) {
             id="troubleshoot-speakers-header"
          >
             <div className={classes.accordionSummary}>
-               <Typography className={classes.heading}>Speakers</Typography>
+               <Typography className={classes.heading}>
+                  {t('conference.media.troubleshooting.speakers.title')}
+               </Typography>
                <Button
                   size="small"
                   variant="contained"
@@ -60,15 +64,14 @@ export default function TroubleshootSpeakers({ expanded, onChange }: Props) {
                   className={classes.playButton}
                >
                   {isPlaying ? <StopIcon fontSize="small" /> : <PlayArrowIcon fontSize="small" />}
-                  {isPlaying ? 'Stop' : 'Play test audio'}
+                  {isPlaying
+                     ? t('conference.media.troubleshooting.speakers.button_stop')
+                     : t('conference.media.troubleshooting.speakers.button_play')}
                </Button>
             </div>
          </AccordionSummary>
          <AccordionDetails>
-            <Typography gutterBottom>
-               To check if your speakers are working, please play the test sound. If you cannot hear anything while the
-               sound is playing, please check your sound output in the settings of your operating system.
-            </Typography>
+            <Typography gutterBottom>{t('conference.media.troubleshooting.speakers.desc')}</Typography>
          </AccordionDetails>
       </Accordion>
    );

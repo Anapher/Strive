@@ -1,5 +1,6 @@
 import { Fab, Tooltip, useTheme } from '@material-ui/core';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { AnimatedIconProps } from 'src/assets/animated-icons/AnimatedIconBase';
 import { showMessage } from 'src/store/notifier/actions';
@@ -9,7 +10,7 @@ type Props = {
    className?: string;
    control: UseMediaState;
    pauseOnToggle?: boolean;
-   title: string;
+   translationKey: string;
 
    Icon: React.ComponentType<AnimatedIconProps>;
    [x: string]: any;
@@ -19,11 +20,12 @@ export default function MediaFab({
    Icon,
    pauseOnToggle,
    control: { enable, disable, pause, resume, enabled, paused },
-   title,
+   translationKey,
    ...fabProps
 }: Props) {
    const dispatch = useDispatch();
    const theme = useTheme();
+   const { t } = useTranslation();
 
    const handleClick = async () => {
       try {
@@ -36,12 +38,12 @@ export default function MediaFab({
             }
          } else {
             if (paused) {
-               resume();
+               await resume();
             } else {
                if (pauseOnToggle) {
-                  pause();
+                  await pause();
                } else {
-                  disable();
+                  await disable();
                }
             }
          }
@@ -50,8 +52,21 @@ export default function MediaFab({
       }
    };
 
+   let title: string;
+   if (enabled) {
+      if (paused) title = t(`conference.media.controls.${translationKey}.paused`);
+      else title = t(`conference.media.controls.${translationKey}.active`);
+   } else {
+      title = t(`conference.media.controls.${translationKey}.disabled`);
+   }
+
+   const label =
+      enabled && !paused
+         ? t(`conference.media.controls.${translationKey}.label_disable`)
+         : t(`conference.media.controls.${translationKey}.label_enable`);
+
    return (
-      <Tooltip title={`${title} is ${enabled && !paused ? 'active' : 'disabled'}`} aria-label={`share ${title}`} arrow>
+      <Tooltip title={title} aria-label={label} arrow>
          <Fab color={enabled ? 'primary' : 'default'} onClick={handleClick} {...fabProps}>
             <Icon
                activated={enabled && !paused}

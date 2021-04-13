@@ -8,6 +8,7 @@ import { ProducerDevices } from 'src/store/webrtc/types';
 import { StriveSettings, setCurrentDevice } from './reducer';
 import { fetchDevices } from './thunks';
 import { InputDeviceDto } from './types';
+import i18next from 'i18next';
 
 /**
  * Executed when local devices changed. Check if the selected devices are still available
@@ -26,7 +27,7 @@ function* updateLocalDevices({ payload }: PayloadAction<InputDeviceDto[]>) {
             yield put(
                showMessage({
                   type: 'info',
-                  message: `The local device for source ${producerDevice} was disconnected, fall back to default device.`,
+                  message: i18next.t('conference.notifications.device_disconnected_local', { name: producerDevice }),
                }),
             );
          }
@@ -52,7 +53,9 @@ function* updateEquipment() {
             yield put(
                showMessage({
                   type: 'info',
-                  message: `The equipment device for source ${producerDevice} was disconnected, fall back to default device.`,
+                  message: i18next.t('conference.notifications.device_disconnected_equipment', {
+                     name: producerDevice,
+                  }),
                }),
             );
          }

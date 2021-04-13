@@ -12,6 +12,7 @@ import PersonIcon from '@material-ui/icons/Person';
 import { Skeleton } from '@material-ui/lab';
 import React, { useEffect } from 'react';
 import { Controller, ControllerRenderProps, UseFormReturn } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from 'src/store';
 import { ConferenceDataForm } from '../form';
@@ -38,6 +39,7 @@ type ModeratorListProps = {
 function ModeratorList({ field: { value, onChange } }: ModeratorListProps) {
    const userInfos = useSelector((state: RootState) => state.createConference.userInfo);
    const dispatch = useDispatch();
+   const { t } = useTranslation();
 
    useEffect(() => {
       dispatch(loadUserInfo(value));
@@ -72,7 +74,11 @@ function ModeratorList({ field: { value, onChange } }: ModeratorListProps) {
                   </ListItemAvatar>
                   <ListItemText
                      primaryTypographyProps={{ color: info.notFound ? 'error' : undefined }}
-                     primary={info.notFound ? `User with id "${info.id}" not found` : info.displayName}
+                     primary={
+                        info.notFound
+                           ? t('dialog_create_conference.tabs.moderators.error_user_not_found', { id: info.id })
+                           : info.displayName
+                     }
                   />
                   <ListItemSecondaryAction>
                      <IconButton edge="end" aria-label="delete" onClick={() => handeDeleteUser(id)}>

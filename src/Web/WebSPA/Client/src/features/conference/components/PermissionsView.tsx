@@ -1,6 +1,7 @@
 import { Chip, Table, TableBody, TableCell, TableRow, Tooltip, Typography } from '@material-ui/core';
 import _ from 'lodash';
 import React, { Fragment, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ParticipantPermissionInfo, PermissionLayer, PermissionValue } from 'src/core-hub.types';
 
 type Props = {
@@ -9,14 +10,12 @@ type Props = {
 
 export default function PermissionsView({ permissions: { layers } }: Props) {
    const viewModels = useMemo(() => mapToViewModels(layers), [layers]);
+   const { t } = useTranslation();
 
    return (
       <div>
          <Typography gutterBottom variant="body2">
-            Here you can inspect the exact permissions and where they come from. A permission consists of a key and a
-            value that maybe used all over the application. The permissions are grouped in layers, depending of the
-            status of the participant there may be different layers. Layers at the top overwrite permissions defined at
-            the bottom if with the same key. The default values are false.
+            {t('conference.dialog_permissions.description')}
          </Typography>
          <Table size="small">
             <TableBody>
@@ -33,7 +32,9 @@ export default function PermissionsView({ permissions: { layers } }: Props) {
                         permission.overwrittenIn ? (
                            <Tooltip
                               key={permission.key}
-                              title={`This property is overwritten in ${permission.overwrittenIn}`}
+                              title={t<string>('conference.dialog_permissions.notice_overwritten', {
+                                 layer: permission.overwrittenIn,
+                              })}
                            >
                               <TableRow style={{ opacity: 0.5 }}>
                                  <TableCell>

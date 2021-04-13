@@ -1,13 +1,16 @@
 import { Box, Button } from '@material-ui/core';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import BaseAuthComponent from './BaseAuthComponent';
 
 export default function SessionLostComponent() {
+   const { t } = useTranslation();
+
    return (
-      <BaseAuthComponent title="Session Lost" text="You are not authenticated">
+      <BaseAuthComponent componentName="SessionLostComponent">
          <Box mt={2}>
             <Button href="/" variant="contained">
-               Back to start
+               {t('common:back_to_start')}
             </Button>
          </Box>
       </BaseAuthComponent>

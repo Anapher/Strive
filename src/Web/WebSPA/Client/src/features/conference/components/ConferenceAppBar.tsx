@@ -9,13 +9,13 @@ import {
    Menu,
    MenuItem,
    Toolbar,
-   Tooltip,
    Typography,
 } from '@material-ui/core';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import SettingsIcon from '@material-ui/icons/Settings';
 import clsx from 'classnames';
-import React, { useRef, useState } from 'react';
+import { useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router';
 import * as coreHub from 'src/core-hub';
@@ -28,6 +28,7 @@ import { ConferenceRouteParams } from 'src/routes/types';
 import { RootState } from 'src/store';
 import useWebRtcStatus from 'src/store/webrtc/hooks/useWebRtcStatus';
 import { selectParticipants } from '../selectors';
+import AppBarLogo from './appbar/AppBarLogo';
 import BreakoutRoomChips from './appbar/BreakoutRoomChip';
 
 const useStyles = makeStyles((theme) =>
@@ -67,6 +68,7 @@ type Props = {
 export default function ConferenceAppBar({ chatWidth }: Props) {
    const classes = useStyles();
    const dispatch = useDispatch();
+   const { t } = useTranslation();
 
    const diagnosticsOpen = useSelector((state: RootState) => state.diagnostics.open);
    const { id: conferenceId } = useParams<ConferenceRouteParams>();
@@ -110,7 +112,7 @@ export default function ConferenceAppBar({ chatWidth }: Props) {
       <AppBar position="static">
          <Toolbar variant="dense" className={classes.toolbar}>
             <Box flex={1}>
-               <Typography variant="h6">Strive</Typography>
+               <AppBarLogo />
             </Box>
             <Box>
                {breakoutRoomState && (
@@ -124,7 +126,9 @@ export default function ConferenceAppBar({ chatWidth }: Props) {
                      className={classes.errorChip}
                      style={{ marginRight: 8 }}
                      label={
-                        webRtcStatus === 'connecting' ? 'Reconnecting to WebRTC server...' : 'WebRTC not initialized'
+                        webRtcStatus === 'connecting'
+                           ? t('conference.appbar.webrtc_reconnecting')
+                           : t('conference.appbar.webrtc_not_initialized')
                      }
                      size="small"
                   />
@@ -132,7 +136,7 @@ export default function ConferenceAppBar({ chatWidth }: Props) {
                {participants && (
                   <Chip
                      className={classes.chip}
-                     label={`Participants: ${Object.entries(participants).length}`}
+                     label={t('conference.appbar.participants', { count: Object.entries(participants).length })}
                      size="small"
                   />
                )}
@@ -146,28 +150,28 @@ export default function ConferenceAppBar({ chatWidth }: Props) {
                {oidcUser && (
                   <Box mr={2}>
                      <Typography variant="caption">
-                        Signed in as <b>{oidcUser.profile.name}</b>
+                        {t('conference.appbar.signed_in_as')} <b>{oidcUser.profile.name}</b>
                      </Typography>
                   </Box>
                )}
-               <Tooltip title="Open Settings" aria-label="open settings">
-                  <IconButton aria-label="settings" color="inherit" onClick={handleOpenSettings}>
-                     <SettingsIcon />
-                  </IconButton>
-               </Tooltip>
+               <IconButton aria-label={t('common:settings')} color="inherit" onClick={handleOpenSettings}>
+                  <SettingsIcon />
+               </IconButton>
                <IconButton aria-label="more" color="inherit" onClick={handleOpenMenu} ref={moreIconButtonRef}>
                   <MoreVertIcon />
                </IconButton>
             </Box>
 
             <Menu open={isMenuOpen} onClose={handleCloseMenu} anchorEl={moreIconButtonRef.current}>
-               <MenuItem onClick={handleShowPermissions}>Show my Permissions</MenuItem>
+               <MenuItem onClick={handleShowPermissions}>{t('conference.appbar.show_my_permissions')}</MenuItem>
                <MenuItem onClick={handleShowDiagnostics} disabled={diagnosticsOpen}>
-                  Diagnostics
+                  {t('conference.appbar.diagnostics')}
                </MenuItem>
-               <MenuItem onClick={handlePatchConference}>Change Conference Settings</MenuItem>
-               {canCloseConference && <MenuItem onClick={handleCloseConference}>Close Conference</MenuItem>}
-               <MenuItem onClick={logout as any}>Sign out</MenuItem>
+               <MenuItem onClick={handlePatchConference}>{t('conference.appbar.change_conference_settings')}</MenuItem>
+               {canCloseConference && (
+                  <MenuItem onClick={handleCloseConference}>{t('conference.appbar.close_conference')}</MenuItem>
+               )}
+               <MenuItem onClick={logout as any}>{t('common:sign_out')}</MenuItem>
             </Menu>
          </Toolbar>
       </AppBar>

@@ -17,7 +17,7 @@ export default function BreakoutRoomsDialog() {
       <Dialog
          open={open}
          onClose={handleClose}
-         aria-labelledby="form-dialog-title"
+         aria-labelledby="breakout-room-dialog-title"
          fullWidth
          maxWidth="md"
          scroll="paper"

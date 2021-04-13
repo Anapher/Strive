@@ -2,6 +2,7 @@ import { Box, Button, FormControl, InputLabel, ListSubheader, makeStyles, MenuIt
 import clsx from 'classnames';
 import _, { Collection } from 'lodash';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { showMessage } from 'src/store/notifier/actions';
 import { DeviceGroup, EquipmentDeviceGroup } from '../selectors';
@@ -32,6 +33,7 @@ export default function DeviceSelector({ devices, defaultName, className, select
    const selectId = defaultName.toLowerCase() + '-select';
    const classes = useStyles();
    const dispatch = useDispatch();
+   const { t } = useTranslation();
 
    const handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
       const value = event.target.value as string;
@@ -60,9 +62,12 @@ export default function DeviceSelector({ devices, defaultName, className, select
       dispatch(
          showMessage({
             type: 'action',
-            message: 'Fetch devices...',
-            failedOn: { type: fetchDevices.rejected.type, message: 'Fetching devices failed' },
-            succeededOn: { type: fetchDevices.fulfilled.type, message: 'Devices updated' },
+            message: t('conference.notifications.fetch_devices.loading'),
+            failedOn: { type: fetchDevices.rejected.type, message: t('conference.notifications.fetch_devices.error') },
+            succeededOn: {
+               type: fetchDevices.fulfilled.type,
+               message: t('conference.notifications.fetch_devices.success'),
+            },
          }),
       );
       dispatch(fetchDevices());
@@ -90,7 +95,9 @@ export default function DeviceSelector({ devices, defaultName, className, select
                   .filter((x) => x.type !== 'local')
                   .map((x) => x as EquipmentDeviceGroup)
                   .map((x, i) => [
-                     <ListSubheader key={x.connectionId}>{x.equipmentName || 'Unnamed device'}</ListSubheader>,
+                     <ListSubheader key={x.connectionId}>
+                        {x.equipmentName || t('conference.settings.unnamed_device')}
+                     </ListSubheader>,
                      x.devices.map((x) => (
                         <MenuItem key={getId(x.device)} value={getId(x.device)}>
                            {x.label || `${defaultName} #${i}`}
@@ -100,7 +107,7 @@ export default function DeviceSelector({ devices, defaultName, className, select
             </Select>
          </FormControl>
          <Box ml={1} onClick={handleRefresh}>
-            <Button>Refresh</Button>
+            <Button>{t('common:refresh')}</Button>
          </Box>
       </Box>
    );

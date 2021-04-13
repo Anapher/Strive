@@ -3,6 +3,7 @@ import { compare } from 'fast-json-patch';
 import { DateTime } from 'luxon';
 import React, { useRef } from 'react';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import * as coreHub from 'src/core-hub';
 import { BreakoutRoomsConfig, OpenBreakoutRoomsDto } from 'src/core-hub.types';
@@ -15,6 +16,7 @@ type Props = {
 
 export default function UpdateBreakoutRoomsDialog({ active, onClose }: Props) {
    const dispatch = useDispatch();
+   const { t } = useTranslation();
 
    // the duration changes every second, so remmeber the initial duration to create a meaningful diff
    const initialDuration = useRef(
@@ -59,19 +61,19 @@ export default function UpdateBreakoutRoomsDialog({ active, onClose }: Props) {
 
    return (
       <form onSubmit={handleSubmit(handleApplyForm)}>
-         <DialogTitle id="form-dialog-title">Update breakout rooms</DialogTitle>
+         <DialogTitle id="breakout-room-dialog-title">{t('conference.dialog_breakout_rooms.update_title')}</DialogTitle>
          <DialogContent>
-            <DialogContentText>Here you can update the current state of the breakout rooms.</DialogContentText>
+            <DialogContentText>{t('conference.dialog_breakout_rooms.update_description')}</DialogContentText>
             <Box mt={4}>
                <BreakoutRoomsForm form={form} participants={null} />
             </Box>
          </DialogContent>
          <DialogActions>
             <Button color="primary" onClick={onClose}>
-               Cancel
+               {t('common:cancel')}
             </Button>
             <Button color="primary" disabled={!formState.isValid} type="submit">
-               Update Breakout Rooms
+               {t('conference.dialog_breakout_rooms.update_breakout_rooms')}
             </Button>
          </DialogActions>
       </form>

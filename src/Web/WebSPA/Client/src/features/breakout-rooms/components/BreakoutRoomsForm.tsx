@@ -1,6 +1,7 @@
 import { Box, TextField } from '@material-ui/core';
 import React from 'react';
 import { Controller, UseFormReturn } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { OpenBreakoutRoomsDto } from 'src/core-hub.types';
 import { Participant } from 'src/features/conference/types';
 import { wrapForInputRef } from 'src/utils/reat-hook-form-utils';
@@ -28,6 +29,7 @@ export default function BreakoutRoomsForm({
    participants,
 }: Props) {
    const amount = watch('amount');
+   const { t } = useTranslation();
 
    return (
       <div>
@@ -36,13 +38,16 @@ export default function BreakoutRoomsForm({
                <TextField
                   {...wrapForInputRef(
                      register('amount', {
-                        min: { value: 1, message: 'Must at least create one breakout room.' },
+                        min: {
+                           value: 1,
+                           message: t('conference.dialog_breakout_rooms.validation_must_create_at_least_one'),
+                        },
                         required: true,
                         validate: validateNumberInteger,
                      }),
                   )}
                   required
-                  label="Amount"
+                  label={t('common:amount')}
                   autoFocus
                   inputProps={{ min: 1, step: 1 }}
                   type="number"
@@ -54,11 +59,14 @@ export default function BreakoutRoomsForm({
                <TextField
                   {...wrapForInputRef(
                      register('deadline', {
-                        min: { value: 1, message: 'Must at least give one minute.' },
+                        min: {
+                           value: 1,
+                           message: t('conference.dialog_breakout_rooms.validation_must_at_least_one_minute'),
+                        },
                         validate: validateNumberInteger,
                      }),
                   )}
-                  label="Duration in minutes"
+                  label={t('conference.dialog_breakout_rooms.duration_in_minutes')}
                   inputProps={{ min: 1, step: 1 }}
                   type="number"
                   error={!!errors.deadline}
@@ -67,9 +75,9 @@ export default function BreakoutRoomsForm({
                   fullWidth
                />
                <TextField
-                  label="Description"
+                  label={t('common:description')}
                   {...wrapForInputRef(register('description'))}
-                  placeholder="Optionally define the task the participants should do."
+                  placeholder={t('conference.dialog_breakout_rooms.description_description')}
                   fullWidth
                   style={{ marginLeft: 16 }}
                />

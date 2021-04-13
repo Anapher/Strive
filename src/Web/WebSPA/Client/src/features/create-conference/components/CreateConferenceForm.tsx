@@ -22,6 +22,7 @@ import TabPermissions from './TabPermissions';
 import AddIcon from '@material-ui/icons/Add';
 import { wrapForInputRef } from 'src/utils/reat-hook-form-utils';
 import { mergeDeep } from 'src/utils/object-merge';
+import { useTranslation } from 'react-i18next';
 
 const useStyles = makeStyles((theme) => ({
    form: {
@@ -57,20 +58,20 @@ const patchConferenceData = (callback: (data: ConferenceDataForm) => void, defau
 ) => callback(mergeDeep(data, { configuration: defaultValues.configuration }));
 
 export default function CreateConferenceForm({ defaultValues, onSubmit, isSubmitting, onClose, mode }: Props) {
+   const classes = useStyles();
+   const theme = useTheme();
+   const { t } = useTranslation();
+
    const form = useForm<ConferenceDataForm>({
       mode: 'onChange',
       defaultValues,
    });
-
+   const { register, formState, handleSubmit } = form;
    const [currentTab, setCurrentTab] = useState('1');
 
    const handleChangeTab = (_: unknown, newValue: string) => {
       setCurrentTab(newValue);
    };
-
-   const { register, formState, handleSubmit } = form;
-   const classes = useStyles();
-   const theme = useTheme();
 
    const transitionDuration = {
       enter: theme.transitions.duration.enteringScreen,
@@ -78,7 +79,7 @@ export default function CreateConferenceForm({ defaultValues, onSubmit, isSubmit
    };
 
    const handleAddModerator = () => {
-      const id = prompt('Enter the id of the user to add to moderators');
+      const id = prompt(t('dialog_create_conference.enter_moderator_id'));
       if (id) {
          const currentMods = form.getValues('configuration.moderators') as string[];
          if (!currentMods.includes(id)) form.setValue('configuration.moderators', [...currentMods, id]);
@@ -91,9 +92,9 @@ export default function CreateConferenceForm({ defaultValues, onSubmit, isSubmit
             <Box mb={2} px={3}>
                <TextField
                   fullWidth
-                  label="Name"
+                  label={t('common:name')}
                   {...wrapForInputRef(register('configuration.name'))}
-                  placeholder="Unnamed conference"
+                  placeholder={t('dialog_create_conference.unnamed_conference')}
                />
             </Box>
             <TabContext value={currentTab}>
@@ -105,9 +106,9 @@ export default function CreateConferenceForm({ defaultValues, onSubmit, isSubmit
                      onChange={handleChangeTab}
                      aria-label="options tabs"
                   >
-                     <Tab label="Common" value="1" />
-                     <Tab label="Moderators" value="2" />
-                     <Tab label="Permissions" value="3" />
+                     <Tab label={t('common:common')} value="1" />
+                     <Tab label={t('common:moderator_plural')} value="2" />
+                     <Tab label={t('common:permissions')} value="3" />
                   </Tabs>
                </Paper>
                <Box position="relative" flex={1} minHeight={0}>
@@ -141,10 +142,10 @@ export default function CreateConferenceForm({ defaultValues, onSubmit, isSubmit
          </Box>
          <DialogActions>
             <Button autoFocus onClick={onClose} color="primary" disabled={isSubmitting}>
-               Cancel
+               {t('common:cancel')}
             </Button>
             <Button type="submit" color="primary" autoFocus disabled={isSubmitting || !formState.isValid}>
-               {mode === 'patch' ? 'Update' : 'Create'}
+               {mode === 'patch' ? t('common:change') : t('common:create')}
             </Button>
          </DialogActions>
          {isSubmitting && <LinearProgress />}

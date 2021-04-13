@@ -1,5 +1,6 @@
 import { makeStyles, Typography } from '@material-ui/core';
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import ErrorWrapper from 'src/components/ErrorWrapper';
 import RenderConsumerVideo from 'src/components/RenderConsumerVideo';
@@ -35,6 +36,7 @@ const useStyles = makeStyles((theme) => ({
 export default function WebcamSettingsTest() {
    const classes = useStyles();
    const myId = useMyParticipantId();
+   const { t } = useTranslation();
    const consumer = useConsumer(myId, 'loopback-webcam');
 
    const localCam = useWebcam(true);
@@ -48,7 +50,7 @@ export default function WebcamSettingsTest() {
          await camController.enable();
       } catch (error) {
          if (error.toString().startsWith('NotAllowedError')) {
-            setError('Permission denied: Please allow the use of your webcam in your browser');
+            setError(t('conference.settings.webcam.permission_denied'));
          } else {
             setError(error.toString());
          }
@@ -63,13 +65,10 @@ export default function WebcamSettingsTest() {
    return (
       <div>
          <Typography variant="h6" gutterBottom>
-            Test
+            {t('conference.settings.test')}
          </Typography>
          <ErrorWrapper failed={!!error} error={error} onRetry={handleEnableWebcam}>
-            <Typography gutterBottom>
-               We will loopback your current webcam input over the server and show the results here. This way, you can
-               check what other participants actually receive and you also get a taste of the actual delay.
-            </Typography>
+            <Typography gutterBottom>{t('conference.settings.webcam.test_description')}</Typography>
             <div className={classes.videoContainer}>
                <RenderConsumerVideo consumer={consumer} height={360} width={640} />
             </div>

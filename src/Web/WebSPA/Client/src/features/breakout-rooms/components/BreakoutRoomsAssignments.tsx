@@ -18,6 +18,7 @@ import PersonIcon from '@material-ui/icons/Person';
 import _ from 'lodash';
 import useMyParticipantId from 'src/hooks/useMyParticipantId';
 import { Participant } from 'src/features/conference/types';
+import { useTranslation } from 'react-i18next';
 
 const useStyles = makeStyles((theme) => ({
    roomListDragOver: {
@@ -98,6 +99,7 @@ export default function BreakoutRoomsAssignments({ data, participants, createdRo
    };
 
    const theme = useTheme();
+   const { t } = useTranslation();
    const isLg = useMediaQuery(theme.breakpoints.up('lg'));
 
    const handleRandomlyAssignParticipants = () => {
@@ -120,9 +122,9 @@ export default function BreakoutRoomsAssignments({ data, participants, createdRo
    return (
       <div>
          <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
-            <Typography variant="h6">Assign participants to rooms</Typography>
+            <Typography variant="h6">{t('conference.dialog_breakout_rooms.assign_participants_to_rooms')}</Typography>
             <Button size="small" variant="contained" color="secondary" onClick={handleRandomlyAssignParticipants}>
-               Randomly assign rooms
+               {t('conference.dialog_breakout_rooms.randomly_assign_rooms')}
             </Button>
          </Box>
          <DragDropContext onDragEnd={handleDragEnd}>
@@ -130,7 +132,7 @@ export default function BreakoutRoomsAssignments({ data, participants, createdRo
                <Grid item lg={4} md={6} xs={12}>
                   <RoomList
                      id="defaultRoom"
-                     title="Unassigned"
+                     title={t('conference.dialog_breakout_rooms.unassigned')}
                      participants={unassignedParticipants ?? []}
                      fullHeight
                   />
@@ -144,7 +146,7 @@ export default function BreakoutRoomsAssignments({ data, participants, createdRo
                                  <RoomList
                                     key={i}
                                     id={formatDroppableId(i)}
-                                    title={`Room #${i + 1}`}
+                                    title={`${t('conference.dialog_breakout_rooms.room#', { n: i + 1 })}`}
                                     participants={selectParticipants(data[i])}
                                  />
                               ),
@@ -157,7 +159,7 @@ export default function BreakoutRoomsAssignments({ data, participants, createdRo
                                  <RoomList
                                     key={i}
                                     id={formatDroppableId(i)}
-                                    title={`Room #${i + 1}`}
+                                    title={`${t('conference.dialog_breakout_rooms.room#', { n: i + 1 })}`}
                                     participants={selectParticipants(data[i])}
                                  />
                               ),
@@ -171,7 +173,7 @@ export default function BreakoutRoomsAssignments({ data, participants, createdRo
                         <RoomList
                            key={i}
                            id={formatDroppableId(i)}
-                           title={`Room #${i + 1}`}
+                           title={`${t('conference.dialog_breakout_rooms.room#', { n: i + 1 })}`}
                            participants={selectParticipants(data[i])}
                         />
                      ))}

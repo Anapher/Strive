@@ -2,8 +2,9 @@ import { Dialog, DialogContent, DialogTitle, Fab, makeStyles, Tooltip } from '@m
 import BugReportIcon from '@material-ui/icons/BugReport';
 import clsx from 'classnames';
 import { motion } from 'framer-motion';
-import { HumanHandsup } from 'mdi-material-ui';
+// import { HumanHandsup } from 'mdi-material-ui';
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import AnimatedCamIcon from 'src/assets/animated-icons/AnimatedCamIcon';
 import AnimatedMicIcon from 'src/assets/animated-icons/AnimatedMicIcon';
@@ -11,7 +12,7 @@ import AnimatedScreenIcon from 'src/assets/animated-icons/AnimatedScreenIcon';
 import Debug from 'src/features/conference/components/troubleshoot/Troubleshooting';
 import usePermission from 'src/hooks/usePermission';
 import {
-   CONFERENCE_CAN_RAISE_HAND,
+   // CONFERENCE_CAN_RAISE_HAND,
    MEDIA_CAN_SHARE_AUDIO,
    MEDIA_CAN_SHARE_SCREEN,
    MEDIA_CAN_SHARE_WEBCAM,
@@ -47,6 +48,10 @@ const useStyles = makeStyles((theme) => ({
    dialog: {
       backgroundColor: theme.palette.background.default,
    },
+   controlsContainer: {
+      display: 'flex',
+      flexDirection: 'row',
+   },
 }));
 
 type Props = {
@@ -73,6 +78,7 @@ const item = {
 
 export default function MediaControls({ className, show }: Props) {
    const classes = useStyles();
+   const { t } = useTranslation();
 
    const gain = useSelector((state: RootState) => state.settings.obj.mic.audioGain);
 
@@ -91,7 +97,7 @@ export default function MediaControls({ className, show }: Props) {
    const canShareScreen = usePermission(MEDIA_CAN_SHARE_SCREEN);
    const canShareAudio = usePermission(MEDIA_CAN_SHARE_AUDIO);
    const canShareWebcam = usePermission(MEDIA_CAN_SHARE_WEBCAM);
-   const canRaiseHand = usePermission(CONFERENCE_CAN_RAISE_HAND);
+   // const canRaiseHand = usePermission(CONFERENCE_CAN_RAISE_HAND);
 
    const [debugDialogOpen, setDebugDialogOpen] = useState(false);
 
@@ -106,18 +112,18 @@ export default function MediaControls({ className, show }: Props) {
          variants={variants}
       >
          <div className={classes.leftActions}>
-            {canRaiseHand && (
+            {/* {canRaiseHand && (
                <Tooltip title="Raise Hand" aria-label="raise hand" arrow>
                   <Fab color="secondary" className={classes.fab} component={motion.button} variants={item}>
                      <HumanHandsup />
                   </Fab>
                </Tooltip>
-            )}
+            )} */}
          </div>
-         <div style={{ display: 'flex', flexDirection: 'row' }}>
+         <div className={classes.controlsContainer}>
             {canShareScreen && (
                <MediaFab
-                  title="Screen"
+                  translationKey="screen"
                   className={classes.fab}
                   Icon={AnimatedScreenIcon}
                   control={screenController}
@@ -127,7 +133,7 @@ export default function MediaControls({ className, show }: Props) {
             )}
             {canShareWebcam && (
                <MediaFab
-                  title="Webcam"
+                  translationKey="webcam"
                   className={classes.fab}
                   Icon={AnimatedCamIcon}
                   control={webcamController}
@@ -137,7 +143,7 @@ export default function MediaControls({ className, show }: Props) {
             )}
             {canShareAudio && (
                <MediaFab
-                  title="Microphone"
+                  translationKey="mic"
                   className={classes.fab}
                   Icon={AnimatedMicIcon}
                   control={micController}
@@ -148,20 +154,21 @@ export default function MediaControls({ className, show }: Props) {
             )}
          </div>
          <div className={classes.rightActions}>
-            <Tooltip title="Troubleshooting" aria-label="troubleshooting" arrow>
+            <Tooltip title={t<string>('conference.media.troubleshooting.title')} arrow>
                <Fab
                   color="default"
                   className={classes.fab}
                   onClick={handleOpenDebugDialog}
                   component={motion.button}
                   variants={item}
+                  aria-label={t('conference.media.troubleshooting.title')}
                >
                   <BugReportIcon />
                </Fab>
             </Tooltip>
          </div>
          <Dialog open={debugDialogOpen} onClose={handleCloseDebugDialog} PaperProps={{ className: classes.dialog }}>
-            <DialogTitle>Troubleshooting</DialogTitle>
+            <DialogTitle>{t('conference.media.troubleshooting.title')}</DialogTitle>
             <DialogContent>
                <Debug />
             </DialogContent>

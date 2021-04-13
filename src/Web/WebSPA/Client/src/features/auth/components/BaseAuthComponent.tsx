@@ -1,5 +1,6 @@
 import { makeStyles, Typography } from '@material-ui/core';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 const useStyles = makeStyles({
    root: {
@@ -17,21 +18,21 @@ const useStyles = makeStyles({
 });
 
 type Props = {
-   title: string;
-   text: string;
+   componentName: string;
    children?: React.ReactNode;
 };
 
-export default function BaseAuthComponent({ title, text, children }: Props) {
+export default function BaseAuthComponent({ componentName, children }: Props) {
    const classes = useStyles();
+   const { t } = useTranslation();
 
    return (
       <div className={classes.root}>
          <div className={classes.content}>
             <Typography variant="h3" gutterBottom>
-               {title}
+               {t(`auth.${componentName}.title`)}
             </Typography>
-            <Typography>{text}</Typography>
+            <Typography>{t(`auth.${componentName}.text`)}</Typography>
             {children}
          </div>
       </div>

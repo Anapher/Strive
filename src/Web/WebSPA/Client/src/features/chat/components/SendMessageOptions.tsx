@@ -8,6 +8,7 @@ import { decode } from '../channel-serializer';
 import CloseIcon from '@material-ui/icons/Close';
 import { useDispatch } from 'react-redux';
 import { closePrivateChat } from '../reducer';
+import { useTranslation } from 'react-i18next';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -30,8 +31,8 @@ type Props = {
 
 export default function SendMessageOptions({ value, onChange, channel }: Props) {
    const classes = useStyles();
-
    const dispatch = useDispatch();
+   const { t } = useTranslation();
 
    const selectIconButtonClass = (enabled: boolean) => (enabled ? classes.iconSelected : classes.iconUnseleted);
 
@@ -48,16 +49,20 @@ export default function SendMessageOptions({ value, onChange, channel }: Props) 
    return (
       <div>
          {isPrivateChat && (
-            <Tooltip title="Close private chat">
-               <IconButton aria-label="close private chat" onClick={handleClosePrivateChat} color="secondary">
+            <Tooltip title={t<string>('conference.chat.options.close_private_chat')}>
+               <IconButton
+                  aria-label={t<string>('conference.chat.options.close_private_chat')}
+                  onClick={handleClosePrivateChat}
+                  color="secondary"
+               >
                   <CloseIcon />
                </IconButton>
             </Tooltip>
          )}
          {canSendAnonymousMessage && !isPrivateChat && (
-            <Tooltip title="Send the message anonymously">
+            <Tooltip title={t<string>('conference.chat.options.send_anonymously')}>
                <IconButton
-                  aria-label="anonymous"
+                  aria-label={t<string>('conference.chat.options.send_anonymously')}
                   className={selectIconButtonClass(value.isAnonymous)}
                   onClick={handleToggleAnonymous}
                >
@@ -66,9 +71,9 @@ export default function SendMessageOptions({ value, onChange, channel }: Props) 
             </Tooltip>
          )}
          {canSendAnnouncement && (
-            <Tooltip title="Send the message as announcement">
+            <Tooltip title={t<string>('conference.chat.options.send_announcement')}>
                <IconButton
-                  aria-label="highlighted"
+                  aria-label={t<string>('conference.chat.options.send_announcement')}
                   className={selectIconButtonClass(value.isAnnouncement)}
                   onClick={handleToggleHighlighted}
                >

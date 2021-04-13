@@ -10,8 +10,11 @@ import { RootState } from 'src/store';
 import CheckIcon from '@material-ui/icons/Check';
 import { selectEquipmentConnections } from '../selectors';
 import { selectMyParticipantId } from 'src/features/auth/selectors';
+import { useTranslation } from 'react-i18next';
 
 export default function EquipmentSettings() {
+   const dispatch = useDispatch();
+   const { t } = useTranslation();
    const token = useSelector((state: RootState) => state.settings.equipmentToken);
    const error = useSelector((state: RootState) => state.settings.equipmentTokenError);
    const equipment = useSelector(selectEquipmentConnections);
@@ -20,7 +23,6 @@ export default function EquipmentSettings() {
    const {
       params: { id },
    } = useRouteMatch<ConferenceRouteParams>();
-   const dispatch = useDispatch();
 
    const handleFetchEquipment = () => dispatch(getEquipmentToken());
 
@@ -34,14 +36,14 @@ export default function EquipmentSettings() {
 
    return (
       <Box p={2} pt={0}>
-         <Typography variant="subtitle1">{`Don't have a webcam but have a smartphone with a camera? Don't have a good microphone but a tablet that has one? No problem, you can use multiple external devices as your microphone or webcam or share their screen.`}</Typography>
+         <Typography variant="subtitle1">{t('conference.settings.equipment.description')}</Typography>
          {error ? (
             <Box mt={2}>
                <Typography color="error" gutterBottom>
-                  An error occurred when trying to fetch the equipment token: {error.message}
+                  {t('conference.settings.equipment.error_fetch_token', { error: error.message })}
                </Typography>
                <Button variant="contained" onClick={handleFetchEquipment}>
-                  Retry
+                  {t('common:retry')}
                </Button>
             </Box>
          ) : (
@@ -52,9 +54,7 @@ export default function EquipmentSettings() {
                   <Skeleton variant="rect" width={200} height={200} />
                )}
                <Box flex={1} ml={3}>
-                  <Typography>
-                     {token ? '1. Scan the QR code or manually open this url on your device:' : <Skeleton />}
-                  </Typography>
+                  <Typography>{token ? t('conference.settings.equipment.step_1') : <Skeleton />}</Typography>
                   <Box mt={1} mb={1}>
                      {token ? (
                         <TextField fullWidth variant="outlined" InputProps={{ readOnly: true }} value={url} />
@@ -62,8 +62,10 @@ export default function EquipmentSettings() {
                         <Skeleton height={50} />
                      )}
                   </Box>
-                  <Typography gutterBottom>{token ? '2. Allow access on your device' : <Skeleton />}</Typography>
-                  <Typography>{token ? '3. Change the default device here in settings' : <Skeleton />}</Typography>
+                  <Typography gutterBottom>
+                     {token ? t('conference.settings.equipment.step_2') : <Skeleton />}
+                  </Typography>
+                  <Typography>{token ? t('conference.settings.equipment.step_3') : <Skeleton />}</Typography>
                </Box>
             </Box>
          )}

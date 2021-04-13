@@ -1,19 +1,18 @@
-import { Button, ButtonGroup, makeStyles, Typography, useTheme } from '@material-ui/core';
-import _ from 'lodash';
+import { Button, ButtonGroup, makeStyles, Typography } from '@material-ui/core';
+import SettingsIcon from '@material-ui/icons/Settings';
 import { DateTime } from 'luxon';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import * as coreHub from 'src/core-hub';
 import { openDialogToPatchAsync } from 'src/features/create-conference/reducer';
-import useMyParticipantId from 'src/hooks/useMyParticipantId';
 import usePermission from 'src/hooks/usePermission';
 import { CONFERENCE_CAN_OPEN_AND_CLOSE } from 'src/permissions';
 import { ConferenceRouteParams } from 'src/routes/types';
 import { SynchronizedConferenceInfo } from 'src/store/signal/synchronization/synchronized-object-ids';
 import { selectParticipants } from '../../selectors';
 import ConferenceNotOpenLayout from './ConferenceNotOpenLayout';
-import SettingsIcon from '@material-ui/icons/Settings';
 
 const useStyles = makeStyles((theme) => ({
    topContent: {
@@ -47,20 +46,14 @@ type Props = {
 
 export default function ConferenceNotOpenModerator({ conferenceInfo }: Props) {
    const classes = useStyles();
-   const participants = useSelector(selectParticipants);
-   const myId = useMyParticipantId();
-
+   const dispatch = useDispatch();
+   const { t } = useTranslation();
    const { id: conferenceId } = useParams<ConferenceRouteParams>();
 
-   const isUserModerator = conferenceInfo.moderators.includes(myId);
-   const isModeratorJoined = _.some(participants, (x) => conferenceInfo.moderators.includes(x.id));
+   const participants = useSelector(selectParticipants);
 
-   const theme = useTheme();
-
-   const dispatch = useDispatch();
-   const handleOpenConference = () => dispatch(coreHub.openConference());
    const canOpen = usePermission(CONFERENCE_CAN_OPEN_AND_CLOSE);
-
+   const handleOpenConference = () => dispatch(coreHub.openConference());
    const handlePatchConference = () => {
       if (conferenceId) dispatch(openDialogToPatchAsync(conferenceId));
    };
@@ -71,20 +64,20 @@ export default function ConferenceNotOpenModerator({ conferenceInfo }: Props) {
             <div className={classes.scheduledForContainer}>
                {conferenceInfo.scheduledDate && (
                   <Typography color="textSecondary">
-                     Conference is scheduled for{' '}
+                     {t('conference_not_open.conference_scheduled_for') + ' '}
                      <span className={classes.scheduledDateText}>
                         {DateTime.fromISO(conferenceInfo.scheduledDate).toLocaleString(DateTime.DATETIME_FULL)}
                      </span>
                   </Typography>
                )}
             </div>
-            <Typography gutterBottom>You are a moderator of this conference.</Typography>
+            <Typography gutterBottom>{t('conference_not_open.you_are_moderator')}</Typography>
          </div>
          <ButtonGroup variant="contained" color="primary">
             <Button onClick={handleOpenConference} disabled={!canOpen}>
-               Open conference
+               {t('conference_not_open.open_conference')}
             </Button>
-            <Button onClick={handlePatchConference}>
+            <Button onClick={handlePatchConference} aria-label={t('conference_not_open.change_conference_settings')}>
                <SettingsIcon />
             </Button>
          </ButtonGroup>
@@ -92,11 +85,7 @@ export default function ConferenceNotOpenModerator({ conferenceInfo }: Props) {
          <div className={classes.bottomContent}>
             {participants.length > 1 && (
                <Typography color="textSecondary" variant="caption" align="center" gutterBottom>
-                  {participants.length - 1}{' '}
-                  {participants.length > 2 ? 'participants are waiting.' : 'participant is waiting.'}
-                  {isModeratorJoined && !isUserModerator && (
-                     <span style={{ color: theme.palette.secondary.main }}> Moderator already joined.</span>
-                  )}
+                  {t('conference_not_open.n_participants_waiting', { count: participants.length - 1 })}
                </Typography>
             )}
             <div className={classes.fill} />

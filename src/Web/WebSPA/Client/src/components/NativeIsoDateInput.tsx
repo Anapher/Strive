@@ -12,12 +12,14 @@ const format = "yyyy-MM-dd'T'HH:mm";
 const toHtmlDate = (date?: string | null) => (date ? DateTime.fromISO(date).toLocal().toFormat(format) : undefined);
 const fromHtmlDate = (s?: string) => (s === undefined ? undefined : DateTime.fromFormat(s, format).toISO());
 
-export default function NativeIsoDateInput({ min, value, onChange, ...inputProps }: Props) {
-   console.log(value);
-
+export default React.forwardRef<HTMLInputElement, Props>(function NativeIsoDateInput(
+   { min, value, onChange, ...inputProps },
+   ref,
+) {
    return (
       <input
          {...inputProps}
+         ref={ref}
          type="datetime-local"
          min={toHtmlDate(min)}
          value={toHtmlDate(value)}
@@ -26,4 +28,4 @@ export default function NativeIsoDateInput({ min, value, onChange, ...inputProps
          }}
       />
    );
-}
+});

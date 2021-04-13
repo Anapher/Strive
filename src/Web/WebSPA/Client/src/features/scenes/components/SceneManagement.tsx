@@ -21,6 +21,7 @@ import { Scene } from '../types';
 import * as coreHub from 'src/core-hub';
 import { selectParticipantRoom } from 'src/features/rooms/selectors';
 import _ from 'lodash';
+import { useTranslation } from 'react-i18next';
 
 const sceneDisplayOrder: Scene['type'][] = ['autonomous', 'grid', 'activeSpeaker', 'screenShare', 'breakoutRoom'];
 
@@ -34,7 +35,9 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function SceneManagement() {
+   const dispatch = useDispatch();
    const classes = useStyles();
+   const { t } = useTranslation();
 
    const [actionPopper, setActionPopper] = useState(false);
    const actionButton = useRef<HTMLButtonElement>(null);
@@ -42,7 +45,6 @@ export default function SceneManagement() {
    const handleOpen = () => setActionPopper(true);
 
    const availableScenes = useSelector(selectAvailableScenesViewModels);
-   const dispatch = useDispatch();
 
    const serverScene = useSelector(selectServerScene);
    const canSetScene = usePermission(SCENES_CAN_SET_SCENE);
@@ -80,7 +82,7 @@ export default function SceneManagement() {
          <List dense disablePadding>
             <li style={{ paddingLeft: 16, marginTop: 16 }}>
                <Typography variant="subtitle2" color="textSecondary">
-                  Scenes
+                  {t('glossary:scene_plural')}
                </Typography>
             </li>
             {availableScenePresenters.map(({ presenter, viewModel }) => (
@@ -94,8 +96,19 @@ export default function SceneManagement() {
             ))}
          </List>
          <Paper elevation={4} className={classes.root}>
-            <Button variant="contained" color="primary" size="small" fullWidth ref={actionButton} onClick={handleOpen}>
-               Actions <ArrowDropDownIcon />
+            <Button
+               variant="contained"
+               color="primary"
+               size="small"
+               fullWidth
+               ref={actionButton}
+               onClick={handleOpen}
+               aria-controls={actionPopper ? 'scene-action-list' : undefined}
+               aria-expanded={actionPopper ? 'true' : undefined}
+               aria-label={t('conference.scenes.actions_description')}
+               aria-haspopup="menu"
+            >
+               {t('conference.scenes.actions')} <ArrowDropDownIcon />
             </Button>
          </Paper>
          <Popper open={actionPopper} anchorEl={actionButton.current} role={undefined} transition>
@@ -108,7 +121,7 @@ export default function SceneManagement() {
                >
                   <Paper>
                      <ClickAwayListener onClickAway={handleClose}>
-                        <MenuList id="action list">
+                        <MenuList id="scene-action-list">
                            {scenePresenters.map(({ type, OpenMenuItem }) => {
                               if (!OpenMenuItem) return null;
                               return <OpenMenuItem key={type} onClose={handleClose} />;

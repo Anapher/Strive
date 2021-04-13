@@ -3,9 +3,11 @@ import { SceneListItemProps, ScenePresenter } from '../../types';
 import SceneListItem from '../SceneListItem';
 import StarIcon from '@material-ui/icons/Star';
 import AutonomousScene from './AutonomousScene';
+import { useTranslation } from 'react-i18next';
 
 function ListItem(props: SceneListItemProps) {
-   return <SceneListItem {...props} title="Autonomous" icon={<StarIcon />} />;
+   const { t } = useTranslation();
+   return <SceneListItem {...props} title={t('conference.scenes.autonomous')} icon={<StarIcon />} />;
 }
 
 const presenter: ScenePresenter = {

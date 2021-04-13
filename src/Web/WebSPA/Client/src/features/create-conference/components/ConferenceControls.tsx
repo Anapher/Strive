@@ -1,6 +1,7 @@
 import { Fab, makeStyles } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { openDialogToCreateAsync } from '../reducer';
 import CreateConferenceDialog from './CreateConferenceDialog';
@@ -17,6 +18,7 @@ const useStyles = makeStyles((theme) => ({
 function ConferenceControls() {
    const classes = useStyles();
    const dispatch = useDispatch();
+   const { t } = useTranslation();
 
    const handleCreateConference = () => dispatch(openDialogToCreateAsync());
 
@@ -24,7 +26,7 @@ function ConferenceControls() {
       <>
          <Fab color="secondary" variant="extended" onClick={handleCreateConference}>
             <AddIcon className={classes.extendedIcon} />
-            Start new conference
+            {t('view_main.start_new_conference')}
          </Fab>
 
          <CreateConferenceDialog />

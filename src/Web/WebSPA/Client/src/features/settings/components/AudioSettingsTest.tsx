@@ -2,6 +2,7 @@ import { Box, Button, makeStyles, Typography } from '@material-ui/core';
 import { motion, useMotionTemplate, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import hark from 'hark';
 import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import ErrorWrapper from 'src/components/ErrorWrapper';
 import useDeviceManagement from 'src/features/media/useDeviceManagement';
@@ -29,6 +30,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function AudioSettingsTest() {
    const classes = useStyles();
+   const { t } = useTranslation();
 
    const myId = useMyParticipantId();
    const consumer = useConsumer(myId, 'loopback-mic');
@@ -47,7 +49,7 @@ export default function AudioSettingsTest() {
          await micController.enable();
       } catch (error) {
          if (error && error.toString().startsWith('NotAllowedError')) {
-            setError('Permission denied: Please allow the use of your microphone in your browser');
+            setError(t('conference.settings.audio.permission_denied'));
          } else {
             setError(error?.toString() ?? 'Unknown error');
          }
@@ -145,22 +147,17 @@ export default function AudioSettingsTest() {
             <audio ref={audioRef} muted /> {/* required, else the analyser wont work */}
             <audio ref={playbackAudioElem} onEnded={handlePlaybackEnded} />
             <Typography variant="h6" gutterBottom>
-               Test
+               {t('conference.settings.test')}
             </Typography>
-            <Typography gutterBottom>
-               We will loopback your current audio input and show the results here. This way, you can check what other
-               participants actually receive and you also get a taste of the actual delay.
-            </Typography>
+            <Typography gutterBottom>{t('conference.settings.audio.test_description')}</Typography>
             <Typography variant="subtitle2" gutterBottom>
-               Your microphone input level:
+               {t('conference.settings.audio.audio_input_level')}
             </Typography>
             <div className={classes.audioBarContainer}>
                <motion.div className={classes.audioBar} style={{ backgroundColor: audioColor }} />
             </div>
             <Box mt={3}>
-               <Typography gutterBottom>
-                  Click the button below and say something. Click it again and we will replay what you just said.
-               </Typography>
+               <Typography gutterBottom>{t('conference.settings.audio.repeat_audio_description')}</Typography>
                <Box display="flex" alignItems="flex-start">
                   <Button
                      variant="contained"
@@ -169,14 +166,14 @@ export default function AudioSettingsTest() {
                      style={{ width: 200 }}
                   >
                      {recordingState === true
-                        ? 'Recording...'
+                        ? t('conference.settings.audio.repeat_recording')
                         : recordingState === false
-                        ? 'Let me hear myself'
-                        : 'Playing back...'}
+                        ? t('conference.settings.audio.repeat_idle')
+                        : t('conference.settings.audio.repeat_playing')}
                   </Button>
                   <Box ml={2}>
-                     <Typography variant="caption">Something to say:</Typography>
-                     <Typography variant="subtitle2">{`"Strive is much better than other video conference systems"`}</Typography>
+                     <Typography variant="caption">{t('conference.settings.audio.something_to_say')}</Typography>
+                     <Typography variant="subtitle2">{t('conference.settings.audio.something_to_say_text')}</Typography>
                   </Box>
                </Box>
             </Box>

@@ -6,6 +6,7 @@ import VolumeUpIcon from '@material-ui/icons/VolumeUp';
 import _ from 'lodash';
 import { AccountRemove } from 'mdi-material-ui';
 import React, { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import * as coreHub from 'src/core-hub';
 import { openPrivateChat, setSelectedChannel } from 'src/features/chat/reducer';
@@ -41,9 +42,11 @@ type Props = {
 };
 
 const ParticipantContextMenu = React.forwardRef<HTMLElement, Props>(({ participant, onClose }) => {
-   const audioInfo = useSelector((state: RootState) => selectParticipantAudioInfo(state, participant.id));
    const dispatch = useDispatch();
    const classes = useStyles();
+   const { t } = useTranslation();
+
+   const audioInfo = useSelector((state: RootState) => selectParticipantAudioInfo(state, participant.id));
    const myId = useMyParticipantId();
 
    const handleToggleMuted = () => {
@@ -93,10 +96,10 @@ const ParticipantContextMenu = React.forwardRef<HTMLElement, Props>(({ participa
       dispatch(
          showMessage({
             type: 'loading',
-            message: `Kick ${participant.displayName}...`,
+            message: t('conference.notifications.kick.loading', { name: participant.displayName }),
             dismissOn: {
                type: coreHub.kickParticipant.returnAction,
-               successMessage: `${participant.displayName} was removed from conference`,
+               successMessage: t('conference.notifications.kick.success', { name: participant.displayName }),
             },
          }),
       );
@@ -108,10 +111,10 @@ const ParticipantContextMenu = React.forwardRef<HTMLElement, Props>(({ participa
       dispatch(
          showMessage({
             type: 'loading',
-            message: `Disable microphone of ${participant.displayName}`,
+            message: t('conference.notifications.disable_mic.loading', { name: participant.displayName }),
             dismissOn: {
                type: coreHub.changeProducerSource.returnAction,
-               successMessage: 'Microphone was disabled',
+               successMessage: t('conference.notifications.disable_mic.success', { name: participant.displayName }),
             },
          }),
       );
@@ -131,7 +134,15 @@ const ParticipantContextMenu = React.forwardRef<HTMLElement, Props>(({ participa
             <Typography>{participant.displayName}</Typography>
             {audioInfo && (
                <Box display="flex" alignItems="center" style={{ marginTop: 4, marginBottom: 4 }}>
-                  <IconButton size="small" onClick={handleToggleMuted}>
+                  <IconButton
+                     size="small"
+                     onClick={handleToggleMuted}
+                     aria-label={
+                        audioInfo.muted
+                           ? t('conference.participant_context_menu.unmute')
+                           : t('conference.participant_context_menu.mute')
+                     }
+                  >
                      {audioInfo.muted ? <VolumeOffIcon fontSize="small" /> : <VolumeUpIcon fontSize="small" />}
                   </IconButton>
                   <Slider
@@ -143,7 +154,7 @@ const ParticipantContextMenu = React.forwardRef<HTMLElement, Props>(({ participa
                      valueLabelDisplay="auto"
                      max={100}
                      min={0}
-                     aria-label="Volume"
+                     aria-label={t('common:volume')}
                   />
                </Box>
             )}
@@ -154,7 +165,7 @@ const ParticipantContextMenu = React.forwardRef<HTMLElement, Props>(({ participa
                <ListItemIcon className={classes.menuIcon}>
                   <SendIcon fontSize="small" />
                </ListItemIcon>
-               Open private chat
+               {t('conference.participant_context_menu.open_private_chat')}
             </MenuItem>
          )}
          {canKick && (
@@ -162,7 +173,7 @@ const ParticipantContextMenu = React.forwardRef<HTMLElement, Props>(({ participa
                <ListItemIcon className={classes.menuIcon}>
                   <AccountRemove fontSize="small" />
                </ListItemIcon>
-               Kick
+               {t('conference.participant_context_menu.kick')}
             </MenuItem>
          )}
          {canChangeParticipantProducers && (
@@ -170,11 +181,15 @@ const ParticipantContextMenu = React.forwardRef<HTMLElement, Props>(({ participa
                <ListItemIcon className={classes.menuIcon}>
                   <MicOffRounded fontSize="small" />
                </ListItemIcon>
-               Disable microphone for all
+               {t('conference.participant_context_menu.disable_mic_for_all')}
             </MenuItem>
          )}
          {canSetTempPermission && <ParticipantContextMenuTempPermissions participantId={participant.id} />}
-         {canSeePermissions && <MenuItem onClick={handleShowPermissions}>Show Permissions</MenuItem>}
+         {canSeePermissions && (
+            <MenuItem onClick={handleShowPermissions}>
+               {t('conference.participant_context_menu.show_permissions')}
+            </MenuItem>
+         )}
       </>
    );
 });

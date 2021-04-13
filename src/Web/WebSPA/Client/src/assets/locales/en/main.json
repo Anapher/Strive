@@ -1,0 +1,288 @@
+{
+    "auth": {
+        "AuthCallback": {
+            "title": "Authentication completed",
+            "text": "You will now be redirected to our application."
+        },
+        "AuthenticatingComponent": {
+            "title": "Authenticating",
+            "text": "You will be redirected to the login page."
+        },
+        "NotAuthenticated": {
+            "title": "Authentication failed",
+            "text": "You are not authenticated."
+        },
+        "SessionLostComponent": {
+            "title": "Session Lost",
+            "text": "You are not authenticated."
+        }
+    },
+    "view_main": {
+        "welcome_message": "Welcome to Strive",
+        "start_new_conference": "Start new conference"
+    },
+    "dialog_create_conference": {
+        "title_mode_create": "Create a new conference",
+        "title_mode_patch": "Change conference settings",
+        "unnamed_conference": "Unnamed conference",
+        "enter_moderator_id": "Enter the id of the user to add to moderators",
+        "tabs": {
+            "common": {
+                "header": "Common",
+                "start": "Start",
+                "schedule": "Schedule",
+                "open_cron_expression_generator": "Open cron expression generator",
+                "disable_room_chat_master": "Disable room chat for master room",
+                "show_participants_typing": "Show participants that are currently typing below chat"
+            },
+            "moderators": {
+                "error_user_not_found": "User with id \"{{id}}\" not found"
+            },
+            "permissions": {
+                "all": "All",
+                "breakout_room": "Breakout Room"
+            }
+        },
+        "created": {
+            "join": "Join",
+            "conference_url": "Conference Url"
+        }
+    },
+    "conference_not_open": {
+        "connecting_to_conference": "Connecting to conference...",
+        "reconnecting_to_conference": "Reconnecting to conference...",
+        "play_sound_on_conference_open": "Play a sound when the conference opens",
+        "open_conference": "Open conference",
+        "change_conference_settings": "Change conference settings",
+        "you_are_moderator": "You are a moderator of this conference.",
+        "conference_scheduled_for": "The conference is scheduled for",
+        "n_participants_waiting": "1 participant is waiting.",
+        "n_participants_waiting_plural": "{{count}} participants are waiting.",
+        "waiting_for_moderator_to_join": "Conference is not yet open. Waiting for moderator to join...",
+        "waiting_for_moderator_to_open": "Conference is not yet open. Waiting for moderator to open this conference...",
+        "moderator_joined": "Moderator joined.",
+        "you_dont_need_to_refresh": "You don't need to refresh this page"
+    },
+    "request_user_interaction": {
+        "title": "Please do something",
+        "request": "Click anywhere | Press any key | Tap anywhere",
+        "description": "We cannot play audio until you have interacted with the website due to your browser's autoplay policy."
+    },
+    "conference": {
+        "appbar": {
+            "signed_in_as": "Signed in as",
+            "show_my_permissions": "Show my Permissions",
+            "diagnostics": "Diagnostics",
+            "change_conference_settings": "Change Conference Settings",
+            "close_conference": "Close Conference",
+            "participants": "Participants: {{count}}",
+            "webrtc_reconnecting": "Reconnecting to WebRTC server...",
+            "webrtc_not_initialized": "WebRTC not initialized"
+        },
+        "participant_context_menu": {
+            "mute": "Mute",
+            "unmute": "Unmute",
+            "open_private_chat": "Open private chat",
+            "kick": "Kick",
+            "disable_mic_for_all": "Disable microphone for all",
+            "show_permissions": "Show Permissions",
+            "allow_screen": "allow screen sharing",
+            "allow_webcam": "allow webcam",
+            "allow_mic": "allow microphone"
+        },
+        "notifications": {
+            "kick": {
+                "loading": "Kick {{name}}...",
+                "success": "{{name}} was removed from conference"
+            },
+            "disable_mic": {
+                "loading": "Disable microphone of {{name}}...",
+                "success": "Microphone was disabled"
+            },
+            "update_permissions": {
+                "loading": "Update permissions...",
+                "success_granted": "Permission granted",
+                "success_revoked": "Permission revoked"
+            },
+            "fetch_devices": {
+                "loading": "Fetch devices...",
+                "error": "Fetching devices failed",
+                "success": "Devices updated"
+            },
+            "device_disconnected_local": "The local device for source {{name}} was disconnected, fall back to default device.",
+            "device_disconnected_equipment": "The equipment device for source {{name}} was disconnected, fall back to default device."
+        },
+        "dialog_permissions": {
+            "title": "Permissions of {{name}}",
+            "description": "Here you can inspect the exact permissions and where they come from. A permission consists of a key and a value that maybe used all over the application. The permissions are grouped in layers, depending of the status of the participant there may be different layers. Layers at the top overwrite permissions defined at the bottom if with the same key. The default values are false.",
+            "notice_overwritten": "This property is overwritten in {{layer}}"
+        },
+        "settings": {
+            "common": {},
+            "audio": {
+                "title": "Audio",
+                "gain": "Gain",
+                "test_description": "We will loopback your current audio input and show the results here. This way, you can check what other participants actually receive and you also get a taste of the actual delay.",
+                "audio_input_level": "Your microphone input level",
+                "repeat_audio_description": "Click the button below and say something. Click it again and we will replay what you just said.",
+                "repeat_recording": "Recording...",
+                "repeat_idle": "Let mne hear myself",
+                "repeat_playing": "Playing back...",
+                "something_to_say": "Something to say",
+                "something_to_say_text": "Strive is much better than other video conference systems",
+                "permission_denied": "Permission denied: Please allow the use of your microphone in your browser"
+            },
+            "webcam": {
+                "title": "Webcam",
+                "test_description": "We will loopback your current webcam input over the server and show the results here. This way, you can check what other participants actually receive and you also get a taste of the actual delay.",
+                "permission_denied": "Permission denied: Please allow the use of your webcam in your browser"
+            },
+            "equipment": {
+                "title": "Equipment",
+                "description": "Don't have a webcam but have a smartphone with a camera? Don't have a good microphone but a tablet that has one? No problem, you can use multiple external devices as your microphone or webcam or share their screen.",
+                "error_fetch_token": "An error occurred when trying to fetch the equipment token: {{error}}",
+                "step_1": "1. Scan the QR code or manually open this url on your device:",
+                "step_2": "2. Allow access on your device",
+                "step_3": "3. Change the default device here in settings"
+            },
+            "diagnostics": {
+                "title": "Diagnostics",
+                "logging": "Logging",
+                "refresh_notice": "Please note: you may have to refresh this page in order to apply the changes",
+                "enable_video_overlay": "Enable video overlay"
+            },
+            "webrtc_not_connected_error": "WebRTC not connected, so you cannot test your audio device. Please refresh the page or contact the server administrator.",
+            "unnamed_device": "Unnamed device",
+            "test": "Test"
+        },
+        "scenes": {
+            "actions": "Actions",
+            "actions_description": "Open available scene actions",
+            "active_speaker": "Active Speaker",
+            "autonomous": "Autonomous",
+            "breakout_rooms": {
+                "label": "Breakout Rooms",
+                "title": "{{count}} breakout room is open",
+                "title_plural": "{{count}} breakout rooms are open",
+                "deadline_description": "Deadline at {{date}}",
+                "add_time_button_group": "Add time button group",
+                "change_breakout_rooms": "Change breakout rooms..."
+            },
+            "grid": "Grid",
+            "screen_share": "{{name}}'s Screen"
+        },
+        "dialog_breakout_rooms": {
+            "assign_participants_to_rooms": "Assign participants to rooms",
+            "randomly_assign_rooms": "Randomly assign rooms",
+            "unassigned": "Unassigned",
+            "room#": "Room #{{n}}",
+            "duration_in_minutes": "Duration in minutes",
+            "validation_must_create_at_least_one": "Must at least create one breakout room.",
+            "validation_must_at_least_one_minute": "Must at least give one minute.",
+            "description_description": "Optionally define the task the participants should do.",
+            "create_description": "Let participants work together in smaller groups. Here you can define the amount of rooms to create. You can assign a duration for the breakout phase, it will be displayed to all participants. After creation the participants can join them on their own.",
+            "open_breakout_rooms": "Open Breakout Rooms",
+            "update_breakout_rooms": "Update Breakout Rooms ",
+            "create_title": "Create breakout rooms",
+            "update_title": "Update breakout rooms",
+            "update_description": "Here you can update the current state of the breakout rooms."
+        },
+        "media": {
+            "controls": {
+                "mic": {
+                    "active": "Microphone is active",
+                    "disabled": "Microphone is disabled",
+                    "paused": "Microphone is paused",
+                    "label_enable": "Enable microphone",
+                    "label_disable": "Disable microphone"
+                },
+                "webcam": {
+                    "active": "Webcam is active",
+                    "disabled": "Webcam is disabled",
+                    "paused": "Webcam is paused",
+                    "label_enable": "Enable webcam",
+                    "label_disable": "Disable webcam"
+                },
+                "screen": {
+                    "active": "Screen is active",
+                    "disabled": "Screen is disabled",
+                    "paused": "Screen is paused",
+                    "label_enable": "Enable screen",
+                    "label_disable": "Disable screen"
+                }
+            },
+            "troubleshooting": {
+                "title": "Troubleshooting",
+                "webrtc": {
+                    "title": "WebRTC Connection",
+                    "status": {
+                        "connecting": {
+                            "message": "Connecting to server...",
+                            "desc": "Trying to connect to WebRTC server (selective forwarding unit). Please make sure that the SFU was started and is reachable."
+                        },
+                        "send_transport_missing": {
+                            "message": "Send transport not created",
+                            "desc": "The send transport was not created. Please refresh this page and if you continue to have this error, please contact the support."
+                        },
+                        "connected": {
+                            "message": "connected"
+                        },
+                        "send_transport_connecting": {
+                            "message": "Connecting...",
+                            "desc": "WebRTC is currently trying to connect the send transport, please stand by."
+                        },
+                        "new": {
+                            "message": "New",
+                            "desc": "The connection was created and initialized, but not yet established."
+                        },
+                        "invalid_connection_state": {
+                            "desc": "The WebRTC connection seems to have problems. Please check your browser or refresh this page."
+                        }
+                    },
+                    "table": {
+                        "id": "Id",
+                        "state": "State",
+                        "recevied": "Received",
+                        "sent": "Sent"
+                    }
+                },
+                "speakers": {
+                    "title": "Speakers",
+                    "desc": "To check if your speakers are working, please play the test sound. If you cannot hear anything while the sound is playing, please check your sound output in the settings of your operating system.",
+                    "button_play": "Play test audio",
+                    "button_stop": "Stop"
+                }
+            }
+        },
+        "equipment": {
+            "request_permissions": {
+                "title": "Use this device as equipment",
+                "grant_permissions": "Grant Permissions",
+                "error": "Please accept the permission request for media."
+            },
+            "available_devices": "Available Devices"
+        },
+        "diagnostics": {
+            "title": "Diagnostics of Strive ({{name}})"
+        },
+        "chat": {
+            "private_chat_disconnected": "@Unknown",
+            "type_your_message": "Type your message...",
+            "options": {
+                "close_private_chat": "Close private chat",
+                "send_anonymously": "Send anonymously",
+                "send_announcement": "Send as announcement"
+            },
+            "open_emojis": "Open Emojis",
+            "send": "Send",
+            "typing": {
+                "tail_more_typing": "{{list}} and <1>{{count}}</1> more is typing",
+                "tail_more_typing_plural": "{{list}} and <1>{{count}}</1> more are typing",
+                "and": "and",
+                "tail_typing": "is typing",
+                "tail_typing_plural": "are typing"
+            },
+            "new_chat_info": "Say hi!"
+        }
+    }
+}

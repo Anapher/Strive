@@ -1,6 +1,7 @@
 import { Dialog, DialogTitle, makeStyles, useMediaQuery, useTheme } from '@material-ui/core';
 import { compare } from 'fast-json-patch';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from 'src/store';
 import { ConferenceDataForm, mapDataToForm, mapFormToData } from '../form';
@@ -31,9 +32,10 @@ const useStyles = makeStyles((theme) => ({
 
 function CreateConferenceDialog() {
    const dispatch = useDispatch();
-   const classes = useStyles();
-
    const theme = useTheme();
+   const classes = useStyles();
+   const { t } = useTranslation();
+
    const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
    const { dialogOpen, createdConferenceId, isCreating, conferenceData, mode } = useSelector(
@@ -68,7 +70,11 @@ function CreateConferenceDialog() {
          className={classes.dialog}
       >
          <DialogTitle id="create-conference-dialog-title">
-            {mode === 'patch' ? 'Change conference settings' : 'Create a new conference'}
+            {t(
+               mode === 'patch'
+                  ? 'dialog_create_conference.title_mode_patch'
+                  : 'dialog_create_conference.title_mode_create',
+            )}
          </DialogTitle>
          {createdConferenceId && mode !== 'patch' ? (
             <ConferenceCreatedView conferenceId={createdConferenceId} />

@@ -3,9 +3,12 @@ import { SceneListItemProps, ScenePresenter } from '../../types';
 import SceneListItem from '../SceneListItem';
 import AppsIcon from '@material-ui/icons/Apps';
 import ParticipantsGrid from './ParticipantsGrid';
+import { useTranslation } from 'react-i18next';
 
 function ListItem(props: SceneListItemProps) {
-   return <SceneListItem {...props} title="Grid" icon={<AppsIcon />} />;
+   const { t } = useTranslation();
+
+   return <SceneListItem {...props} title={t('conference.scenes.grid')} icon={<AppsIcon />} />;
 }
 
 const presenter: ScenePresenter = {

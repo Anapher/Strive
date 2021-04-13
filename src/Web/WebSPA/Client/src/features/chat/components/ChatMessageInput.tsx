@@ -1,5 +1,6 @@
 import { TextField } from '@material-ui/core';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
    value: string;
@@ -14,6 +15,7 @@ export default React.forwardRef<HTMLInputElement, Props>(function ChatMessageInp
    { value, onChange, watchUserTyping, onChangeIsTyping, onSubmit },
    ref,
 ) {
+   const { t } = useTranslation();
    const handleTextFieldKeyPress = (event: React.KeyboardEvent<HTMLDivElement>) => {
       if (event.key === 'Enter' && !event.shiftKey) {
          onSubmit();
@@ -33,7 +35,7 @@ export default React.forwardRef<HTMLInputElement, Props>(function ChatMessageInp
          name="message"
          multiline
          rowsMax={3}
-         placeholder="Type your message..."
+         placeholder={t('conference.chat.type_your_message')}
          autoComplete="off"
          fullWidth
          onKeyPress={handleTextFieldKeyPress}

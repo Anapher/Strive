@@ -2,6 +2,7 @@ import { Box, Checkbox, FormControlLabel, makeStyles, Switch, Typography } from 
 import debug from 'debug';
 import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { setEnableVideoOverlay } from '../reducer';
 import { selectEnableVideoOverlay } from '../selectors';
@@ -9,6 +10,7 @@ import { selectEnableVideoOverlay } from '../selectors';
 const useStyles = makeStyles((theme) => ({
    root: {
       margin: theme.spacing(3),
+      marginTop: 0,
    },
 }));
 
@@ -34,6 +36,7 @@ function filterIncludes(filter: string | null | undefined, namespace: string) {
 
 export default function DiagnosticsSettings() {
    const classes = useStyles();
+   const { t } = useTranslation();
    const dispatch = useDispatch();
 
    const [currentFilter, setCurrentFilter] = useState<string | null>();
@@ -57,7 +60,7 @@ export default function DiagnosticsSettings() {
 
    return (
       <div className={classes.root}>
-         <Typography variant="h6">Logging</Typography>
+         <Typography variant="h6">{t('conference.settings.diagnostics.logging')}</Typography>
          <div>
             {debugFilters.map((x) => (
                <FormControlLabel
@@ -72,9 +75,7 @@ export default function DiagnosticsSettings() {
                />
             ))}
          </div>
-         <Typography variant="caption">
-            Please note: you may have to refresh this page in order to apply the changes
-         </Typography>
+         <Typography variant="caption">{t('conference.settings.diagnostics.refresh_notice')}</Typography>
 
          <Box mt={2}>
             <FormControlLabel
@@ -85,7 +86,7 @@ export default function DiagnosticsSettings() {
                      color="primary"
                   />
                }
-               label="Enable video overlay"
+               label={t('conference.settings.diagnostics.enable_video_overlay')}
             />
          </Box>
       </div>

@@ -2,6 +2,7 @@ import { Box, Button, DialogActions, DialogContent, DialogContentText, DialogTit
 import { DateTime } from 'luxon';
 import React from 'react';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import * as coreHub from 'src/core-hub';
 import { OpenBreakoutRoomsDto } from 'src/core-hub.types';
@@ -14,6 +15,7 @@ type Props = {
 
 export default function CreateBreakoutRoomsDialog({ onClose }: Props) {
    const dispatch = useDispatch();
+   const { t } = useTranslation();
 
    const participants = useSelector(selectParticipants);
    // participants = [
@@ -54,23 +56,19 @@ export default function CreateBreakoutRoomsDialog({ onClose }: Props) {
 
    return (
       <form onSubmit={handleSubmit(handleApplyForm)}>
-         <DialogTitle id="form-dialog-title">Create breakout rooms</DialogTitle>
+         <DialogTitle id="breakout-room-dialog-title">{t('conference.dialog_breakout_rooms.create_title')}</DialogTitle>
          <DialogContent>
-            <DialogContentText>
-               Let participants work together in smaller groups. Here you can define the amount of rooms to create. You
-               can assign a duration for the breakout phase, it will be displayed to all participants. After creation
-               the participants can join them on their own.
-            </DialogContentText>
+            <DialogContentText>{t('conference.dialog_breakout_rooms.create_description')}</DialogContentText>
             <Box mt={4}>
                <BreakoutRoomsForm form={form} participants={participants} />
             </Box>
          </DialogContent>
          <DialogActions>
             <Button color="primary" onClick={onClose}>
-               Cancel
+               {t('common:cancel')}
             </Button>
             <Button color="primary" disabled={!formState.isValid} type="submit">
-               Open Breakout Rooms
+               {t('conference.dialog_breakout_rooms.open_breakout_rooms')}
             </Button>
          </DialogActions>
       </form>

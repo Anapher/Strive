@@ -6,6 +6,7 @@ import App from './App';
 import * as serviceWorker from './serviceWorker';
 import store from './store';
 import debug from 'debug';
+import './services/i18n';
 
 debug.log = console.info.bind(console);
 

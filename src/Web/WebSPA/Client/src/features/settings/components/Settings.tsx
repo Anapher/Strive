@@ -1,5 +1,6 @@
 import { makeStyles, Tab, Tabs } from '@material-ui/core';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import AudioSettings from './AudioSettings';
 import DiagnosticsSettings from './DiagnosticsSettings';
 import EquipmentSettings from './EquipmentSettings';
@@ -54,6 +55,7 @@ const useStyles = makeStyles((theme) => ({
 export default function Settings() {
    const classes = useStyles();
    const [value, setValue] = React.useState(0);
+   const { t } = useTranslation();
 
    const handleChange = (event: React.ChangeEvent<unknown>, newValue: number) => {
       setValue(newValue);
@@ -69,11 +71,11 @@ export default function Settings() {
             value={value}
             onChange={handleChange}
          >
-            <Tab label="Common" {...a11yProps(0)} />
-            <Tab label="Audio" {...a11yProps(1)} />
-            <Tab label="Webcam" {...a11yProps(2)} />
-            <Tab label="Equipment" {...a11yProps(3)} />
-            <Tab label="Diagnostics" {...a11yProps(4)} />
+            <Tab label={t('common:common')} {...a11yProps(0)} />
+            <Tab label={t('conference.settings.audio.title')} {...a11yProps(1)} />
+            <Tab label={t('conference.settings.webcam.title')} {...a11yProps(2)} />
+            <Tab label={t('conference.settings.equipment.title')} {...a11yProps(3)} />
+            <Tab label={t('conference.settings.diagnostics.title')} {...a11yProps(4)} />
          </Tabs>
          <TabPanel value={value} index={0} className={classes.tab}>
             Item One

@@ -8,11 +8,13 @@ import DeviceSelector from './DeviceSelector';
 import WebcamSettingsTest from './WebcamSettingsTest';
 import useWebRtcStatus from 'src/store/webrtc/hooks/useWebRtcStatus';
 import ErrorWrapper from 'src/components/ErrorWrapper';
+import { useTranslation } from 'react-i18next';
 
 const useStyles = makeStyles((theme) => ({
    root: {
       width: '100%',
       padding: theme.spacing(3),
+      paddingTop: 0,
    },
    slider: {
       padding: theme.spacing(0, 2),
@@ -21,6 +23,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function WebcamSettings() {
    const classes = useStyles();
+   const { t } = useTranslation();
    const selectedDevice = useSelector((state: RootState) => state.settings.obj.webcam.device);
    const availableDevices = useSelector((state: RootState) => selectAvailableInputDevices(state, 'webcam'));
    const dispatch = useDispatch();
@@ -30,16 +33,15 @@ export default function WebcamSettings() {
       <div className={classes.root}>
          <DeviceSelector
             devices={availableDevices}
-            label="Webcam"
-            defaultName="Webcam"
+            label={t('common:webcam')}
+            defaultName={t('common:webcam')}
             selectedDevice={selectedDevice}
             onChange={(device) => dispatch(setCurrentDevice({ device, source: 'webcam' }))}
          />
          <Box mt={4}>
             <ErrorWrapper
                failed={webrtcState !== 'connected'}
-               error="WebRTC not connected, so you cannot test your audio device. Please refresh the page or contact the
-                  server administrator."
+               error={t('conference.settings.webrtc_not_connected_error')}
             >
                <WebcamSettingsTest />
             </ErrorWrapper>

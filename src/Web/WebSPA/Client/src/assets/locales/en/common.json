@@ -1,0 +1,22 @@
+{
+    "sign_out": "Sign out",
+    "name": "Name",
+    "create": "Create",
+    "change": "Change",
+    "cancel": "Cancel",
+    "moderator": "Moderator",
+    "moderator_plural": "Moderators",
+    "close": "Close",
+    "back_to_start": "Back to start",
+    "settings": "Settings",
+    "volume": "Volume",
+    "permissions": "Permissions",
+    "common": "Common",
+    "microphone": "Microphone",
+    "refresh": "Refresh",
+    "webcam": "Webcam",
+    "retry": "Retry",
+    "amount": "Amount",
+    "description": "Description",
+    "room": "Room"
+}

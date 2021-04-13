@@ -2,6 +2,7 @@ import { Box, Button, ButtonGroup, Typography } from '@material-ui/core';
 import { DateTime } from 'luxon';
 import React from 'react';
 import Countdown from 'react-countdown';
+import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import CountdownRenderer from 'src/components/CountdownRenderer';
 import { changeBreakoutRooms, closeBreakoutRooms } from 'src/core-hub';
@@ -11,8 +12,9 @@ import { setCreationDialogOpen } from '../../../breakout-rooms/reducer';
 import { selectBreakoutRoomState } from '../../../breakout-rooms/selectors';
 
 export default function BreakoutRoomsPopper() {
-   const state = useSelector(selectBreakoutRoomState);
    const dispatch = useDispatch();
+   const { t } = useTranslation();
+   const state = useSelector(selectBreakoutRoomState);
    const canModify = usePermission(ROOMS_CAN_CREATE_REMOVE);
 
    if (!state) return null;
@@ -36,21 +38,28 @@ export default function BreakoutRoomsPopper() {
    return (
       <div>
          <Box display="flex" justifyContent="space-between" alignItems="center">
-            <Typography variant="h6">{state.amount} breakout rooms are open</Typography>
+            <Typography variant="h6">{t('conference.scenes.breakout_rooms.title', { count: state.amount })}</Typography>
             {canModify && (
                <Button color="secondary" variant="contained" size="small" onClick={handleCloseBreakoutRooms}>
-                  Close
+                  {t('common:close')}
                </Button>
             )}
          </Box>
          {deadline && (
             <Box mt={2}>
                <Typography gutterBottom>
-                  Deadline at {deadline.toLocaleString(DateTime.TIME_24_SIMPLE)} (
+                  {t('conference.scenes.breakout_rooms.deadline_description', {
+                     date: deadline.toLocaleString(DateTime.TIME_24_SIMPLE),
+                  }) + ' '}
+                  (
                   <Countdown date={deadline.toJSDate()} renderer={CountdownRenderer} />)
                </Typography>
                {canModify && (
-                  <ButtonGroup variant="contained" aria-label="add time button group" size="small">
+                  <ButtonGroup
+                     variant="contained"
+                     aria-label={t('conference.scenes.breakout_rooms.add_time_button_group')}
+                     size="small"
+                  >
                      <Button onClick={handleAddMinutes(1)}>+1 min</Button>
                      <Button onClick={handleAddMinutes(5)}>+5 min</Button>
                      <Button onClick={handleAddMinutes(10)}>+10 min</Button>
@@ -61,7 +70,7 @@ export default function BreakoutRoomsPopper() {
          {canModify && (
             <Box mt={2}>
                <Button variant="contained" color="primary" onClick={handleUpdateBreakoutRooms}>
-                  Change breakout rooms...
+                  {t('conference.scenes.breakout_rooms.change_breakout_rooms')}
                </Button>
             </Box>
          )}

@@ -1,5 +1,6 @@
 import { Box, makeStyles, Mark, Slider, Typography } from '@material-ui/core';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import ErrorWrapper from 'src/components/ErrorWrapper';
 import { RootState } from 'src/store';
@@ -13,6 +14,7 @@ const useStyles = makeStyles((theme) => ({
    root: {
       width: '100%',
       padding: theme.spacing(3),
+      paddingTop: 0,
    },
    slider: {
       padding: theme.spacing(0, 2),
@@ -28,6 +30,7 @@ const marks: Mark[] = [
 
 export default function AudioSettings() {
    const classes = useStyles();
+   const { t } = useTranslation();
    const audioGain = useSelector((state: RootState) => state.settings.obj.mic.audioGain);
    const audioDevice = useSelector((state: RootState) => state.settings.obj.mic.device);
    const dispatch = useDispatch();
@@ -43,14 +46,14 @@ export default function AudioSettings() {
       <div className={classes.root}>
          <DeviceSelector
             devices={audioDevices}
-            label="Microphone"
-            defaultName="Microphone"
+            label={t('common:microphone')}
+            defaultName={t('common:microphone')}
             selectedDevice={audioDevice}
             onChange={(device) => dispatch(setCurrentDevice({ device, source: 'mic' }))}
          />
          <Box mt={4}>
             <Typography variant="h6" gutterBottom>
-               Gain
+               {t('conference.settings.audio.gain')}
             </Typography>
             <div className={classes.slider}>
                <Slider
@@ -68,8 +71,7 @@ export default function AudioSettings() {
          <Box mt={4}>
             <ErrorWrapper
                failed={webrtcState !== 'connected'}
-               error="WebRTC not connected, so you cannot test your audio device. Please refresh the page or contact the
-                  server administrator."
+               error={t('conference.settings.webrtc_not_connected_error')}
             >
                <AudioSettingsTest />
             </ErrorWrapper>

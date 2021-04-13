@@ -2,6 +2,7 @@ import { Box, ClickAwayListener, Grow, IconButton, Paper, Popper } from '@materi
 import EmojiEmotionsIcon from '@material-ui/icons/EmojiEmotions';
 import SendIcon from '@material-ui/icons/Send';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { setUserTyping } from 'src/core-hub';
 import { ChatMessageOptions, SendChatMessageDto } from 'src/core-hub.types';
@@ -18,6 +19,7 @@ type Props = {
 
 export default function SendMessageForm({ onSendMessage, isTyping, channel }: Props) {
    const dispatch = useDispatch();
+   const { t } = useTranslation();
 
    const [message, setMessage] = useState('');
    const [options, setOptions] = useState<ChatMessageOptions>({ isAnonymous: false, isAnnouncement: false });
@@ -91,10 +93,14 @@ export default function SendMessageForm({ onSendMessage, isTyping, channel }: Pr
                <SendMessageOptions value={options} onChange={setOptions} channel={channel} />
             </Box>
             <Box display="flex">
-               <IconButton aria-label="emojis" ref={emojisButtonRef} onClick={handleOpenEmojis}>
+               <IconButton
+                  aria-label={t('conference.chat.open_emojis')}
+                  ref={emojisButtonRef}
+                  onClick={handleOpenEmojis}
+               >
                   <EmojiEmotionsIcon fontSize="small" />
                </IconButton>
-               <IconButton aria-label="send" onClick={handleSubmit} disabled={!message}>
+               <IconButton aria-label={t('conference.chat.send')} onClick={handleSubmit} disabled={!message}>
                   <SendIcon fontSize="small" />
                </IconButton>
             </Box>

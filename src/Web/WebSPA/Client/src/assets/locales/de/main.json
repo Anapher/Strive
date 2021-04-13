@@ -1,0 +1,70 @@
+{
+    "auth": {
+        "AuthCallback": {
+            "title": "Authentifizierung erfolgreich",
+            "text": "Sie werden jetzt zu unserer Anwendung weitergeleitet."
+        },
+        "AuthenticatingComponent": {
+            "title": "Authentifiziere",
+            "text": "Sie werden jetzt zur Login Seite weitergeleitet."
+        },
+        "NotAuthenticated": {
+            "title": "Authentifizierung fehlgeschlagen",
+            "text": "Sie sind nicht authentifiziert."
+        },
+        "SessionLostComponent": {
+            "title": "Session Lost",
+            "text": "Sie sind nicht authentifiziert."
+        }
+    },
+    "view_main": {
+        "welcome_message": "Willkomen bei Strive",
+        "start_new_conference": "Neue Konferenz öffnen"
+    },
+    "dialog_create_conference": {
+        "title_mode_create": "Neue Konferenz erstellen",
+        "title_mode_patch": "Konferenz ändern",
+        "unnamed_conference": "Unbenannte Konfernenz",
+        "enter_moderator_id": "Geben Sie die Id des Benutzers ein, der zu den Moderatoren hinzugefügt werden soll",
+        "tabs": {
+            "common": {
+                "start": "Start",
+                "schedule": "Planen",
+                "open_cron_expression_generator": "Cron expression generator öffnen",
+                "disable_room_chat_master": "Room Chat für den master Raum deaktivieren",
+                "show_participants_typing": "Teilnehmer anzeigen, die gerade in den Chat tippen"
+            },
+            "moderators": {
+                "error_user_not_found": "Benutzer mit Id \"{{id}}\" wurde nicht gefunden"
+            },
+            "permissions": {
+                "all": "Alle",
+                "breakout_room": "Breakout Room"
+            }
+        },
+        "created": {
+            "join": "Beitreten",
+            "conference_url": "Konferenz Url"
+        }
+    },
+    "conference_not_open": {
+        "connecting_to_conference": "Verbinde zu Konferenz...",
+        "reconnecting_to_conference": "Versuche, erneut zur Konferenz zu verbinden...",
+        "play_sound_on_conference_open": "Einen Ton abspielen wenn die Konferenz öffnet",
+        "open_conference": "Konferenz öffnen",
+        "change_conference_settings": "Konferenzeinstellungen ändern",
+        "you_are_moderator": "Sie sind ein Moderator der Konferenz.",
+        "conference_scheduled_for": "Die Konferenz ist geplant für",
+        "n_participants_waiting": "1 Teilnehmer wartet.",
+        "n_participants_waiting_plural": "{{count}} Teilnehmer warten.",
+        "waiting_for_moderator_to_join": "Konferenz wurde noch nicht geöffnet. Warte, dass ein Moderator beitritt...",
+        "waiting_for_moderator_to_open": "Konferenz wurde noch nicht geöffnet. Warte auf einen Moderator, der die Konferenz öffnet...",
+        "moderator_joined": "Moderator ist beigetreten.",
+        "you_dont_need_to_refresh": "Sie müssen diese Seite nicht aktualisieren"
+    },
+    "request_user_interaction": {
+        "title": "Bitte tuen Sie etwas",
+        "request": "Klicken Sie irgendwo hin | Drücken Sie eine Taste | Tippen Sie irgendwo hin",
+        "description": "Wir können aufgrund der Autoplay Policy Ihres Browsers keinen Ton abspielen, bevor Sie nicht mit der Website interagiert haben."
+    }
+}
