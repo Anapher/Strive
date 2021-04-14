@@ -58,6 +58,7 @@ export default (): SignalRResult => {
                connection.onclose((error) => {
                   log('connection | onclose %O', error);
 
+                  connection?.stop();
                   connection = undefined;
                   appHubConn.remove();
 

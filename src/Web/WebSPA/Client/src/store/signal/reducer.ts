@@ -18,6 +18,7 @@ export default createReducer(initialState, {
    },
    [onConnectionClosed.type]: (state) => {
       state.isConnected = false;
+      state.isReconnecting = false;
    },
    [onReconnecting.type]: (state) => {
       state.isConnected = false;
