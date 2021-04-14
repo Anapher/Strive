@@ -50,6 +50,8 @@ export default function SceneManagement() {
    const canSetScene = usePermission(SCENES_CAN_SET_SCENE);
    const myRoomId = useSelector(selectParticipantRoom);
 
+   const canChangeScene = canSetScene || !serverScene?.isControlled;
+
    const handleChangeScene = (scene: Scene) => {
       if (canSetScene) {
          dispatch(
@@ -58,7 +60,7 @@ export default function SceneManagement() {
                active: { scene, config: serverScene?.config ?? {}, isControlled: true },
             }),
          );
-      } else if (serverScene && !serverScene.isControlled) {
+      } else if (canChangeScene) {
          dispatch(setAppliedScene(scene));
       }
    };
@@ -76,6 +78,8 @@ export default function SceneManagement() {
       }),
       (x) => sceneDisplayOrder.indexOf(x.viewModel.scene.type),
    );
+
+   if (!canChangeScene) return null;
 
    return (
       <div>
