@@ -36,7 +36,7 @@ export default (): SignalRResult => {
 
             connection = new HubConnectionBuilder()
                .withUrl(url)
-               .withAutomaticReconnect()
+               .withAutomaticReconnect({ nextRetryDelayInMilliseconds: () => 5000 })
                .configureLogging({ log: (level, message) => logLibrary('[%s]: %s', LogLevel[level], message) })
                .build();
 
