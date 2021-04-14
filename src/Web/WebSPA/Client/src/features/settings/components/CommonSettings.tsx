@@ -34,7 +34,7 @@ export default function CommonSettings() {
             <Select
                labelId="language-select-label"
                id="language-select"
-               value={i18n.language}
+               value={i18n.languages.find((x) => supportedLanguages.find((y) => y.id === x))}
                onChange={handleChangeLanguage}
             >
                {supportedLanguages.map(({ id, name }) => (
