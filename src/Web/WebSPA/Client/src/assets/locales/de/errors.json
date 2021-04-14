@@ -6,5 +6,6 @@
     "UI/Server_Unavailable": "Der Server ist aktuell nicht verfügbar. Bitte überprüfen Sie Ihre Internetverbindung.",
     "UI/Request_Error": "Ein interner Fehler ist aufgetreten, als die Anfrage ausgeführt wurde: {{fields.info}}",
     "UI/New_Session_Connected": "Sie haben sich mit einer anderen Sitzung zu dieser Konferenz verbunden.",
-    "UI/Kicked": "Sie wurden von einem Moderator entfernt."
+    "UI/Kicked": "Sie wurden von einem Moderator entfernt.",
+    "UI/MediaNotConnected": "Nicht verbunden"
 }

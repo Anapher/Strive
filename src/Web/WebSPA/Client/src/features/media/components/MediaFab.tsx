@@ -31,12 +31,7 @@ export default function MediaFab({
    const handleClick = async () => {
       try {
          if (!enabled) {
-            try {
-               await enable();
-            } catch (error) {
-               const { message } = error as DOMException;
-               dispatch(showMessage({ message, type: 'error' }));
-            }
+            await enable();
          } else {
             if (paused) {
                await resume();

@@ -1,5 +1,6 @@
 import { Producer, ProducerOptions } from 'mediasoup-client/lib/types';
 import { useEffect, useRef, useState } from 'react';
+import { mediaNotConnected } from 'src/errors';
 import { ProducerSource } from '../types';
 import { ProducerChangedEventArgs } from '../WebRtcConnection';
 import useWebRtc from './useWebRtc';
@@ -59,7 +60,7 @@ export default function useMedia(
    };
 
    const enable = async () => {
-      if (!connection) throw new Error('Not connected');
+      if (!connection) throw mediaNotConnected();
       if (producerRef.current) return;
 
       if (!connection.sendTransport) {

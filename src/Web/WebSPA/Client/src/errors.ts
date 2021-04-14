@@ -38,3 +38,9 @@ export const kickedError: () => DomainError = () => ({
    message: 'You were kicked from this conference.',
    type: 'Conflict',
 });
+
+export const mediaNotConnected: () => DomainError = () => ({
+   code: 'UI/MediaNotConnected',
+   message: 'Not connected',
+   type: 'BadRequest',
+});
