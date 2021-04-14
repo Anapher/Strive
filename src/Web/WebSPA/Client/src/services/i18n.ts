@@ -5,20 +5,20 @@ import de from 'src/assets/locales/de';
 import en from 'src/assets/locales/en';
 import { formatErrorMessage } from 'src/utils/error-utils';
 
+type LanguageInfo = {
+   id: string;
+   name: string;
+};
+
 const resources = {
    en,
    de,
 };
 
-// plural:
-// {
-//     // ...
-//     "basket_delivered": "{{count}} basket delivered",
-//     "basket_delivered_plural": "{{count}} baskets delivered"
-//   }
-
-// <p>{t("basket_delivered", { count: 2342 })}</p>
-// ✋🏽Heads up » The counter variable must be called count, otherwise plural selection won’t work.
+export const supportedLanguages: LanguageInfo[] = [
+   { id: 'en', name: 'English' },
+   { id: 'de', name: 'Deutsch' },
+];
 
 const formatInterpolation: FormatFunction = (value: any, format?: string) => {
    switch (format) {
@@ -35,7 +35,7 @@ i18next
    .init({
       resources,
       fallbackLng: 'en',
-      supportedLngs: ['en', 'de'],
+      supportedLngs: supportedLanguages.map((x) => x.id),
       ns: ['common', 'glossary', 'main'],
       defaultNS: 'main',
       nonExplicitSupportedLngs: true,

@@ -18,5 +18,6 @@
   "retry": "Retry",
   "amount": "Amount",
   "description": "Description",
-  "room": "Room"
+  "room": "Room",
+  "language": "Language"
 }
