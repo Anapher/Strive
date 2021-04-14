@@ -71,7 +71,6 @@
     "appbar": {
       "signed_in_as": "Signed in as",
       "show_my_permissions": "Show my Permissions",
-      "diagnostics": "Diagnostics",
       "change_conference_settings": "Change Conference Settings",
       "close_conference": "Close Conference",
       "participants": "Participants: {{count}}",
@@ -148,7 +147,8 @@
         "title": "Diagnostics",
         "logging": "Logging",
         "refresh_notice": "Please note: you may have to refresh this page in order to apply the changes",
-        "enable_video_overlay": "Enable video overlay"
+        "enable_video_overlay": "Enable video overlay",
+        "open_media_diagnostics": "Open media playback diagnostics"
       },
       "webrtc_not_connected_error": "WebRTC not connected, so you cannot test your audio device. Please refresh the page or contact the server administrator.",
       "unnamed_device": "Unnamed device",

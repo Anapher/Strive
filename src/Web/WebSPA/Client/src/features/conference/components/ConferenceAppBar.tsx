@@ -20,7 +20,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router';
 import * as coreHub from 'src/core-hub';
 import { openDialogToPatchAsync } from 'src/features/create-conference/reducer';
-import { setOpen } from 'src/features/diagnostics/reducer';
 import { openSettings } from 'src/features/settings/reducer';
 import usePermission from 'src/hooks/usePermission';
 import { CONFERENCE_CAN_OPEN_AND_CLOSE } from 'src/permissions';
@@ -70,7 +69,6 @@ export default function ConferenceAppBar({ chatWidth }: Props) {
    const dispatch = useDispatch();
    const { t } = useTranslation();
 
-   const diagnosticsOpen = useSelector((state: RootState) => state.diagnostics.open);
    const { id: conferenceId } = useParams<ConferenceRouteParams>();
 
    const canCloseConference = usePermission(CONFERENCE_CAN_OPEN_AND_CLOSE);
@@ -91,11 +89,6 @@ export default function ConferenceAppBar({ chatWidth }: Props) {
 
    const handleShowPermissions = () => {
       dispatch(coreHub.fetchPermissions(null));
-      handleCloseMenu();
-   };
-
-   const handleShowDiagnostics = () => {
-      dispatch(setOpen(true));
       handleCloseMenu();
    };
 
@@ -164,9 +157,7 @@ export default function ConferenceAppBar({ chatWidth }: Props) {
 
             <Menu open={isMenuOpen} onClose={handleCloseMenu} anchorEl={moreIconButtonRef.current}>
                <MenuItem onClick={handleShowPermissions}>{t('conference.appbar.show_my_permissions')}</MenuItem>
-               <MenuItem onClick={handleShowDiagnostics} disabled={diagnosticsOpen}>
-                  {t('conference.appbar.diagnostics')}
-               </MenuItem>
+
                <MenuItem onClick={handlePatchConference}>{t('conference.appbar.change_conference_settings')}</MenuItem>
                {canCloseConference && (
                   <MenuItem onClick={handleCloseConference}>{t('conference.appbar.close_conference')}</MenuItem>

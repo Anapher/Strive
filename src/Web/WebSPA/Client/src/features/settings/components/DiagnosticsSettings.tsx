@@ -1,9 +1,11 @@
-import { Box, Checkbox, FormControlLabel, makeStyles, Switch, Typography } from '@material-ui/core';
+import { Box, Button, Checkbox, FormControlLabel, makeStyles, Switch, Typography } from '@material-ui/core';
 import debug from 'debug';
 import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
+import { setOpen } from 'src/features/diagnostics/reducer';
+import { RootState } from 'src/store';
 import { setEnableVideoOverlay } from '../reducer';
 import { selectEnableVideoOverlay } from '../selectors';
 
@@ -58,6 +60,11 @@ export default function DiagnosticsSettings() {
       debug.enable(newNamespaces);
    };
 
+   const diagnosticsOpen = useSelector((state: RootState) => state.diagnostics.open);
+   const handleShowDiagnostics = () => {
+      dispatch(setOpen(true));
+   };
+
    return (
       <div className={classes.root}>
          <Typography variant="h6">{t('conference.settings.diagnostics.logging')}</Typography>
@@ -88,6 +95,11 @@ export default function DiagnosticsSettings() {
                }
                label={t('conference.settings.diagnostics.enable_video_overlay')}
             />
+         </Box>
+         <Box mt={2}>
+            <Button onClick={handleShowDiagnostics} disabled={diagnosticsOpen} variant="contained" color="secondary">
+               {t('conference.settings.diagnostics.open_media_diagnostics')}
+            </Button>
          </Box>
       </div>
    );

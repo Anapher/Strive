@@ -9,6 +9,7 @@ import * as coreHub from 'src/core-hub';
 import ConferenceIndex from 'src/features/conference/components';
 import ConferenceConnecting from 'src/features/conference/components/ConferenceConnecting';
 import CreateConferenceDialog from 'src/features/create-conference/components/CreateConferenceDialog';
+import DiagnosticsWindow from 'src/features/diagnostics/components/DiagnosticsWindow';
 import SettingsDialog from 'src/features/settings/components/SettingsDialog';
 import { fetchDevices } from 'src/features/settings/thunks';
 import usePageTitle from 'src/hooks/usePageTitle';
@@ -76,6 +77,7 @@ function ConferenceRoute({
       <WebRtcContext.Provider value={webRtc}>
          <ConferenceIndex conference={conferenceState} />
          <SettingsDialog />
+         <DiagnosticsWindow />
          <CreateConferenceDialog />
       </WebRtcContext.Provider>
    );

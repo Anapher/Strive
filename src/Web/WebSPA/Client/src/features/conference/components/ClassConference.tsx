@@ -5,7 +5,6 @@ import AnnouncementOverlay from 'src/features/chat/components/AnnouncementOverla
 import ChatBar from 'src/features/chat/components/ChatBar';
 import { selectShowChat } from 'src/features/chat/selectors';
 import ConferenceAppBar from 'src/features/conference/components/ConferenceAppBar';
-import DiagnosticsWindow from 'src/features/diagnostics/components/DiagnosticsWindow';
 import ParticipantMicManager from 'src/features/media/components/ParticipantMicManager';
 import { expandToBox } from 'src/features/scenes/calculations';
 import ActiveParticipantsGridSizer from 'src/features/scenes/components/ActiveParticipantsGridSizer';
@@ -89,7 +88,6 @@ export default function ClassConference() {
                )}
             </div>
             <PermissionDialog />
-            <DiagnosticsWindow />
          </div>
       </ParticipantMicManager>
    );

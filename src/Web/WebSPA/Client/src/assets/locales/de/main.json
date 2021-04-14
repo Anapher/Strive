@@ -71,7 +71,6 @@
     "appbar": {
       "change_conference_settings": "Konferenzeinstellungen ändern",
       "close_conference": "Konferenz schließen",
-      "diagnostics": "Diagnose",
       "participants": "Teilnehmer: {{count}}",
       "show_my_permissions": "Meine Berechtigungen anzeigen",
       "signed_in_as": "Eingeloggt als",
@@ -264,7 +263,8 @@
         "enable_video_overlay": "Video-Overlay einschalten",
         "logging": "Logging",
         "refresh_notice": "Bitte beachten Sie: Sie müssen diese Seite möglicherweise aktualisieren, um die Änderungen zu übernehmen",
-        "title": "Diagnose"
+        "title": "Diagnose",
+        "open_media_diagnostics": "Diagnose für Medienwiedergabe öffnen"
       },
       "equipment": {
         "description": "Sie haben keine Webcam, aber ein Smartphone mit einer Kamera? Sie haben kein gutes Mikrofon, aber ein Tablet, das eines hat? Kein Problem, Sie können mehrere externe Geräte als Mikrofon oder Webcam verwenden oder deren Bildschirm teilen.",
