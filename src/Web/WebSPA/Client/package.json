@@ -51,6 +51,7 @@
       "react-beautiful-dnd": "^13.1.0",
       "react-countdown": "^2.3.1",
       "react-dom": "^17.0.1",
+      "react-git-info": "^2.0.0",
       "react-hook-form": "7.0.2",
       "react-hot-toast": "^1.0.0",
       "react-i18next": "^11.8.12",

@@ -116,7 +116,11 @@
       "notice_overwritten": "This permission is overwritten in {{layer}}"
     },
     "settings": {
-      "common": {},
+      "common": {
+        "strive_info": "Strive Info",
+        "strive_creator": "Strive was created by Vincent Griebel.",
+        "strive_commit": "Current commit"
+      },
       "audio": {
         "title": "Audio",
         "gain": "Gain",

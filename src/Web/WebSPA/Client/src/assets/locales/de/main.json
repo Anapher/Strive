@@ -246,6 +246,11 @@
       }
     },
     "settings": {
+      "common": {
+        "strive_info": "Strive Info",
+        "strive_creator": "Strive wurde von Vincent Griebel erstellt.",
+        "strive_commit": "Aktueller Commit"
+      },
       "audio": {
         "audio_input_level": "Ihr Mikrofon Pegel",
         "gain": "Verstärken",
