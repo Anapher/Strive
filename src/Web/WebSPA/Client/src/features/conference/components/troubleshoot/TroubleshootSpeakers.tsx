@@ -13,7 +13,7 @@ const useStyles = makeStyles((theme) => ({
       flex: 1,
    },
    playButton: {
-      width: 160,
+      minWidth: 160,
       marginRight: theme.spacing(2),
    },
    accordionSummary: {
