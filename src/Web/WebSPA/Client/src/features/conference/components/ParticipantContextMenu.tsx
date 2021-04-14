@@ -66,8 +66,8 @@ const ParticipantContextMenu = React.forwardRef<HTMLElement, Props>(({ participa
    const handlePatchVolume = useCallback(
       _.throttle((volume: number) => {
          dispatch(patchParticipantAudio({ participantId: participant.id, data: { volume } }));
-      }, 500),
-      [participant],
+      }, 1000),
+      [participant.id],
    );
 
    const handleChangeVolume = (value: number) => {
