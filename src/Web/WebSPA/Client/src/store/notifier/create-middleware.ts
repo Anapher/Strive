@@ -1,6 +1,7 @@
 import { PayloadAction } from '@reduxjs/toolkit';
 import toast from 'react-hot-toast';
 import { Middleware } from 'redux';
+import { formatErrorMessage } from 'src/utils/error-utils';
 import { showMessage, ShowMessageDto } from './actions';
 
 type ActiveToast = {
@@ -107,7 +108,7 @@ const middleware: Middleware = () => {
                   if (action.payload.success === true) {
                      toast.success(handler.successMessage, { id: handler.toastId });
                   } else if (action.payload.success === false) {
-                     toast.error(action.payload.error.message, { id: handler.toastId });
+                     toast.error(formatErrorMessage(action.payload.error), { id: handler.toastId });
                   } else {
                      toast.dismiss(handler.toastId);
                   }

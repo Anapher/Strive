@@ -1,0 +1,4 @@
+{
+  "FieldValidation": "Request validation failed",
+  "PermissionDenied": "Permission denied. Required permissions: {{fields.requiredPermission}}"
+}

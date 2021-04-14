@@ -11,6 +11,7 @@ import Equipment from '../features/equipment/components/Equipment';
 import { WebRtcManager } from 'src/store/webrtc/WebRtcManager';
 import FullScreenError from 'src/components/FullscreenError';
 import RequestPermissions from '../features/equipment/components/RequestPermissions';
+import { formatErrorMessage } from 'src/utils/error-utils';
 
 const defaultEvents: string[] = [
    equipmentHub.events.onRequestDisconnect,
@@ -60,7 +61,7 @@ export default function EquipmentRoute({
    }
 
    if (connectionError) {
-      return <FullScreenError message={connectionError.message}></FullScreenError>;
+      return <FullScreenError message={formatErrorMessage(connectionError)}></FullScreenError>;
    }
 
    if (!isConnected) {

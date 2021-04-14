@@ -5,7 +5,7 @@ import * as coreHub from 'src/core-hub';
 import { SendChatMessageDto } from 'src/core-hub.types';
 import { Participant } from 'src/features/conference/types';
 import { RootState } from 'src/store';
-import { selectIsNewChannel, selectMessages, selectParticipantsTyping } from '../selectors';
+import { selectIsNewChannel, selectMessages, selectMessagesError, selectParticipantsTyping } from '../selectors';
 import ChatMessageList from './ChatMessageList';
 import NewChat from './NewChat';
 import ParticipantsTyping from './ParticipantsTyping';
@@ -31,6 +31,7 @@ type Props = {
 
 export default function Chat({ channel, participants, participantId, participantColors }: Props) {
    const messages = useSelector((state: RootState) => selectMessages(state, channel));
+   const error = useSelector((state: RootState) => selectMessagesError(state, channel));
    const dispatch = useDispatch();
    const classes = useStyles();
 
@@ -63,10 +64,8 @@ export default function Chat({ channel, participants, participantId, participant
                participantColors={participantColors}
                participants={participants}
                participantId={participantId}
-               error={null}
-               onRetry={() => {
-                  console.log('test');
-               }}
+               error={error}
+               onRetry={handleFetchChat}
             />
          )}
 

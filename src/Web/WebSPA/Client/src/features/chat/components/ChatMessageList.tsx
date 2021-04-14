@@ -2,6 +2,7 @@ import { Badge, Box, Button, Fab, List, makeStyles, Typography, Zoom } from '@ma
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import _ from 'lodash';
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { DomainError } from 'src/communication-types';
 import { ChatMessageDto } from 'src/core-hub.types';
 import { Participant } from 'src/features/conference/types';
@@ -32,7 +33,7 @@ type Props = {
    participants: Participant[] | null;
    participantId?: string | null;
    participantColors: { [id: string]: string };
-   error: DomainError | null;
+   error?: DomainError | null;
    onRetry: () => void;
 };
 
@@ -45,6 +46,7 @@ export default function ChatMessageList({
    onRetry,
 }: Props) {
    const classes = useStyles();
+   const { t } = useTranslation();
 
    const listRef = useRef<HTMLOListElement>(null);
    const bottomAnchor = useRef<HTMLDivElement>(null);
@@ -77,15 +79,14 @@ export default function ChatMessageList({
       <div className={classes.root}>
          <List className={classes.list} ref={listRef}>
             <div ref={bottomAnchor} />
-            {messages == null || messages == undefined ? (
+            {messages == null || messages == undefined || error ? (
                error ? (
                   <Box m={2} display="flex" flexDirection="column" alignItems="center">
-                     <Typography
-                        color="error"
-                        gutterBottom
-                     >{`An error occurred when trying to fetch the chat: ${error.message}`}</Typography>
+                     <Typography color="error" gutterBottom align="center">
+                        {t('conference.chat.error_fetch_chat', { error })}
+                     </Typography>
                      <Button onClick={onRetry} variant="contained">
-                        Retry
+                        {t('common:retry')}
                      </Button>
                   </Box>
                ) : (

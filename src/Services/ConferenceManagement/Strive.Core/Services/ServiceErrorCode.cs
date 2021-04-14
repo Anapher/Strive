@@ -9,7 +9,6 @@ namespace Strive.Core.Services
         // 1001- 2000 reserved for SFU
 
         // Common
-        ParticipantNotFound,
         PermissionDenied,
 
 
@@ -17,26 +16,18 @@ namespace Strive.Core.Services
         Conference_NotFound,
         Conference_UnexpectedError,
         Conference_NotOpen,
-        Conference_ParticipantNotRegistered,
         Conference_InternalServiceError,
-        Conference_ParticipantConnectionNotFound,
-        Conference_InternalError,
 
         // Chat
-        Chat_InvalidMode,
         Chat_InvalidChannel,
         Chat_AnonymousMessagesDisabled,
         Chat_PrivateMessagesDisabled,
-
-        // Rooms
-        Rooms_NotFound,
 
         // Permissions
         Permissions_PermissionKeyNotFound,
         Permissions_InvalidPermissionValueType,
 
         // Equipment
-        Equipment_NotFound,
         Equipment_InvalidToken,
         Equipment_NotInitialized,
         Equipment_ParticipantNotJoined,

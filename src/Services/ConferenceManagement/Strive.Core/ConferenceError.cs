@@ -12,22 +12,9 @@ namespace Strive.Core
         public static Error ConferenceNotOpen =>
             Conflict("The conference is not open.", ServiceErrorCode.Conference_NotOpen);
 
-        public static Error ParticipantNotRegistered =>
-            BadRequest("The participant was not registered with the current conference.",
-                ServiceErrorCode.Conference_ParticipantNotRegistered);
-
-        public static Error ParticipantConnectionNotFound =>
-            Conflict("The connection of the participant was not found.",
-                ServiceErrorCode.Conference_ParticipantConnectionNotFound);
-
         public static Error UnexpectedError(string message)
         {
             return BadRequest(message, ServiceErrorCode.Conference_UnexpectedError);
-        }
-
-        public static Error InternalError(string message)
-        {
-            return InternalServerError(message, ServiceErrorCode.Conference_InternalError);
         }
     }
 }

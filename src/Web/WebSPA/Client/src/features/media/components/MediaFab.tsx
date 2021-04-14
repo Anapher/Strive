@@ -5,6 +5,7 @@ import { useDispatch } from 'react-redux';
 import { AnimatedIconProps } from 'src/assets/animated-icons/AnimatedIconBase';
 import { showMessage } from 'src/store/notifier/actions';
 import { UseMediaState } from 'src/store/webrtc/hooks/useMedia';
+import { formatErrorMessage } from 'src/utils/error-utils';
 
 type Props = {
    className?: string;
@@ -48,7 +49,11 @@ export default function MediaFab({
             }
          }
       } catch (error) {
-         dispatch(showMessage({ message: error.message ?? error.toString(), type: 'error' }));
+         if (error.message) {
+            dispatch(showMessage({ message: formatErrorMessage(error), type: 'error' }));
+         } else {
+            dispatch(showMessage({ message: error?.toString(), type: 'error' }));
+         }
       }
    };
 

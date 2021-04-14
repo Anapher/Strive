@@ -11,6 +11,9 @@ export const selectParticipantsTyping = (state: RootState, channelId: string) =>
 export const selectMessages = (state: RootState, channel: string) =>
    state.chat.channels?.[channel]?.viewModel?.messages;
 
+export const selectMessagesError = (state: RootState, channel: string) =>
+   state.chat.channels?.[channel]?.viewModel?.messagesError;
+
 export const selectAnnouncements = (state: RootState) => state.chat.announcements;
 
 const selectChannelIds = (state: RootState) => {

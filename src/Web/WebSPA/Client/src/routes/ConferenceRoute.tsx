@@ -16,6 +16,7 @@ import { RootState } from 'src/store';
 import { close } from 'src/store/signal/actions';
 import { WebRtcContext } from 'src/store/webrtc/WebRtcContext';
 import { WebRtcManager } from 'src/store/webrtc/WebRtcManager';
+import { formatErrorMessage } from 'src/utils/error-utils';
 import to from 'src/utils/to';
 import { ConferenceRouteParams } from './types';
 
@@ -61,7 +62,7 @@ function ConferenceRoute({
 
    if (error) {
       return (
-         <FullscreenError message={error.message}>
+         <FullscreenError message={formatErrorMessage(error)}>
             <Link {...to('/')}>{t('common:back_to_start')}</Link>
          </FullscreenError>
       );

@@ -61,18 +61,25 @@ const chatSlice = createSlice({
             meta,
          }: PayloadAction<SuccessOrError<ChatMessageDto[]>, string, InvokeMethodMeta<FetchChatMessagesDto>>,
       ) => {
+         if (!state.channels) return;
+
+         const channelId = meta.request.channel;
+         const channel = state.channels[channelId];
+
+         if (!channel) return;
+
          if (payload.success) {
-            if (!state.channels) return;
-
-            const channelId = meta.request.channel;
-            const channel = state.channels[channelId];
-
-            if (!channel) return;
-
             if (!channel.viewModel) {
                channel.viewModel = { messages: payload.response, newMessages: false };
             } else {
                channel.viewModel.messages = mergeChatMessages(channel.viewModel.messages, payload.response);
+            }
+            channel.viewModel.messagesError = undefined;
+         } else {
+            if (!channel.viewModel) {
+               channel.viewModel = { messages: [], newMessages: false, messagesError: payload.error };
+            } else {
+               channel.viewModel.messagesError = payload.error;
             }
          }
       },

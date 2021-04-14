@@ -296,7 +296,7 @@ export class WebRtcConnection {
       const result = await this.client.changeStream(request);
       if (!result.success) {
          log('Change stream %O failure: %O', request, result.error);
-         throw new Error(result.error.message);
+         throw result.error;
       }
    }
 
@@ -311,7 +311,7 @@ export class WebRtcConnection {
       const result = await this.client.setConsumerLayers(request);
       if (!result.success) {
          log('Set prefferred layers %O failure: %O', request, result.error);
-         throw new Error(result.error.message);
+         throw result.error;
       }
 
       this.updateConsumerInfo(request.consumerId, { prefferredLayers: request.layers });

@@ -95,7 +95,8 @@
         "tail_more_typing_plural": "{{list}} und <1>{{count}}</1> weitere sind am Schreiben",
         "tail_typing": "ist am Schreiben",
         "tail_typing_plural": "sind am Schreiben"
-      }
+      },
+      "error_fetch_chat": "Beim Versuch, den Chat abzurufen, ist ein Fehler aufgetreten: {{error, error}}"
     },
     "diagnostics": {
       "title": "Diagnose von Strive ({{name}})"
@@ -267,7 +268,7 @@
       },
       "equipment": {
         "description": "Sie haben keine Webcam, aber ein Smartphone mit einer Kamera? Sie haben kein gutes Mikrofon, aber ein Tablet, das eines hat? Kein Problem, Sie können mehrere externe Geräte als Mikrofon oder Webcam verwenden oder deren Bildschirm teilen.",
-        "error_fetch_token": "Beim Versuch, das Gerätetoken anzufordern, ist ein Fehler aufgetreten: {{error}}",
+        "error_fetch_token": "Beim Versuch, das Gerätetoken anzufordern, ist ein Fehler aufgetreten: {{error, error}}",
         "step_1": "1. Scannen Sie den QR-Code oder öffnen Sie diese URL manuell auf Ihrem Gerät:",
         "step_2": "2. Lassen Sie den Zugriff auf Ihrem Gerät zu",
         "step_3": "3. Ändern Sie das Standardgerät hier in den Einstellungen",

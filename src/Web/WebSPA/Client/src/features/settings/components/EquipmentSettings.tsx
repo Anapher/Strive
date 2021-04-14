@@ -40,7 +40,7 @@ export default function EquipmentSettings() {
          {error ? (
             <Box mt={2}>
                <Typography color="error" gutterBottom>
-                  {t('conference.settings.equipment.error_fetch_token', { error: error.message })}
+                  {t('conference.settings.equipment.error_fetch_token', { error })}
                </Typography>
                <Button variant="contained" onClick={handleFetchEquipment}>
                   {t('common:retry')}

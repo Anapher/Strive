@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Strive.Core.Dto;
 using Strive.Core.Errors;
 using Strive.Core.Services.Permissions;
@@ -10,7 +11,8 @@ namespace Strive.Core.Services
         {
             return NotFound(
                 $"The permission to execute this action were denied. Required permission: {requiredPermission.Key}",
-                ServiceErrorCode.PermissionDenied);
+                ServiceErrorCode.PermissionDenied,
+                new Dictionary<string, string> {{"requiredPermission", requiredPermission.Key}});
         }
 
         public static Error InternalServiceError(string message)

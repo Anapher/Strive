@@ -139,7 +139,7 @@
       "equipment": {
         "title": "Equipment",
         "description": "Don't have a webcam but have a smartphone with a camera? Don't have a good microphone but a tablet that has one? No problem, you can use multiple external devices as your microphone or webcam or share their screen.",
-        "error_fetch_token": "An error occurred when trying to fetch the equipment token: {{error}}",
+        "error_fetch_token": "An error occurred when trying to fetch the equipment token: {{error, error}}",
         "step_1": "1. Scan the QR code or manually open this url on your device:",
         "step_2": "2. Allow access on your device",
         "step_3": "3. Change the default device here in settings"
@@ -281,7 +281,8 @@
         "tail_typing": "is typing",
         "tail_typing_plural": "are typing"
       },
-      "new_chat_info": "Say hi!"
+      "new_chat_info": "Say hi!",
+      "error_fetch_chat": "An error occurred when trying to fetch the chat: {{error, error}}"
     }
   }
 }
