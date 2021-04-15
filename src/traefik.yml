@@ -15,22 +15,10 @@ providers:
   file:
     filename: "traefik.yml"
 
-http:
-  middlewares:
-    cors:
-      headers:
-        accessControlAllowMethods: "*"
-        accessControlAllowOriginList: "https://{{env DNS_NAME_OR_IP}}"
-        accessControlAllowHeaders:
-          - "*"
-          - "X-Requested-With"
-          - "X-SignalR-User-Agent"
-        accessControlAllowCredentials: true
-
 certificatesResolvers:
   letsEncrypt:
     acme:
-      email: { { env LETSENCRYPT_EMAIL } }
+      email: test@yourdomain.com
       storage: acme.json
       httpChallenge:
         # used during the challenge
