@@ -45,7 +45,6 @@ services:
       - SFU__UrlTemplate=https://sfu.${DNS_NAME_OR_IP}/{0}
       - Authentication__NoSslRequired=true
       - Authentication__Issuer=https://identity.${DNS_NAME_OR_IP}
-      - Authentication__Authority=http://host.docker.internal:5105
 
   webspa:
     labels:
