@@ -29,7 +29,11 @@ services:
 
   webspa:
     image: ${DOCKER_REGISTRY-}webspa
-    build: "./Web/WebSPA"
+    build:
+      context: "./Web/WebSPA"
+      args:
+        - GITINFO=${GITINFO}
+        - GITCOMMIT=${GITCOMMIT}
     depends_on:
       - identity-api
       - sfu
