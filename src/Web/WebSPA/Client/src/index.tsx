@@ -11,9 +11,11 @@ import './services/i18n';
 debug.log = console.info.bind(console);
 
 ReactDOM.render(
-   <Provider store={store}>
-      <App />
-   </Provider>,
+   <React.StrictMode>
+      <Provider store={store}>
+         <App />
+      </Provider>
+   </React.StrictMode>,
    document.getElementById('root'),
 );
 
