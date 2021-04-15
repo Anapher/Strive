@@ -8,11 +8,6 @@ services:
       - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
       - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
       - "--entrypoints.web.http.redirections.entrypoint.permanent=true"
-      # Cors Middleware
-      - "traefik.http.middlewares.cors.headers.accessControlAllowOriginList=https://${DNS_NAME_OR_IP}"
-      - "traefik.http.middlewares.cors.headers.accessControlAllowMethods=*"
-      - "traefik.http.middlewares.cors.headers.accessControlAllowHeaders=*,X-Requested-With,X-SignalR-User-Agent"
-      - "traefik.http.middlewares.cors.headers.accessControlAllowCredentials=true"
 
     ports:
       - "80:80"
@@ -27,6 +22,11 @@ services:
       - IdentityServer__SpaClientHost=https://${DNS_NAME_OR_IP}
       - IdentityServer__Issuer=https://identity.${DNS_NAME_OR_IP}
     labels:
+      # Cors Middleware
+      - "traefik.http.middlewares.cors.headers.accessControlAllowOriginList=https://${DNS_NAME_OR_IP}"
+      - "traefik.http.middlewares.cors.headers.accessControlAllowMethods=*"
+      - "traefik.http.middlewares.cors.headers.accessControlAllowHeaders=*,X-Requested-With,X-SignalR-User-Agent"
+      - "traefik.http.middlewares.cors.headers.accessControlAllowCredentials=true"
       - "traefik.enable=true"
       - "traefik.http.routers.identity-api.rule=Host(`identity.${DNS_NAME_OR_IP}`)"
       - "traefik.http.routers.identity-api.entrypoints=websecure"
