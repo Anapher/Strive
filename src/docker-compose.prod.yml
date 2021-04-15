@@ -11,7 +11,7 @@ services:
 
   strive:
     labels:
-      - "traefik.http.routers.strive.tls.certresolver=letsEncrypt"
+      - "traefik.http.routers.api.tls.certresolver=letsEncrypt"
 
   webspa:
     labels:
