@@ -19,11 +19,11 @@ services:
 
   identity-api:
     environment:
-      - IdentityServer__SpaClientHost=https://${DNS_NAME_OR_IP}
+      - IdentityServer__SpaClientHost=https://${FRONTEND_DNS_OR_IP}
       - IdentityServer__Issuer=https://identity.${DNS_NAME_OR_IP}
     labels:
       # Cors Middleware
-      - "traefik.http.middlewares.cors.headers.accessControlAllowOriginList=https://${DNS_NAME_OR_IP}"
+      - "traefik.http.middlewares.cors.headers.accessControlAllowOriginList=https://${FRONTEND_DNS_OR_IP}"
       - "traefik.http.middlewares.cors.headers.accessControlAllowMethods=*"
       - "traefik.http.middlewares.cors.headers.accessControlAllowHeaders=*,X-Requested-With,X-SignalR-User-Agent"
       - "traefik.http.middlewares.cors.headers.accessControlAllowCredentials=true"
@@ -50,13 +50,13 @@ services:
   webspa:
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.spa.rule=Host(`${DNS_NAME_OR_IP}`)"
+      - "traefik.http.routers.spa.rule=Host(`${FRONTEND_DNS_OR_IP}`)"
       - "traefik.http.routers.spa.entrypoints=websecure"
       - "traefik.http.services.webspa.loadbalancer.healthcheck.path=/health"
       - "traefik.http.routers.spa.tls=true"
     environment:
       - App__IdentityUrl=https://identity.${DNS_NAME_OR_IP}
-      - App__FrontendUrl=https://${DNS_NAME_OR_IP}
+      - App__FrontendUrl=https://${FRONTEND_DNS_OR_IP}
       - App__ConferenceUrl=https://api.${DNS_NAME_OR_IP}/
       - App__SignalrHubUrl=https://api.${DNS_NAME_OR_IP}/signalr
       - App__EquipmentSignalrHubUrl=https://api.${DNS_NAME_OR_IP}/equipment-signalr
