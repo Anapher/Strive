@@ -20,7 +20,7 @@ http:
     cors:
       headers:
         accessControlAllowMethods: "*"
-        accessControlAllowOriginList: "https://${DNS_NAME_OR_IP}"
+        accessControlAllowOriginList: "https://{{env DNS_NAME_OR_IP}}"
         accessControlAllowHeaders:
           - "*"
           - "X-Requested-With"
@@ -30,7 +30,7 @@ http:
 certificatesResolvers:
   letsEncrypt:
     acme:
-      email: ${LETSENCRYPT_EMAIL}
+      email: { { env LETSENCRYPT_EMAIL } }
       storage: acme.json
       httpChallenge:
         # used during the challenge
