@@ -1,0 +1,37 @@
+api:
+  insecure: true
+  dashboard: true
+
+entryPoints:
+  web:
+    address: ":80"
+  websecure:
+    address: ":443"
+
+providers:
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
+    exposedByDefault: false
+  file:
+    filename: "traefik.yml"
+
+http:
+  middlewares:
+    cors:
+      headers:
+        accessControlAllowMethods: "*"
+        accessControlAllowOriginList: "https://${DNS_NAME_OR_IP}"
+        accessControlAllowHeaders:
+          - "*"
+          - "X-Requested-With"
+          - "X-SignalR-User-Agent"
+        accessControlAllowCredentials: true
+
+certificatesResolvers:
+  letsEncrypt:
+    acme:
+      email: ${LETSENCRYPT_EMAIL}
+      storage: acme.json
+      httpChallenge:
+        # used during the challenge
+        entryPoint: web

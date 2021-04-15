@@ -1,4 +1,3 @@
-
 $arg = $args[0]
 
 $env:GITINFO = ((git log -1 --pretty=format:"%d at %ai") | Out-String).Trim()

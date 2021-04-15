@@ -1,0 +1,22 @@
+version: "3.4"
+
+services:
+  traefik:
+    volumes:
+      - "./acme.json:/acme.json"
+
+  identity-api:
+    labels:
+      - "traefik.http.routers.identity-api.tls.certresolver=letsEncrypt"
+
+  strive:
+    labels:
+      - "traefik.http.routers.strive.tls.certresolver=letsEncrypt"
+
+  webspa:
+    labels:
+      - "traefik.http.routers.spa.tls.certresolver=letsEncrypt"
+
+  sfu:
+    labels:
+      - "traefik.http.routers.sfu.tls.certresolver=letsEncrypt"
