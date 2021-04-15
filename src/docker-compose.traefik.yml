@@ -10,59 +10,87 @@ services:
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+      - "--entrypoints.web.http.redirections.entrypoint.permanent=true"
+      - "--entrypoints.websecure.address=:443"
     ports:
       - "80:80"
+      - "443:443"
       - "8080:8080"
     volumes:
       - "//var/run/docker.sock:/var/run/docker.sock:ro"
 
   identity-api:
     environment:
-      - IDENTITY_FRONTENDHOST=http://${DNS_NAME_OR_IP}
-      - IDENTITY_ISSUER=http://localhost:5105
-    # labels:
-    #   - "traefik.enable=true"
-    #   - "traefik.http.routers.identity-api.rule=Host(`identity.${DNS_NAME_OR_IP}`)"
-    #   - "traefik.http.routers.identity-api.entrypoints=web"
-    #   - "traefik.http.routers.identity-api.middlewares=cors@docker"
-
-  strive:
+      - IdentityServer__SpaClientHost=https://${DNS_NAME_OR_IP}
+      - IdentityServer__Issuer=https://identity.${DNS_NAME_OR_IP}
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.api.rule=Host(`api.${DNS_NAME_OR_IP}`)"
-      - "traefik.http.routers.api.entrypoints=web"
-      - "traefik.http.services.strive.loadbalancer.healthcheck.path=/health/ready"
-      - "traefik.http.routers.api.middlewares=cors@docker"
       # Cors Middleware
-      - "traefik.http.middlewares.cors.headers.accessControlAllowOriginList=http://${DNS_NAME_OR_IP}"
+      - "traefik.http.middlewares.cors.headers.accessControlAllowOriginList=https://${DNS_NAME_OR_IP}"
       - "traefik.http.middlewares.cors.headers.accessControlAllowMethods=*"
       - "traefik.http.middlewares.cors.headers.accessControlAllowHeaders=*,X-Requested-With,X-SignalR-User-Agent"
       - "traefik.http.middlewares.cors.headers.accessControlAllowCredentials=true"
+
+      - "traefik.enable=true"
+      - "traefik.http.routers.identity-api.rule=Host(`identity.${DNS_NAME_OR_IP}`)"
+      - "traefik.http.routers.identity-api.entrypoints=websecure"
+      - "traefik.http.routers.identity-api.middlewares=cors@docker"
+      - "traefik.http.routers.identity-api.tls=true"
+
+  strive:
+    labels:
+      # Cors Middleware
+      - "traefik.http.middlewares.cors.headers.accessControlAllowOriginList=https://${DNS_NAME_OR_IP}"
+      - "traefik.http.middlewares.cors.headers.accessControlAllowMethods=*"
+      - "traefik.http.middlewares.cors.headers.accessControlAllowHeaders=*,X-Requested-With,X-SignalR-User-Agent"
+      - "traefik.http.middlewares.cors.headers.accessControlAllowCredentials=true"
+
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.rule=Host(`api.${DNS_NAME_OR_IP}`)"
+      - "traefik.http.routers.api.entrypoints=websecure"
+      - "traefik.http.services.strive.loadbalancer.healthcheck.path=/health/ready"
+      - "traefik.http.routers.api.middlewares=cors@docker"
+      - "traefik.http.routers.api.tls=true"
     environment:
-      - SFU__UrlTemplate=http://sfu.${DNS_NAME_OR_IP}/{0}
+      - SFU__UrlTemplate=https://sfu.${DNS_NAME_OR_IP}/{0}
       - Authentication__NoSslRequired=true
-      - Authentication__Issuer=http://localhost:5105
+      - Authentication__Issuer=https://identity.${DNS_NAME_OR_IP}
       - Authentication__Authority=http://host.docker.internal:5105
 
   webspa:
     labels:
+      # Cors Middleware
+      - "traefik.http.middlewares.cors.headers.accessControlAllowOriginList=https://${DNS_NAME_OR_IP}"
+      - "traefik.http.middlewares.cors.headers.accessControlAllowMethods=*"
+      - "traefik.http.middlewares.cors.headers.accessControlAllowHeaders=*,X-Requested-With,X-SignalR-User-Agent"
+      - "traefik.http.middlewares.cors.headers.accessControlAllowCredentials=true"
+
       - "traefik.enable=true"
       - "traefik.http.routers.spa.rule=Host(`${DNS_NAME_OR_IP}`)"
-      - "traefik.http.routers.spa.entrypoints=web"
+      - "traefik.http.routers.spa.entrypoints=websecure"
       - "traefik.http.services.webspa.loadbalancer.healthcheck.path=/health"
+      - "traefik.http.routers.spa.tls=true"
     environment:
-      - App__IdentityUrl=http://localhost:5105/
-      - App__ConferenceUrl=http://api.${DNS_NAME_OR_IP}/
-      - App__SignalrHubUrl=http://api.${DNS_NAME_OR_IP}/signalr
-      - App__EquipmentSignalrHubUrl=http://api.${DNS_NAME_OR_IP}/equipment-signalr
-      - App__FrontendUrl=http://${DNS_NAME_OR_IP}/
+      - App__IdentityUrl=https://identity.${DNS_NAME_OR_IP}
+      - App__FrontendUrl=https://${DNS_NAME_OR_IP}
+      - App__ConferenceUrl=https://api.${DNS_NAME_OR_IP}/
+      - App__SignalrHubUrl=https://api.${DNS_NAME_OR_IP}/signalr
+      - App__EquipmentSignalrHubUrl=https://api.${DNS_NAME_OR_IP}/equipment-signalr
 
   sfu:
     labels:
+      # Cors Middleware
+      - "traefik.http.middlewares.cors.headers.accessControlAllowOriginList=https://${DNS_NAME_OR_IP}"
+      - "traefik.http.middlewares.cors.headers.accessControlAllowMethods=*"
+      - "traefik.http.middlewares.cors.headers.accessControlAllowHeaders=*,X-Requested-With,X-SignalR-User-Agent"
+      - "traefik.http.middlewares.cors.headers.accessControlAllowCredentials=true"
+
       - "traefik.enable=true"
       - "traefik.http.routers.sfu.rule=Host(`sfu.${DNS_NAME_OR_IP}`)"
-      - "traefik.http.routers.sfu.entrypoints=web"
+      - "traefik.http.routers.sfu.entrypoints=websecure"
       - "traefik.http.services.sfu.loadbalancer.healthcheck.path=/health"
       - "traefik.http.services.sfu.loadbalancer.healthcheck.port=9000"
       - "traefik.http.services.sfu.loadbalancer.server.port=3000"
       - "traefik.http.routers.sfu.middlewares=cors@docker"
+      - "traefik.http.routers.sfu.tls=true"

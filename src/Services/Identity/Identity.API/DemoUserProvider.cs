@@ -1,4 +1,5 @@
-﻿using Duende.IdentityServer.Test;
+﻿using System;
+using Duende.IdentityServer.Test;
 using Identity.API.Quickstart;
 
 namespace Identity.API
@@ -12,7 +13,13 @@ namespace Identity.API
 
         public TestUser FindByUsername(string username)
         {
-            return new() {Username = username, IsActive = true, SubjectId = username, Password = "password"};
+            return new()
+            {
+                Username = username,
+                IsActive = true,
+                SubjectId = Guid.NewGuid().ToString("N"),
+                Password = "password",
+            };
         }
     }
 }

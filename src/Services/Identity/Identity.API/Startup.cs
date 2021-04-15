@@ -54,7 +54,13 @@ namespace Identity.API
 
             services.Configure<ForwardedHeadersOptions>(options =>
             {
+                // ref: https://github.com/aspnet/Docs/issues/2384
+
                 options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+                options.RequireHeaderSymmetry = false;
+
+                options.KnownNetworks.Clear();
+                options.KnownProxies.Clear();
             });
         }
 

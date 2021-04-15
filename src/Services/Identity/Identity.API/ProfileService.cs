@@ -15,8 +15,7 @@ namespace Identity.API
             //>Processing
             var claims = new List<Claim>
             {
-                context.Subject.Claims.First(x => x.Type == JwtClaimTypes.Name),
-                new(JwtClaimTypes.Role, "mod")
+                context.Subject.Claims.First(x => x.Type == JwtClaimTypes.Name), new(JwtClaimTypes.Role, "mod"),
             };
 
             context.IssuedClaims.AddRange(claims);
