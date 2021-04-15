@@ -2,7 +2,6 @@ import { Box, FormControl, InputLabel, Link, makeStyles, MenuItem, Select, Typog
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { supportedLanguages } from 'src/services/i18n';
-import GitInfo from 'react-git-info/macro';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -15,7 +14,10 @@ const useStyles = makeStyles((theme) => ({
    },
 }));
 
-const gitInfo = GitInfo();
+const gitInfo = {
+   commit: process.env.REACT_APP_GITCOMMIT,
+   commitInfo: process.env.REACT_APP_COMMITINFO,
+};
 
 export default function CommonSettings() {
    const classes = useStyles();
@@ -49,9 +51,9 @@ export default function CommonSettings() {
             <Typography variant="subtitle1">{t('conference.settings.common.strive_info')}</Typography>
             <Typography>{t('conference.settings.common.strive_creator')}</Typography>
             <Typography>
-               {t('conference.settings.common.strive_commit')}: {gitInfo.commit.shortHash}{' '}
+               {t('conference.settings.common.strive_commit')}: {gitInfo.commit}{' '}
                <Typography color="textSecondary" component="span">
-                  ({gitInfo.branch} at {gitInfo.commit.date})
+                  ({gitInfo.commitInfo})
                </Typography>
             </Typography>
             <Box display="flex" mt={2}>
