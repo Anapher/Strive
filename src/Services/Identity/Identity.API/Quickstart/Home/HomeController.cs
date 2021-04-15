@@ -1,16 +1,16 @@
-// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
 
 
-using IdentityServer4.Services;
+using System.Threading.Tasks;
+using Duende.IdentityServer.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using System.Threading.Tasks;
 
-namespace IdentityServerHost.Quickstart.UI
+namespace Identity.API.Quickstart.Home
 {
     [SecurityHeaders]
     [AllowAnonymous]
