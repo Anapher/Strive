@@ -7,5 +7,7 @@ namespace Identity.API.Quickstart
         bool ValidateCredentials(string username, string password);
 
         TestUser FindByUsername(string username);
+
+        string IdToUsername(string id);
     }
 }

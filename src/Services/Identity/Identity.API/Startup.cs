@@ -62,6 +62,9 @@ namespace Identity.API
                 options.KnownNetworks.Clear();
                 options.KnownProxies.Clear();
             });
+
+            services.AddCors(x =>
+                x.AddDefaultPolicy(builder => builder.WithOrigins(spaHost).AllowAnyMethod().AllowAnyHeader()));
         }
 
         public void Configure(IApplicationBuilder app)
@@ -69,6 +72,8 @@ namespace Identity.API
             app.UseForwardedHeaders();
 
             if (Environment.IsDevelopment()) app.UseDeveloperExceptionPage();
+
+            app.UseCors();
 
             app.UseCookiePolicy(new CookiePolicyOptions
             {
