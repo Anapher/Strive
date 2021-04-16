@@ -53,7 +53,7 @@ export default function CommonSettings() {
             <Typography>
                {t('conference.settings.common.strive_commit')}: {gitInfo.commit}{' '}
                <Typography color="textSecondary" component="span">
-                  ({gitInfo.commitInfo})
+                  {gitInfo.commitInfo}
                </Typography>
             </Typography>
             <Box display="flex" mt={2}>
