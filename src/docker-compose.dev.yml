@@ -1,0 +1,12 @@
+version: "3.4"
+
+services:
+  sfu:
+    environment:
+      - MEDIASOUP_MIN_PORT=2000
+      - MEDIASOUP_MAX_PORT=2020
+    ports:
+      - "3000:3000"
+      - "2000-2020:2000-2020/udp"
+      - "2000-2020:2000-2020/tcp"
+      - "9000:9000"

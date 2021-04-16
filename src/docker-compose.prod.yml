@@ -20,3 +20,7 @@ services:
   sfu:
     labels:
       - "traefik.http.routers.sfu.tls.certresolver=letsEncrypt"
+    environment:
+      - MEDIASOUP_MIN_PORT
+      - MEDIASOUP_MAX_PORT
+    network_mode: host # we need to export a large port range https://docs.docker.com/network/host/
