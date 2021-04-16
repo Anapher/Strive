@@ -15,17 +15,15 @@ const useStyles = makeStyles((theme) => ({
       display: 'flex',
       flexDirection: 'column',
 
-      height: '100%',
-
-      [theme.breakpoints.up('sm')]: {
-         height: 'auto',
+      [theme.breakpoints.down('xs')]: {
+         height: '100%',
       },
    },
    dialogContent: {
-      flex: 1,
       minHeight: 0,
-      [theme.breakpoints.up('sm')]: {
-         height: 496,
+      height: 496,
+      [theme.breakpoints.down('xs')]: {
+         flex: 1,
       },
    },
 }));
@@ -36,7 +34,7 @@ function CreateConferenceDialog() {
    const classes = useStyles();
    const { t } = useTranslation();
 
-   const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
+   const fullScreen = useMediaQuery(theme.breakpoints.down('xs'));
 
    const { dialogOpen, createdConferenceId, isCreating, conferenceData, mode } = useSelector(
       (state: RootState) => state.createConference,
