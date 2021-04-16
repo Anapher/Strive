@@ -20,6 +20,7 @@ certificatesResolvers:
     acme:
       email: test@yourdomain.com
       storage: acme.json
+      # caserver: https://acme-staging-v02.api.letsencrypt.org/directory # use this for tests
       httpChallenge:
         # used during the challenge
         entryPoint: web
