@@ -1,4 +1,4 @@
-$arg = $args[0]
+$arg = $args -join " "
 
 $env:GITREF = ((git log -1 --pretty=format:"%D") | Out-String).Trim()
 $env:GITCOMMIT = ((git rev-parse --short HEAD) | Out-String).Trim()
