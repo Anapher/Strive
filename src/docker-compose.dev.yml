@@ -11,3 +11,5 @@ services:
       - "2000-2020:2000-2020/udp"
       - "2000-2020:2000-2020/tcp"
       - "9000:9000"
+    environment:
+      - DEBUG=strive-mediasoup**

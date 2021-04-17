@@ -24,4 +24,6 @@ services:
         - MEDIASOUP_MAX_PORT=${MEDIASOUP_MAX_PORT}
     labels:
       - "traefik.http.routers.sfu.tls.certresolver=letsEncrypt"
+    environment:
+      - DEBUG=strive-mediasoup**
     network_mode: host # we need to export a large port range https://docs.docker.com/network/host/
