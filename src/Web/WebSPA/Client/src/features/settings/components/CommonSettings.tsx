@@ -1,6 +1,7 @@
 import { Box, FormControl, InputLabel, Link, makeStyles, MenuItem, Select, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import appSettings from 'src/config';
 import { supportedLanguages } from 'src/services/i18n';
 
 const useStyles = makeStyles((theme) => ({
@@ -14,10 +15,7 @@ const useStyles = makeStyles((theme) => ({
    },
 }));
 
-const gitInfo = {
-   commit: process.env.REACT_APP_GITCOMMIT,
-   commitInfo: process.env.REACT_APP_COMMITINFO,
-};
+const gitInfo = appSettings.gitInfo;
 
 export default function CommonSettings() {
    const classes = useStyles();
@@ -53,7 +51,7 @@ export default function CommonSettings() {
             <Typography>
                {t('conference.settings.common.strive_commit')}: {gitInfo.commit}{' '}
                <Typography color="textSecondary" component="span">
-                  {gitInfo.commitInfo}
+                  ({gitInfo.ref} at {gitInfo.timestamp})
                </Typography>
             </Typography>
             <Box display="flex" mt={2}>

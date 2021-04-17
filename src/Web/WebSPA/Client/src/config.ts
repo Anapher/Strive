@@ -1,16 +1,26 @@
 import { UserManagerSettings } from 'oidc-client';
 
+export type AppGitInfo = {
+   commit: string;
+   ref: string;
+   timestamp: string;
+};
+
 export type AppSettings = {
    identityUrl: string;
    conferenceUrl: string;
    signalrHubUrl: string;
    equipmentSignalrHubUrl: string;
    frontendUrl: string;
+
+   gitInfo: AppGitInfo;
 };
 
 // injected by ASP.Net Core, normalize urls. All urls don't have a trailing slash
 const appSettings: AppSettings = Object.fromEntries(
-   Object.entries((window as any).ENV).map(([name, url]) => [name, (url as string).replace(/\/$/, '')]),
+   Object.entries((window as any).ENV).map(([name, value]) =>
+      typeof value === 'string' ? [name, value.replace(/\/$/, '')] : [name, value],
+   ),
 ) as AppSettings;
 
 export default appSettings;

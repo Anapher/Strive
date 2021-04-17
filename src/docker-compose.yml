@@ -32,8 +32,9 @@ services:
     build:
       context: "./Web/WebSPA"
       args:
-        - GITINFO=${GITINFO}
-        - GITCOMMIT=${GITCOMMIT}
+        - GITCOMMIT
+        - GITREF
+        - GITTIMESTAMP
     depends_on:
       - identity-api
       - sfu

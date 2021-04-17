@@ -1,5 +1,6 @@
 export GITCOMMIT=$(git rev-parse --short HEAD)
-export GITINFO="$(git log -1 --pretty=format:"%d at %ai")"
+export GITREF="$(git log -1 --pretty=format:"%D")"
+export GITTIMESTAMP="$(git log -1 --pretty=format:"%ai")"
 
 export DNS_NAME_OR_IP=yourdomain.com
 export FRONTEND_DNS_OR_IP=www.yourdomain.com

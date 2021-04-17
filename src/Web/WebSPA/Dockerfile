@@ -12,8 +12,6 @@ COPY Client/package.json .
 COPY Client/yarn.lock .
 RUN yarn install
 COPY Client/ .
-ARG GITCOMMIT
-ARG GITINFO
 RUN yarn build
 
 FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS publish
@@ -28,4 +26,13 @@ RUN dotnet publish "WebSPA.csproj" --no-restore -c Release -o /app
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app .
+
+ARG GITCOMMIT
+ARG GITREF
+ARG GITTIMESTAMP
+
+ENV App__GitInfo__Commit=$GITCOMMIT
+ENV App__GitInfo__Ref=$GITREF
+ENV App__GitInfo__Timestamp=$GITTIMESTAMP
+
 ENTRYPOINT ["dotnet", "WebSPA.dll"]
