@@ -93,7 +93,14 @@ export class ConferenceRepository {
       // first, subscribe to events for this conference. This is important to prevent race conditions
       // if the conference changes after we fetched the conference but before we begin processing messages
       const syncConference = await this.pubSubMessenger.createSynchronizedConference(conferenceId);
-      const current = await this.client.fetchConference(conferenceId);
+
+      let current: ConferenceInfo;
+      try {
+         current = await this.client.fetchConference(conferenceId);
+      } catch (error) {
+         logger.error('Error occurred when trying to fetch conference from server %O', error);
+         throw error;
+      }
 
       syncConference.initialize(current);
       return syncConference;
