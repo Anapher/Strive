@@ -4,6 +4,8 @@ services:
   traefik:
     volumes:
       - "./acme.json:/acme.json"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   identity-api:
     labels:
@@ -26,4 +28,6 @@ services:
       - "traefik.http.routers.sfu.tls.certresolver=letsEncrypt"
     environment:
       - DEBUG=strive-mediasoup**
+      - API_CONFERENCE_MANAGEMENT=http://0.0.0.0:5100/v1/sfu/{conferenceId}?apiKey=${STRIVE_API_KEY}
+      - AMQP_CONNECTION_STRING=amqp://0.0.0.0:5672
     network_mode: host # we need to export a large port range https://docs.docker.com/network/host/
