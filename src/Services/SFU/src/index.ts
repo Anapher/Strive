@@ -49,13 +49,6 @@ async function main() {
    const app = express();
    configureEndpoints(app, conferenceManager);
 
-   const server = app
-      .listen(config.http.port, () => {
-         lightship.signalReady();
-         logger.info('HTTP server is listening on port %i', config.http.port);
-      })
-      .on('error', () => lightship.shutdown());
-
    lightship.registerShutdownHandler(async () => {
       if (process.env.SERVER_ENVIRONMENT !== 'Development') {
          // Allow sufficient amount of time to allow all of the existing
@@ -67,6 +60,16 @@ async function main() {
       server.close();
       workers.close();
    });
+
+   const server = app
+      .listen(config.http.port, () => {
+         lightship.signalReady();
+         logger.info('HTTP server is listening on port %i', config.http.port);
+      })
+      .on('error', (err) => {
+         logger.error('Express failed with an error %O', err);
+         lightship.shutdown();
+      });
 
    return app;
 }
