@@ -59,6 +59,9 @@ export class WebRtcConnection {
    /** SignalR methods that were subscribed. Must be memorized for unsubscription in close() */
    private signalrSubscription = new Array<HubSubscription>();
 
+   private joiningConsumers = new Map<string, number>();
+   private joiningConsumersId = 0;
+
    constructor(private connection: HubConnection, private client: SfuClient) {
       this.device = new Device();
 
@@ -121,6 +124,9 @@ export class WebRtcConnection {
       log('[Consumer: %s] Received new consumer event, try to process...', id);
 
       try {
+         const processId = this.joiningConsumersId++;
+         this.joiningConsumers.set(id, processId);
+
          const consumer = await this.receiveTransport.consume({
             id,
             rtpParameters,
@@ -128,6 +134,14 @@ export class WebRtcConnection {
             producerId,
             appData: { ...appData, participantId },
          });
+
+         if (this.joiningConsumers.get(id) !== processId) {
+            consumer.close();
+            log('[Consumer: %s] detected race condition, consumer was closed while creating, delete consumer', id);
+            return;
+         }
+
+         this.joiningConsumers.delete(id);
 
          this.consumers.set(consumer.id, consumer);
          consumer.on('transportclose', () => this.consumers.delete(consumer.id));
@@ -137,10 +151,14 @@ export class WebRtcConnection {
       } catch (error) {
          log('[Consumer: %s] Error on adding consumer %O', id, error);
       }
+
+      console.log(this.consumers);
    }
 
    private onConsumerClosed({ consumerId }: ConsumerInfoPayload) {
       const consumer = this.consumers.get(consumerId);
+
+      this.joiningConsumers.delete(consumerId);
 
       if (consumer) {
          consumer.close();
