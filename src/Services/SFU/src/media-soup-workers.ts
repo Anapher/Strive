@@ -30,7 +30,7 @@ export default class MediaSoupWorkers {
          //   }, 120000);
       }
 
-      logger.info('Mediasoup workers started');
+      logger.info('Mediasoup workers started (min_port: %d, max_port: %d)', settings.rtcMinPort, settings.rtcMaxPort);
    }
 
    getNextWorker(): Worker {
