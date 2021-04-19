@@ -3,7 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using MediatR;
 using Strive.Core.Services.BreakoutRooms;
-using Strive.Core.Services.Scenes.Modes;
+using Strive.Core.Services.Scenes.Scenes;
 using Strive.Core.Services.Synchronization.Requests;
 
 namespace Strive.Core.Services.Scenes.Providers

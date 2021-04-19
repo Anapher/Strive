@@ -6,7 +6,7 @@ using Strive.Core.Services.Media.Dtos;
 using Strive.Core.Services.Media.Gateways;
 using Strive.Core.Services.Rooms;
 using Strive.Core.Services.Rooms.Gateways;
-using Strive.Core.Services.Scenes.Modes;
+using Strive.Core.Services.Scenes.Scenes;
 
 namespace Strive.Core.Services.Scenes.Providers
 {

@@ -1,4 +1,4 @@
-namespace Strive.Core.Services.Scenes.Modes
+namespace Strive.Core.Services.Scenes.Scenes
 {
     public record GridScene : IScene
     {

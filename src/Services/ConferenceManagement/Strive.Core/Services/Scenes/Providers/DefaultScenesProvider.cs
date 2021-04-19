@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Strive.Core.Services.Scenes.Modes;
+using Strive.Core.Services.Scenes.Scenes;
 
 namespace Strive.Core.Services.Scenes.Providers
 {
@@ -19,7 +19,7 @@ namespace Strive.Core.Services.Scenes.Providers
 
         public bool IsProvided(IScene scene)
         {
-            return scene is AutonomousScene || scene is ActiveSpeakerScene || scene is GridScene;
+            return scene is AutonomousScene or ActiveSpeakerScene or GridScene;
         }
     }
 }

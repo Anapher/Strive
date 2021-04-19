@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.SignalR.Client;
 using Strive.Core.Interfaces;
 using Strive.Core.Services.Rooms;
 using Strive.Core.Services.Scenes;
-using Strive.Core.Services.Scenes.Modes;
+using Strive.Core.Services.Scenes.Scenes;
 using Strive.Hubs.Core;
 using Strive.Hubs.Core.Dtos;
 using Strive.IntegrationTests._Helpers;

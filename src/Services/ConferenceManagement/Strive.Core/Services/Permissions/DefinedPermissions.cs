@@ -44,6 +44,9 @@ namespace Strive.Core.Services.Permissions
         public static class Scenes
         {
             public static readonly PermissionDescriptor<bool> CanSetScene = new("scenes/canSetScene");
+
+            public static readonly PermissionDescriptor<bool> CanOverwriteContentScene =
+                new("scenes/canOverwriteContentScene");
         }
     }
 }

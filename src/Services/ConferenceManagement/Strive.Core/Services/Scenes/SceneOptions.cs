@@ -1,4 +1,4 @@
-using Strive.Core.Services.Scenes.Modes;
+using Strive.Core.Services.Scenes.Scenes;
 
 namespace Strive.Core.Services.Scenes
 {

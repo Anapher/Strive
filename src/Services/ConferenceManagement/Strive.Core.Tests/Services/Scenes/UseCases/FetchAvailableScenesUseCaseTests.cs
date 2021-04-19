@@ -6,8 +6,8 @@ using Moq;
 using Strive.Core.Extensions;
 using Strive.Core.Services.Scenes;
 using Strive.Core.Services.Scenes.Gateways;
-using Strive.Core.Services.Scenes.Modes;
 using Strive.Core.Services.Scenes.Requests;
+using Strive.Core.Services.Scenes.Scenes;
 using Strive.Core.Services.Scenes.UseCases;
 using Xunit;
 
