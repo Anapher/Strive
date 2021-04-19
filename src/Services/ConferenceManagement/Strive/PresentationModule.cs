@@ -14,7 +14,7 @@ namespace Strive
             builder.RegisterType<ConferenceLinkPresenter>().AsImplementedInterfaces().InstancePerDependency();
             builder.RegisterType<CoreHubConnections>().AsImplementedInterfaces().SingleInstance();
             builder.RegisterType<SfuConferenceInfoProvider>().AsImplementedInterfaces();
-            builder.RegisterType<SfuNotifier>().AsImplementedInterfaces();
+            builder.RegisterType<SfuNotifier>().AsSelf().AsImplementedInterfaces();
         }
     }
 }

@@ -9,13 +9,13 @@ namespace Strive.Hubs
 
         protected ScopedHub(ILifetimeScope scope)
         {
-            HubScope = scope.BeginLifetimeScope();
+            HubScope = scope.BeginLifetimeScope(builder => builder.RegisterModule<PerformanceModule>());
         }
 
         protected override void Dispose(bool disposing)
         {
             // Dispose the hub lifetime scope when the hub is disposed.
-            if (disposing) HubScope.Dispose();
+            if (disposing) HubScope.DisposeAsync();
 
             base.Dispose(disposing);
         }

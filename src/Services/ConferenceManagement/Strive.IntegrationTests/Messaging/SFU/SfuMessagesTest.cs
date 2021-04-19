@@ -115,8 +115,11 @@ namespace Strive.IntegrationTests.Messaging.SFU
             var result = await OpenConference(connection);
             AssertSuccess(result);
 
-            Assert.NotEmpty(endpoint.State.ParticipantToRoom);
-            Assert.NotEmpty(endpoint.State.ParticipantPermissions);
+            await AssertHelper.WaitForAssert(() =>
+            {
+                Assert.NotEmpty(endpoint.State.ParticipantToRoom);
+                Assert.NotEmpty(endpoint.State.ParticipantPermissions);
+            });
 
             // act
             await connection.Hub.DisposeAsync();
