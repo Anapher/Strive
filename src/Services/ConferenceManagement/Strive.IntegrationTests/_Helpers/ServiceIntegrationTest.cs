@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
@@ -41,7 +40,7 @@ namespace Strive.IntegrationTests._Helpers
             {
                 Configuration = new ConferenceConfiguration
                 {
-                    Moderators = new[] {"0"}.Concat(moderators.Select(x => x.Sub)).ToImmutableList(),
+                    Moderators = new[] {"0"}.Concat(moderators.Select(x => x.Sub)).ToList(),
                 },
                 Permissions = new Dictionary<PermissionType, Dictionary<string, JValue>>(),
             };
@@ -51,7 +50,7 @@ namespace Strive.IntegrationTests._Helpers
 
         protected async Task<ConferenceCreatedResponseDto> CreateConference(CreateConferenceRequestDto creationDto)
         {
-            var response = await Client.PostAsJsonAsync("/v1/conference", creationDto);
+            var response = await Client.PostAsync("/v1/conference", new JsonNetContent(creationDto));
             response.EnsureSuccessStatusCode();
 
             var createdConference = await response.Content.ReadFromJsonAsync<ConferenceCreatedResponseDto>();

@@ -17,22 +17,22 @@ namespace Strive.Core.Services.Permissions
 
         public static PermissionLayer BreakoutRoomDefault(IReadOnlyDictionary<string, JValue> permissions)
         {
-            return new(20, "BREAKOUTROOM_DEFAULT", permissions);
+            return new(30, "BREAKOUTROOM_DEFAULT", permissions);
         }
 
         public static PermissionLayer BreakoutRoom(IReadOnlyDictionary<string, JValue> permissions)
         {
-            return new(21, "BREAKOUTROOM", permissions);
+            return new(31, "BREAKOUTROOM", permissions);
         }
 
         public static PermissionLayer ModeratorDefault(IReadOnlyDictionary<string, JValue> permissions)
         {
-            return new(30, "MODERATOR_DEFAULT", permissions);
+            return new(20, "MODERATOR_DEFAULT", permissions);
         }
 
         public static PermissionLayer Moderator(IReadOnlyDictionary<string, JValue> permissions)
         {
-            return new(31, "MODERATOR", permissions);
+            return new(21, "MODERATOR", permissions);
         }
 
         public static PermissionLayer Temporary(IReadOnlyDictionary<string, JValue> permissions)

@@ -1,15 +1,21 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.SignalR.Client;
+using Newtonsoft.Json.Linq;
+using Strive.Core.Domain.Entities;
+using Strive.Core.Extensions;
 using Strive.Core.Interfaces;
 using Strive.Core.Services.BreakoutRooms;
+using Strive.Core.Services.Permissions;
 using Strive.Core.Services.Rooms;
 using Strive.Hubs.Core;
 using Strive.Hubs.Core.Dtos;
 using Strive.IntegrationTests._Helpers;
+using Strive.Models.Request;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -49,6 +55,62 @@ namespace Strive.IntegrationTests.Services
 
             await connection.SyncObjects.AssertSyncObject<SynchronizedRooms>(SynchronizedRooms.SyncObjId,
                 value => { Assert.Equal(amount + 1, value.Rooms.Count); });
+        }
+
+        [Fact]
+        public async Task OpenBreakoutRooms_MoveToBreakoutRoom_UpdatePermissions()
+        {
+            const int amount = 1;
+
+            var permission = DefinedPermissions.Media.CanChangeOtherParticipantsProducers;
+
+            // arrange
+            var conferenceCreationDto = new CreateConferenceRequestDto
+            {
+                Configuration =
+                    new ConferenceConfiguration {Moderators = Moderator.Yield().Select(x => x.Sub).ToList()},
+                Permissions = new Dictionary<PermissionType, Dictionary<string, JValue>>
+                {
+                    {
+                        PermissionType.Moderator,
+                        new Dictionary<string, JValue>(permission.Configure(false).Yield())
+                    },
+                    {
+                        PermissionType.BreakoutRoom,
+                        new Dictionary<string, JValue>(permission.Configure(true).Yield())
+                    },
+                },
+            };
+
+            var conference = await CreateConference(conferenceCreationDto);
+            var connection = await ConnectUserToConference(Moderator, conference);
+            AssertSuccess(await OpenConference(connection));
+
+            Task AssertPermission(bool value)
+            {
+                return connection.SyncObjects.AssertSyncObject<SynchronizedParticipantPermissions>(
+                    SynchronizedParticipantPermissions.SyncObjId(Moderator.Sub),
+                    syncObj => { Assert.Contains(permission.Configure(value), syncObj.Permissions); });
+            }
+
+            AssertSuccess(await connection.Hub.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.OpenBreakoutRooms),
+                new OpenBreakoutRoomsDto(amount, null, null, null)));
+
+            await AssertPermission(false);
+
+            await connection.SyncObjects.AssertSyncObject<SynchronizedRooms>(SynchronizedRooms.SyncObjId,
+                value => Assert.Equal(2, value.Rooms.Count));
+            var syncRooms =
+                connection.SyncObjects.GetSynchronizedObject<SynchronizedRooms>(SynchronizedRooms.SyncObjId);
+
+            var breakoutRoom = syncRooms.Rooms.Single(x => x.RoomId != syncRooms.DefaultRoomId);
+
+            // act
+            AssertSuccess(await connection.Hub.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.SwitchRoom),
+                new SwitchRoomDto(breakoutRoom.RoomId)));
+
+            // assert
+            await AssertPermission(true);
         }
 
         [Fact]
