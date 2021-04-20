@@ -10,7 +10,7 @@ using Strive.Core.Services.ConferenceManagement.Requests;
 using Strive.Core.Services.Permissions;
 using Strive.Core.Services.Permissions.Options;
 using Strive.Core.Services.Rooms;
-using Strive.Core.Services.Synchronization.Requests;
+using Strive.Core.Services.Synchronization.Extensions;
 using Strive.Core.Utilities;
 
 namespace Strive.Core.Services.BreakoutRooms
@@ -33,8 +33,9 @@ namespace Strive.Core.Services.BreakoutRooms
 
         public async ValueTask<IEnumerable<PermissionLayer>> FetchPermissionsForParticipant(Participant participant)
         {
-            var synchronizedRooms = (SynchronizedRooms) await _mediator.Send(
-                new FetchSynchronizedObjectRequest(participant.ConferenceId, SynchronizedRooms.SyncObjId));
+            var synchronizedRooms =
+                await _mediator.FetchSynchronizedObject<SynchronizedRooms>(participant.ConferenceId,
+                    SynchronizedRooms.SyncObjId);
 
             if (!synchronizedRooms.Participants.TryGetValue(participant.Id, out var roomId))
                 return Enumerable.Empty<PermissionLayer>();

@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using MediatR;
 using Strive.Core.Services.ConferenceManagement.Notifications;
 using Strive.Core.Services.ParticipantsList;
+using Strive.Core.Services.Synchronization.Extensions;
 using Strive.Core.Services.Synchronization.Requests;
 
 namespace Strive.Core.Services.ConferenceManagement.NotificationHandlers
@@ -19,8 +20,9 @@ namespace Strive.Core.Services.ConferenceManagement.NotificationHandlers
 
         public async Task Handle(ConferencePatchedNotification notification, CancellationToken cancellationToken)
         {
-            var syncParticipants = (SynchronizedParticipants) await _mediator.Send(
-                new FetchSynchronizedObjectRequest(notification.ConferenceId, SynchronizedParticipants.SyncObjId));
+            var syncParticipants =
+                await _mediator.FetchSynchronizedObject<SynchronizedParticipants>(notification.ConferenceId,
+                    SynchronizedParticipants.SyncObjId);
 
             foreach (var participantId in syncParticipants.Participants.Keys)
             {
