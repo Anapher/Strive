@@ -4,22 +4,23 @@ using Strive.Core.Services.Scenes.Scenes;
 
 namespace Strive.Core.Services.Scenes.Providers
 {
-    public class DefaultScenesProvider : ISceneProvider
+    public class DefaultScenesProvider : ContentSceneProvider
     {
-        public ValueTask<IEnumerable<IScene>> GetAvailableScenes(string conferenceId, string roomId)
+        public override ValueTask<IEnumerable<IScene>> GetAvailableScenes(string conferenceId, string roomId,
+            IReadOnlyList<IScene> sceneStack)
         {
-            return new(new IScene[] {AutonomousScene.Instance, ActiveSpeakerScene.Instance, GridScene.Instance});
+            return new(new IScene[] {ActiveSpeakerScene.Instance, GridScene.Instance});
         }
 
-        public ValueTask<SceneUpdate> UpdateAvailableScenes(string conferenceId, string roomId,
-            object synchronizedObject)
+        public override ValueTask<bool> IsUpdateRequired(string conferenceId, string roomId, object synchronizedObject,
+            object? previousValue)
         {
-            return new(SceneUpdate.NoUpdateRequired);
+            return new(false);
         }
 
-        public bool IsProvided(IScene scene)
+        public override bool IsProvided(IScene scene)
         {
-            return scene is AutonomousScene or ActiveSpeakerScene or GridScene;
+            return scene is ActiveSpeakerScene or GridScene;
         }
     }
 }

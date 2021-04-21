@@ -1,20 +1,22 @@
-using System.Collections.Generic;
 using System.Threading.Tasks;
+using Strive.Infrastructure.KeyValue.Abstractions;
 
 namespace Strive.Core.Services.Scenes.Gateways
 {
     public interface ISceneRepository
     {
+        ValueTask<IAcquiredLock> LockScene(string conferenceId, string roomId);
+
         ValueTask SetScene(string conferenceId, string roomId, ActiveScene scene);
 
         ValueTask<ActiveScene?> GetScene(string conferenceId, string roomId);
 
         ValueTask RemoveScene(string conferenceId, string roomId);
 
-        ValueTask SetAvailableScenes(string conferenceId, string roomId, IReadOnlyList<IScene> scenes);
+        ValueTask SetSceneState(string conferenceId, string roomId, SceneState state);
 
-        ValueTask<IReadOnlyList<IScene>?> GetAvailableScenes(string conferenceId, string roomId);
+        ValueTask<SceneState?> GetSceneState(string conferenceId, string roomId);
 
-        ValueTask RemoveAvailableScenes(string conferenceId, string roomId);
+        ValueTask RemoveSceneState(string conferenceId, string roomId);
     }
 }

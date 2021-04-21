@@ -63,7 +63,7 @@ namespace Strive.Core.Tests.Services.Scenes.NotificationHandlers
             var useCase = Create();
             SetupRooms(new Room(RoomId, ""));
 
-            _sceneProvider.Setup(x => x.UpdateAvailableScenes(ConferenceId, RoomId, It.IsAny<object>()))
+            _sceneProvider.Setup(x => x.UpdateAvailableScenes(ConferenceId, RoomId, It.IsAny<object>(), TODO))
                 .ReturnsAsync(SceneUpdate.NoUpdateRequired);
 
             // act
@@ -82,7 +82,7 @@ namespace Strive.Core.Tests.Services.Scenes.NotificationHandlers
             var useCase = Create();
             SetupRooms(new Room(RoomId, ""));
 
-            _sceneProvider.Setup(x => x.UpdateAvailableScenes(ConferenceId, RoomId, It.IsAny<object>()))
+            _sceneProvider.Setup(x => x.UpdateAvailableScenes(ConferenceId, RoomId, It.IsAny<object>(), TODO))
                 .ReturnsAsync(SceneUpdate.UpdateRequired(new[] {new ScreenShareScene("1")}));
 
             // act
@@ -102,7 +102,7 @@ namespace Strive.Core.Tests.Services.Scenes.NotificationHandlers
             var useCase = Create();
             SetupRooms(new Room(RoomId, ""));
 
-            _sceneProvider.Setup(x => x.UpdateAvailableScenes(ConferenceId, RoomId, It.IsAny<object>()))
+            _sceneProvider.Setup(x => x.UpdateAvailableScenes(ConferenceId, RoomId, It.IsAny<object>(), TODO))
                 .ReturnsAsync(SceneUpdate.UpdateRequired(new[] {new ScreenShareScene("1")}));
             _sceneProvider.Setup(x => x.IsProvided(It.IsAny<ScreenShareScene>())).Returns(true);
 
@@ -135,7 +135,7 @@ namespace Strive.Core.Tests.Services.Scenes.NotificationHandlers
             _repository.Setup(x => x.GetScene(ConferenceId, RoomId))
                 .ReturnsAsync(new ActiveScene(true, new ScreenShareScene("123"), SceneConfig.Default));
 
-            _sceneProvider.Setup(x => x.UpdateAvailableScenes(ConferenceId, RoomId, It.IsAny<object>()))
+            _sceneProvider.Setup(x => x.UpdateAvailableScenes(ConferenceId, RoomId, It.IsAny<object>(), TODO))
                 .ReturnsAsync(SceneUpdate.UpdateRequired(new[] {new ScreenShareScene("1")}));
             _sceneProvider.Setup(x => x.IsProvided(It.IsAny<ScreenShareScene>())).Returns(true);
 

@@ -1,52 +1,61 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using MediatR;
 using Strive.Core.Services.Media;
 using Strive.Core.Services.Media.Dtos;
-using Strive.Core.Services.Media.Gateways;
 using Strive.Core.Services.Rooms;
-using Strive.Core.Services.Rooms.Gateways;
 using Strive.Core.Services.Scenes.Scenes;
+using Strive.Core.Services.Scenes.Utilities;
+using Strive.Core.Services.Synchronization.Extensions;
 
 namespace Strive.Core.Services.Scenes.Providers
 {
-    public class ScreenShareSceneProvider : ISceneProvider
+    public class ScreenShareSceneProvider : ContentSceneProvider
     {
-        private readonly IMediaStateRepository _mediaStateRepository;
-        private readonly IRoomRepository _roomRepository;
+        private readonly IMediator _mediator;
 
-        public ScreenShareSceneProvider(IMediaStateRepository mediaStateRepository, IRoomRepository roomRepository)
+        public ScreenShareSceneProvider(IMediator mediator)
         {
-            _mediaStateRepository = mediaStateRepository;
-            _roomRepository = roomRepository;
+            _mediator = mediator;
         }
 
-        public async ValueTask<IEnumerable<IScene>> GetAvailableScenes(string conferenceId, string roomId)
-        {
-            var participantsInRoom = await _roomRepository.GetParticipantsOfRoom(conferenceId, roomId);
-            var mediaState = await _mediaStateRepository.Get(conferenceId);
-
-            return participantsInRoom
-                .Where(x => mediaState.TryGetValue(x.Id, out var streams) &&
-                            streams.Producers.ContainsKey(ProducerSource.Screen))
-                .Select(x => new ScreenShareScene(x.Id));
-        }
-
-        public async ValueTask<SceneUpdate> UpdateAvailableScenes(string conferenceId, string roomId,
-            object synchronizedObject)
-        {
-            if (synchronizedObject is SynchronizedRooms || synchronizedObject is SynchronizedMediaState)
-            {
-                var scenes = await GetAvailableScenes(conferenceId, roomId);
-                return SceneUpdate.UpdateRequired(scenes);
-            }
-
-            return SceneUpdate.NoUpdateRequired;
-        }
-
-        public bool IsProvided(IScene scene)
+        public override bool IsProvided(IScene scene)
         {
             return scene is ScreenShareScene;
+        }
+
+        public override async ValueTask<IEnumerable<IScene>> GetAvailableScenes(string conferenceId, string roomId,
+            IReadOnlyList<IScene> sceneStack)
+        {
+            var rooms = await _mediator.FetchSynchronizedObject<SynchronizedRooms>(conferenceId,
+                SynchronizedRooms.SyncObjId);
+            var mediaState =
+                await _mediator.FetchSynchronizedObject<SynchronizedMediaState>(conferenceId,
+                    SynchronizedMediaState.SyncObjId);
+
+            var participantsInRoom = SceneUtilities.GetParticipantsOfRoom(rooms, roomId);
+
+            return participantsInRoom
+                .Where(participantId => mediaState.Streams.TryGetValue(participantId, out var streams) &&
+                                        streams.Producers.ContainsKey(ProducerSource.Screen)).Select(participantId =>
+                    new ScreenShareScene(participantId));
+        }
+
+        public override async ValueTask<bool> IsUpdateRequired(string conferenceId, string roomId,
+            object synchronizedObject, object? previousValue)
+        {
+            if (synchronizedObject is SynchronizedRooms rooms)
+            {
+                if (SceneUtilities.ParticipantsOfRoomChanged(roomId, rooms, previousValue as SynchronizedRooms))
+                    return true;
+            }
+            else if (synchronizedObject is SynchronizedMediaState)
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }

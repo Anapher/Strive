@@ -47,7 +47,7 @@ namespace Strive.Core.Tests.Services.Scenes.UseCases
         public async Task Handle_NotCached_FetchResultFromProvidersAndCache()
         {
             // arrange
-            _sceneProvider.Setup(x => x.GetAvailableScenes(ConferenceId, RoomId))
+            _sceneProvider.Setup(x => x.GetAvailableScenes(ConferenceId, RoomId, TODO))
                 .ReturnsAsync(new List<IScene> {AutonomousScene.Instance});
 
             var useCase = Create();

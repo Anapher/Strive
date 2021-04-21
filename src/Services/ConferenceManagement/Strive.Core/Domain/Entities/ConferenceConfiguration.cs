@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Strive.Core.Services.Chat;
+using Strive.Core.Services.Scenes;
 
 namespace Strive.Core.Domain.Entities
 {
@@ -32,5 +33,10 @@ namespace Strive.Core.Domain.Entities
         ///     Chat options
         /// </summary>
         public ChatOptions Chat { get; init; } = new();
+
+        /// <summary>
+        ///     Scene options
+        /// </summary>
+        public SceneOptions Scenes { get; init; } = new();
     }
 }

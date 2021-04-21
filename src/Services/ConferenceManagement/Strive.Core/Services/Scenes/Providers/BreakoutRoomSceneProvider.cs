@@ -1,14 +1,13 @@
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using MediatR;
 using Strive.Core.Services.BreakoutRooms;
 using Strive.Core.Services.Scenes.Scenes;
-using Strive.Core.Services.Synchronization.Requests;
+using Strive.Core.Services.Synchronization.Extensions;
 
 namespace Strive.Core.Services.Scenes.Providers
 {
-    public class BreakoutRoomSceneProvider : ISceneProvider
+    public class BreakoutRoomSceneProvider : ContentSceneProvider
     {
         private readonly IMediator _mediator;
 
@@ -17,38 +16,37 @@ namespace Strive.Core.Services.Scenes.Providers
             _mediator = mediator;
         }
 
-        public async ValueTask<IEnumerable<IScene>> GetAvailableScenes(string conferenceId, string roomId)
+        public override bool IsProvided(IScene scene)
         {
-            var state = (SynchronizedBreakoutRooms?) await _mediator.Send(
-                new FetchSynchronizedObjectRequest(conferenceId, SynchronizedBreakoutRooms.SyncObjId));
+            return scene is BreakoutRoomScene;
+        }
 
-            if (state == null)
-                return Enumerable.Empty<IScene>();
-
+        public override async ValueTask<IEnumerable<IScene>> GetAvailableScenes(string conferenceId, string roomId,
+            IReadOnlyList<IScene> sceneStack)
+        {
+            var state = await _mediator.FetchSynchronizedObject<SynchronizedBreakoutRooms>(conferenceId,
+                SynchronizedBreakoutRooms.SyncObjId);
             return GetAvailableScenes(state);
         }
 
-        public ValueTask<SceneUpdate> UpdateAvailableScenes(string conferenceId, string roomId,
-            object synchronizedObject)
+        public override async ValueTask<bool> IsUpdateRequired(string conferenceId, string roomId,
+            object synchronizedObject, object? previousValue)
         {
             if (synchronizedObject is SynchronizedBreakoutRooms syncBreakoutRooms)
             {
-                var scenes = GetAvailableScenes(syncBreakoutRooms);
-                return new ValueTask<SceneUpdate>(SceneUpdate.UpdateRequired(scenes));
+                var isActive = syncBreakoutRooms.Active != null;
+                var wasActive = (previousValue as SynchronizedBreakoutRooms)?.Active != null;
+
+                return isActive != wasActive;
             }
 
-            return new ValueTask<SceneUpdate>(SceneUpdate.NoUpdateRequired);
+            return false;
         }
 
         private static IEnumerable<IScene> GetAvailableScenes(SynchronizedBreakoutRooms syncBreakoutRooms)
         {
             if (syncBreakoutRooms.Active != null)
                 yield return BreakoutRoomScene.Instance;
-        }
-
-        public bool IsProvided(IScene scene)
-        {
-            return scene is BreakoutRoomScene;
         }
     }
 }

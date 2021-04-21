@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,11 +7,11 @@ using Newtonsoft.Json.Linq;
 using Strive.Core.Extensions;
 using Strive.Core.Services.Permissions;
 using Strive.Core.Services.Scenes.Scenes;
-using Strive.Core.Services.Synchronization.Requests;
+using Strive.Core.Services.Synchronization.Extensions;
 
-namespace Strive.Core.Services.Scenes.Modes.PassTheStone
+namespace Strive.Core.Services.Scenes.Providers.PassTheStone
 {
-    public class PassTheStoneManager : ISceneManager
+    public class PassTheStoneSceneProvider : ISceneProvider
     {
         private readonly IMediator _mediator;
 
@@ -23,20 +22,24 @@ namespace Strive.Core.Services.Scenes.Modes.PassTheStone
             DefinedPermissions.Media.CanShareScreen.Configure(false),
         }.ToImmutableDictionary();
 
-        public PassTheStoneManager(IMediator mediator)
+        public PassTheStoneSceneProvider(IMediator mediator)
         {
             _mediator = mediator;
         }
 
-        public async ValueTask<IEnumerable<IScene>> GetAvailableScenes(string conferenceId, string roomId)
+        public async ValueTask<IEnumerable<IScene>> GetAvailableScenes(string conferenceId, string roomId,
+            IReadOnlyList<IScene> sceneStack)
         {
+            if (sceneStack.OfType<PassTheStoneScene>().Any())
+                return PassTheStoneScene.Instance.Yield();
+
             return Enumerable.Empty<IScene>();
         }
 
-        public async ValueTask<SceneUpdate> UpdateAvailableScenes(string conferenceId, string roomId,
-            object synchronizedObject)
+        public ValueTask<bool> IsUpdateRequired(string conferenceId, string roomId, object synchronizedObject,
+            object? previousValue)
         {
-            return SceneUpdate.NoUpdateRequired;
+            return new(false);
         }
 
         public bool IsProvided(IScene scene)
@@ -45,16 +48,15 @@ namespace Strive.Core.Services.Scenes.Modes.PassTheStone
         }
 
         public async ValueTask<IEnumerable<IScene>> BuildStack(IScene scene, SceneBuilderContext context,
-            Func<IScene, SceneBuilderContext, IEnumerable<IScene>> sceneProviderFunc)
+            SceneStackFunc sceneProviderFunc)
         {
-            var stack = new List<IScene>();
-            stack.Add(PassTheStoneScene.Instance);
+            var stack = new List<IScene> {PassTheStoneScene.Instance};
 
             var syncObj = await GetSyncObj(context.ConferenceId);
             if (syncObj.CurrentSpeakerId != null)
             {
                 var presenterScene = new PresenterScene(syncObj.CurrentSpeakerId);
-                stack.AddRange(sceneProviderFunc(presenterScene, context));
+                stack.AddRange(await sceneProviderFunc(presenterScene, context));
             }
 
             return stack;
@@ -73,8 +75,8 @@ namespace Strive.Core.Services.Scenes.Modes.PassTheStone
 
         private async ValueTask<SynchronizedScenePassTheStone> GetSyncObj(string conferenceId)
         {
-            return (SynchronizedScenePassTheStone) await _mediator.Send(
-                new FetchSynchronizedObjectRequest(conferenceId, SynchronizedScenePassTheStone.SyncObjId));
+            return await _mediator.FetchSynchronizedObject<SynchronizedScenePassTheStone>(conferenceId,
+                SynchronizedScenePassTheStone.SyncObjId);
         }
     }
 }

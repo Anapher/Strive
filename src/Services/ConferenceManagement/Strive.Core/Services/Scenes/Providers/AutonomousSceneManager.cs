@@ -7,19 +7,20 @@ using Strive.Core.Extensions;
 using Strive.Core.Services.Permissions;
 using Strive.Core.Services.Scenes.Scenes;
 
-namespace Strive.Core.Services.Scenes.Modes.Autonomous
+namespace Strive.Core.Services.Scenes.Providers
 {
-    public class AutonomousSceneManager : ISceneManager
+    public class AutonomousSceneManager : ISceneProvider
     {
-        public ValueTask<IEnumerable<IScene>> GetAvailableScenes(string conferenceId, string roomId)
+        public ValueTask<IEnumerable<IScene>> GetAvailableScenes(string conferenceId, string roomId,
+            IReadOnlyList<IScene> sceneStack)
         {
             return new(AutonomousScene.Instance.Yield());
         }
 
-        public ValueTask<SceneUpdate> UpdateAvailableScenes(string conferenceId, string roomId,
-            object synchronizedObject)
+        public ValueTask<bool> IsUpdateRequired(string conferenceId, string roomId, object synchronizedObject,
+            object? previousValue)
         {
-            return new(SceneUpdate.NoUpdateRequired);
+            return new(false);
         }
 
         public bool IsProvided(IScene scene)
@@ -27,15 +28,10 @@ namespace Strive.Core.Services.Scenes.Modes.Autonomous
             return scene is AutonomousScene;
         }
 
-        public ValueTask<IEnumerable<IScene>> BuildStack(IScene scene, SceneBuilderContext context,
-            Func<IScene, SceneBuilderContext, IEnumerable<IScene>> sceneProviderFunc)
+        public async ValueTask<IEnumerable<IScene>> BuildStack(IScene scene, SceneBuilderContext context,
+            SceneStackFunc sceneProviderFunc)
         {
-            var result = new List<IScene> {AutonomousScene.Instance, FindPreferredScene(context)};
-
-            if (context.OverwrittenContent != null)
-                result.Add(context.OverwrittenContent);
-
-            return new ValueTask<IEnumerable<IScene>>(result);
+            return new List<IScene> {AutonomousScene.Instance, FindPreferredScene(context)};
         }
 
         public ValueTask<IEnumerable<PermissionLayer>> FetchPermissionsForParticipant(IScene scene,
@@ -49,7 +45,7 @@ namespace Strive.Core.Services.Scenes.Modes.Autonomous
             if (TryFindScreenShareScene(context, out var screenShareScene))
                 return screenShareScene;
 
-            return GridScene.Instance;
+            return GetDefaultScene(context.Options);
         }
 
         private static bool TryFindScreenShareScene(SceneBuilderContext context,
@@ -64,6 +60,19 @@ namespace Strive.Core.Services.Scenes.Modes.Autonomous
 
             scene = context.AvailableScenes.OfType<ScreenShareScene>().OrderBy(x => x.ParticipantId).FirstOrDefault();
             return scene != null;
+        }
+
+        private static IScene GetDefaultScene(SceneOptions options)
+        {
+            switch (options.DefaultScene)
+            {
+                case SceneOptions.BasicSceneType.Grid:
+                    return GridScene.Instance;
+                case SceneOptions.BasicSceneType.ActiveSpeaker:
+                    return ActiveSpeakerScene.Instance;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(options.DefaultScene), options.DefaultScene, null);
+            }
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Strive.Core.Services.Synchronization;
 
-namespace Strive.Core.Services.Scenes.Modes.PassTheStone
+namespace Strive.Core.Services.Scenes.Providers.PassTheStone
 {
     public record SynchronizedScenePassTheStone(string? CurrentSpeakerId, IReadOnlyList<string> SpeakerQueue,
         PassTheStoneMode Mode)
