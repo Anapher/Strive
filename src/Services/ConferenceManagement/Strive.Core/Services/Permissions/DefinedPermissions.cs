@@ -47,6 +47,12 @@ namespace Strive.Core.Services.Permissions
 
             public static readonly PermissionDescriptor<bool> CanOverwriteContentScene =
                 new("scenes/canOverwriteContentScene");
+
+            public static readonly PermissionDescriptor<bool> CanPassTalkingStick = new("scenes/talkingStick_canPass");
+            public static readonly PermissionDescriptor<bool> CanTakeTalkingStick = new("scenes/talkingStick_canTake");
+
+            public static readonly PermissionDescriptor<bool> CanQueueForTalkingStick =
+                new("scenes/talkingStick_canQueue");
         }
     }
 }

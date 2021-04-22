@@ -9,7 +9,6 @@ using Strive.Core.Services.Scenes.Gateways;
 using Strive.Core.Services.Scenes.Requests;
 using Strive.Core.Services.Synchronization.Extensions;
 using Strive.Core.Services.Synchronization.Notifications;
-using Strive.Core.Services.Synchronization.Requests;
 
 namespace Strive.Core.Services.Scenes.NotificationHandlers
 {
@@ -69,36 +68,21 @@ namespace Strive.Core.Services.Scenes.NotificationHandlers
         private async ValueTask UpdateScenesInRoom(string conferenceId, string roomId,
             IReadOnlyList<ISceneProvider> updatedProviders)
         {
-            await using (var @lock = await _sceneRepository.LockScene(conferenceId, roomId))
+            var sceneState = await _sceneRepository.GetSceneState(conferenceId, roomId);
+            if (sceneState == null) return;
+
+            IEnumerable<IScene> updatedScenes = sceneState.AvailableScenes;
+            foreach (var provider in updatedProviders)
             {
-                var sceneState = await _sceneRepository.GetSceneState(conferenceId, roomId);
-                if (sceneState == null) return;
-
-                IEnumerable<IScene> updatedScenes = sceneState.AvailableScenes;
-                foreach (var provider in updatedProviders)
-                {
-                    var scenes = await provider.GetAvailableScenes(conferenceId, roomId, sceneState.SceneStack);
-                    updatedScenes = ExcludeScenesProvidedBy(updatedScenes, provider).Concat(scenes);
-                }
-
-                var newAvailableScenes = updatedScenes.ToList();
-                if (newAvailableScenes.ScrambledEquals(sceneState.AvailableScenes))
-                    return;
-
-                if (!sceneState.SceneStack.All(newAvailableScenes.Contains))
-                {
-                    // we need to change the scene stack, submit update request
-                    await @lock.DisposeAsync();
-                    await _mediator.Send(new UpdateScenesRequest(conferenceId, roomId));
-                    return;
-                }
-
-                await _sceneRepository.SetSceneState(conferenceId, roomId,
-                    sceneState with {AvailableScenes = newAvailableScenes});
+                var scenes = await provider.GetAvailableScenes(conferenceId, roomId, sceneState.SceneStack);
+                updatedScenes = ExcludeScenesProvidedBy(updatedScenes, provider).Concat(scenes);
             }
 
-            await _mediator.Send(new UpdateSynchronizedObjectRequest(conferenceId,
-                SynchronizedScene.SyncObjId(roomId)));
+            var newAvailableScenes = updatedScenes.ToList();
+            if (newAvailableScenes.ScrambledEquals(sceneState.AvailableScenes))
+                return;
+
+            await _mediator.Send(new UpdateScenesRequest(conferenceId, roomId));
         }
 
         private static IEnumerable<IScene> ExcludeScenesProvidedBy(IEnumerable<IScene> scenes, ISceneProvider provider)

@@ -35,7 +35,7 @@ namespace Strive.Core.Services.Scenes
             foreach (var scene in scenes.SceneStack)
             {
                 var provider = FindProviderForScene(scene);
-                var sceneLayers = await provider.FetchPermissionsForParticipant(scene, participant);
+                var sceneLayers = await provider.FetchPermissionsForParticipant(scene, participant, scenes.SceneStack);
                 permissions.AddRange(sceneLayers);
             }
 

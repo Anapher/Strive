@@ -41,6 +41,8 @@ namespace Strive.Core.Services.Permissions.Options
                     DefinedPermissions.Scenes.CanSetScene.Configure(true),
                     DefinedPermissions.Chat.CanSendAnnouncement.Configure(true),
                     DefinedPermissions.Chat.CanSendAnonymously.Configure(false),
+                    DefinedPermissions.Scenes.CanTakeTalkingStick.Configure(true),
+                    DefinedPermissions.Scenes.CanPassTalkingStick.Configure(true),
                 }.ToImmutableDictionary()
             },
             // Breakout room permissions

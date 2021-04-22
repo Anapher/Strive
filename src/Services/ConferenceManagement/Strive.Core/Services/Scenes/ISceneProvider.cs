@@ -19,6 +19,7 @@ namespace Strive.Core.Services.Scenes
         ValueTask<IEnumerable<IScene>> BuildStack(IScene scene, SceneBuilderContext context,
             SceneStackFunc sceneProviderFunc);
 
-        ValueTask<IEnumerable<PermissionLayer>> FetchPermissionsForParticipant(IScene scene, Participant participant);
+        ValueTask<IEnumerable<PermissionLayer>> FetchPermissionsForParticipant(IScene scene, Participant participant,
+            IReadOnlyList<IScene> sceneStack);
     }
 }

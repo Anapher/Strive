@@ -74,25 +74,25 @@ namespace Strive.Core.Services.Scenes.Providers
         public async ValueTask<IEnumerable<IScene>> BuildStack(IScene scene, SceneBuilderContext context,
             SceneStackFunc sceneProviderFunc)
         {
-            var stack = new Stack<IScene>();
             var presenterScene = (PresenterScene) scene;
+            var stack = new List<IScene> {presenterScene};
 
             var screenShare = context.AvailableScenes.OfType<ScreenShareScene>()
                 .FirstOrDefault(x => x.ParticipantId == presenterScene.PresenterParticipantId);
             if (screenShare != null)
             {
-                stack.Push(screenShare);
+                stack.Add(screenShare);
             }
             else
             {
-                stack.Push(ActiveSpeakerScene.Instance);
+                stack.Add(ActiveSpeakerScene.Instance);
             }
 
             return stack;
         }
 
         public async ValueTask<IEnumerable<PermissionLayer>> FetchPermissionsForParticipant(IScene scene,
-            Participant participant)
+            Participant participant, IReadOnlyList<IScene> sceneStack)
         {
             if (scene is PresenterScene presenterScene && presenterScene.PresenterParticipantId == participant.Id)
             {

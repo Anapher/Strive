@@ -25,7 +25,7 @@ namespace Strive.Core.Services.Scenes
         }
 
         public ValueTask<IEnumerable<PermissionLayer>> FetchPermissionsForParticipant(IScene scene,
-            Participant participant)
+            Participant participant, IReadOnlyList<IScene> sceneStack)
         {
             return new(Enumerable.Empty<PermissionLayer>());
         }

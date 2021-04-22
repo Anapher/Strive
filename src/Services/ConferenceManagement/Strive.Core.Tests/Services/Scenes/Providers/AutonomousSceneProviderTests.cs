@@ -40,7 +40,6 @@ namespace Strive.Core.Tests.Services.Scenes.Providers
             // act
             var availableScenes = await provider.BuildStack(AutonomousScene.Instance, context, _emptyStackFunc);
 
-
             // assert
             Assert.Equal(availableScenes, new IScene[] {AutonomousScene.Instance, GridScene.Instance});
         }
@@ -56,6 +55,21 @@ namespace Strive.Core.Tests.Services.Scenes.Providers
             // act
             var availableScenes = await provider.BuildStack(AutonomousScene.Instance, context, _emptyStackFunc);
 
+            // assert
+            Assert.Equal(availableScenes, new IScene[] {AutonomousScene.Instance, new ScreenShareScene("p1")});
+        }
+
+        [Fact]
+        public async Task BuildStack_NewScreenShareButAlreadyActiveScreenShare_ReturnPreviousScreenShare()
+        {
+            // arrange
+            var provider = new AutonomousSceneProvider();
+            var context = new SceneBuilderContext(ConferenceId, RoomId,
+                new[] {new ScreenShareScene("p2"), new ScreenShareScene("p1")}, new SceneOptions(),
+                new[] {new ScreenShareScene("p1")});
+
+            // act
+            var availableScenes = await provider.BuildStack(AutonomousScene.Instance, context, _emptyStackFunc);
 
             // assert
             Assert.Equal(availableScenes, new IScene[] {AutonomousScene.Instance, new ScreenShareScene("p1")});
