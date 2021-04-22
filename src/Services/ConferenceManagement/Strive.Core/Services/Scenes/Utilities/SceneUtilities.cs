@@ -22,5 +22,11 @@ namespace Strive.Core.Services.Scenes.Utilities
         {
             return rooms.Participants.Where(x => x.Value == roomId).Select(x => x.Key);
         }
+
+        public static bool HasSceneStackChanged(SynchronizedScene current, SynchronizedScene? previous)
+        {
+            if (previous == null) return true;
+            return !current.SceneStack.SequenceEqual(previous.SceneStack);
+        }
     }
 }

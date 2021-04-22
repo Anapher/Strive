@@ -14,7 +14,7 @@ using Xunit;
 
 namespace Strive.Core.Tests.Services.Scenes.UseCases
 {
-    public class SetSceneUseCaseTests
+    public class SetOverwrittenContentSceneUseCaseTests
     {
         private const string ConferenceId = "123";
         private const string RoomId = "45";
@@ -22,7 +22,7 @@ namespace Strive.Core.Tests.Services.Scenes.UseCases
         private readonly Mock<ISceneRepository> _sceneRepository = new();
         private readonly Mock<IMediator> _mediator = new();
 
-        private SetSceneUseCase Create()
+        private SetOverwrittenContentSceneUseCase Create()
         {
             return new(_mediator.Object, _sceneRepository.Object);
         }
@@ -45,12 +45,13 @@ namespace Strive.Core.Tests.Services.Scenes.UseCases
 
             // act
             var newScene = GridScene.Instance;
-            await useCase.Handle(new SetSceneRequest(ConferenceId, RoomId, newScene), CancellationToken.None);
+            await useCase.Handle(new SetOverwrittenContentSceneRequest(ConferenceId, RoomId, newScene),
+                CancellationToken.None);
 
             // assert
             _sceneRepository.Verify(
                 x => x.SetScene(ConferenceId, RoomId,
-                    It.Is<ActiveScene>(scene => Equals(scene.SelectedScene, newScene))), Times.Once);
+                    It.Is<ActiveScene>(scene => Equals(scene.OverwrittenContent, newScene))), Times.Once);
         }
 
         [Fact]
@@ -63,7 +64,8 @@ namespace Strive.Core.Tests.Services.Scenes.UseCases
 
             // act
             var newScene = GridScene.Instance;
-            await useCase.Handle(new SetSceneRequest(ConferenceId, RoomId, newScene), CancellationToken.None);
+            await useCase.Handle(new SetOverwrittenContentSceneRequest(ConferenceId, RoomId, newScene),
+                CancellationToken.None);
 
             // assert
             _mediator.Verify(x => x.Send(It.IsAny<UpdateScenesRequest>(), It.IsAny<CancellationToken>()), Times.Once);

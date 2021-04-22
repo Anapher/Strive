@@ -9,7 +9,7 @@ using Strive.Core.Services.Scenes.Scenes;
 
 namespace Strive.Core.Services.Scenes.Providers
 {
-    public class AutonomousSceneManager : ISceneProvider
+    public class AutonomousSceneProvider : ISceneProvider
     {
         public ValueTask<IEnumerable<IScene>> GetAvailableScenes(string conferenceId, string roomId,
             IReadOnlyList<IScene> sceneStack)

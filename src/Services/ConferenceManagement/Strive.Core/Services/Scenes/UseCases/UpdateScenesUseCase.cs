@@ -61,9 +61,9 @@ namespace Strive.Core.Services.Scenes.UseCases
             var availableScenes =
                 await _mediator.Send(new FetchAvailableScenesRequest(conferenceId, roomId, sceneState.SceneStack));
 
-            var (stack, savedAvailableScenes) = sceneState;
-            if (!stack.All(availableScenes.Contains) || !availableScenes.SequenceEqual(savedAvailableScenes))
+            if (!VerifySceneState(sceneState, availableScenes))
             {
+                // something wrong with the applied scenes, we have to adjust here
                 if (scene.OverwrittenContent != null && !availableScenes.Contains(scene.OverwrittenContent))
                 {
                     scene = scene with {OverwrittenContent = null};
@@ -109,12 +109,23 @@ namespace Strive.Core.Services.Scenes.UseCases
             }
 
             var stack = await SceneStackFunc(selectedScene, context);
-            return stack.ToList();
+
+            var result = stack.ToList();
+            if (activeScene.OverwrittenContent != null)
+                result.Add(activeScene.OverwrittenContent);
+
+            return result;
         }
 
         private ISceneProvider FindProviderForScene(IScene scene)
         {
             return _sceneProviders.First(x => x.IsProvided(scene));
+        }
+
+        private static bool VerifySceneState(SceneState state, IReadOnlyList<IScene> availableScenes)
+        {
+            var (stack, savedAvailableScenes) = state;
+            return stack.All(availableScenes.Contains) && availableScenes.SequenceEqual(savedAvailableScenes);
         }
     }
 }

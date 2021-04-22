@@ -32,7 +32,7 @@ namespace Strive.Core.Services.Scenes
             var scenes = await _mediator.FetchSynchronizedObject<SynchronizedScene>(participant.ConferenceId,
                 SynchronizedScene.SyncObjId(roomId));
 
-            foreach (var scene in scenes.CurrentSceneStack)
+            foreach (var scene in scenes.SceneStack)
             {
                 var provider = FindProviderForScene(scene);
                 var sceneLayers = await provider.FetchPermissionsForParticipant(scene, participant);

@@ -1,8 +1,8 @@
-﻿using System.Linq;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Strive.Core.Services.Permissions.Requests;
+using Strive.Core.Services.Scenes.Utilities;
 using Strive.Core.Services.Synchronization.Notifications;
 
 namespace Strive.Core.Services.Scenes.NotificationHandlers
@@ -21,11 +21,8 @@ namespace Strive.Core.Services.Scenes.NotificationHandlers
         {
             if (notification.Value is SynchronizedScene newSyncScene)
             {
-                if ((notification.PreviousValue as SynchronizedScene)?.CurrentSceneStack.SequenceEqual(newSyncScene
-                    .CurrentSceneStack) == true)
-                {
+                if (!SceneUtilities.HasSceneStackChanged(newSyncScene, notification.PreviousValue as SynchronizedScene))
                     return;
-                }
 
                 await _mediator.Send(new UpdateParticipantsPermissionsRequest(notification.Participants));
             }
