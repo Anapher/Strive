@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 using Autofac;
 using Strive.Core.Domain.Entities;
 using Strive.Core.IntegrationTests.Services.Base;
-using Strive.Core.Notifications;
 using Strive.Core.Services;
+using Strive.Core.Services.ConferenceManagement.Notifications;
 using Strive.Core.Services.ParticipantsList;
 using Strive.Core.Services.ParticipantsList.Requests;
 using Xunit;
@@ -113,7 +113,7 @@ namespace Strive.Core.IntegrationTests.Services
 
             // act
             AddParticipantToConferenceModerators(testParticipant.Participant);
-            await Mediator.Publish(new ConferenceUpdatedNotification(_conference));
+            await Mediator.Publish(new ConferencePatchedNotification(_conference.ConferenceId));
 
             // assert
             var syncObj = GetSyncObj(testParticipant.Participant);

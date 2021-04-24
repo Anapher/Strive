@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using Strive.Core.Services.ConferenceControl.Gateways;
 using Strive.Core.Services.ConferenceControl.Notifications;
 using Strive.Core.Services.Rooms.Gateways;
+using Strive.Core.Services.Rooms.Notifications;
 using Strive.Core.Services.Rooms.Requests;
 
 namespace Strive.Core.Services.Rooms.NotificationHandlers
@@ -42,6 +43,8 @@ namespace Strive.Core.Services.Rooms.NotificationHandlers
         {
             var defaultRoom = GetDefaultRoom();
             await _roomRepository.CreateRoom(conferenceId, defaultRoom);
+
+            await _mediator.Publish(new RoomsCreatedNotification(conferenceId, new[] {defaultRoom.RoomId}));
         }
 
         private Room GetDefaultRoom()

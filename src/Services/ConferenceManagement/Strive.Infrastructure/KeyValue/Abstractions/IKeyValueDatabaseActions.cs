@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Strive.Infrastructure.KeyValue.Redis.Scripts;
 using StackExchange.Redis;
+using Strive.Infrastructure.KeyValue.Redis.Scripts;
 
 namespace Strive.Infrastructure.KeyValue.Abstractions
 {
@@ -30,6 +30,10 @@ namespace Strive.Infrastructure.KeyValue.Abstractions
         ValueTask ListRightPushAsync(string key, string item);
 
         ValueTask<int> ListLenAsync(string key);
+
+        ValueTask<long> ListRemoveAsync(string key, string item);
+
+        ValueTask<string?> ListLeftPopAsync(string key);
 
         ValueTask<IReadOnlyList<string>> ListRangeAsync(string key, int start, int end);
 

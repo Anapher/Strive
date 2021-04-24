@@ -4,10 +4,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Nito.Disposables;
+using StackExchange.Redis;
 using Strive.Core.Extensions;
 using Strive.Infrastructure.KeyValue.Abstractions;
 using Strive.Infrastructure.KeyValue.Redis.Scripts;
-using StackExchange.Redis;
 
 namespace Strive.Infrastructure.KeyValue.InMemory
 {
@@ -146,6 +146,16 @@ namespace Strive.Infrastructure.KeyValue.InMemory
         public override ValueTask<int> ListLenAsync(string key)
         {
             return AddTransactionStep(() => base.ListLenAsync(key));
+        }
+
+        public override ValueTask<long> ListRemoveAsync(string key, string item)
+        {
+            return AddTransactionStep(() => base.ListRemoveAsync(key, item));
+        }
+
+        public override ValueTask<string?> ListLeftPopAsync(string key)
+        {
+            return AddTransactionStep(() => base.ListLeftPopAsync(key));
         }
 
         public override ValueTask<IReadOnlyList<string>> ListRangeAsync(string key, int start, int end)

@@ -40,7 +40,11 @@ namespace Strive.Core.Services.Synchronization.UseCases
             _logger.LogDebug("Update synchronized object {syncObj} ({count} subscribers)", synchronizedObjectId,
                 subscribedParticipants.Count);
 
-            if (!subscribedParticipants.Any()) return Unit.Value;
+            if (!subscribedParticipants.Any())
+            {
+                await _synchronizedObjectRepository.Remove(conferenceId, synchronizedObjectId.ToString());
+                return Unit.Value;
+            }
 
             var newValue = await provider.FetchValue(conferenceId, synchronizedObjectId);
             var previousValue = await _synchronizedObjectRepository.Create(conferenceId,

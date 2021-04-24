@@ -32,8 +32,8 @@ namespace Strive.Core.Services.Rooms.NotificationHandlers
             var result = await _roomRepository.DeleteAllRoomsAndMappingsOfConference(conferenceId);
             await _mediator.Publish(new RoomsRemovedNotification(conferenceId, result.DeletedRooms));
             await _mediator.Publish(new ParticipantsRoomChangedNotification(conferenceId,
-                result.DeletedParticipants.Select(participantId => new Participant(conferenceId, participantId))
-                    .ToList(), false));
+                result.DeletedMapping.ToDictionary(pair => new Participant(conferenceId, pair.Key),
+                    pair => ParticipantRoomChangeInfo.Left(pair.Value))));
         }
     }
 }

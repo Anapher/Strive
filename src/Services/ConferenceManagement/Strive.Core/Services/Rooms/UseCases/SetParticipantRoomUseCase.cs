@@ -1,9 +1,8 @@
-using System.Linq;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using Strive.Core.Extensions;
 using Strive.Core.Services.Rooms.Gateways;
 using Strive.Core.Services.Rooms.Notifications;
 using Strive.Core.Services.Rooms.Requests;
@@ -29,9 +28,15 @@ namespace Strive.Core.Services.Rooms.UseCases
             var (participant, roomId) = request;
 
             _logger.LogDebug("Switch participant {participant} to room {roomId}", participant, roomId);
-            await _roomRepository.SetParticipantRoom(participant, roomId);
+            var previousRoomId = await _roomRepository.SetParticipantRoom(participant, roomId);
+
             await _mediator.Publish(new ParticipantsRoomChangedNotification(participant.ConferenceId,
-                participant.Yield().ToList(), false));
+                new Dictionary<Participant, ParticipantRoomChangeInfo>
+                {
+                    {
+                        participant, ParticipantRoomChangeInfo.Switched(previousRoomId, roomId)
+                    },
+                }));
 
             return Unit.Value;
         }

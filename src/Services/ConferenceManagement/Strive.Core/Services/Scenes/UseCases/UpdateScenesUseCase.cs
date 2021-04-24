@@ -74,9 +74,11 @@ namespace Strive.Core.Services.Scenes.UseCases
                     scene = scene with
                     {
                         SelectedScene = scene.OverwrittenContent ?? SynchronizedSceneProvider.GetDefaultScene(),
+                        OverwrittenContent = null,
                     };
                 }
 
+                await _sceneRepository.SetScene(conferenceId, roomId, scene);
                 await ApplyScene(conferenceId, roomId, scene, sceneState);
             }
         }

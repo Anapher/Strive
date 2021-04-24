@@ -64,7 +64,7 @@ namespace Strive.Infrastructure.KeyValue.Repos
 
             using (var trans = _database.CreateTransaction())
             {
-                var allParticipantsTask = trans.HashGetAllAsync(mappingKey);
+                var mappingTask = trans.HashGetAllAsync(mappingKey);
                 var allRoomsTask = trans.HashGetAllAsync(roomListKey);
 
                 _ = trans.KeyDeleteAsync(mappingKey);
@@ -72,14 +72,10 @@ namespace Strive.Infrastructure.KeyValue.Repos
 
                 await trans.ExecuteAsync();
 
-                var allParticipants = await allParticipantsTask;
+                var mapping = await mappingTask;
                 var allRooms = await allRoomsTask;
 
-                return new DeleteAllResult
-                {
-                    DeletedParticipants = allParticipants.Select(x => x.Key).ToList(),
-                    DeletedRooms = allRooms.Select(x => x.Key).ToList(),
-                };
+                return new DeleteAllResult(mapping, allRooms.Select(x => x.Key).ToList());
             }
         }
 
@@ -89,22 +85,38 @@ namespace Strive.Infrastructure.KeyValue.Repos
             return await _database.HashGetAsync(mappingKey, participant.Id);
         }
 
-        public async ValueTask SetParticipantRoom(Participant participant, string roomId)
+        public async ValueTask<string?> SetParticipantRoom(Participant participant, string roomId)
         {
             var roomMappingKey = GetRoomMappingKey(participant.ConferenceId);
             var roomListKey = GetRoomListKey(participant.ConferenceId);
 
-            var result = await _database.ExecuteScriptAsync(RedisScript.RoomRepository_SetParticipantRoom,
+            using var transaction = _database.CreateTransaction();
+
+            var previousRoomTask = transaction.HashGetAsync(roomMappingKey, participant.Id);
+
+            var scriptTask = transaction.ExecuteScriptAsync(RedisScript.RoomRepository_SetParticipantRoom,
                 roomMappingKey, roomListKey, participant.Id, roomId);
 
-            if (!(bool) result)
+            await transaction.ExecuteAsync();
+
+            if (!(bool) await scriptTask)
                 throw new ConcurrencyException("Failed to set room of participant: The room does not exist.");
+
+            return await previousRoomTask;
         }
 
-        public async ValueTask UnsetParticipantRoom(Participant participant)
+        public async ValueTask<string?> UnsetParticipantRoom(Participant participant)
         {
             var roomMappingKey = GetRoomMappingKey(participant.ConferenceId);
-            await _database.HashDeleteAsync(roomMappingKey, participant.Id);
+
+            using var transaction = _database.CreateTransaction();
+
+            var previousRoomTask = transaction.HashGetAsync(roomMappingKey, participant.Id);
+            _ = transaction.HashDeleteAsync(roomMappingKey, participant.Id);
+
+            await transaction.ExecuteAsync();
+
+            return await previousRoomTask;
         }
 
         private static string GetRoomMappingKey(string conferenceId)

@@ -23,7 +23,7 @@ namespace Strive.Core.Services.Scenes.Providers.TalkingStick
         }.ToImmutableDictionary();
 
         private static readonly IImmutableDictionary<string, JValue> DenyMediaPermissionsButCanQueue =
-            DenyMediaPermissions.SetItems(DefinedPermissions.Scenes.CanPassTalkingStick.Configure(true).Yield());
+            DenyMediaPermissions.SetItems(DefinedPermissions.Scenes.CanQueueForTalkingStick.Configure(true).Yield());
 
         private static readonly IReadOnlyDictionary<TalkingStickMode, TalkingStickModePermissions> Permissions =
             new Dictionary<TalkingStickMode, TalkingStickModePermissions>
@@ -55,9 +55,7 @@ namespace Strive.Core.Services.Scenes.Providers.TalkingStick
                     TalkingStickMode.SpeakerPassStick, new TalkingStickModePermissions
                     {
                         Others = DenyMediaPermissionsButCanQueue,
-                        OthersNoCurrentSpeaker =
-                            DenyMediaPermissions.SetItems(DefinedPermissions.Scenes.CanTakeTalkingStick.Configure(true)
-                                .Yield()),
+                        OthersNoCurrentSpeaker = DenyMediaPermissionsButCanQueue,
                         CurrentSpeaker = DefinedPermissions.Scenes.CanPassTalkingStick.Configure(true).Yield()
                             .ToImmutableDictionary(),
                     }
@@ -75,10 +73,16 @@ namespace Strive.Core.Services.Scenes.Providers.TalkingStick
             return sceneStack.OfType<TalkingStickScene>();
         }
 
-        public ValueTask<bool> IsUpdateRequired(string conferenceId, string roomId, object synchronizedObject,
+        public async ValueTask<bool> IsUpdateRequired(string conferenceId, string roomId, object synchronizedObject,
             object? previousValue)
         {
-            return new(false);
+            if (synchronizedObject is SynchronizedSceneTalkingStick talkingStick)
+            {
+                var previous = previousValue as SynchronizedSceneTalkingStick;
+                return talkingStick.CurrentSpeakerId != previous?.CurrentSpeakerId;
+            }
+
+            return false;
         }
 
         public bool IsProvided(IScene scene)
@@ -127,10 +131,10 @@ namespace Strive.Core.Services.Scenes.Providers.TalkingStick
             if (isPresenter)
                 return permissions.CurrentSpeaker;
 
-            if (!hasPresenter)
-                return permissions.OthersNoCurrentSpeaker;
+            if (hasPresenter)
+                return permissions.Others;
 
-            return permissions.Others;
+            return permissions.OthersNoCurrentSpeaker;
         }
 
         private async ValueTask<SynchronizedSceneTalkingStick> GetSyncObj(string conferenceId, string roomId)
