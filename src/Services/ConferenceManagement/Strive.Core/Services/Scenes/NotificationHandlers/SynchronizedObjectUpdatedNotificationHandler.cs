@@ -49,38 +49,40 @@ namespace Strive.Core.Services.Scenes.NotificationHandlers
             }
         }
 
-        private async ValueTask<IReadOnlyList<ISceneProvider>> FetchSceneProvidersWithRequiredUpdate(
+        private async ValueTask<IReadOnlyList<(ISceneProvider, SceneUpdate)>> FetchSceneProvidersWithRequiredUpdate(
             string conferenceId, string roomId, object syncObj, object? previousSyncObj)
         {
-            var result = new List<ISceneProvider>();
+            var result = new List<(ISceneProvider, SceneUpdate)>();
             foreach (var sceneProvider in _sceneProviders)
             {
-                var updateRequired = await sceneProvider.IsUpdateRequired(conferenceId, roomId, syncObj,
-                    previousSyncObj);
+                var sceneUpdate = await sceneProvider.IsUpdateRequired(conferenceId, roomId, syncObj, previousSyncObj);
 
-                if (updateRequired)
-                    result.Add(sceneProvider);
+                if (sceneUpdate != SceneUpdate.NotRequired)
+                    result.Add((sceneProvider, sceneUpdate));
             }
 
             return result;
         }
 
         private async ValueTask UpdateScenesInRoom(string conferenceId, string roomId,
-            IReadOnlyList<ISceneProvider> updatedProviders)
+            IReadOnlyList<(ISceneProvider, SceneUpdate)> updatedProviders)
         {
             var sceneState = await _sceneRepository.GetSceneState(conferenceId, roomId);
             if (sceneState == null) return;
 
-            IEnumerable<IScene> updatedScenes = sceneState.AvailableScenes;
-            foreach (var provider in updatedProviders)
+            if (updatedProviders.All(x => x.Item2 == SceneUpdate.AvailableScenesChanged))
             {
-                var scenes = await provider.GetAvailableScenes(conferenceId, roomId, sceneState.SceneStack);
-                updatedScenes = ExcludeScenesProvidedBy(updatedScenes, provider).Concat(scenes);
-            }
+                IEnumerable<IScene> updatedScenes = sceneState.AvailableScenes;
+                foreach (var (provider, _) in updatedProviders)
+                {
+                    var scenes = await provider.GetAvailableScenes(conferenceId, roomId, sceneState.SceneStack);
+                    updatedScenes = ExcludeScenesProvidedBy(updatedScenes, provider).Concat(scenes);
+                }
 
-            var newAvailableScenes = updatedScenes.ToList();
-            if (newAvailableScenes.ScrambledEquals(sceneState.AvailableScenes))
-                return;
+                var newAvailableScenes = updatedScenes.ToList();
+                if (newAvailableScenes.ScrambledEquals(sceneState.AvailableScenes))
+                    return;
+            }
 
             await _mediator.Send(new UpdateScenesRequest(conferenceId, roomId));
         }

@@ -85,7 +85,7 @@ namespace Strive.Core.Tests.Services.Scenes.Providers
                 CreateRooms(new Dictionary<string, string> {{"p1", RoomId}}));
 
             // assert
-            Assert.False(result);
+            Assert.Equal(SceneUpdate.NotRequired, result);
         }
 
         [Fact]
@@ -100,7 +100,7 @@ namespace Strive.Core.Tests.Services.Scenes.Providers
                 CreateRooms(new Dictionary<string, string> {{"p1", "other room"}}));
 
             // assert
-            Assert.True(result);
+            Assert.Equal(SceneUpdate.AvailableScenesChanged, result);
         }
 
         [Fact]

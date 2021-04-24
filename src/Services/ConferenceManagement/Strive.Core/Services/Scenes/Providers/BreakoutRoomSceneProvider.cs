@@ -29,7 +29,7 @@ namespace Strive.Core.Services.Scenes.Providers
             return GetAvailableScenes(state);
         }
 
-        public override async ValueTask<bool> IsUpdateRequired(string conferenceId, string roomId,
+        protected override async ValueTask<bool> InternalIsUpdateRequired(string conferenceId, string roomId,
             object synchronizedObject, object? previousValue)
         {
             if (synchronizedObject is SynchronizedBreakoutRooms syncBreakoutRooms)

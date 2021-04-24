@@ -42,7 +42,7 @@ namespace Strive.Core.Services.Scenes.Providers
                     new ScreenShareScene(participantId));
         }
 
-        public override async ValueTask<bool> IsUpdateRequired(string conferenceId, string roomId,
+        protected override async ValueTask<bool> InternalIsUpdateRequired(string conferenceId, string roomId,
             object synchronizedObject, object? previousValue)
         {
             if (synchronizedObject is SynchronizedRooms rooms)

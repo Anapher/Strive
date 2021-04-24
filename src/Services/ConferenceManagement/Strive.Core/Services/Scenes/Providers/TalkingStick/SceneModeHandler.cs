@@ -36,16 +36,7 @@ namespace Strive.Core.Services.Scenes.Providers.TalkingStick
             var rooms = await _mediator.FetchSynchronizedObject<SynchronizedRooms>(conferenceId,
                 SynchronizedRooms.SyncObjId);
 
-            var talkingStick =
-                await _mediator.FetchSynchronizedObject<SynchronizedSceneTalkingStick>(conferenceId,
-                    SynchronizedSceneTalkingStick.SyncObjId(roomId));
-
-            Participant? currentSpeaker;
-            if (talkingStick.CurrentSpeakerId == null)
-                currentSpeaker = null;
-            else
-                currentSpeaker = new Participant(conferenceId, talkingStick.CurrentSpeakerId);
-
+            var currentSpeaker = await _repository.GetCurrentSpeaker(conferenceId, roomId);
             currentSpeaker = await VerifyCurrentSpeakerInRoom(currentSpeaker, roomId, rooms);
 
             if (currentSpeaker == null)

@@ -13,7 +13,7 @@ namespace Strive.Core.Services.Scenes
         ValueTask<IEnumerable<IScene>> GetAvailableScenes(string conferenceId, string roomId,
             IReadOnlyList<IScene> sceneStack);
 
-        ValueTask<bool> IsUpdateRequired(string conferenceId, string roomId, object synchronizedObject,
+        ValueTask<SceneUpdate> IsUpdateRequired(string conferenceId, string roomId, object synchronizedObject,
             object? previousValue);
 
         ValueTask<IEnumerable<IScene>> BuildStack(IScene scene, SceneBuilderContext context,
@@ -21,5 +21,12 @@ namespace Strive.Core.Services.Scenes
 
         ValueTask<IEnumerable<PermissionLayer>> FetchPermissionsForParticipant(IScene scene, Participant participant,
             IReadOnlyList<IScene> sceneStack);
+    }
+
+    public enum SceneUpdate
+    {
+        NotRequired,
+        AvailableScenesChanged,
+        SceneStackChanged,
     }
 }

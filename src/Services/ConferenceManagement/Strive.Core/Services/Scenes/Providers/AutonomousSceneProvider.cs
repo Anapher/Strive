@@ -17,10 +17,10 @@ namespace Strive.Core.Services.Scenes.Providers
             return new(AutonomousScene.Instance.Yield());
         }
 
-        public ValueTask<bool> IsUpdateRequired(string conferenceId, string roomId, object synchronizedObject,
+        public ValueTask<SceneUpdate> IsUpdateRequired(string conferenceId, string roomId, object synchronizedObject,
             object? previousValue)
         {
-            return new(false);
+            return new(SceneUpdate.NotRequired);
         }
 
         public bool IsProvided(IScene scene)

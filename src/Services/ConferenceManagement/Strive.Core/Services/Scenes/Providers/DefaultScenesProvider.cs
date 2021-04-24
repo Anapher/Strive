@@ -12,8 +12,8 @@ namespace Strive.Core.Services.Scenes.Providers
             return new(new IScene[] {ActiveSpeakerScene.Instance, GridScene.Instance});
         }
 
-        public override ValueTask<bool> IsUpdateRequired(string conferenceId, string roomId, object synchronizedObject,
-            object? previousValue)
+        protected override ValueTask<bool> InternalIsUpdateRequired(string conferenceId, string roomId,
+            object synchronizedObject, object? previousValue)
         {
             return new(false);
         }

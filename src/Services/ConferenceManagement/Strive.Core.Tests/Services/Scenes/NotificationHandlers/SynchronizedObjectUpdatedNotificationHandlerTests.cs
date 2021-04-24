@@ -62,7 +62,7 @@ namespace Strive.Core.Tests.Services.Scenes.NotificationHandlers
             SetupRooms(new Room(RoomId, ""));
 
             _sceneProvider.Setup(x => x.IsUpdateRequired(ConferenceId, RoomId, It.IsAny<object>(), It.IsAny<object>()))
-                .ReturnsAsync(false);
+                .ReturnsAsync(SceneUpdate.NotRequired);
 
             // act
             var participants = new List<Participant> {new(ConferenceId, "1")};
@@ -81,7 +81,7 @@ namespace Strive.Core.Tests.Services.Scenes.NotificationHandlers
             SetupRooms(new Room(RoomId, ""));
 
             _sceneProvider.Setup(x => x.IsUpdateRequired(ConferenceId, RoomId, It.IsAny<object>(), It.IsAny<object>()))
-                .ReturnsAsync(true);
+                .ReturnsAsync(SceneUpdate.AvailableScenesChanged);
 
             // act
             var participants = new List<Participant> {new(ConferenceId, "1")};

@@ -44,16 +44,16 @@ namespace Strive.Core.Services.Scenes.Providers
             return Enumerable.Empty<IScene>();
         }
 
-        public async ValueTask<bool> IsUpdateRequired(string conferenceId, string roomId, object synchronizedObject,
-            object? previousValue)
+        public async ValueTask<SceneUpdate> IsUpdateRequired(string conferenceId, string roomId,
+            object synchronizedObject, object? previousValue)
         {
             if (synchronizedObject is SynchronizedRooms rooms)
             {
                 if (SceneUtilities.ParticipantsOfRoomChanged(roomId, rooms, previousValue as SynchronizedRooms))
-                    return true;
+                    return SceneUpdate.AvailableScenesChanged;
             }
 
-            return false;
+            return SceneUpdate.NotRequired;
         }
 
         private static IEnumerable<IScene> GetAvailableScenes(string roomId, SynchronizedRooms rooms,

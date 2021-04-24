@@ -12,8 +12,15 @@ namespace Strive.Core.Services.Scenes
         public abstract ValueTask<IEnumerable<IScene>> GetAvailableScenes(string conferenceId, string roomId,
             IReadOnlyList<IScene> sceneStack);
 
-        public abstract ValueTask<bool> IsUpdateRequired(string conferenceId, string roomId, object synchronizedObject,
-            object? previousValue);
+        protected abstract ValueTask<bool> InternalIsUpdateRequired(string conferenceId, string roomId,
+            object synchronizedObject, object? previousValue);
+
+        public async ValueTask<SceneUpdate> IsUpdateRequired(string conferenceId, string roomId,
+            object synchronizedObject, object? previousValue)
+        {
+            var isRequired = await InternalIsUpdateRequired(conferenceId, roomId, synchronizedObject, previousValue);
+            return isRequired ? SceneUpdate.AvailableScenesChanged : SceneUpdate.NotRequired;
+        }
 
         public async ValueTask<IEnumerable<IScene>> BuildStack(IScene scene, SceneBuilderContext context,
             SceneStackFunc sceneProviderFunc)

@@ -62,7 +62,7 @@ namespace Strive.Core.Tests.Services.Scenes.Providers
             var result = await provider.IsUpdateRequired(ConferenceId, RoomId, _inactiveBreakoutRooms, null);
 
             // assert
-            Assert.False(result);
+            Assert.Equal(SceneUpdate.NotRequired, result);
         }
 
         [Fact]
@@ -76,7 +76,7 @@ namespace Strive.Core.Tests.Services.Scenes.Providers
                 _inactiveBreakoutRooms);
 
             // assert
-            Assert.False(result);
+            Assert.Equal(SceneUpdate.NotRequired, result);
         }
 
         [Fact]
@@ -86,11 +86,11 @@ namespace Strive.Core.Tests.Services.Scenes.Providers
             var provider = new BreakoutRoomSceneProvider(_mediator.Object);
 
             // act
-            var result = await provider.IsUpdateRequired(ConferenceId, RoomId,
-                _activeBreakoutRooms, _inactiveBreakoutRooms);
+            var result = await provider.IsUpdateRequired(ConferenceId, RoomId, _activeBreakoutRooms,
+                _inactiveBreakoutRooms);
 
             // assert
-            Assert.True(result);
+            Assert.Equal(SceneUpdate.AvailableScenesChanged, result);
         }
 
         [Fact]
@@ -100,11 +100,11 @@ namespace Strive.Core.Tests.Services.Scenes.Providers
             var provider = new BreakoutRoomSceneProvider(_mediator.Object);
 
             // act
-            var result = await provider.IsUpdateRequired(ConferenceId, RoomId,
-                _inactiveBreakoutRooms, _activeBreakoutRooms);
+            var result = await provider.IsUpdateRequired(ConferenceId, RoomId, _inactiveBreakoutRooms,
+                _activeBreakoutRooms);
 
             // assert
-            Assert.True(result);
+            Assert.Equal(SceneUpdate.AvailableScenesChanged, result);
         }
 
         [Fact]
@@ -118,7 +118,7 @@ namespace Strive.Core.Tests.Services.Scenes.Providers
                 _activeBreakoutRooms, _activeBreakoutRooms);
 
             // assert
-            Assert.False(result);
+            Assert.Equal(SceneUpdate.NotRequired, result);
         }
     }
 }
