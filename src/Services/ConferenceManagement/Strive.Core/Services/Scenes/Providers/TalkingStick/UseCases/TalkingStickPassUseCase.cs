@@ -1,6 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
+using Strive.Core.Extensions;
 using Strive.Core.Services.Rooms;
 using Strive.Core.Services.Scenes.Providers.TalkingStick.Gateways;
 using Strive.Core.Services.Scenes.Providers.TalkingStick.Requests;
@@ -25,11 +26,18 @@ namespace Strive.Core.Services.Scenes.Providers.TalkingStick.UseCases
 
         public async Task<Unit> Handle(TalkingStickPassRequest request, CancellationToken cancellationToken)
         {
-            var (participant, roomId) = request;
+            var (participant, roomId, failIfHasSpeaker) = request;
 
             await using (await _repository.LockRoom(participant.ConferenceId, roomId))
             {
                 await _mediator.Send(new ClearCacheRequest());
+
+                if (failIfHasSpeaker)
+                {
+                    var currentSpeaker = await _repository.GetCurrentSpeaker(participant.ConferenceId, roomId);
+                    if (currentSpeaker != null)
+                        throw SceneError.AlreadyHasSpeaker.ToException();
+                }
 
                 if (!await CheckParticipantIsInRoom(participant, roomId))
                     throw new ParticipantNotFoundException(participant);

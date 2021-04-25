@@ -396,7 +396,7 @@ namespace Strive.Hubs.Core
             if (roomId == null)
                 return SuccessOrError<Unit>.Failed(SceneError.RoomNotFound);
 
-            return await GetInvoker().Create(new TalkingStickPassRequest(participant, roomId))
+            return await GetInvoker().Create(new TalkingStickPassRequest(participant, roomId, true))
                 .RequirePermissions(DefinedPermissions.Scenes.CanTakeTalkingStick).Send();
         }
 
@@ -412,7 +412,7 @@ namespace Strive.Hubs.Core
                 return SuccessOrError<Unit>.Failed(SceneError.RoomNotFound);
 
             return await GetInvoker()
-                .Create(new TalkingStickPassRequest(new Participant(participant.Id, participantId), roomId))
+                .Create(new TalkingStickPassRequest(new Participant(participant.Id, participantId), roomId, false))
                 .RequirePermissions(DefinedPermissions.Scenes.CanPassTalkingStick).Send();
         }
 

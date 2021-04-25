@@ -242,7 +242,7 @@ namespace Strive.Core.IntegrationTests.Services
             var participant = await PrepareTalkingStick(TalkingStickMode.Moderated);
 
             // act
-            await Mediator.Send(new TalkingStickPassRequest(participant, DefaultRoomId));
+            await Mediator.Send(new TalkingStickPassRequest(participant, DefaultRoomId, true));
 
             // assert
             var talkingStick =
@@ -260,13 +260,13 @@ namespace Strive.Core.IntegrationTests.Services
         {
             // arrange
             var participant = await PrepareTalkingStick(TalkingStickMode.Moderated);
-            await Mediator.Send(new TalkingStickPassRequest(participant, DefaultRoomId));
+            await Mediator.Send(new TalkingStickPassRequest(participant, DefaultRoomId, true));
 
             await JoinParticipant(TestData.Vincent);
             var participant2 = TestData.Vincent.Participant;
 
             // act
-            await Mediator.Send(new TalkingStickPassRequest(participant2, DefaultRoomId));
+            await Mediator.Send(new TalkingStickPassRequest(participant2, DefaultRoomId, false));
 
             // assert
             var talkingStick =
@@ -280,13 +280,35 @@ namespace Strive.Core.IntegrationTests.Services
         }
 
         [Fact]
+        public async Task PassTalkingStickRequestWithFailFlag_HasPresenter_ThrowError()
+        {
+            // arrange
+            var participant = await PrepareTalkingStick(TalkingStickMode.Moderated);
+            await Mediator.Send(new TalkingStickPassRequest(participant, DefaultRoomId, true));
+
+            await JoinParticipant(TestData.Vincent);
+            var participant2 = TestData.Vincent.Participant;
+
+            // act
+            await Assert.ThrowsAsync<IdErrorException>(async () =>
+                await Mediator.Send(new TalkingStickPassRequest(participant2, DefaultRoomId, true)));
+
+            // assert
+            var talkingStick =
+                SynchronizedObjectListener.GetSynchronizedObject<SynchronizedSceneTalkingStick>(participant,
+                    SynchronizedSceneTalkingStick.SyncObjId(DefaultRoomId));
+
+            Assert.Equal(participant.Id, talkingStick.CurrentSpeakerId);
+        }
+
+        [Fact]
         public async Task PassTalkingStickRequest_ParticipantWasInQueue_RemoveFromQueue()
         {
             // arrange
             var participant = await PrepareTalkingStick(TalkingStickMode.Moderated);
 
             await Mediator.Send(new TalkingStickEnqueueRequest(participant, false));
-            await Mediator.Send(new TalkingStickPassRequest(participant, DefaultRoomId));
+            await Mediator.Send(new TalkingStickPassRequest(participant, DefaultRoomId, true));
 
             // assert
             var talkingStick =
@@ -319,7 +341,7 @@ namespace Strive.Core.IntegrationTests.Services
             // arrange
             var participant = await PrepareTalkingStick(TalkingStickMode.Moderated);
 
-            await Mediator.Send(new TalkingStickPassRequest(participant, DefaultRoomId));
+            await Mediator.Send(new TalkingStickPassRequest(participant, DefaultRoomId, true));
 
             // act
             await Mediator.Send(new TalkingStickReturnRequest(participant));
@@ -361,7 +383,7 @@ namespace Strive.Core.IntegrationTests.Services
 
             await JoinParticipant(TestData.Vincent);
             var participant2 = TestData.Vincent.Participant;
-            await Mediator.Send(new TalkingStickPassRequest(participant2, DefaultRoomId));
+            await Mediator.Send(new TalkingStickPassRequest(participant2, DefaultRoomId, true));
 
             var permissions = GetParticipantPermissions(participant);
             Assert.DoesNotContain(permissions,

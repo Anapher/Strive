@@ -34,7 +34,7 @@ namespace Strive.Core.Services
 
         // Scenes
         Scenes_RoomNotFound,
-        Scenes_Invalid,
+        Scenes_HasSpeaker,
 
         // Breakout Rooms
         BreakoutRoom_AlreadyOpen,
