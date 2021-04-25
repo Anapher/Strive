@@ -93,7 +93,7 @@ namespace Strive.IntegrationTests.Services
 
             // assert
             await connection.SyncObjects.AssertSyncObject<SynchronizedParticipants>(SyncObjId,
-                value => Assert.DoesNotContain(value.Participants, x => x.Key == olaf.Sub && x.Value.IsModerator));
+                value => Assert.Contains(value.Participants, x => x.Key == olaf.Sub && x.Value.IsModerator));
         }
     }
 }

@@ -72,7 +72,7 @@ namespace Strive.IntegrationTests.Services
                 Permissions = new Dictionary<PermissionType, Dictionary<string, JValue>>
                 {
                     {
-                        PermissionType.Moderator,
+                        PermissionType.Conference,
                         new Dictionary<string, JValue>(permission.Configure(false).Yield())
                     },
                     {
@@ -86,27 +86,30 @@ namespace Strive.IntegrationTests.Services
             var connection = await ConnectUserToConference(Moderator, conference);
             AssertSuccess(await OpenConference(connection));
 
-            Task AssertPermission(bool value)
-            {
-                return connection.SyncObjects.AssertSyncObject<SynchronizedParticipantPermissions>(
-                    SynchronizedParticipantPermissions.SyncObjId(Moderator.Sub),
-                    syncObj => { Assert.Contains(permission.Configure(value), syncObj.Permissions); });
-            }
-
             AssertSuccess(await connection.Hub.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.OpenBreakoutRooms),
                 new OpenBreakoutRoomsDto(amount, null, null, null)));
 
+            var notModeratorUser = CreateUser();
+            var notModeratorConn = await ConnectUserToConference(notModeratorUser, conference);
+
+            Task AssertPermission(bool value)
+            {
+                return notModeratorConn.SyncObjects.AssertSyncObject<SynchronizedParticipantPermissions>(
+                    SynchronizedParticipantPermissions.SyncObjId(notModeratorUser.Sub),
+                    syncObj => { Assert.Contains(permission.Configure(value), syncObj.Permissions); });
+            }
+
             await AssertPermission(false);
 
-            await connection.SyncObjects.AssertSyncObject<SynchronizedRooms>(SynchronizedRooms.SyncObjId,
+            await notModeratorConn.SyncObjects.AssertSyncObject<SynchronizedRooms>(SynchronizedRooms.SyncObjId,
                 value => Assert.Equal(2, value.Rooms.Count));
             var syncRooms =
-                connection.SyncObjects.GetSynchronizedObject<SynchronizedRooms>(SynchronizedRooms.SyncObjId);
+                notModeratorConn.SyncObjects.GetSynchronizedObject<SynchronizedRooms>(SynchronizedRooms.SyncObjId);
 
             var breakoutRoom = syncRooms.Rooms.Single(x => x.RoomId != syncRooms.DefaultRoomId);
 
             // act
-            AssertSuccess(await connection.Hub.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.SwitchRoom),
+            AssertSuccess(await notModeratorConn.Hub.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.SwitchRoom),
                 new SwitchRoomDto(breakoutRoom.RoomId)));
 
             // assert

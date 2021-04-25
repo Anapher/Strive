@@ -52,6 +52,8 @@ namespace Strive.Core.Services.Permissions.Options
                 {
                     DefinedPermissions.Media.CanShareAudio.Configure(true),
                     DefinedPermissions.Media.CanShareScreen.Configure(true),
+                    DefinedPermissions.Scenes.CanSetScene.Configure(true),
+                    DefinedPermissions.Scenes.CanOverwriteContentScene.Configure(true),
                 }.ToImmutableDictionary()
             },
         };
