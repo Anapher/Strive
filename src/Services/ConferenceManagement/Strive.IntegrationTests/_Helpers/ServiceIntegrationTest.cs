@@ -124,7 +124,7 @@ namespace Strive.IntegrationTests._Helpers
 
         protected void AssertFailed<T>(SuccessOrError<T> successOrError)
         {
-            Assert.False(successOrError.Success);
+            Assert.False(successOrError.Success, "The call succeeded unexpectedly");
         }
     }
 

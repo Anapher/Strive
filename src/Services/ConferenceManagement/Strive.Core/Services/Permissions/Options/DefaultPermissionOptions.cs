@@ -39,6 +39,7 @@ namespace Strive.Core.Services.Permissions.Options
                     DefinedPermissions.Media.CanChangeOtherParticipantsProducers.Configure(true),
                     DefinedPermissions.Rooms.CanCreateAndRemove.Configure(true),
                     DefinedPermissions.Scenes.CanSetScene.Configure(true),
+                    DefinedPermissions.Scenes.CanOverwriteContentScene.Configure(true),
                     DefinedPermissions.Chat.CanSendAnnouncement.Configure(true),
                     DefinedPermissions.Chat.CanSendAnonymously.Configure(false),
                     DefinedPermissions.Scenes.CanTakeTalkingStick.Configure(true),
