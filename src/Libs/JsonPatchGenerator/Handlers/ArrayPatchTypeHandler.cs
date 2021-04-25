@@ -44,10 +44,20 @@ namespace JsonPatchGenerator.Handlers
 
                     var sourcePath = path.AtIndex(existingItem);
                     var targetPath = path.AtIndex(i);
-                    context.Document.Move(sourcePath.ToString(), targetPath.ToString());
 
-                    items.RemoveAt(existingItem);
-                    items.Insert(i, origItem);
+                    if (modifiedArr.Count > existingItem && JToken.DeepEquals(modifiedArr[existingItem], origItem))
+                    {
+                        // the item also exists at the current position, we have to copy
+                        context.Document.Copy(sourcePath.ToString(), targetPath.ToString());
+                        items.Insert(i, origItem);
+                    }
+                    else
+                    {
+                        context.Document.Move(sourcePath.ToString(), targetPath.ToString());
+
+                        items.RemoveAt(existingItem);
+                        items.Insert(i, origItem);
+                    }
                 }
                 else
                 {
