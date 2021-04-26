@@ -5,6 +5,7 @@ using MediatR;
 using Strive.Core.Services.ConferenceControl.Notifications;
 using Strive.Core.Services.Rooms.Gateways;
 using Strive.Core.Services.Rooms.Notifications;
+using Strive.Core.Services.Synchronization.Requests;
 
 namespace Strive.Core.Services.Rooms.NotificationHandlers
 {
@@ -30,6 +31,10 @@ namespace Strive.Core.Services.Rooms.NotificationHandlers
             // as no rooms exist any more, so it is impossible that new mappings will be created
 
             var result = await _roomRepository.DeleteAllRoomsAndMappingsOfConference(conferenceId);
+
+            await _mediator.Send(
+                new UpdateSynchronizedObjectRequest(notification.ConferenceId, SynchronizedRooms.SyncObjId));
+
             await _mediator.Publish(new RoomsRemovedNotification(conferenceId, result.DeletedRooms));
             await _mediator.Publish(new ParticipantsRoomChangedNotification(conferenceId,
                 result.DeletedMapping.ToDictionary(pair => new Participant(conferenceId, pair.Key),

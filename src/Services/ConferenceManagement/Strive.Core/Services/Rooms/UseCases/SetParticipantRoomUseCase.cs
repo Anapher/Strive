@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Strive.Core.Services.Rooms.Gateways;
 using Strive.Core.Services.Rooms.Notifications;
 using Strive.Core.Services.Rooms.Requests;
+using Strive.Core.Services.Synchronization.Requests;
 
 namespace Strive.Core.Services.Rooms.UseCases
 {
@@ -29,6 +30,9 @@ namespace Strive.Core.Services.Rooms.UseCases
 
             _logger.LogDebug("Switch participant {participant} to room {roomId}", participant, roomId);
             var previousRoomId = await _roomRepository.SetParticipantRoom(participant, roomId);
+
+            await _mediator.Send(
+                new UpdateSynchronizedObjectRequest(participant.ConferenceId, SynchronizedRooms.SyncObjId));
 
             await _mediator.Publish(new ParticipantsRoomChangedNotification(participant.ConferenceId,
                 new Dictionary<Participant, ParticipantRoomChangeInfo>

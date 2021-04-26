@@ -274,6 +274,42 @@ namespace Strive.IntegrationTests.Services
         }
 
         [Fact]
+        public async Task TalkingStick_Race_PresenterLeaves_RemoveScene()
+        {
+            // arrange
+            var (conn, conference) = await ConnectToOpenedConference();
+            AssertSuccess(await conn.Hub.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.SetScene),
+                new TalkingStickScene(TalkingStickMode.Race)));
+
+            var pleb = CreateUser();
+            var plebConn = await ConnectUserToConference(pleb, conference);
+
+            AssertSuccess(await plebConn.Hub.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.TalkingStickTake)));
+            await conn.SyncObjects.AssertSyncObject<SynchronizedScene>(
+                SynchronizedScene.SyncObjId(RoomOptions.DEFAULT_ROOM_ID), syncObj =>
+                {
+                    Assert.Equal(syncObj.SceneStack, new IScene[]
+                    {
+                        new TalkingStickScene(TalkingStickMode.Race), new PresenterScene(pleb.Sub),
+                        new ActiveSpeakerScene(),
+                    });
+                });
+
+            // act
+            await plebConn.Hub.DisposeAsync();
+
+            // assert
+            await conn.SyncObjects.AssertSyncObject<SynchronizedScene>(
+                SynchronizedScene.SyncObjId(RoomOptions.DEFAULT_ROOM_ID), syncObj =>
+                {
+                    Assert.Equal(syncObj.SceneStack, new IScene[]
+                    {
+                        new TalkingStickScene(TalkingStickMode.Race),
+                    });
+                });
+        }
+
+        [Fact]
         public async Task TalkingStick_Moderated_PassToParticipant_MakePresenter()
         {
             // arrange

@@ -6,6 +6,7 @@ using MediatR;
 using Newtonsoft.Json.Linq;
 using Strive.Core.Extensions;
 using Strive.Core.Services.Permissions;
+using Strive.Core.Services.Rooms;
 using Strive.Core.Services.Scenes.Scenes;
 using Strive.Core.Services.Synchronization.Extensions;
 
@@ -100,8 +101,15 @@ namespace Strive.Core.Services.Scenes.Providers.TalkingStick
             var syncObj = await GetSyncObj(context.ConferenceId, context.RoomId);
             if (syncObj.CurrentSpeakerId != null)
             {
-                var presenterScene = new PresenterScene(syncObj.CurrentSpeakerId);
-                stack.AddRange(await sceneProviderFunc(presenterScene, context));
+                var rooms = await _mediator.FetchSynchronizedObject<SynchronizedRooms>(context.ConferenceId,
+                    SynchronizedRooms.SyncObjId);
+
+                if (rooms.Participants.TryGetValue(syncObj.CurrentSpeakerId, out var roomId) &&
+                    context.RoomId == roomId)
+                {
+                    var presenterScene = new PresenterScene(syncObj.CurrentSpeakerId);
+                    stack.AddRange(await sceneProviderFunc(presenterScene, context));
+                }
             }
 
             return stack;

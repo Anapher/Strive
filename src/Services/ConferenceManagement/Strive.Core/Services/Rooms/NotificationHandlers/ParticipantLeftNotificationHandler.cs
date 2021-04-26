@@ -5,6 +5,7 @@ using MediatR;
 using Strive.Core.Services.ConferenceControl.Notifications;
 using Strive.Core.Services.Rooms.Gateways;
 using Strive.Core.Services.Rooms.Notifications;
+using Strive.Core.Services.Synchronization.Requests;
 
 namespace Strive.Core.Services.Rooms.NotificationHandlers
 {
@@ -24,6 +25,10 @@ namespace Strive.Core.Services.Rooms.NotificationHandlers
             var (participant, _) = notification;
 
             var previousRoom = await _roomRepository.UnsetParticipantRoom(participant);
+
+            await _mediator.Send(
+                new UpdateSynchronizedObjectRequest(participant.ConferenceId, SynchronizedRooms.SyncObjId));
+
             await _mediator.Publish(new ParticipantsRoomChangedNotification(participant.ConferenceId,
                 new Dictionary<Participant, ParticipantRoomChangeInfo>
                     {{participant, ParticipantRoomChangeInfo.Left(previousRoom)}}));
