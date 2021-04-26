@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import RenderConsumerVideo from 'src/components/RenderConsumerVideo';
+import { selectParticipants } from 'src/features/conference/selectors';
 import useConsumer from 'src/store/webrtc/hooks/useConsumer';
 import { Size } from 'src/types';
 import { RenderSceneProps, ScreenShareScene } from '../../types';
@@ -9,6 +11,7 @@ export default function ScreenShare({
    className,
    dimensions,
    scene,
+   next,
    setShowWebcamUnderChat,
    setAutoHideControls,
 }: RenderSceneProps) {
@@ -18,6 +21,7 @@ export default function ScreenShare({
    const consumer = useConsumer(participantId, 'screen');
 
    const [showParticipantOverlay, setShowParticipantOverlay] = useState(false);
+   const participants = useSelector(selectParticipants);
 
    useEffect(() => {
       setAutoHideControls(true);
@@ -28,10 +32,14 @@ export default function ScreenShare({
       setShowWebcamUnderChat(!canShow);
    };
 
+   const overwrite = next();
+   if (overwrite) return <>{overwrite}</>;
+
    return (
       <PresentationScene
          className={className}
          showParticipants={showParticipantOverlay}
+         fixedParticipants={participants.filter((x) => x.id === participantId)}
          canShowParticipantsWithoutResize={handleCanShowParticipantsWithoutResize}
          dimensions={dimensions}
          contentRatio={videoSize}

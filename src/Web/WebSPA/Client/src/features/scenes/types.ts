@@ -1,11 +1,24 @@
 import { Size } from 'src/types';
 
+export type ActiveSpeakerScene = {
+   type: 'activeSpeaker';
+};
+
+export type AutonomousScene = {
+   type: 'autonomous';
+};
+
+export type BreakoutRoomScene = {
+   type: 'breakoutRoom';
+};
+
 export type GridScene = {
    type: 'grid';
 };
 
-export type ActiveSpeakerScene = {
-   type: 'activeSpeaker';
+export type PresenterScene = {
+   type: 'presenter';
+   presenterParticipantId: string;
 };
 
 export type ScreenShareScene = {
@@ -13,57 +26,48 @@ export type ScreenShareScene = {
    participantId: string;
 };
 
-export type BreakoutRoomScene = {
-   type: 'breakoutRoom';
+export type TalkingStickScene = {
+   type: 'talkingStick';
+   mode: TalkingStickMode;
 };
 
-export type AutonomousScene = {
-   type: 'autonomous';
-};
+export type TalkingStickMode = 'race' | 'queue' | 'moderated' | 'speakerPassStick';
 
-export type FollowServer = {
-   type: 'followServer';
-};
-
-export type ViewableScene = GridScene | ActiveSpeakerScene | BreakoutRoomScene | ScreenShareScene;
-export type Scene = ViewableScene | AutonomousScene;
-
-export type SceneConfig = {
-   hideParticipantsWithoutWebcam?: boolean;
-};
-
-export type ActiveScene = {
-   isControlled: boolean;
-   scene?: Scene;
-   config: SceneConfig;
-};
-
-export type ConfiguredScene = {
-   scene?: Scene;
-   config: SceneConfig;
-};
+export type Scene =
+   | ActiveSpeakerScene
+   | AutonomousScene
+   | BreakoutRoomScene
+   | GridScene
+   | PresenterScene
+   | ScreenShareScene
+   | TalkingStickScene;
 
 export type SynchronizedScene = {
+   selectedScene: Scene;
+   overwrittenContent?: Scene | null;
    availableScenes: Scene[];
-   active: ActiveScene;
+   sceneStack: Scene[];
 };
 
-export type SceneViewModel = {
-   scene: Scene;
-   isApplied: boolean;
-   isCurrent: boolean;
-   id: string;
+export type SynchronizedTalkingStick = {
+   currentSpeakerId?: string;
+   speakerQueue: string[];
 };
 
-export type SceneListItemProps = {
+export type ModeSceneListItemProps = {
+   availableScene?: Scene;
+   selectedScene: Scene;
+   onChangeScene: (newScene: Scene) => void;
+};
+
+export type AvailableSceneListItemProps = {
    scene: Scene;
-   applied: boolean;
-   current: boolean;
+   stack: Scene[];
 
    onChangeScene: (newScene: Scene) => void;
 };
 
-export type ActiveSceneMenuItemProps = {
+export type ActionListItemProps = {
    onClose: () => void;
 };
 
@@ -71,6 +75,9 @@ export type RenderSceneProps = {
    className?: string;
    dimensions: Size;
    scene: Scene;
+
+   next: (additionalProps?: any) => React.ReactNode | null;
+
    setShowWebcamUnderChat: (show: boolean) => void;
    setAutoHideControls: (autoHide: boolean) => void;
 };
@@ -78,9 +85,13 @@ export type RenderSceneProps = {
 export type ScenePresenter = {
    type: Scene['type'];
 
-   ListItem: React.ComponentType<SceneListItemProps>;
+   getSceneId?: (scene: Scene) => string;
+
+   ModeSceneListItem?: React.ComponentType<ModeSceneListItemProps>;
+   AvailableSceneListItem?: React.ComponentType<AvailableSceneListItemProps>;
+   ActionListItem?: React.ComponentType<ActionListItemProps>;
+
    AlwaysRender?: React.ComponentType;
-   OpenMenuItem?: React.ComponentType<ActiveSceneMenuItemProps>;
 
    RenderScene: React.ComponentType<RenderSceneProps>;
 };

@@ -7,11 +7,11 @@ import {
    RoomCreationInfo,
    SendChatMessageDto,
    SendEquipmentCommandDto,
-   SetSceneDto,
    SetTemporaryPermissionDto,
    SetUserIsTypingDto,
    SwitchRoomDto,
 } from './core-hub.types';
+import { Scene } from './features/scenes/types';
 import { connectSignal, invoke, onInvokeReturn } from './store/signal/actions';
 import { ChangeProducerSourceRequest } from './store/webrtc/types';
 
@@ -45,7 +45,13 @@ export const changeProducerSource = createHubFn<ChangeProducerSourceRequest>('Ch
 export const fetchPermissions = createHubFn<string | null>('FetchPermissions');
 export const setTemporaryPermission = createHubFn<SetTemporaryPermissionDto>('SetTemporaryPermission');
 
-export const setScene = createHubFn<SetSceneDto>('SetScene');
+export const setScene = createHubFn<Scene>('SetScene');
+export const setOverwrittenScene = createHubFn<Scene | null>('SetOverwrittenScene');
+export const talkingStickEnqueue = createHubFn('TalkingStickEnqueue');
+export const talkingStickDequeue = createHubFn('TalkingStickDequeue');
+export const talkingStickTake = createHubFn('TalkingStickTake');
+export const talkingStickReturn = createHubFn('TalkingStickReturn');
+export const talkingStickPass = createHubFn<string>('TalkingStickPass');
 
 export function createHubFn<TArg = void>(name: string) {
    const actionCreator = function (arg: TArg) {

@@ -1,9 +1,20 @@
 import { ScenePresenter } from './types';
-import autonmous from './components/autonomous';
+import autonomous from './components/autonomous';
 import screenShare from './components/screenShare';
 import grid from './components/grid';
 import breakoutRoom from './components/breakoutRoom';
 import activeSpeaker from './components/activeSpeaker';
+import talkingStick from './components/talkingStick';
+import presenter from './components/presenter';
 
-const presenters: ScenePresenter[] = [autonmous, screenShare, grid, breakoutRoom, activeSpeaker];
+const presenters: ScenePresenter[] = [
+   autonomous,
+   screenShare,
+   grid,
+   breakoutRoom,
+   activeSpeaker,
+   talkingStick,
+   presenter,
+];
+
 export default presenters;

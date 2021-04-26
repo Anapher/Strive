@@ -1,4 +1,4 @@
-import { SceneListItemProps, ScenePresenter, ScreenShareScene } from '../../types';
+import { AvailableSceneListItemProps, ScenePresenter, ScreenShareScene } from '../../types';
 import SceneListItem from '../SceneListItem';
 import React from 'react';
 import DesktopWindowsIcon from '@material-ui/icons/DesktopWindows';
@@ -7,7 +7,7 @@ import { selectParticipants } from 'src/features/conference/selectors';
 import ScreenShare from './ScreenShare';
 import { useTranslation } from 'react-i18next';
 
-function ListItem(props: SceneListItemProps) {
+function AvailableSceneListItem(props: AvailableSceneListItemProps) {
    const { t } = useTranslation();
 
    const participants = useSelector(selectParticipants);
@@ -20,8 +20,9 @@ function ListItem(props: SceneListItemProps) {
 
 const presenter: ScenePresenter = {
    type: 'screenShare',
-   ListItem,
+   AvailableSceneListItem,
    RenderScene: ScreenShare,
+   getSceneId: (scene) => `${scene.type}::${scene.type === 'screenShare' && scene.participantId}`,
 };
 
 export default presenter;

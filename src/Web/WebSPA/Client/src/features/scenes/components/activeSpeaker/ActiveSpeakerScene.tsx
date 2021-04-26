@@ -25,7 +25,7 @@ const getListeningParticipantsWidth = (width: number) => {
    return 340;
 };
 
-export default function ActiveSpeakerScene({ className, dimensions, setAutoHideControls }: RenderSceneProps) {
+export default function ActiveSpeakerScene({ className, dimensions, setAutoHideControls, next }: RenderSceneProps) {
    const classes = useStyles();
 
    useEffect(() => {
@@ -45,6 +45,9 @@ export default function ActiveSpeakerScene({ className, dimensions, setAutoHideC
 
    const activeParticipants = useSomeParticipants(smallTileCount);
    const participants = useSelector(selectParticipants);
+
+   const overwrite = next();
+   if (overwrite) return <>{overwrite}</>;
 
    if (participants.length === 0) return null;
 

@@ -6,9 +6,9 @@ import { OpenBreakoutRoomsItem } from './OpenBreakoutRoomsItem';
 
 const presenter: ScenePresenter = {
    type: 'breakoutRoom',
-   ListItem: BreakoutRoomListItem,
+   AvailableSceneListItem: BreakoutRoomListItem,
    RenderScene: BreakoutRoomScene,
-   OpenMenuItem: OpenBreakoutRoomsItem,
+   ActionListItem: OpenBreakoutRoomsItem,
    AlwaysRender: BreakoutRoomsDialog,
 };
 

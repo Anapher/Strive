@@ -1,9 +1,10 @@
 import { ListItem, ListItemIcon, ListItemSecondaryAction, ListItemText, makeStyles, Radio } from '@material-ui/core';
 import React from 'react';
-import { SceneListItemProps } from '../types';
 import clsx from 'classnames';
+import { AvailableSceneListItemProps } from '../types';
+import _ from 'lodash';
 
-export type Props = SceneListItemProps & {
+export type Props = AvailableSceneListItemProps & {
    title: string;
    icon: React.ReactNode;
 
@@ -14,7 +15,6 @@ export type Props = SceneListItemProps & {
 const useStyles = makeStyles((theme) => ({
    root: {
       paddingRight: 8,
-      paddingLeft: 0,
    },
    indicator: {
       width: 4,
@@ -30,14 +30,15 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default React.forwardRef<HTMLDivElement, Props>(function SceneListItem(
-   { applied, current, scene, title, onChangeScene, icon, selected, onClick },
+   { scene, stack, title, onChangeScene, icon, selected, onClick },
    ref,
 ) {
    const classes = useStyles();
+   const applied = _.isEqual(stack[stack.length - 1], scene);
 
    return (
       <ListItem button className={classes.root} onClick={onClick} selected={selected} ref={ref}>
-         <div className={clsx(classes.indicator, current && classes.indicatorIsCurrent)} />
+         {/* <div className={clsx(classes.indicator, current && classes.indicatorIsCurrent)} /> */}
          <ListItemIcon className={classes.icon}>{icon}</ListItemIcon>
          <ListItemText primary={title} />
          <ListItemSecondaryAction>

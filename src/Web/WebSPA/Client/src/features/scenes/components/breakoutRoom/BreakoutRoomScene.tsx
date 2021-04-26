@@ -21,10 +21,12 @@ const useStyles = makeStyles({
    },
 });
 
-export default function BreakoutRoomScene({ className }: RenderSceneProps) {
+export default function BreakoutRoomScene({ className, next }: RenderSceneProps) {
    const classes = useStyles();
-
    const state = useSelector(selectBreakoutRoomState);
+
+   const overwrite = next();
+   if (overwrite) return <>{overwrite}</>;
 
    if (!state) return null;
 

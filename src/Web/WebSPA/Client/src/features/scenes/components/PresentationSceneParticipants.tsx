@@ -1,11 +1,10 @@
 import { makeStyles } from '@material-ui/core';
-import React from 'react';
 import clsx from 'classnames';
 import { motion } from 'framer-motion';
-import { useSelector } from 'react-redux';
-import { selectSceneOverlayParticipants } from '../selectors';
-import ParticipantTile from './ParticipantTile';
+import React from 'react';
+import { Participant } from 'src/features/conference/types';
 import useSomeParticipants from '../useSomeParticipants';
+import ParticipantTile from './ParticipantTile';
 
 const useStyles = makeStyles({
    rootBottom: {
@@ -30,13 +29,13 @@ type Props = {
    location: 'bottom' | 'right';
    tileHeight: number;
    tileWidth: number;
+
+   fixedParticipants?: Participant[];
 };
 
-export default function PresentationSceneParticipants({ location, tileWidth, tileHeight }: Props) {
+export default function PresentationSceneParticipants({ location, tileWidth, tileHeight, fixedParticipants }: Props) {
    const classes = useStyles();
-   const sceneParticipants = useSelector(selectSceneOverlayParticipants);
-
-   const participants = useSomeParticipants(4, sceneParticipants).reverse();
+   const participants = useSomeParticipants(4, fixedParticipants).reverse();
 
    return (
       <div className={clsx({ [classes.rootBottom]: location === 'bottom', [classes.rootRight]: location === 'right' })}>

@@ -6,7 +6,7 @@ import { useSelector } from 'react-redux';
 import MediaControls from 'src/features/media/components/MediaControls';
 import useThrottledResizeObserver from 'src/hooks/useThrottledResizeObserver';
 import { Size } from 'src/types';
-import { selectCurrentScene } from '../selectors';
+import { selectSceneStack } from '../selectors';
 import SceneSelector from './SceneSelector';
 
 const AUTO_HIDE_CONTROLS_DELAY_MS = 8000;
@@ -44,7 +44,7 @@ export default function SceneView({ setShowWebcamUnderChat }: Props) {
    if (dimensions && dimensions.width !== undefined && dimensions.height !== undefined)
       fixedDimensions = { width: dimensions.width, height: dimensions.height };
 
-   const appliedScene = useSelector(selectCurrentScene);
+   const sceneStack = useSelector(selectSceneStack);
 
    const [showControls, setShowControls] = useState(true);
    const autoHideControls = useRef<boolean>(false);
@@ -79,11 +79,11 @@ export default function SceneView({ setShowWebcamUnderChat }: Props) {
    return (
       <div className={classes.root} ref={contentRef} onMouseMove={handleMouseMove}>
          <AnimateSharedLayout>
-            {fixedDimensions?.width !== undefined && fixedDimensions?.height !== undefined ? (
+            {fixedDimensions?.width !== undefined && fixedDimensions?.height !== undefined && sceneStack ? (
                <SceneSelector
                   className={classes.currentScene}
                   dimensions={fixedDimensions}
-                  scene={appliedScene}
+                  sceneStack={sceneStack}
                   setShowWebcamUnderChat={setShowWebcamUnderChat}
                   setAutoHideControls={handleSetAutoHideControls}
                />

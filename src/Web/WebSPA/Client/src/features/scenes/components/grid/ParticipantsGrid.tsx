@@ -35,6 +35,7 @@ export default function ParticipantsGrid({
    className,
    setShowWebcamUnderChat,
    setAutoHideControls,
+   next,
 }: RenderSceneProps) {
    const participants = useSelector(selectParticipants);
    const participantsOfRoom = useSelector(selectParticipantsOfCurrentRoom)
@@ -48,7 +49,10 @@ export default function ParticipantsGrid({
       setAutoHideControls(false);
    }, []);
 
-   if (!participantsOfRoom || participantsOfRoom.length === 0) return <div className={className} />;
+   const overwrite = next();
+   if (overwrite) return <>{overwrite}</>;
+
+   if (!participantsOfRoom || participantsOfRoom.length === 0) return null;
 
    const spacing = 8;
    const grid = generateGrid(participantsOfRoom.length, 640, dimensions, spacing);

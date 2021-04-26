@@ -1,5 +1,5 @@
 import { RenderSceneProps } from '../../types';
 
-export default function AutonomousScene({ next }: RenderSceneProps) {
+export default function PresenterScene({ next }: RenderSceneProps) {
    return <>{next()}</>;
 }

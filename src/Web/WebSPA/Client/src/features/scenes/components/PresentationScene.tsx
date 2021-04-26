@@ -1,5 +1,6 @@
 import { makeStyles } from '@material-ui/core';
 import React, { useEffect } from 'react';
+import { Participant } from 'src/features/conference/types';
 import { Size } from 'src/types';
 import { expandToBox, maxWidth } from '../calculations';
 import ActiveParticipantsChips from './ActiveParticipantsChips';
@@ -30,6 +31,7 @@ type Props = {
    maxContentWidth?: number;
 
    showParticipants?: boolean;
+   fixedParticipants?: Participant[];
 
    participantTileWidth?: number;
    participantTileHeight?: number;
@@ -48,6 +50,7 @@ export default function PresentationScene({
    dimensions,
    render,
    showParticipants = true,
+   fixedParticipants,
    participantTileWidth = 16 * 18,
    participantTileHeight = 9 * 18,
    maxOverlayFactor = 0.33,
@@ -107,6 +110,7 @@ export default function PresentationScene({
                   location={participantsPlace}
                   tileHeight={participantTileHeight}
                   tileWidth={participantTileWidth}
+                  fixedParticipants={fixedParticipants}
                />
             )}
          </div>
