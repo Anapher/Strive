@@ -19,6 +19,8 @@ namespace Strive.Core.Services.Scenes.UseCases
         private readonly ISceneRepository _sceneRepository;
         private readonly IEnumerable<ISceneProvider> _sceneProviders;
 
+        private int _recursionCounter;
+
         public UpdateScenesUseCase(IMediator mediator, ISceneRepository sceneRepository,
             IEnumerable<ISceneProvider> sceneProviders)
         {
@@ -76,6 +78,14 @@ namespace Strive.Core.Services.Scenes.UseCases
                         SelectedScene = scene.OverwrittenContent ?? SynchronizedSceneProvider.GetDefaultScene(),
                         OverwrittenContent = null,
                     };
+                }
+
+                if (_recursionCounter++ > 10)
+                {
+                    var safeSceneStack = sceneState.SceneStack.TakeWhile(availableScenes.Contains).ToList();
+                    await _sceneRepository.SetSceneState(conferenceId, roomId,
+                        sceneState with {SceneStack = safeSceneStack});
+                    return;
                 }
 
                 await _sceneRepository.SetScene(conferenceId, roomId, scene);

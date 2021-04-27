@@ -183,6 +183,38 @@ namespace Strive.Core.Tests.Services.Scenes.UseCases
             Assert.Equal(new IScene[] {new AutonomousScene()}, received.SceneStack);
         }
 
+        [Fact]
+        public async Task Handle_BadSceneProvider_BreakInfiniteRecursionAndFixSceneStack()
+        {
+            // arrange
+            SetupConference();
+            var stateCallback = TrackSceneState(false);
+
+            _mediator.Setup(x => x.Send(It.IsAny<FetchAvailableScenesRequest>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync((FetchAvailableScenesRequest _, CancellationToken _) => new IScene[] {new TestScene()});
+
+            _repository.Setup(x => x.GetScene(ConferenceId, RoomId))
+                .ReturnsAsync(new ActiveScene(new TestScene(), null));
+
+            var badSceneProvider = new Mock<ISceneProvider>();
+            badSceneProvider.Setup(x => x.GetAvailableScenes(ConferenceId, RoomId, It.IsAny<IReadOnlyList<IScene>>()))
+                .ReturnsAsync(Array.Empty<IScene>());
+            badSceneProvider.Setup(x => x.IsProvided(It.IsAny<TestScene>())).Returns(true);
+            badSceneProvider
+                .Setup(x => x.BuildStack(It.IsAny<TestScene>(), It.IsAny<SceneBuilderContext>(),
+                    It.IsAny<SceneStackFunc>())).ReturnsAsync(new IScene[] {new TestScene(), GridScene.Instance});
+
+            var request = new UpdateScenesRequest(ConferenceId, RoomId);
+            var useCase = Create(badSceneProvider.Object);
+
+            // act
+            await useCase.Handle(request, CancellationToken.None);
+
+            // assert
+            var state = stateCallback();
+            Assert.Equal(new[] {new TestScene()}, state.SceneStack);
+        }
+
         private record TestScene : IScene;
     }
 }
