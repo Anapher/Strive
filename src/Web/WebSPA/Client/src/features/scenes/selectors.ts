@@ -12,11 +12,16 @@ export const selectOverwrittenScene = (state: RootState) => state.scenes.synchro
 export const selectSceneStack = (state: RootState) => state.scenes.synchronized?.sceneStack;
 
 export const selectTalkingStickCurrentSpeakerId = (state: RootState) => state.scenes.talkingStick?.currentSpeakerId;
+export const selectTalkingStickQueue = (state: RootState) => state.scenes.talkingStick?.speakerQueue ?? [];
 
 export const selectIsMePresenter = createSelector(
    selectTalkingStickCurrentSpeakerId,
    selectMyParticipantId,
    (currentSpeaker, myId) => currentSpeaker === myId,
+);
+
+export const selectIsMeInQueue = createSelector(selectTalkingStickQueue, selectMyParticipantId, (queue, myId) =>
+   myId ? queue.includes(myId) : false,
 );
 
 export const selectActiveParticipantsWithWebcam = createSelector(

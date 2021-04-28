@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import RenderConsumerVideo from 'src/components/RenderConsumerVideo';
 import { selectParticipants } from 'src/features/conference/selectors';
@@ -13,9 +13,8 @@ export default function ScreenShare({
    scene,
    next,
    setShowWebcamUnderChat,
-   setAutoHideControls,
-}: RenderSceneProps) {
-   const { participantId } = scene as ScreenShareScene;
+}: RenderSceneProps<ScreenShareScene>) {
+   const { participantId } = scene;
 
    const videoSize: Size = { width: 1920, height: 1080 };
    const consumer = useConsumer(participantId, 'screen');
@@ -23,16 +22,12 @@ export default function ScreenShare({
    const [showParticipantOverlay, setShowParticipantOverlay] = useState(false);
    const participants = useSelector(selectParticipants);
 
-   useEffect(() => {
-      setAutoHideControls(true);
-   }, [setAutoHideControls]);
-
    const handleCanShowParticipantsWithoutResize = (canShow: boolean) => {
       setShowParticipantOverlay(canShow);
       setShowWebcamUnderChat(!canShow);
    };
 
-   const overwrite = next();
+   const overwrite = next({ appliedShowMediaControls: true });
    if (overwrite) return <>{overwrite}</>;
 
    return (

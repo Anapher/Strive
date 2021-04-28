@@ -1,5 +1,5 @@
 import React from 'react';
-import { AvailableSceneListItemProps, ScenePresenter } from '../../types';
+import { AvailableSceneListItemProps, GridScene, ScenePresenter } from '../../types';
 import SceneListItem from '../SceneListItem';
 import AppsIcon from '@material-ui/icons/Apps';
 import ParticipantsGrid from './ParticipantsGrid';
@@ -10,10 +10,11 @@ function AvailableSceneListItem(props: AvailableSceneListItemProps) {
    return <SceneListItem {...props} title={t('conference.scenes.grid')} icon={<AppsIcon />} />;
 }
 
-const presenter: ScenePresenter = {
+const presenter: ScenePresenter<GridScene> = {
    type: 'grid',
    AvailableSceneListItem,
    RenderScene: ParticipantsGrid,
+   getAutoHideMediaControls: () => true,
 };
 
 export default presenter;

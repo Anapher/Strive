@@ -30,9 +30,6 @@ namespace Strive.Core.Services.Scenes.NotificationHandlers
         public async Task Handle(SynchronizedObjectUpdatedNotification notification,
             CancellationToken cancellationToken)
         {
-            if (notification.PreviousValue == null)
-                return; // no update
-
             var conferenceId = notification.Participants.First().ConferenceId;
             var rooms = await _mediator.FetchSynchronizedObject<SynchronizedRooms>(conferenceId,
                 SynchronizedRooms.SyncObjId);

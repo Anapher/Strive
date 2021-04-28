@@ -396,7 +396,7 @@ namespace Strive.Hubs.Core
             if (roomId == null)
                 return SuccessOrError<Unit>.Failed(SceneError.RoomNotFound);
 
-            return await GetInvoker().Create(new TalkingStickPassRequest(participant, roomId, true))
+            return await GetInvoker().Create(new TalkingStickPassRequest(participant, roomId, false))
                 .RequirePermissions(DefinedPermissions.Scenes.CanTakeTalkingStick).Send();
         }
 

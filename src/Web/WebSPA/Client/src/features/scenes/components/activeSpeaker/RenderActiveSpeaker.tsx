@@ -1,11 +1,11 @@
 import { makeStyles } from '@material-ui/core';
 import clsx from 'classnames';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useSelector } from 'react-redux';
 import { selectParticipants } from 'src/features/conference/selectors';
 import { Size } from 'src/types';
 import { expandToBox } from '../../calculations';
-import { RenderSceneProps } from '../../types';
+import { ActiveSpeakerScene, RenderSceneProps } from '../../types';
 import useSomeParticipants from '../../useSomeParticipants';
 import ParticipantTile from '../ParticipantTile';
 
@@ -14,6 +14,9 @@ const useStyles = makeStyles({
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
+   },
+   rootCenter: {
+      justifyContent: 'center',
    },
 });
 
@@ -25,12 +28,8 @@ const getListeningParticipantsWidth = (width: number) => {
    return 340;
 };
 
-export default function ActiveSpeakerScene({ className, dimensions, setAutoHideControls, next }: RenderSceneProps) {
+export default function RenderActiveSpeaker({ className, dimensions, next }: RenderSceneProps<ActiveSpeakerScene>) {
    const classes = useStyles();
-
-   useEffect(() => {
-      setAutoHideControls(true);
-   }, []);
 
    const tileWidth = getListeningParticipantsWidth(dimensions.width);
    const tileHeight = (tileWidth / 16) * 9;
@@ -49,16 +48,19 @@ export default function ActiveSpeakerScene({ className, dimensions, setAutoHideC
    const overwrite = next();
    if (overwrite) return <>{overwrite}</>;
 
-   if (participants.length === 0) return null;
+   if (activeParticipants.length === 0) return null;
 
    return (
-      <div className={clsx(className, classes.root)}>
+      <div className={clsx(className, classes.root, participants.length === 1 && classes.rootCenter)}>
          <div style={{ margin: 8, ...size }}>
             <ParticipantTile {...size} participant={activeParticipants[0]} disableLayoutAnimation />
          </div>
          <div style={{ display: 'flex', marginTop: 8 }}>
             {activeParticipants.slice(1).map((participant, i) => (
-               <div style={{ width: tileWidth, height: tileHeight, marginLeft: i === 0 ? 8 : 0 }} key={participant.id}>
+               <div
+                  style={{ width: tileWidth, height: tileHeight, marginRight: i === 0 ? 16 : 0 }}
+                  key={participant.id}
+               >
                   <ParticipantTile
                      width={tileWidth}
                      height={tileHeight}

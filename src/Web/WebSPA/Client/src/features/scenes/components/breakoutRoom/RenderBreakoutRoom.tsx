@@ -6,7 +6,7 @@ import Countdown from 'react-countdown';
 import { useSelector } from 'react-redux';
 import CountdownRenderer from 'src/components/CountdownRenderer';
 import { selectBreakoutRoomState } from 'src/features/breakout-rooms/selectors';
-import { RenderSceneProps } from '../../types';
+import { BreakoutRoomScene, RenderSceneProps } from '../../types';
 
 const useStyles = makeStyles({
    root: {
@@ -21,7 +21,7 @@ const useStyles = makeStyles({
    },
 });
 
-export default function BreakoutRoomScene({ className, next }: RenderSceneProps) {
+export default function RenderBreakoutRoom({ className, next }: RenderSceneProps<BreakoutRoomScene>) {
    const classes = useStyles();
    const state = useSelector(selectBreakoutRoomState);
 

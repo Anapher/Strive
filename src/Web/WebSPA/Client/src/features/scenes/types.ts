@@ -71,21 +71,20 @@ export type ActionListItemProps = {
    onClose: () => void;
 };
 
-export type RenderSceneProps = {
+export type RenderSceneProps<S extends Scene = Scene> = {
    className?: string;
    dimensions: Size;
-   scene: Scene;
+   scene: S;
 
    next: (additionalProps?: any) => React.ReactNode | null;
 
    setShowWebcamUnderChat: (show: boolean) => void;
-   setAutoHideControls: (autoHide: boolean) => void;
 };
 
-export type ScenePresenter = {
-   type: Scene['type'];
+export type ScenePresenter<S extends Scene> = {
+   type: S['type'];
 
-   getSceneId?: (scene: Scene) => string;
+   getSceneId?: (scene: S) => string;
 
    ModeSceneListItem?: React.ComponentType<ModeSceneListItemProps>;
    AvailableSceneListItem?: React.ComponentType<AvailableSceneListItemProps>;
@@ -93,7 +92,9 @@ export type ScenePresenter = {
 
    AlwaysRender?: React.ComponentType;
 
-   RenderScene: React.ComponentType<RenderSceneProps>;
+   RenderScene: React.ComponentType<RenderSceneProps<S>>;
+
+   getAutoHideMediaControls?: (scene: S, participantId: string) => boolean | undefined;
 };
 
 export type ActiveParticipantData = {

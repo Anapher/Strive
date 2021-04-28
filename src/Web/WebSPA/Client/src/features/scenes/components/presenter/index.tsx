@@ -1,9 +1,10 @@
-import { ScenePresenter } from '../../types';
-import PresenterScene from './PresenterScene';
+import { PresenterScene, ScenePresenter } from '../../types';
+import RenderPresenter from './RenderPresenter';
 
-const presenter: ScenePresenter = {
+const presenter: ScenePresenter<PresenterScene> = {
    type: 'presenter',
-   RenderScene: PresenterScene,
+   RenderScene: RenderPresenter,
+   getAutoHideMediaControls: () => false,
 };
 
 export default presenter;

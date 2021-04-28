@@ -2,8 +2,8 @@ import { ListItem, ListItemIcon, ListItemText } from '@material-ui/core';
 import StarIcon from '@material-ui/icons/Star';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { ModeSceneListItemProps, ScenePresenter } from '../../types';
-import AutonomousScene from './AutonomousScene';
+import { AutonomousScene, ModeSceneListItemProps, ScenePresenter } from '../../types';
+import RenderAutonomous from './RenderAutonomous';
 
 function ModeSceneListItem({ selectedScene, onChangeScene }: ModeSceneListItemProps) {
    const { t } = useTranslation();
@@ -24,10 +24,10 @@ function ModeSceneListItem({ selectedScene, onChangeScene }: ModeSceneListItemPr
    );
 }
 
-const presenter: ScenePresenter = {
+const presenter: ScenePresenter<AutonomousScene> = {
    type: 'autonomous',
    ModeSceneListItem,
-   RenderScene: AutonomousScene,
+   RenderScene: RenderAutonomous,
 };
 
 export default presenter;

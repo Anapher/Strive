@@ -1,13 +1,13 @@
-import { ScenePresenter } from './types';
-import autonomous from './components/autonomous';
-import screenShare from './components/screenShare';
-import grid from './components/grid';
-import breakoutRoom from './components/breakoutRoom';
 import activeSpeaker from './components/activeSpeaker';
-import talkingStick from './components/talkingStick';
+import autonomous from './components/autonomous';
+import breakoutRoom from './components/breakoutRoom';
+import grid from './components/grid';
 import presenter from './components/presenter';
+import screenShare from './components/screenShare';
+import talkingStick from './components/talkingStick';
+import { ScenePresenter } from './types';
 
-const presenters: ScenePresenter[] = [
+const presenters: ScenePresenter<any>[] = [
    autonomous,
    screenShare,
    grid,

@@ -1,15 +1,16 @@
 import BreakoutRoomsDialog from 'src/features/breakout-rooms/components/BreakoutRoomsDialog';
-import { ScenePresenter } from '../../types';
+import { BreakoutRoomScene, ScenePresenter } from '../../types';
 import BreakoutRoomListItem from './BreakoutRoomListItem';
-import BreakoutRoomScene from './BreakoutRoomScene';
 import { OpenBreakoutRoomsItem } from './OpenBreakoutRoomsItem';
+import RenderBreakoutRoom from './RenderBreakoutRoom';
 
-const presenter: ScenePresenter = {
+const presenter: ScenePresenter<BreakoutRoomScene> = {
    type: 'breakoutRoom',
    AvailableSceneListItem: BreakoutRoomListItem,
-   RenderScene: BreakoutRoomScene,
+   RenderScene: RenderBreakoutRoom,
    ActionListItem: OpenBreakoutRoomsItem,
    AlwaysRender: BreakoutRoomsDialog,
+   getAutoHideMediaControls: () => false,
 };
 
 export default presenter;

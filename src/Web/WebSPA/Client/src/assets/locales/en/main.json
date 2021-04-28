@@ -173,7 +173,21 @@
         "moderated": "Moderated",
         "moderated_description": "Participants can join a list. The moderators can select participants from the list who then become the presenter.",
         "speakerPassStick": "Speaker pass stick",
-        "speakerPassStick_description": "Participants can join a list. The first participant becomes the presenter and after finishing, he can select the next presenter from the list."
+        "speakerPassStick_description": "Participants can join a list. The first participant becomes the presenter and after finishing, he can select the next presenter from the list.",
+        "return_stick": "Return Stick",
+        "mode_desc": "Mode: {{name}}",
+        "take_stick": "Take Stick",
+        "enqueue": "Join Queue",
+        "enqueue_status": "{{count}} currently in queue",
+        "dequeue": "Leave Queue",
+        "dequeue_status": "Position: {{pos}} of {{total}}",
+        "queue_youre_next": "You are next!",
+        "add_to_list": "I want to say something",
+        "add_to_list_status": "One other wants to say something",
+        "add_to_list_status_plural": "{{count}} others want to say something",
+        "remove_from_list": "I don't want to say something",
+        "pass_stick": "Pass Stick",
+        "pass_stick_to_participant": "Pass Stick to Participant"
       },
       "breakout_rooms": {
         "label": "Breakout Rooms",
@@ -187,7 +201,8 @@
       "screen_share": "{{name}}'s Screen",
       "mode_dialog": {
         "title": "Scene selection mode"
-      }
+      },
+      "presenter_text": "Presenter: {{name}}"
     },
     "dialog_breakout_rooms": {
       "assign_participants_to_rooms": "Assign participants to rooms",
