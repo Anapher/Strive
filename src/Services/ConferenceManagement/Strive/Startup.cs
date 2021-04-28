@@ -46,7 +46,6 @@ using Strive.Messaging.Consumers;
 using Strive.Messaging.SFU.SendContracts;
 using Strive.Services;
 using Strive.Utilities;
-using Swashbuckle.AspNetCore.Swagger;
 
 namespace Strive
 {
@@ -177,14 +176,14 @@ namespace Strive
                 }
                 else
                 {
-                    config.AddRabbitMqMessageScheduler();
+                    config.AddDelayedMessageScheduler();
                     config.UsingRabbitMq((context, configurator) =>
                     {
                         if (rabbitMqOptions.RabbitMq != null)
                             configurator.ConfigureOptions(rabbitMqOptions.RabbitMq);
 
                         configurator.UseHealthCheck(context);
-                        configurator.UseDelayedExchangeMessageScheduler();
+                        configurator.UseDelayedMessageScheduler();
 
                         configurator.ConfigureEndpoints(context);
 
@@ -224,14 +223,12 @@ namespace Strive
                     In = ParameterLocation.Header,
                     Description = "Please insert JWT with Bearer into field",
                     Name = "Authorization",
-                    Type = SecuritySchemeType.ApiKey
+                    Type = SecuritySchemeType.ApiKey,
                 };
 
                 // Swagger 2.+ support
                 c.AddSecurityDefinition("Bearer", scheme);
                 c.AddSecurityRequirement(new OpenApiSecurityRequirement {{scheme, new List<string>()}});
-
-                c.AddFluentValidationRules();
             });
 
             services.AddMediatR(typeof(Startup), typeof(CoreModule));
