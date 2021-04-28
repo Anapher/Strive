@@ -17,8 +17,8 @@
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="5.0.0" />
     <PackageReference Include="MongoDB.Concurrency" Version="1.1.0" />
     <PackageReference Include="MongoDB.Driver" Version="2.12.2" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.8.0" />
-    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.8.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.11.0" />
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.11.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="5.0.0" />
     <PackageReference Include="System.Linq.Async" Version="5.0.0" />

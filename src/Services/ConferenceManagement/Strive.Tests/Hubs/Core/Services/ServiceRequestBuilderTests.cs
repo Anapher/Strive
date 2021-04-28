@@ -116,7 +116,7 @@ namespace Strive.Tests.Hubs.Core.Services
 
             // assert
             Assert.False(result.Success);
-            Assert.Equal(result.Error.Code, ServiceErrorCode.Conference_UnexpectedError.ToString());
+            Assert.Equal(result.Error?.Code, ServiceErrorCode.Conference_UnexpectedError.ToString());
         }
 
         [Fact]
@@ -156,7 +156,7 @@ namespace Strive.Tests.Hubs.Core.Services
 
             // assert
             Assert.False(result.Success);
-            Assert.Equal(CommonError.ConcurrencyError.Code, result.Error.Code);
+            Assert.Equal(CommonError.ConcurrencyError.Code, result.Error?.Code);
 
             _mediator.Verify(x => x.Send(It.IsAny<TestRequest>(), It.IsAny<CancellationToken>()), Times.Never);
         }

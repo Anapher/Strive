@@ -67,7 +67,7 @@ namespace Strive.Tests.Hubs.Core.Services.Middlewares
 
             // assert
             Assert.False(result.Success);
-            Assert.Equal(result.Error.Code, CommonError.PermissionDenied(permission).Code);
+            Assert.Equal(result.Error?.Code, CommonError.PermissionDenied(permission).Code);
         }
 
         [Fact]
