@@ -4,6 +4,9 @@ import {
    ClickAwayListener,
    Grow,
    List,
+   ListItem,
+   ListItemIcon,
+   ListItemText,
    makeStyles,
    MenuList,
    Paper,
@@ -22,6 +25,8 @@ import { RootState } from 'src/store';
 import scenePresenters from '../scene-presenter-registry';
 import { Scene } from '../types';
 import SceneManagementModeSelectionDialog from './SceneManagementModeSelectionDialog';
+import CloseIcon from '@material-ui/icons/Close';
+import presenters from '../scene-presenter-registry';
 
 const sceneDisplayOrder: Scene['type'][] = ['autonomous', 'grid', 'activeSpeaker', 'screenShare', 'breakoutRoom'];
 
@@ -68,6 +73,12 @@ export default function SceneManagement() {
       }
    };
 
+   const handleOverwriteScene = (scene: Scene | null) => {
+      if (canOverwriteScene) {
+         dispatch(coreHub.setOverwrittenScene(scene));
+      }
+   };
+
    const availableScenePresenters = _.orderBy(
       availableScenes.map((scene) => {
          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -90,8 +101,10 @@ export default function SceneManagement() {
                   {t('glossary:scene_plural')}
                </Typography>
             </li>
-            <ButtonBase className={classes.modeButton} onClick={handleOpenModeSelection}>
-               <Typography variant="body2">Mode: {selectedScene?.type}</Typography>
+            <ButtonBase className={classes.modeButton} onClick={handleOpenModeSelection} disabled={!canSetScene}>
+               <Typography variant="body2" noWrap>
+                  <ActiveSceneDescriptor scene={selectedScene} />
+               </Typography>
             </ButtonBase>
             {availableScenePresenters.map(
                ({ presenter, scene }) =>
@@ -100,9 +113,20 @@ export default function SceneManagement() {
                         key={presenter.getSceneId ? presenter.getSceneId(scene) : scene.type}
                         scene={scene}
                         stack={sceneStack}
-                        onChangeScene={handleChangeScene}
+                        onChangeScene={handleOverwriteScene}
                      />
                   ),
+            )}
+            {overwrittenContent && (
+               <ListItem button onClick={() => handleOverwriteScene(null)}>
+                  <ListItemIcon style={{ minWidth: 32 }}>
+                     <CloseIcon />
+                  </ListItemIcon>
+                  <ListItemText
+                     primaryTypographyProps={{ noWrap: true }}
+                     primary={t('conference.scenes.remove_overwrite')}
+                  />
+               </ListItem>
             )}
          </List>
          <Paper elevation={4} className={classes.root}>
@@ -152,4 +176,11 @@ export default function SceneManagement() {
          />
       </div>
    );
+}
+
+function ActiveSceneDescriptor({ scene }: { scene?: Scene }) {
+   const presenter = presenters.find((x) => x.type === scene?.type);
+   if (presenter?.ActiveDescriptor) return <presenter.ActiveDescriptor scene={scene} />;
+
+   return <span>{scene?.type}</span>;
 }

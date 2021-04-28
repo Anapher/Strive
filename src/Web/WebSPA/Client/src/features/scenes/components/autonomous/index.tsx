@@ -24,10 +24,16 @@ function ModeSceneListItem({ selectedScene, onChangeScene }: ModeSceneListItemPr
    );
 }
 
+function ActiveDescriptor() {
+   const { t } = useTranslation();
+   return <span>{t('conference.scenes.autonomous')}</span>;
+}
+
 const presenter: ScenePresenter<AutonomousScene> = {
    type: 'autonomous',
    ModeSceneListItem,
    RenderScene: RenderAutonomous,
+   ActiveDescriptor,
 };
 
 export default presenter;

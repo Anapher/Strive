@@ -38,9 +38,8 @@ export default React.forwardRef<HTMLDivElement, Props>(function SceneListItem(
 
    return (
       <ListItem button className={classes.root} onClick={onClick} selected={selected} ref={ref}>
-         {/* <div className={clsx(classes.indicator, current && classes.indicatorIsCurrent)} /> */}
          <ListItemIcon className={classes.icon}>{icon}</ListItemIcon>
-         <ListItemText primary={title} />
+         <ListItemText primary={title} primaryTypographyProps={{ noWrap: true }} />
          <ListItemSecondaryAction>
             <Radio
                edge="end"

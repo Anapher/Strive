@@ -81,10 +81,16 @@ export type RenderSceneProps<S extends Scene = Scene> = {
    setShowWebcamUnderChat: (show: boolean) => void;
 };
 
+export type ActiveDescriptorProps<S extends Scene = Scene> = {
+   scene: S;
+};
+
 export type ScenePresenter<S extends Scene> = {
    type: S['type'];
 
    getSceneId?: (scene: S) => string;
+
+   ActiveDescriptor?: React.ComponentType<ActiveDescriptorProps<S>>;
 
    ModeSceneListItem?: React.ComponentType<ModeSceneListItemProps>;
    AvailableSceneListItem?: React.ComponentType<AvailableSceneListItemProps>;

@@ -243,6 +243,37 @@
         "label": "Breakout Räume",
         "title": "{{count}} Breakout Raum ist offen",
         "title_plural": "{{count}} Breakout Räume sind offen"
+      },
+      "autonomous_description": "Wähle die aktuelle Szene automatisch aus. Sie können das Verhalten in den Einstellungen ändern.",
+      "mode_dialog": {
+        "title": "Szenen Auswahl Modus"
+      },
+      "presenter_text": "Präsentator: {{name}}",
+      "remove_overwrite": "Überschreiben entfernen",
+      "talking_stick": "Redestein",
+      "talking_stick_modes": {
+        "add_to_list": "Ich möchte etwas sagen",
+        "add_to_list_status": "Ein anderer möchte etwas sagen",
+        "add_to_list_status_plural": "{{count}} andere möchten etwas sagen",
+        "dequeue": "Warteschlange verlassen",
+        "dequeue_status": "Position: {{pos}} von {{total}}",
+        "enqueue": "Warteschlange beitreten",
+        "enqueue_status": "{{count}} aktuell in Warteschlange",
+        "mode_desc": "Modus: {{name}}",
+        "moderated": "Moderiert",
+        "moderated_description": "Teilnehmer können einer Liste beitreten. Die Moderatoren können Teilnehmer aus der Liste auswählen, die dann zum Präsentator werden.",
+        "pass_stick": "Stein weitergeben",
+        "pass_stick_to_participant": "Stein an Teilnehmer weitergeben",
+        "queue": "Warteschlange",
+        "queue_description": "Teilnehmer können der Warteschlange beitreten. Wenn ein Teilnehmer an der Reihe ist, wird er zum Präsentator, bis er den Stein zurückgibt. Wenn die Warteschlange nicht leer ist, wird automatisch der nächste Teilnehmer ausgewählt.",
+        "queue_youre_next": "Sie kommen als nächstes!",
+        "race": "Wettlauf",
+        "race_description": "Der erste, der den Stein nimmt, wird zum Präsentator. Nachdem er den Stein zurückgegeben hat kann ihn wieder jeder nehmen.",
+        "remove_from_list": "Ich möchte doch nichts sagen",
+        "return_stick": "Stein zurückgeben",
+        "speakerPassStick": "Präsentator nimmt nächsten",
+        "speakerPassStick_description": "Teilnehmer können einer Liste beitreten. Der erste Teilnehmer wird der Präsentator und kann dann von der Liste den nächsten bestimmen.",
+        "take_stick": "Stein nehmen"
       }
     },
     "settings": {

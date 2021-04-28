@@ -92,7 +92,7 @@ export default function TalkingStickFrame({ children }: Props) {
                      </TwoLineFab>
                   </Grid>
                )}
-               {canTake && (
+               {canTake && !isPresenter && (
                   <Grid item>
                      <Fab variant="extended" color="primary" onClick={handleTake}>
                         {t<string>('conference.scenes.talking_stick_modes.take_stick')}

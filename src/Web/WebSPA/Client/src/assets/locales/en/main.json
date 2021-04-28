@@ -169,11 +169,11 @@
         "queue": "Queue",
         "queue_description": "Participants can enqueue. If it's a participants turn, he becomes the presenter until he returns the stick. If the queue is not empty, the next participant will automatically be selected.",
         "race": "Race",
-        "race_description": "A participant can take the stick and then becomes the presenter. After he returned the stick, again everyone is able to take it to become the next presenter.",
+        "race_description": "The first person to take the stick becomes the presenter. After he returns the stick, anyone can take it again.",
         "moderated": "Moderated",
         "moderated_description": "Participants can join a list. The moderators can select participants from the list who then become the presenter.",
-        "speakerPassStick": "Speaker pass stick",
-        "speakerPassStick_description": "Participants can join a list. The first participant becomes the presenter and after finishing, he can select the next presenter from the list.",
+        "speakerPassStick": "Presenter pass stick",
+        "speakerPassStick_description": "Participants can join a list. The first participant becomes the presenter and can then choose the next one from the list.",
         "return_stick": "Return Stick",
         "mode_desc": "Mode: {{name}}",
         "take_stick": "Take Stick",
@@ -202,7 +202,8 @@
       "mode_dialog": {
         "title": "Scene selection mode"
       },
-      "presenter_text": "Presenter: {{name}}"
+      "presenter_text": "Presenter: {{name}}",
+      "remove_overwrite": "Remove overwrite"
     },
     "dialog_breakout_rooms": {
       "assign_participants_to_rooms": "Assign participants to rooms",
