@@ -39,22 +39,6 @@ namespace Strive.Core.Tests.Services.Scenes.NotificationHandlers
         }
 
         [Fact]
-        public async Task Handle_PreviousValueNull_DoNothing()
-        {
-            // arrange
-            var useCase = Create();
-
-            // act
-            await useCase.Handle(
-                new SynchronizedObjectUpdatedNotification(ImmutableList<Participant>.Empty, "test", "hey", null),
-                CancellationToken.None);
-
-            // assert
-            _repository.VerifyNoOtherCalls();
-            _sceneProvider.VerifyNoOtherCalls();
-        }
-
-        [Fact]
         public async Task Handle_NoUpdatesRequired_DoNothing()
         {
             // arrange
