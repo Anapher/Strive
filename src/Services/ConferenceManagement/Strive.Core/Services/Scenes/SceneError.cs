@@ -8,7 +8,7 @@ namespace Strive.Core.Services.Scenes
         public static Error RoomNotFound =>
             NotFound("The room the scene should be set for was not found.", ServiceErrorCode.Scenes_RoomNotFound);
 
-        public static Error InvalidScene =>
-            NotFound("The scene is invalid for this room.", ServiceErrorCode.Scenes_Invalid);
+        public static Error AlreadyHasSpeaker =>
+            NotFound("The room already has a speaker.", ServiceErrorCode.Scenes_HasSpeaker);
     }
 }

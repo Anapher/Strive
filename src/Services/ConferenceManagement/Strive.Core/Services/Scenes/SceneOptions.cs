@@ -1,17 +1,14 @@
-using Strive.Core.Services.Scenes.Modes;
-
 namespace Strive.Core.Services.Scenes
 {
     public class SceneOptions
     {
-        /// <summary>
-        ///     The default state for the default room
-        /// </summary>
-        public ActiveScene DefaultRoomState { get; set; } = new(true, AutonomousScene.Instance, new SceneConfig(false));
+        public bool HideParticipantsWithoutWebcam { get; set; } = false;
+        public BasicSceneType DefaultScene { get; set; } = BasicSceneType.Grid;
 
-        /// <summary>
-        ///     The default state for other rooms
-        /// </summary>
-        public ActiveScene RoomState { get; set; } = new(false, AutonomousScene.Instance, new SceneConfig(false));
+        public enum BasicSceneType
+        {
+            Grid,
+            ActiveSpeaker,
+        }
     }
 }

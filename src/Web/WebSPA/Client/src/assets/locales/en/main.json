@@ -163,6 +163,32 @@
       "actions_description": "Open available scene actions",
       "active_speaker": "Active Speaker",
       "autonomous": "Autonomous",
+      "autonomous_description": "Automatically select the current scene. You can change the behavior in conference settings.",
+      "talking_stick": "Talking Stick",
+      "talking_stick_modes": {
+        "queue": "Queue",
+        "queue_description": "Participants can enqueue. If it's a participants turn, he becomes the presenter until he returns the stick. If the queue is not empty, the next participant will automatically be selected.",
+        "race": "Race",
+        "race_description": "The first person to take the stick becomes the presenter. After he returns the stick, anyone can take it again.",
+        "moderated": "Moderated",
+        "moderated_description": "Participants can join a list. The moderators can select participants from the list who then become the presenter.",
+        "speakerPassStick": "Presenter pass stick",
+        "speakerPassStick_description": "Participants can join a list. The first participant becomes the presenter and can then choose the next one from the list.",
+        "return_stick": "Return Stick",
+        "mode_desc": "Mode: {{name}}",
+        "take_stick": "Take Stick",
+        "enqueue": "Join Queue",
+        "enqueue_status": "{{count}} currently in queue",
+        "dequeue": "Leave Queue",
+        "dequeue_status": "Position: {{pos}} of {{total}}",
+        "queue_youre_next": "You are next!",
+        "add_to_list": "I want to say something",
+        "add_to_list_status": "One other wants to say something",
+        "add_to_list_status_plural": "{{count}} others want to say something",
+        "remove_from_list": "I don't want to say something",
+        "pass_stick": "Pass Stick",
+        "pass_stick_to_participant": "Pass Stick to Participant"
+      },
       "breakout_rooms": {
         "label": "Breakout Rooms",
         "title": "{{count}} breakout room is open",
@@ -172,7 +198,12 @@
         "change_breakout_rooms": "Change breakout rooms..."
       },
       "grid": "Grid",
-      "screen_share": "{{name}}'s Screen"
+      "screen_share": "{{name}}'s Screen",
+      "mode_dialog": {
+        "title": "Scene selection mode"
+      },
+      "presenter_text": "Presenter: {{name}}",
+      "remove_overwrite": "Remove overwrite"
     },
     "dialog_breakout_rooms": {
       "assign_participants_to_rooms": "Assign participants to rooms",

@@ -1,4 +1,4 @@
-namespace Strive.Core.Services.Scenes
+﻿namespace Strive.Core.Services.Scenes
 {
-    public record ActiveScene(bool IsControlled, IScene? Scene, SceneConfig Config);
+    public record ActiveScene(IScene SelectedScene, IScene? OverwrittenContent);
 }

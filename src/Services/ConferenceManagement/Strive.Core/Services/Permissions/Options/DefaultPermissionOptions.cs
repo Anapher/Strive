@@ -39,8 +39,11 @@ namespace Strive.Core.Services.Permissions.Options
                     DefinedPermissions.Media.CanChangeOtherParticipantsProducers.Configure(true),
                     DefinedPermissions.Rooms.CanCreateAndRemove.Configure(true),
                     DefinedPermissions.Scenes.CanSetScene.Configure(true),
+                    DefinedPermissions.Scenes.CanOverwriteContentScene.Configure(true),
                     DefinedPermissions.Chat.CanSendAnnouncement.Configure(true),
                     DefinedPermissions.Chat.CanSendAnonymously.Configure(false),
+                    DefinedPermissions.Scenes.CanTakeTalkingStick.Configure(true),
+                    DefinedPermissions.Scenes.CanPassTalkingStick.Configure(true),
                 }.ToImmutableDictionary()
             },
             // Breakout room permissions
@@ -50,6 +53,8 @@ namespace Strive.Core.Services.Permissions.Options
                 {
                     DefinedPermissions.Media.CanShareAudio.Configure(true),
                     DefinedPermissions.Media.CanShareScreen.Configure(true),
+                    DefinedPermissions.Scenes.CanSetScene.Configure(true),
+                    DefinedPermissions.Scenes.CanOverwriteContentScene.Configure(true),
                 }.ToImmutableDictionary()
             },
         };

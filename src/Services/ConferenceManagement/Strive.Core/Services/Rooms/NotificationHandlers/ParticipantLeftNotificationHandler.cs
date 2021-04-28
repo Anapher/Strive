@@ -1,11 +1,11 @@
-using System.Linq;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using Strive.Core.Extensions;
 using Strive.Core.Services.ConferenceControl.Notifications;
 using Strive.Core.Services.Rooms.Gateways;
 using Strive.Core.Services.Rooms.Notifications;
+using Strive.Core.Services.Synchronization.Requests;
 
 namespace Strive.Core.Services.Rooms.NotificationHandlers
 {
@@ -24,9 +24,14 @@ namespace Strive.Core.Services.Rooms.NotificationHandlers
         {
             var (participant, _) = notification;
 
-            await _roomRepository.UnsetParticipantRoom(participant);
+            var previousRoom = await _roomRepository.UnsetParticipantRoom(participant);
+
+            await _mediator.Send(
+                new UpdateSynchronizedObjectRequest(participant.ConferenceId, SynchronizedRooms.SyncObjId));
+
             await _mediator.Publish(new ParticipantsRoomChangedNotification(participant.ConferenceId,
-                participant.Yield().ToList(), true));
+                new Dictionary<Participant, ParticipantRoomChangeInfo>
+                    {{participant, ParticipantRoomChangeInfo.Left(previousRoom)}}));
         }
     }
 }

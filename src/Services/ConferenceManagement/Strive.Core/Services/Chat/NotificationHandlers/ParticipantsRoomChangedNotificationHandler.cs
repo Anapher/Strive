@@ -21,11 +21,11 @@ namespace Strive.Core.Services.Chat.NotificationHandlers
 
         public async Task Handle(ParticipantsRoomChangedNotification notification, CancellationToken cancellationToken)
         {
-            foreach (var participant in notification.Participants)
+            foreach (var (participant, info) in notification.Participants)
             {
                 await SetParticipantTypingFalseInPreviousRoom(participant);
 
-                if (!notification.ParticipantsLeft)
+                if (!info.HasLeft)
                     await _mediator.Send(new UpdateSubscriptionsRequest(participant), cancellationToken);
             }
         }

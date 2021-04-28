@@ -6,6 +6,7 @@ using Strive.Core.Services.Chat;
 using Strive.Core.Services.ConferenceControl;
 using Strive.Core.Services.Permissions;
 using Strive.Core.Services.Scenes;
+using Strive.Core.Services.Scenes.Providers.TalkingStick;
 using Strive.Core.Services.Synchronization;
 
 namespace Strive.Core
@@ -35,6 +36,8 @@ namespace Strive.Core
             builder.RegisterType<ParticipantTypingTimer>().As<IParticipantTypingTimer>().SingleInstance();
             builder.RegisterAssemblyTypes(ThisAssembly).AssignableTo<ISceneProvider>().As<ISceneProvider>()
                 .SingleInstance();
+
+            builder.RegisterType<TalkingStickModeHandler>().AsImplementedInterfaces().InstancePerDependency();
         }
     }
 }

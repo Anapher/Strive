@@ -1,26 +1,28 @@
 import { createSelector } from '@reduxjs/toolkit';
 import _ from 'lodash';
 import { RootState } from 'src/store';
-import { selectParticipants } from '../conference/selectors';
+import { selectMyParticipantId } from '../auth/selectors';
 import { selectStreams } from '../media/selectors';
-import { Scene, SceneViewModel } from './types';
-
-export const selectAppliedScene = (state: RootState) => {
-   const appScene = state.scenes.appliedScene;
-   if (appScene.type === 'followServer') {
-      const serverScene = state.scenes.synchronized?.active.scene;
-      return serverScene ?? { type: 'autonomous' };
-   }
-
-   return appScene;
-};
-
-export const selectCurrentScene = (state: RootState) => state.scenes.currentScene;
 
 export const selectActiveParticipants = (state: RootState) => state.scenes.activeParticipants;
 export const selectAvailableScenes = (state: RootState) => state.scenes.synchronized?.availableScenes ?? [];
 
-export const selectServerScene = (state: RootState) => state.scenes.synchronized?.active;
+export const selectSelectedScene = (state: RootState) => state.scenes.synchronized?.selectedScene;
+export const selectOverwrittenScene = (state: RootState) => state.scenes.synchronized?.overwrittenContent;
+export const selectSceneStack = (state: RootState) => state.scenes.synchronized?.sceneStack;
+
+export const selectTalkingStickCurrentSpeakerId = (state: RootState) => state.scenes.talkingStick?.currentSpeakerId;
+export const selectTalkingStickQueue = (state: RootState) => state.scenes.talkingStick?.speakerQueue ?? [];
+
+export const selectIsMePresenter = createSelector(
+   selectTalkingStickCurrentSpeakerId,
+   selectMyParticipantId,
+   (currentSpeaker, myId) => currentSpeaker === myId,
+);
+
+export const selectIsMeInQueue = createSelector(selectTalkingStickQueue, selectMyParticipantId, (queue, myId) =>
+   myId ? queue.includes(myId) : false,
+);
 
 export const selectActiveParticipantsWithWebcam = createSelector(
    selectActiveParticipants,
@@ -35,40 +37,3 @@ export const selectActiveParticipantsWithWebcam = createSelector(
          .value();
    },
 );
-
-export const selectAvailableScenesViewModels = createSelector(
-   selectAvailableScenes,
-   selectAppliedScene,
-   selectCurrentScene,
-   (scenes, applied, current) => {
-      const appliedSceneId = getSceneId(applied);
-      const currentSceneId = getSceneId(current);
-
-      return scenes.map<SceneViewModel>((scene) => {
-         const id = getSceneId(scene);
-
-         return { scene, id, isApplied: id === appliedSceneId, isCurrent: id === currentSceneId };
-      });
-   },
-);
-
-export const selectSceneOverlayParticipants = createSelector(
-   selectCurrentScene,
-   selectParticipants,
-   (scene, participants) => {
-      if (scene.type === 'screenShare') {
-         return participants?.filter((x) => x.id === scene.participantId) ?? [];
-      }
-
-      return [];
-   },
-);
-
-export const getSceneId = (scene: Scene) => {
-   switch (scene.type) {
-      case 'screenShare':
-         return `${scene.type}::${scene.participantId}`;
-      default:
-         return scene.type;
-   }
-};

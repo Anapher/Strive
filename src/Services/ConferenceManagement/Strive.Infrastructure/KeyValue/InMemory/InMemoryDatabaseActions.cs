@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
+using StackExchange.Redis;
 using Strive.Core.Extensions;
 using Strive.Core.Utilities;
 using Strive.Infrastructure.KeyValue.Abstractions;
 using Strive.Infrastructure.KeyValue.Redis.Scripts;
-using StackExchange.Redis;
 
 namespace Strive.Infrastructure.KeyValue.InMemory
 {
@@ -164,6 +164,40 @@ namespace Strive.Infrastructure.KeyValue.InMemory
 
                 var list = (List<string>) listObj;
                 return new ValueTask<int>(list.Count);
+            }
+        }
+
+        public virtual ValueTask<long> ListRemoveAsync(string key, string item)
+        {
+            using (Lock())
+            {
+                if (_data.TryGetValue(key, out var listObj))
+                {
+                    var list = (List<string>) listObj;
+                    var removedCount = list.RemoveAll(x => x == item);
+
+                    return new ValueTask<long>(removedCount);
+                }
+
+                return new ValueTask<long>(0L);
+            }
+        }
+
+        public virtual ValueTask<string?> ListLeftPopAsync(string key)
+        {
+            using (LockRead())
+            {
+                if (!_data.TryGetValue(key, out var listObj))
+                    return new ValueTask<string?>((string?) null);
+
+                var list = (List<string>) listObj;
+                if (list.Count == 0)
+                    return new ValueTask<string?>((string?) null);
+
+                var leftItem = list[0];
+                list.RemoveAt(0);
+
+                return new ValueTask<string?>(leftItem);
             }
         }
 

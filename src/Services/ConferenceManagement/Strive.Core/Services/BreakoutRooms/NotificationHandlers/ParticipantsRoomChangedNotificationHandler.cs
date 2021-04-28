@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Strive.Core.Services.Permissions.Requests;
@@ -17,8 +18,8 @@ namespace Strive.Core.Services.BreakoutRooms.NotificationHandlers
 
         public async Task Handle(ParticipantsRoomChangedNotification notification, CancellationToken cancellationToken)
         {
-            if (!notification.ParticipantsLeft)
-                await _mediator.Send(new UpdateParticipantsPermissionsRequest(notification.Participants));
+            await _mediator.Send(new UpdateParticipantsPermissionsRequest(notification.Participants
+                .Where(x => !x.Value.HasLeft).Select(x => x.Key)));
         }
     }
 }

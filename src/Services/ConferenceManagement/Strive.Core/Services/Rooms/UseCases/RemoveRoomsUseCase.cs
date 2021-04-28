@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Strive.Core.Services.Rooms.Gateways;
 using Strive.Core.Services.Rooms.Notifications;
 using Strive.Core.Services.Rooms.Requests;
+using Strive.Core.Services.Synchronization.Requests;
 
 namespace Strive.Core.Services.Rooms.UseCases
 {
@@ -43,7 +44,12 @@ namespace Strive.Core.Services.Rooms.UseCases
             }
 
             if (removedRooms.Any())
+            {
+                await _mediator.Send(
+                    new UpdateSynchronizedObjectRequest(request.ConferenceId, SynchronizedRooms.SyncObjId));
+
                 await _mediator.Publish(new RoomsRemovedNotification(conferenceId, removedRooms));
+            }
 
             return Unit.Value;
         }

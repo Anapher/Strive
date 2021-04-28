@@ -31,7 +31,10 @@ using Strive.Core.Services.Permissions.Requests;
 using Strive.Core.Services.Permissions.Responses;
 using Strive.Core.Services.Rooms;
 using Strive.Core.Services.Rooms.Requests;
+using Strive.Core.Services.Scenes;
+using Strive.Core.Services.Scenes.Providers.TalkingStick.Requests;
 using Strive.Core.Services.Scenes.Requests;
+using Strive.Core.Services.Synchronization.Extensions;
 using Strive.Core.Utilities;
 using Strive.Extensions;
 using Strive.Hubs.Core.Dtos;
@@ -106,6 +109,14 @@ namespace Strive.Hubs.Core
             var participantId = httpContext.User.GetUserId();
 
             return new Participant(conferenceId, participantId);
+        }
+
+        private async ValueTask<string?> GetParticipantRoomId(Participant participant)
+        {
+            var rooms = await _mediator.FetchSynchronizedObject<SynchronizedRooms>(participant.ConferenceId,
+                SynchronizedRooms.SyncObjId);
+            rooms.Participants.TryGetValue(participant.Id, out var roomId);
+            return roomId;
         }
 
         private ParticipantMetadata GetMetadata()
@@ -337,11 +348,78 @@ namespace Strive.Hubs.Core
                     dto.Action)).Send();
         }
 
-        public async Task<SuccessOrError<Unit>> SetScene(SetSceneDto dto)
+        public async Task<SuccessOrError<Unit>> SetScene(IScene? scene)
+        {
+            if (scene == null)
+                return SuccessOrError<Unit>.Failed(new FieldValidationError("scene", "Scene must not be null"));
+
+            var participant = GetContextParticipant();
+            var roomId = await GetParticipantRoomId(participant);
+            if (roomId == null)
+                return SuccessOrError<Unit>.Failed(SceneError.RoomNotFound);
+
+            return await GetInvoker().Create(new SetSceneRequest(participant.ConferenceId, roomId, scene))
+                .RequirePermissions(DefinedPermissions.Scenes.CanSetScene).Send();
+        }
+
+        public async Task<SuccessOrError<Unit>> SetOverwrittenScene(IScene? scene)
         {
             var participant = GetContextParticipant();
-            return await GetInvoker().Create(new SetSceneRequest(participant.ConferenceId, dto.RoomId, dto.Active))
-                .RequirePermissions(DefinedPermissions.Scenes.CanSetScene).Send();
+            var roomId = await GetParticipantRoomId(participant);
+            if (roomId == null)
+                return SuccessOrError<Unit>.Failed(SceneError.RoomNotFound);
+
+            return await GetInvoker()
+                .Create(new SetOverwrittenContentSceneRequest(participant.ConferenceId, roomId, scene))
+                .RequirePermissions(DefinedPermissions.Scenes.CanOverwriteContentScene).Send();
+        }
+
+        public async Task<SuccessOrError<Unit>> TalkingStickEnqueue()
+        {
+            var participant = GetContextParticipant();
+
+            return await GetInvoker().Create(new TalkingStickEnqueueRequest(participant, false))
+                .RequirePermissions(DefinedPermissions.Scenes.CanQueueForTalkingStick).Send();
+        }
+
+        public async Task<SuccessOrError<Unit>> TalkingStickDequeue()
+        {
+            var participant = GetContextParticipant();
+
+            return await GetInvoker().Create(new TalkingStickEnqueueRequest(participant, true)).Send();
+        }
+
+        public async Task<SuccessOrError<Unit>> TalkingStickTake()
+        {
+            var participant = GetContextParticipant();
+            var roomId = await GetParticipantRoomId(participant);
+            if (roomId == null)
+                return SuccessOrError<Unit>.Failed(SceneError.RoomNotFound);
+
+            return await GetInvoker().Create(new TalkingStickPassRequest(participant, roomId, false))
+                .RequirePermissions(DefinedPermissions.Scenes.CanTakeTalkingStick).Send();
+        }
+
+        public async Task<SuccessOrError<Unit>> TalkingStickPass(string? participantId)
+        {
+            if (participantId == null)
+                return SuccessOrError<Unit>.Failed(new FieldValidationError(nameof(participantId),
+                    "Participant id not be null"));
+
+            var participant = GetContextParticipant();
+            var roomId = await GetParticipantRoomId(participant);
+            if (roomId == null)
+                return SuccessOrError<Unit>.Failed(SceneError.RoomNotFound);
+
+            return await GetInvoker()
+                .Create(new TalkingStickPassRequest(new Participant(participant.ConferenceId, participantId), roomId,
+                    false)).RequirePermissions(DefinedPermissions.Scenes.CanPassTalkingStick).Send();
+        }
+
+        public async Task<SuccessOrError<Unit>> TalkingStickReturn()
+        {
+            var participant = GetContextParticipant();
+            return await GetInvoker().Create(new TalkingStickReturnRequest(participant)).Send();
         }
     }
 }

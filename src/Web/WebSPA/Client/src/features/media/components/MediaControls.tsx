@@ -57,6 +57,7 @@ const useStyles = makeStyles((theme) => ({
 type Props = {
    className?: string;
    show: boolean;
+   leftActionsRef: React.Ref<HTMLDivElement>;
 };
 
 const variants = {
@@ -76,7 +77,7 @@ const item = {
    hidden: { opacity: 0, scale: 0 },
 };
 
-export default function MediaControls({ className, show }: Props) {
+export default function MediaControls({ className, show, leftActionsRef }: Props) {
    const classes = useStyles();
    const { t } = useTranslation();
 
@@ -97,7 +98,6 @@ export default function MediaControls({ className, show }: Props) {
    const canShareScreen = usePermission(MEDIA_CAN_SHARE_SCREEN);
    const canShareAudio = usePermission(MEDIA_CAN_SHARE_AUDIO);
    const canShareWebcam = usePermission(MEDIA_CAN_SHARE_WEBCAM);
-   // const canRaiseHand = usePermission(CONFERENCE_CAN_RAISE_HAND);
 
    const [debugDialogOpen, setDebugDialogOpen] = useState(false);
 
@@ -111,15 +111,7 @@ export default function MediaControls({ className, show }: Props) {
          animate={show ? 'visible' : 'hidden'}
          variants={variants}
       >
-         <div className={classes.leftActions}>
-            {/* {canRaiseHand && (
-               <Tooltip title="Raise Hand" aria-label="raise hand" arrow>
-                  <Fab color="secondary" className={classes.fab} component={motion.button} variants={item}>
-                     <HumanHandsup />
-                  </Fab>
-               </Tooltip>
-            )} */}
-         </div>
+         <div className={classes.leftActions} ref={leftActionsRef} />
          <div className={classes.controlsContainer}>
             {canShareScreen && (
                <MediaFab

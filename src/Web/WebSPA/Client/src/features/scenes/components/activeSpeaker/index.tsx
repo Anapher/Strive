@@ -1,19 +1,20 @@
 import React from 'react';
-import { SceneListItemProps, ScenePresenter } from '../../types';
+import { ActiveSpeakerScene, AvailableSceneListItemProps, ScenePresenter } from '../../types';
 import SceneListItem from '../SceneListItem';
 import RecordVoiceOverIcon from '@material-ui/icons/RecordVoiceOver';
-import ActiveSpeakerScene from './ActiveSpeakerScene';
+import RenderActiveSpeaker from './RenderActiveSpeaker';
 import { useTranslation } from 'react-i18next';
 
-function ListItem(props: SceneListItemProps) {
+function AvailableSceneListItem(props: AvailableSceneListItemProps) {
    const { t } = useTranslation();
    return <SceneListItem {...props} title={t('conference.scenes.active_speaker')} icon={<RecordVoiceOverIcon />} />;
 }
 
-const presenter: ScenePresenter = {
+const presenter: ScenePresenter<ActiveSpeakerScene> = {
    type: 'activeSpeaker',
-   ListItem,
-   RenderScene: ActiveSpeakerScene,
+   AvailableSceneListItem,
+   RenderScene: RenderActiveSpeaker,
+   getAutoHideMediaControls: () => true,
 };
 
 export default presenter;

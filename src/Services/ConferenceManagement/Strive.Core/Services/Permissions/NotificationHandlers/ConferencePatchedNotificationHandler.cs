@@ -5,7 +5,7 @@ using MediatR;
 using Strive.Core.Services.ConferenceManagement.Notifications;
 using Strive.Core.Services.ParticipantsList;
 using Strive.Core.Services.Permissions.Requests;
-using Strive.Core.Services.Synchronization.Requests;
+using Strive.Core.Services.Synchronization.Extensions;
 
 namespace Strive.Core.Services.Permissions.NotificationHandlers
 {
@@ -20,8 +20,8 @@ namespace Strive.Core.Services.Permissions.NotificationHandlers
 
         public async Task Handle(ConferencePatchedNotification notification, CancellationToken cancellationToken)
         {
-            var syncParticipants = (SynchronizedParticipants) await _mediator.Send(
-                new FetchSynchronizedObjectRequest(notification.ConferenceId, SynchronizedParticipants.SyncObjId));
+            var syncParticipants = await _mediator.FetchSynchronizedObject<SynchronizedParticipants>(
+                notification.ConferenceId, SynchronizedParticipants.SyncObjId);
 
             await _mediator.Send(new UpdateParticipantsPermissionsRequest(
                 syncParticipants.Participants.Keys.Select(x => new Participant(notification.ConferenceId, x))));

@@ -132,7 +132,7 @@
     "expected": "bar",
     "disabled": true
   },
-  
+
 
   {
     "comment": "append to root array document?",
@@ -146,7 +146,7 @@
     ],
     "expected": [ "hi" ]
   },
-  
+
   {
     "comment": "Add composite value at top level",
     "doc": { "foo": 1 },
@@ -582,8 +582,8 @@
     "expected": { "foo": "truthy" },
     "comment": "null value should be valid obj property to be replaced with something truthy"
   },
-  
-  
+
+
 
   {
     "doc": {
@@ -1268,7 +1268,7 @@
     }
   },
   {
-    "comment": "Can handle slashs",
+    "comment": "Can handle slashes",
     "doc": {},
     "patch": [
       {
@@ -1278,7 +1278,19 @@
       }
     ],
     "expected": {
-      "media/audio": true 
-    } 
+      "media/audio": true
+    }
+  },
+  {
+    "comment": "Add duplicate item to end",
+    "doc": [3, 4],
+    "patch": [
+      {
+        "op": "copy",
+        "path": "/2",
+        "from": "/1"
+      }
+    ],
+    "expected": [3, 4, 4]
   }
 ]

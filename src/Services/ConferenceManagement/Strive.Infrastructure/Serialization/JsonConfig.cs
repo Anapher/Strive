@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using Strive.Core.Services.Scenes;
-using Strive.Core.Services.Scenes.Modes;
+using Strive.Core.Services.Scenes.Scenes;
 using Strive.Infrastructure.Extensions;
 
 namespace Strive.Infrastructure.Serialization

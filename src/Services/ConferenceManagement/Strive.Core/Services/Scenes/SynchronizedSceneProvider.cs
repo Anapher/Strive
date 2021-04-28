@@ -1,62 +1,48 @@
-using System.Collections.Generic;
-using System.Linq;
+using System.Collections.Immutable;
 using System.Threading.Tasks;
 using MediatR;
-using Microsoft.Extensions.Options;
-using Strive.Core.Extensions;
-using Strive.Core.Services.Rooms;
-using Strive.Core.Services.Rooms.Gateways;
 using Strive.Core.Services.Scenes.Gateways;
-using Strive.Core.Services.Scenes.Requests;
+using Strive.Core.Services.Scenes.Scenes;
 using Strive.Core.Services.Synchronization;
 
 namespace Strive.Core.Services.Scenes
 {
-    public class SynchronizedSceneProvider : SynchronizedObjectProvider<SynchronizedScene>
+    public class SynchronizedSceneProvider : SynchronizedObjectProviderForRoom<SynchronizedScene>
     {
-        private readonly IRoomRepository _roomRepository;
         private readonly ISceneRepository _sceneRepository;
-        private readonly IMediator _mediator;
-        private readonly SceneOptions _options;
 
-        public SynchronizedSceneProvider(IRoomRepository roomRepository, ISceneRepository sceneRepository,
-            IMediator mediator, IOptions<SceneOptions> options)
+        public SynchronizedSceneProvider(ISceneRepository sceneRepository, IMediator mediator) : base(mediator)
         {
-            _roomRepository = roomRepository;
             _sceneRepository = sceneRepository;
-            _mediator = mediator;
-            _options = options.Value;
         }
 
-        public override string Id { get; } = SynchronizedObjectIds.SCENE;
+        public override string Id => SynchronizedObjectIds.SCENE;
 
-        public override async ValueTask<IEnumerable<SynchronizedObjectId>> GetAvailableObjects(Participant participant)
+        protected override async ValueTask<SynchronizedScene> InternalFetchValue(string conferenceId, string roomId)
         {
-            var roomId = await _roomRepository.GetRoomOfParticipant(participant);
-            if (roomId == null)
-                return Enumerable.Empty<SynchronizedObjectId>();
-
-            return SynchronizedScene.SyncObjId(roomId).Yield();
-        }
-
-        protected override async ValueTask<SynchronizedScene> InternalFetchValue(string conferenceId,
-            SynchronizedObjectId synchronizedObjectId)
-        {
-            var roomId = synchronizedObjectId.Parameters[SynchronizedScene.PROP_ROOMID];
             var scene = await _sceneRepository.GetScene(conferenceId, roomId);
-            scene ??= GetDefaultScene(roomId);
+            scene ??= GetDefaultActiveScene();
 
-            var availableScenes = await _mediator.Send(new FetchAvailableScenesRequest(conferenceId, roomId));
+            var state = await _sceneRepository.GetSceneState(conferenceId, roomId);
+            state ??= GetEmptySceneState();
 
-            return new SynchronizedScene(scene, availableScenes);
+            return new SynchronizedScene(scene.SelectedScene, scene.OverwrittenContent, state.AvailableScenes,
+                state.SceneStack);
         }
 
-        private ActiveScene GetDefaultScene(string roomId)
+        public static ActiveScene GetDefaultActiveScene()
         {
-            if (roomId == RoomOptions.DEFAULT_ROOM_ID)
-                return _options.DefaultRoomState;
+            return new(GetDefaultScene(), null);
+        }
 
-            return _options.RoomState;
+        public static IScene GetDefaultScene()
+        {
+            return AutonomousScene.Instance;
+        }
+
+        public static SceneState GetEmptySceneState()
+        {
+            return new(ImmutableList<IScene>.Empty, ImmutableList<IScene>.Empty);
         }
     }
 }

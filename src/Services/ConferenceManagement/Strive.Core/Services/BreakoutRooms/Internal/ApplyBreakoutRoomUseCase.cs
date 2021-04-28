@@ -12,6 +12,7 @@ using Strive.Core.Services.BreakoutRooms.Gateways;
 using Strive.Core.Services.BreakoutRooms.Notifications;
 using Strive.Core.Services.Rooms;
 using Strive.Core.Services.Rooms.Requests;
+using Strive.Core.Services.Synchronization.Extensions;
 using Strive.Core.Services.Synchronization.Requests;
 
 namespace Strive.Core.Services.BreakoutRooms.Internal
@@ -109,8 +110,8 @@ namespace Strive.Core.Services.BreakoutRooms.Internal
 
         private async Task<SynchronizedRooms> FetchSynchronizedRooms(string conferenceId)
         {
-            return (SynchronizedRooms) await _mediator.Send(
-                new FetchSynchronizedObjectRequest(conferenceId, SynchronizedRooms.SyncObjId));
+            return await _mediator.FetchSynchronizedObject<SynchronizedRooms>(conferenceId,
+                SynchronizedRooms.SyncObjId);
         }
 
         private IReadOnlyList<RoomCreationInfo> FindMissingRoomsToCreate(int amount, IReadOnlyList<Room> rooms)

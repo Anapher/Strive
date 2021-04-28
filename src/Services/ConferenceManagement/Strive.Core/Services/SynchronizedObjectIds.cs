@@ -18,5 +18,6 @@ namespace Strive.Core.Services
 
         // room
         public const string SCENE = "scene";
+        public const string SCENE_TALKINGSTICK = "scene_talkingStick";
     }
 }

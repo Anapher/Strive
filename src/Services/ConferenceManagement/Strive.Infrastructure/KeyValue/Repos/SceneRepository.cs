@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Strive.Core.Services.Scenes;
 using Strive.Core.Services.Scenes.Gateways;
@@ -11,13 +9,20 @@ namespace Strive.Infrastructure.KeyValue.Repos
     public class SceneRepository : ISceneRepository, IKeyValueRepo
     {
         private const string SCENES_PROPERTY_KEY = "scenes";
-        private const string AVAILABLESCENES_PROPERTY_KEY = "availableScenes";
+        private const string SCENESTATE_PROPERTY_KEY = "sceneState";
+        private const string LOCK_PROPERTY_KEY = "scenesLock";
 
         private readonly IKeyValueDatabase _database;
 
         public SceneRepository(IKeyValueDatabase database)
         {
             _database = database;
+        }
+
+        public async ValueTask<IAcquiredLock> LockScene(string conferenceId, string roomId)
+        {
+            var lockKey = GetLockKey(conferenceId, roomId);
+            return await _database.AcquireLock(lockKey);
         }
 
         public async ValueTask SetScene(string conferenceId, string roomId, ActiveScene scene)
@@ -38,21 +43,21 @@ namespace Strive.Infrastructure.KeyValue.Repos
             await _database.HashDeleteAsync(key, roomId);
         }
 
-        public async ValueTask SetAvailableScenes(string conferenceId, string roomId, IReadOnlyList<IScene> scenes)
+        public async ValueTask SetSceneState(string conferenceId, string roomId, SceneState state)
         {
-            var key = GetAvailableScenesKey(conferenceId);
-            await _database.HashSetAsync(key, roomId, scenes.OrderBy(x => x.ToString()).ToList());
+            var key = GetSceneStateKey(conferenceId);
+            await _database.HashSetAsync(key, roomId, state);
         }
 
-        public async ValueTask<IReadOnlyList<IScene>?> GetAvailableScenes(string conferenceId, string roomId)
+        public async ValueTask<SceneState?> GetSceneState(string conferenceId, string roomId)
         {
-            var key = GetAvailableScenesKey(conferenceId);
-            return await _database.HashGetAsync<IReadOnlyList<IScene>>(key, roomId);
+            var key = GetSceneStateKey(conferenceId);
+            return await _database.HashGetAsync<SceneState>(key, roomId);
         }
 
-        public async ValueTask RemoveAvailableScenes(string conferenceId, string roomId)
+        public async ValueTask RemoveSceneState(string conferenceId, string roomId)
         {
-            var key = GetAvailableScenesKey(conferenceId);
+            var key = GetSceneStateKey(conferenceId);
             await _database.HashDeleteAsync(key, roomId);
         }
 
@@ -61,9 +66,15 @@ namespace Strive.Infrastructure.KeyValue.Repos
             return DatabaseKeyBuilder.ForProperty(SCENES_PROPERTY_KEY).ForConference(conferenceId).ToString();
         }
 
-        private static string GetAvailableScenesKey(string conferenceId)
+        private static string GetSceneStateKey(string conferenceId)
         {
-            return DatabaseKeyBuilder.ForProperty(AVAILABLESCENES_PROPERTY_KEY).ForConference(conferenceId).ToString();
+            return DatabaseKeyBuilder.ForProperty(SCENESTATE_PROPERTY_KEY).ForConference(conferenceId).ToString();
+        }
+
+        private static string GetLockKey(string conferenceId, string roomId)
+        {
+            return DatabaseKeyBuilder.ForProperty(LOCK_PROPERTY_KEY).ForConference(conferenceId).ForSecondary(roomId)
+                .ToString();
         }
     }
 }

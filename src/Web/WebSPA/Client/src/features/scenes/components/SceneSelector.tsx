@@ -1,10 +1,20 @@
 import React from 'react';
 import scenePresenters from '../scene-presenter-registry';
-import { RenderSceneProps } from '../types';
+import { RenderSceneProps, Scene } from '../types';
 
-export default function SceneSelector(props: RenderSceneProps) {
-   const presenter = scenePresenters.find((x) => x.type === props.scene.type);
+type SceneSelectorProps = Omit<Omit<RenderSceneProps, 'next'>, 'scene'> & { sceneStack: Scene[] };
+
+export default function SceneSelector({ sceneStack, ...props }: SceneSelectorProps) {
+   const scene = sceneStack[0];
+   const otherScenes = sceneStack.slice(1);
+
+   const presenter = scenePresenters.find((x) => x.type === scene.type);
    if (!presenter) return null;
 
-   return <presenter.RenderScene {...props} />;
+   const next = (additional?: any) => {
+      if (otherScenes.length === 0) return null;
+      return <SceneSelector {...props} {...additional} sceneStack={otherScenes} />;
+   };
+
+   return <presenter.RenderScene {...props} scene={scene} next={next} />;
 }

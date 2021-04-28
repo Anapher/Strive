@@ -1,15 +1,13 @@
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Moq;
-using Strive.Core.Services;
 using Strive.Core.Services.Rooms;
 using Strive.Core.Services.Scenes;
 using Strive.Core.Services.Scenes.Gateways;
-using Strive.Core.Services.Scenes.Modes;
 using Strive.Core.Services.Scenes.Requests;
+using Strive.Core.Services.Scenes.Scenes;
 using Strive.Core.Services.Scenes.UseCases;
 using Strive.Core.Services.Synchronization.Requests;
 using Xunit;
@@ -26,7 +24,7 @@ namespace Strive.Core.Tests.Services.Scenes.UseCases
 
         private SetSceneUseCase Create()
         {
-            return new(_sceneRepository.Object, _mediator.Object);
+            return new(_mediator.Object, _sceneRepository.Object);
         }
 
         private void SetupRooms(params Room[] rooms)
@@ -38,133 +36,37 @@ namespace Strive.Core.Tests.Services.Scenes.UseCases
         }
 
         [Fact]
-        public async Task Handle_SynchronizedRoomsNull_DontUpdateSyncObjAndDontSetInRepo()
+        public async Task Handle_PatchScene_SetInRepository()
         {
             // arrange
-            var useCase = Create();
-
-            // act
-            await Assert.ThrowsAnyAsync<IdErrorException>(async () =>
-                await useCase.Handle(
-                    new SetSceneRequest(ConferenceId, RoomId, new ActiveScene(false, null, SceneConfig.Default)),
-                    CancellationToken.None));
-
-            // assert
-            _mediator.Verify(x => x.Send(It.IsAny<UpdateSynchronizedObjectRequest>(), It.IsAny<CancellationToken>()),
-                Times.Never);
-            _sceneRepository.Verify(x => x.RemoveScene(ConferenceId, RoomId), Times.Once);
-        }
-
-        [Fact]
-        public async Task Handle_RoomDoesNotExist_DontUpdateSyncObjAndDontSetInRepo()
-        {
-            // arrange
-            var useCase = Create();
-            SetupRooms();
-
-            // act
-            await Assert.ThrowsAnyAsync<IdErrorException>(async () =>
-                await useCase.Handle(
-                    new SetSceneRequest(ConferenceId, RoomId, new ActiveScene(false, null, SceneConfig.Default)),
-                    CancellationToken.None));
-
-            // assert
-            _mediator.Verify(x => x.Send(It.IsAny<UpdateSynchronizedObjectRequest>(), It.IsAny<CancellationToken>()),
-                Times.Never);
-            _sceneRepository.Verify(x => x.RemoveScene(ConferenceId, RoomId), Times.Once);
-        }
-
-        [Fact]
-        public async Task Handle_RoomExists_UpdateSyncObj()
-        {
-            // arrange
-            var useCase = Create();
             SetupRooms(new Room(RoomId, "DefaultRoom"));
 
+            var useCase = Create();
+
             // act
-            await useCase.Handle(
-                new SetSceneRequest(ConferenceId, RoomId, new ActiveScene(false, null, SceneConfig.Default)),
-                CancellationToken.None);
+            var newScene = GridScene.Instance;
+            await useCase.Handle(new SetSceneRequest(ConferenceId, RoomId, newScene), CancellationToken.None);
 
             // assert
-            _mediator.Verify(x => x.Send(It.IsAny<UpdateSynchronizedObjectRequest>(), It.IsAny<CancellationToken>()),
-                Times.Once);
-            _sceneRepository.Verify(x => x.SetScene(ConferenceId, RoomId, It.IsAny<ActiveScene>()), Times.Once);
-            _sceneRepository.Verify(x => x.RemoveScene(ConferenceId, RoomId), Times.Never);
+            _sceneRepository.Verify(
+                x => x.SetScene(ConferenceId, RoomId,
+                    It.Is<ActiveScene>(scene => Equals(scene.SelectedScene, newScene))), Times.Once);
         }
 
         [Fact]
-        public async Task Handle_NoActiveSceneAndNewSceneNotAvailable_ThrowAndSetNull()
+        public async Task Handle_PatchScene_SendUpdateScenes()
         {
             // arrange
-            var useCase = Create();
             SetupRooms(new Room(RoomId, "DefaultRoom"));
 
-            _mediator.Setup(x => x.Send(It.IsAny<FetchAvailableScenesRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new List<IScene>());
-
-            // act
-            await Assert.ThrowsAnyAsync<IdErrorException>(async () =>
-            {
-                await useCase.Handle(
-                    new SetSceneRequest(ConferenceId, RoomId,
-                        new ActiveScene(false, AutonomousScene.Instance, SceneConfig.Default)),
-                    CancellationToken.None);
-            });
-
-            // assert
-            _mediator.Verify(x => x.Send(It.IsAny<UpdateSynchronizedObjectRequest>(), It.IsAny<CancellationToken>()),
-                Times.Never);
-            _sceneRepository.Verify(x => x.RemoveScene(ConferenceId, RoomId), Times.Once);
-        }
-
-        [Fact]
-        public async Task Handle_HasActiveSceneAndNewSceneNotAvailable_ThrowAndSetToPreviousScene()
-        {
-            // arrange
             var useCase = Create();
-            SetupRooms(new Room(RoomId, "DefaultRoom"));
-
-            var previousScene = new ActiveScene(false, ActiveSpeakerScene.Instance, SceneConfig.Default);
-
-            _sceneRepository.Setup(x => x.GetScene(ConferenceId, RoomId)).ReturnsAsync(previousScene);
-
-            _mediator.Setup(x => x.Send(It.IsAny<FetchAvailableScenesRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new List<IScene>());
 
             // act
-            await Assert.ThrowsAnyAsync<IdErrorException>(async () =>
-            {
-                await useCase.Handle(
-                    new SetSceneRequest(ConferenceId, RoomId,
-                        new ActiveScene(false, AutonomousScene.Instance, SceneConfig.Default)),
-                    CancellationToken.None);
-            });
+            var newScene = GridScene.Instance;
+            await useCase.Handle(new SetSceneRequest(ConferenceId, RoomId, newScene), CancellationToken.None);
 
             // assert
-            _mediator.Verify(x => x.Send(It.IsAny<UpdateSynchronizedObjectRequest>(), It.IsAny<CancellationToken>()),
-                Times.Never);
-            _sceneRepository.Verify(x => x.SetScene(ConferenceId, RoomId, previousScene), Times.Once);
-        }
-
-        [Fact]
-        public async Task Handle_NewSceneIsAvailable_SetNewScene()
-        {
-            // arrange
-            var useCase = Create();
-            SetupRooms(new Room(RoomId, "DefaultRoom"));
-
-            _mediator.Setup(x => x.Send(It.IsAny<FetchAvailableScenesRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new List<IScene> {new ScreenShareScene("213")});
-
-            // act
-            await useCase.Handle(
-                new SetSceneRequest(ConferenceId, RoomId,
-                    new ActiveScene(false, new ScreenShareScene("213"), SceneConfig.Default)), CancellationToken.None);
-
-            // assert
-            _mediator.Verify(x => x.Send(It.IsAny<UpdateSynchronizedObjectRequest>(), It.IsAny<CancellationToken>()),
-                Times.Once);
+            _mediator.Verify(x => x.Send(It.IsAny<UpdateScenesRequest>(), It.IsAny<CancellationToken>()), Times.Once);
         }
     }
 }

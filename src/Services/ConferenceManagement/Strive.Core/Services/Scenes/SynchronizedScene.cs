@@ -3,13 +3,12 @@ using Strive.Core.Services.Synchronization;
 
 namespace Strive.Core.Services.Scenes
 {
-    public record SynchronizedScene(ActiveScene Active, IReadOnlyList<IScene> AvailableScenes)
+    public record SynchronizedScene(IScene SelectedScene, IScene? OverwrittenContent,
+        IReadOnlyList<IScene> AvailableScenes, IReadOnlyList<IScene> SceneStack)
     {
-        public const string PROP_ROOMID = "roomId";
-
         public static SynchronizedObjectId SyncObjId(string roomId)
         {
-            return new(SynchronizedObjectIds.SCENE, new Dictionary<string, string> {{PROP_ROOMID, roomId}});
+            return SynchronizedSceneProvider.BuildSyncObjId(SynchronizedObjectIds.SCENE, roomId);
         }
     }
 }

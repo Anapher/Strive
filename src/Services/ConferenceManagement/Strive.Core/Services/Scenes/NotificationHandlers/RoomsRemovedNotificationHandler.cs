@@ -20,7 +20,7 @@ namespace Strive.Core.Services.Scenes.NotificationHandlers
             foreach (var removedRoomId in notification.RemovedRoomIds)
             {
                 await _repository.RemoveScene(notification.ConferenceId, removedRoomId);
-                await _repository.RemoveAvailableScenes(notification.ConferenceId, removedRoomId);
+                await _repository.RemoveSceneState(notification.ConferenceId, removedRoomId);
             }
         }
     }

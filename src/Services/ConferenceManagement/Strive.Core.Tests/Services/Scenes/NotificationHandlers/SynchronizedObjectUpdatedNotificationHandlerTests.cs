@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
@@ -10,7 +9,6 @@ using Strive.Core.Services;
 using Strive.Core.Services.Rooms;
 using Strive.Core.Services.Scenes;
 using Strive.Core.Services.Scenes.Gateways;
-using Strive.Core.Services.Scenes.Modes;
 using Strive.Core.Services.Scenes.NotificationHandlers;
 using Strive.Core.Services.Synchronization.Notifications;
 using Strive.Core.Services.Synchronization.Requests;
@@ -41,30 +39,14 @@ namespace Strive.Core.Tests.Services.Scenes.NotificationHandlers
         }
 
         [Fact]
-        public async Task Handle_PreviousValueNull_DoNothing()
-        {
-            // arrange
-            var useCase = Create();
-
-            // act
-            await useCase.Handle(
-                new SynchronizedObjectUpdatedNotification(ImmutableList<Participant>.Empty, "test", "hey", null),
-                CancellationToken.None);
-
-            // assert
-            _repository.VerifyNoOtherCalls();
-            _sceneProvider.VerifyNoOtherCalls();
-        }
-
-        [Fact]
-        public async Task Handle_NoUpdatesAvailable_DoNothing()
+        public async Task Handle_NoUpdatesRequired_DoNothing()
         {
             // arrange
             var useCase = Create();
             SetupRooms(new Room(RoomId, ""));
 
-            _sceneProvider.Setup(x => x.UpdateAvailableScenes(ConferenceId, RoomId, It.IsAny<object>()))
-                .ReturnsAsync(SceneUpdate.NoUpdateRequired);
+            _sceneProvider.Setup(x => x.IsUpdateRequired(ConferenceId, RoomId, It.IsAny<object>(), It.IsAny<object>()))
+                .ReturnsAsync(SceneUpdate.NotRequired);
 
             // act
             var participants = new List<Participant> {new(ConferenceId, "1")};
@@ -76,14 +58,14 @@ namespace Strive.Core.Tests.Services.Scenes.NotificationHandlers
         }
 
         [Fact]
-        public async Task Handle_UpdatesAvailableButCachedAvailableScenesNull_DoNothing()
+        public async Task Handle_UpdateRequiredButSceneStateNull_DoNothing()
         {
             // arrange
             var useCase = Create();
             SetupRooms(new Room(RoomId, ""));
 
-            _sceneProvider.Setup(x => x.UpdateAvailableScenes(ConferenceId, RoomId, It.IsAny<object>()))
-                .ReturnsAsync(SceneUpdate.UpdateRequired(new[] {new ScreenShareScene("1")}));
+            _sceneProvider.Setup(x => x.IsUpdateRequired(ConferenceId, RoomId, It.IsAny<object>(), It.IsAny<object>()))
+                .ReturnsAsync(SceneUpdate.AvailableScenesChanged);
 
             // act
             var participants = new List<Participant> {new(ConferenceId, "1")};
@@ -91,65 +73,8 @@ namespace Strive.Core.Tests.Services.Scenes.NotificationHandlers
                 CancellationToken.None);
 
             // assert
-            _repository.Verify(x => x.GetAvailableScenes(ConferenceId, RoomId));
-            _repository.VerifyNoOtherCalls();
-        }
-
-        [Fact]
-        public async Task Handle_NewUpdate_UpdateAvailableScenesAndUpdateSyncObj()
-        {
-            // arrange
-            var useCase = Create();
-            SetupRooms(new Room(RoomId, ""));
-
-            _sceneProvider.Setup(x => x.UpdateAvailableScenes(ConferenceId, RoomId, It.IsAny<object>()))
-                .ReturnsAsync(SceneUpdate.UpdateRequired(new[] {new ScreenShareScene("1")}));
-            _sceneProvider.Setup(x => x.IsProvided(It.IsAny<ScreenShareScene>())).Returns(true);
-
-            _repository.Setup(x => x.GetAvailableScenes(ConferenceId, RoomId))
-                .ReturnsAsync(new IScene[] {AutonomousScene.Instance, new ScreenShareScene("2")});
-
-            // act
-            var participants = new List<Participant> {new(ConferenceId, "1")};
-            await useCase.Handle(new SynchronizedObjectUpdatedNotification(participants, "123", "hello", "hllo"),
-                CancellationToken.None);
-
-            // assert
-            _repository.Verify(
-                x => x.SetAvailableScenes(ConferenceId, RoomId,
-                    It.Is<IReadOnlyList<IScene>>(val =>
-                        val.Count == 2 && val.Contains(AutonomousScene.Instance) &&
-                        val.Contains(new ScreenShareScene("1")))), Times.Once);
-
-            _mediator.Verify(x => x.Send(It.IsAny<UpdateSynchronizedObjectRequest>(), It.IsAny<CancellationToken>()),
-                Times.Once);
-        }
-
-        [Fact]
-        public async Task Handle_NewUpdateAndCurrentSceneDoesntExistAnymore_RemoveCurrentScene()
-        {
-            // arrange
-            var useCase = Create();
-            SetupRooms(new Room(RoomId, ""));
-
-            _repository.Setup(x => x.GetScene(ConferenceId, RoomId))
-                .ReturnsAsync(new ActiveScene(true, new ScreenShareScene("123"), SceneConfig.Default));
-
-            _sceneProvider.Setup(x => x.UpdateAvailableScenes(ConferenceId, RoomId, It.IsAny<object>()))
-                .ReturnsAsync(SceneUpdate.UpdateRequired(new[] {new ScreenShareScene("1")}));
-            _sceneProvider.Setup(x => x.IsProvided(It.IsAny<ScreenShareScene>())).Returns(true);
-
-            _repository.Setup(x => x.GetAvailableScenes(ConferenceId, RoomId))
-                .ReturnsAsync(new IScene[] {AutonomousScene.Instance, new ScreenShareScene("2")});
-
-            // act
-            var participants = new List<Participant> {new(ConferenceId, "1")};
-            await useCase.Handle(new SynchronizedObjectUpdatedNotification(participants, "123", "hello", "hllo"),
-                CancellationToken.None);
-
-            // assert
-            _repository.Verify(x => x.SetScene(ConferenceId, RoomId, It.Is<ActiveScene>(x => x.Scene == null)),
-                Times.Once);
+            _repository.Verify(x => x.SetSceneState(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<SceneState>()),
+                Times.Never);
         }
     }
 }

@@ -82,12 +82,24 @@ namespace Strive.Core.IntegrationTests.Services
         }
 
         [Fact]
+        public async Task OpenConference_ConferenceIsOpen_PublishRoomCreatedNotification()
+        {
+            // act
+            await Mediator.Send(new OpenConferenceRequest(ConferenceId));
+
+            // assert
+            NotificationCollector.AssertSingleNotificationIssued<RoomsCreatedNotification>();
+        }
+
+        [Fact]
         public async Task CreateRoomsRequest_ConferenceIsOpen_PublishRoomCreatedNotification()
         {
             const string roomDisplayName = "Test";
 
             // arrange
             await Mediator.Send(new OpenConferenceRequest(ConferenceId));
+
+            NotificationCollector.Reset();
 
             // act
             var room = new RoomCreationInfo(roomDisplayName);
@@ -143,7 +155,9 @@ namespace Strive.Core.IntegrationTests.Services
             NotificationCollector.AssertSingleNotificationIssued<ParticipantsRoomChangedNotification>(notification =>
             {
                 Assert.Equal(ConferenceId, notification.ConferenceId);
-                Assert.Equal(_testParticipant, Assert.Single(notification.Participants));
+                Assert.Single(notification.Participants,
+                    new KeyValuePair<Participant, ParticipantRoomChangeInfo>(_testParticipant,
+                        ParticipantRoomChangeInfo.Joined(RoomOptions.DEFAULT_ROOM_ID)));
             });
         }
 
@@ -166,7 +180,9 @@ namespace Strive.Core.IntegrationTests.Services
             NotificationCollector.AssertLastNotificationIssued<ParticipantsRoomChangedNotification>(notification =>
             {
                 Assert.Equal(ConferenceId, notification.ConferenceId);
-                Assert.Equal(_testParticipant, Assert.Single(notification.Participants));
+                Assert.Single(notification.Participants,
+                    new KeyValuePair<Participant, ParticipantRoomChangeInfo>(_testParticipant,
+                        ParticipantRoomChangeInfo.Switched(RoomOptions.DEFAULT_ROOM_ID, createdRoom.RoomId)));
             });
         }
 
@@ -189,7 +205,9 @@ namespace Strive.Core.IntegrationTests.Services
             NotificationCollector.AssertSingleNotificationIssued<ParticipantsRoomChangedNotification>(notification =>
             {
                 Assert.Equal(ConferenceId, notification.ConferenceId);
-                Assert.Equal(_testParticipant, Assert.Single(notification.Participants));
+                Assert.Single(notification.Participants,
+                    new KeyValuePair<Participant, ParticipantRoomChangeInfo>(_testParticipant,
+                        ParticipantRoomChangeInfo.Left(RoomOptions.DEFAULT_ROOM_ID)));
             });
         }
 
@@ -208,7 +226,9 @@ namespace Strive.Core.IntegrationTests.Services
             NotificationCollector.AssertSingleNotificationIssued<ParticipantsRoomChangedNotification>(notification =>
             {
                 Assert.Equal(ConferenceId, notification.ConferenceId);
-                Assert.Equal(_testParticipant, Assert.Single(notification.Participants));
+                Assert.Single(notification.Participants,
+                    new KeyValuePair<Participant, ParticipantRoomChangeInfo>(_testParticipant,
+                        ParticipantRoomChangeInfo.Joined(RoomOptions.DEFAULT_ROOM_ID)));
             });
         }
 
@@ -231,7 +251,9 @@ namespace Strive.Core.IntegrationTests.Services
             NotificationCollector.AssertSingleNotificationIssued<ParticipantsRoomChangedNotification>(notification =>
             {
                 Assert.Equal(ConferenceId, notification.ConferenceId);
-                Assert.Equal(_testParticipant, Assert.Single(notification.Participants));
+                Assert.Single(notification.Participants,
+                    new KeyValuePair<Participant, ParticipantRoomChangeInfo>(_testParticipant,
+                        ParticipantRoomChangeInfo.Left(RoomOptions.DEFAULT_ROOM_ID)));
             });
         }
     }

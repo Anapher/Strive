@@ -33,6 +33,14 @@ export const ROOMS_CAN_SWITCH_ROOM: BoolPermission = { key: 'rooms/canSwitchRoom
 
 // Scenes
 export const SCENES_CAN_SET_SCENE: BoolPermission = { key: 'scenes/canSetScene', type: 'bool' };
+export const SCENES_CAN_OVERWRITE_CONTENT_SCENE: BoolPermission = {
+   key: 'scenes/canOverwriteContentScene',
+   type: 'bool',
+};
+
+export const SCENES_CAN_PASS_TALKING_STICK: BoolPermission = { key: 'scenes/talkingStick_canPass', type: 'bool' };
+export const SCENES_CAN_TAKE_TALKING_STICK: BoolPermission = { key: 'scenes/talkingStick_canTake', type: 'bool' };
+export const SCENES_CAN_QUEUE_FOR_TALKING_STICK: BoolPermission = { key: 'scenes/talkingStick_canQueue', type: 'bool' };
 
 export type BoolPermission = {
    key: string;

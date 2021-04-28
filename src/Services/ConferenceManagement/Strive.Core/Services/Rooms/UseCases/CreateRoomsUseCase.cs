@@ -10,6 +10,7 @@ using Strive.Core.Services.ConferenceControl.Gateways;
 using Strive.Core.Services.Rooms.Gateways;
 using Strive.Core.Services.Rooms.Notifications;
 using Strive.Core.Services.Rooms.Requests;
+using Strive.Core.Services.Synchronization.Requests;
 
 namespace Strive.Core.Services.Rooms.UseCases
 {
@@ -44,6 +45,9 @@ namespace Strive.Core.Services.Rooms.UseCases
 
                 throw new ConcurrencyException("The conference is not open.");
             }
+
+            await _mediator.Send(
+                new UpdateSynchronizedObjectRequest(request.ConferenceId, SynchronizedRooms.SyncObjId));
 
             await _mediator.Publish(new RoomsCreatedNotification(conferenceId, rooms.Select(x => x.RoomId).ToList()));
             return rooms;

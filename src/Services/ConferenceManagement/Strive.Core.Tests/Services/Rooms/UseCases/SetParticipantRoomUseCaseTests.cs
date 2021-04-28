@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
@@ -57,6 +58,7 @@ namespace Strive.Core.Tests.Services.Rooms.UseCases
             // arrange
             var handler = Create();
             var capturedNotification = _mediator.CaptureNotification<ParticipantsRoomChangedNotification>();
+            _roomRepo.Setup(x => x.SetParticipantRoom(_testParticipant, NewRoomId)).ReturnsAsync("oldRoom");
 
             // act
             await handler.Handle(new SetParticipantRoomRequest(_testParticipant, NewRoomId), CancellationToken.None);
@@ -66,7 +68,9 @@ namespace Strive.Core.Tests.Services.Rooms.UseCases
 
             var notification = capturedNotification.GetNotification();
             Assert.Equal(_testParticipant.ConferenceId, notification.ConferenceId);
-            Assert.Equal(_testParticipant, Assert.Single(notification.Participants));
+            Assert.Single(notification.Participants,
+                new KeyValuePair<Participant, ParticipantRoomChangeInfo>(_testParticipant,
+                    ParticipantRoomChangeInfo.Switched("oldRoom", NewRoomId)));
         }
     }
 }

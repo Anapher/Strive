@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using StackExchange.Redis;
 using Strive.Infrastructure.KeyValue.Abstractions;
 using Strive.Infrastructure.KeyValue.Redis.Scripts;
-using StackExchange.Redis;
 
 namespace Strive.Infrastructure.KeyValue.Redis
 {
@@ -82,6 +82,16 @@ namespace Strive.Infrastructure.KeyValue.Redis
                     "Seems like a list grew larger than the maximum size of the integer. Maybe it's time to switch to long as return type.");
 
             return (int) result;
+        }
+
+        public async ValueTask<long> ListRemoveAsync(string key, string item)
+        {
+            return await _database.ListRemoveAsync(key, item);
+        }
+
+        public async ValueTask<string?> ListLeftPopAsync(string key)
+        {
+            return await _database.ListLeftPopAsync(key);
         }
 
         public async ValueTask<IReadOnlyList<string>> ListRangeAsync(string key, int start, int end)

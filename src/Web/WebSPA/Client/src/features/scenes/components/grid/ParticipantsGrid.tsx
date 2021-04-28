@@ -8,7 +8,7 @@ import { selectParticipants } from 'src/features/conference/selectors';
 import { Participant } from 'src/features/conference/types';
 import { selectParticipantsOfCurrentRoom } from 'src/features/rooms/selectors';
 import { generateGrid } from '../../calculations';
-import { RenderSceneProps } from '../../types';
+import { GridScene, RenderSceneProps } from '../../types';
 import ParticipantTile from '../ParticipantTile';
 
 const useStyles = makeStyles(() => ({
@@ -34,8 +34,8 @@ export default function ParticipantsGrid({
    dimensions,
    className,
    setShowWebcamUnderChat,
-   setAutoHideControls,
-}: RenderSceneProps) {
+   next,
+}: RenderSceneProps<GridScene>) {
    const participants = useSelector(selectParticipants);
    const participantsOfRoom = useSelector(selectParticipantsOfCurrentRoom)
       .map((id) => participants.find((x) => x.id === id))
@@ -45,10 +45,12 @@ export default function ParticipantsGrid({
 
    useEffect(() => {
       setShowWebcamUnderChat(false);
-      setAutoHideControls(false);
-   }, []);
+   }, [setShowWebcamUnderChat]);
 
-   if (!participantsOfRoom || participantsOfRoom.length === 0) return <div className={className} />;
+   const overwrite = next();
+   if (overwrite) return <>{overwrite}</>;
+
+   if (!participantsOfRoom || participantsOfRoom.length === 0) return null;
 
    const spacing = 8;
    const grid = generateGrid(participantsOfRoom.length, 640, dimensions, spacing);

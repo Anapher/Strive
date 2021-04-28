@@ -9,9 +9,11 @@ namespace Strive.Core.Services.Rooms.Gateways
         ValueTask CreateRoom(string conferenceId, Room room);
 
         /// <exception cref="ConcurrencyException">A concurrency exception occurs if the room does not exist</exception>
-        ValueTask SetParticipantRoom(Participant participant, string roomId);
+        /// <returns>Returns previous room id</returns>
+        ValueTask<string?> SetParticipantRoom(Participant participant, string roomId);
 
-        ValueTask UnsetParticipantRoom(Participant participant);
+        /// <returns>Returns previous room id</returns>
+        ValueTask<string?> UnsetParticipantRoom(Participant participant);
 
         /// <returns>Returns true if the room was actually removed, false if the room did not exist</returns>
         ValueTask<bool> RemoveRoom(string conferenceId, string roomId);
@@ -27,10 +29,16 @@ namespace Strive.Core.Services.Rooms.Gateways
         ValueTask<string?> GetRoomOfParticipant(Participant participant);
     }
 
-    public struct DeleteAllResult
+    public readonly struct DeleteAllResult
     {
-        public IReadOnlyList<string> DeletedParticipants { get; set; }
+        public DeleteAllResult(IReadOnlyDictionary<string, string> deletedMapping, IReadOnlyList<string> deletedRooms)
+        {
+            DeletedMapping = deletedMapping;
+            DeletedRooms = deletedRooms;
+        }
 
-        public IReadOnlyList<string> DeletedRooms { get; set; }
+        public IReadOnlyDictionary<string, string> DeletedMapping { get; }
+
+        public IReadOnlyList<string> DeletedRooms { get; }
     }
 }

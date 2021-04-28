@@ -1,43 +1,32 @@
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
+using Strive.Core.Services.Permissions;
 
 namespace Strive.Core.Services.Scenes
 {
+    public delegate ValueTask<IEnumerable<IScene>> SceneStackFunc(IScene scene, SceneBuilderContext context);
+
     public interface ISceneProvider
     {
-        ValueTask<IEnumerable<IScene>> GetAvailableScenes(string conferenceId, string roomId);
-
-        ValueTask<SceneUpdate> UpdateAvailableScenes(string conferenceId, string roomId, object synchronizedObject);
-
         bool IsProvided(IScene scene);
+
+        ValueTask<IEnumerable<IScene>> GetAvailableScenes(string conferenceId, string roomId,
+            IReadOnlyList<IScene> sceneStack);
+
+        ValueTask<SceneUpdate> IsUpdateRequired(string conferenceId, string roomId, object synchronizedObject,
+            object? previousValue);
+
+        ValueTask<IEnumerable<IScene>> BuildStack(IScene scene, SceneBuilderContext context,
+            SceneStackFunc sceneProviderFunc);
+
+        ValueTask<IEnumerable<PermissionLayer>> FetchPermissionsForParticipant(IScene scene, Participant participant,
+            IReadOnlyList<IScene> sceneStack);
     }
 
-    public record SceneUpdate
+    public enum SceneUpdate
     {
-        private SceneUpdate(IEnumerable<IScene>? updateScenes)
-        {
-            Required = updateScenes != null;
-            UpdateScenes = updateScenes;
-        }
-
-        [MemberNotNullWhen(true, nameof(UpdateScenes))]
-        public bool Required { get; }
-
-        public IEnumerable<IScene>? UpdateScenes { get; }
-
-        public static readonly SceneUpdate NoUpdateRequired = new((IEnumerable<IScene>?) null);
-
-        public static SceneUpdate UpdateRequired(IEnumerable<IScene> updatedScenes)
-        {
-            return new(updatedScenes);
-        }
-    }
-
-    public enum SceneValidationResult
-    {
-        None,
-        Valid,
-        Invalid,
+        NotRequired,
+        AvailableScenesChanged,
+        SceneStackChanged,
     }
 }

@@ -4,10 +4,12 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.JsonPatch;
+using Newtonsoft.Json;
 using Strive.Core;
 using Strive.Core.Domain.Entities;
 using Strive.Core.Dto;
 using Strive.Core.Services.ConferenceManagement;
+using Strive.Infrastructure.Serialization;
 using Strive.IntegrationTests._Helpers;
 using Strive.Models.Response;
 using Strive.Tests.Utils;
@@ -52,7 +54,9 @@ namespace Strive.IntegrationTests.Controllers
             var response = await _client.GetAsync($"/v1/conference/{conferenceId}");
             response.EnsureSuccessStatusCode();
 
-            var conference = await response.Content.ReadFromJsonAsync<Conference>();
+            var s = await response.Content.ReadAsStringAsync();
+            var conference = JsonConvert.DeserializeObject<Conference>(s, JsonConfig.Default);
+
             Assert.NotNull(conference);
 
             assertAction(conference!);

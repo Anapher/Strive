@@ -1,8 +1,12 @@
 import {
    Button,
+   ButtonBase,
    ClickAwayListener,
    Grow,
    List,
+   ListItem,
+   ListItemIcon,
+   ListItemText,
    makeStyles,
    MenuList,
    Paper,
@@ -10,18 +14,19 @@ import {
    Typography,
 } from '@material-ui/core';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
-import React, { useRef, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import usePermission from 'src/hooks/usePermission';
-import { SCENES_CAN_SET_SCENE } from 'src/permissions';
-import { setAppliedScene } from '../reducer';
-import scenePresenters from '../scene-presenter-registry';
-import { selectAvailableScenesViewModels, selectServerScene } from '../selectors';
-import { Scene } from '../types';
-import * as coreHub from 'src/core-hub';
-import { selectParticipantRoom } from 'src/features/rooms/selectors';
 import _ from 'lodash';
+import React, { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useDispatch, useSelector } from 'react-redux';
+import * as coreHub from 'src/core-hub';
+import usePermission from 'src/hooks/usePermission';
+import { SCENES_CAN_OVERWRITE_CONTENT_SCENE, SCENES_CAN_SET_SCENE } from 'src/permissions';
+import { RootState } from 'src/store';
+import scenePresenters from '../scene-presenter-registry';
+import { Scene } from '../types';
+import SceneManagementModeSelectionDialog from './SceneManagementModeSelectionDialog';
+import CloseIcon from '@material-ui/icons/Close';
+import presenters from '../scene-presenter-registry';
 
 const sceneDisplayOrder: Scene['type'][] = ['autonomous', 'grid', 'activeSpeaker', 'screenShare', 'breakoutRoom'];
 
@@ -31,6 +36,11 @@ const useStyles = makeStyles((theme) => ({
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
+   },
+   modeButton: {
+      padding: theme.spacing(1, 1, 1, 2),
+      width: '100%',
+      textAlign: 'left',
    },
 }));
 
@@ -44,42 +54,44 @@ export default function SceneManagement() {
    const handleClose = () => setActionPopper(false);
    const handleOpen = () => setActionPopper(true);
 
-   const availableScenes = useSelector(selectAvailableScenesViewModels);
+   const [modeSelectionOpen, setModeSelectionOpen] = useState(false);
+   const handleOpenModeSelection = () => setModeSelectionOpen(true);
+   const handleCloseModeSelection = () => setModeSelectionOpen(false);
 
-   const serverScene = useSelector(selectServerScene);
    const canSetScene = usePermission(SCENES_CAN_SET_SCENE);
-   const myRoomId = useSelector(selectParticipantRoom);
+   const canOverwriteScene = usePermission(SCENES_CAN_OVERWRITE_CONTENT_SCENE);
 
-   const canChangeScene = canSetScene || !serverScene?.isControlled;
+   const synchronized = useSelector((state: RootState) => state.scenes.synchronized);
+   if (synchronized === null) return null;
+
+   const { availableScenes, sceneStack, selectedScene, overwrittenContent } = synchronized;
 
    const handleChangeScene = (scene: Scene) => {
       if (canSetScene) {
-         dispatch(
-            coreHub.setScene({
-               roomId: myRoomId as string,
-               active: { scene, config: serverScene?.config ?? {}, isControlled: true },
-            }),
-         );
-      } else if (canChangeScene) {
-         dispatch(setAppliedScene(scene));
+         dispatch(coreHub.setScene(scene));
+         setModeSelectionOpen(false);
+      }
+   };
+
+   const handleOverwriteScene = (scene: Scene | null) => {
+      if (canOverwriteScene) {
+         dispatch(coreHub.setOverwrittenScene(scene));
       }
    };
 
    const availableScenePresenters = _.orderBy(
-      availableScenes.map((viewModel) => {
+      availableScenes.map((scene) => {
          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-         const presenter = scenePresenters.find((x) => x.type === viewModel.scene.type)!;
-         if (!presenter) console.error('Presenter not found', viewModel.scene);
+         const presenter = scenePresenters.find((x) => x.type === scene.type)!;
+         if (!presenter) console.error('Presenter not found', scene);
 
          return {
-            viewModel,
+            scene,
             presenter,
          };
       }),
-      (x) => sceneDisplayOrder.indexOf(x.viewModel.scene.type),
+      (x) => sceneDisplayOrder.indexOf(x.scene.type),
    );
-
-   if (!canChangeScene) return null;
 
    return (
       <div>
@@ -89,15 +101,33 @@ export default function SceneManagement() {
                   {t('glossary:scene_plural')}
                </Typography>
             </li>
-            {availableScenePresenters.map(({ presenter, viewModel }) => (
-               <presenter.ListItem
-                  key={viewModel.id}
-                  applied={viewModel.isApplied}
-                  current={viewModel.isCurrent}
-                  scene={viewModel.scene}
-                  onChangeScene={handleChangeScene}
-               />
-            ))}
+            <ButtonBase className={classes.modeButton} onClick={handleOpenModeSelection} disabled={!canSetScene}>
+               <Typography variant="body2" noWrap>
+                  <ActiveSceneDescriptor scene={selectedScene} />
+               </Typography>
+            </ButtonBase>
+            {availableScenePresenters.map(
+               ({ presenter, scene }) =>
+                  presenter.AvailableSceneListItem && (
+                     <presenter.AvailableSceneListItem
+                        key={presenter.getSceneId ? presenter.getSceneId(scene) : scene.type}
+                        scene={scene}
+                        stack={sceneStack}
+                        onChangeScene={handleOverwriteScene}
+                     />
+                  ),
+            )}
+            {overwrittenContent && (
+               <ListItem button onClick={() => handleOverwriteScene(null)}>
+                  <ListItemIcon style={{ minWidth: 32 }}>
+                     <CloseIcon />
+                  </ListItemIcon>
+                  <ListItemText
+                     primaryTypographyProps={{ noWrap: true }}
+                     primary={t('conference.scenes.remove_overwrite')}
+                  />
+               </ListItem>
+            )}
          </List>
          <Paper elevation={4} className={classes.root}>
             <Button
@@ -126,9 +156,9 @@ export default function SceneManagement() {
                   <Paper>
                      <ClickAwayListener onClickAway={handleClose}>
                         <MenuList id="scene-action-list">
-                           {scenePresenters.map(({ type, OpenMenuItem }) => {
-                              if (!OpenMenuItem) return null;
-                              return <OpenMenuItem key={type} onClose={handleClose} />;
+                           {scenePresenters.map(({ type, ActionListItem }) => {
+                              if (!ActionListItem) return null;
+                              return <ActionListItem key={type} onClose={handleClose} />;
                            })}
                         </MenuList>
                      </ClickAwayListener>
@@ -137,6 +167,20 @@ export default function SceneManagement() {
             )}
          </Popper>
          {scenePresenters.map(({ AlwaysRender, type }) => AlwaysRender && <AlwaysRender key={type} />)}
+         <SceneManagementModeSelectionDialog
+            open={modeSelectionOpen}
+            onClose={handleCloseModeSelection}
+            availableScenes={availableScenes}
+            selectedScene={selectedScene}
+            onChangeScene={handleChangeScene}
+         />
       </div>
    );
+}
+
+function ActiveSceneDescriptor({ scene }: { scene?: Scene }) {
+   const presenter = presenters.find((x) => x.type === scene?.type);
+   if (presenter?.ActiveDescriptor) return <presenter.ActiveDescriptor scene={scene} />;
+
+   return <span>{scene?.type}</span>;
 }
