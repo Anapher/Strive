@@ -1,8 +1,7 @@
 import { ListItem, ListItemIcon, ListItemSecondaryAction, ListItemText, makeStyles, Radio } from '@material-ui/core';
-import React from 'react';
-import clsx from 'classnames';
-import { AvailableSceneListItemProps } from '../types';
 import _ from 'lodash';
+import React from 'react';
+import { AvailableSceneListItemProps } from '../types';
 
 export type Props = AvailableSceneListItemProps & {
    title: string;

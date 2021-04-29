@@ -60,8 +60,8 @@ export type ModeSceneListItemProps = {
    onChangeScene: (newScene: Scene) => void;
 };
 
-export type AvailableSceneListItemProps = {
-   scene: Scene;
+export type AvailableSceneListItemProps<S extends Scene = Scene> = {
+   scene: S;
    stack: Scene[];
 
    onChangeScene: (newScene: Scene) => void;
@@ -93,7 +93,7 @@ export type ScenePresenter<S extends Scene> = {
    ActiveDescriptor?: React.ComponentType<ActiveDescriptorProps<S>>;
 
    ModeSceneListItem?: React.ComponentType<ModeSceneListItemProps>;
-   AvailableSceneListItem?: React.ComponentType<AvailableSceneListItemProps>;
+   AvailableSceneListItem?: React.ComponentType<AvailableSceneListItemProps<S>>;
    ActionListItem?: React.ComponentType<ActionListItemProps>;
 
    AlwaysRender?: React.ComponentType;

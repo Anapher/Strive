@@ -8,8 +8,11 @@ export const selectParticipants = (state: RootState): Participant[] =>
       ? Object.entries(state.conference.participants.participants).map(([id, data]) => ({ ...data, id }))
       : [];
 
-export const selectParticipant = (state: RootState, participantId: string) =>
-   selectParticipants(state)?.find((x) => x.id === participantId);
+const getId = (_: unknown, id: string | undefined) => id;
+
+export const selectParticipant = createSelector(selectParticipants, getId, (participants, participantId) =>
+   participants?.find((x) => x.id === participantId),
+);
 
 export const selectOtherParticipants = createSelector(
    selectParticipants,
