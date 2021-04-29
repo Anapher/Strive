@@ -86,7 +86,8 @@
       "show_permissions": "Show Permissions",
       "allow_screen": "allow screen sharing",
       "allow_webcam": "allow webcam",
-      "allow_mic": "allow microphone"
+      "allow_mic": "allow microphone",
+      "make_presenter": "Make Presenter"
     },
     "notifications": {
       "kick": {

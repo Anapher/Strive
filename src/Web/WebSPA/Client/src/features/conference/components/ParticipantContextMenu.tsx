@@ -21,11 +21,13 @@ import {
    MEDIA_CAN_CHANGE_PARTICIPANTS_PRODUCER,
    PERMISSIONS_CAN_GIVE_TEMPORARY_PERMISSION,
    PERMISSIONS_CAN_SEE_ANY_PARTICIPANTS_PERMISSIONS,
+   SCENES_CAN_SET_SCENE,
 } from 'src/permissions';
 import { RootState } from 'src/store';
 import { showMessage } from 'src/store/notifier/actions';
 import { Participant } from '../types';
 import ParticipantContextMenuTempPermissions from './ParticipantContextMenuTempPermissions';
+import { AccountVoice } from 'mdi-material-ui';
 
 const useStyles = makeStyles((theme) => ({
    infoMenuItem: {
@@ -122,11 +124,17 @@ const ParticipantContextMenu = React.forwardRef<HTMLElement, Props>(({ participa
       onClose();
    };
 
+   const handleSetPresenter = () => {
+      dispatch(coreHub.setScene({ type: 'presenter', presenterParticipantId: participant.id }));
+      onClose();
+   };
+
    const canSetTempPermission = usePermission(PERMISSIONS_CAN_GIVE_TEMPORARY_PERMISSION);
    const canSeePermissions = usePermission(PERMISSIONS_CAN_SEE_ANY_PARTICIPANTS_PERMISSIONS);
    const canSendPrivateMessage = useSelector(selectPrivateMessageEnabled);
    const canKick = usePermission(CONFERENCE_CAN_KICK_PARTICIPANT);
    const canChangeParticipantProducers = usePermission(MEDIA_CAN_CHANGE_PARTICIPANTS_PRODUCER);
+   const canSetScene = usePermission(SCENES_CAN_SET_SCENE);
 
    return (
       <>
@@ -182,6 +190,14 @@ const ParticipantContextMenu = React.forwardRef<HTMLElement, Props>(({ participa
                   <MicOffRounded fontSize="small" />
                </ListItemIcon>
                {t('conference.participant_context_menu.disable_mic_for_all')}
+            </MenuItem>
+         )}
+         {canSetScene && (
+            <MenuItem onClick={handleSetPresenter}>
+               <ListItemIcon className={classes.menuIcon}>
+                  <AccountVoice fontSize="small" />
+               </ListItemIcon>
+               {t('conference.participant_context_menu.make_presenter')}
             </MenuItem>
          )}
          {canSetTempPermission && <ParticipantContextMenuTempPermissions participantId={participant.id} />}
