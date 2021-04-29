@@ -1283,7 +1283,7 @@
   },
   {
     "comment": "Add duplicate item to end",
-    "doc": [3, 4],
+    "doc": [ 3, 4 ],
     "patch": [
       {
         "op": "copy",
@@ -1291,6 +1291,18 @@
         "from": "/1"
       }
     ],
-    "expected": [3, 4, 4]
+    "expected": [ 3, 4, 4 ]
+  },
+  {
+    "comment": "Duplicate items in array",
+    "doc": [ 3, 4, 4 ],
+    "patch": [
+      {
+        "op": "copy",
+        "path": "/2",
+        "from": "/1"
+      }
+    ],
+    "expected": [ 3, 3, 4 ]
   }
 ]

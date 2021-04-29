@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json.Linq;
 
@@ -20,10 +18,17 @@ namespace JsonPatchGenerator.Handlers
             var items = originalArr.ToList();
 
             // remove all items that were removed
+            var newArrayItems = modifiedArr.ToList();
             for (var i = items.Count - 1; i >= 0; i--)
             {
                 var item = items[i];
-                if (!modifiedArr.Any(x => JToken.DeepEquals(x, item)))
+
+                var existingIndex = newArrayItems.FindLastIndex(x => JToken.DeepEquals(x, item));
+                if (existingIndex > -1)
+                {
+                    newArrayItems.RemoveAt(existingIndex);
+                }
+                else
                 {
                     context.Document.Remove(path.AtIndex(i).ToString());
                     items.RemoveAt(i);
@@ -35,7 +40,7 @@ namespace JsonPatchGenerator.Handlers
             {
                 var modifiedItem = modifiedArr[i];
 
-                var existingItem = FindIndex(items, token => JToken.DeepEquals(modifiedItem, token));
+                var existingItem = items.FindIndex(token => JToken.DeepEquals(modifiedItem, token));
                 if (existingItem > -1)
                 {
                     if (existingItem == i) continue;
@@ -67,17 +72,6 @@ namespace JsonPatchGenerator.Handlers
                     items.Insert(i, modifiedItem);
                 }
             }
-        }
-
-        private static int FindIndex<T>(IList<T> list, Predicate<T> predicate)
-        {
-            for (var i = 0; i < list.Count; i++)
-            {
-                if (predicate(list[i]))
-                    return i;
-            }
-
-            return -1;
         }
     }
 }

@@ -50,7 +50,7 @@ namespace JsonPatchGenerator.Tests
             var resultingToken = JToken.FromObject(originalObj);
 
             Assert.True(JToken.DeepEquals(resultingToken, modifiedToken),
-                $"Comment: {comment}\r\nexpected patch: {expectedPatch}\r\nactual patch: {JToken.FromObject(actualPatch)}");
+                $"Comment: {comment}\r\nexpected patch: {expectedPatch}\r\nactual patch: {JToken.FromObject(actualPatch)}\r\nexpected: {modifiedToken}\r\nactual: {resultingToken}");
         }
     }
 }
