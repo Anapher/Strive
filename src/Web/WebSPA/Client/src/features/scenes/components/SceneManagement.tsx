@@ -2,11 +2,13 @@ import {
    Button,
    ButtonBase,
    ClickAwayListener,
+   Divider,
    Grow,
    List,
    ListItem,
    ListItemIcon,
    ListItemText,
+   ListSubheader,
    makeStyles,
    MenuList,
    Paper,
@@ -41,6 +43,9 @@ const useStyles = makeStyles((theme) => ({
       padding: theme.spacing(1, 1, 1, 2),
       width: '100%',
       textAlign: 'left',
+   },
+   divider: {
+      marginLeft: theme.spacing(2),
    },
 }));
 
@@ -93,58 +98,71 @@ export default function SceneManagement() {
       (x) => sceneDisplayOrder.indexOf(x.scene.type),
    );
 
+   const visibleActionItemPresenter = presenters.filter(
+      (x) => x.ActionListItem && (!x.getIsActionListItemVisible || x.getIsActionListItemVisible()),
+   );
+
    return (
       <div>
-         <List dense disablePadding>
-            <li style={{ paddingLeft: 16, marginTop: 16 }}>
-               <Typography variant="subtitle2" color="textSecondary">
-                  {t('glossary:scene_plural')}
-               </Typography>
-            </li>
-            <ButtonBase className={classes.modeButton} onClick={handleOpenModeSelection} disabled={!canSetScene}>
-               <Typography variant="body2" noWrap>
-                  <ActiveSceneDescriptor scene={selectedScene} />
-               </Typography>
-            </ButtonBase>
-            {availableScenePresenters.map(
-               ({ presenter, scene }) =>
-                  presenter.AvailableSceneListItem && (
-                     <presenter.AvailableSceneListItem
-                        key={presenter.getSceneId ? presenter.getSceneId(scene) : scene.type}
-                        scene={scene}
-                        stack={sceneStack}
-                        onChangeScene={handleOverwriteScene}
-                     />
-                  ),
-            )}
-            {overwrittenContent && (
-               <ListItem button onClick={() => handleOverwriteScene(null)}>
-                  <ListItemIcon style={{ minWidth: 32 }}>
-                     <CloseIcon />
-                  </ListItemIcon>
-                  <ListItemText
-                     primaryTypographyProps={{ noWrap: true }}
-                     primary={t('conference.scenes.remove_overwrite')}
-                  />
-               </ListItem>
-            )}
-         </List>
-         <Paper elevation={4} className={classes.root}>
-            <Button
-               variant="contained"
-               color="primary"
-               size="small"
-               fullWidth
-               ref={actionButton}
-               onClick={handleOpen}
-               aria-controls={actionPopper ? 'scene-action-list' : undefined}
-               aria-expanded={actionPopper ? 'true' : undefined}
-               aria-label={t('conference.scenes.actions_description')}
-               aria-haspopup="menu"
-            >
-               {t('conference.scenes.actions')} <ArrowDropDownIcon />
-            </Button>
-         </Paper>
+         {(canSetScene || canOverwriteScene) && (
+            <>
+               <Divider className={classes.divider} />
+               <List dense disablePadding>
+                  <ListSubheader>{t('glossary:scene_plural')}</ListSubheader>
+                  {canSetScene && (
+                     <ButtonBase
+                        className={classes.modeButton}
+                        onClick={handleOpenModeSelection}
+                        disabled={!canSetScene}
+                     >
+                        <Typography variant="body2" noWrap>
+                           <ActiveSceneDescriptor scene={selectedScene} />
+                        </Typography>
+                     </ButtonBase>
+                  )}
+                  {availableScenePresenters.map(
+                     ({ presenter, scene }) =>
+                        presenter.AvailableSceneListItem && (
+                           <presenter.AvailableSceneListItem
+                              key={presenter.getSceneId ? presenter.getSceneId(scene) : scene.type}
+                              scene={scene}
+                              stack={sceneStack}
+                              onChangeScene={handleOverwriteScene}
+                           />
+                        ),
+                  )}
+                  {overwrittenContent && (
+                     <ListItem button onClick={() => handleOverwriteScene(null)}>
+                        <ListItemIcon style={{ minWidth: 32 }}>
+                           <CloseIcon />
+                        </ListItemIcon>
+                        <ListItemText
+                           primaryTypographyProps={{ noWrap: true }}
+                           primary={t('conference.scenes.remove_overwrite')}
+                        />
+                     </ListItem>
+                  )}
+               </List>
+            </>
+         )}
+         {visibleActionItemPresenter.length > 0 && (
+            <Paper elevation={4} className={classes.root}>
+               <Button
+                  variant="contained"
+                  color="primary"
+                  size="small"
+                  fullWidth
+                  ref={actionButton}
+                  onClick={handleOpen}
+                  aria-controls={actionPopper ? 'scene-action-list' : undefined}
+                  aria-expanded={actionPopper ? 'true' : undefined}
+                  aria-label={t('conference.scenes.actions_description')}
+                  aria-haspopup="menu"
+               >
+                  {t('conference.scenes.actions')} <ArrowDropDownIcon />
+               </Button>
+            </Paper>
+         )}
          <Popper open={actionPopper} anchorEl={actionButton.current} role={undefined} transition>
             {({ TransitionProps }) => (
                <Grow
@@ -156,7 +174,7 @@ export default function SceneManagement() {
                   <Paper>
                      <ClickAwayListener onClickAway={handleClose}>
                         <MenuList id="scene-action-list">
-                           {scenePresenters.map(({ type, ActionListItem }) => {
+                           {visibleActionItemPresenter.map(({ type, ActionListItem }) => {
                               if (!ActionListItem) return null;
                               return <ActionListItem key={type} onClose={handleClose} />;
                            })}

@@ -1,4 +1,4 @@
-import { Divider, makeStyles } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core';
 import clsx from 'classnames';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -70,7 +70,6 @@ export default function RoomsList() {
                </div>
             ))}
          </div>
-         <Divider style={{ marginLeft: 16 }} />
          <SceneManagement />
       </div>
    );

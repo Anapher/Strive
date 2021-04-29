@@ -101,6 +101,7 @@ export type ScenePresenter<S extends Scene> = {
    RenderScene: React.ComponentType<RenderSceneProps<S>>;
 
    getAutoHideMediaControls?: (scene: S, participantId: string) => boolean | undefined;
+   getIsActionListItemVisible?: () => void;
 };
 
 export type ActiveParticipantData = {

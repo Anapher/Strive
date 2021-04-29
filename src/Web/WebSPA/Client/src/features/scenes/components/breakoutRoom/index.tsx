@@ -1,4 +1,6 @@
 import BreakoutRoomsDialog from 'src/features/breakout-rooms/components/BreakoutRoomsDialog';
+import usePermission from 'src/hooks/usePermission';
+import { ROOMS_CAN_CREATE_REMOVE } from 'src/permissions';
 import { BreakoutRoomScene, ScenePresenter } from '../../types';
 import BreakoutRoomListItem from './BreakoutRoomListItem';
 import { OpenBreakoutRoomsItem } from './OpenBreakoutRoomsItem';
@@ -11,6 +13,7 @@ const presenter: ScenePresenter<BreakoutRoomScene> = {
    ActionListItem: OpenBreakoutRoomsItem,
    AlwaysRender: BreakoutRoomsDialog,
    getAutoHideMediaControls: () => false,
+   getIsActionListItemVisible: () => usePermission(ROOMS_CAN_CREATE_REMOVE),
 };
 
 export default presenter;
