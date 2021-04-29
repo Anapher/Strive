@@ -1,8 +1,6 @@
 import { makeStyles } from '@material-ui/core';
 import clsx from 'classnames';
 import React from 'react';
-import { useSelector } from 'react-redux';
-import { selectParticipants } from 'src/features/conference/selectors';
 import { Size } from 'src/types';
 import { expandToBox } from '../../calculations';
 import { ActiveSpeakerScene, RenderSceneProps } from '../../types';
@@ -43,7 +41,6 @@ export default function RenderActiveSpeaker({ className, dimensions, next }: Ren
    const smallTileCount = (dimensions.width - 8) / (tileWidth + 8);
 
    const activeParticipants = useSomeParticipants(smallTileCount);
-   const participants = useSelector(selectParticipants);
 
    const overwrite = next();
    if (overwrite) return <>{overwrite}</>;
@@ -51,7 +48,7 @@ export default function RenderActiveSpeaker({ className, dimensions, next }: Ren
    if (activeParticipants.length === 0) return null;
 
    return (
-      <div className={clsx(className, classes.root, participants.length === 1 && classes.rootCenter)}>
+      <div className={clsx(className, classes.root, activeParticipants.length === 1 && classes.rootCenter)}>
          <div style={{ margin: 8, ...size }}>
             <ParticipantTile {...size} participant={activeParticipants[0]} disableLayoutAnimation />
          </div>

@@ -2,6 +2,7 @@ import _ from 'lodash';
 import { useSelector } from 'react-redux';
 import { selectParticipants } from '../conference/selectors';
 import { Participant } from '../conference/types';
+import { selectParticipantsOfCurrentRoom } from '../rooms/selectors';
 import { selectActiveParticipants } from './selectors';
 
 export default function useSomeParticipants(
@@ -11,6 +12,7 @@ export default function useSomeParticipants(
 ): Participant[] {
    const activeParticipants = useSelector(selectActiveParticipants);
    const allParticipants = useSelector(selectParticipants);
+   const participantsInRoom = useSelector(selectParticipantsOfCurrentRoom);
 
    const orderedActiveParticipants = _.orderBy(Object.entries(activeParticipants), (x) => x[1].orderNumber)
       .map(([participantId]) => allParticipants.find((x) => x.id === participantId))
@@ -18,7 +20,9 @@ export default function useSomeParticipants(
 
    return _(includedParticipants ?? [])
       .concat(orderedActiveParticipants)
-      .concat(allParticipants)
+      .concat(
+         participantsInRoom.map((x) => allParticipants.find((p) => p.id === x)).filter((x): x is Participant => !!x),
+      )
       .uniqBy((x) => x.id)
       .filter((x) => !excludedParticipants?.includes(x.id))
       .slice(0, count)
