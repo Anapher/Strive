@@ -46,60 +46,58 @@ export default function TalkingStickFrame({ children }: Props) {
    return (
       <div>
          <Portal container={mediaContext.leftControlsContainer}>
-            <Grid container spacing={1}>
-               {isPresenter && (
-                  <Grid item>
-                     <Fab
-                        variant="extended"
-                        color="secondary"
-                        className={classes.primaryAction}
-                        onClick={handleReturnStick}
-                     >
-                        {t<string>('conference.scenes.talking_stick_modes.return_stick')}
-                     </Fab>
-                  </Grid>
-               )}
-               {canQueue && !isInQueue && (
-                  <Grid item>
-                     <TwoLineFab
-                        variant="extended"
-                        color="secondary"
-                        className={classes.primaryAction}
-                        onClick={handleEnqueue}
-                        subtitle={t('conference.scenes.talking_stick_modes.enqueue_status', { count: queue.length })}
-                     >
-                        {t<string>('conference.scenes.talking_stick_modes.enqueue')}
-                     </TwoLineFab>
-                  </Grid>
-               )}
-               {isInQueue && (
-                  <Grid item>
-                     <TwoLineFab
-                        variant="extended"
-                        color="secondary"
-                        className={classes.primaryAction}
-                        onClick={handleDequeue}
-                        subtitle={
-                           queueYoureNext
-                              ? t('conference.scenes.talking_stick_modes.queue_youre_next')
-                              : t('conference.scenes.talking_stick_modes.dequeue_status', {
-                                   total: queue.length,
-                                   pos: queuePosition,
-                                })
-                        }
-                     >
-                        {t<string>('conference.scenes.talking_stick_modes.dequeue')}
-                     </TwoLineFab>
-                  </Grid>
-               )}
-               {canTake && !isPresenter && (
-                  <Grid item>
-                     <Fab variant="extended" color="primary" onClick={handleTake}>
-                        {t<string>('conference.scenes.talking_stick_modes.take_stick')}
-                     </Fab>
-                  </Grid>
-               )}
-            </Grid>
+            {isPresenter && (
+               <Grid item>
+                  <Fab
+                     variant="extended"
+                     color="secondary"
+                     className={classes.primaryAction}
+                     onClick={handleReturnStick}
+                  >
+                     {t<string>('conference.scenes.talking_stick_modes.return_stick')}
+                  </Fab>
+               </Grid>
+            )}
+            {canQueue && !isInQueue && (
+               <Grid item>
+                  <TwoLineFab
+                     variant="extended"
+                     color="secondary"
+                     className={classes.primaryAction}
+                     onClick={handleEnqueue}
+                     subtitle={t('conference.scenes.talking_stick_modes.enqueue_status', { count: queue.length })}
+                  >
+                     {t<string>('conference.scenes.talking_stick_modes.enqueue')}
+                  </TwoLineFab>
+               </Grid>
+            )}
+            {isInQueue && (
+               <Grid item>
+                  <TwoLineFab
+                     variant="extended"
+                     color="secondary"
+                     className={classes.primaryAction}
+                     onClick={handleDequeue}
+                     subtitle={
+                        queueYoureNext
+                           ? t('conference.scenes.talking_stick_modes.queue_youre_next')
+                           : t('conference.scenes.talking_stick_modes.dequeue_status', {
+                                total: queue.length,
+                                pos: queuePosition,
+                             })
+                     }
+                  >
+                     {t<string>('conference.scenes.talking_stick_modes.dequeue')}
+                  </TwoLineFab>
+               </Grid>
+            )}
+            {canTake && !isPresenter && (
+               <Grid item>
+                  <Fab variant="extended" color="primary" onClick={handleTake}>
+                     {t<string>('conference.scenes.talking_stick_modes.take_stick')}
+                  </Fab>
+               </Grid>
+            )}
          </Portal>
          {children}
       </div>

@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogTitle, Fab, makeStyles, Tooltip } from '@material-ui/core';
+import { Dialog, DialogContent, DialogTitle, Fab, Grid, makeStyles, Tooltip } from '@material-ui/core';
 import BugReportIcon from '@material-ui/icons/BugReport';
 import clsx from 'classnames';
 import { motion } from 'framer-motion';
@@ -111,7 +111,7 @@ export default function MediaControls({ className, show, leftActionsRef }: Props
          animate={show ? 'visible' : 'hidden'}
          variants={variants}
       >
-         <div className={classes.leftActions} ref={leftActionsRef} />
+         <Grid container spacing={1} className={classes.leftActions} ref={leftActionsRef} />
          <div className={classes.controlsContainer}>
             {canShareScreen && (
                <MediaFab

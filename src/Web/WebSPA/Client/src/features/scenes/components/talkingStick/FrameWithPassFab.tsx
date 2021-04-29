@@ -31,32 +31,30 @@ export default function FrameWithPassFab({ children }: FrameProps) {
    return (
       <div>
          <Portal container={mediaContext.leftControlsContainer}>
-            <Grid container spacing={1}>
-               {canPass && (
-                  <Grid item>
-                     <PassStickFab />
-                  </Grid>
-               )}
-               {isPresenter && (
-                  <Grid item>
-                     <Fab variant="extended" color="secondary" onClick={handleReturnStick}>
-                        {t<string>('conference.scenes.talking_stick_modes.return_stick')}
-                     </Fab>
-                  </Grid>
-               )}
-               {!isPresenter && !canPass && (
-                  <Grid item>
-                     <AddToListFab />
-                  </Grid>
-               )}
-               {canTake && !isPresenter && (
-                  <Grid item>
-                     <Fab variant="extended" color="primary" onClick={handleTake}>
-                        {t<string>('conference.scenes.talking_stick_modes.take_stick')}
-                     </Fab>
-                  </Grid>
-               )}
-            </Grid>
+            {canPass && (
+               <Grid item>
+                  <PassStickFab />
+               </Grid>
+            )}
+            {isPresenter && (
+               <Grid item>
+                  <Fab variant="extended" color="secondary" onClick={handleReturnStick}>
+                     {t<string>('conference.scenes.talking_stick_modes.return_stick')}
+                  </Fab>
+               </Grid>
+            )}
+            {!isPresenter && !canPass && (
+               <Grid item>
+                  <AddToListFab />
+               </Grid>
+            )}
+            {canTake && !isPresenter && (
+               <Grid item>
+                  <Fab variant="extended" color="primary" onClick={handleTake}>
+                     {t<string>('conference.scenes.talking_stick_modes.take_stick')}
+                  </Fab>
+               </Grid>
+            )}
          </Portal>
          {children}
       </div>
