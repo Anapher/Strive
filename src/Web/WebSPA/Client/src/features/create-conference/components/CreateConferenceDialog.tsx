@@ -85,6 +85,7 @@ function CreateConferenceDialog() {
                      onSubmit={handleSubmit}
                      defaultValues={mapDataToForm(conferenceData)}
                      mode={mode}
+                     conferenceId={createdConferenceId}
                   />
                ) : (
                   <CreateConferenceFormSkeleton />

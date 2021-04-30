@@ -49,6 +49,7 @@ type Props = {
    onSubmit: (data: ConferenceDataForm) => void;
    isSubmitting: boolean;
    onClose: () => void;
+   conferenceId: string | null;
 
    mode: 'create' | 'patch';
 };
@@ -57,7 +58,14 @@ const patchConferenceData = (callback: (data: ConferenceDataForm) => void, defau
    data: ConferenceDataForm,
 ) => callback(mergeDeep(data, { configuration: defaultValues.configuration }));
 
-export default function CreateConferenceForm({ defaultValues, onSubmit, isSubmitting, onClose, mode }: Props) {
+export default function CreateConferenceForm({
+   defaultValues,
+   onSubmit,
+   isSubmitting,
+   onClose,
+   mode,
+   conferenceId,
+}: Props) {
    const classes = useStyles();
    const theme = useTheme();
    const { t } = useTranslation();
@@ -116,7 +124,7 @@ export default function CreateConferenceForm({ defaultValues, onSubmit, isSubmit
                      <TabCommon form={form} />
                   </TabPanel>
                   <TabPanel value="2" className={classes.tabPanel}>
-                     <TabModerators form={form} />
+                     <TabModerators form={form} conferenceId={conferenceId} />
                   </TabPanel>
                   <TabPanel value="3" className={classes.tabPanel}>
                      <TabPermissions form={form} />

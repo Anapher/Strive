@@ -35,7 +35,8 @@
         "show_participants_typing": "Show participants that are currently typing below chat"
       },
       "moderators": {
-        "error_user_not_found": "User with id \"{{id}}\" not found"
+        "error_user_not_found": "User with id \"{{id}}\" not found",
+        "add_from_conference": "Add participants from this conference"
       },
       "permissions": {
         "all": "All",
