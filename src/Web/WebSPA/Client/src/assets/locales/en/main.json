@@ -203,7 +203,7 @@
         "change_breakout_rooms": "Change breakout rooms..."
       },
       "grid": "Grid",
-      "screen_share": "{{name}}'s Screen",
+      "screen_share": "{{name}}",
       "mode_dialog": {
         "title": "Scene selection mode"
       },

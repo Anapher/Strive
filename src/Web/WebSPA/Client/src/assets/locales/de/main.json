@@ -32,7 +32,10 @@
         "schedule": "Planen",
         "open_cron_expression_generator": "Cron expression generator öffnen",
         "disable_room_chat_master": "Room Chat für den master Raum deaktivieren",
-        "show_participants_typing": "Teilnehmer anzeigen, die gerade in den Chat tippen"
+        "show_participants_typing": "Teilnehmer anzeigen, die gerade in den Chat tippen",
+        "default_scene": "Standard Szene",
+        "hide_participants_without_webcam": "Blende Teilnehmer ohne aktive Webcam aus",
+        "overlay_scene": "Szene mit Webcam überlagern, falls erforderlich"
       },
       "moderators": {
         "error_user_not_found": "Benutzer mit Id \"{{id}}\" wurde nicht gefunden",
@@ -237,7 +240,7 @@
       "active_speaker": "Aktiver Sprecher",
       "autonomous": "Autonom",
       "grid": "Raster",
-      "screen_share": "{{name}}s Bildschirm",
+      "screen_share": "{{name}}",
       "breakout_rooms": {
         "add_time_button_group": "Zeit hinzufügen Schaltflächengruppe",
         "change_breakout_rooms": "Breakout Räume verändern...",
