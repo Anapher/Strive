@@ -35,7 +35,8 @@
         "show_participants_typing": "Teilnehmer anzeigen, die gerade in den Chat tippen"
       },
       "moderators": {
-        "error_user_not_found": "Benutzer mit Id \"{{id}}\" wurde nicht gefunden"
+        "error_user_not_found": "Benutzer mit Id \"{{id}}\" wurde nicht gefunden",
+        "add_from_conference": "Teilnehmer von dieser Konferenz hinzufügen"
       },
       "permissions": {
         "all": "Alle",
@@ -227,7 +228,8 @@
       "mute": "Stummschalten",
       "open_private_chat": "Privaten Chat öffnen",
       "show_permissions": "Berechtigungen anzeigen",
-      "unmute": "Stummschaltung aufheben"
+      "unmute": "Stummschaltung aufheben",
+      "make_presenter": "Zum Präsentator machen"
     },
     "scenes": {
       "actions": "Aktionen",
