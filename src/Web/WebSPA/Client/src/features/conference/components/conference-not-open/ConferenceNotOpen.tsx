@@ -5,7 +5,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { SynchronizedConferenceInfo } from 'src/store/signal/synchronization/synchronized-object-ids';
-import { selectParticipants } from '../../selectors';
+import { selectParticipantList } from '../../selectors';
 import ConferenceNotOpenLayout from './ConferenceNotOpenLayout';
 
 const useStyles = makeStyles((theme) => ({
@@ -74,7 +74,7 @@ export default function ConferenceNotOpen({ conferenceInfo }: Props) {
    const classes = useStyles();
    const theme = useTheme();
    const { t } = useTranslation();
-   const participants = useSelector(selectParticipants);
+   const participants = useSelector(selectParticipantList);
 
    const isModeratorJoined = _.some(participants, (x) => conferenceInfo.moderators.includes(x.id));
 

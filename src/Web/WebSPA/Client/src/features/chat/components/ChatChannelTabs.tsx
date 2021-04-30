@@ -3,7 +3,7 @@ import { TFunction } from 'i18next';
 import _ from 'lodash';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import { Participant } from 'src/features/conference/types';
+import { ParticipantsMap, selectParticipants } from 'src/features/conference/selectors';
 import { RootState } from 'src/store';
 import { ChatChannel, ChatChannelWithId } from '../channel-serializer';
 import NewMessagesIndicator from './NewMessagesIndicator';
@@ -13,18 +13,12 @@ type Props = {
    selected?: string | null;
    onSelectedChanged: (channel: ChatChannelWithId) => void;
    myParticipantId: string;
-   participants: Participant[];
 };
 
-export default function ChatChannelTabs({
-   channels,
-   selected,
-   onSelectedChanged,
-   myParticipantId,
-   participants,
-}: Props) {
+export default function ChatChannelTabs({ channels, selected, onSelectedChanged, myParticipantId }: Props) {
    const { t } = useTranslation();
    const viewModels = useSelector((state: RootState) => state.chat.channels);
+   const participants = useSelector(selectParticipants);
 
    const handleChange = (_: React.ChangeEvent<unknown>, newValue: number) => {
       onSelectedChanged(channels[newValue]);
@@ -48,7 +42,7 @@ export default function ChatChannelTabs({
                         {viewModels?.[channel.id]?.viewModel?.newMessages && <NewMessagesIndicator />}
                      </div>
                   }
-               ></Tab>
+               />
             ))}
          </Tabs>
       </AppBar>
@@ -58,7 +52,7 @@ export default function ChatChannelTabs({
 function ChannelToString(
    channel: ChatChannel,
    myParticipantId: string,
-   participants: Participant[],
+   participants: ParticipantsMap,
    t: TFunction,
 ): string {
    switch (channel.type) {
@@ -69,7 +63,7 @@ function ChannelToString(
       case 'private': {
          const otherParticipantId =
             channel.participants[0] === myParticipantId ? channel.participants[1] : channel.participants[0];
-         const otherParticipant = participants.find((x) => x.id === otherParticipantId);
+         const otherParticipant = participants[otherParticipantId];
          return otherParticipant ? `@${otherParticipant?.displayName}` : t('conference.chat.private_chat_disconnected');
       }
    }

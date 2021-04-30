@@ -23,7 +23,7 @@ export default function PassStickList({ onPassStick }: Props) {
    return (
       <List dense>
          {queue
-            .map((id) => participants.find((x) => x.id === id))
+            .map((id) => participants[id])
             .filter((x): x is Participant => !!x)
             .map(({ id, displayName }) => (
                <ListItem key={id} button onClick={() => onPassStick(id)}>

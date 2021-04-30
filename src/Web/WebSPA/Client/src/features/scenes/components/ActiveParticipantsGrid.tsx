@@ -54,7 +54,7 @@ export default function ActiveParticipantsGrid({ width }: Props) {
    }
 
    const participantDtos = activeParticipants
-      .map((participantId) => participants.find((x) => x.id === participantId))
+      .map((participantId) => participants[participantId])
       .filter((x): x is Participant => !!x);
 
    return (

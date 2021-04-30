@@ -1,7 +1,7 @@
 import { makeStyles, Paper } from '@material-ui/core';
 import React, { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectParticipants } from 'src/features/conference/selectors';
+import { selectParticipantList } from 'src/features/conference/selectors';
 import useMyParticipantId from 'src/hooks/useMyParticipantId';
 import { RootState } from 'src/store';
 import * as actions from '../actions';
@@ -27,7 +27,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function ChatBar() {
    const classes = useStyles();
-   const participants = useSelector(selectParticipants);
+   const participants = useSelector(selectParticipantList);
    const connected = useSelector((state: RootState) => state.signalr.isConnected);
    const channels = useSelector(selectChannels);
    const selectedChannelId = useSelector(selectSelectedChannel);
@@ -56,16 +56,10 @@ export default function ChatBar() {
             channels={channels}
             selected={selectedChannelId}
             onSelectedChanged={handleChangeSelectedChannel}
-            participants={participants}
             myParticipantId={myParticipantId}
          />
          {selectedChannelId && (
-            <Chat
-               channel={selectedChannelId}
-               participantColors={participantColors}
-               participants={participants}
-               participantId={myParticipantId}
-            />
+            <Chat channel={selectedChannelId} participantColors={participantColors} participantId={myParticipantId} />
          )}
       </Paper>
    );

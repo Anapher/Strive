@@ -11,7 +11,7 @@ import usePermission from 'src/hooks/usePermission';
 import { CONFERENCE_CAN_OPEN_AND_CLOSE } from 'src/permissions';
 import { ConferenceRouteParams } from 'src/routes/types';
 import { SynchronizedConferenceInfo } from 'src/store/signal/synchronization/synchronized-object-ids';
-import { selectParticipants } from '../../selectors';
+import { selectParticipantList } from '../../selectors';
 import ConferenceNotOpenLayout from './ConferenceNotOpenLayout';
 
 const useStyles = makeStyles((theme) => ({
@@ -50,7 +50,7 @@ export default function ConferenceNotOpenModerator({ conferenceInfo }: Props) {
    const { t } = useTranslation();
    const { id: conferenceId } = useParams<ConferenceRouteParams>();
 
-   const participants = useSelector(selectParticipants);
+   const participants = useSelector(selectParticipantList);
 
    const canOpen = usePermission(CONFERENCE_CAN_OPEN_AND_CLOSE);
    const handleOpenConference = () => dispatch(coreHub.openConference());

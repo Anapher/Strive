@@ -5,7 +5,6 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DomainError } from 'src/communication-types';
 import { ChatMessageDto } from 'src/core-hub.types';
-import { Participant } from 'src/features/conference/types';
 import useBottomScrollTrigger from 'src/hooks/useBottomScrollTrigger';
 import { getScrollbarWidth } from 'src/utils/browser-info';
 import ChatMessage from './ChatMessage';
@@ -30,21 +29,13 @@ const useStyles = makeStyles({
 
 type Props = {
    messages: ChatMessageDto[] | undefined;
-   participants: Participant[] | null;
    participantId?: string | null;
    participantColors: { [id: string]: string };
    error?: DomainError | null;
    onRetry: () => void;
 };
 
-export default function ChatMessageList({
-   messages,
-   participants,
-   participantId,
-   participantColors,
-   error,
-   onRetry,
-}: Props) {
+export default function ChatMessageList({ messages, participantId, participantColors, error, onRetry }: Props) {
    const classes = useStyles();
    const { t } = useTranslation();
 
@@ -99,7 +90,6 @@ export default function ChatMessageList({
                      <ChatMessage
                         key={message.id}
                         participantColors={participantColors}
-                        participants={participants}
                         message={message}
                         participantId={participantId}
                      />

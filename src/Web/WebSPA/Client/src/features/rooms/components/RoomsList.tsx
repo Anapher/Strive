@@ -64,7 +64,7 @@ export default function RoomsList() {
                   />
                   <div className={classes.participants}>
                      {room.participants.map((id) => (
-                        <ParticipantItem key={id} participant={participants.find((x) => id === x.id)} />
+                        <ParticipantItem key={id} participant={participants[id]} />
                      ))}
                   </div>
                </div>

@@ -44,7 +44,7 @@ export const selectScreenSharingParticipants = createSelector(
 
       return Object.entries(streams)
          .filter(([, pstreams]) => pstreams?.producers.screen?.paused === false)
-         .map(([participantId]) => participants.find((x) => x.id === participantId))
+         .map(([participantId]) => participants[participantId])
          .filter((x): x is Participant => !!x);
    },
 );

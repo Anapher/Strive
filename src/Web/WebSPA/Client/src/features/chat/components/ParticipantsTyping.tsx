@@ -23,7 +23,7 @@ export default function ParticipantsTyping({ participantsTyping, participantColo
    const classes = useStyles();
 
    const mappedParticipantsTyping = participantsTyping
-      .map((x) => participants.find((p) => p.id === x))
+      .map((id) => participants[id])
       .filter((x): x is Participant => !!x);
 
    return (

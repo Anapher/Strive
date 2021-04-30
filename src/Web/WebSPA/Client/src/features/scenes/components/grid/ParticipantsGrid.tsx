@@ -38,7 +38,7 @@ export default function ParticipantsGrid({
 }: RenderSceneProps<GridScene>) {
    const participants = useSelector(selectParticipants);
    const participantsOfRoom = useSelector(selectParticipantsOfCurrentRoom)
-      .map((id) => participants.find((x) => x.id === id))
+      .map((id) => participants[id])
       .filter((x): x is Participant => Boolean(x));
 
    const classes = useStyles();

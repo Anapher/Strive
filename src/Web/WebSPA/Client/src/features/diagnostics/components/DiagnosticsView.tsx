@@ -5,7 +5,7 @@ import _ from 'lodash';
 import { Consumer } from 'mediasoup-client/lib/Consumer';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { selectParticipants } from 'src/features/conference/selectors';
+import { selectParticipantList, selectParticipants } from 'src/features/conference/selectors';
 import { selectParticipantAudio, selectStreams } from 'src/features/media/selectors';
 import { selectParticipantsOfCurrentRoom } from 'src/features/rooms/selectors';
 import useMyParticipantId from 'src/hooks/useMyParticipantId';
@@ -13,7 +13,9 @@ import useWebRtc from 'src/store/webrtc/hooks/useWebRtc';
 
 export default function DiagnosticsView() {
    const participantsOfRoom = useSelector(selectParticipantsOfCurrentRoom);
-   const participants = useSelector(selectParticipants);
+   const participants = useSelector(selectParticipantList);
+   const participantMap = useSelector(selectParticipants);
+
    const myId = useMyParticipantId();
 
    const streams = useSelector(selectStreams);
@@ -81,7 +83,7 @@ export default function DiagnosticsView() {
                         </TableCell>
                         <TableCell>
                            {Object.entries(streams?.[participantId]?.consumers ?? {}).map(([participantId, info]) => {
-                              const participant = participants?.find((x) => x.id === info.participantId);
+                              const participant = participantMap[info.participantId];
                               const consumer = consumers.find((x) => x.id === participantId);
 
                               return (

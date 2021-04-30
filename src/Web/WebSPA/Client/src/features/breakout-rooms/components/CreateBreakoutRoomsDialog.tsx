@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import * as coreHub from 'src/core-hub';
 import { OpenBreakoutRoomsDto } from 'src/core-hub.types';
-import { selectParticipants } from 'src/features/conference/selectors';
+import { selectParticipantList } from 'src/features/conference/selectors';
 import BreakoutRoomsForm from './BreakoutRoomsForm';
 
 type Props = {
@@ -17,7 +17,7 @@ export default function CreateBreakoutRoomsDialog({ onClose }: Props) {
    const dispatch = useDispatch();
    const { t } = useTranslation();
 
-   const participants = useSelector(selectParticipants);
+   const participants = useSelector(selectParticipantList);
    // participants = [
    //    ...participants,
    //    ...Array.from({ length: 15 }).map((_, i) => ({

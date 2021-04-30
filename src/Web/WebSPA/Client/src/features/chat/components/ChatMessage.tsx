@@ -1,15 +1,18 @@
 import { makeStyles, Typography } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
-import { useMemo, useRef } from 'react';
-import { DateTime } from 'luxon';
-import emojiRegex from 'emoji-regex/RGI_Emoji';
 import clsx from 'classnames';
-import { hashCode, numberToColor } from '../color-utils';
-import { Participant } from 'src/features/conference/types';
-import { ChatMessageDto } from 'src/core-hub.types';
-import { Bullhorn } from 'mdi-material-ui';
-import Linkify from 'linkifyjs/react';
+import emojiRegex from 'emoji-regex/RGI_Emoji';
 import { Options } from 'linkifyjs';
+import Linkify from 'linkifyjs/react';
+import { DateTime } from 'luxon';
+import { Bullhorn } from 'mdi-material-ui';
+import { useMemo, useRef } from 'react';
+import { useSelector } from 'react-redux';
+import { ChatMessageDto } from 'src/core-hub.types';
+import { selectParticipant } from 'src/features/conference/selectors';
+import { Participant } from 'src/features/conference/types';
+import { RootState } from 'src/store';
+import { hashCode, numberToColor } from '../color-utils';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -63,15 +66,14 @@ const onlyEmojisRegex = new RegExp('^(' + emojiRegex().toString().replace(/\/g$/
 
 type Props = {
    message?: ChatMessageDto;
-   participants?: Participant[] | null;
    participantId?: string | null;
    participantColors: { [id: string]: string };
 };
 
-export default function ChatMessage({ message, participants, participantColors }: Props) {
+export default function ChatMessage({ message, participantColors }: Props) {
    const classes = useStyles();
    const isEmoji = message && message.message.length <= 8 && onlyEmojisRegex.test(message.message);
-   const sender = message?.sender && participants?.find((x) => x.id === message.sender?.participantId);
+   const sender = useSelector((state: RootState) => selectParticipant(state, message?.sender?.participantId));
 
    const isAnonymous = message && !message.sender;
    const isDisconnected = message?.sender && !sender;

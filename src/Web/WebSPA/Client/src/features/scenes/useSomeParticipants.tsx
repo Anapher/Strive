@@ -15,14 +15,12 @@ export default function useSomeParticipants(
    const participantsInRoom = useSelector(selectParticipantsOfCurrentRoom);
 
    const orderedActiveParticipants = _.orderBy(Object.entries(activeParticipants), (x) => x[1].orderNumber)
-      .map(([participantId]) => allParticipants.find((x) => x.id === participantId))
+      .map(([participantId]) => allParticipants[participantId])
       .filter((x): x is Participant => !!x);
 
    return _(includedParticipants ?? [])
       .concat(orderedActiveParticipants)
-      .concat(
-         participantsInRoom.map((x) => allParticipants.find((p) => p.id === x)).filter((x): x is Participant => !!x),
-      )
+      .concat(participantsInRoom.map((x) => allParticipants[x]).filter((x): x is Participant => !!x))
       .uniqBy((x) => x.id)
       .filter((x) => !excludedParticipants?.includes(x.id))
       .slice(0, count)

@@ -3,7 +3,6 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import * as coreHub from 'src/core-hub';
 import { SendChatMessageDto } from 'src/core-hub.types';
-import { Participant } from 'src/features/conference/types';
 import { RootState } from 'src/store';
 import { selectIsNewChannel, selectMessages, selectMessagesError, selectParticipantsTyping } from '../selectors';
 import ChatMessageList from './ChatMessageList';
@@ -24,12 +23,11 @@ const useStyles = makeStyles((theme) => ({
 
 type Props = {
    channel: string;
-   participants: Participant[] | null;
    participantId?: string | null;
    participantColors: { [id: string]: string };
 };
 
-export default function Chat({ channel, participants, participantId, participantColors }: Props) {
+export default function Chat({ channel, participantId, participantColors }: Props) {
    const messages = useSelector((state: RootState) => selectMessages(state, channel));
    const error = useSelector((state: RootState) => selectMessagesError(state, channel));
    const dispatch = useDispatch();
@@ -62,7 +60,6 @@ export default function Chat({ channel, participants, participantId, participant
             <ChatMessageList
                messages={messages}
                participantColors={participantColors}
-               participants={participants}
                participantId={participantId}
                error={error}
                onRetry={handleFetchChat}

@@ -26,7 +26,7 @@ import { CONFERENCE_CAN_OPEN_AND_CLOSE } from 'src/permissions';
 import { ConferenceRouteParams } from 'src/routes/types';
 import { RootState } from 'src/store';
 import useWebRtcStatus from 'src/store/webrtc/hooks/useWebRtcStatus';
-import { selectParticipants } from '../selectors';
+import { selectParticipantList } from '../selectors';
 import AppBarLogo from './appbar/AppBarLogo';
 import BreakoutRoomChips from './appbar/BreakoutRoomChip';
 
@@ -82,7 +82,7 @@ export default function ConferenceAppBar({ chatWidth }: Props) {
    const handleCloseMenu = () => setIsMenuOpen(false);
 
    const moreIconButtonRef = useRef<HTMLButtonElement>(null);
-   const participants = useSelector(selectParticipants);
+   const participants = useSelector(selectParticipantList);
    const webRtcStatus = useWebRtcStatus();
 
    const breakoutRoomState = useSelector((state: RootState) => state.breakoutRooms.synchronized?.active);
@@ -129,7 +129,7 @@ export default function ConferenceAppBar({ chatWidth }: Props) {
                {participants && (
                   <Chip
                      className={classes.chip}
-                     label={t('conference.appbar.participants', { count: Object.entries(participants).length })}
+                     label={t('conference.appbar.participants', { count: participants.length })}
                      size="small"
                   />
                )}

@@ -3,22 +3,34 @@ import { RootState } from 'src/store';
 import { selectMyParticipantId } from '../auth/selectors';
 import { Participant } from './types';
 
-export const selectParticipants = (state: RootState): Participant[] =>
-   state.conference.participants
-      ? Object.entries(state.conference.participants.participants).map(([id, data]) => ({ ...data, id }))
-      : [];
+const selectParticipantsMapRaw = (state: RootState) => state.conference.participants?.participants ?? {};
 
-const getId = (_: unknown, id: string | undefined) => id;
+export type ParticipantsMap = { [participantId: string]: Participant };
+export const selectParticipants = createSelector(
+   selectParticipantsMapRaw,
+   (participants) =>
+      Object.fromEntries(Object.entries(participants).map(([id, data]) => [id, { ...data, id }])) as ParticipantsMap,
+);
 
-export const selectParticipant = createSelector(selectParticipants, getId, (participants, participantId) =>
-   participants?.find((x) => x.id === participantId),
+export const selectParticipant: (state: RootState, participantId: string | undefined) => Participant | undefined = (
+   state: RootState,
+   participantId: string | undefined,
+) => {
+   if (!participantId) return undefined;
+
+   const participantMap = selectParticipants(state);
+   return participantMap[participantId];
+};
+
+export const selectParticipantList = createSelector(selectParticipants, (participants) =>
+   Object.entries(participants).map(([id, data]) => ({ ...data, id })),
 );
 
 export const selectOtherParticipants = createSelector(
    selectParticipants,
    selectMyParticipantId,
    (participants, myId) => {
-      return participants?.filter((x) => x.id !== myId);
+      return Object.fromEntries(Object.entries(participants).filter(([id]) => id !== myId));
    },
 );
 
