@@ -8,6 +8,7 @@ using FluentValidation.AspNetCore;
 using MassTransit;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
@@ -26,6 +27,7 @@ using Newtonsoft.Json;
 using StackExchange.Redis.Extensions.Core.Abstractions;
 using StackExchange.Redis.Extensions.Core.Configuration;
 using StackExchange.Redis.Extensions.Newtonsoft;
+using Strive.Auth;
 using Strive.Config;
 using Strive.Core;
 using Strive.Core.Domain.Entities;
@@ -84,6 +86,7 @@ namespace Strive
 
                     options.AcceptTokenFromQuery();
                 });
+            services.AddSingleton<IAuthorizationHandler, UserIsModeratorOfConferenceHandler>();
 
             var sfuOptions = Configuration.GetSection("SFU").Get<SfuOptions>();
             var signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(sfuOptions.TokenSecret ??

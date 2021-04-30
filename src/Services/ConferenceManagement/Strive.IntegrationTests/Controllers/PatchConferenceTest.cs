@@ -74,7 +74,7 @@ namespace Strive.IntegrationTests.Controllers
         }
 
         [Fact]
-        public async Task PatchConference_AddModerator_ReturnSuccess()
+        public async Task PatchConference_IsAdmin_ReturnSuccess()
         {
             // arrange
             _factory.CreateUser("Vincent", true).SetupHttpClient(_client);
@@ -97,6 +97,51 @@ namespace Strive.IntegrationTests.Controllers
                 {
                     AssertHelper.AssertScrambledEquals(new[] {"test", "test2"}, conference.Configuration.Moderators);
                 });
+        }
+
+        [Fact]
+        public async Task PatchConference_IsModerator_ReturnSuccess()
+        {
+            // arrange
+            var user = _factory.CreateUser("Vincent", false).SetupHttpClient(_client);
+
+            var conferenceData = new ConferenceData();
+            conferenceData.Configuration.Moderators.Add(user.Sub);
+
+            var conferenceId = await CreateConference(conferenceData);
+
+            // act
+            var patch = new JsonPatchDocument<ConferenceData>();
+            patch.Add(x => x.Configuration.Moderators, "test2");
+
+            var response = await _client.PatchAsync($"/v1/conference/{conferenceId}", JsonNetContent.Create(patch));
+            response.EnsureSuccessStatusCode();
+
+            // assert
+            await AssertConference(conferenceId,
+                conference =>
+                {
+                    AssertHelper.AssertScrambledEquals(new[] {user.Sub, "test2"}, conference.Configuration.Moderators);
+                });
+        }
+
+        [Fact]
+        public async Task PatchConference_IsNeitherModeratorNorAdmin_ReturnFailure()
+        {
+            // arrange
+            var user = _factory.CreateUser("Vincent", false).SetupHttpClient(_client);
+
+            var conferenceData = new ConferenceData();
+            conferenceData.Configuration.Moderators.Add("wtf");
+
+            var conferenceId = await CreateConference(conferenceData);
+
+            // act
+            var patch = new JsonPatchDocument<ConferenceData>();
+            patch.Add(x => x.Configuration.Moderators, "test2");
+
+            var response = await _client.PatchAsync($"/v1/conference/{conferenceId}", JsonNetContent.Create(patch));
+            Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
         }
 
         [Fact]

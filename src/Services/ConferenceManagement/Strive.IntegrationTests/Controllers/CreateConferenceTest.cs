@@ -56,15 +56,6 @@ namespace Strive.IntegrationTests.Controllers
         }
 
         [Fact]
-        public async Task CreateConference_NotModerator_ReturnForbidden()
-        {
-            _factory.CreateUser("Vincent", false).SetupHttpClient(_client);
-
-            var response = await _client.PostAsync("/v1/conference", JsonContent.Create(GetValidConference()));
-            Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
-        }
-
-        [Fact]
         public async Task CreateConference_WithoutModerators_ReturnValidationError()
         {
             _factory.CreateUser("Ralph", true).SetupHttpClient(_client);

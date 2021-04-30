@@ -10,9 +10,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-using Strive.IntegrationTests._Helpers;
 using Serilog;
 using Serilog.Events;
+using Strive.IntegrationTests._Helpers;
 using Xunit.Abstractions;
 
 namespace Strive.IntegrationTests
@@ -36,7 +36,7 @@ namespace Strive.IntegrationTests
 
             var claims = new List<Claim> {new(ClaimTypes.NameIdentifier, sub), new("name", name)};
             if (isModerator)
-                claims.Add(new Claim(ClaimTypes.Role, AppRoles.Moderator));
+                claims.Add(new Claim(ClaimTypes.Role, AppRoles.Administrator));
 
             var token = JwtTokens.GenerateJwtToken(claims);
             return new UserAccount(sub, name, isModerator, token);

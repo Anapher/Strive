@@ -16,7 +16,7 @@ namespace Identity.API
             {
                 new IdentityResources.OpenId(),
                 new IdentityResources.Profile(),
-                new IdentityResource {Name = "user.info", UserClaims = {ClaimTypes.Role, ClaimTypes.Name}}
+                new IdentityResource {Name = "user.info", UserClaims = {ClaimTypes.Role, ClaimTypes.Name}},
             };
 
         public static Client BuildSpaClient(string host)
@@ -27,12 +27,12 @@ namespace Identity.API
                 AllowedScopes =
                 {
                     IdentityServerConstants.StandardScopes.OpenId, IdentityServerConstants.StandardScopes.Profile,
-                    "user.info"
+                    "user.info",
                 },
                 RedirectUris = {$"{host}/authentication/callback", $"{host}/authentication/silent_callback"},
                 PostLogoutRedirectUris = {$"{host}/"},
                 AllowedCorsOrigins = {host},
-                RequireClientSecret = false
+                RequireClientSecret = false,
             };
         }
     }
