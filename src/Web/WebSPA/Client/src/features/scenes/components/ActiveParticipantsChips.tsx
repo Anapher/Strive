@@ -9,6 +9,5 @@ type Props = {
 
 export default function ActiveParticipantsChips({ className }: Props) {
    const activeParticipants = useSelector(selectActiveParticipants);
-
    return <ParticipantChips className={className} participantIds={Object.keys(activeParticipants)} />;
 }

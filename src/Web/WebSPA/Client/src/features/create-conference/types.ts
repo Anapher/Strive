@@ -1,4 +1,5 @@
 import { Permissions } from 'src/core-hub.types';
+import { Scene } from '../scenes/types';
 
 export type CreateConferenceResponse = {
    conferenceId: string;
@@ -13,6 +14,12 @@ export type ChatOptions = {
    isPrivateChatEnabled: boolean;
 };
 
+export type SceneOptions = {
+   defaultScene: Scene['type'];
+   hideParticipantsWithoutWebcam: boolean;
+   overlayScene: boolean;
+};
+
 export type PermissionType = 'conference' | 'moderator' | 'breakoutRoom';
 
 export type ConferenceConfiguration = {
@@ -22,6 +29,7 @@ export type ConferenceConfiguration = {
    scheduleCron?: string | null;
 
    chat: ChatOptions;
+   scenes: SceneOptions;
 };
 
 export type ConferencePermissions = { [key in PermissionType]?: Permissions };

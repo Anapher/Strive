@@ -1,7 +1,7 @@
 import { put, select } from 'redux-saga/effects';
 import { takeEverySynchronizedObjectChange } from 'src/store/saga-utils';
 import { selectMyParticipantId } from '../auth/selectors';
-import { selectParticipants } from '../conference/selectors';
+import { selectParticipantList } from '../conference/selectors';
 import { Participant } from '../conference/types';
 import { removeParticipantAudio, setParticipantAudio } from './reducer';
 import { selectParticipantAudio } from './selectors';
@@ -18,7 +18,7 @@ export const DEFAULT_PARTICIPANT_AUDIO: ParticipantAudioInfo = {
  * synchronize participants list with audio info
  */
 function* updateParticipants() {
-   const participants: Participant[] = yield select(selectParticipants);
+   const participants: Participant[] = yield select(selectParticipantList);
    const audioInfo: { [id: string]: ParticipantAudioInfo } = yield select(selectParticipantAudio);
    const myId: string = yield select(selectMyParticipantId);
 

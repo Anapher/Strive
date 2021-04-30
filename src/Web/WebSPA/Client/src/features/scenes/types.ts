@@ -77,8 +77,6 @@ export type RenderSceneProps<S extends Scene = Scene> = {
    scene: S;
 
    next: (additionalProps?: any) => React.ReactNode | null;
-
-   setShowWebcamUnderChat: (show: boolean) => void;
 };
 
 export type ActiveDescriptorProps<S extends Scene = Scene> = {

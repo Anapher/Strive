@@ -1,5 +1,6 @@
 import { Permissions } from 'src/core-hub.types';
 import { ParticipantData } from 'src/features/conference/types';
+import { SceneOptions } from 'src/features/create-conference/types';
 import { EquipmentConnection } from 'src/features/media/types';
 
 export const ROOMS = 'rooms';
@@ -25,6 +26,7 @@ export type SynchronizedConferenceInfo = {
    scheduledDate?: string | null;
    name: string | null;
    isPrivateChatEnabled: boolean;
+   sceneOptions: SceneOptions;
 };
 
 export type SynchronizedParticipantsPermissions = {

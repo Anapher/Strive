@@ -1,5 +1,5 @@
-import { makeStyles } from '@material-ui/core';
-import React, { useEffect, useState } from 'react';
+import { Grid, makeStyles } from '@material-ui/core';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import AnnouncementOverlay from 'src/features/chat/components/AnnouncementOverlay';
 import ChatBar from 'src/features/chat/components/ChatBar';
@@ -7,10 +7,10 @@ import { selectShowChat } from 'src/features/chat/selectors';
 import ConferenceAppBar from 'src/features/conference/components/ConferenceAppBar';
 import ParticipantMicManager from 'src/features/media/components/ParticipantMicManager';
 import { expandToBox } from 'src/features/scenes/calculations';
-import ActiveParticipantsGridSizer from 'src/features/scenes/components/ActiveParticipantsGridSizer';
 import useThrottledResizeObserver from 'src/hooks/useThrottledResizeObserver';
 import { Size } from 'src/types';
 import SceneView from '../../scenes/components/SceneView';
+import ConferenceLayoutContext, { ConferenceLayoutContextType } from '../conference-layout-context';
 import PermissionDialog from './PermissionDialog';
 import PinnableSidebar from './PinnableSidebar';
 
@@ -39,12 +39,16 @@ const useStyles = makeStyles(() => ({
       display: 'flex',
       flexDirection: 'column',
    },
+   chat: {
+      display: 'flex',
+      flexDirection: 'column',
+      height: '100%',
+   },
 }));
 
 export default function ClassConference() {
    const classes = useStyles();
    const [roomsPinned, setRoomsPinned] = useState(true);
-   const [showUnderChat, setShowUnderChat] = useState(false);
 
    const showChat = useSelector(selectShowChat);
 
@@ -70,25 +74,37 @@ export default function ClassConference() {
       }
    }, [dimensions.width, dimensions.height]);
 
+   const chatContainer = useRef<HTMLDivElement>(null);
+
+   const context = useMemo<ConferenceLayoutContextType>(
+      () => ({
+         chatContainer: chatContainer.current,
+         chatWidth,
+      }),
+      [chatContainer.current, chatWidth],
+   );
+
    return (
       <ParticipantMicManager>
-         <div className={classes.root}>
-            <AnnouncementOverlay />
-            <ConferenceAppBar chatWidth={chatWidth} />
-            <div className={classes.conferenceMain} ref={contentRef}>
-               <PinnableSidebar pinned={roomsPinned} onTogglePinned={() => setRoomsPinned((x) => !x)} />
-               <div className={classes.scene}>
-                  <SceneView setShowWebcamUnderChat={(show) => setShowUnderChat(show)} />
-               </div>
-               {showChat && (
-                  <div style={{ width: chatWidth, display: 'flex', flexDirection: 'column', height: '100%' }}>
-                     <ActiveParticipantsGridSizer show={showUnderChat} width={chatWidth} />
-                     <ChatBar />
+         <ConferenceLayoutContext.Provider value={context}>
+            <div className={classes.root}>
+               <AnnouncementOverlay />
+               <ConferenceAppBar chatWidth={chatWidth} />
+               <div className={classes.conferenceMain} ref={contentRef}>
+                  <PinnableSidebar pinned={roomsPinned} onTogglePinned={() => setRoomsPinned((x) => !x)} />
+                  <div className={classes.scene}>
+                     <SceneView />
                   </div>
-               )}
+                  {showChat && (
+                     <div className={classes.chat} style={{ width: chatWidth }}>
+                        <Grid ref={chatContainer} />
+                        <ChatBar />
+                     </div>
+                  )}
+               </div>
+               <PermissionDialog />
             </div>
-            <PermissionDialog />
-         </div>
+         </ConferenceLayoutContext.Provider>
       </ParticipantMicManager>
    );
 }

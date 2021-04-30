@@ -4,6 +4,8 @@ import { RootState } from 'src/store';
 import { selectMyParticipantId } from '../auth/selectors';
 import { selectStreams } from '../media/selectors';
 
+export const selectSceneOptions = (state: RootState) => state.conference.conferenceState?.sceneOptions;
+
 export const selectActiveParticipants = (state: RootState) => state.scenes.activeParticipants;
 export const selectAvailableScenes = (state: RootState) => state.scenes.synchronized?.availableScenes ?? [];
 

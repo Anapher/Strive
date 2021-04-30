@@ -3,10 +3,11 @@ import React, { useEffect } from 'react';
 import { Participant } from 'src/features/conference/types';
 import { Size } from 'src/types';
 import { expandToBox, maxWidth } from '../calculations';
-import ActiveParticipantsChips from './ActiveParticipantsChips';
+import ActiveChipsLayout from './ActiveChipsLayout';
 import PresentationSceneParticipants from './PresentationSceneParticipants';
+import clsx from 'classnames';
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles((theme) => ({
    container: {
       width: '100%',
       height: '100%',
@@ -15,15 +16,16 @@ const useStyles = makeStyles(() => ({
       alignItems: 'center',
       justifyContent: 'flex-start',
       flexDirection: 'column',
+      overflow: 'hidden',
    },
    chips: {
-      marginTop: 8,
-      marginBottom: 8,
-      paddingRight: 16,
+      marginTop: theme.spacing(1),
+      marginBottom: theme.spacing(1),
+      paddingRight: theme.spacing(2),
    },
 }));
 
-type Props = {
+export type PresentationSceneProps = {
    className?: string;
    dimensions: Size;
 
@@ -38,9 +40,9 @@ type Props = {
 
    maxOverlayFactor?: number;
 
-   render: (size: Size) => React.ReactNode;
+   render: (size: Size, style: React.CSSProperties) => React.ReactNode;
 
-   canShowParticipantsWithoutResize: (canShow: boolean) => void;
+   canShowParticipantsWithoutResize?: (canShow: boolean) => void;
 };
 
 export default function PresentationScene({
@@ -53,9 +55,9 @@ export default function PresentationScene({
    fixedParticipants,
    participantTileWidth = 16 * 18,
    participantTileHeight = 9 * 18,
-   maxOverlayFactor = 0.33,
+   maxOverlayFactor = 0.3,
    canShowParticipantsWithoutResize,
-}: Props) {
+}: PresentationSceneProps) {
    const classes = useStyles();
 
    dimensions = { ...dimensions, height: dimensions.height - 40 };
@@ -66,12 +68,15 @@ export default function PresentationScene({
 
    let participantsPlace: 'bottom' | 'right' | undefined;
 
+   console.log(dimensions.width);
+   console.log(computedSize.width);
+
    // compute the vertical/horizontal margin if we would use the full size content
    const marginBottom = dimensions.height - computedSize.height;
    const marginRight = dimensions.width - computedSize.width;
 
-   const neededPlaceBottom = participantTileHeight * (1 - maxOverlayFactor);
-   const neededPlaceRight = participantTileWidth * (1 - maxOverlayFactor);
+   const neededPlaceBottom = (participantTileHeight + 20) * (1 - maxOverlayFactor);
+   const neededPlaceRight = (participantTileWidth + 12) * (1 - maxOverlayFactor);
 
    const missingPlaceBottom = Math.max(0, neededPlaceBottom - marginBottom);
    const missingPlaceRight = Math.max(0, neededPlaceRight - marginRight);
@@ -91,7 +96,7 @@ export default function PresentationScene({
    }
 
    useEffect(() => {
-      canShowParticipantsWithoutResize(newDimensions === undefined);
+      if (canShowParticipantsWithoutResize) canShowParticipantsWithoutResize(newDimensions === undefined);
    }, [newDimensions === undefined]);
 
    // arrange
@@ -101,19 +106,16 @@ export default function PresentationScene({
    }
 
    return (
-      <div className={className}>
-         <div className={classes.container}>
-            <ActiveParticipantsChips className={classes.chips} />
-            {render(computedSize)}
-            {showParticipants && (
-               <PresentationSceneParticipants
-                  location={participantsPlace}
-                  tileHeight={participantTileHeight}
-                  tileWidth={participantTileWidth}
-                  fixedParticipants={fixedParticipants}
-               />
-            )}
-         </div>
-      </div>
+      <ActiveChipsLayout className={clsx(className, classes.container)}>
+         {render(computedSize, { marginRight: participantsPlace === 'right' ? neededPlaceRight : undefined })}
+         {showParticipants && (
+            <PresentationSceneParticipants
+               location={participantsPlace}
+               tileHeight={participantTileHeight}
+               tileWidth={participantTileWidth}
+               fixedParticipants={fixedParticipants}
+            />
+         )}
+      </ActiveChipsLayout>
    );
 }

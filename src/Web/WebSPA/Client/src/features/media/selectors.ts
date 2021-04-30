@@ -3,6 +3,7 @@ import { RootState } from 'src/store';
 import { ProducerDevice } from 'src/store/webrtc/types';
 import { selectParticipants } from '../conference/selectors';
 import { Participant } from '../conference/types';
+import { selectParticipantsOfCurrentRoom } from '../rooms/selectors';
 import { ProducerInfo } from './types';
 
 const getId = (_: unknown, id: string | undefined) => id;
@@ -19,6 +20,18 @@ export const selectParticipantProducers = createSelector(selectStreams, getId, (
 
    return participantStreams.producers;
 });
+
+export const selectParticipantsOfRoomWebcamAvailable = createSelector(
+   selectParticipantsOfCurrentRoom,
+   selectStreams,
+   (participants, streams) => {
+      if (!streams) return [];
+
+      return Object.entries(streams)
+         .filter(([id, media]) => participants.includes(id) && media?.producers.webcam)
+         .map(([id]) => id);
+   },
+);
 
 export const selectParticipantMicActivated = createSelector(selectStreams, getId, (streams, participantId) => {
    if (!streams) return false;

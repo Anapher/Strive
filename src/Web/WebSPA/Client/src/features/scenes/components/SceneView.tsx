@@ -20,6 +20,7 @@ const useStyles = makeStyles({
       width: '100%',
       height: '100%',
       position: 'relative',
+      overflow: 'hidden',
    },
    currentScene: {
       position: 'absolute',
@@ -27,6 +28,7 @@ const useStyles = makeStyles({
       top: 0,
       bottom: 0,
       right: 0,
+      overflow: 'hidden',
    },
    mediaControls: {
       position: 'absolute',
@@ -35,10 +37,6 @@ const useStyles = makeStyles({
       bottom: 0,
    },
 });
-
-type Props = {
-   setShowWebcamUnderChat: (show: boolean) => void;
-};
 
 const getSceneAutoHideControls: (scene: Scene, participantId: string) => boolean | undefined = (
    scene,
@@ -50,7 +48,7 @@ const getSceneAutoHideControls: (scene: Scene, participantId: string) => boolean
    return presenter.getAutoHideMediaControls(scene, participantId);
 };
 
-export default function SceneView({ setShowWebcamUnderChat }: Props) {
+export default function SceneView() {
    const classes = useStyles();
    const [contentRef, dimensions] = useThrottledResizeObserver(100);
 
@@ -100,7 +98,7 @@ export default function SceneView({ setShowWebcamUnderChat }: Props) {
       () => ({
          leftControlsContainer: mediaLeftActionsRef.current,
       }),
-      [delayHideControls, mediaLeftActionsRef.current],
+      [mediaLeftActionsRef.current],
    );
 
    const handleMouseMove = () => {
@@ -119,7 +117,6 @@ export default function SceneView({ setShowWebcamUnderChat }: Props) {
                      className={classes.currentScene}
                      dimensions={fixedDimensions}
                      sceneStack={sceneStack}
-                     setShowWebcamUnderChat={setShowWebcamUnderChat}
                   />
                ) : null}
             </AnimateSharedLayout>

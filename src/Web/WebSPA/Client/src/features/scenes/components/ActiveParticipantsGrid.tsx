@@ -1,10 +1,8 @@
 import { makeStyles } from '@material-ui/core';
 import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
-import { selectParticipants } from 'src/features/conference/selectors';
 import { Participant } from 'src/features/conference/types';
 import { Size } from 'src/types';
-import { selectActiveParticipantsWithWebcam } from '../selectors';
+import useSomeParticipants from '../useSomeParticipants';
 import ParticipantTile from './ParticipantTile';
 
 export const ACTIVE_PARTICIPANTS_WEBCAM_RATIO = 9 / 16;
@@ -24,13 +22,12 @@ const useStyles = makeStyles({
 
 type Props = {
    width: number;
+   fixedParticipants?: Participant[];
 };
 
-export default function ActiveParticipantsGrid({ width }: Props) {
+export default function ActiveParticipantsGrid({ width, fixedParticipants }: Props) {
    const classes = useStyles();
-
-   const activeParticipants = useSelector(selectActiveParticipantsWithWebcam);
-   const participants = useSelector(selectParticipants);
+   const participants = useSomeParticipants(3, fixedParticipants);
 
    const [mainTileSize, setMainTileSize] = useState<Size>({ width: 0, height: 0 });
    const [secondaryTileSize, setSecondaryTileSize] = useState<Size>({ width: 0, height: 0 });
@@ -49,29 +46,21 @@ export default function ActiveParticipantsGrid({ width }: Props) {
       });
    }, [width]);
 
-   if (!participants) {
-      return null;
-   }
-
-   const participantDtos = activeParticipants
-      .map((participantId) => participants[participantId])
-      .filter((x): x is Participant => !!x);
-
    return (
       <div className={classes.root}>
-         {participantDtos.length > 0 && (
+         {participants.length > 0 && (
             <div style={{ ...mainTileSize }}>
-               <ParticipantTile disableLayoutAnimation {...mainTileSize} participant={participantDtos[0]} />
+               <ParticipantTile disableLayoutAnimation {...mainTileSize} participant={participants[0]} />
             </div>
          )}
-         {participantDtos.length > 1 && (
+         {participants.length > 1 && (
             <div className={classes.secondaryTiles}>
                <div style={{ ...secondaryTileSize }}>
-                  <ParticipantTile disableLayoutAnimation {...secondaryTileSize} participant={participantDtos[1]} />
+                  <ParticipantTile disableLayoutAnimation {...secondaryTileSize} participant={participants[1]} />
                </div>
-               {participantDtos.length > 2 && (
+               {participants.length > 2 && (
                   <div style={{ ...secondaryTileSize }}>
-                     <ParticipantTile disableLayoutAnimation {...secondaryTileSize} participant={participantDtos[2]} />
+                     <ParticipantTile disableLayoutAnimation {...secondaryTileSize} participant={participants[2]} />
                   </div>
                )}
             </div>

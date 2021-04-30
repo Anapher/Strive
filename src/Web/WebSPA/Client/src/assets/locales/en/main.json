@@ -32,7 +32,10 @@
         "schedule": "Schedule",
         "open_cron_expression_generator": "Open cron expression generator",
         "disable_room_chat_master": "Disable room chat for master room",
-        "show_participants_typing": "Show participants that are currently typing below chat"
+        "show_participants_typing": "Show participants that are currently typing below chat",
+        "hide_participants_without_webcam": "Don't show participants without active webcam",
+        "overlay_scene": "Overlay scene with webcam if necessary",
+        "default_scene": "Default Scene"
       },
       "moderators": {
         "error_user_not_found": "User with id \"{{id}}\" not found",

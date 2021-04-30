@@ -2,11 +2,15 @@ import {
    Box,
    Checkbox,
    Collapse,
+   FormControl,
    FormControlLabel,
    Grid,
    IconButton,
    InputAdornment,
+   InputLabel,
    makeStyles,
+   MenuItem,
+   Select,
    TextField,
    Typography,
 } from '@material-ui/core';
@@ -25,9 +29,19 @@ const checkBoxWidth = 150;
 const useStyles = makeStyles((theme) => ({
    root: {
       padding: theme.spacing(3),
+      width: '100%',
+      height: '100%',
+      overflowY: 'auto',
    },
    checkBoxLabel: {
       width: checkBoxWidth,
+   },
+   sectionGrid: {
+      paddingTop: theme.spacing(3),
+   },
+   selectFormControl: {
+      maxWidth: 240,
+      margin: theme.spacing(2, 0),
    },
 }));
 
@@ -158,47 +172,9 @@ export default function TabCommon({
                </Collapse>
             </div>
          </Grid>
-         <Grid item xs={12}>
-            <Box mt={4}>
-               <Typography variant="h6">{t('glossary:chat')}</Typography>
-               <Box>
-                  <FormControlLabel
-                     control={
-                        <Controller
-                           render={({ field: { onChange, value } }) => (
-                              <Checkbox onChange={(e) => onChange(e.target.checked)} checked={value} />
-                           )}
-                           control={control}
-                           name="configuration.chat.isGlobalChatEnabled"
-                        />
-                     }
-                     label={t('glossary:all_chat')}
-                  />
-                  <FormControlLabel
-                     control={
-                        <Controller
-                           render={({ field: { onChange, value } }) => (
-                              <Checkbox onChange={(e) => onChange(e.target.checked)} checked={value} />
-                           )}
-                           control={control}
-                           name="configuration.chat.isRoomChatEnabled"
-                        />
-                     }
-                     label={t('glossary:room_chat')}
-                  />
-                  <FormControlLabel
-                     control={
-                        <Controller
-                           render={({ field: { onChange, value } }) => (
-                              <Checkbox onChange={(e) => onChange(e.target.checked)} checked={value} />
-                           )}
-                           control={control}
-                           name="configuration.chat.isPrivateChatEnabled"
-                        />
-                     }
-                     label={t('glossary:private_chat')}
-                  />
-               </Box>
+         <Grid item xs={12} className={classes.sectionGrid}>
+            <Typography variant="h6">{t('glossary:chat')}</Typography>
+            <Box>
                <FormControlLabel
                   control={
                      <Controller
@@ -206,10 +182,10 @@ export default function TabCommon({
                            <Checkbox onChange={(e) => onChange(e.target.checked)} checked={value} />
                         )}
                         control={control}
-                        name="configuration.chat.isDefaultRoomChatDisabled"
+                        name="configuration.chat.isGlobalChatEnabled"
                      />
                   }
-                  label={t('dialog_create_conference.tabs.common.disable_room_chat_master')}
+                  label={t('glossary:all_chat')}
                />
                <FormControlLabel
                   control={
@@ -218,12 +194,99 @@ export default function TabCommon({
                            <Checkbox onChange={(e) => onChange(e.target.checked)} checked={value} />
                         )}
                         control={control}
-                        name="configuration.chat.showTyping"
+                        name="configuration.chat.isRoomChatEnabled"
                      />
                   }
-                  label={t('dialog_create_conference.tabs.common.show_participants_typing')}
+                  label={t('glossary:room_chat')}
+               />
+               <FormControlLabel
+                  control={
+                     <Controller
+                        render={({ field: { onChange, value } }) => (
+                           <Checkbox onChange={(e) => onChange(e.target.checked)} checked={value} />
+                        )}
+                        control={control}
+                        name="configuration.chat.isPrivateChatEnabled"
+                     />
+                  }
+                  label={t('glossary:private_chat')}
                />
             </Box>
+            <FormControlLabel
+               control={
+                  <Controller
+                     render={({ field: { onChange, value } }) => (
+                        <Checkbox onChange={(e) => onChange(e.target.checked)} checked={value} />
+                     )}
+                     control={control}
+                     name="configuration.chat.isDefaultRoomChatDisabled"
+                  />
+               }
+               label={t('dialog_create_conference.tabs.common.disable_room_chat_master')}
+            />
+            <FormControlLabel
+               control={
+                  <Controller
+                     render={({ field: { onChange, value } }) => (
+                        <Checkbox onChange={(e) => onChange(e.target.checked)} checked={value} />
+                     )}
+                     control={control}
+                     name="configuration.chat.showTyping"
+                  />
+               }
+               label={t('dialog_create_conference.tabs.common.show_participants_typing')}
+            />
+         </Grid>
+         <Grid item xs={12} className={classes.sectionGrid}>
+            <Typography variant="h6" gutterBottom>
+               {t('glossary:scene_plural')}
+            </Typography>
+            <div className={classes.selectFormControl}>
+               <FormControl fullWidth>
+                  <InputLabel id="default-scene-select-label">
+                     {t('dialog_create_conference.tabs.common.default_scene')}
+                  </InputLabel>
+                  <Controller
+                     render={({ field: { onChange, value } }) => (
+                        <Select
+                           labelId="default-scene-select-label"
+                           id="default-scene-select"
+                           value={value}
+                           onChange={onChange}
+                        >
+                           <MenuItem value="grid">{t('conference.scenes.grid')}</MenuItem>
+                           <MenuItem value="activeSpeaker">{t('conference.scenes.active_speaker')}</MenuItem>
+                        </Select>
+                     )}
+                     control={control}
+                     name="configuration.scenes.defaultScene"
+                  />
+               </FormControl>
+            </div>
+            <FormControlLabel
+               control={
+                  <Controller
+                     render={({ field: { onChange, value } }) => (
+                        <Checkbox onChange={(e) => onChange(e.target.checked)} checked={value} />
+                     )}
+                     control={control}
+                     name="configuration.scenes.hideParticipantsWithoutWebcam"
+                  />
+               }
+               label={t('dialog_create_conference.tabs.common.hide_participants_without_webcam')}
+            />
+            <FormControlLabel
+               control={
+                  <Controller
+                     render={({ field: { onChange, value } }) => (
+                        <Checkbox onChange={(e) => onChange(e.target.checked)} checked={value} />
+                     )}
+                     control={control}
+                     name="configuration.scenes.overlayScene"
+                  />
+               }
+               label={t('dialog_create_conference.tabs.common.overlay_scene')}
+            />
          </Grid>
       </Grid>
    );
