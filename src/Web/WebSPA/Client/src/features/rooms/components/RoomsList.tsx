@@ -29,6 +29,8 @@ const useStyles = makeStyles((theme) => ({
    rooms: {
       flex: 1,
       marginTop: theme.spacing(1),
+      minHeight: 0,
+      overflowY: 'auto',
    },
    roomHeader: {
       marginBottom: theme.spacing(0.5),
