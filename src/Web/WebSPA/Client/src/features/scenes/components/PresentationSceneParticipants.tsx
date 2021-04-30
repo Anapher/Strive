@@ -35,7 +35,11 @@ type Props = {
 
 export default function PresentationSceneParticipants({ location, tileWidth, tileHeight, fixedParticipants }: Props) {
    const classes = useStyles();
-   const participants = useSomeParticipants(4, fixedParticipants).reverse();
+   const participants = useSomeParticipants(4, {
+      includedParticipants: fixedParticipants,
+      activeOnly: true,
+      webcamOnly: true,
+   }).reverse();
 
    return (
       <div className={clsx({ [classes.rootBottom]: location === 'bottom', [classes.rootRight]: location === 'right' })}>

@@ -26,6 +26,9 @@ const useStyles = makeStyles((theme) => ({
    icon: {
       minWidth: 32,
    },
+   listItemText: {
+      marginRight: 36,
+   },
 }));
 
 export default React.forwardRef<HTMLDivElement, Props>(function SceneListItem(
@@ -38,7 +41,7 @@ export default React.forwardRef<HTMLDivElement, Props>(function SceneListItem(
    return (
       <ListItem button className={classes.root} onClick={onClick} selected={selected} ref={ref}>
          <ListItemIcon className={classes.icon}>{icon}</ListItemIcon>
-         <ListItemText primary={title} primaryTypographyProps={{ noWrap: true }} />
+         <ListItemText primary={title} className={classes.listItemText} primaryTypographyProps={{ noWrap: true }} />
          <ListItemSecondaryAction>
             <Radio
                edge="end"
