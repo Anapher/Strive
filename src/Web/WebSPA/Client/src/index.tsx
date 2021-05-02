@@ -8,6 +8,8 @@ import store from './store';
 import debug from 'debug';
 import './services/i18n';
 
+window.AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+
 debug.log = console.info.bind(console);
 
 ReactDOM.render(
