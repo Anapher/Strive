@@ -18,9 +18,10 @@ const useStyles = makeStyles({
 
 type Props = {
    children: React.ReactNode;
+   className?: string;
 };
 
-export default function TalkingStickFrame({ children }: Props) {
+export default function TalkingStickFrame({ children, className }: Props) {
    const { t } = useTranslation();
    const classes = useStyles();
    const dispatch = useDispatch();
@@ -44,7 +45,7 @@ export default function TalkingStickFrame({ children }: Props) {
    const queueYoureNext = queuePosition === 1;
 
    return (
-      <div>
+      <div className={className}>
          <Portal container={mediaContext.leftControlsContainer}>
             {isPresenter && (
                <Grid item>

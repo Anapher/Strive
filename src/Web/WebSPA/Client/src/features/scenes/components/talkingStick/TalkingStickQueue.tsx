@@ -11,7 +11,7 @@ import TalkingStickScreen from './TalkingStickScreen';
 
 export default function TalkingStickQueue({ className, next }: RenderSceneProps) {
    const overwritten = next();
-   if (overwritten) return <TalkingStickFrame>{overwritten}</TalkingStickFrame>;
+   if (overwritten) return <TalkingStickFrame className={className}>{overwritten}</TalkingStickFrame>;
 
    return <QueueNoPresenter className={className} />;
 }
