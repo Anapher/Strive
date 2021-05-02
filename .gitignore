@@ -325,3 +325,7 @@ lerna-debug.log
 # System Files
 .DS_Store
 Thumbs.db
+
+
+# Traefik Let's Encrypt
+acme.json
