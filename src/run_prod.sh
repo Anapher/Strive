@@ -2,7 +2,8 @@ export GITCOMMIT=$(git rev-parse --short HEAD)
 export GITREF="$(git log -1 --pretty=format:"%D")"
 export GITTIMESTAMP="$(git log -1 --pretty=format:"%ai")"
 
-export DNS_NAME_OR_IP=yourdomain.com
+export ANNOUNCED_IP=127.0.0.1
+export SITE_HOST=yourdomain.com
 export FRONTEND_DNS_OR_IP=www.yourdomain.com
 export STRIVE_TOKEN_SECRET=fill_in_random_token
 export STRIVE_API_KEY=fill_in_random_token

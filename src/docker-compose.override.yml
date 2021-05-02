@@ -38,4 +38,4 @@ services:
       - API_CONFERENCE_MANAGEMENT=http://strive/v1/sfu/{conferenceId}?apiKey=${STRIVE_API_KEY}
       - AMQP_CONNECTION_STRING=amqp://rabbitmq
       - API_TOKEN_SECRET=${STRIVE_TOKEN_SECRET}
-      - MEDIASOUP_ANNOUNCED_IP=${DNS_NAME_OR_IP} # this will not work with firefox if it's localhost. to make it work for firefox, use your local ipv4 here
+      - MEDIASOUP_ANNOUNCED_IP=${ANNOUNCED_IP} # this will not work with firefox if it's localhost. to make it work for firefox, use your local ipv4 here

@@ -20,7 +20,7 @@ services:
   identity-api:
     environment:
       - IdentityServer__SpaClientHost=https://${FRONTEND_DNS_OR_IP}
-      - IdentityServer__Issuer=https://identity.${DNS_NAME_OR_IP}
+      - IdentityServer__Issuer=https://identity.${SITE_HOST}
     labels:
       # Cors Middleware
       - "traefik.http.middlewares.cors.headers.accessControlAllowOriginList=https://${FRONTEND_DNS_OR_IP}"
@@ -28,7 +28,7 @@ services:
       - "traefik.http.middlewares.cors.headers.accessControlAllowHeaders=*,X-Requested-With,X-SignalR-User-Agent"
       - "traefik.http.middlewares.cors.headers.accessControlAllowCredentials=true"
       - "traefik.enable=true"
-      - "traefik.http.routers.identity-api.rule=Host(`identity.${DNS_NAME_OR_IP}`)"
+      - "traefik.http.routers.identity-api.rule=Host(`identity.${SITE_HOST}`)"
       - "traefik.http.routers.identity-api.entrypoints=websecure"
       - "traefik.http.routers.identity-api.middlewares=cors@docker"
       - "traefik.http.routers.identity-api.tls=true"
@@ -36,15 +36,15 @@ services:
   strive:
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.api.rule=Host(`api.${DNS_NAME_OR_IP}`)"
+      - "traefik.http.routers.api.rule=Host(`api.${SITE_HOST}`)"
       - "traefik.http.routers.api.entrypoints=websecure"
       - "traefik.http.services.strive.loadbalancer.healthcheck.path=/health/ready"
       - "traefik.http.routers.api.middlewares=cors@docker"
       - "traefik.http.routers.api.tls=true"
     environment:
-      - SFU__UrlTemplate=https://sfu.${DNS_NAME_OR_IP}/{0}
+      - SFU__UrlTemplate=https://sfu.${SITE_HOST}/{0}
       - Authentication__NoSslRequired=true
-      - Authentication__Issuer=https://identity.${DNS_NAME_OR_IP}
+      - Authentication__Issuer=https://identity.${SITE_HOST}
 
   webspa:
     labels:
@@ -54,16 +54,16 @@ services:
       - "traefik.http.services.webspa.loadbalancer.healthcheck.path=/health"
       - "traefik.http.routers.spa.tls=true"
     environment:
-      - App__IdentityUrl=https://identity.${DNS_NAME_OR_IP}
+      - App__IdentityUrl=https://identity.${SITE_HOST}
       - App__FrontendUrl=https://${FRONTEND_DNS_OR_IP}
-      - App__ConferenceUrl=https://api.${DNS_NAME_OR_IP}/
-      - App__SignalrHubUrl=https://api.${DNS_NAME_OR_IP}/signalr
-      - App__EquipmentSignalrHubUrl=https://api.${DNS_NAME_OR_IP}/equipment-signalr
+      - App__ConferenceUrl=https://api.${SITE_HOST}/
+      - App__SignalrHubUrl=https://api.${SITE_HOST}/signalr
+      - App__EquipmentSignalrHubUrl=https://api.${SITE_HOST}/equipment-signalr
 
   sfu:
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.sfu.rule=Host(`sfu.${DNS_NAME_OR_IP}`)"
+      - "traefik.http.routers.sfu.rule=Host(`sfu.${SITE_HOST}`)"
       - "traefik.http.routers.sfu.entrypoints=websecure"
       - "traefik.http.services.sfu.loadbalancer.healthcheck.path=/health"
       - "traefik.http.services.sfu.loadbalancer.healthcheck.port=9000"
