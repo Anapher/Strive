@@ -21,7 +21,7 @@ const CHAT_DEFAULT_WIDTH = 320;
 // optimize for 16:9
 const defaultContentRatio: Size = { width: 16, height: 9 };
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles((theme) => ({
    root: {
       height: '100%',
       display: 'flex',
@@ -43,6 +43,7 @@ const useStyles = makeStyles(() => ({
       display: 'flex',
       flexDirection: 'column',
       height: '100%',
+      padding: theme.spacing(1, 1, 1, 0),
    },
 }));
 

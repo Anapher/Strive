@@ -19,8 +19,7 @@ const useStyles = makeStyles((theme) => ({
       flexDirection: 'column',
       overflowY: 'hidden',
       borderColor: theme.palette.divider,
-      borderWidth: '0px 0px 0px 1px',
-      borderStyle: 'solid',
+      borderRadius: theme.shape.borderRadius,
       height: '100%',
    },
 }));

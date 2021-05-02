@@ -38,6 +38,8 @@ const useStyles = makeStyles((theme) => ({
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
+      borderTopLeftRadius: 0,
+      borderTopRightRadius: 0,
    },
    modeButton: {
       padding: theme.spacing(1, 1, 1, 2),

@@ -1,36 +1,35 @@
 import { ClickAwayListener, fade, IconButton, makeStyles, Paper, Tooltip } from '@material-ui/core';
-import clsx from 'classnames';
-import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import RoomsList from 'src/features/rooms/components/RoomsList';
-import { RootState } from 'src/store';
-import { setParticipantsOpen } from '../reducer';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import { motion } from 'framer-motion';
 import { Pin, PinOff } from 'mdi-material-ui';
+import React from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import RoomsList from 'src/features/rooms/components/RoomsList';
+import SceneManagement from 'src/features/scenes/components/SceneManagement';
+import { RootState } from 'src/store';
+import { setParticipantsOpen } from '../reducer';
 
-const drawerWidth = 200;
+const drawerWidth = 216;
 
 const useStyles = makeStyles((theme) => ({
-   drawer: {
+   drawerContainer: {
+      padding: theme.spacing(1, 0, 1, 1),
       width: drawerWidth,
+      height: '100%',
+   },
+   drawer: {
+      display: 'flex',
+      flexDirection: 'column',
+
       flexShrink: 0,
+      width: '100%',
       whiteSpace: 'nowrap',
 
       backgroundColor: fade(theme.palette.background.paper, 0.5),
-      borderTopLeftRadius: 0,
-      borderBottomLeftRadius: 0,
       height: '100%',
-   },
-   drawerOpen: {
-      width: drawerWidth,
+
       borderColor: theme.palette.divider,
-      borderWidth: '0px 1px 0px 0px',
-      borderStyle: 'solid',
-   },
-   drawerClose: {
-      overflowX: 'hidden',
-      width: 0,
+      borderWidth: 0,
    },
    listRoot: {
       position: 'relative',
@@ -76,15 +75,14 @@ export default function PinnableSidebar({ pinned, onTogglePinned }: Props) {
    return (
       <ClickAwayListener onClickAway={handleClickAway}>
          <div className={classes.listRoot}>
-            <Paper
-               className={clsx(classes.drawer, {
-                  [classes.drawerOpen]: open,
-                  [classes.drawerClose]: !open,
-               })}
-               elevation={1}
-            >
-               <RoomsList />
-            </Paper>
+            {open && (
+               <div className={classes.drawerContainer}>
+                  <Paper className={classes.drawer} elevation={1}>
+                     <RoomsList />
+                     <SceneManagement />
+                  </Paper>
+               </div>
+            )}
             <div className={classes.backArrowButton}>
                <IconButton aria-label="toggle room list" size="small" onClick={handleToggle}>
                   <ArrowBackIcon

@@ -5,16 +5,16 @@ import { useDispatch, useSelector } from 'react-redux';
 import * as coreHub from 'src/core-hub';
 import ParticipantItem from 'src/features/conference/components/ParticipantItem';
 import { selectParticipants } from 'src/features/conference/selectors';
-import SceneManagement from 'src/features/scenes/components/SceneManagement';
 import useMyParticipantId from 'src/hooks/useMyParticipantId';
 import { selectRoomViewModels } from '../selectors';
 import RoomHeader from './RoomHeader';
 
 const useStyles = makeStyles((theme) => ({
    root: {
-      height: '100%',
+      flex: 1,
       display: 'flex',
       flexDirection: 'column',
+      minHeight: 0,
    },
    room: {
       flex: 1,
@@ -72,7 +72,6 @@ export default function RoomsList() {
                </div>
             ))}
          </div>
-         <SceneManagement />
       </div>
    );
 }

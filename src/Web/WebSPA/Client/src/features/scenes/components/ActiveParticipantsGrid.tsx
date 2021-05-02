@@ -6,12 +6,12 @@ import useSomeParticipants from '../useSomeParticipants';
 import ParticipantTile from './ParticipantTile';
 
 export const ACTIVE_PARTICIPANTS_WEBCAM_RATIO = 9 / 16;
-export const ACTIVE_PARTICIPANTS_MARGIN = 0;
+export const ACTIVE_PARTICIPANTS_MARGIN = 8;
 export const ACTIVE_PARTICIPANTS_SECONDARY_TILES_SPACE = 8;
 
 const useStyles = makeStyles({
    root: {
-      padding: ACTIVE_PARTICIPANTS_MARGIN,
+      paddingRight: ACTIVE_PARTICIPANTS_MARGIN,
       height: '100%',
    },
 });
@@ -32,7 +32,7 @@ export default function ActiveParticipantsGrid({ width, fixedParticipants }: Pro
    const [mainTileSize, setMainTileSize] = useState<Size>({ width: 0, height: 0 });
 
    useEffect(() => {
-      const mainTileWidth = width - 2 * ACTIVE_PARTICIPANTS_MARGIN;
+      const mainTileWidth = width - ACTIVE_PARTICIPANTS_MARGIN;
       setMainTileSize({
          width: mainTileWidth,
          height: mainTileWidth * ACTIVE_PARTICIPANTS_WEBCAM_RATIO,
@@ -42,7 +42,7 @@ export default function ActiveParticipantsGrid({ width, fixedParticipants }: Pro
    return (
       <div className={classes.root}>
          {participants.length > 0 && (
-            <div style={{ ...mainTileSize, marginBottom: 4 }}>
+            <div style={{ ...mainTileSize, marginBottom: 8 }}>
                <ParticipantTile disableLayoutAnimation {...mainTileSize} participant={participants[0]} />
             </div>
          )}
