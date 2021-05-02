@@ -18,6 +18,7 @@ const logLibrary = debug('signalr:library');
 
 export default (): SignalRResult => {
    let connection: HubConnection | undefined;
+   let subscribedEvents = new Array<string>();
 
    // Define the list of handlers, now that we have an instance of ReduxWebSocket.
    const handlers: {
@@ -47,6 +48,7 @@ export default (): SignalRResult => {
                dispatch(actions.close());
             });
 
+            subscribedEvents = [...defaultEvents];
             for (const eventName of defaultEvents) {
                log('subscribe event %s', eventName);
                connection.on(eventName, (args) => dispatch(actions.onEventOccurred(eventName)(args)));
@@ -88,8 +90,9 @@ export default (): SignalRResult => {
          }
       },
       [actions.subscribeEvent.type]: ({ dispatch }, { payload: { name } }) => {
-         if (connection) {
+         if (connection && !subscribedEvents.includes(name)) {
             log('subscribe event %s', name);
+            subscribedEvents.push(name);
             connection.on(name, (args) => dispatch(actions.onEventOccurred(name)(args)));
          }
       },

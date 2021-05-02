@@ -52,6 +52,13 @@ const chatSlice = createSlice({
             state.selectedChannel = Object.keys(state.channels ?? {})[0];
          }
       },
+      clearChat(state) {
+         if (state.channels) {
+            for (const channel of Object.values(state.channels)) {
+               if (channel.viewModel) channel.viewModel.messages = [];
+            }
+         }
+      },
    },
    extraReducers: {
       [coreHub.fetchChatMessages.returnAction]: (
@@ -102,6 +109,7 @@ export const {
    removeAnnouncement,
    openPrivateChat,
    closePrivateChat,
+   clearChat,
 } = chatSlice.actions;
 
 export default chatSlice.reducer;

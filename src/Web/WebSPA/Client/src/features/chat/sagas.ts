@@ -1,6 +1,8 @@
 import { put, select } from '@redux-saga/core/effects';
+import { PayloadAction } from '@reduxjs/toolkit';
 import { takeEvery } from 'redux-saga/effects';
-import { sendChatMessage } from 'src/core-hub';
+import { events, sendChatMessage } from 'src/core-hub';
+import { ChatMessageDto } from 'src/core-hub.types';
 import { showErrorOn } from 'src/store/notifier/utils';
 import { takeEverySynchronizedObjectChange } from 'src/store/saga-utils';
 import { onEventOccurred } from 'src/store/signal/actions';
@@ -8,9 +10,6 @@ import { CHAT } from 'src/store/signal/synchronization/synchronized-object-ids';
 import { ChatChannelWithId } from './channel-serializer';
 import { addAnnouncement, setSelectedChannel } from './reducer';
 import { selectChannels, selectSelectedChannel } from './selectors';
-import { events } from 'src/core-hub';
-import { PayloadAction } from '@reduxjs/toolkit';
-import { ChatMessageDto } from 'src/core-hub.types';
 
 export default function* mySaga() {
    yield showErrorOn(sendChatMessage.returnAction);

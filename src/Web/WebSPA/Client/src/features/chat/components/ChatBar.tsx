@@ -7,7 +7,7 @@ import { RootState } from 'src/store';
 import * as actions from '../actions';
 import { ChatChannelWithId } from '../channel-serializer';
 import { hashCode, numberToColor } from '../color-utils';
-import { setSelectedChannel } from '../reducer';
+import { clearChat, setSelectedChannel } from '../reducer';
 import { selectChannels, selectSelectedChannel } from '../selectors';
 import Chat from './Chat';
 import ChatChannelTabs from './ChatChannelTabs';
@@ -41,6 +41,7 @@ export default function ChatBar() {
 
    useEffect(() => {
       if (connected) {
+         dispatch(clearChat());
          dispatch(actions.subscribeChatMessages());
       }
    }, [connected]);
