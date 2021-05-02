@@ -1,8 +1,7 @@
 import { makeStyles, Typography } from '@material-ui/core';
-import React from 'react';
-import clsx from 'classnames';
-import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { TalkingStickMode } from '../../types';
 import ActiveChipsLayout from '../ActiveChipsLayout';
 

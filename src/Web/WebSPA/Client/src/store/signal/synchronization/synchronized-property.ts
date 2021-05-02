@@ -53,7 +53,7 @@ class SynchronizedSingle implements ISynchronizedProperty {
       applyPatch(currentStateValue, value);
    }
 
-   remove(id: string, state: any): void {
+   remove(): void {
       // dont remove the object as we might have a new default object with just a different id
    }
 }
