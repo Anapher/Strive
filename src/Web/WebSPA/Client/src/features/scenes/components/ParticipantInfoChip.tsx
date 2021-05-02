@@ -1,5 +1,5 @@
 import { makeStyles, useTheme } from '@material-ui/core';
-import Chip from '@material-ui/core/Chip';
+import Chip, { ChipProps } from '@material-ui/core/Chip';
 import clsx from 'classnames';
 import React from 'react';
 import { useSelector } from 'react-redux';
@@ -28,13 +28,14 @@ const useStyles = makeStyles((theme) => ({
    },
 }));
 
-type Props = {
+type Props = ChipProps<any, { component: any }> & {
    participantId: string;
    participant?: Participant;
    audioInfo?: ParticipantAudioInfo;
+   className?: string;
 };
 
-export default function ParticipantInfoChip({ participantId, participant, audioInfo }: Props) {
+export default function ParticipantInfoChip({ className, participantId, participant, audioInfo, ...props }: Props) {
    const classes = useStyles();
    const theme = useTheme();
    const micActivated = useSelector((state: RootState) => selectParticipantMicActivated(state, participantId));
@@ -42,7 +43,7 @@ export default function ParticipantInfoChip({ participantId, participant, audioI
    return (
       <Chip
          size="small"
-         className={clsx(classes.chip, {
+         className={clsx(classes.chip, className, {
             [classes.chipSpeaking]: audioInfo?.speaking,
             [classes.chipMicDeactivated]: !micActivated,
          })}
@@ -50,6 +51,7 @@ export default function ParticipantInfoChip({ participantId, participant, audioI
          label={participant?.displayName ?? participantId}
          variant="outlined"
          icon={<AnimatedMicIcon activated={micActivated} disabledColor={theme.palette.error.main} />}
+         {...props}
       />
    );
 }
