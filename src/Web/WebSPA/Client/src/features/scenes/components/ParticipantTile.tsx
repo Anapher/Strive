@@ -1,7 +1,7 @@
 import { fade, IconButton, makeStyles, Typography, useTheme } from '@material-ui/core';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import clsx from 'classnames';
-import { motion, MotionValue, useTransform } from 'framer-motion';
+import { AnimateSharedLayout, motion, MotionValue, useTransform } from 'framer-motion';
 import React, { useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import AnimatedMicIcon from 'src/assets/animated-icons/AnimatedMicIcon';
@@ -75,12 +75,11 @@ const useStyles = makeStyles((theme) => ({
 type Props = {
    className?: string;
    participant: Participant;
-   disableLayoutAnimation?: boolean;
    width: number;
    height: number;
 };
 
-export default function ParticipantTile({ className, participant, width, height, disableLayoutAnimation }: Props) {
+export default function ParticipantTile({ className, participant, width, height }: Props) {
    const classes = useStyles();
    const consumer = useConsumer(participant.id, 'webcam');
    const micActivated = useSelector((state: RootState) => selectParticipantMicActivated(state, participant?.id));
@@ -109,7 +108,7 @@ export default function ParticipantTile({ className, participant, width, height,
    };
 
    return (
-      <>
+      <AnimateSharedLayout>
          <motion.div className={clsx(classes.root, className)}>
             <RenderConsumerVideo consumer={consumer} height={height} width={width} className={classes.video} />
             <motion.div style={{ borderWidth: audioBorder }} className={classes.volumeBorder} />
@@ -117,12 +116,7 @@ export default function ParticipantTile({ className, participant, width, height,
             {isWebcamActive && (
                <motion.div className={classes.infoBox}>
                   <AnimatedMicIcon activated={micActivated} disabledColor={theme.palette.error.main} />
-                  <Typography
-                     component={motion.h4}
-                     layoutId={disableLayoutAnimation ? undefined : `name-${participant.id}`}
-                     variant="h4"
-                     style={{ fontSize, marginLeft: 8 }}
-                  >
+                  <Typography component={motion.h4} layoutId="name" variant="h4" style={{ fontSize, marginLeft: 8 }}>
                      {participant.displayName}
                   </Typography>
                </motion.div>
@@ -136,12 +130,7 @@ export default function ParticipantTile({ className, participant, width, height,
                      className={classes.micIconWithoutWebcam}
                   />
                   <div className={classes.centerText}>
-                     <Typography
-                        component={motion.span}
-                        layoutId={disableLayoutAnimation ? undefined : `name-${participant.id}`}
-                        variant="h4"
-                        style={{ fontSize }}
-                     >
+                     <Typography component={motion.span} layoutId="name" variant="h4" style={{ fontSize }}>
                         {participant.displayName}
                      </Typography>
                   </div>
@@ -167,6 +156,6 @@ export default function ParticipantTile({ className, participant, width, height,
             participant={participant}
             anchorEl={moreIconRef.current}
          />
-      </>
+      </AnimateSharedLayout>
    );
 }

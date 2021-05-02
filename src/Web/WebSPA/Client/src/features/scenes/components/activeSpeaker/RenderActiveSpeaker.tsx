@@ -50,7 +50,7 @@ export default function RenderActiveSpeaker({ className, dimensions, next }: Ren
    return (
       <div className={clsx(className, classes.root, activeParticipants.length === 1 && classes.rootCenter)}>
          <div style={{ margin: 8, ...size }}>
-            <ParticipantTile {...size} participant={activeParticipants[0]} disableLayoutAnimation />
+            <ParticipantTile {...size} participant={activeParticipants[0]} />
          </div>
          <div style={{ display: 'flex', marginTop: 8 }}>
             {activeParticipants.slice(1).map((participant, i) => (
@@ -58,12 +58,7 @@ export default function RenderActiveSpeaker({ className, dimensions, next }: Ren
                   style={{ width: tileWidth, height: tileHeight, marginRight: i === 0 ? 16 : 0 }}
                   key={participant.id}
                >
-                  <ParticipantTile
-                     width={tileWidth}
-                     height={tileHeight}
-                     participant={participant}
-                     disableLayoutAnimation
-                  />
+                  <ParticipantTile width={tileWidth} height={tileHeight} participant={participant} />
                </div>
             ))}
          </div>

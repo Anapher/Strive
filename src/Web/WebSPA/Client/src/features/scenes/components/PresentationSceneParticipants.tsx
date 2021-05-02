@@ -50,7 +50,7 @@ export default function PresentationSceneParticipants({ location, tileWidth, til
                key={x.id}
                style={{ width: tileWidth, height: tileHeight, marginLeft: i === 0 ? 8 : 0 }}
             >
-               <ParticipantTile participant={x} width={tileWidth} height={tileHeight} disableLayoutAnimation />
+               <ParticipantTile participant={x} width={tileWidth} height={tileHeight} />
             </motion.div>
          ))}
       </div>

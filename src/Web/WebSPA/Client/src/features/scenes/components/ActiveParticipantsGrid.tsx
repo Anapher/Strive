@@ -43,7 +43,7 @@ export default function ActiveParticipantsGrid({ width, fixedParticipants }: Pro
       <div className={classes.root}>
          {participants.length > 0 && (
             <div style={{ ...mainTileSize, marginBottom: 8 }}>
-               <ParticipantTile disableLayoutAnimation {...mainTileSize} participant={participants[0]} />
+               <ParticipantTile {...mainTileSize} participant={participants[0]} />
             </div>
          )}
       </div>
