@@ -281,7 +281,7 @@
           "table": {
             "id": "Id",
             "state": "State",
-            "recevied": "Received",
+            "received": "Received",
             "sent": "Sent"
           }
         },

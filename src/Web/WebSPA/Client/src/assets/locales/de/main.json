@@ -192,7 +192,7 @@
           },
           "table": {
             "id": "ID",
-            "recevied": "Empfangen",
+            "received": "Empfangen",
             "sent": "Gesendet",
             "state": "Status"
           },
