@@ -119,7 +119,7 @@ export const useParticipantAudio = (participantId: string) => {
       return () => {
          context.off('update', onUpdate);
       };
-   }, [context]);
+   }, [context, participantId]);
 
    return audioInfo;
 };
