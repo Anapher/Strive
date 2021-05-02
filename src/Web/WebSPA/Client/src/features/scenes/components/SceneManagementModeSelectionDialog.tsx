@@ -29,6 +29,7 @@ export default function SceneManagementModeSelectionDialog({
             ({ ModeSceneListItem, type }) =>
                ModeSceneListItem && (
                   <ModeSceneListItem
+                     key={type}
                      selectedScene={selectedScene}
                      availableScene={availableScenes.find((x) => x.type === type)}
                      onChangeScene={onChangeScene}
