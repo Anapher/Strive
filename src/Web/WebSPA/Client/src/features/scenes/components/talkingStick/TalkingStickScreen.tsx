@@ -4,6 +4,7 @@ import clsx from 'classnames';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { TalkingStickMode } from '../../types';
+import ActiveChipsLayout from '../ActiveChipsLayout';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -39,7 +40,7 @@ export default function TalkingStickScreen({ children, className, mode, footerCh
    const { t } = useTranslation();
 
    return (
-      <div className={clsx(className, classes.root)}>
+      <ActiveChipsLayout className={className} contentClassName={classes.root}>
          <motion.div initial={{ translateY: -48 }} animate={{ translateY: 0 }} className={classes.headerContainer}>
             <Typography variant="h2" align="center">
                {t('conference.scenes.talking_stick')}
@@ -54,6 +55,6 @@ export default function TalkingStickScreen({ children, className, mode, footerCh
             {children}
          </motion.div>
          <div className={classes.footer}>{footerChildren}</div>
-      </div>
+      </ActiveChipsLayout>
    );
 }

@@ -24,15 +24,16 @@ type Props = {
    children?: React.ReactNode;
    className?: string;
    style?: React.CSSProperties;
+   contentClassName?: string;
 };
 
-export default function ActiveChipsLayout({ children, className, style }: Props) {
+export default function ActiveChipsLayout({ children, className, style, contentClassName }: Props) {
    const classes = useStyles();
 
    return (
       <div className={clsx(classes.root, className)} style={style}>
          <ActiveParticipantsChips className={classes.chips} />
-         <div className={classes.content}>{children}</div>
+         <div className={clsx(classes.content, contentClassName)}>{children}</div>
       </div>
    );
 }
