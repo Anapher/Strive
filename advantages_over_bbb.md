@@ -1,5 +1,5 @@
 # Advantages over BigBlueButton
-Initially, I created Strive because I was tried with BigBlueButton. I identified some points that I would do different than the creators of BBB. In this document, I want to describe advantages of Strive in comparison to BBB. Please note that I was a tutor at my university.
+Initially, I created Strive because I was tired with BigBlueButton. I identified some points that I would do different than the creators of BBB. In this document, I want to describe advantages of Strive in comparison to BBB. Please note that I was a tutor at my university.
 
 ### Global chat
 If breakout rooms are active, the global chat is very nice for students to ask questions, as all students no matter in which breakout room they currently are can see them (and especially the answer).
