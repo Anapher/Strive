@@ -24,8 +24,8 @@
 ## Table of content
 
 - [About the project](#about-the-project)
-    - [Architecture](#architecture)
     - [Features](#features)
+    - [Architecture](#architecture)
 - [Getting Started](#getting-started)
     - [Running on localhost with Docker Compose and Traefik](#running-on-localhost-with-docker-compose-and-traefik)
     - [Running on production server](#running-on-production-server)
@@ -47,7 +47,7 @@ Last year when I was tutor at my university, I had to use BigBlueButton which wa
 - Multiple scenes (grid, active speaker)
 - Presenter mode
 - Room Chat & Global Chat, anonymous chat messages
-- Use smartphone as webcam by scanning QR code
+- Equipment / use smartphone as webcam by scanning a QR code
 - Talking Stick / moderated talking
 - Reduce traffic using WebRTC simulcast
 - Up-to-date and responsive UI
