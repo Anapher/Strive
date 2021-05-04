@@ -31,6 +31,7 @@
     - [Development](#development)
 - [Contributing](#contributing)
 - [License](#license)
+- [Acknowledgements](#acknowledgements)
 
 
 ## About The Project
@@ -39,6 +40,17 @@ Last year when I was tutor at my university, I had to use BigBlueButton which wa
 ### Architecture
 ![Architecture](./img/architecture.png)
 
+#### WebSPA
+The frontend, written with React/TypeScript. Basically everything you see.
+
+#### Identity Microservice
+Manages the authentication process. This is basically an [OpenID Connect](https://openid.net/connect/) server that provides the frontend for the login aswell as managing the access/refresh tokens.
+
+#### Selective Forwarding Unit (SFU)
+Redirects the media traffic (audio/video) between the participants.
+
+#### Conference Management
+This is the heart of Strive, here are conferences created, chat messages delivered, rooms created etc.
 
 <!-- GETTING STARTED -->
 ## Getting Started
@@ -111,3 +123,12 @@ Contributions are what make the open source community such an amazing place to b
 ## License
 
 Distributed under the Apache-2.0 License. See `LICENSE` for more information.
+
+
+<!-- ACKNOWLEDGEMENTS -->
+## Acknowledgements
+* [ASP.Net Core](https://docs.microsoft.com/en-us/aspnet/core)
+* [mediasoup](https://mediasoup.org/)
+* [Material-UI](https://material-ui.com/)
+* [React Hook Form](https://react-hook-form.com/)
+* [Duende IdentityServer](https://duendesoftware.com/)
