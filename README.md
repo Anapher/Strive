@@ -74,6 +74,7 @@ This is the heart of Strive, here are conferences created, chat messages deliver
    ```sh
    chmod +x ./compose.sh && ./compose.sh up --build
    ```
+4. Go to `https://localhost` using your favorite browser. Please note that you may have to trust the self signed certificate for localhost. If you are using Google Chrome, you can simply enable this option [chrome://flags/#allow-insecure-localhost](chrome://flags/#allow-insecure-localhost)
    
 In the `.env` file you can change some parameters, but they are already preconfigured for local testing.
 
