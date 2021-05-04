@@ -25,6 +25,7 @@
 
 - [About the project](#about-the-project)
     - [Architecture](#architecture)
+    - [Features](#features)
 - [Getting Started](#getting-started)
     - [Running on localhost with Docker Compose and Traefik](#running-on-localhost-with-docker-compose-and-traefik)
     - [Running on production server](#running-on-production-server)
@@ -36,6 +37,23 @@
 
 ## About The Project
 Last year when I was tutor at my university, I had to use BigBlueButton which was a very frustrating experience. I wondered how hard it can be to create a video conference system and that's how Strive was started. You can find a list with issues of BBB I wanted to address [here](./advantages_over_bbb.md).
+
+
+### Features
+
+- Flexible Permission System
+- Breakout Rooms
+- Screen Share
+- Multiple scenes (grid, active speaker)
+- Presenter mode
+- Room Chat & Global Chat, anonymous chat messages
+- Use smartphone as webcam by scanning QR code
+- Talking Stick / moderated talking
+- Reduce traffic using WebRTC simulcast
+- Up-to-date and responsive UI
+- Announcements / show a message to all participants, also these in breakout rooms
+- Horizontal and vertical scalability
+
 
 ### Architecture
 ![Architecture](./img/architecture.png)
