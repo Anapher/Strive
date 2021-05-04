@@ -68,7 +68,7 @@ Last year when I was tutor at my university, I had to use BigBlueButton which wa
    chmod +x ./compose.sh && ./compose.sh up --build
    ```
    
-In the `.env` file, you can change some parameters, but they are already preconfigured for local testing.
+In the `.env` file you can change some parameters, but they are already preconfigured for local testing.
 
 ### Running on production server
 Please refer to the [installation instructions](./installation.md).
@@ -89,7 +89,7 @@ Then you need to start the required microservices you do NOT want to modify:
    ```sh
    cd src/Web/WebSPA && dotnet run
    ```
-  Do not use yarn start in the ClientApp folder, as the ASP.Net Core app injects some parameters required for the frontend to work.
+  Do not use yarn start in the ClientApp folder, as the ASP.Net Core app injects some parameters required for the frontend to work. Fast refresh will still work in the React app.
 - SFU (runs on `http://localhost:3000`)
    ```sh
    cd src/Services/SFU && yarn dev
@@ -98,4 +98,4 @@ Then you need to start the required microservices you do NOT want to modify:
    ```sh
    cd src/Services/ConferenceManagement/Strive && dotnet run
    ```
-Do not change these ports as they are by configured to work together in a local development environment.
+Do not change these ports as they are configured to work together in a local development environment. You can then attach a debugger to the microservice you want to change. For ASP.Net Core projects, instead of executing this command you may also open the solution with Visual Studio and run the debugger here.
