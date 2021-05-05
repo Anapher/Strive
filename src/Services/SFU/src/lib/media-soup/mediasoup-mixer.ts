@@ -128,7 +128,7 @@ export class MediasoupMixer {
          consumer = await transport.consume({
             producerId: producer.id,
             rtpCapabilities: connection.rtpCapabilities,
-            paused: false,
+            paused: true,
          });
       } catch (error) {
          logger.warn('createConsumer() | transport.consume():%o', error);
