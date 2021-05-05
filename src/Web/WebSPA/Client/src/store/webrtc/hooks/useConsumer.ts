@@ -1,7 +1,18 @@
 import { Consumer } from 'mediasoup-client/lib/types';
 import { useEffect, useState } from 'react';
+import { UnregisterConsumerCallback } from '../consumer-usage-control';
 import { ProducerSource } from '../types';
 import useWebRtc from './useWebRtc';
+
+const findConsumer = (consumers: IterableIterator<Consumer>, participantId: string, kind: ProducerSource) => {
+   for (const c of consumers) {
+      if (c.appData.participantId == participantId && c.appData.source === kind) {
+         return c;
+      }
+   }
+
+   return null;
+};
 
 export default function useConsumer(participantId: string | undefined, kind: ProducerSource): Consumer | null {
    const [consumer, setConsumer] = useState<Consumer | null>(null);
@@ -9,43 +20,54 @@ export default function useConsumer(participantId: string | undefined, kind: Pro
 
    useEffect(() => {
       let currentConsumer: string | undefined;
+      let unregister: UnregisterConsumerCallback | undefined;
+
       if (connection && participantId) {
-         const findConsumer = (consumers: IterableIterator<Consumer>) => {
-            for (const c of consumers) {
-               if (c.appData.participantId == participantId && c.appData.source === kind) {
-                  return c;
-               }
+         const updateConsumer = () => {
+            const consumerId = findConsumer(connection.consumerManager.getConsumers(), participantId, kind)?.id;
+            let consumerUse: [Consumer, UnregisterConsumerCallback] | undefined;
+
+            if (consumerId) {
+               consumerUse = connection.consumerUsageControl.useConsumer(consumerId);
             }
 
-            return null;
-         };
+            unregister?.();
+            unregister = undefined;
 
-         const initConsumer = (consumer: Consumer | null) => {
-            currentConsumer = consumer?.id;
-            setConsumer(consumer);
-            if (consumer && consumer.paused) {
-               connection.changeStream({ type: 'consumer', action: 'resume', id: consumer.id });
-            }
-         };
-
-         const listener = () => {
-            initConsumer(findConsumer(connection.getConsumers()));
-         };
-
-         const updateListener = ({ consumerId }: { consumerId: string }) => {
-            if (currentConsumer === consumerId) {
-               const consumer = findConsumer(connection.getConsumers());
-               setConsumer(consumer);
-               currentConsumer = consumer?.id;
+            if (!consumerUse) {
+               currentConsumer = undefined;
+               setConsumer(null);
+            } else {
+               const [newConsumer, dispose] = consumerUse;
+               currentConsumer = newConsumer.id;
+               setConsumer(newConsumer);
+               unregister = dispose;
             }
          };
 
-         initConsumer(findConsumer(connection.getConsumers()));
-         connection.eventEmitter.addListener('onConsumersChanged', listener);
-         connection.eventEmitter.addListener('onConsumerUpdated', updateListener);
+         const onConsumerAdded = () => {
+            if (!currentConsumer) {
+               console.log('uppdate consumer' + kind);
+
+               updateConsumer();
+            }
+         };
+
+         const onConsumerRemoved = (id: string) => {
+            if (id === currentConsumer) {
+               updateConsumer();
+            }
+         };
+
+         updateConsumer();
+
+         connection.consumerManager.on('consumerAdded', onConsumerAdded);
+         connection.consumerManager.on('consumerRemoved', onConsumerRemoved);
          return () => {
-            connection.eventEmitter.removeListener('onConsumersChanged', listener);
-            connection.eventEmitter.removeListener('onConsumerUpdated', updateListener);
+            connection.consumerManager.off('consumerAdded', onConsumerAdded);
+            connection.consumerManager.off('consumerRemoved', onConsumerRemoved);
+
+            unregister?.();
          };
       } else {
          setConsumer(null);

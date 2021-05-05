@@ -149,20 +149,14 @@ export default function useMedia(
             }
          };
 
-         connection.eventEmitter.on('onProducerChanged', producerChangedHandler);
+         connection.on('onProducerChanged', producerChangedHandler);
 
          return () => {
-            connection.eventEmitter.off('onProducerChanged', producerChangedHandler);
+            disable(true);
+            connection.off('onProducerChanged', producerChangedHandler);
          };
       }
    }, [connection]);
-
-   // disable device on component unmount
-   useEffect(() => {
-      return () => {
-         disable();
-      };
-   }, []);
 
    return { enable, disable, enabled, pause, resume, paused, switchDevice, connected: !!connection, streamInfo };
 }

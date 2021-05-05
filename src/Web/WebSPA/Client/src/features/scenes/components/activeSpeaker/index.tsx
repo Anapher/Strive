@@ -4,6 +4,7 @@ import SceneListItem from '../SceneListItem';
 import RecordVoiceOverIcon from '@material-ui/icons/RecordVoiceOver';
 import RenderActiveSpeaker from './RenderActiveSpeaker';
 import { useTranslation } from 'react-i18next';
+import allowOverwrite from '../../allow-overwrite-hoc';
 
 function AvailableSceneListItem(props: AvailableSceneListItemProps) {
    const { t } = useTranslation();
@@ -13,7 +14,7 @@ function AvailableSceneListItem(props: AvailableSceneListItemProps) {
 const presenter: ScenePresenter<ActiveSpeakerScene> = {
    type: 'activeSpeaker',
    AvailableSceneListItem,
-   RenderScene: RenderActiveSpeaker,
+   RenderScene: allowOverwrite(RenderActiveSpeaker),
    getAutoHideMediaControls: () => true,
 };
 

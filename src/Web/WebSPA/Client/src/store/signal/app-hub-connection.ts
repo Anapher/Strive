@@ -1,10 +1,12 @@
 import { HubConnection } from '@microsoft/signalr';
-import { EventEmitter } from 'events';
+import { TypedEmitter } from 'tiny-typed-emitter';
 
-class AppHubConnection {
+interface AppHubConnectionEvents {
+   update: () => void;
+}
+
+class AppHubConnection extends TypedEmitter<AppHubConnectionEvents> {
    private connection: HubConnection | undefined;
-
-   public eventEmitter = new EventEmitter();
 
    get current() {
       return this.connection;
@@ -12,12 +14,12 @@ class AppHubConnection {
 
    public register(hub: HubConnection) {
       this.connection = hub;
-      this.eventEmitter.emit('update');
+      this.emit('update');
    }
 
    public remove() {
       this.connection = undefined;
-      this.eventEmitter.emit('update');
+      this.emit('update');
    }
 }
 

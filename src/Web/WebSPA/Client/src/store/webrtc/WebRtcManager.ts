@@ -1,8 +1,8 @@
 import debug from 'debug';
-import { EventEmitter } from 'events';
 import { SuccessOrError } from 'src/communication-types';
 import { SfuConnectionInfo } from 'src/core-hub.types';
 import { sleep } from 'src/utils/promise-utils';
+import { TypedEmitter } from 'tiny-typed-emitter';
 import appHubConn from '../signal/app-hub-connection';
 import SfuClient from './sfu-client';
 import { WebRtcConnection } from './WebRtcConnection';
@@ -17,10 +17,15 @@ export type WebRtcOptions = {
 
 export type WebRtcStatus = 'uninitialized' | 'connecting' | 'connected';
 
+interface WebRtcManagerEvents {
+   update: () => void;
+   statuschanged: () => void;
+}
+
 /**
  * Manager for {@see WebRtcConnection}. This class will initialize the connection and reconnect if the connection is lost
  */
-export class WebRtcManager extends EventEmitter {
+export class WebRtcManager extends TypedEmitter<WebRtcManagerEvents> {
    private _current: WebRtcConnection | undefined;
 
    constructor(private options: WebRtcOptions) {
@@ -41,7 +46,7 @@ export class WebRtcManager extends EventEmitter {
       // ensure that only one connection loop is activated
       if (this.status !== 'uninitialized') return;
 
-      appHubConn.eventEmitter.on('update', () => this.tryConnect());
+      appHubConn.on('update', () => this.tryConnect());
       this.tryConnect();
    }
 

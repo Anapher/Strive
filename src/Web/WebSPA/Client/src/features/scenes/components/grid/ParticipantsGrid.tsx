@@ -9,16 +9,13 @@ import { GridScene, RenderSceneProps } from '../../types';
 import ActiveChipsLayout from '../ActiveChipsLayout';
 import RenderGrid from './RenderGrid';
 
-export default function ParticipantsGrid({ dimensions, className, next }: RenderSceneProps<GridScene>) {
+export default function ParticipantsGrid({ dimensions, className }: RenderSceneProps<GridScene>) {
    const participants = useSelector(selectParticipants);
    let visibleParticipants = useSelector(selectParticipantsOfCurrentRoom)
       .map((id) => participants[id])
       .filter((x): x is Participant => Boolean(x));
    const options = useSelector(selectSceneOptions);
    const participantsWithWebcam = useSelector(selectParticipantsOfRoomWebcamAvailable);
-
-   const overwrite = next();
-   if (overwrite) return <>{overwrite}</>;
 
    if (options?.hideParticipantsWithoutWebcam) {
       visibleParticipants = visibleParticipants.filter((x) => participantsWithWebcam.includes(x.id));

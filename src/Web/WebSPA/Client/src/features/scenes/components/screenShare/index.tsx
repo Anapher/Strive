@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { selectParticipant } from 'src/features/conference/selectors';
 import { RootState } from 'src/store';
+import allowOverwrite from '../../allow-overwrite-hoc';
 import { AvailableSceneListItemProps, ScenePresenter, ScreenShareScene } from '../../types';
 import SceneListItem from '../SceneListItem';
 import ScreenShare from './ScreenShare';
@@ -20,7 +21,7 @@ function AvailableSceneListItem(props: AvailableSceneListItemProps<ScreenShareSc
 const presenter: ScenePresenter<ScreenShareScene> = {
    type: 'screenShare',
    AvailableSceneListItem,
-   RenderScene: ScreenShare,
+   RenderScene: allowOverwrite(ScreenShare),
    getSceneId: (scene) => `${scene.type}::${scene.participantId}`,
    getAutoHideMediaControls: (scene, participantId) => scene.participantId !== participantId,
 };

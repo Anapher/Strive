@@ -1,9 +1,13 @@
-import { EventEmitter } from 'events';
 import { MotionValue } from 'framer-motion';
 import hark from 'hark';
+import { TypedEmitter } from 'tiny-typed-emitter';
 import { ParticipantAudioElement } from './types';
 
-export default class AudioManager extends EventEmitter {
+interface AudioManagerEvents {
+   update: (participantId: string) => void;
+}
+
+export default class AudioManager extends TypedEmitter<AudioManagerEvents> {
    public audioElems = new Map<string, ParticipantAudioElement>();
 
    register(
@@ -57,7 +61,7 @@ export default class AudioManager extends EventEmitter {
       elem.play();
 
       this.audioElems.set(participantId, { audioLevel, elem, stream, hark: analyser });
-      this.emit('update', { participantId });
+      this.emit('update', participantId);
    }
 
    unregister(participantId: string) {
@@ -65,7 +69,7 @@ export default class AudioManager extends EventEmitter {
       if (audioElem) {
          this.audioElems.delete(participantId);
          audioElem.hark.stop();
-         this.emit('update', { participantId });
+         this.emit('update', participantId);
       }
    }
 }

@@ -108,13 +108,13 @@ export const useParticipantAudio = (participantId: string) => {
    useEffect(() => {
       if (!context) return;
 
-      const onUpdate = ({ participantId: eventId }: { participantId: string }) => {
-         if (eventId === participantId) {
+      const onUpdate = (id: string) => {
+         if (id === participantId) {
             setAudioInfo(context.audioElems.get(participantId));
          }
       };
 
-      onUpdate({ participantId });
+      onUpdate(participantId);
       context.on('update', onUpdate);
       return () => {
          context.off('update', onUpdate);

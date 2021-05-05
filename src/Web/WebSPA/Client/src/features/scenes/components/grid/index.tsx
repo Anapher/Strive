@@ -4,6 +4,7 @@ import SceneListItem from '../SceneListItem';
 import AppsIcon from '@material-ui/icons/Apps';
 import ParticipantsGrid from './ParticipantsGrid';
 import { useTranslation } from 'react-i18next';
+import allowOverwrite from '../../allow-overwrite-hoc';
 
 function AvailableSceneListItem(props: AvailableSceneListItemProps) {
    const { t } = useTranslation();
@@ -13,7 +14,7 @@ function AvailableSceneListItem(props: AvailableSceneListItemProps) {
 const presenter: ScenePresenter<GridScene> = {
    type: 'grid',
    AvailableSceneListItem,
-   RenderScene: ParticipantsGrid,
+   RenderScene: allowOverwrite(ParticipantsGrid),
    getAutoHideMediaControls: () => true,
 };
 

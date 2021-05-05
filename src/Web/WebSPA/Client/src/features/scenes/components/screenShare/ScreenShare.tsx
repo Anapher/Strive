@@ -9,7 +9,7 @@ import { selectSceneOptions } from '../../selectors';
 import { RenderSceneProps, ScreenShareScene } from '../../types';
 import PresentationSceneMaxSize from '../PresentationSceneMaxSize';
 
-export default function ScreenShare({ className, dimensions, scene, next }: RenderSceneProps<ScreenShareScene>) {
+export default function ScreenShare({ className, dimensions, scene }: RenderSceneProps<ScreenShareScene>) {
    const { participantId } = scene;
 
    const videoSize: Size = { width: 1920, height: 1080 };
@@ -17,9 +17,6 @@ export default function ScreenShare({ className, dimensions, scene, next }: Rend
 
    const participant = useSelector((state: RootState) => selectParticipant(state, participantId));
    const sceneOptions = useSelector(selectSceneOptions);
-
-   const overwrite = next({ appliedShowMediaControls: true });
-   if (overwrite) return <>{overwrite}</>;
 
    return (
       <PresentationSceneMaxSize

@@ -1,9 +1,11 @@
 import { HubConnection } from '@microsoft/signalr';
 import debug from 'debug';
-import { EventEmitter } from 'events';
 import { Device } from 'mediasoup-client';
-import { Consumer, MediaKind, RtpParameters, Transport } from 'mediasoup-client/lib/types';
+import { MediaKind, RtpParameters, Transport } from 'mediasoup-client/lib/types';
 import { HubSubscription, subscribeEvent, unsubscribeAll } from 'src/utils/signalr-utils';
+import { TypedEmitter } from 'tiny-typed-emitter';
+import ConsumerManager from './consumer-manager';
+import ConsumerUsageControl from './consumer-usage-control';
 import SfuClient from './sfu-client';
 import { ChangeStreamRequest, ConsumerLayers, ConsumerScore, ProducerSource, SetPreferredLayersRequest } from './types';
 
@@ -49,20 +51,22 @@ export type ConsumerStatusInfo = {
    prefferredLayers?: ConsumerLayers;
 };
 
-export class WebRtcConnection {
-   /** all current consumers */
-   private consumers = new Map<string, Consumer>();
+interface WebRtcConnectionEvents {
+   onProducerChanged: (args: ProducerChangedEventArgs) => void;
+}
 
-   /** the latest received score for all consumers */
-   private consumerInfo = new Map<string, ConsumerStatusInfo>();
-
+export class WebRtcConnection extends TypedEmitter<WebRtcConnectionEvents> {
    /** SignalR methods that were subscribed. Must be memorized for unsubscription in close() */
    private signalrSubscription = new Array<HubSubscription>();
 
    private joiningConsumers = new Map<string, number>();
    private joiningConsumersId = 0;
 
+   public consumerManager = new ConsumerManager();
+   public consumerUsageControl = new ConsumerUsageControl(this);
+
    constructor(private connection: HubConnection, private client: SfuClient) {
+      super();
       this.device = new Device();
 
       this.signalrSubscription.push(
@@ -77,8 +81,6 @@ export class WebRtcConnection {
       );
    }
 
-   public eventEmitter = new EventEmitter();
-
    public device: Device;
    public sendTransport: Transport | null = null;
    public receiveTransport: Transport | null = null;
@@ -91,26 +93,16 @@ export class WebRtcConnection {
       return this.device.canProduce('audio');
    }
 
-   public getConsumers(): IterableIterator<Consumer> {
-      return this.consumers.values();
-   }
-
-   public getConsumerInfo(consumerId: string): ConsumerStatusInfo | undefined {
-      return this.consumerInfo.get(consumerId);
-   }
-
    public close(): void {
       log('Close connection');
 
       this.sendTransport?.close();
       this.receiveTransport?.close();
 
-      for (const consumer of this.consumers.values()) {
+      for (const consumer of this.consumerManager.getConsumers()) {
          consumer.close();
+         this.consumerManager.removeConsumer(consumer);
       }
-
-      this.consumers.clear();
-      this.eventEmitter.emit('onConsumersChanged');
 
       unsubscribeAll(this.connection, this.signalrSubscription);
    }
@@ -139,33 +131,25 @@ export class WebRtcConnection {
             consumer.close();
             log('[Consumer: %s] detected race condition, consumer was closed while creating, delete consumer', id);
             return;
+         } else {
+            this.joiningConsumers.delete(id);
          }
 
-         this.joiningConsumers.delete(id);
-
-         this.consumers.set(consumer.id, consumer);
-         consumer.on('transportclose', () => this.consumers.delete(consumer.id));
-
-         this.eventEmitter.emit('onConsumersChanged');
+         this.consumerManager.addConsumer(consumer);
          log('[Consumer: %s] Consumer added successfully', id);
       } catch (error) {
          log('[Consumer: %s] Error on adding consumer %O', id, error);
       }
-
-      console.log(this.consumers);
    }
 
    private onConsumerClosed({ consumerId }: ConsumerInfoPayload) {
-      const consumer = this.consumers.get(consumerId);
-
+      const consumer = this.consumerManager.getConsumer(consumerId);
       this.joiningConsumers.delete(consumerId);
 
       if (consumer) {
          consumer.close();
-         this.consumers.delete(consumerId);
-         this.consumerInfo.delete(consumerId);
-         this.eventEmitter.emit('onConsumerUpdated', { consumerId });
 
+         this.consumerManager.removeConsumer(consumer);
          log('[Consumer: %s] Removed', consumerId);
       } else {
          log('[Consumer: %s] Received consumer closed event, but consumer was not found', consumerId);
@@ -173,11 +157,10 @@ export class WebRtcConnection {
    }
 
    private onConsumerPaused({ consumerId }: ConsumerInfoPayload) {
-      const consumer = this.consumers.get(consumerId);
+      const consumer = this.consumerManager.getConsumer(consumerId);
       if (consumer) {
          consumer.pause();
-         this.consumerInfo.delete(consumerId);
-         this.eventEmitter.emit('onConsumerUpdated', { consumerId });
+         this.consumerManager.pausedConsumer(consumer.id);
 
          log('[Consumer: %s] Paused', consumerId);
       } else {
@@ -186,10 +169,10 @@ export class WebRtcConnection {
    }
 
    private onConsumerResumed({ consumerId }: ConsumerInfoPayload) {
-      const consumer = this.consumers.get(consumerId);
+      const consumer = this.consumerManager.getConsumer(consumerId);
       if (consumer) {
          consumer.resume();
-         this.eventEmitter.emit('onConsumerUpdated', { consumerId });
+         this.consumerManager.resumedConsumer(consumer.id);
 
          log('[Consumer: %s] Resumed', consumerId);
       } else {
@@ -198,16 +181,16 @@ export class WebRtcConnection {
    }
 
    private onProducerChanged(args: ProducerChangedEventArgs) {
-      this.eventEmitter.emit('onProducerChanged', args);
+      this.emit('onProducerChanged', args);
    }
 
    private onConsumerScore({ consumerId, score }: ConsumerScorePayload) {
-      this.updateConsumerInfo(consumerId, { score });
+      this.consumerManager.updateConsumerInfo(consumerId, { score });
       log('[Consumer: %s] Receive consumer score: %O', consumerId, score);
    }
 
    private onLayersChanged({ consumerId, layers }: LayersChangedPayload) {
-      this.updateConsumerInfo(consumerId, { currentLayers: layers });
+      this.consumerManager.updateConsumerInfo(consumerId, { currentLayers: layers });
       log('[Consumer: %s] Receive consumer layers: %O', consumerId, layers);
    }
 
@@ -319,7 +302,7 @@ export class WebRtcConnection {
    }
 
    public async setConsumerLayers(request: SetPreferredLayersRequest): Promise<void> {
-      const currentInfo = this.consumerInfo.get(request.consumerId);
+      const currentInfo = this.consumerManager.getConsumerInfo(request.consumerId);
       if (
          currentInfo?.prefferredLayers?.spatialLayer === request.layers.spatialLayer &&
          currentInfo?.prefferredLayers?.temporalLayer === request.layers.temporalLayer
@@ -332,14 +315,6 @@ export class WebRtcConnection {
          throw result.error;
       }
 
-      this.updateConsumerInfo(request.consumerId, { prefferredLayers: request.layers });
-   }
-
-   private updateConsumerInfo(consumerId: string, update: Partial<ConsumerStatusInfo>) {
-      this.consumerInfo.set(consumerId, {
-         ...this.consumerInfo.get(consumerId),
-         ...update,
-      });
-      this.eventEmitter.emit('onConsumerStatusInfoUpdated', { consumerId });
+      this.consumerManager.updateConsumerInfo(request.consumerId, { prefferredLayers: request.layers });
    }
 }

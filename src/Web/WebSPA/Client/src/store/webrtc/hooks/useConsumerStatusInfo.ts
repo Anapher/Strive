@@ -2,26 +2,29 @@ import { useEffect, useState } from 'react';
 import { ConsumerStatusInfo } from '../WebRtcConnection';
 import useWebRtc from './useWebRtc';
 
-export default function useConsumerStatusInfo(consumerId: string): ConsumerStatusInfo | undefined {
+export default function useConsumerStatusInfo(consumerId: string): ConsumerStatusInfo | null {
    const connection = useWebRtc();
-   const [info, setInfo] = useState<ConsumerStatusInfo | undefined>();
+   const [info, setInfo] = useState<ConsumerStatusInfo | null>(null);
 
    useEffect(() => {
       if (!connection) {
-         setInfo(undefined);
+         setInfo(null);
          return;
       }
 
-      const handleUpdateConsumerScore = ({ consumerId }: { consumerId: string }) => {
-         setInfo(connection.getConsumerInfo(consumerId));
+      const handleUpdateConsumerScore = (id: string) => {
+         if (id === consumerId) {
+            setInfo(connection.consumerManager.getConsumerInfo(consumerId) ?? null);
+         }
       };
 
-      handleUpdateConsumerScore({ consumerId });
-      connection.eventEmitter.on('onConsumerStatusInfoUpdated', handleUpdateConsumerScore);
+      handleUpdateConsumerScore(consumerId);
+
+      connection.consumerManager.on('consumerInfoUpdated', handleUpdateConsumerScore);
       return () => {
-         connection.eventEmitter.off('onConsumerStatusInfoUpdated', handleUpdateConsumerScore);
+         connection.consumerManager.off('consumerInfoUpdated', handleUpdateConsumerScore);
       };
-   }, [connection]);
+   }, [connection, consumerId]);
 
    return info;
 }

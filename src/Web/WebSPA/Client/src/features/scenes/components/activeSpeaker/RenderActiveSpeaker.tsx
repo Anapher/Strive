@@ -26,7 +26,7 @@ const getListeningParticipantsWidth = (width: number) => {
    return 340;
 };
 
-export default function RenderActiveSpeaker({ className, dimensions, next }: RenderSceneProps<ActiveSpeakerScene>) {
+export default function RenderActiveSpeaker({ className, dimensions }: RenderSceneProps<ActiveSpeakerScene>) {
    const classes = useStyles();
 
    const tileWidth = getListeningParticipantsWidth(dimensions.width);
@@ -41,9 +41,6 @@ export default function RenderActiveSpeaker({ className, dimensions, next }: Ren
    const smallTileCount = (dimensions.width - 8) / (tileWidth + 8);
 
    const activeParticipants = useSomeParticipants(smallTileCount);
-
-   const overwrite = next();
-   if (overwrite) return <>{overwrite}</>;
 
    if (activeParticipants.length === 0) return null;
 

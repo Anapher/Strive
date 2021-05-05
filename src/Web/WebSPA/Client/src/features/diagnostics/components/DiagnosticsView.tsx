@@ -27,17 +27,19 @@ export default function DiagnosticsView() {
    useEffect(() => {
       if (connection) {
          const handleUpdateConsumers = () => {
-            setConsumers(Array.from(connection.getConsumers()));
+            setConsumers(Array.from(connection.consumerManager.getConsumers()));
          };
 
-         connection.eventEmitter.addListener('onConsumersChanged', handleUpdateConsumers);
-         connection.eventEmitter.addListener('onConsumerUpdated', handleUpdateConsumers);
+         connection.consumerManager.on('consumerAdded', handleUpdateConsumers);
+         connection.consumerManager.on('consumerRemoved', handleUpdateConsumers);
+         connection.consumerManager.on('consumerUpdated', handleUpdateConsumers);
 
          handleUpdateConsumers();
 
          return () => {
-            connection.eventEmitter.removeListener('onConsumersChanged', handleUpdateConsumers);
-            connection.eventEmitter.removeListener('onConsumerUpdated', handleUpdateConsumers);
+            connection.consumerManager.off('consumerAdded', handleUpdateConsumers);
+            connection.consumerManager.off('consumerRemoved', handleUpdateConsumers);
+            connection.consumerManager.off('consumerUpdated', handleUpdateConsumers);
          };
       }
    }, [connection]);
