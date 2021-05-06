@@ -1,9 +1,10 @@
-import { Box, Button, FormControl, InputLabel, ListSubheader, makeStyles, MenuItem, Select } from '@material-ui/core';
+import { Box, Button, FormControl, InputLabel, makeStyles } from '@material-ui/core';
 import clsx from 'classnames';
 import _, { Collection } from 'lodash';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
+import MobileAwareSelect from 'src/components/MobileAwareSelect';
 import { showMessage } from 'src/store/notifier/actions';
 import { DeviceGroup, EquipmentDeviceGroup } from '../selectors';
 import { fetchDevices } from '../thunks';
@@ -79,32 +80,29 @@ export default function DeviceSelector({ devices, defaultName, className, select
       <Box display="flex" alignItems="flex-end">
          <FormControl className={clsx(className, classes.control)}>
             <InputLabel htmlFor={selectId}>{label}</InputLabel>
-            <Select
+            <MobileAwareSelect
                id={selectId}
                value={selectedDevice ? getId(selectedDevice) : defaultDevice ? getId(defaultDevice) : ''}
                onChange={handleChange}
             >
-               {devices
-                  .find((x) => x.type === 'local')
-                  ?.devices.map((x, i) => (
-                     <MenuItem key={getId(x.device)} value={getId(x.device)}>
-                        {x.label || `${defaultName} #${i}`}
-                     </MenuItem>
-                  ))}
-               {devices
-                  .filter((x) => x.type !== 'local')
-                  .map((x) => x as EquipmentDeviceGroup)
-                  .map((x, i) => [
-                     <ListSubheader key={x.connectionId}>
-                        {x.equipmentName || t('conference.settings.unnamed_device')}
-                     </ListSubheader>,
-                     x.devices.map((x) => (
-                        <MenuItem key={getId(x.device)} value={getId(x.device)}>
-                           {x.label || `${defaultName} #${i}`}
-                        </MenuItem>
-                     )),
-                  ])}
-            </Select>
+               {[
+                  ...(devices
+                     .find((x) => x.type === 'local')
+                     ?.devices.map((x, i) => ({ value: getId(x.device), label: x.label || `${defaultName} #${i}` })) ||
+                     []),
+                  ...devices
+                     .filter((x) => x.type !== 'local')
+                     .map((x) => x as EquipmentDeviceGroup)
+                     .map((x, i) => ({
+                        label: x.equipmentName || t('conference.settings.unnamed_device'),
+                        key: x.connectionId,
+                        children: x.devices.map((x) => ({
+                           value: getId(x.device),
+                           label: x.label || `${defaultName} #${i}`,
+                        })),
+                     })),
+               ]}
+            </MobileAwareSelect>
          </FormControl>
          <Box ml={1} onClick={handleRefresh}>
             <Button>{t('common:refresh')}</Button>

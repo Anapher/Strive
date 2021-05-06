@@ -1,6 +1,7 @@
-import { Box, FormControl, InputLabel, Link, makeStyles, MenuItem, Select, Typography } from '@material-ui/core';
+import { Box, FormControl, InputLabel, Link, makeStyles, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import MobileAwareSelect from 'src/components/MobileAwareSelect';
 import appSettings from 'src/config';
 import { supportedLanguages } from 'src/services/i18n';
 
@@ -31,18 +32,14 @@ export default function CommonSettings() {
       <div className={classes.root}>
          <FormControl className={classes.languageSelect} fullWidth>
             <InputLabel id="language-select-label">{t('common:language')}</InputLabel>
-            <Select
+            <MobileAwareSelect
                labelId="language-select-label"
                id="language-select"
                value={i18n.languages.find((x) => supportedLanguages.find((y) => y.id === x))}
                onChange={handleChangeLanguage}
             >
-               {supportedLanguages.map(({ id, name }) => (
-                  <MenuItem value={id} key={id}>
-                     {name}
-                  </MenuItem>
-               ))}
-            </Select>
+               {supportedLanguages.map(({ id, name }) => ({ value: id, label: name }))}
+            </MobileAwareSelect>
          </FormControl>
 
          <Box mt={4}>

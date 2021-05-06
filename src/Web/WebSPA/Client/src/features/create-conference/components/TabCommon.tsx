@@ -9,20 +9,19 @@ import {
    InputAdornment,
    InputLabel,
    makeStyles,
-   MenuItem,
-   Select,
    TextField,
    Typography,
 } from '@material-ui/core';
+import ScheduleIcon from '@material-ui/icons/Schedule';
 import cronstrue from 'cronstrue/i18n';
 import { DateTime } from 'luxon';
 import React, { useEffect, useRef, useState } from 'react';
 import { Controller, UseFormReturn } from 'react-hook-form';
-import ScheduleIcon from '@material-ui/icons/Schedule';
-import { ConferenceDataForm } from '../form';
-import { wrapForInputRef } from 'src/utils/reat-hook-form-utils';
-import NativeIsoDateInput from 'src/components/NativeIsoDateInput';
 import { useTranslation } from 'react-i18next';
+import MobileAwareSelect from 'src/components/MobileAwareSelect';
+import NativeIsoDateInput from 'src/components/NativeIsoDateInput';
+import { wrapForInputRef } from 'src/utils/reat-hook-form-utils';
+import { ConferenceDataForm } from '../form';
 
 const checkBoxWidth = 150;
 
@@ -248,15 +247,17 @@ export default function TabCommon({
                   </InputLabel>
                   <Controller
                      render={({ field: { onChange, value } }) => (
-                        <Select
+                        <MobileAwareSelect
                            labelId="default-scene-select-label"
                            id="default-scene-select"
                            value={value}
                            onChange={onChange}
                         >
-                           <MenuItem value="grid">{t('conference.scenes.grid')}</MenuItem>
-                           <MenuItem value="activeSpeaker">{t('conference.scenes.active_speaker')}</MenuItem>
-                        </Select>
+                           {[
+                              { value: 'grid', label: t<string>('conference.scenes.grid') },
+                              { value: 'activeSpeaker', label: t<string>('conference.scenes.active_speaker') },
+                           ]}
+                        </MobileAwareSelect>
                      )}
                      control={control}
                      name="configuration.scenes.defaultScene"
