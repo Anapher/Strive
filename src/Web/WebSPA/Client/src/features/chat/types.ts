@@ -7,6 +7,7 @@ export type ChatSynchronizedObjectViewModel = {
 
 export type ChannelViewModel = {
    messages: ChatMessageDto[];
+   messagesFetched: boolean;
    newMessages: boolean;
    messagesError?: DomainError;
 };

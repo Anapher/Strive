@@ -77,14 +77,19 @@ const chatSlice = createSlice({
 
          if (payload.success) {
             if (!channel.viewModel) {
-               channel.viewModel = { messages: payload.response, newMessages: false };
+               channel.viewModel = { messages: payload.response, newMessages: false, messagesFetched: true };
             } else {
                channel.viewModel.messages = mergeChatMessages(channel.viewModel.messages, payload.response);
             }
             channel.viewModel.messagesError = undefined;
          } else {
             if (!channel.viewModel) {
-               channel.viewModel = { messages: [], newMessages: false, messagesError: payload.error };
+               channel.viewModel = {
+                  messages: [],
+                  newMessages: false,
+                  messagesError: payload.error,
+                  messagesFetched: false,
+               };
             } else {
                channel.viewModel.messagesError = payload.error;
             }
@@ -94,7 +99,7 @@ const chatSlice = createSlice({
          const channel = state.channels?.[payload.channel];
          if (!channel) return;
 
-         if (!channel.viewModel) channel.viewModel = { messages: [], newMessages: false };
+         if (!channel.viewModel) channel.viewModel = { messages: [], newMessages: false, messagesFetched: false };
          channel.viewModel.messages.push(payload);
 
          if (state.selectedChannel !== payload.channel) channel.viewModel.newMessages = true;

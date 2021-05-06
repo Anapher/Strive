@@ -4,7 +4,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import * as coreHub from 'src/core-hub';
 import { SendChatMessageDto } from 'src/core-hub.types';
 import { RootState } from 'src/store';
-import { selectIsNewChannel, selectMessages, selectMessagesError, selectParticipantsTyping } from '../selectors';
+import {
+   selectIsNewChannel,
+   selectMessages,
+   selectMessagesError,
+   selectMessagesFetched,
+   selectParticipantsTyping,
+} from '../selectors';
 import ChatMessageList from './ChatMessageList';
 import NewChat from './NewChat';
 import ParticipantsTyping from './ParticipantsTyping';
@@ -29,6 +35,7 @@ type Props = {
 
 export default function Chat({ channel, participantId, participantColors }: Props) {
    const messages = useSelector((state: RootState) => selectMessages(state, channel));
+   const messagesFetched = useSelector((state: RootState) => selectMessagesFetched(state, channel));
    const error = useSelector((state: RootState) => selectMessagesError(state, channel));
    const dispatch = useDispatch();
    const classes = useStyles();
@@ -43,7 +50,7 @@ export default function Chat({ channel, participantId, participantColors }: Prop
    };
 
    useEffect(() => {
-      if (!messages && !isNewChannel) {
+      if (!messagesFetched && !isNewChannel) {
          handleFetchChat();
       }
    }, [messages, channel, isNewChannel]);

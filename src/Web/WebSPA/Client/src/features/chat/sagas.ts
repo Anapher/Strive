@@ -7,9 +7,9 @@ import { showErrorOn } from 'src/store/notifier/utils';
 import { takeEverySynchronizedObjectChange } from 'src/store/saga-utils';
 import { onEventOccurred } from 'src/store/signal/actions';
 import { CHAT } from 'src/store/signal/synchronization/synchronized-object-ids';
-import { ChatChannelWithId } from './channel-serializer';
-import { addAnnouncement, setSelectedChannel } from './reducer';
-import { selectChannels, selectSelectedChannel } from './selectors';
+import { ChatChannelWithId, decode } from './channel-serializer';
+import { addAnnouncement, openPrivateChat, setSelectedChannel } from './reducer';
+import { selectChannels, selectOpenedPrivateChats, selectSelectedChannel } from './selectors';
 
 export default function* mySaga() {
    yield showErrorOn(sendChatMessage.returnAction);
@@ -44,6 +44,13 @@ function* adjustSelectedChannel(): any {
 function* onChatMessage({ payload }: PayloadAction<ChatMessageDto>) {
    if (payload.options.isAnnouncement) {
       yield put(addAnnouncement(payload));
+   }
+
+   if (decode(payload.channel).type === 'private') {
+      const openedChannels: string[] = yield select(selectOpenedPrivateChats);
+      if (!openedChannels.includes(payload.channel)) {
+         yield put(openPrivateChat(payload.channel));
+      }
    }
 }
 

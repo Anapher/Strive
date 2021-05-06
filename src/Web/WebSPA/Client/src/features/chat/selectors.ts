@@ -11,6 +11,9 @@ export const selectParticipantsTyping = (state: RootState, channelId: string) =>
 export const selectMessages = (state: RootState, channel: string) =>
    state.chat.channels?.[channel]?.viewModel?.messages;
 
+export const selectMessagesFetched = (state: RootState, channel: string) =>
+   state.chat.channels?.[channel]?.viewModel?.messagesFetched;
+
 export const selectMessagesError = (state: RootState, channel: string) =>
    state.chat.channels?.[channel]?.viewModel?.messagesError;
 
@@ -23,7 +26,7 @@ const selectChannelIds = (state: RootState) => {
    return [...synchronizedChannels.filter((x) => !privateChannels.includes(x)), ...privateChannels];
 };
 
-const selectOpenedPrivateChats = (state: RootState) => state.chat.openedPrivateChats;
+export const selectOpenedPrivateChats = (state: RootState) => state.chat.openedPrivateChats;
 
 export const selectChannels = createSelector(
    selectChannelIds,
