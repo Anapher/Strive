@@ -68,6 +68,11 @@ export default function SceneManagement() {
    const canSetScene = usePermission(SCENES_CAN_SET_SCENE);
    const canOverwriteScene = usePermission(SCENES_CAN_OVERWRITE_CONTENT_SCENE);
 
+   // getIsActionListItemVisible() may contain hooks
+   const visibleActionItemPresenter = presenters.filter(
+      (x) => x.ActionListItem && (!x.getIsActionListItemVisible || x.getIsActionListItemVisible()),
+   );
+
    const synchronized = useSelector((state: RootState) => state.scenes.synchronized);
    if (synchronized === null) return null;
 
@@ -98,10 +103,6 @@ export default function SceneManagement() {
          };
       }),
       (x) => sceneDisplayOrder.indexOf(x.scene.type),
-   );
-
-   const visibleActionItemPresenter = presenters.filter(
-      (x) => x.ActionListItem && (!x.getIsActionListItemVisible || x.getIsActionListItemVisible()),
    );
 
    return (
