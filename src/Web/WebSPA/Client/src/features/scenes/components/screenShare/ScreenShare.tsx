@@ -33,6 +33,7 @@ export default function ScreenShare({ className, dimensions, scene }: RenderScen
                   height={size.height}
                   width={size.width}
                   diagnosticsLocation="top-right"
+                  videoContain
                />
             </div>
          )}

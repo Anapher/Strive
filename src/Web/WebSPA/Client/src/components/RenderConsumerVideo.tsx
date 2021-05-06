@@ -83,6 +83,8 @@ type Props = {
    consumer?: Consumer | null;
    className?: string;
 
+   videoContain?: boolean;
+
    diagnosticsLocation?: 'bottom-right' | 'top-right';
 };
 
@@ -91,6 +93,7 @@ export default function RenderConsumerVideo({
    width,
    height,
    className,
+   videoContain,
    diagnosticsLocation = 'bottom-right',
 }: Props) {
    const connection = useWebRtc();
@@ -131,7 +134,13 @@ export default function RenderConsumerVideo({
 
    return (
       <>
-         <video ref={videoRef} className={clsx(className, classes.video)} hidden={!isActive} autoPlay />
+         <video
+            ref={videoRef}
+            className={clsx(className, classes.video)}
+            hidden={!isActive}
+            autoPlay
+            style={videoContain ? { objectFit: 'contain' } : undefined}
+         />
          {consumer && showDiagnostics && (
             <div
                className={clsx({
