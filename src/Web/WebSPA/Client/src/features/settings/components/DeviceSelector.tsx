@@ -27,6 +27,11 @@ type Props = {
    selectedDevice?: AnyInputDevice;
 };
 
+const parseDeviceId: (deviceId: string) => [string, string] = (deviceId) => {
+   const i = deviceId.indexOf('/');
+   return [deviceId.slice(0, i), deviceId.slice(i + 1)];
+};
+
 const getId = (device: AnyInputDevice) =>
    device.type === 'local' ? `local/${device.deviceId}` : `${device.connectionId}/${device.deviceId}`;
 
@@ -40,16 +45,13 @@ export default function DeviceSelector({ devices, defaultName, className, select
       const value = event.target.value as string;
       if (!value) return;
 
-      let deviceId: string | undefined;
       let possibleDevices: Collection<DeviceGroup> | undefined;
 
-      if (value.startsWith('local/')) {
+      const [type, deviceId] = parseDeviceId(value);
+      if (type === 'local') {
          possibleDevices = _(devices).filter((x) => x.type === 'local');
-         deviceId = value.split('/')[1];
       } else {
-         const split = value.split('/');
-         possibleDevices = _(devices).filter((x) => x.type === 'equipment' && x.connectionId === split[0]);
-         deviceId = split[1];
+         possibleDevices = _(devices).filter((x) => x.type === 'equipment' && x.connectionId === type);
       }
 
       const viewModel = possibleDevices.flatMap((x) => x.devices).find((x) => x.device.deviceId === deviceId);
