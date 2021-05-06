@@ -303,10 +303,7 @@ export class WebRtcConnection extends TypedEmitter<WebRtcConnectionEvents> {
 
       this.receiveTransport = transport;
 
-      console.log(
-         'Receive transport created successfully, process %d pending consumers...',
-         this.pendingConsumers.length,
-      );
+      log('Receive transport created successfully, process %d pending consumers...', this.pendingConsumers.length);
 
       for (const payload of this.pendingConsumers) {
          await this.initNewConsumer(payload, transport);
