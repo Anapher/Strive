@@ -58,6 +58,7 @@ interface WebRtcConnectionEvents {
 export class WebRtcConnection extends TypedEmitter<WebRtcConnectionEvents> {
    /** SignalR methods that were subscribed. Must be memorized for unsubscription in close() */
    private signalrSubscription = new Array<HubSubscription>();
+   private pendingConsumers = new Array<OnNewConsumerPayload>();
 
    private joiningConsumers = new Map<string, number>();
    private joiningConsumersId = 0;
@@ -107,19 +108,28 @@ export class WebRtcConnection extends TypedEmitter<WebRtcConnectionEvents> {
       unsubscribeAll(this.connection, this.signalrSubscription);
    }
 
-   private async onNewConsumer({ id, producerId, kind, rtpParameters, appData, participantId }: OnNewConsumerPayload) {
+   private async onNewConsumer(payload: OnNewConsumerPayload) {
       if (!this.receiveTransport) {
-         log('received new consumer, but receive transport is not initialized');
+         log('[Consumer: %s] Received new consumer, but receive transport is not initialized, cache', payload.id);
+         this.pendingConsumers.push(payload);
          return;
       }
 
-      log('[Consumer: %s] Received new consumer event, try to process...', id);
+      log('[Consumer: %s] Received new consumer event, initialize', payload.id);
+      await this.initNewConsumer(payload, this.receiveTransport);
+   }
+
+   private async initNewConsumer(
+      { id, producerId, kind, rtpParameters, appData, participantId }: OnNewConsumerPayload,
+      transport: Transport,
+   ): Promise<void> {
+      log('[Consumer: %s] Begin initializing consumer...', id);
 
       try {
          const processId = this.joiningConsumersId++;
          this.joiningConsumers.set(id, processId);
 
-         const consumer = await this.receiveTransport.consume({
+         const consumer = await transport.consume({
             id,
             rtpParameters,
             kind,
@@ -136,9 +146,9 @@ export class WebRtcConnection extends TypedEmitter<WebRtcConnectionEvents> {
          }
 
          this.consumerManager.addConsumer(consumer);
-         log('[Consumer: %s] Consumer added successfully', id);
+         log('[Consumer: %s] Consumer initialized successfully', id);
       } catch (error) {
-         log('[Consumer: %s] Error on adding consumer %O', id, error);
+         log('[Consumer: %s] Error on initializing consumer %O', id, error);
       }
    }
 
@@ -259,6 +269,8 @@ export class WebRtcConnection extends TypedEmitter<WebRtcConnectionEvents> {
    }
 
    public async createReceiveTransport(): Promise<Transport> {
+      this.pendingConsumers = [];
+
       const transportOptions = await this.client.createTransport({ producing: false, consuming: true });
 
       if (!transportOptions.success) {
@@ -290,6 +302,16 @@ export class WebRtcConnection extends TypedEmitter<WebRtcConnectionEvents> {
       });
 
       this.receiveTransport = transport;
+
+      console.log(
+         'Receive transport created successfully, process %d pending consumers...',
+         this.pendingConsumers.length,
+      );
+
+      for (const payload of this.pendingConsumers) {
+         await this.initNewConsumer(payload, transport);
+      }
+
       return transport;
    }
 
