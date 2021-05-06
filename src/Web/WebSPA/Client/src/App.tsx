@@ -52,7 +52,7 @@ function App() {
                   <Route path="/">
                      <AuthenticationProvider
                         configuration={ocidConfig}
-                        loggerLevel={oidcLog.DEBUG}
+                        loggerLevel={oidcLog.ERROR}
                         isEnabled
                         callbackComponentOverride={AuthCallback}
                         notAuthenticated={NotAuthenticated}
