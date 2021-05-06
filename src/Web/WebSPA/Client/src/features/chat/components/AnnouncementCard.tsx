@@ -42,14 +42,18 @@ type Props = {
    onClose: () => void;
 };
 
+const paperProps: MotionProps = {
+   initial: { scale: 1, opacity: 0, translateY: 100 },
+   animate: { scale: 1, opacity: 1, translateY: 0 },
+   exit: { opacity: 0 },
+   transition: {
+      mass: 500,
+      ease: 'easeInOut',
+   },
+};
+
 export default function AnnouncementCard({ message, className, onClose }: Props) {
    const classes = useStyles();
-
-   const paperProps: MotionProps = {
-      initial: { scale: 2, opacity: 0 },
-      animate: { scale: 1, opacity: 1 },
-      exit: { opacity: 0 },
-   };
 
    return (
       <Paper
