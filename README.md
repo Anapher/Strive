@@ -30,6 +30,7 @@
     - [Running on localhost with Docker Compose and Traefik](#running-on-localhost-with-docker-compose-and-traefik)
     - [Running on production server](#running-on-production-server)
     - [Development](#development)
+    - [Known Issues](#known-issues)
 - [Contributing](#contributing)
 - [License](#license)
 - [Acknowledgements](#acknowledgements)
@@ -125,6 +126,9 @@ Then you need to start the required microservices you do NOT want to modify:
    cd src/Services/ConferenceManagement/Strive && dotnet run
    ```
 Do not change these ports as they are configured to work together in a local development environment. You can then attach a debugger to the microservice you want to change. For ASP.Net Core projects, instead of executing this command you may also open the solution with Visual Studio and run the debugger here.
+
+### Known Issues
+- Firefox will not connect to the SFU on localhost (in simple language, if you are running Strive on localhost, you cannot use your microphone, webcam, etc.) as Firefox has [limitations for ICE over TCP](https://mediasoup.discourse.group/t/firefox-ice-failed-add-a-stun-server-and-see-about-webrtc-for-more-details/805). For local development, I suggest to use a different browser (e. g. Google Chrome).
 
 <!-- CONTRIBUTING -->
 ## Contributing
