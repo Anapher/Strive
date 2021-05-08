@@ -1,10 +1,11 @@
 import { RouterOptions } from 'mediasoup/lib/Router';
 import { WebRtcTransportOptions } from 'mediasoup/lib/WebRtcTransport';
 import { WorkerSettings } from 'mediasoup/lib/Worker';
+import * as os from 'os';
 
 const config: Config = {
    mediasoup: {
-      numWorkers: 10,
+      numWorkers: Object.keys(os.cpus()).length,
       workerSettings: {
          logLevel: 'debug',
          logTags: ['info', 'ice', 'dtls', 'rtp', 'srtp', 'rtcp', 'rtx', 'bwe', 'score', 'simulcast', 'svc', 'sctp'],
