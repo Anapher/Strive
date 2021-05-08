@@ -9,7 +9,7 @@ export default class MediaSoupWorkers {
    private nextWorkerId = 0;
 
    async run(numWorkers: number, settings: WorkerSettings): Promise<void> {
-      logger.info('running %d mediasoup Workers...', numWorkers);
+      logger.info('Initialize Mediasoup %s, run %d mediasoup Workers...', mediasoup.version, numWorkers);
 
       for (let i = 0; i < numWorkers; ++i) {
          const worker = await mediasoup.createWorker(settings);
