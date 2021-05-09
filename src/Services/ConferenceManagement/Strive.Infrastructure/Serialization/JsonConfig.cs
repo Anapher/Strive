@@ -24,9 +24,11 @@ namespace Strive.Infrastructure.Serialization
 
         public static void Apply(JsonSerializerSettings settings)
         {
-            settings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+            settings.ContractResolver = new CamelCasePropertyNamesContractResolver
+                {NamingStrategy = new CamelCaseNamingStrategy(false, true)};
             settings.Converters.Add(new StringEnumConverter(new CamelCaseNamingStrategy()));
             settings.Converters.Add(GetSceneConverter());
+            settings.Converters.Add(new ErrorConverter());
         }
 
         private static JsonConverter GetSceneConverter()

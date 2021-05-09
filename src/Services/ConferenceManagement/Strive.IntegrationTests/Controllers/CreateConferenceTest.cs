@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
@@ -69,6 +70,8 @@ namespace Strive.IntegrationTests.Controllers
             var error = await response.Content.ReadFromJsonAsync<Error>();
             Assert.Equal(ErrorType.BadRequest.ToString(), error?.Type);
             Assert.Equal(ErrorCode.FieldValidation.ToString(), error?.Code);
+
+            Assert.All(error?.Fields?.Keys ?? Enumerable.Empty<string>(), x => Assert.True(char.IsLower(x[0])));
         }
     }
 }
