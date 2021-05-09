@@ -19,6 +19,7 @@ using Strive.IntegrationTests._Helpers;
 using Strive.Tests.Utils;
 using Xunit;
 using Xunit.Abstractions;
+using RequestDisconnectDto = Strive.Hubs.Equipment.Responses.RequestDisconnectDto;
 
 namespace Strive.IntegrationTests.Services
 {
@@ -145,7 +146,8 @@ namespace Strive.IntegrationTests.Services
             var (user, equipmentHub) = await ConnectEquipment(testDevices);
 
             var requestDisconnect = false;
-            equipmentHub.On(EquipmentHubMessages.OnRequestDisconnect, () => requestDisconnect = true);
+            equipmentHub.On<RequestDisconnectDto>(EquipmentHubMessages.OnRequestDisconnect,
+                _ => requestDisconnect = true);
 
             // act
             await user.Hub.DisposeAsync();
