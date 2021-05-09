@@ -16,7 +16,8 @@ namespace Strive.Hubs.Equipment
 
         public static Task OnRequestDisconnect(this IClientProxy clientProxy, CancellationToken token = default)
         {
-            return clientProxy.SendAsync(CoreHubMessages.OnRequestDisconnect, token);
+            return clientProxy.SendAsync(CoreHubMessages.OnRequestDisconnect,
+                new RequestDisconnectDto(EquipmentKickedReason.ParticipantLeft), token);
         }
     }
 }
