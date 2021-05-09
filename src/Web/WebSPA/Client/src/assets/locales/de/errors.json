@@ -1,11 +1,15 @@
 {
-    "FieldValidation": "Überprüfung der Anfrage fehlgeschlagen",
-    "PermissionDenied": "Vorgang verweigert. Erforderliche Berechtigung: {{fields.requiredPermission}}",
-    "Conference_NotFound": "Die Konferenz wurde nicht gefunden.",
-    "Conference_NotOpen": "Die Konferenz ist aktuell nicht geöffnet.",
-    "UI/Server_Unavailable": "Der Server ist aktuell nicht verfügbar. Bitte überprüfen Sie Ihre Internetverbindung.",
-    "UI/Request_Error": "Ein interner Fehler ist aufgetreten, als die Anfrage ausgeführt wurde: {{fields.info}}",
-    "UI/New_Session_Connected": "Sie haben sich mit einer anderen Sitzung zu dieser Konferenz verbunden.",
-    "UI/Kicked": "Sie wurden von einem Moderator entfernt.",
-    "UI/MediaNotConnected": "Nicht verbunden"
+  "FieldValidation": "Überprüfung der Anfrage fehlgeschlagen",
+  "PermissionDenied": "Vorgang verweigert. Erforderliche Berechtigung: {{fields.requiredPermission}}",
+  "Conference_NotFound": "Die Konferenz wurde nicht gefunden.",
+  "Conference_NotOpen": "Die Konferenz ist aktuell nicht geöffnet.",
+  "UI/Server_Unavailable": "Der Server ist aktuell nicht verfügbar. Bitte überprüfen Sie Ihre Internetverbindung.",
+  "UI/Request_Error": "Ein interner Fehler ist aufgetreten, als die Anfrage ausgeführt wurde: {{fields.info}}",
+  "UI/New_Session_Connected": "Sie haben sich mit einer anderen Sitzung zu dieser Konferenz verbunden.",
+  "UI/Kicked": "Sie wurden von einem Moderator entfernt.",
+  "UI/MediaNotConnected": "Nicht verbunden",
+  "UI/Equipment_ParticipantLeft": "Sie haben die Konferenz verlassen",
+  "Equipment/Command_Error": "\"{{fields.source}} {{fields.action}}\" fehlgeschlagen: {{fields.message}}",
+  "Equipment_ParticipantNotJoined": "Der Teilnehmer ist nicht mit der Konferenz verbunden.",
+  "Equipment_InvalidToken": "Falscher Token für das Equipment. Bitte stellen Sie sicher, dass die Url korrekt ist."
 }

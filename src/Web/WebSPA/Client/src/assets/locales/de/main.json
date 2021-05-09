@@ -131,6 +131,26 @@
         "error": "Bitte akzeptieren Sie die Anfrage von Ihrem Browser nach den Berechtigungen.",
         "grant_permissions": "Berechtigungen erteilen",
         "title": "Verwenden Sie dieses Gerät als Equipment"
+      },
+      "command_history": "Ausgeführte Befehle",
+      "history": {
+        "actions": {
+          "disable": "Deaktivieren",
+          "enable": "Aktivieren",
+          "pause": "Pausieren",
+          "resume": "Fortsetzen",
+          "switchDevice": "Ändere Gerät zu {{name}}"
+        },
+        "error": "Fehler: {{error}}",
+        "pending": "Ausstehend",
+        "succeeded": "Erfolgreich",
+        "sources": {
+          "loopback-mic": "Loopback-Mikrofon",
+          "loopback-webcam": "Loopback-Webcam",
+          "mic": "Mikrofon",
+          "screen": "Bildschirm",
+          "webcam": "Webcam"
+        }
       }
     },
     "media": {
@@ -322,7 +342,10 @@
         "test_description": "Wir werden Ihren aktuellen Webcameingang zu Ihnen zurücksenden und die Ergebnisse hier anzeigen. Auf diese Weise können Sie überprüfen, wie andere Teilnehmer Ihr Videosignal empfangen und Sie sehen, wie andere Teilnehmer die Verzögerung wahrnehmen.",
         "title": "Webcam"
       },
-      "webrtc_not_connected_error": "WebRTC nicht verbunden, daher können Sie Ihr Audiogerät nicht testen. Bitte aktualisieren Sie die Seite oder wenden Sie sich an den Server-Administrator."
+      "webrtc_not_connected_error": "WebRTC nicht verbunden, daher können Sie Ihr Audiogerät nicht testen. Bitte aktualisieren Sie die Seite oder wenden Sie sich an den Server-Administrator.",
+      "screen": {
+        "title": "Bildschirm"
+      }
     }
   }
 }

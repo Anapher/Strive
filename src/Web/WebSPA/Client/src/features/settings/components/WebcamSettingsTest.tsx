@@ -58,9 +58,11 @@ export default function WebcamSettingsTest() {
    };
 
    useEffect(() => {
-      // cam mic is automatically disabled on component unmount
-      handleEnableWebcam();
-   }, []);
+      if (!camController.enabled) {
+         // cam mic is automatically disabled on component unmount
+         handleEnableWebcam();
+      }
+   }, [camController.enabled, camDevice]);
 
    return (
       <div>

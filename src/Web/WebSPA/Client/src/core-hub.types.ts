@@ -1,3 +1,4 @@
+import { DomainError } from './communication-types';
 import { EquipmentCommandAction } from './equipment-hub.types';
 import { ProducerSource } from './store/webrtc/types';
 
@@ -92,6 +93,11 @@ export type SendEquipmentCommandDto = {
    source: ProducerSource;
    deviceId?: string;
    action: EquipmentCommandAction;
+};
+
+export type EquipmentErrorDto = {
+   connectionId: string;
+   error: DomainError;
 };
 
 export type ParticipantKickedReason = 'byModerator' | 'newSessionConnected';

@@ -6,6 +6,7 @@ import conference from 'src/features/conference/sagas';
 import chat from 'src/features/chat/sagas';
 import breakoutRooms from 'src/features/breakout-rooms/sagas';
 import createConference from 'src/features/create-conference/sagas';
+import equipment from 'src/features/equipment/sagas';
 
 export default function* rootSaga() {
    yield spawn(scenes);
@@ -15,4 +16,5 @@ export default function* rootSaga() {
    yield spawn(chat);
    yield spawn(breakoutRooms);
    yield spawn(createConference);
+   yield spawn(equipment);
 }

@@ -144,6 +144,9 @@
         "test_description": "We will loopback your current webcam input over the server and show the results here. This way, you can check what other participants actually receive and you also get a taste of the actual delay.",
         "permission_denied": "Permission denied: Please allow the use of your webcam in your browser"
       },
+      "screen": {
+        "title": "Screen"
+      },
       "equipment": {
         "title": "Equipment",
         "description": "Don't have a webcam but have a smartphone with a camera? Don't have a good microphone but a tablet that has one? No problem, you can use multiple external devices as your microphone or webcam or share their screen.",
@@ -299,7 +302,27 @@
         "grant_permissions": "Grant Permissions",
         "error": "Please accept the permission request for media."
       },
-      "available_devices": "Available Devices"
+      "available_devices": "Available Devices",
+      "command_history": "Command History",
+      "history": {
+        "pending": "Pending",
+        "succeeded": "Succeeded",
+        "error": "Error: {{error}}",
+        "actions": {
+          "enable": "Enable",
+          "disable": "Disable",
+          "pause": "Pause",
+          "resume": "Resume",
+          "switchDevice": "Switch Device to {{name}}"
+        },
+        "sources": {
+          "mic": "Microphone",
+          "loopback-mic": "Loopback Microphone",
+          "webcam": "Webcam",
+          "loopback-webcam": "Loopback Webcam",
+          "screen": "Screen"
+        }
+      }
     },
     "diagnostics": {
       "title": "Diagnostics of Strive ({{name}})"

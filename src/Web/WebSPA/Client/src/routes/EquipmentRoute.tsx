@@ -12,6 +12,7 @@ import { WebRtcManager } from 'src/store/webrtc/WebRtcManager';
 import FullScreenError from 'src/components/FullscreenError';
 import RequestPermissions from '../features/equipment/components/RequestPermissions';
 import { formatErrorMessage } from 'src/utils/error-utils';
+import RequestUserInteractionView from 'src/features/conference/components/RequestUserInteractionView';
 
 const defaultEvents: string[] = [
    equipmentHub.events.onRequestDisconnect,
@@ -29,6 +30,7 @@ export default function EquipmentRoute({
 }: Props) {
    const connectionError = useSelector((state: RootState) => state.conference.connectionError);
    const { isConnected, isReconnecting } = useSelector((state: RootState) => state.signalr);
+   const userInteractionMade = useSelector((state: RootState) => state.media.userInteractionMade);
 
    const dispatch = useDispatch();
    const webRtc = useRef(new WebRtcManager({ sendMedia: true, receiveMedia: false })).current;
@@ -68,9 +70,22 @@ export default function EquipmentRoute({
       return <ConferenceConnecting isReconnecting={isReconnecting} />;
    }
 
+   if (!hasPermissions) {
+      <RequestPermissions
+         onPermissionsGranted={() => {
+            setHasPermissions(true);
+         }}
+      />;
+   }
+
+   if (!userInteractionMade) {
+      // as request permissions may return automatically
+      return <RequestUserInteractionView />;
+   }
+
    return (
       <WebRtcContext.Provider value={webRtc}>
-         {hasPermissions ? <Equipment /> : <RequestPermissions onPermissionsGranted={() => setHasPermissions(true)} />}
+         <Equipment />
       </WebRtcContext.Provider>
    );
 }

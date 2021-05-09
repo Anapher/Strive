@@ -3,11 +3,12 @@ import { motion, useMotionTemplate, useMotionValue, useSpring, useTransform } fr
 import hark from 'hark';
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import ErrorWrapper from 'src/components/ErrorWrapper';
 import useDeviceManagement from 'src/features/media/useDeviceManagement';
 import useMyParticipantId from 'src/hooks/useMyParticipantId';
 import { RootState } from 'src/store';
+import { showMessage } from 'src/store/notifier/actions';
 import useConsumer from 'src/store/webrtc/hooks/useConsumer';
 import useMicrophone from 'src/store/webrtc/hooks/useMicrophone';
 
@@ -31,6 +32,7 @@ const useStyles = makeStyles((theme) => ({
 export default function AudioSettingsTest() {
    const classes = useStyles();
    const { t } = useTranslation();
+   const dispatch = useDispatch();
 
    const myId = useMyParticipantId();
    const consumer = useConsumer(myId, 'loopback-mic');
@@ -57,9 +59,11 @@ export default function AudioSettingsTest() {
    };
 
    useEffect(() => {
-      // the mic is automatically disabled on component unmount
-      handleEnableMic();
-   }, []);
+      if (!micController.enabled) {
+         // the mic is automatically disabled on component unmount
+         handleEnableMic();
+      }
+   }, [micController.enabled, audioDevice]);
 
    const audioRef = useRef<HTMLAudioElement>(null);
    const mediaRecorder = useRef<MediaRecorder | undefined>();
@@ -127,8 +131,13 @@ export default function AudioSettingsTest() {
             break;
          case false:
             recordedChunks.current = []; // clear chunks
+            try {
+               mediaRecorder.current.start();
+            } catch (error) {
+               console.error(error);
+               dispatch(showMessage({ type: 'error', message: `An error occurred starting the media recorder` }));
+            }
             setRecordingState(true);
-            mediaRecorder.current.start();
             break;
          case 'playing':
             playbackAudioElem.current.src = '';

@@ -23,3 +23,8 @@ export type InitializeEquipmentDto = {
    name: string;
    devices: EquipmentDevice[];
 };
+
+export type EquipmentKickedReason = 'participantLeft';
+export type RequestDisconnectDto = {
+   reason: EquipmentKickedReason;
+};

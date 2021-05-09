@@ -1,6 +1,6 @@
 import { AuthenticationProvider, oidcLog, OidcSecure } from '@axa-fr/react-oidc-context';
 import LuxonUtils from '@date-io/luxon';
-import { createMuiTheme, CssBaseline, makeStyles } from '@material-ui/core';
+import { createMuiTheme, CssBaseline, makeStyles, responsiveFontSizes } from '@material-ui/core';
 import { blue, pink } from '@material-ui/core/colors';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import { ThemeProvider } from '@material-ui/styles';
@@ -23,21 +23,23 @@ const useStyles = makeStyles((theme) => ({
    },
 }));
 
-const theme = createMuiTheme({
-   palette: {
-      type: 'dark',
-      primary: {
-         main: blue[500],
+const theme = responsiveFontSizes(
+   createMuiTheme({
+      palette: {
+         type: 'dark',
+         primary: {
+            main: blue[500],
+         },
+         secondary: {
+            main: pink[500],
+         },
+         background: {
+            default: 'rgb(20, 20, 22)',
+            paper: '#303030',
+         },
       },
-      secondary: {
-         main: pink[500],
-      },
-      background: {
-         default: 'rgb(20, 20, 22)',
-         paper: '#303030',
-      },
-   },
-});
+   }),
+);
 
 function App() {
    return (

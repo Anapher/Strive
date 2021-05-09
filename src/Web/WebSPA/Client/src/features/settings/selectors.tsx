@@ -4,7 +4,7 @@ import { ProducerSource } from 'src/store/webrtc/types';
 import { AnyInputDevice } from './types';
 
 const getSource = (_: unknown, source: ProducerSource | undefined) => source;
-const selectLocalDevices = (state: RootState) => state.settings.availableDevices;
+export const selectLocalDevices = (state: RootState) => state.settings.availableDevices;
 export const selectEquipmentConnections = (state: RootState) => state.media.equipment?.connections;
 
 export const selectAvailableInputDevices = createSelector(

@@ -8,14 +8,14 @@ import DesktopWindowsIcon from '@material-ui/icons/DesktopWindows';
 import { useTranslation } from 'react-i18next';
 
 export default function AvailableEquipmentTable() {
-   const devices = useSelector((state: RootState) => state.settings.availableDevices);
    const { t } = useTranslation();
+   const devices = useSelector((state: RootState) => state.settings.availableDevices);
 
    return (
       <List
          aria-labelledby="available-devices-subheader"
          subheader={
-            <ListSubheader component="div" id="available-devices-subheader">
+            <ListSubheader component="div" id="available-devices-subheader" disableSticky>
                {t('conference.equipment.available_devices')}
             </ListSubheader>
          }

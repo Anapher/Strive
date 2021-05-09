@@ -5,6 +5,7 @@ import AudioSettings from './AudioSettings';
 import CommonSettings from './CommonSettings';
 import DiagnosticsSettings from './DiagnosticsSettings';
 import EquipmentSettings from './EquipmentSettings';
+import ScreenSettings from './ScreenSettings';
 import WebcamSettings from './WebcamSettings';
 
 interface TabPanelProps {
@@ -75,8 +76,9 @@ export default function Settings() {
             <Tab label={t('common:common')} {...a11yProps(0)} />
             <Tab label={t('conference.settings.audio.title')} {...a11yProps(1)} />
             <Tab label={t('conference.settings.webcam.title')} {...a11yProps(2)} />
-            <Tab label={t('conference.settings.equipment.title')} {...a11yProps(3)} />
-            <Tab label={t('conference.settings.diagnostics.title')} {...a11yProps(4)} />
+            <Tab label={t('conference.settings.screen.title')} {...a11yProps(3)} />
+            <Tab label={t('conference.settings.equipment.title')} {...a11yProps(4)} />
+            <Tab label={t('conference.settings.diagnostics.title')} {...a11yProps(5)} />
          </Tabs>
          <TabPanel value={value} index={0} className={classes.tab}>
             <CommonSettings />
@@ -88,9 +90,12 @@ export default function Settings() {
             <WebcamSettings />
          </TabPanel>
          <TabPanel value={value} index={3} className={classes.tab}>
-            <EquipmentSettings />
+            <ScreenSettings />
          </TabPanel>
          <TabPanel value={value} index={4} className={classes.tab}>
+            <EquipmentSettings />
+         </TabPanel>
+         <TabPanel value={value} index={5} className={classes.tab}>
             <DiagnosticsSettings />
          </TabPanel>
       </div>
