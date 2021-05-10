@@ -25,10 +25,18 @@ namespace Strive.Infrastructure.Serialization
         public static void Apply(JsonSerializerSettings settings)
         {
             settings.ContractResolver = new CamelCasePropertyNamesContractResolver
-                {NamingStrategy = new CamelCaseNamingStrategy(false, true)};
-            settings.Converters.Add(new StringEnumConverter(new CamelCaseNamingStrategy()));
+                {NamingStrategy = new CamelCaseNamingStrategy(true, true)};
+            settings.Converters.Add(new StringEnumConverter(new CamelCaseNamingStrategy(true, true)));
             settings.Converters.Add(GetSceneConverter());
             settings.Converters.Add(new ErrorConverter());
+
+            // This is a hack to accomplish the following:
+            // we want to preserve the casing of dictionary keys (so dont camel case keys as they might be case sensitive ids etc.)
+            // but we also want to convert enums to camel case
+            // A potential fix would've been to set CamelCaseNamingStrategy.ProcessDictionaryKeys to false, but the problem is that 
+            // enum values are then also not converted to camel case. This converter fixes it by serializing all dictionaries Dictionary<string,any>
+            // without changing the keys
+            settings.Converters.Add(new DictionaryStringKeyPreserveCasingConverter());
         }
 
         private static JsonConverter GetSceneConverter()
