@@ -1,4 +1,4 @@
-import { Box, Button, Chip, Grid, TextField, Typography } from '@material-ui/core';
+import { Box, Button, Chip, Grid, makeStyles, TextField, Typography } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import QRCode from 'qrcode.react';
 import React, { useEffect } from 'react';
@@ -12,9 +12,22 @@ import { selectEquipmentConnections } from '../selectors';
 import { selectMyParticipantId } from 'src/features/auth/selectors';
 import { useTranslation } from 'react-i18next';
 
+const QR_CODE_PADDING = 8;
+
+const useStyles = makeStyles({
+   qrCodeContainer: {
+      backgroundColor: 'white',
+      padding: QR_CODE_PADDING,
+      height: 200 + 2 * QR_CODE_PADDING,
+      width: 200 + 2 * QR_CODE_PADDING,
+   },
+});
+
 export default function EquipmentSettings() {
    const dispatch = useDispatch();
    const { t } = useTranslation();
+   const classes = useStyles();
+
    const token = useSelector((state: RootState) => state.settings.equipmentToken);
    const error = useSelector((state: RootState) => state.settings.equipmentTokenError);
    const equipment = useSelector(selectEquipmentConnections);
@@ -49,7 +62,9 @@ export default function EquipmentSettings() {
          ) : (
             <Box display="flex" mt={4}>
                {token ? (
-                  <QRCode value={url} size={200} renderAs="svg" />
+                  <div className={classes.qrCodeContainer}>
+                     <QRCode value={url} size={200} renderAs="svg" />
+                  </div>
                ) : (
                   <Skeleton variant="rect" width={200} height={200} />
                )}
