@@ -95,7 +95,7 @@ namespace Strive.Hubs.Equipment
             }
             catch (Exception e)
             {
-                LogException(e);
+                LogException(e, dto);
                 return e.ToError();
             }
         }
@@ -111,7 +111,7 @@ namespace Strive.Hubs.Equipment
             }
             catch (Exception e)
             {
-                LogException(e);
+                LogException(e, dto);
                 return e.ToError();
             }
         }
@@ -127,7 +127,7 @@ namespace Strive.Hubs.Equipment
             }
             catch (Exception e)
             {
-                LogException(e);
+                LogException(e, dto);
                 return e.ToError();
             }
         }
@@ -147,7 +147,7 @@ namespace Strive.Hubs.Equipment
             }
         }
 
-        private void LogException(Exception e, [CallerMemberName] string? methodName = null)
+        private void LogException(Exception e, object? param = null, [CallerMemberName] string? methodName = null)
         {
             if (e is IdErrorException)
             {
@@ -155,7 +155,8 @@ namespace Strive.Hubs.Equipment
             }
             else
             {
-                _logger.LogError(e, "An error occurred on invoking {method}", methodName);
+                _logger.LogError(e, "An error occurred on invoking \"{method}\". Parameter: {@param}", methodName,
+                    param);
             }
         }
     }
