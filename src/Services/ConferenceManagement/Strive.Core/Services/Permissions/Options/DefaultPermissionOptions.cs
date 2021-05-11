@@ -21,7 +21,6 @@ namespace Strive.Core.Services.Permissions.Options
                     DefinedPermissions.Chat.CanSendChatMessage.Configure(true),
                     DefinedPermissions.Chat.CanSendAnonymously.Configure(true),
                     DefinedPermissions.Rooms.CanSwitchRoom.Configure(true),
-                    DefinedPermissions.Conference.CanRaiseHand.Configure(true),
                 }.ToImmutableDictionary()
             },
             // Moderator permissions

@@ -5,7 +5,6 @@ namespace Strive.Core.Services.Permissions
         public static class Conference
         {
             public static readonly PermissionDescriptor<bool> CanOpenAndClose = new("conference/canOpenAndClose");
-            public static readonly PermissionDescriptor<bool> CanRaiseHand = new("conference/canRaiseHand");
             public static readonly PermissionDescriptor<bool> CanKickParticipant = new("conference/canKickParticipant");
         }
 
