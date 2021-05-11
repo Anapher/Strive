@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
@@ -7,6 +6,7 @@ using Strive.Core.Extensions;
 using Strive.Core.Services.ConferenceControl.Requests;
 using Strive.Core.Services.Equipment.Gateways;
 using Strive.Core.Services.Equipment.Requests;
+using Strive.Core.Services.Media.Dtos;
 using Strive.Core.Services.Synchronization.Requests;
 
 namespace Strive.Core.Services.Equipment.UseCases
@@ -24,9 +24,8 @@ namespace Strive.Core.Services.Equipment.UseCases
 
         public async Task<Unit> Handle(InitializeEquipmentRequest request, CancellationToken cancellationToken)
         {
-            var devices = request.Devices.ToDictionary(x => x.DeviceId, x => x);
-            var connection = new EquipmentConnection(request.ConnectionId, request.Name, devices,
-                ImmutableDictionary<string, UseMediaStateInfo>.Empty);
+            var connection = new EquipmentConnection(request.ConnectionId, request.Name, request.Devices,
+                ImmutableDictionary<ProducerSource, UseMediaStateInfo>.Empty);
 
             await _repository.SetConnection(request.Participant, connection);
 

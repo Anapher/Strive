@@ -24,7 +24,7 @@ export type SynchronizedMediaState = { streams: Record<string, ParticipantStream
 export type EquipmentConnection = {
    connectionId: string;
    name: string;
-   devices: Record<string, EquipmentDevice>;
+   devices: EquipmentDevice[];
    status: Record<ProducerSource, UseMediaStateInfo>;
 };
 

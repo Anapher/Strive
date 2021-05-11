@@ -61,9 +61,9 @@ namespace Strive.Core.Tests.Services.Equipment.UseCases
             Assert.Equal(DeviceName, addedConnection!.Name);
             Assert.Equal(ConnectionId, addedConnection!.ConnectionId);
             Assert.Empty(addedConnection!.Status);
+
             var device = Assert.Single(addedConnection!.Devices);
-            Assert.Equal(testDevice.DeviceId, device.Key);
-            Assert.Equal(testDevice, device.Value);
+            Assert.Equal(testDevice, device);
         }
 
         [Fact]

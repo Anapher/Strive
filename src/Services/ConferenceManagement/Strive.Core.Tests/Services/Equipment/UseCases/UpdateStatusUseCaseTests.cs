@@ -10,6 +10,7 @@ using Strive.Core.Services.Equipment;
 using Strive.Core.Services.Equipment.Gateways;
 using Strive.Core.Services.Equipment.Requests;
 using Strive.Core.Services.Equipment.UseCases;
+using Strive.Core.Services.Media.Dtos;
 using Strive.Core.Services.Synchronization.Requests;
 using Strive.Tests.Utils;
 using Xunit;
@@ -38,7 +39,7 @@ namespace Strive.Core.Tests.Services.Equipment.UseCases
             // act
             await Assert.ThrowsAnyAsync<Exception>(async () => await useCase.Handle(
                 new UpdateStatusRequest(_testParticipant, ConnectionId,
-                    ImmutableDictionary<string, UseMediaStateInfo>.Empty), CancellationToken.None));
+                    ImmutableDictionary<ProducerSource, UseMediaStateInfo>.Empty), CancellationToken.None));
         }
 
         [Fact]
@@ -46,9 +47,8 @@ namespace Strive.Core.Tests.Services.Equipment.UseCases
         {
             // arrange
             var useCase = Create();
-            var existingConnection = new EquipmentConnection(ConnectionId, "Smartphone",
-                ImmutableDictionary<string, EquipmentDevice>.Empty,
-                ImmutableDictionary<string, UseMediaStateInfo>.Empty);
+            var existingConnection = new EquipmentConnection(ConnectionId, "Smartphone", Array.Empty<EquipmentDevice>(),
+                ImmutableDictionary<ProducerSource, UseMediaStateInfo>.Empty);
 
             _repo.Setup(x => x.GetConnection(_testParticipant, ConnectionId)).ReturnsAsync(existingConnection);
 
@@ -56,8 +56,8 @@ namespace Strive.Core.Tests.Services.Equipment.UseCases
             _repo.Setup(x => x.SetConnection(_testParticipant, It.IsAny<EquipmentConnection>()))
                 .Callback((Participant _, EquipmentConnection conn) => addedConnection = conn);
 
-            var newMediaState =
-                new Dictionary<string, UseMediaStateInfo> {{"test", new UseMediaStateInfo(true, false, false, null)}};
+            var newMediaState = new Dictionary<ProducerSource, UseMediaStateInfo>
+                {{ProducerSource.Mic, new UseMediaStateInfo(true, false, false, null)}};
 
             // act
             await useCase.Handle(new UpdateStatusRequest(_testParticipant, ConnectionId, newMediaState),
@@ -77,9 +77,8 @@ namespace Strive.Core.Tests.Services.Equipment.UseCases
         {
             // arrange
             var useCase = Create();
-            var existingConnection = new EquipmentConnection(ConnectionId, "Smartphone",
-                ImmutableDictionary<string, EquipmentDevice>.Empty,
-                ImmutableDictionary<string, UseMediaStateInfo>.Empty);
+            var existingConnection = new EquipmentConnection(ConnectionId, "Smartphone", Array.Empty<EquipmentDevice>(),
+                ImmutableDictionary<ProducerSource, UseMediaStateInfo>.Empty);
 
             _repo.Setup(x => x.GetConnection(_testParticipant, ConnectionId)).ReturnsAsync(existingConnection);
 
@@ -88,7 +87,7 @@ namespace Strive.Core.Tests.Services.Equipment.UseCases
             // act
             await useCase.Handle(
                 new UpdateStatusRequest(_testParticipant, ConnectionId,
-                    ImmutableDictionary<string, UseMediaStateInfo>.Empty), CancellationToken.None);
+                    ImmutableDictionary<ProducerSource, UseMediaStateInfo>.Empty), CancellationToken.None);
 
             // assert
             capturedRequest.AssertReceived();

@@ -47,7 +47,7 @@ function* updateEquipment() {
       if (!device) continue;
 
       if (device.type === 'equipment') {
-         if (!equipment?.connections[device.connectionId]?.devices[device.deviceId]) {
+         if (!equipment?.connections[device.connectionId]?.devices.find((x) => x.deviceId === device.deviceId)) {
             yield put(setCurrentDevice({ source: producerDevice, device: undefined }));
 
             yield put(

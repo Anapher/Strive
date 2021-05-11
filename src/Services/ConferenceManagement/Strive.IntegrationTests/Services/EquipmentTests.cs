@@ -76,8 +76,26 @@ namespace Strive.IntegrationTests.Services
                     Assert.Empty(connection.Value.Status);
                     var actualDevice = Assert.Single(connection.Value.Devices);
 
-                    Assert.Equal(testMic.DeviceId, actualDevice.Key);
-                    Assert.Equal(testMic, actualDevice.Value);
+                    Assert.Equal(testMic, actualDevice);
+                });
+        }
+
+        [Fact]
+        public async Task InitializeEquipment_MultipleDevicesSameId_UpdateSynchronizedObject()
+        {
+            // arrange
+            var testMic = new EquipmentDevice("mic1", "Microphone", DeviceType.Mic);
+            var testMic2 = new EquipmentDevice("mic1", "Webcam", DeviceType.Webcam);
+            var testDevices = new List<EquipmentDevice> {testMic, testMic2};
+
+            var (user, _) = await ConnectEquipment(testDevices);
+
+            // assert
+            await user.SyncObjects.AssertSyncObject<SynchronizedEquipment>(
+                SynchronizedEquipment.SyncObjId(user.User.Sub), syncEquipment =>
+                {
+                    var connection = Assert.Single(syncEquipment.Connections);
+                    AssertHelper.AssertScrambledEquals(testDevices, connection.Value.Devices);
                 });
         }
 
@@ -103,8 +121,8 @@ namespace Strive.IntegrationTests.Services
 
             var (user, equipmentHub) = await ConnectEquipment(testDevices);
 
-            var update =
-                new Dictionary<string, UseMediaStateInfo> {{"mic1", new UseMediaStateInfo(true, true, false, null)}};
+            var update = new Dictionary<ProducerSource, UseMediaStateInfo>
+                {{ProducerSource.Mic, new UseMediaStateInfo(true, true, false, null)}};
 
             // act
             await equipmentHub.InvokeAsync(nameof(EquipmentHub.UpdateStatus), update);

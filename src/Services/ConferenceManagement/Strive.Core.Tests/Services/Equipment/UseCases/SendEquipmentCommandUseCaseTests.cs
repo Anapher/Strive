@@ -50,8 +50,8 @@ namespace Strive.Core.Tests.Services.Equipment.UseCases
             var capturedNotification = _mediator.CaptureNotification<SendEquipmentCommandNotification>();
 
             _repo.Setup(x => x.GetConnection(_testParticipant, connectionId)).ReturnsAsync(
-                new EquipmentConnection(connectionId, "test name", ImmutableDictionary<string, EquipmentDevice>.Empty,
-                    ImmutableDictionary<string, UseMediaStateInfo>.Empty));
+                new EquipmentConnection(connectionId, "test name", Array.Empty<EquipmentDevice>(),
+                    ImmutableDictionary<ProducerSource, UseMediaStateInfo>.Empty));
 
             // act
             await useCase.Handle(

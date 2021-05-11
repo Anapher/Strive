@@ -25,12 +25,12 @@ export const selectAvailableInputDevices = createSelector(
 
       if (equipment) {
          for (const connected of Object.values(equipment)) {
-            if (connected.devices)
+            if (connected.devices?.length > 0)
                result.push({
                   type: 'equipment',
                   equipmentName: connected.name,
                   connectionId: connected.connectionId,
-                  devices: Object.values(connected.devices)
+                  devices: connected.devices
                      .filter((x) => x.source === source)
                      .map((x) => ({
                         label: x.label,

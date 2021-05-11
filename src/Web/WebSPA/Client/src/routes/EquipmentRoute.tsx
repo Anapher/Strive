@@ -71,11 +71,13 @@ export default function EquipmentRoute({
    }
 
    if (!hasPermissions) {
-      <RequestPermissions
-         onPermissionsGranted={() => {
-            setHasPermissions(true);
-         }}
-      />;
+      return (
+         <RequestPermissions
+            onPermissionsGranted={() => {
+               setHasPermissions(true);
+            }}
+         />
+      );
    }
 
    if (!userInteractionMade) {

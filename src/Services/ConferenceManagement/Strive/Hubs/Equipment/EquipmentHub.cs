@@ -15,6 +15,7 @@ using Strive.Core.Services.Equipment;
 using Strive.Core.Services.Equipment.Notifications;
 using Strive.Core.Services.Equipment.Requests;
 using Strive.Core.Services.Media;
+using Strive.Core.Services.Media.Dtos;
 using Strive.Core.Services.Media.Requests;
 using Strive.Extensions;
 using Strive.Hubs.Equipment.Dtos;
@@ -100,7 +101,7 @@ namespace Strive.Hubs.Equipment
             }
         }
 
-        public async Task<SuccessOrError<Unit>> UpdateStatus(Dictionary<string, UseMediaStateInfo> dto)
+        public async Task<SuccessOrError<Unit>> UpdateStatus(Dictionary<ProducerSource, UseMediaStateInfo> dto)
         {
             try
             {
