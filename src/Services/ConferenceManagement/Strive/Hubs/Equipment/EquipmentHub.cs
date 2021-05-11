@@ -1,7 +1,6 @@
-// https://github.com/Anapher/Strive/blob/master/src/Strive.Core/Services/Equipment/EquipmentService.cs
-
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Autofac;
 using MediatR;
@@ -96,6 +95,7 @@ namespace Strive.Hubs.Equipment
             }
             catch (Exception e)
             {
+                LogException(e);
                 return e.ToError();
             }
         }
@@ -111,6 +111,7 @@ namespace Strive.Hubs.Equipment
             }
             catch (Exception e)
             {
+                LogException(e);
                 return e.ToError();
             }
         }
@@ -126,6 +127,7 @@ namespace Strive.Hubs.Equipment
             }
             catch (Exception e)
             {
+                LogException(e);
                 return e.ToError();
             }
         }
@@ -140,7 +142,20 @@ namespace Strive.Hubs.Equipment
             }
             catch (Exception e)
             {
+                LogException(e);
                 return e.ToError();
+            }
+        }
+
+        private void LogException(Exception e, [CallerMemberName] string? methodName = null)
+        {
+            if (e is IdErrorException)
+            {
+                _logger.LogWarning(e, "An error occurred on invoking {method}", methodName);
+            }
+            else
+            {
+                _logger.LogError(e, "An error occurred on invoking {method}", methodName);
             }
         }
     }

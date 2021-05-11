@@ -16,6 +16,8 @@ import { commandExecuted } from '../reducer';
 import useWebcam from 'src/store/webrtc/hooks/useWebcam';
 import useScreen from 'src/store/webrtc/hooks/useScreen';
 import { DomainError } from 'src/communication-types';
+import FullscreenError from 'src/components/FullscreenError';
+import { formatErrorMessage } from 'src/utils/error-utils';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -39,6 +41,7 @@ export default function Equipment() {
 
    const availableEquipment = useSelector((state: RootState) => state.settings.availableDevices);
    const commandHistory = useSelector((state: RootState) => state.equipment.commandHistory);
+   const initError = useSelector((state: RootState) => state.equipment.initializeError);
 
    useEffect(() => {
       dispatch(fetchDevices());
@@ -129,6 +132,10 @@ export default function Equipment() {
          [],
       ),
    );
+
+   if (initError) {
+      return <FullscreenError message={formatErrorMessage(initError)} />;
+   }
 
    return (
       <div className={classes.root}>
