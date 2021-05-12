@@ -10,6 +10,7 @@ import AnimatedCamIcon from 'src/assets/animated-icons/AnimatedCamIcon';
 import AnimatedMicIcon from 'src/assets/animated-icons/AnimatedMicIcon';
 import AnimatedScreenIcon from 'src/assets/animated-icons/AnimatedScreenIcon';
 import Debug from 'src/features/conference/components/troubleshoot/Troubleshooting';
+import { selectIsDeviceAvailable } from 'src/features/settings/selectors';
 import usePermission from 'src/hooks/usePermission';
 import {
    // CONFERENCE_CAN_RAISE_HAND,
@@ -86,14 +87,17 @@ export default function MediaControls({ className, show, leftActionsRef }: Props
    const localMic = useMicrophone(gain);
    const audioDevice = useSelector((state: RootState) => state.settings.obj.mic.device);
    const micController = useDeviceManagement('mic', localMic, audioDevice);
+   const micAvailable = useSelector((state: RootState) => selectIsDeviceAvailable(state, 'mic'));
 
    const webcamDevice = useSelector((state: RootState) => state.settings.obj.webcam.device);
    const localWebcam = useWebcam();
    const webcamController = useDeviceManagement('webcam', localWebcam, webcamDevice);
+   const webcamAvailable = useSelector((state: RootState) => selectIsDeviceAvailable(state, 'webcam'));
 
    const screenDevice = useSelector((state: RootState) => state.settings.obj.screen.device);
    const localScreen = useScreen();
    const screenController = useDeviceManagement('screen', localScreen, screenDevice);
+   const screenAvailable = useSelector((state: RootState) => selectIsDeviceAvailable(state, 'screen'));
 
    const canShareScreen = usePermission(MEDIA_CAN_SHARE_SCREEN);
    const canShareAudio = usePermission(MEDIA_CAN_SHARE_AUDIO);
@@ -113,7 +117,7 @@ export default function MediaControls({ className, show, leftActionsRef }: Props
       >
          <Grid container spacing={1} className={classes.leftActions} ref={leftActionsRef} />
          <div className={classes.controlsContainer}>
-            {canShareScreen && (
+            {canShareScreen && screenAvailable && (
                <MediaFab
                   translationKey="screen"
                   className={classes.fab}
@@ -125,6 +129,7 @@ export default function MediaControls({ className, show, leftActionsRef }: Props
             )}
             {canShareWebcam && (
                <MediaFab
+                  disabled={!webcamAvailable}
                   translationKey="webcam"
                   className={classes.fab}
                   Icon={AnimatedCamIcon}
@@ -135,6 +140,7 @@ export default function MediaControls({ className, show, leftActionsRef }: Props
             )}
             {canShareAudio && (
                <MediaFab
+                  disabled={!micAvailable}
                   translationKey="mic"
                   className={classes.fab}
                   Icon={AnimatedMicIcon}
