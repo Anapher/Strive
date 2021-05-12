@@ -15,11 +15,13 @@ export const selectAvailableInputDevices = createSelector(
       const result = new Array<DeviceGroup>();
 
       if (devices) {
+         const localDevices = devices
+            .filter((x) => x.source === source)
+            .map<DeviceViewModel>((x) => ({ label: x.label, device: { type: 'local', deviceId: x.deviceId } }));
+
          result.push({
             type: 'local',
-            devices: devices
-               .filter((x) => x.source === source)
-               .map((x) => ({ label: x.label, device: { type: 'local', deviceId: x.deviceId } })),
+            devices: localDevices,
          });
       }
 
@@ -43,6 +45,10 @@ export const selectAvailableInputDevices = createSelector(
       return result;
    },
 );
+
+export const selectIsDeviceAvailable = createSelector(selectAvailableInputDevices, getSource, (devices) => {
+   return Boolean(devices.find((x) => x.devices.length > 0));
+});
 
 export const selectEnableVideoOverlay = (state: RootState) => state.settings.obj.diagnostics.enableVideoOverlay;
 

@@ -145,7 +145,8 @@
         "permission_denied": "Permission denied: Please allow the use of your webcam in your browser"
       },
       "screen": {
-        "title": "Screen"
+        "title": "Screen",
+        "error_no_devices": "Your screen was not found. Sadly, some browsers still do not support sharing the screen, like most of the mobile browsers. You can connect equipment and share it's screen."
       },
       "equipment": {
         "title": "Equipment",

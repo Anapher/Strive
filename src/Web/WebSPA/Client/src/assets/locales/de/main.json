@@ -344,7 +344,8 @@
       },
       "webrtc_not_connected_error": "WebRTC nicht verbunden, daher können Sie Ihr Audiogerät nicht testen. Bitte aktualisieren Sie die Seite oder wenden Sie sich an den Server-Administrator.",
       "screen": {
-        "title": "Bildschirm"
+        "title": "Bildschirm",
+        "error_no_devices": "Ihr Bildschirm wurde nicht gefunden. Leider unterstützen einige Browser immer noch nicht die Freigabe des Bildschirms, wie z. B. die meisten der Browser auf mobilen Endgeräten. Sie können trotzdem Equipment verbinden und deren Bildschirm freigeben."
       }
     }
   }
