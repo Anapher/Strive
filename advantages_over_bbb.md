@@ -41,3 +41,6 @@ Strive is load balancable by design, meaning you can scale the application over 
 
 ### Equipment
 Everyone has a smartphone with a good camera but not everyone has a webcam. In Strive, you can add your devices by scanning a qr code and access the microphone, camera or screen - without rejoining with a second account.
+
+### Volume of participants can be adjusted individually
+Every participant has a volume slider that can be adjusted. Also, you can adjust the volume of your current microphone in a range of 0% to 200%.

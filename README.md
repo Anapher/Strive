@@ -19,8 +19,6 @@
   </p>
 </p>
 
-
-
 ## Table of content
 
 - [About the project](#about-the-project)
@@ -35,6 +33,13 @@
 - [License](#license)
 - [Acknowledgements](#acknowledgements)
 
+**This is a very new project and I'm very thankful for all kinds of contributions including**
+- design suggestions
+- typos or if you think something is worded poorly
+- feature ideas
+- bug reports
+- problems you have for a specific use case
+- and basically all your thoughts about Strive
 
 ## About The Project
 Last year when I was tutor at my university, I had to use BigBlueButton which was a very frustrating experience. I wondered how hard it can be to create a video conference system and that's how Strive was started. You can find a list with issues of BBB I wanted to address [here](./advantages_over_bbb.md).
