@@ -1,6 +1,7 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import useMyParticipantId from 'src/hooks/useMyParticipantId';
+import useUpdateDeviceLabelsAutomatically from 'src/hooks/useUpdateDeviceLabelsAutomatically';
 import { RootState } from 'src/store';
 import { SynchronizedConferenceInfo } from 'src/store/signal/synchronization/synchronized-object-ids';
 import ClassConference from './ClassConference';
@@ -16,6 +17,8 @@ export default function index({ conference }: Props) {
    const userInteractionMade = useSelector((state: RootState) => state.media.userInteractionMade);
    const myId = useMyParticipantId();
    const isModerator = conference.moderators.includes(myId);
+
+   useUpdateDeviceLabelsAutomatically();
 
    if (!conference.isOpen) {
       return isModerator ? (

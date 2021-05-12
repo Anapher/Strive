@@ -39,7 +39,6 @@ export default function useMedia(
    const [paused, setPaused] = useState(false);
    const appliedDeviceId = useRef<string | undefined>(undefined);
    const [streamInfo, setStreamInfo] = useState<CurrentStreamInfo | undefined>(undefined);
-
    const connection = useWebRtc();
 
    const disable = async (dontUpdateConnection?: boolean) => {
@@ -68,6 +67,8 @@ export default function useMedia(
       }
 
       const track = await getMediaTrack(appliedDeviceId.current);
+      connection.notifyDeviceEnabled(source);
+
       const producerOptions = typeof options === 'function' ? options(track) : options;
 
       const producer = await connection.sendTransport.produce({

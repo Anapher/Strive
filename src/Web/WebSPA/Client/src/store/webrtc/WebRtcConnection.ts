@@ -53,6 +53,7 @@ export type ConsumerStatusInfo = {
 
 interface WebRtcConnectionEvents {
    onProducerChanged: (args: ProducerChangedEventArgs) => void;
+   onDeviceEnabled: (source: ProducerSource) => void;
 }
 
 export class WebRtcConnection extends TypedEmitter<WebRtcConnectionEvents> {
@@ -106,6 +107,10 @@ export class WebRtcConnection extends TypedEmitter<WebRtcConnectionEvents> {
       }
 
       unsubscribeAll(this.connection, this.signalrSubscription);
+   }
+
+   public notifyDeviceEnabled(source: ProducerSource) {
+      this.emit('onDeviceEnabled', source);
    }
 
    private async onNewConsumer(payload: OnNewConsumerPayload) {
