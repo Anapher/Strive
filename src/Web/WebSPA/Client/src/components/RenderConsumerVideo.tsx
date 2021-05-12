@@ -115,7 +115,7 @@ export default function RenderConsumerVideo({
                consumerId: consumer.id,
                layers: { spatialLayer: computePrefferredLayerForDevice(height, scalabilityMode, device) },
             })
-            .catch((err) => console.error('Error setting prefferred layers', err));
+            .catch((err) => console.error('Error setting preferred layers', err));
       }
    }, [height, connection, consumer]);
 

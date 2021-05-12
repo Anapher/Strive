@@ -48,7 +48,7 @@ export type ProducerChangedEventArgs = {
 export type ConsumerStatusInfo = {
    score?: ConsumerScore;
    currentLayers?: ConsumerLayers;
-   prefferredLayers?: ConsumerLayers;
+   preferredLayers?: ConsumerLayers;
 };
 
 interface WebRtcConnectionEvents {
@@ -323,17 +323,17 @@ export class WebRtcConnection extends TypedEmitter<WebRtcConnectionEvents> {
    public async setConsumerLayers(request: SetPreferredLayersRequest): Promise<void> {
       const currentInfo = this.consumerManager.getConsumerInfo(request.consumerId);
       if (
-         currentInfo?.prefferredLayers?.spatialLayer === request.layers.spatialLayer &&
-         currentInfo?.prefferredLayers?.temporalLayer === request.layers.temporalLayer
+         currentInfo?.preferredLayers?.spatialLayer === request.layers.spatialLayer &&
+         currentInfo?.preferredLayers?.temporalLayer === request.layers.temporalLayer
       )
          return;
 
       const result = await this.client.setConsumerLayers(request);
       if (!result.success) {
-         log('Set prefferred layers %O failure: %O', request, result.error);
+         log('Set preferred layers %O failure: %O', request, result.error);
          throw result.error;
       }
 
-      this.consumerManager.updateConsumerInfo(request.consumerId, { prefferredLayers: request.layers });
+      this.consumerManager.updateConsumerInfo(request.consumerId, { preferredLayers: request.layers });
    }
 }

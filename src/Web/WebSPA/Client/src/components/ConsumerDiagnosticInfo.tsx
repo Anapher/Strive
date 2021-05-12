@@ -49,9 +49,9 @@ export default function ConsumerDiagnosticInfo({ consumer, tileWidth, tileHeight
          <br />
          <span>Current Temporal Layers: {info?.currentLayers?.temporalLayer}</span>
          <br />
-         <span>Prefferred Spatial Layers: {info?.prefferredLayers?.spatialLayer}</span>
+         <span>Preferred Spatial Layers: {info?.preferredLayers?.spatialLayer}</span>
          <br />
-         <span>Prefferred Temporal Layers: {info?.prefferredLayers?.temporalLayer}</span>
+         <span>Preferred Temporal Layers: {info?.preferredLayers?.temporalLayer}</span>
          <br />
          <span>
             Video Size: {videoWidth}x{videoHeight}
