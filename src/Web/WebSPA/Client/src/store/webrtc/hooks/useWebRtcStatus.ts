@@ -4,7 +4,6 @@ import { WebRtcStatus } from '../WebRtcManager';
 
 const useWebRtcStatus = () => {
    const context = useContext(WebRtcContext);
-
    const [status, setStatus] = useState<WebRtcStatus>(context.status);
 
    useEffect(() => {

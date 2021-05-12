@@ -3,7 +3,6 @@ import { WebRtcContext } from '../WebRtcContext';
 
 const useWebRtc = () => {
    const context = useContext(WebRtcContext);
-
    const [webRtc, setWebRtc] = useState(context.current);
 
    useEffect(() => {
