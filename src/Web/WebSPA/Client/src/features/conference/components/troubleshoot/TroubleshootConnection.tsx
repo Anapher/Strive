@@ -124,17 +124,21 @@ export default function TroubleshootConnection({ expanded, onChange }: Props) {
    useEffect(() => {
       if (!expanded) return;
 
-      const handle = setInterval(async () => {
+      const refreshStats = async () => {
          const stats = await connection?.sendTransport?.getStats();
 
          if (stats) {
+            console.log(Array.from(stats.entries()));
             const transports = Array.from(stats.entries())
                .filter((x) => x[1].type === 'transport')
                .map((x) => x[1]);
 
             setTransports(transports);
          }
-      }, 1000);
+      };
+      refreshStats();
+
+      const handle = setInterval(refreshStats, 1000);
 
       return () => clearInterval(handle);
    }, [connection?.sendTransport, expanded]);
@@ -191,7 +195,7 @@ export default function TroubleshootConnection({ expanded, onChange }: Props) {
                            </TableRow>
                         ))}
                         {transports.length === 0 &&
-                           Array.from({ length: 2 }).map((_, i) => (
+                           Array.from({ length: 1 }).map((_, i) => (
                               <TableRow key={i}>
                                  <TableCell>
                                     <Skeleton />
