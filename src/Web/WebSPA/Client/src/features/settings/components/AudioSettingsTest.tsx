@@ -1,16 +1,16 @@
-import { Box, Button, makeStyles, Typography } from '@material-ui/core';
+import { makeStyles, Typography } from '@material-ui/core';
 import { motion, useMotionTemplate, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import hark from 'hark';
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import ErrorWrapper from 'src/components/ErrorWrapper';
 import useDeviceManagement from 'src/features/media/useDeviceManagement';
 import useMyParticipantId from 'src/hooks/useMyParticipantId';
 import { RootState } from 'src/store';
-import { showMessage } from 'src/store/notifier/actions';
 import useConsumer from 'src/store/webrtc/hooks/useConsumer';
 import useMicrophone from 'src/store/webrtc/hooks/useMicrophone';
+import AudioRecorderTest from './AudioRecorderTest';
 
 const useStyles = makeStyles((theme) => ({
    audioBarContainer: {
@@ -27,16 +27,20 @@ const useStyles = makeStyles((theme) => ({
       left: 0,
       borderRadius: theme.shape.borderRadius,
    },
+   audioRecorder: {
+      marginTop: theme.spacing(3),
+   },
 }));
 
 export default function AudioSettingsTest() {
    const classes = useStyles();
    const { t } = useTranslation();
-   const dispatch = useDispatch();
 
    const myId = useMyParticipantId();
    const consumer = useConsumer(myId, 'loopback-mic');
    const audioLevel = useMotionValue(0);
+   const audioRef = useRef<HTMLAudioElement>(null);
+   const [stream, setStream] = useState<MediaStream | undefined>();
 
    const gain = useSelector((state: RootState) => state.settings.obj.mic.audioGain);
 
@@ -65,10 +69,6 @@ export default function AudioSettingsTest() {
       }
    }, [micController.enabled, audioDevice]);
 
-   const audioRef = useRef<HTMLAudioElement>(null);
-   const mediaRecorder = useRef<MediaRecorder | undefined>();
-   const recordedChunks = useRef<Blob[]>([]);
-
    useEffect(() => {
       if (consumer) {
          const stream = new MediaStream();
@@ -92,23 +92,11 @@ export default function AudioSettingsTest() {
             audioRef.current.play();
          }
 
-         const recorder = new MediaRecorder(stream);
-         recorder.ondataavailable = (e) => recordedChunks.current.push(e.data);
-         recorder.onstop = () => {
-            if (!playbackAudioElem.current) return;
-            const blob = new Blob(recordedChunks.current, { type: 'audio/ogg; codecs=opus' });
-
-            const audioURL = window.URL.createObjectURL(blob);
-            playbackAudioElem.current.src = audioURL;
-            playbackAudioElem.current.play();
-         };
-
-         mediaRecorder.current = recorder;
+         setStream(stream);
 
          return () => {
             analyser.stop();
-
-            if (recorder.state !== 'inactive') recorder.stop();
+            setStream(undefined);
          };
       }
    }, [consumer]);
@@ -117,44 +105,10 @@ export default function AudioSettingsTest() {
    const currentAudioLevel = useSpring(transform);
    const audioColor = useMotionTemplate`rgba(39, 174, 96, ${currentAudioLevel})`;
 
-   const [recordingState, setRecordingState] = useState<boolean | 'playing'>(false);
-   const playbackAudioElem = useRef<HTMLAudioElement>(null);
-
-   const handleToggleRecordAudio = () => {
-      if (!mediaRecorder.current) return;
-      if (!playbackAudioElem.current) return;
-
-      switch (recordingState) {
-         case true:
-            mediaRecorder.current.stop();
-            setRecordingState('playing');
-            break;
-         case false:
-            recordedChunks.current = []; // clear chunks
-            try {
-               mediaRecorder.current.start();
-            } catch (error) {
-               console.error(error);
-               dispatch(showMessage({ type: 'error', message: `An error occurred starting the media recorder` }));
-            }
-            setRecordingState(true);
-            break;
-         case 'playing':
-            playbackAudioElem.current.src = '';
-            setRecordingState(false);
-            break;
-      }
-   };
-
-   const handlePlaybackEnded = () => {
-      setRecordingState(false);
-   };
-
    return (
       <ErrorWrapper failed={!!error} error={error} onRetry={handleEnableMic}>
          <div>
             <audio ref={audioRef} muted /> {/* required, else the analyser wont work */}
-            <audio ref={playbackAudioElem} onEnded={handlePlaybackEnded} />
             <Typography variant="h6" gutterBottom>
                {t('conference.settings.test')}
             </Typography>
@@ -165,27 +119,7 @@ export default function AudioSettingsTest() {
             <div className={classes.audioBarContainer}>
                <motion.div className={classes.audioBar} style={{ backgroundColor: audioColor }} />
             </div>
-            <Box mt={3}>
-               <Typography gutterBottom>{t('conference.settings.audio.repeat_audio_description')}</Typography>
-               <Box display="flex" alignItems="flex-start">
-                  <Button
-                     variant="contained"
-                     color="secondary"
-                     onClick={handleToggleRecordAudio}
-                     style={{ width: 200 }}
-                  >
-                     {recordingState === true
-                        ? t('conference.settings.audio.repeat_recording')
-                        : recordingState === false
-                        ? t('conference.settings.audio.repeat_idle')
-                        : t('conference.settings.audio.repeat_playing')}
-                  </Button>
-                  <Box ml={2}>
-                     <Typography variant="caption">{t('conference.settings.audio.something_to_say')}</Typography>
-                     <Typography variant="subtitle2">{t('conference.settings.audio.something_to_say_text')}</Typography>
-                  </Box>
-               </Box>
-            </Box>
+            <AudioRecorderTest stream={stream} className={classes.audioRecorder} />
          </div>
       </ErrorWrapper>
    );
