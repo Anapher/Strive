@@ -153,7 +153,7 @@ export default function useMedia(
          connection.on('onProducerChanged', producerChangedHandler);
 
          return () => {
-            disable(true);
+            disable();
             connection.off('onProducerChanged', producerChangedHandler);
          };
       }
