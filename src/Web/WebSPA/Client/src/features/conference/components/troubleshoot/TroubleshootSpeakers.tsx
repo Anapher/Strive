@@ -2,7 +2,7 @@ import { Accordion, AccordionDetails, AccordionSummary, Button, makeStyles, Typo
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import StopIcon from '@material-ui/icons/Stop';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import testAudioFile from 'src/assets/audio/test_audio_file.mp3';
 import useSound from 'use-sound';
@@ -44,6 +44,12 @@ export default function TroubleshootSpeakers({ expanded, onChange }: Props) {
 
       event.stopPropagation();
    };
+
+   useEffect(() => {
+      return () => {
+         stop();
+      };
+   }, [stop]);
 
    return (
       <Accordion expanded={expanded} onChange={handleChange}>
