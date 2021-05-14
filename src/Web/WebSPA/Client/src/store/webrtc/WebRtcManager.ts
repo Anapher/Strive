@@ -20,6 +20,7 @@ export type WebRtcStatus = 'uninitialized' | 'connecting' | 'connected';
 interface WebRtcManagerEvents {
    update: () => void;
    statuschanged: () => void;
+   errorOccurred: () => void;
 }
 
 /**
@@ -33,6 +34,7 @@ export class WebRtcManager extends TypedEmitter<WebRtcManagerEvents> {
    }
 
    public status: WebRtcStatus = 'uninitialized';
+   public latestError: any | undefined;
 
    get current(): WebRtcConnection | undefined {
       return this._current;
@@ -58,9 +60,11 @@ export class WebRtcManager extends TypedEmitter<WebRtcManagerEvents> {
          try {
             await this.initialize();
             this.status = 'connected';
+            this.latestError = undefined;
             this.onStatusChanged();
             break;
          } catch (error) {
+            this.setLatestError(error);
             log('Error initializing WebRtc connection: %O', error);
          }
 
@@ -141,5 +145,10 @@ export class WebRtcManager extends TypedEmitter<WebRtcManagerEvents> {
    private onStatusChanged() {
       this.emit('statuschanged');
       log('Set status to %s', this.status);
+   }
+
+   private setLatestError(error: any) {
+      this.latestError = error;
+      this.emit('errorOccurred');
    }
 }

@@ -78,8 +78,7 @@
       "participants": "Teilnehmer: {{count}}",
       "show_my_permissions": "Meine Berechtigungen anzeigen",
       "signed_in_as": "Eingeloggt als",
-      "webrtc_not_initialized": "WebRTC nicht initialisiert",
-      "webrtc_reconnecting": "Verbindung zum WebRTC-Server wiederherstellen..."
+      "webrtc_error": "WebRTC Verbindungsfehler"
     },
     "chat": {
       "new_chat_info": "Sag Hallo!",
@@ -190,24 +189,42 @@
             "connected": {
               "message": "verbunden"
             },
-            "connecting": {
-              "desc": "Es wird versucht, eine Verbindung zum WebRTC-Server (Selective Forwarding Unit) herzustellen. Bitte stellen Sie sicher, dass die SFU gestartet wurde und erreichbar ist.",
-              "message": "Verbinde zu Server..."
-            },
             "invalid_connection_state": {
               "desc": "Die WebRTC-Verbindung scheint Probleme zu haben. Bitte überprüfen Sie Ihren Browser oder aktualisieren Sie diese Seite."
-            },
-            "new": {
-              "desc": "Die Verbindung wurde erstellt und initialisiert, aber noch nicht aufgebaut.",
-              "message": "Neu"
-            },
-            "send_transport_connecting": {
-              "desc": "WebRTC versucht gerade, den Sendetransport zu verbinden, bitte warten Sie kurz.",
-              "message": "Verbinde..."
             },
             "send_transport_missing": {
               "desc": "Der Sendetransport wurde nicht erstellt. Bitte aktualisieren Sie diese Seite und kontaktieren Sie den Support, wenn der Fehler weiterhin auftritt.",
               "message": "Sendetransport nicht erstellt"
+            },
+            "connector_connecting": {
+              "desc": "Es wird versucht, eine Verbindung zum WebRTC-Server (Selective Forwarding Unit) herzustellen. Bitte stellen Sie sicher, dass die SFU gestartet wurde und erreichbar ist.",
+              "message": "Verbinde zu Server..."
+            },
+            "transport_new": {
+              "desc": "Die Verbindung wurde erstellt und initialisiert, aber noch nicht aufgebaut.",
+              "message": "{{transport}} neu"
+            },
+            "uninitialized": {
+              "message": "nicht initialisiert"
+            },
+            "transport_notInitialized": {
+              "message": "{{transport}} nicht initialisiert"
+            },
+            "transport_failed": {
+              "message": "{{transport}} fehlgeschlagen"
+            },
+            "transport_disconnected": {
+              "message": "{{transport}} getrennt"
+            },
+            "transport_connecting": {
+              "desc": "WebRTC versucht gerade, den Transport zu verbinden, bitte warten Sie kurz.",
+              "message": "{{transport}} verbinde..."
+            },
+            "transport_connected": {
+              "message": "{{transport}} verbunden"
+            },
+            "transport_closed": {
+              "message": "{{transport}} geschlossen"
             }
           },
           "table": {

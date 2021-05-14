@@ -14,7 +14,7 @@ import {
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import SettingsIcon from '@material-ui/icons/Settings';
 import clsx from 'classnames';
-import { useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router';
@@ -25,10 +25,10 @@ import usePermission from 'src/hooks/usePermission';
 import { CONFERENCE_CAN_OPEN_AND_CLOSE } from 'src/permissions';
 import { ConferenceRouteParams } from 'src/routes/types';
 import { RootState } from 'src/store';
-import useWebRtcStatus from 'src/store/webrtc/hooks/useWebRtcStatus';
 import { selectParticipantList } from '../selectors';
 import AppBarLogo from './appbar/AppBarLogo';
 import BreakoutRoomChips from './appbar/BreakoutRoomChip';
+import WebRtcStatusChip from './appbar/WebRtcStatusChip';
 
 const useStyles = makeStyles((theme) =>
    createStyles({
@@ -52,10 +52,6 @@ const useStyles = makeStyles((theme) =>
       breakoutRoomChip: {
          marginRight: theme.spacing(1),
          backgroundColor: theme.palette.primary.dark,
-      },
-      errorChip: {
-         backgroundColor: theme.palette.error.main,
-         color: theme.palette.error.contrastText,
       },
    }),
 );
@@ -83,7 +79,6 @@ export default function ConferenceAppBar({ chatWidth }: Props) {
 
    const moreIconButtonRef = useRef<HTMLButtonElement>(null);
    const participants = useSelector(selectParticipantList);
-   const webRtcStatus = useWebRtcStatus();
 
    const breakoutRoomState = useSelector((state: RootState) => state.breakoutRooms.synchronized?.active);
 
@@ -114,18 +109,7 @@ export default function ConferenceAppBar({ chatWidth }: Props) {
                      state={breakoutRoomState}
                   />
                )}
-               {webRtcStatus !== 'connected' && (
-                  <Chip
-                     className={classes.errorChip}
-                     style={{ marginRight: 8 }}
-                     label={
-                        webRtcStatus === 'connecting'
-                           ? t('conference.appbar.webrtc_reconnecting')
-                           : t('conference.appbar.webrtc_not_initialized')
-                     }
-                     size="small"
-                  />
-               )}
+               <WebRtcStatusChip />
                {participants && (
                   <Chip
                      className={classes.chip}

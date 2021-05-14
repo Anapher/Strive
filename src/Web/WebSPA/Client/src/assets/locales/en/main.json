@@ -78,8 +78,7 @@
       "change_conference_settings": "Change Conference Settings",
       "close_conference": "Close Conference",
       "participants": "Participants: {{count}}",
-      "webrtc_reconnecting": "Reconnecting to WebRTC server...",
-      "webrtc_not_initialized": "WebRTC not initialized"
+      "webrtc_error": "WebRTC connection error"
     },
     "participant_context_menu": {
       "mute": "Mute",
@@ -259,27 +258,45 @@
         "webrtc": {
           "title": "WebRTC Connection",
           "status": {
-            "connecting": {
-              "message": "Connecting to server...",
+            "connector_connecting": {
+              "message": "connecting to server...",
               "desc": "Trying to connect to WebRTC server (selective forwarding unit). Please make sure that the SFU was started and is reachable."
             },
             "send_transport_missing": {
-              "message": "Send transport not created",
+              "message": "send transport not created",
               "desc": "The send transport was not created. Please refresh this page and if you continue to have this error, please contact the support."
             },
             "connected": {
               "message": "connected"
             },
-            "send_transport_connecting": {
-              "message": "Connecting...",
-              "desc": "WebRTC is currently trying to connect the send transport, please stand by."
-            },
-            "new": {
-              "message": "New",
-              "desc": "The connection was created and initialized, but not yet established."
-            },
             "invalid_connection_state": {
               "desc": "The WebRTC connection seems to have problems. Please check your browser or refresh this page."
+            },
+            "uninitialized": {
+              "message": "uninitialized"
+            },
+            "transport_closed": {
+              "message": "{{transport}} closed"
+            },
+            "transport_notInitialized": {
+              "message": "{{transport}} not initialized"
+            },
+            "transport_new": {
+              "message": "{{transport}} new",
+              "desc": "The connection was created and initialized, but not yet established."
+            },
+            "transport_connecting": {
+              "message": "{{transport}} connecting...",
+              "desc": "WebRTC is currently trying to connect the transport, please stand by."
+            },
+            "transport_failed": {
+              "message": "{{transport}} failed"
+            },
+            "transport_disconnected": {
+              "message": "{{transport}} disconnected"
+            },
+            "transport_connected": {
+              "message": "{{transport}} connected"
             }
           },
           "table": {
