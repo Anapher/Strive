@@ -160,3 +160,4 @@ Distributed under the Apache-2.0 License. See `LICENSE` for more information.
 * [Material-UI](https://material-ui.com/)
 * [React Hook Form](https://react-hook-form.com/)
 * [Duende IdentityServer](https://duendesoftware.com/)
+* [eShopOnContainers](https://github.com/dotnet-architecture/eShopOnContainers)
