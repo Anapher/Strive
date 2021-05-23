@@ -11,6 +11,14 @@ import scenes from '../features/scenes/reducer';
 import breakoutRooms from '../features/breakout-rooms/reducer';
 import diagnostics from '../features/diagnostics/reducer';
 import auth from '../features/auth/reducer';
+import storage from 'redux-persist/lib/storage';
+import { PersistConfig, persistReducer } from 'redux-persist';
+
+const settingsPersistConfig: PersistConfig<any> = {
+   key: 'settings',
+   storage: storage,
+   whitelist: ['obj'],
+};
 
 const rootReducer = combineReducers({
    auth,
@@ -20,7 +28,7 @@ const rootReducer = combineReducers({
    signalr,
    media,
    rooms,
-   settings,
+   settings: persistReducer(settingsPersistConfig, settings),
    equipment,
    scenes,
    breakoutRooms,
