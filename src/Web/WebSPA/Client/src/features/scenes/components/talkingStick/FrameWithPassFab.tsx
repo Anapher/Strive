@@ -6,7 +6,7 @@ import * as coreHub from 'src/core-hub';
 import MediaControlsContext from 'src/features/media/media-controls-context';
 import usePermission from 'src/hooks/usePermission';
 import { SCENES_CAN_PASS_TALKING_STICK, SCENES_CAN_TAKE_TALKING_STICK } from 'src/permissions';
-import { selectIsMePresenter } from '../../selectors';
+import { selectTalkingStickIsMeSpeaker } from '../../selectors';
 import AddToListFab from './AddToListFab';
 import PassStickFab from './PassStickFab';
 
@@ -21,7 +21,7 @@ export default function FrameWithPassFab({ children }: FrameProps) {
    const canPass = usePermission(SCENES_CAN_PASS_TALKING_STICK);
    const canTake = usePermission(SCENES_CAN_TAKE_TALKING_STICK);
 
-   const isPresenter = useSelector(selectIsMePresenter);
+   const isPresenter = useSelector(selectTalkingStickIsMeSpeaker);
 
    const mediaContext = useContext(MediaControlsContext);
 

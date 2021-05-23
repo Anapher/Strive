@@ -1,3 +1,4 @@
+import { PresenterScene } from './types';
 import { createSelector } from '@reduxjs/toolkit';
 import _ from 'lodash';
 import { RootState } from 'src/store';
@@ -16,11 +17,19 @@ export const selectSceneStack = (state: RootState) => state.scenes.synchronized?
 export const selectTalkingStickCurrentSpeakerId = (state: RootState) => state.scenes.talkingStick?.currentSpeakerId;
 export const selectTalkingStickQueue = (state: RootState) => state.scenes.talkingStick?.speakerQueue ?? [];
 
-export const selectIsMePresenter = createSelector(
+export const selectTalkingStickIsMeSpeaker = createSelector(
    selectTalkingStickCurrentSpeakerId,
    selectMyParticipantId,
    (currentSpeaker, myId) => currentSpeaker === myId,
 );
+
+const getId = (_: unknown, id: string | undefined) => id;
+export const selectIsParticipantPresenter = createSelector(selectSceneStack, getId, (scenes, id) => {
+   if (!scenes) return false;
+
+   const presenterScene = _.findLast(scenes, (x) => x.type === 'presenter') as PresenterScene | undefined;
+   return presenterScene?.presenterParticipantId === id;
+});
 
 export const selectIsMeInQueue = createSelector(selectTalkingStickQueue, selectMyParticipantId, (queue, myId) =>
    myId ? queue.includes(myId) : false,

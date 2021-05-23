@@ -28,6 +28,7 @@ import { showMessage } from 'src/store/notifier/actions';
 import { Participant } from '../types';
 import ParticipantContextMenuTempPermissions from './ParticipantContextMenuTempPermissions';
 import { AccountVoice } from 'mdi-material-ui';
+import { selectIsParticipantPresenter } from 'src/features/scenes/selectors';
 
 const useStyles = makeStyles((theme) => ({
    infoMenuItem: {
@@ -136,6 +137,8 @@ const ParticipantContextMenu = React.forwardRef<HTMLElement, Props>(({ participa
    const canChangeParticipantProducers = usePermission(MEDIA_CAN_CHANGE_PARTICIPANTS_PRODUCER);
    const canSetScene = usePermission(SCENES_CAN_SET_SCENE);
 
+   const isPresenter = useSelector((state: RootState) => selectIsParticipantPresenter(state, participant.id));
+
    return (
       <>
          <div className={classes.infoMenuItem}>
@@ -192,7 +195,7 @@ const ParticipantContextMenu = React.forwardRef<HTMLElement, Props>(({ participa
                {t('conference.participant_context_menu.disable_mic_for_all')}
             </MenuItem>
          )}
-         {canSetScene && (
+         {canSetScene && !isPresenter && (
             <MenuItem onClick={handleSetPresenter}>
                <ListItemIcon className={classes.menuIcon}>
                   <AccountVoice fontSize="small" />

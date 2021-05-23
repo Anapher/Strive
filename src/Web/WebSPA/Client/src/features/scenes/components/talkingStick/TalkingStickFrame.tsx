@@ -8,7 +8,7 @@ import MediaControlsContext from 'src/features/media/media-controls-context';
 import useMyParticipantId from 'src/hooks/useMyParticipantId';
 import usePermission from 'src/hooks/usePermission';
 import { SCENES_CAN_QUEUE_FOR_TALKING_STICK, SCENES_CAN_TAKE_TALKING_STICK } from 'src/permissions';
-import { selectIsMePresenter, selectTalkingStickQueue } from '../../selectors';
+import { selectTalkingStickIsMeSpeaker, selectTalkingStickQueue } from '../../selectors';
 
 const useStyles = makeStyles({
    primaryAction: {
@@ -29,7 +29,7 @@ export default function TalkingStickFrame({ children, className }: Props) {
    const canQueue = usePermission(SCENES_CAN_QUEUE_FOR_TALKING_STICK);
    const canTake = usePermission(SCENES_CAN_TAKE_TALKING_STICK);
 
-   const isPresenter = useSelector(selectIsMePresenter);
+   const isPresenter = useSelector(selectTalkingStickIsMeSpeaker);
    const myId = useMyParticipantId();
    const queue = useSelector(selectTalkingStickQueue);
    const isInQueue = queue.includes(myId);
