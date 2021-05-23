@@ -1,11 +1,12 @@
 import { makeStyles, Typography } from '@material-ui/core';
-import { motion, useMotionTemplate, useMotionValue, useSpring, useTransform } from 'framer-motion';
-import hark from 'hark';
-import React, { useEffect, useRef, useState } from 'react';
+import { motion, useMotionTemplate } from 'framer-motion';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import ErrorWrapper from 'src/components/ErrorWrapper';
 import useDeviceManagement from 'src/features/media/useDeviceManagement';
+import useConsumerMediaStream from 'src/hooks/useConsumerMediaStream';
+import useMediaStreamMotionAudioLevel from 'src/hooks/useMediaStreamMotionAudioLevel';
 import useMyParticipantId from 'src/hooks/useMyParticipantId';
 import { RootState } from 'src/store';
 import useConsumer from 'src/store/webrtc/hooks/useConsumer';
@@ -38,9 +39,6 @@ export default function AudioSettingsTest() {
 
    const myId = useMyParticipantId();
    const consumer = useConsumer(myId, 'loopback-mic');
-   const audioLevel = useMotionValue(0);
-   const audioRef = useRef<HTMLAudioElement>(null);
-   const [stream, setStream] = useState<MediaStream | undefined>();
 
    const gain = useSelector((state: RootState) => state.settings.obj.mic.audioGain);
 
@@ -69,46 +67,13 @@ export default function AudioSettingsTest() {
       }
    }, [micController.enabled, audioDevice]);
 
-   useEffect(() => {
-      if (consumer) {
-         const stream = new MediaStream();
-         stream.addTrack(consumer.track);
-
-         const analyser = hark(stream, { play: false });
-         analyser.on('volume_change', (dBs) => {
-            // The exact formula to convert from dBs (-100..0) to linear (0..1) is:
-            //   Math.pow(10, dBs / 20)
-            // However it does not produce a visually useful output, so let exagerate
-            // it a bit. Also, let convert it from 0..1 to 0..10 and avoid value 1 to
-            // minimize component renderings.
-            let audioVolume = Math.round(Math.pow(10, dBs / 85) * 10);
-
-            if (audioVolume === 1) audioVolume = 0;
-            audioLevel.set(audioVolume / 10);
-         });
-
-         if (audioRef.current) {
-            audioRef.current.srcObject = stream;
-            audioRef.current.play();
-         }
-
-         setStream(stream);
-
-         return () => {
-            analyser.stop();
-            setStream(undefined);
-         };
-      }
-   }, [consumer]);
-
-   const transform = useTransform(audioLevel, [0, 1], [0, 2]);
-   const currentAudioLevel = useSpring(transform);
+   const stream = useConsumerMediaStream(consumer);
+   const currentAudioLevel = useMediaStreamMotionAudioLevel(stream);
    const audioColor = useMotionTemplate`rgba(39, 174, 96, ${currentAudioLevel})`;
 
    return (
       <ErrorWrapper failed={!!error} error={error} onRetry={handleEnableMic}>
          <div>
-            <audio ref={audioRef} muted /> {/* required, else the analyser wont work */}
             <Typography variant="h6" gutterBottom>
                {t('conference.settings.test')}
             </Typography>
