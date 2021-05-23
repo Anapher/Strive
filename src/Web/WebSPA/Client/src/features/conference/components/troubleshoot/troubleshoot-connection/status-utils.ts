@@ -1,5 +1,5 @@
 import { TFunction } from 'react-i18next';
-import { WebRtcHealth } from '../useWebRtcHealth';
+import { WebRtcHealth } from './useWebRtcHealth';
 
 const webRtcNamespace = 'conference.media.troubleshooting.webrtc.status';
 

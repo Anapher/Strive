@@ -2,7 +2,7 @@ import { Grid, Typography, Box } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import StatusChip from '../StatusChip';
-import { WebRtcHealth } from '../useWebRtcHealth';
+import { WebRtcHealth } from './useWebRtcHealth';
 
 const webRtcNamespace = 'conference.media.troubleshooting.webrtc.status';
 

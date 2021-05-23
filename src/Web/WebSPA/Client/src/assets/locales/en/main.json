@@ -311,6 +311,26 @@
           "desc": "To check if your speakers are working, please play the test sound. If you cannot hear anything while the sound is playing, please check your sound output in the settings of your operating system.",
           "button_play": "Play test audio",
           "button_stop": "Stop"
+        },
+        "microphone": {
+          "device": {
+            "success": "Audio device selected",
+            "not_found": "Audio device was not found"
+          },
+          "activation": {
+            "success": "Microphone activated",
+            "error": "Microphone activation failed"
+          },
+          "stream": {
+            "success": "Stream registered",
+            "error": "Stream registration problem",
+            "error_paused": "Stream is paused",
+            "error_not_found": "Stream does not exist"
+          },
+          "consumer": {
+            "success": "Consumer received",
+            "not_found": "Consumer was not received"
+          }
         }
       }
     },

@@ -14,7 +14,6 @@ const useStyles = makeStyles((theme) => ({
    },
    playButton: {
       minWidth: 160,
-      marginRight: theme.spacing(2),
    },
    accordionSummary: {
       display: 'flex',

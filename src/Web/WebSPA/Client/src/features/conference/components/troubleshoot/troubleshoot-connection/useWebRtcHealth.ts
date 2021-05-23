@@ -3,15 +3,7 @@ import { useContext, useEffect, useState } from 'react';
 import useWebRtc from 'src/store/webrtc/hooks/useWebRtc';
 import { WebRtcContext } from 'src/store/webrtc/WebRtcContext';
 import { WebRtcStatus } from 'src/store/webrtc/WebRtcManager';
-
-export type HealthStatus = 'ok' | 'warn' | 'error';
-export type ComponentHealth = { status: HealthStatus };
-
-function mergeHealth(components: (ComponentHealth | undefined)[]): HealthStatus {
-   if (components.find((x) => x?.status === 'error')) return 'error';
-   if (components.find((x) => x?.status === 'warn')) return 'warn';
-   return 'ok';
-}
+import { ComponentHealth, HealthStatus, mergeHealth } from '../utils';
 
 export type SfuConnectorHealth = ComponentHealth & { webRtcStatus: WebRtcStatus; latestError: any | undefined };
 

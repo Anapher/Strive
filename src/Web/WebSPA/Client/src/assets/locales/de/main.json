@@ -234,6 +234,26 @@
             "state": "Status"
           },
           "title": "WebRTC Verbindung"
+        },
+        "microphone": {
+          "activation": {
+            "error": "Mikrofon Aktivierung fehlgeschlagen",
+            "success": "Mikrofon aktiviert"
+          },
+          "consumer": {
+            "not_found": "Consumer wurde nicht empfangen",
+            "success": "Consumer empfangen"
+          },
+          "device": {
+            "not_found": "Audiogerät wurde nicht gefunden",
+            "success": "Audiogerät ausgewählt"
+          },
+          "stream": {
+            "error": "Stream Registrierungsproblem",
+            "error_not_found": "Stream existiert nicht",
+            "error_paused": "Stream ist pausiert",
+            "success": "Stream ist registriert"
+          }
         }
       }
     },

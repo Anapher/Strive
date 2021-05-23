@@ -1,7 +1,7 @@
 import { Chip, makeStyles } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import useWebRtcHealth from '../troubleshoot/useWebRtcHealth';
+import useWebRtcHealth from '../troubleshoot/troubleshoot-connection/useWebRtcHealth';
 
 const useStyles = makeStyles((theme) => ({
    errorChip: {
