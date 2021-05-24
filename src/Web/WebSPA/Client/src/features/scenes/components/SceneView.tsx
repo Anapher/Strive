@@ -63,21 +63,29 @@ export default function SceneView() {
    const mediaLeftActionsRef = useRef<HTMLDivElement>(null);
    const participantId = useMyParticipantId();
 
-   const delayHideControls = useMemo(
-      () =>
-         _.debounce(() => {
-            if (autoHideControls.current) {
-               setShowControls(false);
-            }
-         }, AUTO_HIDE_CONTROLS_DELAY_MS),
-      [setShowControls, autoHideControls],
-   );
+   const delayHideControlsFactory = () =>
+      _.debounce(() => {
+         if (autoHideControls.current) {
+            setShowControls(false);
+         }
+      }, AUTO_HIDE_CONTROLS_DELAY_MS);
+
+   const delayHideControls = useRef<_.DebouncedFunc<() => void>>(delayHideControlsFactory());
+
+   useEffect(() => {
+      delayHideControls.current.cancel();
+
+      const fn = delayHideControlsFactory();
+      delayHideControls.current = fn;
+
+      return () => fn.cancel();
+   }, [setShowControls, autoHideControls]);
 
    const handleSetAutoHideControls = (autoHide: boolean) => {
       autoHideControls.current = autoHide;
 
       if (autoHide) {
-         delayHideControls();
+         delayHideControls.current();
       } else {
          setShowControls(true);
       }
@@ -105,7 +113,7 @@ export default function SceneView() {
       if (!autoHideControls.current) return;
 
       setShowControls(true);
-      delayHideControls();
+      delayHideControls.current();
    };
 
    return (
