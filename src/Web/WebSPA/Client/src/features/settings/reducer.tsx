@@ -19,6 +19,9 @@ export type StriveSettings = {
    diagnostics: {
       enableVideoOverlay: boolean;
    };
+   conference: {
+      playSoundOnOpen?: boolean;
+   };
 };
 
 type SettingsState = {
@@ -39,6 +42,9 @@ const initialState: SettingsState = {
       screen: {},
       diagnostics: {
          enableVideoOverlay: false,
+      },
+      conference: {
+         playSoundOnOpen: false,
       },
    },
    equipmentToken: null,
@@ -68,6 +74,9 @@ const settingsSlice = createSlice({
       setEnableVideoOverlay(state, { payload }: PayloadAction<boolean>) {
          state.obj.diagnostics.enableVideoOverlay = payload;
       },
+      setPlaySoundOnOpen(state, { payload }: PayloadAction<boolean>) {
+         state.obj.conference.playSoundOnOpen = payload;
+      },
    },
    extraReducers: {
       [getEquipmentToken.returnAction]: (state, action: PayloadAction<SuccessOrError<string>>) => {
@@ -92,6 +101,7 @@ export const {
    setAudioGain,
    setCurrentDevice,
    setEnableVideoOverlay,
+   setPlaySoundOnOpen,
 } = settingsSlice.actions;
 
 export default settingsSlice.reducer;

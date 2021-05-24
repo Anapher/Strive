@@ -2,9 +2,11 @@ import { Box, Button, Checkbox, Container, FormControlLabel, IconButton, makeSty
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
-import { openSettings } from 'src/features/settings/reducer';
+import { useDispatch, useSelector } from 'react-redux';
+import { openSettings, setPlaySoundOnOpen } from 'src/features/settings/reducer';
+import { RootState } from 'src/store';
 import to from 'src/utils/to';
+import ConferenceOpenSound from './ConferenceOpenSound';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -50,6 +52,8 @@ export default function ConferenceNotOpenLayout({ children }: Props) {
    const dispatch = useDispatch();
    const { t } = useTranslation();
 
+   const playSoundOnOpen = useSelector((state: RootState) => state.settings.obj.conference.playSoundOnOpen);
+
    const handleOpenSettings = () => dispatch(openSettings());
 
    return (
@@ -64,13 +68,15 @@ export default function ConferenceNotOpenLayout({ children }: Props) {
          </div>
          <Box display="flex" flexDirection="row" position="absolute" left={32} bottom={32}>
             <FormControlLabel
-               control={<Checkbox checked={true} />}
+               control={<Checkbox checked={Boolean(playSoundOnOpen)} />}
+               onChange={(_, value) => dispatch(setPlaySoundOnOpen(value))}
                label={t('conference_not_open.play_sound_on_conference_open')}
             />
          </Box>
          <Container maxWidth="md" className={classes.container}>
             {children as any}
          </Container>
+         <ConferenceOpenSound />
       </div>
    );
 }

@@ -4,8 +4,7 @@ import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import StopIcon from '@material-ui/icons/Stop';
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import testAudioFile from 'src/assets/audio/test_audio_file.mp3';
-import useSound from 'use-sound';
+import useStriveSound from 'src/hooks/useStriveSound';
 
 const useStyles = makeStyles((theme) => ({
    heading: {
@@ -31,7 +30,7 @@ type Props = {
 export default function TroubleshootSpeakers({ expanded, onChange }: Props) {
    const classes = useStyles();
    const { t } = useTranslation();
-   const [play, { isPlaying, stop }] = useSound(testAudioFile, { volume: 0.75 });
+   const [play, { isPlaying, stop }] = useStriveSound('testAudioFile');
 
    const handleChange = (_: React.ChangeEvent<unknown>, isExpanded: boolean) => {
       onChange(isExpanded);

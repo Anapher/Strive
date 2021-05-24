@@ -15,10 +15,16 @@ type Props = {
 
 export default function index({ conference }: Props) {
    const userInteractionMade = useSelector((state: RootState) => state.media.userInteractionMade);
+   const playSoundOnConferenceOpen = useSelector((state: RootState) => state.settings.obj.conference.playSoundOnOpen);
+
    const myId = useMyParticipantId();
    const isModerator = conference.moderators.includes(myId);
 
    useUpdateDeviceLabelsAutomatically();
+
+   if (playSoundOnConferenceOpen && !userInteractionMade) {
+      return <RequestUserInteractionView />;
+   }
 
    if (!conference.isOpen) {
       return isModerator ? (
