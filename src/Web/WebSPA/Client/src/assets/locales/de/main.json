@@ -54,7 +54,7 @@
   "conference_not_open": {
     "connecting_to_conference": "Verbinde zu Konferenz...",
     "reconnecting_to_conference": "Versuche, erneut zur Konferenz zu verbinden...",
-    "play_sound_on_conference_open": "Einen Ton abspielen wenn die Konferenz öffnet",
+    "play_sound_on_conference_open": "Einen Ton abspielen, wenn die Konferenz öffnet",
     "open_conference": "Konferenz öffnen",
     "change_conference_settings": "Konferenzeinstellungen ändern",
     "you_are_moderator": "Sie sind ein Moderator der Konferenz.",
