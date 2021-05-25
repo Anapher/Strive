@@ -1,6 +1,5 @@
 import {
    Box,
-   Typography,
    Button,
    Grid,
    List,
@@ -8,21 +7,37 @@ import {
    ListItemIcon,
    ListItemText,
    makeStyles,
+   Typography,
    useMediaQuery,
    useTheme,
 } from '@material-ui/core';
-import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
-import React, { useEffect } from 'react';
-import clsx from 'classnames';
 import PersonIcon from '@material-ui/icons/Person';
+import clsx from 'classnames';
 import _ from 'lodash';
-import useMyParticipantId from 'src/hooks/useMyParticipantId';
-import { Participant } from 'src/features/conference/types';
+import React, { useEffect } from 'react';
+import { DragDropContext, Draggable, Droppable, DropResult } from 'react-beautiful-dnd';
 import { useTranslation } from 'react-i18next';
+import { Participant } from 'src/features/conference/types';
+import useMyParticipantId from 'src/hooks/useMyParticipantId';
 
 const useStyles = makeStyles((theme) => ({
+   roomList: {
+      minHeight: 64,
+      borderRadius: theme.shape.borderRadius,
+      borderColor: theme.palette.divider,
+      borderWidth: 1,
+      borderStyle: 'solid',
+      position: 'relative',
+      paddingTop: 32,
+   },
+   roomListHeader: {
+      position: 'absolute',
+      top: 8,
+      left: 8,
+      fontSize: 12,
+   },
    roomListDragOver: {
-      backgroundColor: theme.palette.background.paper,
+      backgroundColor: theme.palette.divider,
    },
    roomListItemDragging: {
       backgroundColor: theme.palette.primary.main,
@@ -200,34 +215,37 @@ function RoomList({ id, participants, title, fullHeight }: RoomListProps) {
          {(provided, snapshot) => (
             <div
                ref={provided.innerRef}
-               className={clsx(snapshot.isDraggingOver && classes.roomListDragOver)}
+               className={clsx(classes.roomList, snapshot.isDraggingOver && classes.roomListDragOver)}
                style={{ marginBottom: 8, height: fullHeight ? '100%' : undefined }}
+               {...provided.droppableProps}
             >
-               <Typography variant="caption" color={snapshot.isDraggingOver ? 'secondary' : undefined}>
+               <Typography className={classes.roomListHeader} variant="caption">
                   {title}
                </Typography>
                <List disablePadding>
-                  {participants.map((item, index) => (
-                     <Draggable key={item.id} draggableId={item.id} index={index}>
-                        {(provided, snapshot) => (
-                           <ListItem
-                              dense
-                              button
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              {...provided.dragHandleProps}
-                              className={clsx(snapshot.isDragging && classes.roomListItemDragging)}
-                              style={provided.draggableProps.style}
-                           >
-                              <ListItemIcon>
-                                 <PersonIcon />
-                              </ListItemIcon>
-                              <ListItemText primary={item.displayName} />
-                           </ListItem>
-                        )}
-                     </Draggable>
-                  ))}
-                  {provided.placeholder}
+                  <div>
+                     {participants.map((item, index) => (
+                        <Draggable key={item.id} draggableId={item.id} index={index}>
+                           {(provided, snapshot) => (
+                              <ListItem
+                                 dense
+                                 button
+                                 ref={provided.innerRef}
+                                 {...provided.draggableProps}
+                                 {...provided.dragHandleProps}
+                                 className={clsx(snapshot.isDragging && classes.roomListItemDragging)}
+                                 style={provided.draggableProps.style}
+                              >
+                                 <ListItemIcon>
+                                    <PersonIcon />
+                                 </ListItemIcon>
+                                 <ListItemText primary={item.displayName} />
+                              </ListItem>
+                           )}
+                        </Draggable>
+                     ))}
+                     {provided.placeholder}
+                  </div>
                </List>
             </div>
          )}
