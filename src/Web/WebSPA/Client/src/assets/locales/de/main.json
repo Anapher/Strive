@@ -120,7 +120,7 @@
       "validation_must_create_at_least_one": "Es muss mindestens ein Raum erstellt werden."
     },
     "dialog_permissions": {
-      "description": "Hier können Sie die genauen Berechtigungen einsehen und woher diese kommen. Eine Berechtigung besteht aus einem Schlüssel und einem Wert, der überall in der Anwendung verwendet werden kann. Die Berechtigungen sind in Ebenen gruppiert, je nach Status des Teilnehmers kann es verschiedene Ebenen geben. Die oberen Schichten überschreiben die unten definierten Berechtigungen, wenn sie denselben Schlüssel haben. Die Standardwerte sind false.",
+      "description": "Hier können Sie die genauen Berechtigungen einsehen und woher diese kommen. Eine Berechtigung besteht aus einem Schlüssel und einem Wert, der überall in der Anwendung verwendet werden kann. Die Berechtigungen sind in Ebenen gruppiert, je nach Status des Teilnehmers kann es verschiedene Ebenen geben. Die oberen Ebenen überschreiben die unten definierten Berechtigungen, wenn sie denselben Schlüssel haben. Die Standardwerte sind false.",
       "notice_overwritten": "Diese Berechtigung wird in {{layer}} überschrieben",
       "title": "Berechtigung von {{name}}"
     },
