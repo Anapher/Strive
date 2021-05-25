@@ -1,0 +1,19 @@
+{
+  "name": "strive",
+  "version": "1.0.0",
+  "repository": "https://github.com/Anapher/Strive",
+  "author": "Vincent (Anapher) <anapher@protonmail.com>",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@commitlint/config-conventional": "^12.1.4",
+    "husky": "^6.0.0"
+  },
+  "dependencies": {
+    "@commitlint/cli": "^12.1.4"
+  },
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ]
+  }
+}
