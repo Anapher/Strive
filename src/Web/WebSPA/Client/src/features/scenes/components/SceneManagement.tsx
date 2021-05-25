@@ -1,6 +1,5 @@
 import {
    Button,
-   ButtonBase,
    ClickAwayListener,
    Divider,
    Grow,
@@ -16,6 +15,7 @@ import {
    Typography,
 } from '@material-ui/core';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
+import CloseIcon from '@material-ui/icons/Close';
 import _ from 'lodash';
 import React, { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -24,11 +24,9 @@ import * as coreHub from 'src/core-hub';
 import usePermission from 'src/hooks/usePermission';
 import { SCENES_CAN_OVERWRITE_CONTENT_SCENE, SCENES_CAN_SET_SCENE } from 'src/permissions';
 import { RootState } from 'src/store';
-import scenePresenters from '../scene-presenter-registry';
+import { default as presenters, default as scenePresenters } from '../scene-presenter-registry';
 import { Scene } from '../types';
 import SceneManagementModeSelectionDialog from './SceneManagementModeSelectionDialog';
-import CloseIcon from '@material-ui/icons/Close';
-import presenters from '../scene-presenter-registry';
 
 const sceneDisplayOrder: Scene['type'][] = ['autonomous', 'grid', 'activeSpeaker', 'screenShare', 'breakoutRoom'];
 
@@ -42,9 +40,13 @@ const useStyles = makeStyles((theme) => ({
       borderTopRightRadius: 0,
    },
    modeButton: {
-      padding: theme.spacing(1, 1, 1, 2),
-      width: '100%',
       textAlign: 'left',
+      textOverflow: 'ellipsis',
+      width: '100%',
+   },
+   modeButtonContainer: {
+      padding: theme.spacing(0, 1, 1, 1),
+      width: '100%',
    },
    divider: {
       marginLeft: theme.spacing(2),
@@ -113,38 +115,48 @@ export default function SceneManagement() {
                <List dense disablePadding>
                   <ListSubheader>{t('glossary:scene_plural')}</ListSubheader>
                   {canSetScene && (
-                     <ButtonBase
-                        className={classes.modeButton}
-                        onClick={handleOpenModeSelection}
-                        disabled={!canSetScene}
-                     >
-                        <Typography variant="body2" noWrap>
-                           <ActiveSceneDescriptor scene={selectedScene} />
-                        </Typography>
-                     </ButtonBase>
+                     <div className={classes.modeButtonContainer}>
+                        <Button
+                           size="small"
+                           className={classes.modeButton}
+                           onClick={handleOpenModeSelection}
+                           disabled={!canSetScene}
+                           variant="outlined"
+                        >
+                           <Typography variant="body2" noWrap>
+                              <ActiveSceneDescriptor scene={selectedScene} />
+                           </Typography>
+                        </Button>
+                     </div>
                   )}
-                  {availableScenePresenters.map(
-                     ({ presenter, scene }) =>
-                        presenter.AvailableSceneListItem && (
-                           <presenter.AvailableSceneListItem
-                              key={presenter.getSceneId ? presenter.getSceneId(scene) : scene.type}
-                              scene={scene}
-                              stack={sceneStack}
-                              onChangeScene={handleOverwriteScene}
+                  <div>
+                     {availableScenePresenters.map(
+                        ({ presenter, scene }) =>
+                           presenter.AvailableSceneListItem && (
+                              <presenter.AvailableSceneListItem
+                                 key={presenter.getSceneId ? presenter.getSceneId(scene) : scene.type}
+                                 scene={scene}
+                                 stack={sceneStack}
+                                 onChangeScene={handleOverwriteScene}
+                              />
+                           ),
+                     )}
+                     {overwrittenContent && (
+                        <ListItem
+                           button
+                           onClick={() => handleOverwriteScene(null)}
+                           title={t('conference.scenes.remove_overwrite')}
+                        >
+                           <ListItemIcon style={{ minWidth: 32 }}>
+                              <CloseIcon />
+                           </ListItemIcon>
+                           <ListItemText
+                              primaryTypographyProps={{ noWrap: true }}
+                              primary={t('conference.scenes.remove_overwrite')}
                            />
-                        ),
-                  )}
-                  {overwrittenContent && (
-                     <ListItem button onClick={() => handleOverwriteScene(null)}>
-                        <ListItemIcon style={{ minWidth: 32 }}>
-                           <CloseIcon />
-                        </ListItemIcon>
-                        <ListItemText
-                           primaryTypographyProps={{ noWrap: true }}
-                           primary={t('conference.scenes.remove_overwrite')}
-                        />
-                     </ListItem>
-                  )}
+                        </ListItem>
+                     )}
+                  </div>
                </List>
             </>
          )}

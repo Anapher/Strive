@@ -1,4 +1,4 @@
-import { Box, Button, ButtonGroup, Typography } from '@material-ui/core';
+import { Box, Button, ButtonGroup, makeStyles, Typography } from '@material-ui/core';
 import { DateTime } from 'luxon';
 import React from 'react';
 import Countdown from 'react-countdown';
@@ -11,9 +11,17 @@ import { ROOMS_CAN_CREATE_REMOVE } from 'src/permissions';
 import { setCreationDialogOpen } from '../../../breakout-rooms/reducer';
 import { selectBreakoutRoomState } from '../../../breakout-rooms/selectors';
 
+const useStyles = makeStyles((theme) => ({
+   marginLeft: {
+      marginLeft: theme.spacing(1),
+   },
+}));
+
 export default function BreakoutRoomsPopper() {
    const dispatch = useDispatch();
    const { t } = useTranslation();
+   const classes = useStyles();
+
    const state = useSelector(selectBreakoutRoomState);
    const canModify = usePermission(ROOMS_CAN_CREATE_REMOVE);
 
@@ -39,11 +47,6 @@ export default function BreakoutRoomsPopper() {
       <div>
          <Box display="flex" justifyContent="space-between" alignItems="center">
             <Typography variant="h6">{t('conference.scenes.breakout_rooms.title', { count: state.amount })}</Typography>
-            {canModify && (
-               <Button color="secondary" variant="contained" size="small" onClick={handleCloseBreakoutRooms}>
-                  {t('common:close')}
-               </Button>
-            )}
          </Box>
          {deadline && (
             <Box mt={2}>
@@ -56,7 +59,7 @@ export default function BreakoutRoomsPopper() {
                </Typography>
                {canModify && (
                   <ButtonGroup
-                     variant="contained"
+                     variant="outlined"
                      aria-label={t('conference.scenes.breakout_rooms.add_time_button_group')}
                      size="small"
                   >
@@ -69,8 +72,17 @@ export default function BreakoutRoomsPopper() {
          )}
          {canModify && (
             <Box mt={2}>
-               <Button variant="contained" color="primary" onClick={handleUpdateBreakoutRooms}>
+               <Button variant="contained" color="primary" size="small" onClick={handleUpdateBreakoutRooms}>
                   {t('conference.scenes.breakout_rooms.change_breakout_rooms')}
+               </Button>
+               <Button
+                  variant="contained"
+                  color="primary"
+                  size="small"
+                  onClick={handleCloseBreakoutRooms}
+                  className={classes.marginLeft}
+               >
+                  {t('common:close')}
                </Button>
             </Box>
          )}

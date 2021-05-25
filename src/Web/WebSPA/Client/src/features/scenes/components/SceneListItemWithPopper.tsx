@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import SceneListItem, { Props as SceneListItemProps } from './SceneListItem';
-import { Box, ClickAwayListener, Grow, Paper, Popper } from '@material-ui/core';
+import { Box, ClickAwayListener, Grow, IconButton, ListItemSecondaryAction, Paper, Popper } from '@material-ui/core';
+import SettingsIcon from '@material-ui/icons/Settings';
 
 type Props = SceneListItemProps & {
    children: React.ReactNode;
@@ -15,7 +16,13 @@ export default function SceneListItemWithPopper(props: Props) {
 
    return (
       <>
-         <SceneListItem {...props} selected={open} onClick={handleOpen} ref={listItemRef} />
+         <SceneListItem {...props} ref={listItemRef}>
+            <ListItemSecondaryAction>
+               <IconButton edge="end" aria-label="options" onClick={handleOpen}>
+                  <SettingsIcon />
+               </IconButton>
+            </ListItemSecondaryAction>
+         </SceneListItem>
          <Popper open={open} anchorEl={listItemRef.current} transition placement="right-end">
             {({ TransitionProps }) => (
                <Grow {...TransitionProps} style={{ transformOrigin: 'left bottom' }}>
