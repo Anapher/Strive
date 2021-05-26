@@ -38,16 +38,16 @@ export default function TransportStats({ className }: Props) {
          <TableHead>
             <TableRow>
                <TableCell>
-                  <b>{t('conference.media.troubleshooting.webrtc.table.id')}</b>
+                  <b>{t('conference.troubleshooting.webrtc.table.id')}</b>
                </TableCell>
                <TableCell>
-                  <b>{t('conference.media.troubleshooting.webrtc.table.state')}</b>
+                  <b>{t('conference.troubleshooting.webrtc.table.state')}</b>
                </TableCell>
                <TableCell>
-                  <b>{t('conference.media.troubleshooting.webrtc.table.received')}</b>
+                  <b>{t('conference.troubleshooting.webrtc.table.received')}</b>
                </TableCell>
                <TableCell>
-                  <b>{t('conference.media.troubleshooting.webrtc.table.sent')}</b>
+                  <b>{t('conference.troubleshooting.webrtc.table.sent')}</b>
                </TableCell>
             </TableRow>
          </TableHead>

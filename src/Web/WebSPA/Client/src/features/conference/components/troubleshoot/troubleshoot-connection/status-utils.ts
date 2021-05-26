@@ -1,7 +1,7 @@
 import { TFunction } from 'react-i18next';
 import { WebRtcHealth } from './useWebRtcHealth';
 
-const webRtcNamespace = 'conference.media.troubleshooting.webrtc.status';
+const webRtcNamespace = 'conference.troubleshooting.webrtc.status';
 
 export const getStatusMessage: (health: WebRtcHealth, t: TFunction<'translation'>) => string = (health, t) => {
    if (health.connection?.status === 'ok' && health.connector.status === 'ok')

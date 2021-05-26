@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import StatusChip from '../StatusChip';
 import { WebRtcHealth } from './useWebRtcHealth';
 
-const webRtcNamespace = 'conference.media.troubleshooting.webrtc.status';
+const webRtcNamespace = 'conference.troubleshooting.webrtc.status';
 
 type Props = {
    health: WebRtcHealth;

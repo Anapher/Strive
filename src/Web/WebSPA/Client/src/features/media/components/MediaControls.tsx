@@ -152,21 +152,21 @@ export default function MediaControls({ className, show, leftActionsRef }: Props
             )}
          </div>
          <div className={classes.rightActions}>
-            <Tooltip title={t<string>('conference.media.troubleshooting.title')} arrow>
+            <Tooltip title={t<string>('conference.troubleshooting.title')} arrow>
                <Fab
                   color="default"
                   className={classes.fab}
                   onClick={handleOpenDebugDialog}
                   component={motion.button}
                   variants={item}
-                  aria-label={t('conference.media.troubleshooting.title')}
+                  aria-label={t('conference.troubleshooting.title')}
                >
                   <BugReportIcon />
                </Fab>
             </Tooltip>
          </div>
          <Dialog open={debugDialogOpen} onClose={handleCloseDebugDialog} PaperProps={{ className: classes.dialog }}>
-            <DialogTitle>{t('conference.media.troubleshooting.title')}</DialogTitle>
+            <DialogTitle>{t('conference.troubleshooting.title')}</DialogTitle>
             <DialogContent>
                <Debug />
             </DialogContent>

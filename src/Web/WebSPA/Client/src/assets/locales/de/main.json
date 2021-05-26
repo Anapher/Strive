@@ -175,86 +175,95 @@
           "label_enable": "Webcam aktivieren",
           "paused": "Webcam ist pausiert"
         }
+      }
+    },
+    "troubleshooting": {
+      "speakers": {
+        "button_play": "Testaudio abspielen",
+        "button_stop": "Stopp",
+        "desc": "Um zu prüfen, ob Ihre Lautsprecher funktionieren, spielen Sie bitte das Testaudio ab. Wenn Sie während der Tonwiedergabe nichts hören, überprüfen Sie bitte Ihre Tonausgabe in den Einstellungen Ihres Betriebssystems.",
+        "title": "Lautsprecher"
       },
-      "troubleshooting": {
-        "speakers": {
-          "button_play": "Testaudio abspielen",
-          "button_stop": "Stopp",
-          "desc": "Um zu prüfen, ob Ihre Lautsprecher funktionieren, spielen Sie bitte das Testaudio ab. Wenn Sie während der Tonwiedergabe nichts hören, überprüfen Sie bitte Ihre Tonausgabe in den Einstellungen Ihres Betriebssystems.",
-          "title": "Lautsprecher"
-        },
-        "title": "Fehlersuche",
-        "webrtc": {
-          "status": {
-            "connected": {
-              "message": "verbunden"
-            },
-            "invalid_connection_state": {
-              "desc": "Die WebRTC-Verbindung scheint Probleme zu haben. Bitte überprüfen Sie Ihren Browser oder aktualisieren Sie diese Seite."
-            },
-            "send_transport_missing": {
-              "desc": "Der Sendetransport wurde nicht erstellt. Bitte aktualisieren Sie diese Seite und kontaktieren Sie den Support, wenn der Fehler weiterhin auftritt.",
-              "message": "Sendetransport nicht erstellt"
-            },
-            "connector_connecting": {
-              "desc": "Es wird versucht, eine Verbindung zum WebRTC-Server (Selective Forwarding Unit) herzustellen. Bitte stellen Sie sicher, dass die SFU gestartet wurde und erreichbar ist.",
-              "message": "Verbinde zu Server..."
-            },
-            "transport_new": {
-              "desc": "Die Verbindung wurde erstellt und initialisiert, aber noch nicht aufgebaut.",
-              "message": "{{transport}} neu"
-            },
-            "uninitialized": {
-              "message": "nicht initialisiert"
-            },
-            "transport_notInitialized": {
-              "message": "{{transport}} nicht initialisiert"
-            },
-            "transport_failed": {
-              "message": "{{transport}} fehlgeschlagen"
-            },
-            "transport_disconnected": {
-              "message": "{{transport}} getrennt"
-            },
-            "transport_connecting": {
-              "desc": "WebRTC versucht gerade, den Transport zu verbinden, bitte warten Sie kurz.",
-              "message": "{{transport}} verbinde..."
-            },
-            "transport_connected": {
-              "message": "{{transport}} verbunden"
-            },
-            "transport_closed": {
-              "message": "{{transport}} geschlossen"
-            }
+      "title": "Fehlersuche",
+      "webrtc": {
+        "status": {
+          "connected": {
+            "message": "verbunden"
           },
-          "table": {
-            "id": "ID",
-            "received": "Empfangen",
-            "sent": "Gesendet",
-            "state": "Status"
+          "invalid_connection_state": {
+            "desc": "Die WebRTC-Verbindung scheint Probleme zu haben. Bitte überprüfen Sie Ihren Browser oder aktualisieren Sie diese Seite."
           },
-          "title": "WebRTC Verbindung"
-        },
-        "microphone": {
-          "activation": {
-            "error": "Mikrofon Aktivierung fehlgeschlagen",
-            "success": "Mikrofon aktiviert"
+          "send_transport_missing": {
+            "desc": "Der Sendetransport wurde nicht erstellt. Bitte aktualisieren Sie diese Seite und kontaktieren Sie den Support, wenn der Fehler weiterhin auftritt.",
+            "message": "Sendetransport nicht erstellt"
           },
-          "consumer": {
-            "not_found": "Consumer wurde nicht empfangen",
-            "success": "Consumer empfangen"
+          "connector_connecting": {
+            "desc": "Es wird versucht, eine Verbindung zum WebRTC-Server (Selective Forwarding Unit) herzustellen. Bitte stellen Sie sicher, dass die SFU gestartet wurde und erreichbar ist.",
+            "message": "Verbinde zu Server..."
           },
-          "device": {
-            "not_found": "Audiogerät wurde nicht gefunden",
-            "success": "Audiogerät ausgewählt"
+          "transport_new": {
+            "desc": "Die Verbindung wurde erstellt und initialisiert, aber noch nicht aufgebaut.",
+            "message": "{{transport}} neu"
           },
-          "stream": {
-            "error": "Stream Registrierungsproblem",
-            "error_not_found": "Stream existiert nicht",
-            "error_paused": "Stream ist pausiert",
-            "success": "Stream ist registriert"
+          "uninitialized": {
+            "message": "nicht initialisiert"
+          },
+          "transport_notInitialized": {
+            "message": "{{transport}} nicht initialisiert"
+          },
+          "transport_failed": {
+            "message": "{{transport}} fehlgeschlagen"
+          },
+          "transport_disconnected": {
+            "message": "{{transport}} getrennt"
+          },
+          "transport_connecting": {
+            "desc": "WebRTC versucht gerade, den Transport zu verbinden, bitte warten Sie kurz.",
+            "message": "{{transport}} verbinde..."
+          },
+          "transport_connected": {
+            "message": "{{transport}} verbunden"
+          },
+          "transport_closed": {
+            "message": "{{transport}} geschlossen"
           }
+        },
+        "table": {
+          "id": "ID",
+          "received": "Empfangen",
+          "sent": "Gesendet",
+          "state": "Status"
+        },
+        "title": "WebRTC Verbindung"
+      },
+      "microphone": {
+        "activation": {
+          "error": "Mikrofon Aktivierung fehlgeschlagen",
+          "success": "Mikrofon aktiviert"
+        },
+        "consumer": {
+          "not_found": "Consumer wurde nicht empfangen",
+          "success": "Consumer empfangen"
+        },
+        "device": {
+          "not_found": "Audiogerät wurde nicht gefunden",
+          "success": "Audiogerät ausgewählt"
+        },
+        "stream": {
+          "error": "Stream Registrierungsproblem",
+          "error_not_found": "Stream existiert nicht",
+          "error_paused": "Stream ist pausiert",
+          "success": "Stream ist registriert"
         }
+      },
+      "diagnostics": {
+        "title": "Diagnose",
+        "enable_video_overlay": "Video-Overlay einschalten",
+        "open_media_diagnostics": "Diagnose für Medienwiedergabe öffnen"
+      },
+      "logging": {
+        "title": "Logging",
+        "refresh_notice": "Bitte beachten Sie: Sie müssen diese Seite möglicherweise aktualisieren, um die Änderungen zu übernehmen"
       }
     },
     "notifications": {
@@ -339,11 +348,6 @@
       }
     },
     "settings": {
-      "common": {
-        "strive_info": "Strive Info",
-        "strive_creator": "Strive wurde von Vincent Griebel erstellt.",
-        "strive_commit": "Aktueller Commit"
-      },
       "audio": {
         "audio_input_level": "Ihr Mikrofon Pegel",
         "gain": "Verstärken",
@@ -357,12 +361,13 @@
         "test_description": "Wir werden Ihren aktuellen Audioeingang zu Ihnen zurücksenden und die Ergebnisse hier anzeigen. Auf diese Weise können Sie überprüfen, wie andere Teilnehmer Ihr Audiosignal empfangen.",
         "title": "Audio"
       },
-      "diagnostics": {
-        "enable_video_overlay": "Video-Overlay einschalten",
-        "logging": "Logging",
-        "refresh_notice": "Bitte beachten Sie: Sie müssen diese Seite möglicherweise aktualisieren, um die Änderungen zu übernehmen",
-        "title": "Diagnose",
-        "open_media_diagnostics": "Diagnose für Medienwiedergabe öffnen"
+      "about": {
+        "title": "Über",
+        "about_strive": "Über Strive",
+        "strive_creator": "Strive wurde von Vincent Griebel erstellt.",
+        "strive_commit": "Aktueller Commit",
+        "sound_effects_obtained_from": "Sounds zur Verfügung gestellt von",
+        "open_source_acknowledgements": "Dieses Projekt wäre ohne all die großartigen Open-Source-Bibliotheken nicht möglich gewesen. Sie können <1>hier</1> eine Liste finden."
       },
       "equipment": {
         "description": "Sie haben keine Webcam, aber ein Smartphone mit einer Kamera? Sie haben kein gutes Mikrofon, aber ein Tablet, das eines hat? Kein Problem, Sie können mehrere externe Geräte als Mikrofon oder Webcam verwenden oder deren Bildschirm teilen.",

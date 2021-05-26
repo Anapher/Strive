@@ -57,9 +57,7 @@ export default function TroubleshootSpeakers({ expanded, onChange }: Props) {
             id="troubleshoot-speakers-header"
          >
             <div className={classes.accordionSummary}>
-               <Typography className={classes.heading}>
-                  {t('conference.media.troubleshooting.speakers.title')}
-               </Typography>
+               <Typography className={classes.heading}>{t('conference.troubleshooting.speakers.title')}</Typography>
                <Button
                   size="small"
                   variant="contained"
@@ -69,13 +67,13 @@ export default function TroubleshootSpeakers({ expanded, onChange }: Props) {
                >
                   {isPlaying ? <StopIcon fontSize="small" /> : <PlayArrowIcon fontSize="small" />}
                   {isPlaying
-                     ? t('conference.media.troubleshooting.speakers.button_stop')
-                     : t('conference.media.troubleshooting.speakers.button_play')}
+                     ? t('conference.troubleshooting.speakers.button_stop')
+                     : t('conference.troubleshooting.speakers.button_play')}
                </Button>
             </div>
          </AccordionSummary>
          <AccordionDetails>
-            <Typography gutterBottom>{t('conference.media.troubleshooting.speakers.desc')}</Typography>
+            <Typography gutterBottom>{t('conference.troubleshooting.speakers.desc')}</Typography>
          </AccordionDetails>
       </Accordion>
    );

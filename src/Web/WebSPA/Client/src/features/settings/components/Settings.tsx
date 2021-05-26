@@ -1,9 +1,9 @@
 import { makeStyles, Tab, Tabs } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import About from './About';
 import AudioSettings from './AudioSettings';
 import CommonSettings from './CommonSettings';
-import DiagnosticsSettings from './DiagnosticsSettings';
 import EquipmentSettings from './EquipmentSettings';
 import ScreenSettings from './ScreenSettings';
 import WebcamSettings from './WebcamSettings';
@@ -78,7 +78,7 @@ export default function Settings() {
             <Tab label={t('conference.settings.webcam.title')} {...a11yProps(2)} />
             <Tab label={t('conference.settings.screen.title')} {...a11yProps(3)} />
             <Tab label={t('conference.settings.equipment.title')} {...a11yProps(4)} />
-            <Tab label={t('conference.settings.diagnostics.title')} {...a11yProps(5)} />
+            <Tab label={t('conference.settings.about.title')} {...a11yProps(6)} />
          </Tabs>
          <TabPanel value={value} index={0} className={classes.tab}>
             <CommonSettings />
@@ -96,7 +96,7 @@ export default function Settings() {
             <EquipmentSettings />
          </TabPanel>
          <TabPanel value={value} index={5} className={classes.tab}>
-            <DiagnosticsSettings />
+            <About />
          </TabPanel>
       </div>
    );

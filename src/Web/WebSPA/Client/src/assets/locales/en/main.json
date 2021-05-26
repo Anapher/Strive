@@ -120,11 +120,6 @@
       "notice_overwritten": "This permission is overwritten in {{layer}}"
     },
     "settings": {
-      "common": {
-        "strive_info": "Strive Info",
-        "strive_creator": "Strive was created by Vincent Griebel.",
-        "strive_commit": "Current commit"
-      },
       "audio": {
         "title": "Audio",
         "gain": "Gain",
@@ -155,12 +150,13 @@
         "step_2": "2. Allow access on your device",
         "step_3": "3. Change the default device here in settings"
       },
-      "diagnostics": {
-        "title": "Diagnostics",
-        "logging": "Logging",
-        "refresh_notice": "Please note: you may have to refresh this page in order to apply the changes",
-        "enable_video_overlay": "Enable video overlay",
-        "open_media_diagnostics": "Open media playback diagnostics"
+      "about": {
+        "title": "About",
+        "about_strive": "About Strive",
+        "strive_creator": "Strive was created by Vincent Griebel.",
+        "strive_commit": "Current commit",
+        "sound_effects_obtained_from": "Sound effects obtained from",
+        "open_source_acknowledgements": "This project would not have been possible without all these awesome open source libraries. You can find a list <1>here</1>."
       },
       "webrtc_not_connected_error": "WebRTC not connected, so you cannot test your audio device. Please refresh the page or contact the server administrator.",
       "unnamed_device": "Unnamed device",
@@ -252,86 +248,95 @@
           "label_enable": "Enable screen",
           "label_disable": "Disable screen"
         }
-      },
-      "troubleshooting": {
-        "title": "Troubleshooting",
-        "webrtc": {
-          "title": "WebRTC Connection",
-          "status": {
-            "connector_connecting": {
-              "message": "connecting to server...",
-              "desc": "Trying to connect to WebRTC server (selective forwarding unit). Please make sure that the SFU was started and is reachable."
-            },
-            "send_transport_missing": {
-              "message": "send transport not created",
-              "desc": "The send transport was not created. Please refresh this page and if you continue to have this error, please contact the support."
-            },
-            "connected": {
-              "message": "connected"
-            },
-            "invalid_connection_state": {
-              "desc": "The WebRTC connection seems to have problems. Please check your browser or refresh this page."
-            },
-            "uninitialized": {
-              "message": "uninitialized"
-            },
-            "transport_closed": {
-              "message": "{{transport}} closed"
-            },
-            "transport_notInitialized": {
-              "message": "{{transport}} not initialized"
-            },
-            "transport_new": {
-              "message": "{{transport}} new",
-              "desc": "The connection was created and initialized, but not yet established."
-            },
-            "transport_connecting": {
-              "message": "{{transport}} connecting...",
-              "desc": "WebRTC is currently trying to connect the transport, please stand by."
-            },
-            "transport_failed": {
-              "message": "{{transport}} failed"
-            },
-            "transport_disconnected": {
-              "message": "{{transport}} disconnected"
-            },
-            "transport_connected": {
-              "message": "{{transport}} connected"
-            }
+      }
+    },
+    "troubleshooting": {
+      "title": "Troubleshooting",
+      "webrtc": {
+        "title": "WebRTC Connection",
+        "status": {
+          "connector_connecting": {
+            "message": "connecting to server...",
+            "desc": "Trying to connect to WebRTC server (selective forwarding unit). Please make sure that the SFU was started and is reachable."
           },
-          "table": {
-            "id": "Id",
-            "state": "State",
-            "received": "Received",
-            "sent": "Sent"
+          "send_transport_missing": {
+            "message": "send transport not created",
+            "desc": "The send transport was not created. Please refresh this page and if you continue to have this error, please contact the support."
+          },
+          "connected": {
+            "message": "connected"
+          },
+          "invalid_connection_state": {
+            "desc": "The WebRTC connection seems to have problems. Please check your browser or refresh this page."
+          },
+          "uninitialized": {
+            "message": "uninitialized"
+          },
+          "transport_closed": {
+            "message": "{{transport}} closed"
+          },
+          "transport_notInitialized": {
+            "message": "{{transport}} not initialized"
+          },
+          "transport_new": {
+            "message": "{{transport}} new",
+            "desc": "The connection was created and initialized, but not yet established."
+          },
+          "transport_connecting": {
+            "message": "{{transport}} connecting...",
+            "desc": "WebRTC is currently trying to connect the transport, please stand by."
+          },
+          "transport_failed": {
+            "message": "{{transport}} failed"
+          },
+          "transport_disconnected": {
+            "message": "{{transport}} disconnected"
+          },
+          "transport_connected": {
+            "message": "{{transport}} connected"
           }
         },
-        "speakers": {
-          "title": "Speakers",
-          "desc": "To check if your speakers are working, please play the test sound. If you cannot hear anything while the sound is playing, please check your sound output in the settings of your operating system.",
-          "button_play": "Play test audio",
-          "button_stop": "Stop"
-        },
-        "microphone": {
-          "device": {
-            "success": "Audio device selected",
-            "not_found": "Audio device was not found"
-          },
-          "activation": {
-            "success": "Microphone activated",
-            "error": "Microphone activation failed"
-          },
-          "stream": {
-            "success": "Stream registered",
-            "error": "Stream registration problem",
-            "error_paused": "Stream is paused",
-            "error_not_found": "Stream does not exist"
-          },
-          "consumer": {
-            "success": "Consumer received",
-            "not_found": "Consumer was not received"
-          }
+        "table": {
+          "id": "Id",
+          "state": "State",
+          "received": "Received",
+          "sent": "Sent"
         }
+      },
+      "speakers": {
+        "title": "Speakers",
+        "desc": "To check if your speakers are working, please play the test sound. If you cannot hear anything while the sound is playing, please check your sound output in the settings of your operating system.",
+        "button_play": "Play test audio",
+        "button_stop": "Stop"
+      },
+      "microphone": {
+        "device": {
+          "success": "Audio device selected",
+          "not_found": "Audio device was not found"
+        },
+        "activation": {
+          "success": "Microphone activated",
+          "error": "Microphone activation failed"
+        },
+        "stream": {
+          "success": "Stream registered",
+          "error": "Stream registration problem",
+          "error_paused": "Stream is paused",
+          "error_not_found": "Stream does not exist"
+        },
+        "consumer": {
+          "success": "Consumer received",
+          "not_found": "Consumer was not received"
+        }
+      },
+      "diagnostics": {
+        "title": "Diagnostics",
+        "enable_video_overlay": "Enable video overlay",
+        "open_media_diagnostics": "Open media playback diagnostics"
+      },
+      "logging": {
+        "title": "Logging",
+        "refresh_notice": "Please note: you may have to refresh this page in order to apply the changes"
       }
     },
     "equipment": {

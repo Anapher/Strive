@@ -47,42 +47,36 @@ export default function DetailedStatus({ enableError }: Props) {
             {audioDevice ? (
                <StatusListItem
                   success
-                  description={t('conference.media.troubleshooting.microphone.device.success')}
+                  description={t('conference.troubleshooting.microphone.device.success')}
                   secondary={findMicrophoneLabel(audioDevice, mics)}
                />
             ) : (
-               <StatusListItem description={t('conference.media.troubleshooting.microphone.device.not_found')} />
+               <StatusListItem description={t('conference.troubleshooting.microphone.device.not_found')} />
             )}
             {!enableError ? (
-               <StatusListItem
-                  success
-                  description={t('conference.media.troubleshooting.microphone.activation.success')}
-               />
+               <StatusListItem success description={t('conference.troubleshooting.microphone.activation.success')} />
             ) : (
                <StatusListItem
-                  description={t('conference.media.troubleshooting.microphone.activation.error')}
+                  description={t('conference.troubleshooting.microphone.activation.error')}
                   secondary={enableError}
                />
             )}
             {loopbackMicStream?.paused === false ? (
-               <StatusListItem success description={t('conference.media.troubleshooting.microphone.stream.success')} />
+               <StatusListItem success description={t('conference.troubleshooting.microphone.stream.success')} />
             ) : (
                <StatusListItem
-                  description={t('conference.media.troubleshooting.microphone.stream.error')}
+                  description={t('conference.troubleshooting.microphone.stream.error')}
                   secondary={
                      loopbackMicStream
-                        ? t('conference.media.troubleshooting.microphone.stream.error_paused')
-                        : t('conference.media.troubleshooting.microphone.stream.error_not_found')
+                        ? t('conference.troubleshooting.microphone.stream.error_paused')
+                        : t('conference.troubleshooting.microphone.stream.error_not_found')
                   }
                />
             )}
             {consumer ? (
-               <StatusListItem
-                  success
-                  description={t('conference.media.troubleshooting.microphone.consumer.success')}
-               />
+               <StatusListItem success description={t('conference.troubleshooting.microphone.consumer.success')} />
             ) : (
-               <StatusListItem description={t('conference.media.troubleshooting.microphone.consumer.not_found')} />
+               <StatusListItem description={t('conference.troubleshooting.microphone.consumer.not_found')} />
             )}
          </List>
       </div>

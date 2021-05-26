@@ -28,7 +28,7 @@ export default function TroubleshootConnection({ expanded, onChange }: Props) {
 
    return (
       <TroubleshootAccordion
-         title={t('conference.media.troubleshooting.webrtc.title')}
+         title={t('conference.troubleshooting.webrtc.title')}
          expanded={expanded}
          onChange={onChange}
          renderStatus={() => <StatusChip size="small" status={health.status} label={getStatusMessage(health, t)} />}
