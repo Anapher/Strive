@@ -17,6 +17,7 @@ export default function TransportStats({ className }: Props) {
    useEffect(() => {
       const refreshStats = async () => {
          const stats = await connection?.sendTransport?.getStats();
+         console.log(stats ? Array.from(stats.entries()) : 'stats are undefined');
 
          if (stats) {
             const transports = Array.from(stats.entries())
