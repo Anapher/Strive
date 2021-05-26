@@ -13,6 +13,11 @@ const useStyles = makeStyles(() => ({
    transportStats: {
       width: '100%',
    },
+   transportStatsContainer: {
+      width: '100%',
+      maxHeight: 400,
+      overflowY: 'auto',
+   },
 }));
 
 type Props = {
@@ -34,7 +39,9 @@ export default function TroubleshootConnection({ expanded, onChange }: Props) {
          renderStatus={() => <StatusChip size="small" status={health.status} label={getStatusMessage(health, t)} />}
       >
          {health.status === 'ok' ? (
-            <TransportStats className={classes.transportStats} />
+            <div className={classes.transportStatsContainer}>
+               <TransportStats className={classes.transportStats} />
+            </div>
          ) : (
             <div>
                <DetailedErrorStatus health={health} />

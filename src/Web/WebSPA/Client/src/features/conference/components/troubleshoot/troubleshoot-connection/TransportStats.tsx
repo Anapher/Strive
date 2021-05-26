@@ -5,6 +5,47 @@ import { useTranslation } from 'react-i18next';
 import useWebRtc from 'src/store/webrtc/hooks/useWebRtc';
 import { formatBytes } from 'src/utils/string-utils';
 
+type StatsRow = {
+   id: string;
+   name: string;
+   state: string;
+   received: string;
+   sent: string;
+};
+
+const mapStats = (report: RTCStatsReport): StatsRow[] => {
+   const stats = Array.from(report);
+   return [
+      ...stats
+         .filter(([, value]) => value.type === 'transport')
+         .map(([id, value]) => ({
+            id,
+            name: id,
+            state: value.dtlsState,
+            received: formatBytes(value.bytesReceived),
+            sent: formatBytes(value.bytesSent),
+         })),
+      ...stats
+         .filter(([, value]) => value.type === 'outbound-rtp' && Boolean(value.bytesSent))
+         .map(([id, value]) => ({
+            id,
+            name: `${value.type} (${value.kind})`,
+            state: 'ok',
+            received: '-',
+            sent: formatBytes(value.bytesSent),
+         })),
+      ...stats
+         .filter(([, value]) => value.type === 'remote-inbound-rtp')
+         .map(([id, value]) => ({
+            id,
+            name: `${value.type} (${value.kind})`,
+            state: value.packetsLost !== undefined ? `${value.packetsLost} packet(s) lost` : 'ok',
+            received: value.bytesReceived !== undefined ? formatBytes(value.bytesReceived) : '-',
+            sent: '-',
+         })),
+   ];
+};
+
 type Props = {
    className?: string;
 };
@@ -12,19 +53,13 @@ type Props = {
 export default function TransportStats({ className }: Props) {
    const { t } = useTranslation();
    const connection = useWebRtc();
-   const [transports, setTransports] = useState<any[]>([]);
+   const [transports, setTransports] = useState<StatsRow[]>([]);
 
    useEffect(() => {
       const refreshStats = async () => {
          const stats = await connection?.sendTransport?.getStats();
-         console.log(stats ? Array.from(stats.entries()) : 'stats are undefined');
-
          if (stats) {
-            const transports = Array.from(stats.entries())
-               .filter((x) => x[1].type === 'transport')
-               .map((x) => x[1]);
-
-            setTransports(transports);
+            setTransports(mapStats(stats));
          }
       };
       refreshStats();
@@ -55,10 +90,10 @@ export default function TransportStats({ className }: Props) {
          <TableBody>
             {transports.map((row) => (
                <TableRow key={row.id}>
-                  <TableCell>{row.id}</TableCell>
-                  <TableCell>{row.dtlsState}</TableCell>
-                  <TableCell>{formatBytes(row.bytesReceived)}</TableCell>
-                  <TableCell>{formatBytes(row.bytesSent)}</TableCell>
+                  <TableCell>{row.name}</TableCell>
+                  <TableCell>{row.state}</TableCell>
+                  <TableCell>{row.received}</TableCell>
+                  <TableCell>{row.sent}</TableCell>
                </TableRow>
             ))}
             {transports.length === 0 &&
