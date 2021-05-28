@@ -3,6 +3,7 @@ on:
   push:
     paths:
       - src/**
+      - .github/workflows/e2e-tests.yml
 
 jobs:
   test:
@@ -11,8 +12,9 @@ jobs:
       run:
         working-directory: src/
     steps:
-      - uses: actions/checkout@v2
-      - name: Build and run docker compose
-        run: chmod +x ./compose.sh && ./compose.sh -f .\docker-compose.e2e.yml up --exit-code-from e2e
-      env:
-        CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+    - uses: actions/checkout@v2
+    - name: Build and run docker compose
+      run: chmod +x ./compose.sh
+      run: ./compose.sh -f .\docker-compose.e2e.yml up --exit-code-from e2e
+    env:
+      CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
