@@ -52,7 +52,9 @@ class ConsumerUsageControl {
 
       if (currentUsage === 1) {
          log('Consumer was not used before, resume...');
-         this.connection.changeStream({ id: consumer.id, type: 'consumer', action: 'resume' });
+         this.connection.changeStream({ id: consumer.id, type: 'consumer', action: 'resume' }).catch(() => {
+            // ignore
+         });
       }
 
       const unregisterCallback = () => this.unregisterConsumer(id);
@@ -97,7 +99,9 @@ class ConsumerUsageControl {
          if (this.consumerUsage.get(id)) return;
 
          log('Send pause request');
-         this.connection.changeStream({ id: consumer.id, type: 'consumer', action: 'pause' });
+         this.connection.changeStream({ id: consumer.id, type: 'consumer', action: 'pause' }).catch(() => {
+            // ignore
+         });
       }, PAUSE_CONSUMER_TIMEOUT);
 
       this.deletionTimeouts.set(id, timeout);
