@@ -24,3 +24,32 @@ I still decided that Return Codes are the better design choice for this project 
 For all top level code (especially UseCases), we use a return code (using `SuccessOrError`) for expected/user errors and exceptions if something very unexpected happend.
 
 For low level code please still use exceptions or out parameters and a return boolean (like in `Dictionary.TryGetValue()`).
+
+## Commit Messages
+We use [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) to describe what was done. Basically, the commit message template is:
+```
+<type>[optional scope]: <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+where type must be one of the following:
+| type     | description                                                                                           |
+| -------- | ----------------------------------------------------------------------------------------------------- |
+| build    | Changes that affect the build system or external dependencies (example scopes: nuget, yarn, docker)   |
+| ci       | Changes to our CI configuration files and scripts (example scopes: github workflow, cypress, codecov) |
+| docs     | Documentation only changes                                                                            |
+| feat     | A new feature                                                                                         |
+| fix      | A bug fix                                                                                             |
+| perf     | A code change that improves performance                                                               |
+| refactor | A code change that neither fixes a bug nor adds a feature                                             |
+| test     | Adding missing tests or correcting existing tests                                                     |
+
+and scope must be one of
+| scope | description                         |
+| ----- | ----------------------------------- |
+| spa   | The single page application (React) |
+| conf  | The conference management (Strive)  |
+| sfu   | The Seletive Forwarding Unit        |
