@@ -1,0 +1,29 @@
+version: "3.4"
+
+services:
+  e2e:
+    image: ${DOCKER_REGISTRY-}e2e
+    build: ./Tests/e2e
+    depends_on:
+      - webspa
+    # note: inside e2e container, the network allows accessing
+    # "web" host under name "web"
+    # so "curl http://web" would return whatever the webserver
+    # in the "web" container is cooking
+    # see https://docs.docker.com/compose/networking/
+    environment:
+      - CYPRESS_baseUrl=https://localhost
+      - CYPRESS_RECORD_KEY=${CYPRESS_RECORD_KEY-}
+    # mount the host directory e2e/cypress and the file e2e/cypress.json as
+    # volumes within the container
+    # this means that:
+    #  1. anything that Cypress writes to these folders (e.g., screenshots,
+    #     videos) appears also on the Docker host's filesystem
+    #  2. any change that the developer applies to Cypress files on the host
+    #     machine immediately takes effect within the e2e container (no docker
+    #     rebuild required).
+    volumes:
+      - ./Tests/e2e/cypress:/cypress
+      - ./Tests/e2e/cypress.json:/cypress.json
+
+    network_mode: host

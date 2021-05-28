@@ -1,0 +1,10 @@
+{
+    "projectId": "coci4n",
+    "baseUrl": "https://localhost/",
+    "hosts": {
+        "*.localhost": "127.0.0.1"
+    },
+    "chromeWebSecurity": false,
+    "browser": "chrome",
+    "defaultCommandTimeout": 10000
+}

@@ -24,7 +24,7 @@ function ConferenceControls() {
 
    return (
       <>
-         <Fab color="secondary" variant="extended" onClick={handleCreateConference}>
+         <Fab color="secondary" variant="extended" onClick={handleCreateConference} id="create-conference-button">
             <AddIcon className={classes.extendedIcon} />
             {t('view_main.start_new_conference')}
          </Fab>

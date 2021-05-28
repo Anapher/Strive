@@ -77,7 +77,7 @@ function ModeratorList({ field: { value, onChange }, conferenceId }: ModeratorLi
    };
 
    return (
-      <List className={classes.list}>
+      <List className={classes.list} id="create-conference-form-moderators-list">
          {value.map((id) => {
             const info = userInfos.find((x) => x.id === id);
             if (!info)
