@@ -1,6 +1,5 @@
 // Conference
 export const CONFERENCE_CAN_OPEN_AND_CLOSE: Permission = { key: 'conference/canOpenAndClose', type: 'bool' };
-export const CONFERENCE_CAN_RAISE_HAND: BoolPermission = { key: 'conference/canRaiseHand', type: 'bool' };
 export const CONFERENCE_CAN_KICK_PARTICIPANT: BoolPermission = { key: 'conference/canKickParticipant', type: 'bool' };
 
 // Permissions

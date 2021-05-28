@@ -12,12 +12,7 @@ import AnimatedScreenIcon from 'src/assets/animated-icons/AnimatedScreenIcon';
 import Debug from 'src/features/conference/components/troubleshoot/Troubleshooting';
 import { selectIsDeviceAvailable } from 'src/features/settings/selectors';
 import usePermission from 'src/hooks/usePermission';
-import {
-   // CONFERENCE_CAN_RAISE_HAND,
-   MEDIA_CAN_SHARE_AUDIO,
-   MEDIA_CAN_SHARE_SCREEN,
-   MEDIA_CAN_SHARE_WEBCAM,
-} from 'src/permissions';
+import { MEDIA_CAN_SHARE_AUDIO, MEDIA_CAN_SHARE_SCREEN, MEDIA_CAN_SHARE_WEBCAM } from 'src/permissions';
 import { RootState } from 'src/store';
 import useMicrophone from 'src/store/webrtc/hooks/useMicrophone';
 import useScreen from 'src/store/webrtc/hooks/useScreen';
