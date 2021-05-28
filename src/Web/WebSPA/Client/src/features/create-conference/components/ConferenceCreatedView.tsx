@@ -27,13 +27,20 @@ export default function ConferenceCreatedView({ conferenceId }: Props) {
       <DialogContent>
          <Box display="flex" flexDirection="row" alignItems="center">
             <TextField
+               id="created-conference-url"
                variant="outlined"
                label={t('dialog_create_conference.created.conference_url')}
                InputProps={{ readOnly: true }}
                value={new URL('/c/' + conferenceId, document.baseURI).href}
                className={classes.conferenceUrlField}
             />
-            <Button variant="contained" {...to('/c/' + conferenceId)} onClick={handleClose} color="primary">
+            <Button
+               id="join-conference-button"
+               variant="contained"
+               {...to('/c/' + conferenceId)}
+               onClick={handleClose}
+               color="primary"
+            >
                {t('dialog_create_conference.created.join')}
             </Button>
          </Box>
