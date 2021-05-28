@@ -25,7 +25,7 @@
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 import "cypress-wait-until";
 
-Cypress.Commands.add("IdentityServerAPILogin", (username) => {
+Cypress.Commands.add("identityServerLogin", (username) => {
   cy.visit("https://identity.localhost/Account/Login");
   cy.get("input[name=Username]").type(username);
   cy.get("input[name=Password]").type("test");
@@ -46,7 +46,8 @@ Cypress.Commands.add("loginAndLoadMainSite", (username) => {
         .then((x) => x.isOkStatusCode),
     { interval: 500, timeout: 60000 }
   );
-  cy.IdentityServerAPILogin(username);
+
+  cy.identityServerLogin(username);
 
   cy.forceVisit("https://localhost");
 });
