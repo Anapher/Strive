@@ -19,3 +19,5 @@ jobs:
         run: ./compose.sh -f ./docker-compose.e2e.yml up --build --exit-code-from e2e
     env:
       CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+      COMMIT_INFO_SHA: ${{ env.GITHUB_SHA }}
+      COMMIT_INFO_BRANCH: ${{ env.GITHUB_REF }}
