@@ -21,3 +21,4 @@ jobs:
       CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
       COMMIT_INFO_SHA: ${{ env.GITHUB_SHA }}
       COMMIT_INFO_BRANCH: ${{ env.GITHUB_REF }}
+      CYPRESS_COMMAND: --record
