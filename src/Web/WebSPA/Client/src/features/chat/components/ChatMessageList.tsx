@@ -68,7 +68,7 @@ export default function ChatMessageList({ messages, participantId, participantCo
 
    return (
       <div className={classes.root}>
-         <List className={classes.list} ref={listRef}>
+         <List className={classes.list} ref={listRef} id="chat-message-list">
             <div ref={bottomAnchor} />
             {messages == null || messages == undefined || error ? (
                error ? (

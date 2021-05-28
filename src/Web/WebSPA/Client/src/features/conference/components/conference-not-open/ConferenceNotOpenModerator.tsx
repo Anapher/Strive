@@ -74,10 +74,14 @@ export default function ConferenceNotOpenModerator({ conferenceInfo }: Props) {
             <Typography gutterBottom>{t('conference_not_open.you_are_moderator')}</Typography>
          </div>
          <ButtonGroup variant="contained" color="primary">
-            <Button onClick={handleOpenConference} disabled={!canOpen}>
+            <Button onClick={handleOpenConference} disabled={!canOpen} id="moderator-open-conference-button">
                {t('conference_not_open.open_conference')}
             </Button>
-            <Button onClick={handlePatchConference} aria-label={t('conference_not_open.change_conference_settings')}>
+            <Button
+               onClick={handlePatchConference}
+               aria-label={t('conference_not_open.change_conference_settings')}
+               id="moderator-change-conference-settings-button"
+            >
                <SettingsIcon />
             </Button>
          </ButtonGroup>

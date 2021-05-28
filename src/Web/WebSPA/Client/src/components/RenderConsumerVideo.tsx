@@ -76,7 +76,7 @@ const getProducerDevice: (source: ProducerSource) => ProducerDevice = (source) =
    }
 };
 
-type Props = {
+type Props = Omit<Omit<React.HTMLProps<HTMLVideoElement>, 'hidden'>, 'style'> & {
    width: number;
    height: number;
 
@@ -95,6 +95,7 @@ export default function RenderConsumerVideo({
    className,
    videoContain,
    diagnosticsLocation = 'bottom-right',
+   ...props
 }: Props) {
    const connection = useWebRtc();
    const classes = useStyles();
@@ -140,6 +141,7 @@ export default function RenderConsumerVideo({
             hidden={!isActive}
             autoPlay
             style={videoContain ? { objectFit: 'contain' } : undefined}
+            {...props}
          />
          {consumer && showDiagnostics && (
             <div

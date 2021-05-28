@@ -118,7 +118,7 @@ export default function SceneView() {
 
    return (
       <MediaControlsContext.Provider value={mediaControlsContextValue}>
-         <div className={classes.root} ref={contentRef} onMouseMove={handleMouseMove}>
+         <div className={classes.root} ref={contentRef} onMouseMove={handleMouseMove} id="scene-view">
             <AnimateSharedLayout>
                {fixedDimensions?.width !== undefined && fixedDimensions?.height !== undefined && sceneStack ? (
                   <SceneSelector

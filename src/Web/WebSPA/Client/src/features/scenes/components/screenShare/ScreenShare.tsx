@@ -29,6 +29,7 @@ export default function ScreenShare({ className, dimensions, scene }: RenderScen
          render={(size, style) => (
             <div style={{ position: 'relative', ...size, ...style }}>
                <RenderConsumerVideo
+                  id="video-screenshare"
                   consumer={consumer}
                   height={size.height}
                   width={size.width}

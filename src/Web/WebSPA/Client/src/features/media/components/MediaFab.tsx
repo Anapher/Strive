@@ -67,7 +67,12 @@ export default function MediaFab({
 
    return (
       <Tooltip title={title} aria-label={label} arrow>
-         <Fab color={enabled ? 'primary' : 'default'} onClick={handleClick} {...fabProps}>
+         <Fab
+            id={`media-controls-${translationKey}`}
+            color={enabled ? 'primary' : 'default'}
+            onClick={handleClick}
+            {...fabProps}
+         >
             <Icon
                activated={enabled && !paused}
                color={enabled ? theme.palette.primary.contrastText : theme.palette.background.default}

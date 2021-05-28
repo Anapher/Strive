@@ -97,10 +97,16 @@ export default function SendMessageForm({ onSendMessage, isTyping, channel }: Pr
                   aria-label={t('conference.chat.open_emojis')}
                   ref={emojisButtonRef}
                   onClick={handleOpenEmojis}
+                  id="chat-open-emojis"
                >
                   <EmojiEmotionsIcon fontSize="small" />
                </IconButton>
-               <IconButton aria-label={t('conference.chat.send')} onClick={handleSubmit} disabled={!message}>
+               <IconButton
+                  id="chat-send"
+                  aria-label={t('conference.chat.send')}
+                  onClick={handleSubmit}
+                  disabled={!message}
+               >
                   <SendIcon fontSize="small" />
                </IconButton>
             </Box>

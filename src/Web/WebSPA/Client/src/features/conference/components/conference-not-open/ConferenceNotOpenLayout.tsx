@@ -59,7 +59,9 @@ export default function ConferenceNotOpenLayout({ children }: Props) {
    return (
       <div className={classes.root}>
          <div className={classes.settingsContainer}>
-            <Button onClick={handleOpenSettings}>{t('common:settings')}</Button>
+            <Button onClick={handleOpenSettings} id="change-settings-button">
+               {t('common:settings')}
+            </Button>
          </div>
          <div className={classes.backButtonContainer}>
             <IconButton {...to('/')} aria-label={t('common:back_to_start')}>
