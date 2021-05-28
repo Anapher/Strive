@@ -6,6 +6,7 @@ import { HealthStatus } from './utils';
 const useStyles = makeStyles((theme) => ({
    statusChip: {
       cursor: 'pointer',
+      maxWidth: 200,
    },
    statusChipOk: {
       backgroundColor: '#27ae60',
