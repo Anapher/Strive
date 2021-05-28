@@ -19,4 +19,19 @@
 module.exports = (on, config) => {
   // `on` is used to hook into various events Cypress emits
   // `config` is the resolved Cypress config
-}
+
+  on("before:browser:launch", (browser = {}, launchOptions) => {
+    // args.push('--use-fake-device-for-media-stream')
+    if (browser.name === "chrome") {
+      launchOptions.args.push("--use-fake-ui-for-media-stream");
+      launchOptions.args.push("--use-fake-device-for-media-stream");
+      launchOptions.args.push(
+        "--use-file-for-fake-audio-capture=cypress/fixtures/microphone.wav"
+      );
+      launchOptions.args.push("--no-sandbox");
+      launchOptions.args.push("--allow-file-access-from-files");
+    }
+
+    return launchOptions;
+  });
+};

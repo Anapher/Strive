@@ -38,16 +38,34 @@ Cypress.Commands.add("forceVisit", (url) => {
   });
 });
 
-Cypress.Commands.add("loginAndLoadMainSite", (username) => {
+Cypress.Commands.add("waitUntilSiteAvailable", (url) => {
   cy.waitUntil(
     () =>
       cy
-        .request({ failOnStatusCode: false, url: "/", log: false })
+        .request({ failOnStatusCode: false, url, log: false })
         .then((x) => x.isOkStatusCode),
     { interval: 500, timeout: 60000 }
   );
+});
+
+Cypress.Commands.add("loginAndLoadMainSite", (username) => {
+  cy.waitUntilSiteAvailable("/");
+  cy.waitUntilSiteAvailable("https://api.localhost/swagger/");
 
   cy.identityServerLogin(username);
 
   cy.forceVisit("https://localhost");
+});
+
+Cypress.Commands.add("createAndJoinConference", (username) => {
+  cy.loginAndLoadMainSite(username);
+  cy.get("#create-conference-button").click();
+
+  cy.get("button[type=submit]").click();
+  cy.get("#join-conference-button").click();
+});
+
+Cypress.Commands.add("createAndJoinOpenedConference", (username) => {
+  cy.createAndJoinConference(username);
+  cy.get("#moderator-open-conference-button").click();
 });
