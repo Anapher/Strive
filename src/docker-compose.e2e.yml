@@ -6,6 +6,7 @@ services:
     build: ./Tests/e2e
     depends_on:
       - webspa
+    command: --record
     # note: inside e2e container, the network allows accessing
     # "web" host under name "web"
     # so "curl http://web" would return whatever the webserver
