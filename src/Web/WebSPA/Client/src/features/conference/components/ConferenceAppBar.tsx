@@ -27,7 +27,7 @@ import { ConferenceRouteParams } from 'src/routes/types';
 import { RootState } from 'src/store';
 import { selectParticipantList } from '../selectors';
 import AppBarLogo from './appbar/AppBarLogo';
-import BreakoutRoomChips from './appbar/BreakoutRoomChip';
+import BreakoutRoomChip from './appbar/BreakoutRoomChip';
 import WebRtcStatusChip from './appbar/WebRtcStatusChip';
 
 const useStyles = makeStyles((theme) =>
@@ -52,6 +52,7 @@ const useStyles = makeStyles((theme) =>
       breakoutRoomChip: {
          marginRight: theme.spacing(1),
          backgroundColor: theme.palette.primary.dark,
+         minWidth: 0,
       },
    }),
 );
@@ -99,12 +100,12 @@ export default function ConferenceAppBar({ chatWidth }: Props) {
    return (
       <AppBar position="static">
          <Toolbar variant="dense" className={classes.toolbar}>
-            <Box flex={1}>
+            <Box pr={2}>
                <AppBarLogo />
             </Box>
-            <Box>
+            <Box display="flex" justifyContent="flex-end" flex={1} minWidth={0}>
                {breakoutRoomState && (
-                  <BreakoutRoomChips
+                  <BreakoutRoomChip
                      className={clsx(classes.chip, classes.breakoutRoomChip)}
                      state={breakoutRoomState}
                   />
