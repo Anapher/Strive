@@ -60,22 +60,24 @@ export default function UpdateBreakoutRoomsDialog({ active, onClose }: Props) {
    };
 
    return (
-      <form onSubmit={handleSubmit(handleApplyForm)}>
+      <>
          <DialogTitle id="breakout-room-dialog-title">{t('conference.dialog_breakout_rooms.update_title')}</DialogTitle>
          <DialogContent>
             <DialogContentText>{t('conference.dialog_breakout_rooms.update_description')}</DialogContentText>
-            <Box mt={4}>
-               <BreakoutRoomsForm form={form} participants={null} />
-            </Box>
+            <form onSubmit={handleSubmit(handleApplyForm)} id="breakout-room-dialog-form">
+               <Box mt={4}>
+                  <BreakoutRoomsForm form={form} participants={null} />
+               </Box>
+            </form>
          </DialogContent>
          <DialogActions>
             <Button color="primary" onClick={onClose}>
                {t('common:cancel')}
             </Button>
-            <Button color="primary" disabled={!formState.isValid} type="submit">
+            <Button color="primary" disabled={!formState.isValid} type="submit" form="breakout-room-dialog-form">
                {t('conference.dialog_breakout_rooms.update_breakout_rooms')}
             </Button>
          </DialogActions>
-      </form>
+      </>
    );
 }

@@ -55,22 +55,24 @@ export default function CreateBreakoutRoomsDialog({ onClose }: Props) {
    };
 
    return (
-      <form onSubmit={handleSubmit(handleApplyForm)}>
+      <>
          <DialogTitle id="breakout-room-dialog-title">{t('conference.dialog_breakout_rooms.create_title')}</DialogTitle>
          <DialogContent>
             <DialogContentText>{t('conference.dialog_breakout_rooms.create_description')}</DialogContentText>
-            <Box mt={4}>
-               <BreakoutRoomsForm form={form} participants={participants} />
-            </Box>
+            <form onSubmit={handleSubmit(handleApplyForm)} id="breakout-room-dialog-form">
+               <Box mt={4}>
+                  <BreakoutRoomsForm form={form} participants={participants} />
+               </Box>
+            </form>
          </DialogContent>
          <DialogActions>
             <Button color="primary" onClick={onClose}>
                {t('common:cancel')}
             </Button>
-            <Button color="primary" disabled={!formState.isValid} type="submit">
+            <Button color="primary" disabled={!formState.isValid} type="submit" form="breakout-room-dialog-form">
                {t('conference.dialog_breakout_rooms.open_breakout_rooms')}
             </Button>
          </DialogActions>
-      </form>
+      </>
    );
 }
