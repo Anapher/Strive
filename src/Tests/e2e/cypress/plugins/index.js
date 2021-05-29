@@ -30,6 +30,7 @@ module.exports = (on, config) => {
       );
       launchOptions.args.push("--no-sandbox");
       launchOptions.args.push("--allow-file-access-from-files");
+      launchOptions.args.push("--lang=en");
     }
 
     return launchOptions;
