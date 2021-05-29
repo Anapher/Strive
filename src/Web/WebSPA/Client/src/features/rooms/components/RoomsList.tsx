@@ -52,7 +52,7 @@ export default function RoomsList() {
 
    return (
       <div className={classes.root}>
-         <div className={classes.rooms}>
+         <div className={classes.rooms} id="room-list">
             {rooms?.map((room) => (
                <div
                   key={room.roomId}

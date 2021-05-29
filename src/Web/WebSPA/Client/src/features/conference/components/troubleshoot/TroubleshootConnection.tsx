@@ -36,7 +36,14 @@ export default function TroubleshootConnection({ expanded, onChange }: Props) {
          title={t('conference.troubleshooting.webrtc.title')}
          expanded={expanded}
          onChange={onChange}
-         renderStatus={() => <StatusChip size="small" status={health.status} label={getStatusMessage(health, t)} />}
+         renderStatus={() => (
+            <StatusChip
+               id="troubleshooting-connection-badge"
+               size="small"
+               status={health.status}
+               label={getStatusMessage(health, t)}
+            />
+         )}
       >
          {health.status === 'ok' ? (
             <div className={classes.transportStatsContainer}>

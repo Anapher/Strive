@@ -149,6 +149,7 @@ export default function MediaControls({ className, show, leftActionsRef }: Props
          <div className={classes.rightActions}>
             <Tooltip title={t<string>('conference.troubleshooting.title')} arrow>
                <Fab
+                  id="media-controls-troubleshooting"
                   color="default"
                   className={classes.fab}
                   onClick={handleOpenDebugDialog}
@@ -160,7 +161,12 @@ export default function MediaControls({ className, show, leftActionsRef }: Props
                </Fab>
             </Tooltip>
          </div>
-         <Dialog open={debugDialogOpen} onClose={handleCloseDebugDialog} PaperProps={{ className: classes.dialog }}>
+         <Dialog
+            id="troubleshooting-dialog"
+            open={debugDialogOpen}
+            onClose={handleCloseDebugDialog}
+            PaperProps={{ className: classes.dialog }}
+         >
             <DialogTitle>{t('conference.troubleshooting.title')}</DialogTitle>
             <DialogContent>
                <Debug />

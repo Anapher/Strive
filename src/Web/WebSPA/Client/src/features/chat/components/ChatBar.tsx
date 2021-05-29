@@ -51,7 +51,7 @@ export default function ChatBar() {
    );
 
    return (
-      <Paper className={classes.root} elevation={12} square>
+      <Paper id="chat-bar" className={classes.root} elevation={12} square>
          <ChatChannelTabs
             channels={channels}
             selected={selectedChannelId}

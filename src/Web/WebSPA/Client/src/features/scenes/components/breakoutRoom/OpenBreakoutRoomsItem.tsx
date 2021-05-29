@@ -19,7 +19,7 @@ export function OpenBreakoutRoomsItem({ onClose }: ActionListItemProps) {
    const isOpen = useSelector(selectIsBreakoutRoomsOpen);
 
    return (
-      <MenuItem onClick={handleOpen} disabled={isOpen}>
+      <MenuItem id="scene-management-actions-breakoutrooms" onClick={handleOpen} disabled={isOpen}>
          <GroupWorkIcon fontSize="small" style={{ marginRight: 16 }} />
          {t('conference.scenes.breakout_rooms.label')}
       </MenuItem>

@@ -112,11 +112,12 @@ export default function SceneManagement() {
          {(canSetScene || canOverwriteScene) && (
             <>
                <Divider className={classes.divider} />
-               <List dense disablePadding>
+               <List dense disablePadding id="scene-management-selection-list">
                   <ListSubheader>{t('glossary:scene_plural')}</ListSubheader>
                   {canSetScene && (
                      <div className={classes.modeButtonContainer}>
                         <Button
+                           id="scene-management-mode"
                            size="small"
                            className={classes.modeButton}
                            onClick={handleOpenModeSelection}
@@ -129,40 +130,39 @@ export default function SceneManagement() {
                         </Button>
                      </div>
                   )}
-                  <div>
-                     {availableScenePresenters.map(
-                        ({ presenter, scene }) =>
-                           presenter.AvailableSceneListItem && (
-                              <presenter.AvailableSceneListItem
-                                 key={presenter.getSceneId ? presenter.getSceneId(scene) : scene.type}
-                                 scene={scene}
-                                 stack={sceneStack}
-                                 onChangeScene={handleOverwriteScene}
-                              />
-                           ),
-                     )}
-                     {overwrittenContent && (
-                        <ListItem
-                           button
-                           onClick={() => handleOverwriteScene(null)}
-                           title={t('conference.scenes.remove_overwrite')}
-                        >
-                           <ListItemIcon style={{ minWidth: 32 }}>
-                              <CloseIcon />
-                           </ListItemIcon>
-                           <ListItemText
-                              primaryTypographyProps={{ noWrap: true }}
-                              primary={t('conference.scenes.remove_overwrite')}
+                  {availableScenePresenters.map(
+                     ({ presenter, scene }) =>
+                        presenter.AvailableSceneListItem && (
+                           <presenter.AvailableSceneListItem
+                              key={presenter.getSceneId ? presenter.getSceneId(scene) : scene.type}
+                              scene={scene}
+                              stack={sceneStack}
+                              onChangeScene={handleOverwriteScene}
                            />
-                        </ListItem>
-                     )}
-                  </div>
+                        ),
+                  )}
+                  {overwrittenContent && (
+                     <ListItem
+                        button
+                        onClick={() => handleOverwriteScene(null)}
+                        title={t('conference.scenes.remove_overwrite')}
+                     >
+                        <ListItemIcon style={{ minWidth: 32 }}>
+                           <CloseIcon />
+                        </ListItemIcon>
+                        <ListItemText
+                           primaryTypographyProps={{ noWrap: true }}
+                           primary={t('conference.scenes.remove_overwrite')}
+                        />
+                     </ListItem>
+                  )}
                </List>
             </>
          )}
          {visibleActionItemPresenter.length > 0 && (
             <Paper elevation={4} className={classes.root}>
                <Button
+                  id="scene-management-actions"
                   variant="contained"
                   color="primary"
                   size="small"

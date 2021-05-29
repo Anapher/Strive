@@ -19,6 +19,7 @@ export default function WebRtcStatusChip() {
 
    return (
       <Chip
+         id="appbar-status-chip-webrtc"
          className={classes.errorChip}
          style={{ marginRight: 8 }}
          label={t('conference.appbar.webrtc_error')}

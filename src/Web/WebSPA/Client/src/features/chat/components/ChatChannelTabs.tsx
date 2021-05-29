@@ -29,6 +29,7 @@ export default function ChatChannelTabs({ channels, selected, onSelectedChanged,
    return (
       <AppBar position="static" color="inherit">
          <Tabs
+            id="chat-tabs"
             value={selectedIndex === -1 ? false : selectedIndex}
             onChange={handleChange}
             variant={channels.length <= 2 ? 'fullWidth' : 'scrollable'}
