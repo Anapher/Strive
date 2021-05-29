@@ -78,7 +78,9 @@
       "participants": "Teilnehmer: {{count}}",
       "show_my_permissions": "Meine Berechtigungen anzeigen",
       "signed_in_as": "Eingeloggt als",
-      "webrtc_error": "WebRTC Verbindungsfehler"
+      "webrtc_error": "WebRTC Verbindungsfehler",
+      "breakout_room_chip": "Breakoutraum Phase",
+      "breakout_room_chip_deadline": "bis {{deadline}}"
     },
     "chat": {
       "new_chat_info": "Sag Hallo!",

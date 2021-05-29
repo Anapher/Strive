@@ -78,7 +78,9 @@
       "change_conference_settings": "Change Conference Settings",
       "close_conference": "Close Conference",
       "participants": "Participants: {{count}}",
-      "webrtc_error": "WebRTC connection error"
+      "webrtc_error": "WebRTC connection error",
+      "breakout_room_chip": "Breakout Room phase",
+      "breakout_room_chip_deadline": "until {{deadline}}"
     },
     "participant_context_menu": {
       "mute": "Mute",
