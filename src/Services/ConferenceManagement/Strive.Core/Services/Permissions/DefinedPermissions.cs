@@ -53,5 +53,13 @@ namespace Strive.Core.Services.Permissions
             public static readonly PermissionDescriptor<bool> CanQueueForTalkingStick =
                 new("scenes/talkingStick_canQueue");
         }
+
+        public static class Poll
+        {
+            public static readonly PermissionDescriptor<bool> CanOpenPoll = new("poll/canOpen");
+
+            public static readonly PermissionDescriptor<bool> CanSeeUnpublishedPollResults =
+                new("poll/canSeeUnpublishedPollResults");
+        }
     }
 }

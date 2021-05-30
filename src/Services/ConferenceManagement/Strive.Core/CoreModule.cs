@@ -5,6 +5,7 @@ using Strive.Core.Services;
 using Strive.Core.Services.Chat;
 using Strive.Core.Services.ConferenceControl;
 using Strive.Core.Services.Permissions;
+using Strive.Core.Services.Poll;
 using Strive.Core.Services.Scenes;
 using Strive.Core.Services.Scenes.Providers.TalkingStick;
 using Strive.Core.Services.Synchronization;
@@ -38,6 +39,11 @@ namespace Strive.Core
                 .SingleInstance();
 
             builder.RegisterType<TalkingStickModeHandler>().AsImplementedInterfaces().InstancePerDependency();
+
+            builder.RegisterAssemblyTypes(ThisAssembly).AsClosedTypesOf(typeof(IPollAnswerAggregator<,>))
+                .AsImplementedInterfaces();
+            builder.RegisterAssemblyTypes(ThisAssembly).AsClosedTypesOf(typeof(IPollAnswerValidator<,>))
+                .AsImplementedInterfaces();
         }
     }
 }

@@ -9,6 +9,9 @@ namespace Strive.Core.Services
         public const string CHAT = "chat";
         public const string BREAKOUT_ROOMS = "breakoutRooms";
         public const string TEMPORARY_PERMISSIONS = "temporaryPermissions";
+        public const string POLL = "poll";
+        public const string POLL_RESULT = "poll_result";
+        public const string POLL_ANSWERS = "poll_answers";
 
         // individual
         public const string MEDIA = "media";
