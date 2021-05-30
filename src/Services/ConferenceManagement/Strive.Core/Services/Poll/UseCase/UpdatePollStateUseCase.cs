@@ -32,12 +32,13 @@ namespace Strive.Core.Services.Poll.UseCase
                 throw PollError.PollNotFound.ToException();
             }
 
+            await _mediator.Send(new UpdateSynchronizedObjectRequest(conferenceId, SynchronizedPoll.SyncObjId(pollId)));
+
             if (request.State.ResultsPublished != previousState?.ResultsPublished)
             {
                 await _mediator.Send(new UpdateParticipantSubscriptionsOfPollRequest(conferenceId, poll));
             }
 
-            await _mediator.Send(new UpdateSynchronizedObjectRequest(conferenceId, SynchronizedPoll.SyncObjId(pollId)));
             return Unit.Value;
         }
     }

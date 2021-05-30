@@ -1,4 +1,4 @@
 ﻿namespace Strive.Core.Services.Poll.Types.SingleChoice
 {
-    public record SingleChoiceInstruction(string[] Options) : PollInstruction;
+    public record SingleChoiceInstruction(string[] Options) : PollInstruction<SingleChoiceAnswer>;
 }

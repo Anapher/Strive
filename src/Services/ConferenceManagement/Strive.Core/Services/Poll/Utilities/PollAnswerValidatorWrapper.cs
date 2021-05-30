@@ -33,8 +33,8 @@ namespace Strive.Core.Services.Poll.Utilities
                 throw new ArgumentException(
                     $"The generic parameter {nameof(TAnswer)} must match the {nameof(instruction)}");
 
-            var aggregator = _context.Resolve<IPollAnswerValidator<TInstruction, TAnswer>>();
-            return aggregator.Validate(typedInstruction, (TAnswer) answer);
+            var validator = _context.Resolve<IPollAnswerValidator<TInstruction, TAnswer>>();
+            return validator.Validate(typedInstruction, (TAnswer) answer);
         }
 
         private static Type GetBaseType(Type type, Type baseType)

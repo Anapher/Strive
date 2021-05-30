@@ -2,12 +2,13 @@
 using System.Threading.Tasks;
 using Autofac;
 using Strive.Core.Services.Poll;
+using Strive.Core.Services.Poll.Types;
 using Strive.Core.Services.Poll.Types.MultipleChoice;
 using Strive.Core.Services.Poll.Types.SingleChoice;
 using Strive.Core.Services.Poll.Utilities;
 using Xunit;
 
-namespace Strive.Core.Tests.Services.Poll
+namespace Strive.Core.Tests.Services.Poll.Utilities
 {
     public class PollAnswerAggregatorWrapperTests
     {
@@ -33,7 +34,7 @@ namespace Strive.Core.Tests.Services.Poll
             var result = await wrapper.AggregateAnswers(instruction, answers);
 
             // assert
-            Assert.IsType<MultipleChoicePollResults>(result);
+            Assert.IsType<SelectionPollResults>(result);
         }
 
         [Fact]

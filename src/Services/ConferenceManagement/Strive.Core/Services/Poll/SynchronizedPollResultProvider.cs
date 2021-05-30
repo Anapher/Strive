@@ -54,7 +54,7 @@ namespace Strive.Core.Services.Poll
 
         public static SynchronizedObjectId BuildSyncObjId(string pollId)
         {
-            return new(SynchronizedObjectIds.POLL, new Dictionary<string, string> {{PROP_POLL_ID, pollId}});
+            return new(SynchronizedObjectIds.POLL_RESULT, new Dictionary<string, string> {{PROP_POLL_ID, pollId}});
         }
 
         private bool ContainsUnpublishedPoll(IEnumerable<(Poll, PollState? state)> polls)

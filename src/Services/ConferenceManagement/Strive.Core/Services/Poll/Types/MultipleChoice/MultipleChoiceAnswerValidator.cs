@@ -17,7 +17,7 @@ namespace Strive.Core.Services.Poll.Types.MultipleChoice
         {
             if (answer.Selected.Length == 0)
             {
-                _logger.LogDebug("Multiple choice answer rejected because no options were selected");
+                _logger.LogDebug("Answer rejected because no options were selected");
                 return false;
             }
 

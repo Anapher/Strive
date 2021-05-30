@@ -23,10 +23,11 @@ namespace Strive.Core.Services.Poll.Gateways
 
         ValueTask SetPollAnswer(Participant participant, string pollId, PollAnswerWithKey answer);
 
-        ValueTask<IReadOnlyDictionary<string, PollAnswerWithKey>> GetPollAnswersOfParticipant(Participant participant);
+        ValueTask<IReadOnlyDictionary<string, PollAnswerWithKey>> GetPollAnswersOfParticipant(Participant participant,
+            IEnumerable<string> pollIds);
 
         ValueTask<IReadOnlyDictionary<string, PollAnswerWithKey>> GetPollAnswers(string conferenceId, string pollId);
 
-        ValueTask<PollAnswerWithKey> GetPollAnswer(Participant participant, string pollId);
+        ValueTask<PollAnswerWithKey?> GetPollAnswer(Participant participant, string pollId);
     }
 }

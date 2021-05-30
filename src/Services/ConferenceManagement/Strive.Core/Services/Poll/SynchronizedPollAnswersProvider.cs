@@ -30,13 +30,16 @@ namespace Strive.Core.Services.Poll
         {
             var participantId = synchronizedObjectId.Parameters[PROP_PARTICIPANT_ID];
 
-            var answers = await _repository.GetPollAnswersOfParticipant(new Participant(conferenceId, participantId));
+            var conferencePolls = await _repository.GetPollsOfConference(conferenceId);
+            var answers = await _repository.GetPollAnswersOfParticipant(new Participant(conferenceId, participantId),
+                conferencePolls.Select(x => x.Id));
+
             return new SynchronizedPollAnswers(answers.ToDictionary(x => x.Key, x => x.Value));
         }
 
         public static SynchronizedObjectId BuildSyncObjId(string participantId)
         {
-            return new(SynchronizedObjectIds.POLL, new Dictionary<string, string>
+            return new(SynchronizedObjectIds.POLL_ANSWERS, new Dictionary<string, string>
                 {{PROP_PARTICIPANT_ID, participantId}});
         }
     }
