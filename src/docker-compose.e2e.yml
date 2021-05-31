@@ -15,8 +15,13 @@ services:
     environment:
       - CYPRESS_baseUrl=https://localhost
       - CYPRESS_RECORD_KEY=${CYPRESS_RECORD_KEY-}
-      - COMMIT_INFO_SHA=${COMMIT_INFO_SHA-}
-      - COMMIT_INFO_BRANCH=${COMMIT_INFO_BRANCH-}
+      - COMMIT_INFO_BRANCH=${COMMIT_INFO_BRANCH}
+      - COMMIT_INFO_MESSAGE=${COMMIT_INFO_MESSAGE}
+      - COMMIT_INFO_EMAIL=${COMMIT_INFO_EMAIL}
+      - COMMIT_INFO_AUTHOR=${COMMIT_INFO_AUTHOR}
+      - COMMIT_INFO_SHA=${COMMIT_INFO_SHA}
+      - COMMIT_INFO_REMOTE=${COMMIT_INFO_REMOTE}
+
     # mount the host directory e2e/cypress and the file e2e/cypress.json as
     # volumes within the container
     # this means that:
