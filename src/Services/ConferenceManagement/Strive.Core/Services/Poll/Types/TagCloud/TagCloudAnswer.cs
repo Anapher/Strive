@@ -1,4 +1,6 @@
-﻿namespace Strive.Core.Services.Poll.Types.TagCloud
+﻿using System.Collections.Generic;
+
+namespace Strive.Core.Services.Poll.Types.TagCloud
 {
-    public record TagCloudAnswer(string[] Tags) : PollAnswer;
+    public record TagCloudAnswer(IReadOnlyList<string> Tags) : PollAnswer;
 }
