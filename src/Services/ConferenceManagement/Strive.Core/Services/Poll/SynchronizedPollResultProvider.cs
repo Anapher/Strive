@@ -49,7 +49,7 @@ namespace Strive.Core.Services.Poll
             var pollId = synchronizedObjectId.Parameters[PROP_POLL_ID];
 
             var result = await _mediator.Send(new FetchPollResultsRequest(conferenceId, pollId));
-            return new SynchronizedPollResult(pollId, result.Results, result.ParticipantTokenToId);
+            return new SynchronizedPollResult(pollId, result.Results, result.TokenIdToParticipant);
         }
 
         public static SynchronizedObjectId BuildSyncObjId(string pollId)

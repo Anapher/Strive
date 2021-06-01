@@ -25,5 +25,15 @@ namespace Strive.Infrastructure.Tests.Extensions
             var actual = original.ToCamelCase();
             Assert.Equal(expected, actual);
         }
+
+        [Theory]
+        [InlineData("", "test", "")]
+        [InlineData("hello", "lo", "hel")]
+        [InlineData("ProviderScene", "Scene", "Provider")]
+        public void TrimEnd_TestValues_IsCorrect(string original, string trim, string expected)
+        {
+            var actual = original.TrimEnd(trim);
+            Assert.Equal(expected, actual);
+        }
     }
 }

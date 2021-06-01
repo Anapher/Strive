@@ -39,7 +39,7 @@ namespace Strive.Core.Services.Poll.UseCase
             IReadOnlyDictionary<string, string>? participantIdTranslationTable = null;
             if (!poll.Config.IsAnonymous)
             {
-                participantIdTranslationTable = answers.ToDictionary(x => x.Key, x => x.Value.Key);
+                participantIdTranslationTable = answers.ToDictionary(x => x.Value.Key, x => x.Key);
             }
 
             return new SanitizedPollResult(result, participantIdTranslationTable);

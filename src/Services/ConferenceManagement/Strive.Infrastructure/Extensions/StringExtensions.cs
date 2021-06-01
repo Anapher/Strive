@@ -1,3 +1,5 @@
+using System;
+
 namespace Strive.Infrastructure.Extensions
 {
     public static class StringExtensions
@@ -13,6 +15,15 @@ namespace Strive.Infrastructure.Extensions
         {
             if (string.IsNullOrEmpty(value)) return value;
             return char.ToLowerInvariant(value[0]) + value[1..];
+        }
+
+        public static string TrimEnd(this string source, string value,
+            StringComparison comparisonType = StringComparison.CurrentCulture)
+        {
+            if (!source.EndsWith(value))
+                return source;
+
+            return source.Remove(source.LastIndexOf(value, comparisonType));
         }
     }
 }

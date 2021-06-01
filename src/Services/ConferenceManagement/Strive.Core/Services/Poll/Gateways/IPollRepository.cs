@@ -9,7 +9,7 @@ namespace Strive.Core.Services.Poll.Gateways
 
         ValueTask DeletePollAndState(string conferenceId, string pollId);
 
-        ValueTask DeletePollAnswers(string conferenceId, string pollId);
+        ValueTask<IReadOnlyDictionary<string, PollAnswerWithKey>> DeletePollAnswers(string conferenceId, string pollId);
 
         ValueTask<PollState?> SetPollState(string conferenceId, string pollId, PollState state);
 

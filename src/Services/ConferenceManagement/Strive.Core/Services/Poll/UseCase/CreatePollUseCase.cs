@@ -4,10 +4,11 @@ using System.Threading.Tasks;
 using MediatR;
 using Strive.Core.Services.Poll.Gateways;
 using Strive.Core.Services.Poll.Requests;
+using Strive.Core.Services.Poll.Utilities;
 
 namespace Strive.Core.Services.Poll.UseCase
 {
-    public class CreatePollUseCase : IRequestHandler<CreatePollRequest>
+    public class CreatePollUseCase : IRequestHandler<CreatePollRequest, string>
     {
         private readonly IMediator _mediator;
         private readonly IPollRepository _repository;
@@ -18,7 +19,7 @@ namespace Strive.Core.Services.Poll.UseCase
             _mediator = mediator;
         }
 
-        public async Task<Unit> Handle(CreatePollRequest request, CancellationToken cancellationToken)
+        public async Task<string> Handle(CreatePollRequest request, CancellationToken cancellationToken)
         {
             var (conferenceId, pollInstruction, pollConfig, initialState, roomId) = request;
 
@@ -29,8 +30,9 @@ namespace Strive.Core.Services.Poll.UseCase
             await _repository.SetPollState(conferenceId, pollId, initialState);
 
             await _mediator.Send(new UpdateParticipantSubscriptionsOfPollRequest(conferenceId, poll));
+            await SceneUpdater.UpdateScene(_mediator, conferenceId, roomId);
 
-            return Unit.Value;
+            return pollId;
         }
     }
 }

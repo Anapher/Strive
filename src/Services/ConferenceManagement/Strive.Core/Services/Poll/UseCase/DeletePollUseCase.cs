@@ -3,6 +3,8 @@ using System.Threading.Tasks;
 using MediatR;
 using Strive.Core.Services.Poll.Gateways;
 using Strive.Core.Services.Poll.Requests;
+using Strive.Core.Services.Poll.Utilities;
+using Strive.Core.Services.Synchronization.Requests;
 
 namespace Strive.Core.Services.Poll.UseCase
 {
@@ -25,9 +27,17 @@ namespace Strive.Core.Services.Poll.UseCase
             if (poll == null) return Unit.Value;
 
             await _repository.DeletePollAndState(conferenceId, pollId);
-            await _repository.DeletePollAnswers(conferenceId, pollId);
+            var deletedAnswers = await _repository.DeletePollAnswers(conferenceId, pollId);
 
             await _mediator.Send(new UpdateParticipantSubscriptionsOfPollRequest(conferenceId, poll));
+            await SceneUpdater.UpdateScene(_mediator, conferenceId, poll.RoomId);
+
+            foreach (var participantId in deletedAnswers.Keys)
+            {
+                await _mediator.Send(new UpdateSynchronizedObjectRequest(conferenceId,
+                    SynchronizedPollAnswers.SyncObjId(participantId)));
+            }
+
             return Unit.Value;
         }
     }

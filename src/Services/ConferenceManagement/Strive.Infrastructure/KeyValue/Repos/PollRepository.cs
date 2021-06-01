@@ -40,10 +40,18 @@ namespace Strive.Infrastructure.KeyValue.Repos
             await transaction.ExecuteAsync();
         }
 
-        public async ValueTask DeletePollAnswers(string conferenceId, string pollId)
+        public async ValueTask<IReadOnlyDictionary<string, PollAnswerWithKey>> DeletePollAnswers(string conferenceId,
+            string pollId)
         {
             var key = GetPollAnswersKey(conferenceId, pollId);
-            await _database.KeyDeleteAsync(key);
+
+            using var transaction = _database.CreateTransaction();
+            var answersTask = _database.HashGetAllAsync<PollAnswerWithKey>(key);
+            _ = transaction.KeyDeleteAsync(key);
+
+            await transaction.ExecuteAsync();
+
+            return await answersTask!;
         }
 
         public async ValueTask<PollState?> SetPollState(string conferenceId, string pollId, PollState state)
@@ -52,7 +60,7 @@ namespace Strive.Infrastructure.KeyValue.Repos
 
             using var transaction = _database.CreateTransaction();
             var previousPollTask = transaction.HashGetAsync<PollState>(stateKey, pollId);
-            _ = transaction.HashDeleteAsync(stateKey, pollId);
+            _ = transaction.HashSetAsync(stateKey, pollId, state);
 
             await transaction.ExecuteAsync();
 
