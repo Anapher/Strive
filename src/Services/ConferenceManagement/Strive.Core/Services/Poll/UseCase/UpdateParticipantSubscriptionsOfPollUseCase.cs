@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
@@ -24,6 +25,21 @@ namespace Strive.Core.Services.Poll.UseCase
         {
             var (conferenceId, poll) = request;
 
+            var participantsSubscribed = await _mediator.Send(
+                new FetchSubscribedParticipantsRequest(conferenceId, SynchronizedPoll.SyncObjId(poll.Id)));
+            var participantsShouldBeSubscribed = await FetchParticipantsThatShouldBeSubscribed(conferenceId, poll);
+
+            foreach (var participant in participantsSubscribed.Union(participantsShouldBeSubscribed))
+            {
+                await _mediator.Send(new UpdateSubscriptionsRequest(participant));
+            }
+
+            return Unit.Value;
+        }
+
+        private async Task<IEnumerable<Participant>> FetchParticipantsThatShouldBeSubscribed(string conferenceId,
+            Poll poll)
+        {
             var participantsMap =
                 await _mediator.FetchSynchronizedObject<SynchronizedRooms>(conferenceId, SynchronizedRooms.SyncObjId);
 
@@ -34,12 +50,7 @@ namespace Strive.Core.Services.Poll.UseCase
                     .ToList();
             }
 
-            foreach (var participantId in participants)
-            {
-                await _mediator.Send(new UpdateSubscriptionsRequest(new Participant(conferenceId, participantId)));
-            }
-
-            return Unit.Value;
+            return participants.Select(x => new Participant(conferenceId, x));
         }
     }
 }

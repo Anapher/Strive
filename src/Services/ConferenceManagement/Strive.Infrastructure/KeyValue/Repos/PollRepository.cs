@@ -51,7 +51,7 @@ namespace Strive.Infrastructure.KeyValue.Repos
 
             await transaction.ExecuteAsync();
 
-            return await answersTask!;
+            return (await answersTask)!;
         }
 
         public async ValueTask<PollState?> SetPollState(string conferenceId, string pollId, PollState state)

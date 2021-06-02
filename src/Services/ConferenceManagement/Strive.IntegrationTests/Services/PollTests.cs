@@ -346,5 +346,51 @@ namespace Strive.IntegrationTests.Services
                 SynchronizedScene.SyncObjId(RoomOptions.DEFAULT_ROOM_ID),
                 obj => { Assert.DoesNotContain(obj.AvailableScenes, x => x is PollScene scene); });
         }
+
+        [Fact]
+        public async Task CloseConference_PollsOpen_DeleteAllPolls()
+        {
+            // arrange
+            var (connection, _) = await ConnectToOpenedConference();
+
+            await CreatePollReturnId(connection,
+                new CreatePollDto(new SingleChoiceInstruction(new[] {"A", "B"}), new PollConfig("A or B?", true, false),
+                    PollState.Default, null));
+
+            await CreatePollReturnId(connection,
+                new CreatePollDto(new SingleChoiceInstruction(new[] {"A", "B"}), new PollConfig("A or B?", true, false),
+                    PollState.Default, RoomOptions.DEFAULT_ROOM_ID));
+
+            await connection.SyncObjects.AssertSyncObject<SynchronizedSubscriptions>(
+                SynchronizedSubscriptions.SyncObjId(connection.User.Sub),
+                obj =>
+                {
+                    Assert.Equal(2,
+                        obj.Subscriptions.Keys.Select(SynchronizedObjectId.Parse)
+                            .Count(x => x.Id == SynchronizedObjectIds.POLL));
+                });
+
+            // act
+            AssertSuccess(await connection.Hub.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.CloseConference)));
+
+            // assert
+            await connection.SyncObjects.AssertSyncObject<SynchronizedSubscriptions>(
+                SynchronizedSubscriptions.SyncObjId(connection.User.Sub), obj =>
+                {
+                    // no polls
+                    Assert.Equal(0,
+                        obj.Subscriptions.Keys.Select(SynchronizedObjectId.Parse)
+                            .Count(x => x.Id == SynchronizedObjectIds.POLL));
+
+                    // no poll results
+                    Assert.Equal(0,
+                        obj.Subscriptions.Keys.Select(SynchronizedObjectId.Parse)
+                            .Count(x => x.Id == SynchronizedObjectIds.POLL_RESULT));
+                });
+
+            // no poll answers
+            await connection.SyncObjects.AssertSyncObject<SynchronizedPollAnswers>(
+                SynchronizedPollAnswers.SyncObjId(connection.User.Sub), results => { Assert.Empty(results.Answers); });
+        }
     }
 }
