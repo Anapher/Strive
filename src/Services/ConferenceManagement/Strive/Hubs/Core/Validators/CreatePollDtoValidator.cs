@@ -14,7 +14,6 @@ namespace Strive.Hubs.Core.Validators
         {
             RuleFor(x => x.Instruction).NotNull();
             RuleFor(x => x.Config).NotNull();
-            RuleFor(x => x.Config.Question).NotEmpty();
             RuleFor(x => x.InitialState).NotNull();
 
             RuleFor(x => x.Instruction).SetInheritanceValidator(v =>

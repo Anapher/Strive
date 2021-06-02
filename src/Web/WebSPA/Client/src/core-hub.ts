@@ -1,6 +1,8 @@
 import { Operation } from 'fast-json-patch';
 import appSettings from './config';
 import {
+   CreatePollDto,
+   DeletePollDto,
    FetchChatMessagesDto,
    KickParticipantRequestDto,
    OpenBreakoutRoomsDto,
@@ -9,7 +11,9 @@ import {
    SendEquipmentCommandDto,
    SetTemporaryPermissionDto,
    SetUserIsTypingDto,
+   SubmitPollAnswerDto,
    SwitchRoomDto,
+   UpdatePollStateDto,
 } from './core-hub.types';
 import { Scene } from './features/scenes/types';
 import { connectSignal, invoke, onInvokeReturn } from './store/signal/actions';
@@ -52,6 +56,11 @@ export const talkingStickDequeue = createHubFn('TalkingStickDequeue');
 export const talkingStickTake = createHubFn('TalkingStickTake');
 export const talkingStickReturn = createHubFn('TalkingStickReturn');
 export const talkingStickPass = createHubFn<string>('TalkingStickPass');
+
+export const createPoll = createHubFn<CreatePollDto>('CreatePoll');
+export const submitPollAnswer = createHubFn<SubmitPollAnswerDto>('SubmitPollAnswer');
+export const updatePollState = createHubFn<UpdatePollStateDto>('UpdatePollState');
+export const deletePoll = createHubFn<DeletePollDto>('DeletePoll');
 
 export function createHubFn<TArg = void>(name: string) {
    const actionCreator = function (arg: TArg) {

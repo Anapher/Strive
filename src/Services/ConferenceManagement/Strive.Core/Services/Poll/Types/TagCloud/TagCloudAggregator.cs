@@ -14,7 +14,7 @@ namespace Strive.Core.Services.Poll.Types.TagCloud
 
             var groups = TagCloudGrouper.GroupAnswers(instruction.Mode, submittedTags);
 
-            return new ValueTask<PollResults>(new TagCloudResults(groups.ToDictionary(
+            return new ValueTask<PollResults>(new TagCloudPollResults(groups.ToDictionary(
                 tagGroup => GetGroupTagName(tagGroup.Select(x => x.Tag)),
                 tagGroup => (IReadOnlyList<string>) tagGroup.Select(x => x.SubmittedBy).ToList())));
         }

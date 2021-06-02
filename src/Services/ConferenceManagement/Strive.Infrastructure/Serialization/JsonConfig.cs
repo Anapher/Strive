@@ -68,7 +68,7 @@ namespace Strive.Infrastructure.Serialization
                 x => x.TrimEnd("Answer").ToCamelCase()));
 
             settings.Converters.Add(CreateJsonConverter<PollResults>(typeof(PollResults), "type",
-                x => x.TrimEnd("Results").ToCamelCase()));
+                x => x.TrimEnd("PollResults").ToCamelCase()));
         }
 
         private static JsonConverter CreateJsonConverter<T>(Type baseType, string discriminatorProperty,

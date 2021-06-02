@@ -1,13 +1,13 @@
 import { MenuItem } from '@material-ui/core';
-import GroupWorkIcon from '@material-ui/icons/GroupWork';
+import PollIcon from '@material-ui/icons/Poll';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
+import { setCreationDialogOpen } from 'src/features/poll/reducer';
 import { ActionListItemProps } from 'src/features/scenes/types';
-import { setCreationDialogOpen } from '../../../breakout-rooms/reducer';
 import { selectIsBreakoutRoomsOpen } from '../../../breakout-rooms/selectors';
 
-export default function OpenBreakoutRoomsItem({ onClose }: ActionListItemProps) {
+export default function PollActionItem({ onClose }: ActionListItemProps) {
    const dispatch = useDispatch();
    const { t } = useTranslation();
 
@@ -19,9 +19,9 @@ export default function OpenBreakoutRoomsItem({ onClose }: ActionListItemProps) 
    const isOpen = useSelector(selectIsBreakoutRoomsOpen);
 
    return (
-      <MenuItem id="scene-management-actions-breakoutrooms" onClick={handleOpen} disabled={isOpen}>
-         <GroupWorkIcon fontSize="small" style={{ marginRight: 16 }} />
-         {t('conference.scenes.breakout_rooms.label')}
+      <MenuItem id="scene-management-actions-poll" onClick={handleOpen} disabled={isOpen}>
+         <PollIcon fontSize="small" style={{ marginRight: 16 }} />
+         {t('conference.scenes.poll.label')}
       </MenuItem>
    );
 }

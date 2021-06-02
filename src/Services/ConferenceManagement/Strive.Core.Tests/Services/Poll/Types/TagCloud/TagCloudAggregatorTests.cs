@@ -24,7 +24,7 @@ namespace Strive.Core.Tests.Services.Poll.Types.TagCloud
             };
 
             // act
-            var result = (TagCloudResults) await aggregator.Aggregate(instruction, answers);
+            var result = (TagCloudPollResults) await aggregator.Aggregate(instruction, answers);
 
             // assert
             AssertCluster(new Dictionary<string, IReadOnlyList<string>>
@@ -66,7 +66,7 @@ namespace Strive.Core.Tests.Services.Poll.Types.TagCloud
             };
 
             // act
-            var result = (TagCloudResults) await aggregator.Aggregate(instruction, answers);
+            var result = (TagCloudPollResults) await aggregator.Aggregate(instruction, answers);
 
             // assert
             AssertCluster(new Dictionary<string, IReadOnlyList<string>>

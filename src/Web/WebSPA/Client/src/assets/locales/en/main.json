@@ -203,6 +203,10 @@
         "add_time_button_group": "Add time button group",
         "change_breakout_rooms": "Change breakout rooms..."
       },
+      "poll": {
+        "label": "Open Poll",
+        "scene_label": "Poll"
+      },
       "grid": "Grid",
       "screen_share": "{{name}}",
       "mode_dialog": {
@@ -391,6 +395,69 @@
       },
       "new_chat_info": "Say hi!",
       "error_fetch_chat": "An error occurred when trying to fetch the chat: {{error, error}}"
+    },
+    "poll": {
+      "create_dialog": {
+        "title": "Open poll",
+        "question": "Question",
+        "poll_type": "Poll Type",
+        "advanced_options": "Advanced options",
+        "options_label": "Options",
+        "options_helper_text": "One option per line, empty lines are ignored",
+        "options_error_at_least_two": "You must provide at least two options (fill in two lines) for the participants to select",
+        "multiple_choice_limit_choices": "Limit choices",
+        "no_limit": "No Limit",
+        "numeric_description": "Participants submit a number within optional boundaries. Can be used for number estimations.",
+        "tag_cloud_description": "Participants submit words that are grouped and presented as a tag cloud.",
+        "max_tags": "Maximum tags / participant",
+        "min": "Minimum",
+        "max": "Maximum",
+        "step": "Step",
+        "tag_cloud_mode": "Word grouping mode",
+        "tag_cloud_mode_ignore_case": "Ignore case",
+        "tag_cloud_mode_ignore_typos": "Ignore typos",
+        "submit": "Create poll",
+        "presets": {
+          "title": "Presets",
+          "yes_no": {
+            "label": "Yes / No",
+            "yes": "Yes",
+            "no": "No"
+          },
+          "a_b_c": {
+            "label": "A / B / C"
+          },
+          "task_status": {
+            "label": "Finished / Surrendered / Need time",
+            "finished": "I finished the task",
+            "surrendered": "I surrendered",
+            "need_time": "I need more time"
+          },
+          "true_false": {
+            "label": "True / False",
+            "true": "True",
+            "false": "False"
+          }
+        },
+        "advanced": {
+          "anonymous_label": "Anonymous",
+          "anonymous_helper": "If selected, nobody can see who submitted which answer",
+          "anwser_final_label": "Answer is final",
+          "anwser_final_helper": "If selected, once an answer is submitted, it cannot be changed",
+          "open_label": "Open on creation",
+          "open_helper": "If selected, the poll is immediately opened",
+          "publish_results_label": "Publish results on creation",
+          "publish_results_helper": "If selected, the results of the poll are immediately visible to everyone",
+          "global_label": "Global",
+          "global_helper": "Show the poll to all participants of all rooms"
+        }
+      },
+      "types": {
+        "single_choice": "Single choice",
+        "multiple_choice": "Multiple choice",
+        "numeric": "Numeric",
+        "tag_cloud": "Tag Cloud"
+      }
     }
   }
 }

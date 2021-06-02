@@ -37,6 +37,13 @@ export const SCENES_CAN_OVERWRITE_CONTENT_SCENE: BoolPermission = {
    type: 'bool',
 };
 
+// Poll
+export const POLL_CAN_OPEN: BoolPermission = { key: 'poll/canOpen', type: 'bool' };
+export const POLL_CAN_SEE_UNPUBLISHED_RESULTS: BoolPermission = {
+   key: 'poll/canSeeUnpublishedPollResults',
+   type: 'bool',
+};
+
 export const SCENES_CAN_PASS_TALKING_STICK: BoolPermission = { key: 'scenes/talkingStick_canPass', type: 'bool' };
 export const SCENES_CAN_TAKE_TALKING_STICK: BoolPermission = { key: 'scenes/talkingStick_canTake', type: 'bool' };
 export const SCENES_CAN_QUEUE_FOR_TALKING_STICK: BoolPermission = { key: 'scenes/talkingStick_canQueue', type: 'bool' };
