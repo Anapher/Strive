@@ -98,6 +98,12 @@ namespace Strive.Infrastructure.KeyValue.Repos
             await _database.HashSetAsync(key, participant.Id, answer);
         }
 
+        public async ValueTask DeletePollAnswer(Participant participant, string pollId)
+        {
+            var key = GetPollAnswersKey(participant.ConferenceId, pollId);
+            await _database.HashDeleteAsync(key, participant.Id);
+        }
+
         public async ValueTask<IReadOnlyDictionary<string, PollAnswerWithKey>> GetPollAnswersOfParticipant(
             Participant participant, IEnumerable<string> pollIds)
         {

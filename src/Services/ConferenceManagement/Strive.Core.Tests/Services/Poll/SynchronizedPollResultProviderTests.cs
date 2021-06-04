@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MediatR;
@@ -44,7 +45,7 @@ namespace Strive.Core.Tests.Services.Poll
         private Core.Services.Poll.Poll GetPoll(string pollId)
         {
             return new(pollId, new MultipleChoiceInstruction(new[] {"A", "B", "C"}, null), new PollConfig(
-                "What is wrong?", false, false), null);
+                "What is wrong?", false, false), null, DateTimeOffset.MinValue);
         }
 
         [Fact]

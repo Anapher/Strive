@@ -33,7 +33,7 @@ namespace Strive.Core.Tests.Services.Poll.UseCase
         private Core.Services.Poll.Poll GetPoll(bool isAnswerFinal = false)
         {
             return new(PollId, new MultipleChoiceInstruction(new[] {"A", "B", "C"}, null), new PollConfig(
-                "What is wrong?", false, isAnswerFinal), null);
+                "What is wrong?", false, isAnswerFinal), null, DateTimeOffset.MinValue);
         }
 
         private IComponentContext SetupValidator(bool validatesTo = true)
@@ -148,7 +148,7 @@ namespace Strive.Core.Tests.Services.Poll.UseCase
                     CancellationToken.None));
 
             // assert
-            Assert.Equal(ServiceErrorCode.Poll_AnswerAlreadySubmitted.ToString(), error.Error.Code);
+            Assert.Equal(ServiceErrorCode.Poll_AnswerCannotBeChanged.ToString(), error.Error.Code);
         }
 
         [Fact]
@@ -167,6 +167,37 @@ namespace Strive.Core.Tests.Services.Poll.UseCase
 
             // assert
             _repository.Verify(x => x.SetPollAnswer(_participant, PollId, It.IsAny<PollAnswerWithKey>()), Times.Once);
+        }
+
+        [Fact]
+        public async Task Handle_AnswerNullButFinal_Throw()
+        {
+            // arrange
+            var useCase = Create(SetupValidator());
+            _repository.Setup(x => x.GetPoll(ConferenceId, PollId)).ReturnsAsync(GetPoll(true));
+            _repository.Setup(x => x.GetPollState(ConferenceId, PollId)).ReturnsAsync(new PollState(true, false));
+
+            // act
+            var error = await Assert.ThrowsAsync<IdErrorException>(async () =>
+                await useCase.Handle(new SubmitAnswerRequest(_participant, PollId, null), CancellationToken.None));
+
+            // assert
+            Assert.Equal(ServiceErrorCode.Poll_AnswerCannotBeChanged.ToString(), error.Error.Code);
+        }
+
+        [Fact]
+        public async Task Handle_AnswerNull_DeleteAnswer()
+        {
+            // arrange
+            var useCase = Create(SetupValidator());
+            _repository.Setup(x => x.GetPoll(ConferenceId, PollId)).ReturnsAsync(GetPoll());
+            _repository.Setup(x => x.GetPollState(ConferenceId, PollId)).ReturnsAsync(new PollState(true, false));
+
+            // act
+            await useCase.Handle(new SubmitAnswerRequest(_participant, PollId, null), CancellationToken.None);
+
+            // assert
+            _repository.Verify(x => x.DeletePollAnswer(_participant, PollId), Times.Once);
         }
     }
 }

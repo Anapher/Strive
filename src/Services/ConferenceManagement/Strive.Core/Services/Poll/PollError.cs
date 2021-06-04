@@ -12,8 +12,8 @@ namespace Strive.Core.Services.Poll
         public static Error InvalidAnswer =>
             NotFound("The answer for this poll was invalid.", ServiceErrorCode.Poll_InvalidAnswer);
 
-        public static Error AnswerAlreadySubmitted =>
+        public static Error AnswerCannotBeChanged =>
             NotFound("You already submitted an answer to this poll and it cannot be changed.",
-                ServiceErrorCode.Poll_AnswerAlreadySubmitted);
+                ServiceErrorCode.Poll_AnswerCannotBeChanged);
     }
 }

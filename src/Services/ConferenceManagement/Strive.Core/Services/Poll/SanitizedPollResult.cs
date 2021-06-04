@@ -2,5 +2,6 @@
 
 namespace Strive.Core.Services.Poll
 {
-    public record SanitizedPollResult(PollResults Results, IReadOnlyDictionary<string, string>? TokenIdToParticipant);
+    public record SanitizedPollResult(PollResults Results, int ParticipantsAnswered,
+        IReadOnlyDictionary<string, string>? TokenIdToParticipant);
 }

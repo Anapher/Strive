@@ -36,27 +36,37 @@ namespace Strive.Core.Services.Poll.UseCase
             if (state?.IsOpen != true)
                 throw PollError.PollClosed.ToException();
 
-            var wrapper = new PollAnswerValidatorWrapper(_context);
-            if (!wrapper.Validate(poll.Instruction, answer))
-                throw PollError.InvalidAnswer.ToException();
-
-            if (poll.Config.IsAnswerFinal)
+            if (answer == null)
             {
-                var existingAnswer = await _repository.GetPollAnswer(participant, pollId);
-                if (existingAnswer != null)
-                    throw PollError.AnswerAlreadySubmitted.ToException();
+                if (poll.Config.IsAnswerFinal)
+                    throw PollError.AnswerCannotBeChanged.ToException();
+
+                await _repository.DeletePollAnswer(participant, pollId);
             }
-
-            var key = Guid.NewGuid().ToString("N");
-
-            await _repository.SetPollAnswer(participant, pollId, new PollAnswerWithKey(answer, key));
-
-            poll = await _repository.GetPoll(participant.ConferenceId, pollId);
-            if (poll == null)
+            else
             {
-                // optimistic concurrency
-                await _repository.DeletePollAnswers(participant.ConferenceId, pollId);
-                throw PollError.PollNotFound.ToException();
+                var wrapper = new PollAnswerValidatorWrapper(_context);
+                if (!wrapper.Validate(poll.Instruction, answer))
+                    throw PollError.InvalidAnswer.ToException();
+
+                if (poll.Config.IsAnswerFinal)
+                {
+                    var existingAnswer = await _repository.GetPollAnswer(participant, pollId);
+                    if (existingAnswer != null)
+                        throw PollError.AnswerCannotBeChanged.ToException();
+                }
+
+                var key = Guid.NewGuid().ToString("N");
+
+                await _repository.SetPollAnswer(participant, pollId, new PollAnswerWithKey(answer, key));
+
+                poll = await _repository.GetPoll(participant.ConferenceId, pollId);
+                if (poll == null)
+                {
+                    // optimistic concurrency
+                    await _repository.DeletePollAnswers(participant.ConferenceId, pollId);
+                    throw PollError.PollNotFound.ToException();
+                }
             }
 
             await _mediator.Send(new UpdateSynchronizedObjectRequest(participant.ConferenceId,

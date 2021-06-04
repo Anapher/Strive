@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
@@ -47,7 +48,7 @@ namespace Strive.Core.Tests.Services.Poll.UseCase
         private static Core.Services.Poll.Poll CreatePoll(string id, string? roomId)
         {
             return new(id, new SingleChoiceInstruction(new[] {"Ja", "Nein"}), new PollConfig("What?", false, false),
-                roomId);
+                roomId, DateTimeOffset.MinValue);
         }
 
         [Fact]

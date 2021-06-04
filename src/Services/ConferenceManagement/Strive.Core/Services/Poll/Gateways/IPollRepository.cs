@@ -23,6 +23,8 @@ namespace Strive.Core.Services.Poll.Gateways
 
         ValueTask SetPollAnswer(Participant participant, string pollId, PollAnswerWithKey answer);
 
+        ValueTask DeletePollAnswer(Participant participant, string pollId);
+
         ValueTask<IReadOnlyDictionary<string, PollAnswerWithKey>> GetPollAnswersOfParticipant(Participant participant,
             IEnumerable<string> pollIds);
 

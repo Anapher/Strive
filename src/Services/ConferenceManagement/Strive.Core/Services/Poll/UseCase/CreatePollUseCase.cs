@@ -29,7 +29,8 @@ namespace Strive.Core.Services.Poll.UseCase
             var (conferenceId, pollInstruction, pollConfig, initialState, roomId) = request;
 
             var pollId = Guid.NewGuid().ToString("N");
-            var poll = new Poll(pollId, pollInstruction, pollConfig, roomId);
+            var timestamp = DateTimeOffset.UtcNow;
+            var poll = new Poll(pollId, pollInstruction, pollConfig, roomId, timestamp);
 
             await _repository.CreatePoll(conferenceId, poll);
             await _repository.SetPollState(conferenceId, pollId, initialState);

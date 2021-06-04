@@ -76,6 +76,7 @@ namespace Strive.IntegrationTests.Services
                 SynchronizedPollResult.SyncObjId(pollId), results =>
                 {
                     Assert.Equal(pollId, results.PollId);
+                    Assert.Equal(0, results.ParticipantsAnswered);
 
                     var pollResults = Assert.IsType<SelectionPollResults>(results.Results);
                     Assert.DoesNotContain(pollResults.Options, x => x.Value.Any());
@@ -101,6 +102,8 @@ namespace Strive.IntegrationTests.Services
             await connection.SyncObjects.AssertSyncObject<SynchronizedPollResult>(
                 SynchronizedPollResult.SyncObjId(pollId), results =>
                 {
+                    Assert.Equal(1, results.ParticipantsAnswered);
+
                     var pollResults = Assert.IsType<SelectionPollResults>(results.Results);
                     Assert.Equal(1, pollResults.Options["A"].Count);
                     Assert.Null(results.TokenIdToParticipant);
@@ -186,6 +189,49 @@ namespace Strive.IntegrationTests.Services
                     Assert.Equal(pollId, actualAnswer.Key);
                     Assert.Equal(answer, actualAnswer.Value.Answer);
                 });
+        }
+
+        [Fact]
+        public async Task DeleteAnswer_AnswerDoesNotExist_DoNothing()
+        {
+            // arrange
+            var (connection, _) = await ConnectToOpenedConference();
+
+            var createDto = new CreatePollDto(new SingleChoiceInstruction(new[] {"A", "B"}),
+                new PollConfig("A or B?", true, false), new PollState(true, false), null);
+
+            var pollId = await CreatePollReturnId(connection, createDto);
+
+            // act
+            AssertSuccess(await connection.Hub.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.DeletePollAnswer),
+                new DeletePollAnswerDto(pollId)));
+        }
+
+        [Fact]
+        public async Task DeleteAnswer_AnswerDoesExist_RemoveAnswer()
+        {
+            // arrange
+            var (connection, _) = await ConnectToOpenedConference();
+
+            var createDto = new CreatePollDto(new SingleChoiceInstruction(new[] {"A", "B"}),
+                new PollConfig("A or B?", true, false), new PollState(true, false), null);
+
+            var pollId = await CreatePollReturnId(connection, createDto);
+
+            var answer = new SingleChoiceAnswer("A");
+            AssertSuccess(await connection.Hub.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.SubmitPollAnswer),
+                new SubmitPollAnswerDto(pollId, answer)));
+
+            await connection.SyncObjects.AssertSyncObject<SynchronizedPollAnswers>(
+                SynchronizedPollAnswers.SyncObjId(connection.User.Sub), results => { Assert.Single(results.Answers); });
+
+            // act
+            AssertSuccess(await connection.Hub.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.DeletePollAnswer),
+                new DeletePollAnswerDto(pollId)));
+
+            // assert
+            await connection.SyncObjects.AssertSyncObject<SynchronizedPollAnswers>(
+                SynchronizedPollAnswers.SyncObjId(connection.User.Sub), results => { Assert.Empty(results.Answers); });
         }
 
         [Fact]

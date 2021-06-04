@@ -42,7 +42,7 @@ namespace Strive.Core.Services.Poll.UseCase
                 participantIdTranslationTable = answers.ToDictionary(x => x.Value.Key, x => x.Key);
             }
 
-            return new SanitizedPollResult(result, participantIdTranslationTable);
+            return new SanitizedPollResult(result, answers.Count, participantIdTranslationTable);
         }
     }
 }

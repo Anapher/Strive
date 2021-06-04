@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MediatR;
@@ -40,7 +41,7 @@ namespace Strive.Core.Services.Poll
                 return GetDefaultSynchronizedPoll(pollId);
 
             var state = await _repository.GetPollState(conferenceId, pollId) ?? PollState.Default;
-            return new SynchronizedPoll(pollId, poll.Instruction, poll.Config, state);
+            return new SynchronizedPoll(pollId, poll.Instruction, poll.Config, state, poll.CreatedOn);
         }
 
         public static SynchronizedObjectId BuildSyncObjId(string pollId)
@@ -51,7 +52,7 @@ namespace Strive.Core.Services.Poll
         private static SynchronizedPoll GetDefaultSynchronizedPoll(string pollId)
         {
             return new(pollId, new SingleChoiceInstruction(new[] {""}), new PollConfig("", false, false), new PollState(
-                false, false));
+                false, false), DateTimeOffset.MinValue);
         }
     }
 }

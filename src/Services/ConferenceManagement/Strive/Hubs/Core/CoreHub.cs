@@ -452,5 +452,12 @@ namespace Strive.Hubs.Core
             return await GetInvoker().Create(new DeletePollRequest(participant.ConferenceId, dto.PollId))
                 .RequirePermissions(DefinedPermissions.Poll.CanOpenPoll).ValidateObject(dto).Send();
         }
+
+        public async Task<SuccessOrError<Unit>> DeletePollAnswer(DeletePollAnswerDto dto)
+        {
+            var participant = GetContextParticipant();
+            return await GetInvoker().Create(new SubmitAnswerRequest(participant, dto.PollId, null)).ValidateObject(dto)
+                .Send();
+        }
     }
 }
