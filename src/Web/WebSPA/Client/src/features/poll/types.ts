@@ -95,9 +95,16 @@ export type SynchronizedPoll = {
 export type SynchronizedPollResults = {
    pollId: string;
    results: PollResults;
+   participantsAnswered: number;
    participantTokenToId?: { [token: string]: string } | null;
 };
 
 export type SynchronizedPollAnswers = {
    answers: { [key: string]: PollAnswerWithKey };
+};
+
+export type PollViewModel = {
+   poll: SynchronizedPoll;
+   answer?: PollAnswerWithKey;
+   results?: SynchronizedPollResults;
 };

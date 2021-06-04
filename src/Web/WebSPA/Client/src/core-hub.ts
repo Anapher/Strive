@@ -14,6 +14,7 @@ import {
    SubmitPollAnswerDto,
    SwitchRoomDto,
    UpdatePollStateDto,
+   DeletePollAnswerDto,
 } from './core-hub.types';
 import { Scene } from './features/scenes/types';
 import { connectSignal, invoke, onInvokeReturn } from './store/signal/actions';
@@ -61,6 +62,7 @@ export const createPoll = createHubFn<CreatePollDto>('CreatePoll');
 export const submitPollAnswer = createHubFn<SubmitPollAnswerDto>('SubmitPollAnswer');
 export const updatePollState = createHubFn<UpdatePollStateDto>('UpdatePollState');
 export const deletePoll = createHubFn<DeletePollDto>('DeletePoll');
+export const deletePollAnswer = createHubFn<DeletePollAnswerDto>('DeletePollAnswer');
 
 export function createHubFn<TArg = void>(name: string) {
    const actionCreator = function (arg: TArg) {

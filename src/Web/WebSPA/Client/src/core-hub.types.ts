@@ -126,3 +126,7 @@ export type UpdatePollStateDto = {
 export type DeletePollDto = {
    pollId: string;
 };
+
+export type DeletePollAnswerDto = {
+   pollId: string;
+};

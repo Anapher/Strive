@@ -6,6 +6,7 @@ import ChatBar from 'src/features/chat/components/ChatBar';
 import { selectShowChat } from 'src/features/chat/selectors';
 import ConferenceAppBar from 'src/features/conference/components/ConferenceAppBar';
 import ParticipantMicManager from 'src/features/media/components/ParticipantMicManager';
+import CurrentPollsBar from 'src/features/poll/components/CurrentPollsBar';
 import { expandToBox } from 'src/features/scenes/calculations';
 import useThrottledResizeObserver from 'src/hooks/useThrottledResizeObserver';
 import { Size } from 'src/types';
@@ -100,6 +101,7 @@ export default function ClassConference() {
                   {showChat && (
                      <div className={classes.chat} style={{ width: chatWidth }}>
                         <Grid ref={chatContainer} />
+                        <CurrentPollsBar />
                         <ChatBar />
                      </div>
                   )}

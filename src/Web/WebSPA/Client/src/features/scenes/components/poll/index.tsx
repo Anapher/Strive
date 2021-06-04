@@ -5,11 +5,12 @@ import { PollScene, ScenePresenter } from '../../types';
 import PollListItem from './PollListItem';
 import PollActionItem from './PollActionItem';
 import RenderPollScene from './RenderPollScene';
+import allowOverwrite from '../../allow-overwrite-hoc';
 
 const presenter: ScenePresenter<PollScene> = {
    type: 'poll',
    AvailableSceneListItem: PollListItem,
-   RenderScene: RenderPollScene,
+   RenderScene: allowOverwrite(RenderPollScene),
    ActionListItem: PollActionItem,
    AlwaysRender: OpenPollDialog,
    getAutoHideMediaControls: () => false,

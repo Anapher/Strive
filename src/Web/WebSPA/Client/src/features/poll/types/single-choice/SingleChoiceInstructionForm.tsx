@@ -22,6 +22,7 @@ export default function SingleChoiceInstructionForm({
 
    return (
       <TextField
+         autoFocus
          label={t('conference.poll.create_dialog.options_label')}
          fullWidth
          {...wrapForInputRef(register('instruction.options', { validate: validateOptionsText }))}

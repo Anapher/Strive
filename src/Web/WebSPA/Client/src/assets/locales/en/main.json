@@ -452,11 +452,28 @@
           "global_helper": "Show the poll to all participants of all rooms"
         }
       },
+      "open_poll": "Open poll",
+      "close_poll": "Close poll",
+      "publish_results": "Publish results",
+      "hide_results": "Hide results",
       "types": {
-        "single_choice": "Single choice",
-        "multiple_choice": "Multiple choice",
-        "numeric": "Numeric",
-        "tag_cloud": "Tag Cloud"
+        "single_choice": {
+          "label": "Single choice"
+        },
+        "multiple_choice": {
+          "label": "Multiple choice",
+          "description": "$t(conference.poll.types.multiple_choice.label) (max choices: {{count}})"
+        },
+        "numeric": {
+          "label": "Numeric",
+          "description_min": "min {{count}}",
+          "description_max": "max {{count}}",
+          "description_between": "between {{min}} and {{max}}",
+          "description_step": "step {{count}}"
+        },
+        "tag_cloud": {
+          "label": "Tag Cloud"
+        }
       }
     }
   }

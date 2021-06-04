@@ -1,13 +1,23 @@
-import React, { useRef, useState } from 'react';
-import SceneListItem, { Props as SceneListItemProps } from './SceneListItem';
-import { Box, ClickAwayListener, Grow, IconButton, ListItemSecondaryAction, Paper, Popper } from '@material-ui/core';
+import { IconButton, ListItemSecondaryAction, PopperProps } from '@material-ui/core';
 import SettingsIcon from '@material-ui/icons/Settings';
+import React, { useRef, useState } from 'react';
+import { Scene } from '../types';
+import SceneListItem, { Props as SceneListItemProps } from './SceneListItem';
 
-type Props = SceneListItemProps & {
-   children: React.ReactNode;
+export type ListItemPopperProps = {
+   open: boolean;
+   anchorEl: PopperProps['anchorEl'];
+   onClose: () => void;
+
+   scene: Scene;
 };
 
-export default function SceneListItemWithPopper(props: Props) {
+type Props = SceneListItemProps & {
+   PopperComponent: React.ComponentType<ListItemPopperProps>;
+   listItemIcon: React.ReactNode;
+};
+
+export default function SceneListItemWithPopper({ PopperComponent, listItemIcon, ...props }: Props) {
    const [open, setOpen] = useState(false);
    const listItemRef = useRef(null);
 
@@ -16,24 +26,15 @@ export default function SceneListItemWithPopper(props: Props) {
 
    return (
       <>
-         <SceneListItem {...props} ref={listItemRef}>
+         <SceneListItem {...props}>
             <ListItemSecondaryAction>
-               <IconButton edge="end" aria-label="options" onClick={handleOpen}>
-                  <SettingsIcon />
+               <IconButton edge="end" aria-label="options" onClick={handleOpen} ref={listItemRef}>
+                  {listItemIcon}
                </IconButton>
             </ListItemSecondaryAction>
          </SceneListItem>
-         <Popper open={open} anchorEl={listItemRef.current} transition placement="right-end">
-            {({ TransitionProps }) => (
-               <Grow {...TransitionProps} style={{ transformOrigin: 'left bottom' }}>
-                  <Paper style={{ width: 400 }}>
-                     <ClickAwayListener onClickAway={handleClose}>
-                        <Box p={2}>{props.children}</Box>
-                     </ClickAwayListener>
-                  </Paper>
-               </Grow>
-            )}
-         </Popper>
+
+         <PopperComponent open={open} anchorEl={listItemRef.current} onClose={handleClose} scene={props.scene} />
       </>
    );
 }

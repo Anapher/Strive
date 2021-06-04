@@ -49,7 +49,7 @@ const getPresets: (t: TFunction) => PollPreset[] = (t) => [
    {
       label: t<string>('conference.poll.create_dialog.presets.task_status.label'),
       data: {
-         config: { isAnonymous: true, isAnswerFinal: true },
+         config: { isAnonymous: true, isAnswerFinal: false },
          initialState: { isOpen: true, resultsPublished: false },
          instruction: {
             type: 'singleChoice',
