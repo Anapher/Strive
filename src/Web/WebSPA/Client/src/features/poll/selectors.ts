@@ -39,3 +39,6 @@ export const selectPollViewModel = createSelector(
       return { poll, results, answer } as PollViewModel;
    },
 );
+
+export const selectPollResults = (state: RootState, pollId: string) =>
+   Object.values(selectMyPollResults(state)).find((x) => x.pollId === pollId);

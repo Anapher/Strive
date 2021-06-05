@@ -457,9 +457,11 @@
       "publish_results": "Publish results",
       "hide_results": "Hide results",
       "submit_answer": "Submit",
+      "chart_legend": "{{count}} votes",
       "types": {
         "single_choice": {
-          "label": "Single choice"
+          "label": "Single choice",
+          "axis_legend": "Answers"
         },
         "multiple_choice": {
           "label": "Multiple choice",

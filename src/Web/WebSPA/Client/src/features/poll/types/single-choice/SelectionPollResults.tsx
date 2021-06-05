@@ -1,20 +1,25 @@
 import { useTheme } from '@material-ui/core';
 import { ResponsiveBar } from '@nivo/bar';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
+import { NivoTooltipContent } from '../NivoTooltip';
 import { PollResultsProps } from '../types';
 
-export default function SelectionPollResults({ viewModel }: PollResultsProps) {
+export default function SelectionPollResults({ viewModel: { results, poll } }: PollResultsProps) {
    const theme = useTheme();
-   if (viewModel.results?.results.type !== 'selection') return null;
+   const { t } = useTranslation();
 
-   const maxAnswers = Math.ceil(Math.max(viewModel.results.participantsAnswered, 5) / 5) * 5;
+   if (results?.results.type !== 'selection') return null;
+
+   const maxAnswers = Math.ceil(Math.max(results.participantsAnswered, 5) / 5) * 5;
 
    return (
       <div style={{ height: '100%' }}>
          <ResponsiveBar
-            data={Object.entries(viewModel.results.results.options).map(([option, answers]) => ({
+            data={Object.entries(results.results.options).map(([option, answers]) => ({
                option,
                count: answers.length,
+               tokens: answers,
             }))}
             keys={['count']}
             indexBy="option"
@@ -29,6 +34,17 @@ export default function SelectionPollResults({ viewModel }: PollResultsProps) {
             borderColor={{ from: 'color', modifiers: [['darker', 1.6]] }}
             axisTop={null}
             axisRight={null}
+            tooltip={({ data: { option, count, tokens } }) => (
+               <NivoTooltipContent
+                  header={
+                     <span>
+                        {option}: <strong>{count}</strong>
+                     </span>
+                  }
+                  participantTokens={tokens as any}
+                  pollId={poll.id}
+               />
+            )}
             padding={0.3}
             theme={{
                textColor: theme.palette.text.secondary,
@@ -43,12 +59,17 @@ export default function SelectionPollResults({ viewModel }: PollResultsProps) {
                      },
                   },
                },
+               tooltip: {
+                  container: {
+                     backgroundColor: theme.palette.background.paper,
+                  },
+               },
             }}
             axisBottom={{
                tickSize: 5,
                tickPadding: 5,
                tickRotation: 0,
-               legend: `${viewModel.results.participantsAnswered} votes`,
+               legend: t('conference.poll.chart_legend', { count: results.participantsAnswered }),
                legendPosition: 'middle',
                legendOffset: 40,
             }}
@@ -56,7 +77,7 @@ export default function SelectionPollResults({ viewModel }: PollResultsProps) {
                tickSize: 5,
                tickPadding: 5,
                tickRotation: 0,
-               legend: 'Antworten',
+               legend: t('conference.poll.types.single_choice.axis_legend'),
                legendPosition: 'middle',
                legendOffset: -40,
                tickValues: 5,

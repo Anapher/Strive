@@ -3,8 +3,8 @@ import { Theme as NivoTheme } from '@nivo/core';
 import { ResponsiveSwarmPlot } from '@nivo/swarmplot';
 import _ from 'lodash';
 import React from 'react';
-import { useSelector } from 'react-redux';
-import { selectParticipants } from 'src/features/conference/selectors';
+import { useTranslation } from 'react-i18next';
+import NivoTooltip from '../NivoTooltip';
 import { PollResultsProps } from '../types';
 
 const getNivoTheme: (theme: Theme) => NivoTheme = (theme) => ({
@@ -12,13 +12,13 @@ const getNivoTheme: (theme: Theme) => NivoTheme = (theme) => ({
    axis: {
       ticks: {
          line: {
-            stroke: 'rgb(84, 39, 136)',
+            stroke: theme.palette.text.primary,
          },
       },
    },
    grid: {
       line: {
-         stroke: theme.palette.primary.light,
+         stroke: theme.palette.divider,
       },
    },
 });
@@ -28,13 +28,14 @@ export default function NumericPollResults({ viewModel: { poll, results } }: Pol
    if (poll.instruction.type !== 'numeric') throw new Error('Invalid instruction type');
 
    const theme = useTheme();
-   const participants = useSelector(selectParticipants);
+   const { t } = useTranslation();
 
    const data = _(Object.entries(results.results.answers))
       .groupBy((x) => x[1])
       .map((value, key) => ({
          key: Number(key),
          count: value.length,
+         tokens: value.map((x) => x[0]),
          group: 'A',
       }))
       .value();
@@ -42,8 +43,6 @@ export default function NumericPollResults({ viewModel: { poll, results } }: Pol
    const maxCount = _(data)
       .orderBy((x) => x.count)
       .last()?.count;
-
-   console.log(data);
 
    return (
       <div style={{ height: '100%' }}>
@@ -58,13 +57,28 @@ export default function NumericPollResults({ viewModel: { poll, results } }: Pol
                max: poll.instruction.max ?? undefined,
                reverse: false,
             }}
+            tooltip={({
+               node: {
+                  data: { key, count, tokens },
+               },
+            }: any) => (
+               <NivoTooltip
+                  header={
+                     <span>
+                        {key}: <strong>{count}</strong>
+                     </span>
+                  }
+                  participantTokens={tokens}
+                  pollId={poll.id}
+               />
+            )}
             layout="horizontal"
             enableGridY={false}
             axisTop={null}
             axisRight={null}
             axisLeft={null}
             axisBottom={{
-               legend: `custom node rendering with donut charts using usePie() React hook from @nivo/pie package`,
+               legend: t('conference.poll.chart_legend', { count: results.participantsAnswered }),
                legendPosition: 'middle',
                legendOffset: 50,
             }}
@@ -75,7 +89,7 @@ export default function NumericPollResults({ viewModel: { poll, results } }: Pol
                bottom: 80,
                left: 60,
             }}
-            size={{ key: 'count', values: [0, maxCount ?? 1], sizes: [6, 50] }}
+            size={{ key: 'count', values: [0, (maxCount ?? 1) + 5], sizes: [6, 50] }}
          />
       </div>
    );

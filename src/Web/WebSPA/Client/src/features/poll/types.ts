@@ -96,7 +96,7 @@ export type SynchronizedPollResults = {
    pollId: string;
    results: PollResults;
    participantsAnswered: number;
-   participantTokenToId?: { [token: string]: string } | null;
+   tokenIdToParticipant?: { [token: string]: string } | null;
 };
 
 export type SynchronizedPollAnswers = {
