@@ -43,7 +43,7 @@ namespace Strive.Core.Services
 
         // Poll
         Poll_NotFound,
-        Poll_InvalidAnswer,
+        AnswerValidationFailed,
         Poll_AnswerCannotBeChanged,
         Poll_Closed,
     }

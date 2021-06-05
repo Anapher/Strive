@@ -41,7 +41,7 @@ namespace Strive.Core.Tests.Services.Poll.UseCase
             var validatorMock = new Mock<IPollAnswerValidator<MultipleChoiceInstruction, MultipleChoiceAnswer>>();
             validatorMock
                 .Setup(x => x.Validate(It.IsAny<MultipleChoiceInstruction>(), It.IsAny<MultipleChoiceAnswer>()))
-                .Returns(validatesTo);
+                .Returns(validatesTo ? null : PollError.AnswerValidationFailed("test"));
 
             var builder = new ContainerBuilder();
             builder.RegisterInstance(validatorMock.Object).AsImplementedInterfaces();
@@ -114,7 +114,7 @@ namespace Strive.Core.Tests.Services.Poll.UseCase
                     CancellationToken.None));
 
             // assert
-            Assert.Equal(ServiceErrorCode.Poll_InvalidAnswer.ToString(), error.Error.Code);
+            Assert.Equal(ServiceErrorCode.AnswerValidationFailed.ToString(), error.Error.Code);
         }
 
         [Fact]

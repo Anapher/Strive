@@ -36,7 +36,7 @@ namespace Strive.Core.Tests.Services.Poll.Utilities
             var result = wrapper.Validate(instruction, answer);
 
             // assert
-            Assert.True(result);
+            Assert.Null(result);
         }
 
         [Fact]
@@ -54,7 +54,7 @@ namespace Strive.Core.Tests.Services.Poll.Utilities
             var result = wrapper.Validate(instruction, answer);
 
             // assert
-            Assert.False(result);
+            Assert.NotNull(result);
         }
 
         [Fact]

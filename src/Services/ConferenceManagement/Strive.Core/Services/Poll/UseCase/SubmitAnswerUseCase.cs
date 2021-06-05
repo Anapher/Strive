@@ -46,8 +46,9 @@ namespace Strive.Core.Services.Poll.UseCase
             else
             {
                 var wrapper = new PollAnswerValidatorWrapper(_context);
-                if (!wrapper.Validate(poll.Instruction, answer))
-                    throw PollError.InvalidAnswer.ToException();
+                var validationResult = wrapper.Validate(poll.Instruction, answer);
+                if (validationResult != null)
+                    throw validationResult.ToException();
 
                 if (poll.Config.IsAnswerFinal)
                 {

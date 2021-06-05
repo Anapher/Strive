@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using Autofac;
+using Strive.Core.Dto;
 
 namespace Strive.Core.Services.Poll.Utilities
 {
@@ -13,7 +14,7 @@ namespace Strive.Core.Services.Poll.Utilities
             _context = context;
         }
 
-        public bool Validate(PollInstruction instruction, PollAnswer answer)
+        public Error? Validate(PollInstruction instruction, PollAnswer answer)
         {
             var genericMethod = GetType().GetMethod(nameof(ValidateGeneric),
                 BindingFlags.NonPublic | BindingFlags.Instance);
@@ -23,10 +24,10 @@ namespace Strive.Core.Services.Poll.Utilities
 
             genericMethod = genericMethod!.MakeGenericMethod(instructionType, baseType);
 
-            return (bool) genericMethod.Invoke(this, new object[] {instruction, answer})!;
+            return (Error?) genericMethod.Invoke(this, new object[] {instruction, answer})!;
         }
 
-        private bool ValidateGeneric<TInstruction, TAnswer>(PollInstruction instruction, PollAnswer answer)
+        private Error? ValidateGeneric<TInstruction, TAnswer>(PollInstruction instruction, PollAnswer answer)
             where TAnswer : PollAnswer where TInstruction : PollInstruction<TAnswer>
         {
             if (instruction is not TInstruction typedInstruction)

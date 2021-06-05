@@ -1,22 +1,15 @@
 ﻿using Strive.Core.Services.Poll.Types.TagCloud;
-using Strive.Tests.Utils;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Strive.Core.Tests.Services.Poll.Types.TagCloud
 {
     public class TagCloudAnswerValidatorTests
     {
-        private readonly TagCloudAnswerValidator _validator;
+        private readonly TagCloudAnswerValidator _validator = new();
 
-        public TagCloudAnswerValidatorTests(ITestOutputHelper testOutputHelper)
-        {
-            var logger = testOutputHelper.CreateLogger<TagCloudAnswerValidator>();
-            _validator = new TagCloudAnswerValidator(logger);
-        }
 
         [Fact]
-        public void Validate_EmptyAnswers_ReturnFalse()
+        public void Validate_EmptyAnswers_ReturnError()
         {
             // arrange
             var answer = new TagCloudAnswer(new string[0]);
@@ -26,11 +19,11 @@ namespace Strive.Core.Tests.Services.Poll.Types.TagCloud
             var result = _validator.Validate(instruction, answer);
 
             // assert
-            Assert.False(result);
+            Assert.NotNull(result);
         }
 
         [Fact]
-        public void Validate_TooManyAnswers_ReturnFalse()
+        public void Validate_TooManyAnswers_ReturnError()
         {
             // arrange
             var answer = new TagCloudAnswer(new[] {"a", "b", "c", "d"});
@@ -40,11 +33,11 @@ namespace Strive.Core.Tests.Services.Poll.Types.TagCloud
             var result = _validator.Validate(instruction, answer);
 
             // assert
-            Assert.False(result);
+            Assert.NotNull(result);
         }
 
         [Fact]
-        public void Validate_CaseInsensitive_DuplicateAnswers_ReturnFalse()
+        public void Validate_CaseInsensitive_DuplicateAnswers_ReturnError()
         {
             // arrange
             var answer = new TagCloudAnswer(new[] {"visual basic", "Visual Basic"});
@@ -54,11 +47,11 @@ namespace Strive.Core.Tests.Services.Poll.Types.TagCloud
             var result = _validator.Validate(instruction, answer);
 
             // assert
-            Assert.False(result);
+            Assert.NotNull(result);
         }
 
         [Fact]
-        public void Validate_Fuzzy_DuplicateAnswers_ReturnFalse()
+        public void Validate_Fuzzy_DuplicateAnswers_ReturnError()
         {
             // arrange
             var answer = new TagCloudAnswer(new[] {"visual basic", "visualbasic"});
@@ -68,11 +61,11 @@ namespace Strive.Core.Tests.Services.Poll.Types.TagCloud
             var result = _validator.Validate(instruction, answer);
 
             // assert
-            Assert.False(result);
+            Assert.NotNull(result);
         }
 
         [Fact]
-        public void Validate_Fuzzy_ValidAnswers_ReturnTrue()
+        public void Validate_Fuzzy_ValidAnswers_ReturnNull()
         {
             // arrange
             var answer = new TagCloudAnswer(new[] {"visual basic", "c#"});
@@ -82,11 +75,11 @@ namespace Strive.Core.Tests.Services.Poll.Types.TagCloud
             var result = _validator.Validate(instruction, answer);
 
             // assert
-            Assert.True(result);
+            Assert.Null(result);
         }
 
         [Fact]
-        public void Validate_CaseInsensitive_ValidAnswers_ReturnTrue()
+        public void Validate_CaseInsensitive_ValidAnswers_ReturnNull()
         {
             // arrange
             var answer = new TagCloudAnswer(new[] {"visual basic", "c#"});
@@ -96,7 +89,7 @@ namespace Strive.Core.Tests.Services.Poll.Types.TagCloud
             var result = _validator.Validate(instruction, answer);
 
             // assert
-            Assert.True(result);
+            Assert.Null(result);
         }
     }
 }

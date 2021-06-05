@@ -1,40 +1,34 @@
 ﻿using System.Linq;
-using Microsoft.Extensions.Logging;
+using Strive.Core.Dto;
 
 namespace Strive.Core.Services.Poll.Types.TagCloud
 {
     public class TagCloudAnswerValidator : IPollAnswerValidator<TagCloudInstruction, TagCloudAnswer>
     {
-        private readonly ILogger<TagCloudAnswerValidator> _logger;
-
-        public TagCloudAnswerValidator(ILogger<TagCloudAnswerValidator> logger)
-        {
-            _logger = logger;
-        }
-
-        public bool Validate(TagCloudInstruction instruction, TagCloudAnswer answer)
+        public Error? Validate(TagCloudInstruction instruction, TagCloudAnswer answer)
         {
             if (!answer.Tags.Any())
             {
-                _logger.LogDebug("Empty answers submitted");
-                return false;
+                return PollError.AnswerValidationFailed("The answer does not contain any tags");
             }
 
             if (answer.Tags.Count > instruction.MaxTags)
             {
-                _logger.LogDebug("Too many tags submitted (count: {count}, max: {max})", answer.Tags.Count,
-                    instruction.MaxTags);
-                return false;
+                return PollError.AnswerValidationFailed(
+                    $"Too many tags submitted (count: {answer.Tags.Count}, max: {instruction.MaxTags})");
             }
 
-            if (TagCloudGrouper.GroupAnswers(instruction.Mode, answer.Tags.Select(x => new TagCloudTag("1", x)))
-                .Any(x => x.Count > 1))
+            var groups =
+                TagCloudGrouper.GroupAnswers(instruction.Mode, answer.Tags.Select(x => new TagCloudTag("1", x)));
+
+            if (groups.Any(x => x.Count > 1))
             {
-                _logger.LogDebug("Duplicate tags submitted.");
-                return false;
+                var duplicateTags = groups.Where(x => x.Count > 1).ToList();
+                return PollError.AnswerValidationFailed(
+                    $"The answer does contain {duplicateTags.Sum(x => x.Count)} duplicate tags. The following tags are an equal group: {string.Join(", ", groups.Select(x => "(" + string.Join(", ", x.Select(t => t.Tag)) + ")"))}.");
             }
 
-            return true;
+            return null;
         }
     }
 }
