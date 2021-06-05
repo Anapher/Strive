@@ -6,7 +6,7 @@ import useMyParticipantId from 'src/hooks/useMyParticipantId';
 import { RootState } from 'src/store';
 import * as actions from '../actions';
 import { ChatChannelWithId } from '../channel-serializer';
-import { hashCode, numberToColor } from '../color-utils';
+import { hashCode, numberToColor } from 'src/utils/color-utils';
 import { clearChat, setSelectedChannel } from '../reducer';
 import { selectChannels, selectSelectedChannel } from '../selectors';
 import Chat from './Chat';

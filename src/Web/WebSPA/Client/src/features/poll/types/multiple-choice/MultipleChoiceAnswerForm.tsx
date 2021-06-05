@@ -1,8 +1,8 @@
-import { Chip, Grid, makeStyles } from '@material-ui/core';
-import React from 'react';
+import { Chip, Grid, makeStyles, Portal } from '@material-ui/core';
+import React, { useState } from 'react';
+import PollCardSubmitButton from '../../components/PollCardSubmitButton';
 import { MultipleChoiceAnswer } from '../../types';
 import { PollAnswerFormProps } from '../types';
-import clsx from 'classnames';
 
 type SelectionChipProps = {
    className: string;
@@ -19,7 +19,7 @@ function SelectionChip({ className, option, selected, applied, disabled, onClick
       <Chip
          className={className}
          label={option}
-         color={selected ? 'primary' : undefined}
+         color={selected || applied ? 'primary' : undefined}
          disabled={disabled}
          clickable
          variant={selected && !applied ? 'outlined' : undefined}
@@ -30,57 +30,70 @@ function SelectionChip({ className, option, selected, applied, disabled, onClick
    );
 }
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles({
    chip: {
       minWidth: 56,
    },
-   chipPreselected: {},
-}));
+});
+
+const createAnswerDto: (selected: string[]) => MultipleChoiceAnswer = (selected) => ({
+   type: 'multipleChoice',
+   selected,
+});
 
 export default function MultipleChoiceAnswerForm({
-   onChangeCurrentAnswer,
-   currentAnswer,
    onSubmit,
    onDelete,
    poll: { poll, answer },
+   footerPortalRef,
 }: PollAnswerFormProps<MultipleChoiceAnswer>) {
    if (poll.instruction.type !== 'multipleChoice') throw new Error('Multiple choice instruction required');
 
    const classes = useStyles();
-   const selected = currentAnswer.selected;
+   const [selected, setSelected] = useState(new Array<string>());
+
+   const selectedMax = poll.instruction.maxSelections
+      ? !!selected && selected.length >= poll.instruction.maxSelections
+      : false;
 
    const handleSelectOption = (option: string) => {
-      const answer: MultipleChoiceAnswer = {
-         type: 'multipleChoice',
-         selected: selected?.includes(option)
-            ? selected.filter((x) => x !== option)
-            : [...(selected || []), option].sort(),
-      };
-      onChangeCurrentAnswer(answer);
+      setSelected(
+         selected.includes(option) ? selected.filter((x) => x !== option) : [...(selected || []), option].sort(),
+      );
 
       if (!poll.config.isAnswerFinal) {
-         if (answer.selected.length === 0) {
+         if (selected.length === 0) {
             onDelete();
          } else {
-            onSubmit(answer);
+            onSubmit(createAnswerDto(selected));
          }
       }
    };
 
    return (
-      <Grid container spacing={1} justify="center">
-         {poll.instruction.options.map((x) => (
-            <Grid item key={x}>
-               <SelectionChip
-                  option={x}
-                  className={classes.chip}
-                  applied={answer?.answer.type === 'multipleChoice' && answer.answer.selected.includes(x)}
-                  selected={Boolean(selected?.includes(x))}
-                  disabled={Boolean(answer && poll.config.isAnswerFinal)}
-                  onClick={() => handleSelectOption(x)}
+      <>
+         <Grid container spacing={1} justify="center">
+            {poll.instruction.options.map((x) => (
+               <Grid item key={x}>
+                  <SelectionChip
+                     option={x}
+                     className={classes.chip}
+                     applied={answer?.answer.type === 'multipleChoice' && answer.answer.selected.includes(x)}
+                     selected={poll.config.isAnswerFinal && Boolean(selected?.includes(x))}
+                     disabled={Boolean(answer && poll.config.isAnswerFinal) || (selectedMax && !selected.includes(x))}
+                     onClick={() => handleSelectOption(x)}
+                  />
+               </Grid>
+            ))}
+         </Grid>
+         {poll.config.isAnswerFinal && !answer && (
+            <Portal container={footerPortalRef}>
+               <PollCardSubmitButton
+                  disabled={selected.length === 0}
+                  onClick={() => onSubmit(createAnswerDto(selected))}
                />
-            </Grid>
-         ))}
-      </Grid>
+            </Portal>
+         )}
+      </>
    );
 }

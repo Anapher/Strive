@@ -1,11 +1,13 @@
 import { TFunction } from 'react-i18next';
 import { TagCloudAnswer, TagCloudInstruction } from '../../types';
 import { PollTypePresenter } from '../types';
+import TagCloudAnswerForm from './TagCloudAnswerForm';
 import TagCloudInstructionForm from './TagCloudForm';
+import TagCloudResults from './TagCloudResults';
 
 const getPollDescription = (instruction: TagCloudInstruction, t: TFunction<string>) =>
    instruction.maxTags
-      ? t('conference.poll.types.tag_cloud.description', { count: instruction.maxTags })
+      ? t('conference.poll.types.tag_cloud.description_max', { count: instruction.maxTags })
       : t('conference.poll.types.tag_cloud.label');
 
 const presenter: PollTypePresenter<TagCloudInstruction, TagCloudAnswer> = {
@@ -16,9 +18,9 @@ const presenter: PollTypePresenter<TagCloudInstruction, TagCloudAnswer> = {
 
    answerType: 'tagCloud',
    InstructionForm: TagCloudInstructionForm,
-   PollAnswerForm: null as any,
+   PollAnswerForm: TagCloudAnswerForm,
 
-   ResultsView: null as any,
+   ResultsView: TagCloudResults,
 };
 
 export default presenter;

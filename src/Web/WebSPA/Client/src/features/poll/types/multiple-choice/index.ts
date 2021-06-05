@@ -19,7 +19,6 @@ const presenter: PollTypePresenter<MultipleChoiceInstruction, MultipleChoiceAnsw
 
    answerType: 'multipleChoice',
    PollAnswerForm: MultipleChoiceAnswerForm,
-   pollAnswerFormExternalSubmit: true,
 
    ResultsView: SelectionPollResults,
 };

@@ -21,5 +21,7 @@
   "description": "Description",
   "room": "Room",
   "language": "Language",
-  "delete": "Delete"
+  "delete": "Delete",
+  "participant": "participant",
+  "participant_plural": "participants"
 }

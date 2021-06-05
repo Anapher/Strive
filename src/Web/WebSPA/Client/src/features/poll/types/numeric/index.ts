@@ -1,7 +1,9 @@
 import { TFunction } from 'react-i18next';
 import { NumericAnswer, NumericInstruction } from '../../types';
 import { PollTypePresenter } from '../types';
+import NumericAnswerForm from './NumericAnswerForm';
 import NumericInstructionForm from './NumericInstructionForm';
+import NumericPollResults from './NumericPollResults';
 
 const getPollDescription = (instruction: NumericInstruction, t: TFunction<string>) => {
    const modifiers = new Array<string>();
@@ -33,9 +35,9 @@ const presenter: PollTypePresenter<NumericInstruction, NumericAnswer> = {
 
    answerType: 'numeric',
    InstructionForm: NumericInstructionForm,
-   PollAnswerForm: null as any,
+   PollAnswerForm: NumericAnswerForm,
 
-   ResultsView: null as any,
+   ResultsView: NumericPollResults,
 };
 
 export default presenter;

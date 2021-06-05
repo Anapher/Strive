@@ -13,9 +13,8 @@ import {
 } from '@material-ui/core';
 import { OverridableComponent } from '@material-ui/core/OverridableComponent';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
-import _ from 'lodash';
 import { Incognito, IncognitoOff, Pencil, PencilOff } from 'mdi-material-ui';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import * as coreHub from 'src/core-hub';
@@ -85,10 +84,10 @@ export default function PollCard({ poll: viewModel }: Props) {
    const [resultsOpen, setResultsOpen] = useState(false);
    const [resultsAnchorEl, setResultsAnchorEl] = useState<null | HTMLElement>(null);
 
+   const footerContainer = useRef(null);
+
    const presenter = pollTypes.find((x) => x.instructionType === poll.instruction.type);
    if (!presenter) return null;
-
-   const [currentAnswer, setCurrentAnswer] = useState<Partial<PollAnswer>>({ type: presenter.answerType });
 
    const onSubmitAnswer = (answer: PollAnswer) => {
       dispatch(coreHub.submitPollAnswer({ answer, pollId: poll.id }));
@@ -117,7 +116,7 @@ export default function PollCard({ poll: viewModel }: Props) {
                <Typography variant="caption">
                   {presenter.getPollDescription(viewModel.poll.instruction, t as any)}
                </Typography>
-               <Typography gutterBottom style={{ marginTop: 8 }}>
+               <Typography gutterBottom style={{ marginTop: 8, marginBottom: 8 }}>
                   {poll.config.question}
                </Typography>
             </div>
@@ -136,28 +135,16 @@ export default function PollCard({ poll: viewModel }: Props) {
             )}
          </div>
          {poll.state.isOpen && (
-            <div>
-               <presenter.PollAnswerForm
-                  onSubmit={onSubmitAnswer}
-                  onDelete={deleteAnswer}
-                  currentAnswer={currentAnswer}
-                  onChangeCurrentAnswer={setCurrentAnswer}
-                  poll={viewModel}
-               />
-            </div>
+            <presenter.PollAnswerForm
+               onSubmit={onSubmitAnswer}
+               onDelete={deleteAnswer}
+               poll={viewModel}
+               footerPortalRef={footerContainer.current}
+            />
          )}
          <div className={classes.bottomInfo}>
-            <div>
-               {presenter.pollAnswerFormExternalSubmit && poll.state.isOpen && (
-                  <Button
-                     size="small"
-                     color="secondary"
-                     type="submit"
-                     disabled={_.isEqual(currentAnswer, viewModel.answer?.answer)}
-                  >
-                     Submit
-                  </Button>
-               )}
+            <div style={{ display: 'flex' }}>
+               <div ref={footerContainer} />
                <Button size="small" disabled={!poll.state.resultsPublished && !canOpenPoll} onClick={handleOpenResults}>
                   Results
                </Button>
@@ -186,13 +173,13 @@ export default function PollCard({ poll: viewModel }: Props) {
          >
             {({ TransitionProps }) => (
                <Grow {...TransitionProps} style={{ transformOrigin: 'right top' }}>
-                  <Paper style={{ width: 600, padding: 16, backgroundColor: '#272727' }} elevation={5}>
+                  <Paper style={{ width: 600, backgroundColor: '#272727' }} elevation={5}>
                      <ClickAwayListener onClickAway={handleCloseResults}>
-                        <Box height={300} display="flex" flexDirection="column">
-                           <Typography align="center" variant="h6">
+                        <Box display="flex" flexDirection="column">
+                           <Typography align="center" variant="h6" style={{ margin: 16 }}>
                               {viewModel.poll.config.question}
                            </Typography>
-                           <div style={{ flex: 1, minHeight: 0 }}>
+                           <div style={{ height: 300, minHeight: 0 }}>
                               <PollResultsView viewModel={viewModel} />
                            </div>
                         </Box>

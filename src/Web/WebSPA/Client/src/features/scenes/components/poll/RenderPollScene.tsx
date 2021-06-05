@@ -36,7 +36,7 @@ export default function RenderPollScene({ className, scene }: RenderSceneProps<P
    return (
       <ActiveChipsLayout className={className} contentClassName={classes.root}>
          <div className={classes.content}>
-            <Typography variant="h4">What is love?</Typography>
+            <Typography variant="h4">{viewModel.poll.config.question}</Typography>
             {viewModel.results && (
                <div className={classes.pollContainer}>
                   <PollResultsView viewModel={viewModel} />

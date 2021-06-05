@@ -45,6 +45,7 @@ export default function NumericInstructionForm({ form: { register } }: Instructi
                         shouldUnregister: true,
                      }),
                   )}
+                  InputProps={{ inputProps: { step: 0.1 } }}
                />
             </Grid>
          </Grid>

@@ -1,3 +1,4 @@
+import { PortalProps } from '@material-ui/core';
 import { UseFormReturn } from 'react-hook-form';
 import { TFunction } from 'react-i18next';
 import { CreatePollDto } from 'src/core-hub.types';
@@ -10,10 +11,10 @@ export type InstructionFormProps = {
 
 export type PollAnswerFormProps<A extends PollAnswer> = {
    poll: PollViewModel;
-   currentAnswer: Partial<A>;
-   onChangeCurrentAnswer: (value: Partial<A>) => void;
    onSubmit: (value: A) => void;
    onDelete: () => void;
+
+   footerPortalRef: PortalProps['container'];
 };
 
 export type PollResultsProps = {
@@ -29,7 +30,6 @@ export type PollTypePresenter<I extends PollInstruction, A extends PollAnswer> =
 
    answerType: A['type'];
    PollAnswerForm: React.ComponentType<PollAnswerFormProps<A>>;
-   pollAnswerFormExternalSubmit?: boolean;
 
    ResultsView: React.ComponentType<PollResultsProps>;
 };

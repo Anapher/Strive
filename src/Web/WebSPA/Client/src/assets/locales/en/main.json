@@ -456,6 +456,7 @@
       "close_poll": "Close poll",
       "publish_results": "Publish results",
       "hide_results": "Hide results",
+      "submit_answer": "Submit",
       "types": {
         "single_choice": {
           "label": "Single choice"
@@ -469,10 +470,21 @@
           "description_min": "min {{count}}",
           "description_max": "max {{count}}",
           "description_between": "between {{min}} and {{max}}",
-          "description_step": "step {{count}}"
+          "description_step": "step {{count}}",
+          "error_invalid_number": "Invalid number",
+          "error_too_small": "Number is too small",
+          "error_too_large": "Number is too large",
+          "error_not_match_step": "Number does not match the step",
+          "your_number": "Your number"
         },
         "tag_cloud": {
-          "label": "Tag Cloud"
+          "label": "Tag Cloud",
+          "description_max": "$t(conference.poll.types.tag_cloud.label) (max tags: {{count}})",
+          "cloud_description": "submitted one tag",
+          "cloud_description_plural": "submitted {{count}} tags",
+          "your_tags": "Your tags",
+          "your_tags_helper": "Press return to add",
+          "error_max_exceeded": "Maximum amount of tags exceeded by {{count}}"
         }
       }
     }

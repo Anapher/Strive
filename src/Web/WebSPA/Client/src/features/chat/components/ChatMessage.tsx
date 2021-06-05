@@ -12,7 +12,7 @@ import { ChatMessageDto } from 'src/core-hub.types';
 import { selectParticipant } from 'src/features/conference/selectors';
 import { Participant } from 'src/features/conference/types';
 import { RootState } from 'src/store';
-import { hashCode, numberToColor } from '../color-utils';
+import { hashCode, numberToColor } from 'src/utils/color-utils';
 
 const useStyles = makeStyles((theme) => ({
    root: {
