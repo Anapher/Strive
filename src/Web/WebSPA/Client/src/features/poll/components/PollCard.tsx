@@ -1,16 +1,4 @@
-import {
-   Box,
-   Button,
-   ClickAwayListener,
-   Grow,
-   IconButton,
-   makeStyles,
-   Paper,
-   Popper,
-   SvgIconTypeMap,
-   Tooltip,
-   Typography,
-} from '@material-ui/core';
+import { Button, IconButton, makeStyles, SvgIconTypeMap, Tooltip, Typography } from '@material-ui/core';
 import { OverridableComponent } from '@material-ui/core/OverridableComponent';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import { Incognito, IncognitoOff, Pencil, PencilOff } from 'mdi-material-ui';
@@ -22,8 +10,9 @@ import usePermission from 'src/hooks/usePermission';
 import { POLL_CAN_OPEN } from 'src/permissions';
 import { PollAnswer, PollViewModel } from '../types';
 import pollTypes from '../types/register';
+import PollCardResultsPopup from './PollCardResultsPopup';
+import PollCardResultSummary from './PollCardResultSummary';
 import PollContextMenu from './PollContextMenu';
-import PollResultsView from './PollResultsView';
 
 type PollStatusIconProps = {
    Icon: OverridableComponent<SvgIconTypeMap>;
@@ -50,6 +39,9 @@ const useStyles = makeStyles((theme) => ({
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
+   },
+   bottomInfoButtons: {
+      display: 'flex',
    },
    header: {
       display: 'flex',
@@ -142,52 +134,39 @@ export default function PollCard({ poll: viewModel }: Props) {
                footerPortalRef={footerContainer.current}
             />
          )}
+         {!poll.state.isOpen && <PollCardResultSummary viewModel={viewModel} />}
          <div className={classes.bottomInfo}>
-            <div style={{ display: 'flex' }}>
+            <div className={classes.bottomInfoButtons}>
                <div ref={footerContainer} />
                <Button size="small" disabled={!poll.state.resultsPublished && !canOpenPoll} onClick={handleOpenResults}>
-                  Results
+                  {t('conference.poll.results')}
                </Button>
             </div>
             <div>
                <PollStatusIconProps
                   Icon={poll.config.isAnonymous ? Incognito : IncognitoOff}
-                  description={poll.config.isAnonymous ? 'Anonymous poll' : 'This poll is not anonymous'}
+                  description={
+                     poll.config.isAnonymous
+                        ? t('conference.poll.desc_anonymous')
+                        : t('conference.poll.desc_anonymous_not')
+                  }
                />
                <PollStatusIconProps
                   Icon={poll.config.isAnswerFinal ? PencilOff : Pencil}
                   description={
                      poll.config.isAnswerFinal
-                        ? 'You cannot change your answer after submission'
-                        : 'You can change your answer after submission'
+                        ? t('conference.poll.desc_answer_change_not')
+                        : t('conference.poll.desc_answer_change')
                   }
                />
             </div>
          </div>
-         <Popper
+         <PollCardResultsPopup
             open={resultsOpen}
+            onClose={handleCloseResults}
+            viewModel={viewModel}
             anchorEl={resultsAnchorEl}
-            transition
-            placement="right-start"
-            style={{ zIndex: 5000 }}
-         >
-            {({ TransitionProps }) => (
-               <Grow {...TransitionProps} style={{ transformOrigin: 'right top' }}>
-                  <Paper style={{ width: 600, backgroundColor: '#272727' }} elevation={5}>
-                     <ClickAwayListener onClickAway={handleCloseResults}>
-                        <Box display="flex" flexDirection="column">
-                           <Typography align="center" variant="h6" style={{ margin: 16 }}>
-                              {viewModel.poll.config.question}
-                           </Typography>
-                           <div style={{ height: 300, minHeight: 0 }}>
-                              <PollResultsView viewModel={viewModel} />
-                           </div>
-                        </Box>
-                     </ClickAwayListener>
-                  </Paper>
-               </Grow>
-            )}
-         </Popper>
+         />
       </div>
    );
 }

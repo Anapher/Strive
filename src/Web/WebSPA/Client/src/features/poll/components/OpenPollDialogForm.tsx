@@ -23,7 +23,6 @@ import { useSelector } from 'react-redux';
 import MobileAwareSelect from 'src/components/MobileAwareSelect';
 import { CreatePollDto } from 'src/core-hub.types';
 import { selectParticipantRoom } from 'src/features/rooms/selectors';
-import { RootState } from 'src/store';
 import { wrapForInputRef } from 'src/utils/reat-hook-form-utils';
 import getPresets from '../poll-presets';
 import pollTypes from '../types/register';

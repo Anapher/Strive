@@ -1,4 +1,5 @@
 import { createSelector } from '@reduxjs/toolkit';
+import { DomainError } from 'src/communication-types';
 import { RootState } from 'src/store';
 import { PollViewModel } from './types';
 
@@ -7,6 +8,9 @@ const getPollId = (_: unknown, id: string) => id;
 const selectMyPolls = (state: RootState) => Object.values(state.poll.polls);
 const selectMyAnswers = (state: RootState) => state.poll.answers.answers;
 const selectMyPollResults = (state: RootState) => Object.values(state.poll.results);
+
+export const selectAnswerSubmissionError = (state: RootState, pollId: string) =>
+   state.poll.answerSubmissionErrors[pollId] as DomainError | undefined;
 
 export const selectPollViewModels = createSelector(
    selectMyPolls,

@@ -90,6 +90,7 @@ export type SynchronizedPoll = {
    instruction: PollInstruction;
    config: PollConfig;
    state: PollState;
+   createdOn: string;
 };
 
 export type SynchronizedPollResults = {

@@ -62,7 +62,7 @@ export default function TagCloudInstructionForm({
                            shouldUnregister: true,
                         }),
                      )}
-                     helperText="Maximum tags a participant can submit"
+                     helperText={t('conference.poll.create_dialog.tag_cloud_max_helper')}
                      inputProps={{ min: 1, step: 1 }}
                      error={Boolean((errors.instruction as any)?.maxTags)}
                   />

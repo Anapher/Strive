@@ -1,4 +1,5 @@
 import { Divider, makeStyles, Paper } from '@material-ui/core';
+import _ from 'lodash';
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { selectPollViewModels } from '../selectors';
@@ -8,10 +9,11 @@ const useStyles = makeStyles((theme) => ({
    root: {
       display: 'flex',
       flexDirection: 'column',
-      overflowY: 'hidden',
+      overflowY: 'auto',
       borderColor: theme.palette.divider,
       borderRadius: theme.shape.borderRadius,
       marginBottom: theme.spacing(1),
+      maxHeight: '35%',
    },
 }));
 
@@ -23,12 +25,15 @@ export default function CurrentPollsBar() {
 
    return (
       <Paper className={classes.root} elevation={12} square>
-         {polls.map((x) => (
-            <div key={x.poll.id}>
-               <PollCard poll={x} />
-               <Divider />
-            </div>
-         ))}
+         {_(polls)
+            .orderBy([(x) => x.poll.state.isOpen, (x) => x.poll.createdOn], ['desc', 'desc'])
+            .map((x, i) => (
+               <div key={x.poll.id}>
+                  {i !== 0 && <Divider />}
+                  <PollCard poll={x} />
+               </div>
+            ))
+            .value()}
       </Paper>
    );
 }

@@ -410,6 +410,7 @@
         "numeric_description": "Participants submit a number within optional boundaries. Can be used for number estimations.",
         "tag_cloud_description": "Participants submit words that are grouped and presented as a tag cloud.",
         "max_tags": "Maximum tags / participant",
+        "tag_cloud_max_helper": "Maximum tags a participant can submit",
         "min": "Minimum",
         "max": "Maximum",
         "step": "Step",
@@ -458,6 +459,7 @@
       "hide_results": "Hide results",
       "submit_answer": "Submit",
       "chart_legend": "{{count}} votes",
+      "results": "Results",
       "types": {
         "single_choice": {
           "label": "Single choice",
@@ -488,6 +490,16 @@
           "your_tags_helper": "Press return to add",
           "error_max_exceeded": "Maximum amount of tags exceeded by {{count}}"
         }
+      },
+      "desc_anonymous": "Anonymous",
+      "desc_anonymous_not": "Not anonymous",
+      "desc_answer_change": "Answer can be changed",
+      "desc_answer_change_not": "Answer is final",
+      "desc_poll_open": "Poll is open",
+      "desc_poll_open_not": "Poll is closed",
+      "scene": {
+        "warn_results_not_published": "You selected this scene while the results of this poll are not yet published to all participants. Others won't see the chart.",
+        "publish": "Publish"
       }
     }
   }

@@ -1,5 +1,4 @@
 import { IconButton, ListItemSecondaryAction, PopperProps } from '@material-ui/core';
-import SettingsIcon from '@material-ui/icons/Settings';
 import React, { useRef, useState } from 'react';
 import { Scene } from '../types';
 import SceneListItem, { Props as SceneListItemProps } from './SceneListItem';

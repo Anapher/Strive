@@ -25,7 +25,7 @@ namespace Strive.Core.Services.Poll.Types.TagCloud
             {
                 var duplicateTags = groups.Where(x => x.Count > 1).ToList();
                 return PollError.AnswerValidationFailed(
-                    $"The answer does contain {duplicateTags.Sum(x => x.Count)} duplicate tags. The following tags are an equal group: {string.Join(", ", groups.Select(x => "(" + string.Join(", ", x.Select(t => t.Tag)) + ")"))}.");
+                    $"The answer does contain {duplicateTags.Sum(x => x.Count)} duplicate tags. The following tags are an equal group: {string.Join(", ", duplicateTags.Select(x => "(" + string.Join(", ", x.Select(t => t.Tag)) + ")"))}.");
             }
 
             return null;

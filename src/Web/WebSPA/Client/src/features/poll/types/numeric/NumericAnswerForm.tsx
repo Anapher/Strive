@@ -91,7 +91,9 @@ export default function NumericAnswerForm({
                      canSubmitAnswer ||
                      (answer?.answer.type === 'numeric' && answer.answer.selected === number)
                   }
-                  onClick={() => onSubmit(createAnswerDto(number!))}
+                  onClick={() => {
+                     if (number !== undefined) onSubmit(createAnswerDto(number));
+                  }}
                />
             </Portal>
          )}

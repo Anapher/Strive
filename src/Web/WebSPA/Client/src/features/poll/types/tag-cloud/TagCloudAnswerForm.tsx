@@ -2,7 +2,10 @@ import { Chip, Portal, TextField } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
+import { RootState } from 'src/store';
 import PollCardSubmitButton from '../../components/PollCardSubmitButton';
+import { selectAnswerSubmissionError } from '../../selectors';
 import { TagCloudAnswer, TagCloudInstruction } from '../../types';
 import { PollAnswerFormProps } from '../types';
 
@@ -24,6 +27,7 @@ export default function TagCloudAnswerForm({
    const [selectedTags, setSelectedTags] = useState(
       (answer?.answer as TagCloudAnswer | undefined)?.tags ?? new Array<string>(),
    );
+   const submissionError = useSelector((state: RootState) => selectAnswerSubmissionError(state, poll.id));
 
    const hasMaxTagsReached = (values: string[]) =>
       Boolean(
@@ -59,12 +63,14 @@ export default function TagCloudAnswerForm({
             renderInput={(params) => (
                <TextField
                   {...params}
-                  error={maxTagsExceeded}
+                  error={maxTagsExceeded || submissionError !== undefined}
                   helperText={
                      maxTagsExceeded
                         ? t('conference.poll.types.tag_cloud.error_max_exceeded', {
                              count: selectedTags.length - ((poll.instruction as TagCloudInstruction).maxTags ?? 0),
                           })
+                        : submissionError
+                        ? submissionError.message
                         : t('conference.poll.types.tag_cloud.your_tags_helper')
                   }
                   variant="outlined"

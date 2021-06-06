@@ -5,7 +5,7 @@ import _ from 'lodash';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import ReactWordcloud from 'react-wordcloud';
-import { hashCode } from 'src/utils/color-utils';
+import { hashCode } from 'src/utils/string-utils';
 import 'tippy.js/animations/scale.css';
 import 'tippy.js/dist/tippy.css';
 import { PollResultsProps } from '../types';
