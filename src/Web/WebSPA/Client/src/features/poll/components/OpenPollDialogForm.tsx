@@ -163,10 +163,8 @@ export default function OpenPollDialogForm({ open, onSubmit }: Props) {
    return (
       <>
          <DialogContent>
+            <Typography variant="caption">{t('conference.poll.create_dialog.presets.title')}:</Typography>
             <Grid container spacing={1}>
-               <Grid item>
-                  <Typography>{t('conference.poll.create_dialog.presets.title')}: </Typography>
-               </Grid>
                {presets.map((x) => (
                   <Grid item key={x.label}>
                      <Chip label={x.label} size="small" onClick={() => handleApplyPreset(x.data)} />
@@ -219,7 +217,7 @@ export default function OpenPollDialogForm({ open, onSubmit }: Props) {
                      <Typography gutterBottom className={classes.advancedOptionsHeader}>
                         {t('conference.poll.create_dialog.advanced_options')}
                      </Typography>
-                     <Grid container>
+                     <Grid container spacing={1}>
                         <Grid item xs={12} sm={6}>
                            <AdvancedOption
                               control={control}

@@ -20,5 +20,8 @@
   "volume": "Lautstärke",
   "webcam": "Webcam",
   "language": "Sprache",
-  "screen": "Bildschirm"
+  "screen": "Bildschirm",
+  "delete": "Löschen",
+  "participant": "Teilnehmer",
+  "participant_plural": "Teilnehmer"
 }

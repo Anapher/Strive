@@ -23,7 +23,7 @@ export default function SingleChoiceInstructionForm({
    return (
       <TextField
          autoFocus
-         label={t('conference.poll.create_dialog.options_label')}
+         label={t('conference.poll.create_dialog.choices_label')}
          fullWidth
          {...wrapForInputRef(register('instruction.options', { validate: validateOptionsText }))}
          rows={4}
@@ -32,8 +32,8 @@ export default function SingleChoiceInstructionForm({
          error={Boolean((errors.instruction as any)?.options)}
          helperText={
             (errors.instruction as any)?.options
-               ? t('conference.poll.create_dialog.options_error_at_least_two')
-               : t('conference.poll.create_dialog.options_helper_text')
+               ? t('conference.poll.create_dialog.choices_error_at_least_two')
+               : t('conference.poll.create_dialog.choices_helper_text')
          }
       />
    );
