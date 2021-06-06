@@ -8,14 +8,14 @@ const mockRoom = () => {
       leave: jest.fn(),
       updateParticipant: jest.fn(),
    };
-   spyOn(Room, 'default').and.returnValue(mock);
+   jest.spyOn(Room, 'default').mockReturnValue(mock as any);
    return mock;
 };
 
 const createLoopbackManager = () =>
    new LoopbackManager(undefined as any, undefined as any, undefined as any, undefined as any);
 
-const createProducer = (id: string) => (({ producer: { id } } as any) as ProducerLink);
+const createProducer = (id: string) => ({ producer: { id } } as any as ProducerLink);
 
 test('updateParticipant() | no loopback producers | do nothing', async () => {
    const room = mockRoom();

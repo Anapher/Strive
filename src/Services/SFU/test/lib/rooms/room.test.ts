@@ -19,13 +19,13 @@ const createMediasoupMixerMock = () => {
 
    const instance = { removeReceiveTransport, addReceiveTransport, removeProducer, addProducer };
 
-   spyOn(mediasoupMixer, 'MediasoupMixer').and.returnValue(instance);
+   jest.spyOn(mediasoupMixer, 'MediasoupMixer').mockReturnValue(instance as any);
 
    return instance;
 };
 
 const createConn = (connectionId: string) => ({ connectionId } as Connection);
-const createProducer = (id: string) => (({ producer: { id } } as any) as ProducerLink);
+const createProducer = (id: string) => ({ producer: { id } } as any as ProducerLink);
 
 const conferenceWithPermissions = (participantId: string, ...permissions: Permission<boolean>[]): ConferenceInfo => ({
    ...emptyConference,
