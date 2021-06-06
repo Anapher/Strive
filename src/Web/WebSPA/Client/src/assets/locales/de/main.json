@@ -498,7 +498,7 @@
       "desc_poll_open": "Umfrage ist geöffnet",
       "desc_poll_open_not": "Umfrage ist geschlossen",
       "scene": {
-        "warn_results_not_published": "Sie haben diese Szene ausgewählt, obwohl die Ergebnisse der Umfrage noch nicht für alle Teilnehmer veröffentlicht sind. Andere Teilnehmer werden die Diagramme nicht sehen.",
+        "warn_results_not_published": "Sie haben diese Szene ausgewählt, obwohl die Ergebnisse der Umfrage noch nicht für alle Teilnehmer veröffentlicht sind. Andere Teilnehmer können die Diagramme nicht sehen.",
         "publish": "Veröffentlichen"
       }
     }
