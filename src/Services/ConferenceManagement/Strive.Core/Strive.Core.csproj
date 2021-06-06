@@ -6,7 +6,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="autofac" Version="6.2.0" />
-		<PackageReference Include="FluentValidation" Version="10.1.0" />
+		<PackageReference Include="FluentValidation" Version="10.2.3" />
 		<PackageReference Include="Hashids.net" Version="1.4.0" />
 		<PackageReference Include="MediatR" Version="9.0.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
