@@ -20,5 +20,8 @@
   "amount": "Amount",
   "description": "Description",
   "room": "Room",
-  "language": "Language"
+  "language": "Language",
+  "delete": "Delete",
+  "participant": "participant",
+  "participant_plural": "participants"
 }

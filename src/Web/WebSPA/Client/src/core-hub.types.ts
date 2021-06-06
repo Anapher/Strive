@@ -1,5 +1,6 @@
 import { DomainError } from './communication-types';
 import { EquipmentCommandAction } from './equipment-hub.types';
+import { PollAnswer, PollConfig, PollInstruction, PollState } from './features/poll/types';
 import { ProducerSource } from './store/webrtc/types';
 
 export type SyncStatePayload = { id: string; value: any };
@@ -103,4 +104,29 @@ export type EquipmentErrorDto = {
 export type ParticipantKickedReason = 'byModerator' | 'newSessionConnected';
 export type RequestDisconnectDto = {
    reason: ParticipantKickedReason;
+};
+
+export type CreatePollDto = {
+   instruction: PollInstruction;
+   config: PollConfig;
+   initialState: PollState;
+   roomId?: string;
+};
+
+export type SubmitPollAnswerDto = {
+   pollId: string;
+   answer: PollAnswer;
+};
+
+export type UpdatePollStateDto = {
+   pollId: string;
+   state: PollState;
+};
+
+export type DeletePollDto = {
+   pollId: string;
+};
+
+export type DeletePollAnswerDto = {
+   pollId: string;
 };

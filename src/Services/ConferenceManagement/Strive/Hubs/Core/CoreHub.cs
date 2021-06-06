@@ -29,6 +29,7 @@ using Strive.Core.Services.Media.Requests;
 using Strive.Core.Services.Permissions;
 using Strive.Core.Services.Permissions.Requests;
 using Strive.Core.Services.Permissions.Responses;
+using Strive.Core.Services.Poll.Requests;
 using Strive.Core.Services.Rooms;
 using Strive.Core.Services.Rooms.Requests;
 using Strive.Core.Services.Scenes;
@@ -345,7 +346,7 @@ namespace Strive.Hubs.Core
             var participant = GetContextParticipant();
             return await GetInvoker()
                 .Create(new SendEquipmentCommandRequest(participant, dto.ConnectionId, dto.Source, dto.DeviceId,
-                    dto.Action)).Send();
+                    dto.Action)).ValidateObject(dto).Send();
         }
 
         public async Task<SuccessOrError<Unit>> SetScene(IScene? scene)
@@ -420,6 +421,43 @@ namespace Strive.Hubs.Core
         {
             var participant = GetContextParticipant();
             return await GetInvoker().Create(new TalkingStickReturnRequest(participant)).Send();
+        }
+
+        public async Task<SuccessOrError<string>> CreatePoll(CreatePollDto dto)
+        {
+            var participant = GetContextParticipant();
+            return await GetInvoker().Create(new CreatePollRequest(participant.ConferenceId, dto.Instruction,
+                    dto.Config, dto.InitialState, dto.RoomId)).RequirePermissions(DefinedPermissions.Poll.CanOpenPoll)
+                .ValidateObject(dto).Send();
+        }
+
+        public async Task<SuccessOrError<Unit>> SubmitPollAnswer(SubmitPollAnswerDto dto)
+        {
+            var participant = GetContextParticipant();
+            return await GetInvoker().Create(new SubmitAnswerRequest(participant, dto.PollId, dto.Answer))
+                .ValidateObject(dto).Send();
+        }
+
+        public async Task<SuccessOrError<Unit>> UpdatePollState(UpdatePollStateDto dto)
+        {
+            var participant = GetContextParticipant();
+            return await GetInvoker()
+                .Create(new UpdatePollStateRequest(participant.ConferenceId, dto.PollId, dto.State))
+                .RequirePermissions(DefinedPermissions.Poll.CanOpenPoll).ValidateObject(dto).Send();
+        }
+
+        public async Task<SuccessOrError<Unit>> DeletePoll(DeletePollDto dto)
+        {
+            var participant = GetContextParticipant();
+            return await GetInvoker().Create(new DeletePollRequest(participant.ConferenceId, dto.PollId))
+                .RequirePermissions(DefinedPermissions.Poll.CanOpenPoll).ValidateObject(dto).Send();
+        }
+
+        public async Task<SuccessOrError<Unit>> DeletePollAnswer(DeletePollAnswerDto dto)
+        {
+            var participant = GetContextParticipant();
+            return await GetInvoker().Create(new SubmitAnswerRequest(participant, dto.PollId, null)).ValidateObject(dto)
+                .Send();
         }
     }
 }

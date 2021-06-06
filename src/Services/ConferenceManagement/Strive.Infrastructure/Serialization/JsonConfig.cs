@@ -1,9 +1,11 @@
+using System;
 using System.Linq;
 using Autofac;
 using JsonSubTypes;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
+using Strive.Core.Services.Poll;
 using Strive.Core.Services.Scenes;
 using Strive.Core.Services.Scenes.Scenes;
 using Strive.Infrastructure.Extensions;
@@ -29,6 +31,7 @@ namespace Strive.Infrastructure.Serialization
             settings.Converters.Add(new StringEnumConverter(new CamelCaseNamingStrategy(true, true)));
             settings.Converters.Add(GetSceneConverter());
             settings.Converters.Add(new ErrorConverter());
+            ConfigurePollConverters(settings);
 
             // This is a hack to accomplish the following:
             // we want to preserve the casing of dictionary keys (so dont camel case keys as they might be case sensitive ids etc.)
@@ -51,6 +54,34 @@ namespace Strive.Infrastructure.Serialization
             {
                 var key = sceneType.Name.Replace("Scene", null).ToCamelCase();
                 builder.RegisterSubtype(sceneType, key);
+            }
+
+            return builder.SerializeDiscriminatorProperty().Build();
+        }
+
+        private static void ConfigurePollConverters(JsonSerializerSettings settings)
+        {
+            settings.Converters.Add(CreateJsonConverter<PollInstruction>(typeof(PollInstruction), "type",
+                x => x.TrimEnd("Instruction").ToCamelCase()));
+
+            settings.Converters.Add(CreateJsonConverter<PollAnswer>(typeof(PollAnswer), "type",
+                x => x.TrimEnd("Answer").ToCamelCase()));
+
+            settings.Converters.Add(CreateJsonConverter<PollResults>(typeof(PollResults), "type",
+                x => x.TrimEnd("PollResults").ToCamelCase()));
+        }
+
+        private static JsonConverter CreateJsonConverter<T>(Type baseType, string discriminatorProperty,
+            Func<string, string> classNameFactory)
+        {
+            var subTypes = baseType.Assembly.GetTypes().Where(x =>
+                x.IsInNamespace(baseType.Namespace!) && !x.IsAbstract && x.IsAssignableTo<T>());
+
+            var builder = JsonSubtypesConverterBuilder.Of<T>(discriminatorProperty);
+            foreach (var type in subTypes)
+            {
+                var key = classNameFactory(type.Name);
+                builder.RegisterSubtype(type, key);
             }
 
             return builder.SerializeDiscriminatorProperty().Build();

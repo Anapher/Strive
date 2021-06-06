@@ -15,7 +15,7 @@ type MockRoom = {
 const mockRoom = () => {
    const rooms: MockRoom[] = [];
 
-   spyOn(Room, 'default').and.callFake(() => {
+   jest.spyOn(Room, 'default').mockImplementation(() => {
       const participants = new Map<string, any>();
       const mock = {
          join: jest.fn().mockImplementation((p: Participant) => participants.set(p.participantId, 'joined')),
@@ -24,7 +24,7 @@ const mockRoom = () => {
          participants,
       };
       rooms.push(mock);
-      return mock;
+      return mock as any;
    });
 
    return rooms;
@@ -50,7 +50,7 @@ const createConferenceRepoMock = (rooms: {
 
 const mockLoopbackManager = () => {
    const updateParticipant = jest.fn();
-   spyOn(loopbackManager, 'LoopbackManager').and.returnValue({ updateParticipant });
+   jest.spyOn(loopbackManager, 'LoopbackManager').mockReturnValue({ updateParticipant } as any);
    return updateParticipant;
 };
 

@@ -12,6 +12,11 @@ export type BreakoutRoomScene = {
    type: 'breakoutRoom';
 };
 
+export type PollScene = {
+   type: 'poll';
+   pollId: string;
+};
+
 export type GridScene = {
    type: 'grid';
 };
@@ -37,6 +42,7 @@ export type Scene =
    | ActiveSpeakerScene
    | AutonomousScene
    | BreakoutRoomScene
+   | PollScene
    | GridScene
    | PresenterScene
    | ScreenShareScene

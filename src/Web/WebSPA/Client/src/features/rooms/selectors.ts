@@ -19,6 +19,9 @@ export const selectParticipantsOfCurrentRoom = createSelector(selectParticipantR
       .map<string>(([participantId]) => participantId);
 });
 
+export const selectIsParticipantInSameRoomAsMe = (state: RootState, otherParticipantId: string) =>
+   selectParticipantsOfCurrentRoom(state).includes(otherParticipantId);
+
 export const selectParticipantsOfCurrentRoomWithoutMe = createSelector(
    selectParticipantsOfCurrentRoom,
    selectMyParticipantId,

@@ -203,6 +203,10 @@
         "add_time_button_group": "Add time button group",
         "change_breakout_rooms": "Change breakout rooms..."
       },
+      "poll": {
+        "label": "Open Poll",
+        "scene_label": "Poll"
+      },
       "grid": "Grid",
       "screen_share": "{{name}}",
       "mode_dialog": {
@@ -391,6 +395,112 @@
       },
       "new_chat_info": "Say hi!",
       "error_fetch_chat": "An error occurred when trying to fetch the chat: {{error, error}}"
+    },
+    "poll": {
+      "create_dialog": {
+        "title": "Open poll",
+        "question": "Question",
+        "poll_type": "Poll Type",
+        "advanced_options": "Advanced options",
+        "choices_label": "Choices",
+        "choices_helper_text": "One choice per line, empty lines are ignored",
+        "choices_error_at_least_two": "You must provide at least two choices (fill in two lines) for the participants to select",
+        "multiple_choice_limit_choices": "Limit choices",
+        "no_limit": "No Limit",
+        "numeric_description": "Participants submit a number within optional boundaries. Can be used for number estimations.",
+        "tag_cloud_description": "Participants submit words that are grouped and presented as a tag cloud.",
+        "max_tags": "Maximum tags / participant",
+        "tag_cloud_max_helper": "Maximum tags a participant can submit",
+        "min": "Minimum",
+        "max": "Maximum",
+        "step": "Step",
+        "tag_cloud_mode": "Word grouping mode",
+        "tag_cloud_mode_ignore_case": "Ignore case",
+        "tag_cloud_mode_ignore_typos": "Ignore typos",
+        "submit": "Create poll",
+        "presets": {
+          "title": "Presets",
+          "yes_no": {
+            "label": "Yes / No",
+            "yes": "Yes",
+            "no": "No"
+          },
+          "a_b_c": {
+            "label": "A / B / C"
+          },
+          "task_status": {
+            "label": "Finished / Surrendered / Need time",
+            "finished": "I finished the task",
+            "surrendered": "I surrendered",
+            "need_time": "I need more time"
+          },
+          "true_false": {
+            "label": "True / False",
+            "true": "True",
+            "false": "False"
+          }
+        },
+        "advanced": {
+          "anonymous_label": "Anonymous",
+          "anonymous_helper": "If selected, nobody can see who submitted which answer",
+          "anwser_final_label": "Answer is final",
+          "anwser_final_helper": "If selected, once an answer is submitted, it cannot be changed",
+          "open_label": "Open on creation",
+          "open_helper": "If selected, the poll is immediately opened",
+          "publish_results_label": "Publish results on creation",
+          "publish_results_helper": "If selected, the results of the poll are immediately visible to everyone",
+          "global_label": "Global",
+          "global_helper": "Show the poll to all participants of all rooms"
+        }
+      },
+      "open_poll": "Open poll",
+      "close_poll": "Close poll",
+      "publish_results": "Publish results",
+      "hide_results": "Hide results",
+      "submit_answer": "Submit",
+      "chart_legend": "{{count}} votes",
+      "results": "Results",
+      "types": {
+        "single_choice": {
+          "label": "Single choice",
+          "axis_legend": "Answers"
+        },
+        "multiple_choice": {
+          "label": "Multiple choice",
+          "description": "$t(conference.poll.types.multiple_choice.label) (max choices: {{count}})"
+        },
+        "numeric": {
+          "label": "Numeric",
+          "description_min": "min {{count}}",
+          "description_max": "max {{count}}",
+          "description_between": "between {{min}} and {{max}}",
+          "description_step": "step {{count}}",
+          "error_invalid_number": "Invalid number",
+          "error_too_small": "Number is too small",
+          "error_too_large": "Number is too large",
+          "error_not_match_step": "Number does not match the step",
+          "your_number": "Your number"
+        },
+        "tag_cloud": {
+          "label": "Tag Cloud",
+          "description_max": "$t(conference.poll.types.tag_cloud.label) (max tags: {{count}})",
+          "cloud_description": "submitted one tag",
+          "cloud_description_plural": "submitted {{count}} tags",
+          "your_tags": "Your tags",
+          "your_tags_helper": "Press return to add",
+          "error_max_exceeded": "Maximum amount of tags exceeded by {{count}}"
+        }
+      },
+      "desc_anonymous": "Anonymous",
+      "desc_anonymous_not": "Not anonymous",
+      "desc_answer_change": "Answer can be changed",
+      "desc_answer_change_not": "Answer is final",
+      "desc_poll_open": "Poll is open",
+      "desc_poll_open_not": "Poll is closed",
+      "scene": {
+        "warn_results_not_published": "You selected this scene while the results of this poll are not yet published to all participants. Others won't see the chart.",
+        "publish": "Publish"
+      }
     }
   }
 }

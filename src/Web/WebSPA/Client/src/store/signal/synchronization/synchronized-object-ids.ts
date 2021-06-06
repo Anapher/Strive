@@ -15,6 +15,9 @@ export const EQUIPMENT = 'equipment';
 export const SCENE = 'scene';
 export const SCENE_TALKINGSTICK = 'scene_talkingStick';
 export const TEMPORARY_PERMISSIONS = 'temporaryPermissions';
+export const POLL = 'poll';
+export const POLL_RESULT = 'poll_result';
+export const POLL_ANSWERS = 'poll_answers';
 
 export type SynchronizedParticipants = {
    participants: { [participantId: string]: ParticipantData };

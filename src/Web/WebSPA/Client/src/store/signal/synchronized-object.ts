@@ -6,7 +6,10 @@ import { parseSynchronizedObjectId } from './synchronization/synchronized-object
 import { SUBSCRIPTIONS } from './synchronization/synchronized-object-ids';
 import { synchronizedPropertyFactory, SynchronizeProperty } from './synchronization/synchronized-property';
 
-export function synchronizeObjectState(requests: SynchronizeProperty | SynchronizeProperty[]) {
+export function synchronizeObjectState<TS = any>(
+   requests: SynchronizeProperty | SynchronizeProperty[],
+   syncObjDeletedCallback?: (state: TS, syncObjId: string) => void,
+) {
    if (!Array.isArray(requests)) {
       requests = [requests];
    }
@@ -41,6 +44,7 @@ export function synchronizeObjectState(requests: SynchronizeProperty | Synchroni
             for (const syncObjId of removedSubscriptions) {
                const removeTrigger = synchronizedProperties.find((x) => x.isTriggeredBy(syncObjId));
                if (removeTrigger) removeTrigger.remove(syncObjId, state);
+               if (syncObjDeletedCallback) syncObjDeletedCallback(state, syncObjId);
             }
          }
       },

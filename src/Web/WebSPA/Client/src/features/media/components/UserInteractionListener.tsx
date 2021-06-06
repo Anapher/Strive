@@ -17,7 +17,7 @@ export default function UserInteractionListener() {
       };
 
       for (const event of events) {
-         document.body.addEventListener(event, handleUserInteraction);
+         document.body.addEventListener(event, handleUserInteraction, { once: true });
       }
    }, []);
 

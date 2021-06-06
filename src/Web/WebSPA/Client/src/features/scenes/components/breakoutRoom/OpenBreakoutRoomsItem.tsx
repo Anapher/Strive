@@ -7,7 +7,7 @@ import { ActionListItemProps } from 'src/features/scenes/types';
 import { setCreationDialogOpen } from '../../../breakout-rooms/reducer';
 import { selectIsBreakoutRoomsOpen } from '../../../breakout-rooms/selectors';
 
-export function OpenBreakoutRoomsItem({ onClose }: ActionListItemProps) {
+export default function OpenBreakoutRoomsItem({ onClose }: ActionListItemProps) {
    const dispatch = useDispatch();
    const { t } = useTranslation();
 

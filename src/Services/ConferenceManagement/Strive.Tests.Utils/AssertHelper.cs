@@ -11,6 +11,12 @@ namespace Strive.Tests.Utils
     {
         public static void AssertScrambledEquals<T>(IEnumerable<T> expected, IEnumerable<T> actual)
         {
+            AssertScrambledEquals(expected, actual, EqualityComparer<T>.Default);
+        }
+
+        public static void AssertScrambledEquals<T>(IEnumerable<T> expected, IEnumerable<T> actual,
+            IEqualityComparer<T> comparer)
+        {
             if (typeof(T).IsAssignableTo(typeof(IComparable)))
             {
                 Assert.Equal(expected.OrderBy(x => x), actual.OrderBy(x => x));
@@ -23,8 +29,20 @@ namespace Strive.Tests.Utils
 
                 foreach (var expectedItem in expectedList)
                 {
-                    Assert.Contains(expectedItem, actualList);
+                    Assert.Contains(expectedItem, actualList, comparer);
                 }
+            }
+        }
+
+        public static void AssertDictionariesEqual<TK, TV>(IReadOnlyDictionary<TK, TV> expected,
+            IReadOnlyDictionary<TK, TV> actual, IEqualityComparer<TV> comparer)
+        {
+            Assert.Equal(expected.Count, actual.Count);
+
+            foreach (var (k, v) in expected)
+            {
+                Assert.Contains(actual.Keys, x => Equals(x, k));
+                Assert.Equal(v, actual[k], comparer);
             }
         }
 

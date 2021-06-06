@@ -40,5 +40,11 @@ namespace Strive.Core.Services
         BreakoutRoom_AlreadyOpen,
         BreakoutRoom_NotOpen,
         BreakoutRoom_AssigningParticipantsFailed,
+
+        // Poll
+        Poll_NotFound,
+        AnswerValidationFailed,
+        Poll_AnswerCannotBeChanged,
+        Poll_Closed,
     }
 }

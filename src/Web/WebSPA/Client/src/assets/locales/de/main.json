@@ -347,6 +347,10 @@
         "speakerPassStick": "Präsentator nimmt nächsten",
         "speakerPassStick_description": "Teilnehmer können einer Liste beitreten. Der erste Teilnehmer wird der Präsentator und kann dann von der Liste den nächsten bestimmen.",
         "take_stick": "Stein nehmen"
+      },
+      "poll": {
+        "label": "Umfrage öffnen",
+        "scene_label": "Umfrage"
       }
     },
     "settings": {
@@ -390,6 +394,112 @@
       "screen": {
         "title": "Bildschirm",
         "error_no_devices": "Ihr Bildschirm wurde nicht gefunden. Leider unterstützen einige Browser immer noch nicht die Freigabe des Bildschirms, wie z. B. die meisten der Browser auf mobilen Endgeräten. Sie können trotzdem Equipment verbinden und deren Bildschirm freigeben."
+      }
+    },
+    "poll": {
+      "create_dialog": {
+        "title": "Umfrage erstellen",
+        "question": "Frage",
+        "poll_type": "Umfragentyp",
+        "advanced_options": "Erweiterte Optionen",
+        "choices_label": "Auswahlmöglichkeiten",
+        "choices_helper_text": "Eine Auswahlmöglichkeit pro Zeile, Leerzeilen werden ignoriert",
+        "choices_error_at_least_two": "Sie müssen mindestens zwei Auswahlmöglichkeiten angeben (zwei Zeilen ausfüllen)",
+        "multiple_choice_limit_choices": "Auswahlmöglichlichkeiten limitieren",
+        "no_limit": "Kein Limit",
+        "numeric_description": "Teilnehmer geben eine Zahl innerhalb optionaler Grenzen ein. Kann für Zahlenschätzungen verwendet werden.",
+        "tag_cloud_description": "Die Teilnehmer reichen Wörter ein, die gruppiert und als Tag-Cloud dargestellt werden.",
+        "max_tags": "Maximale Tags / Teilnehmer",
+        "tag_cloud_max_helper": "Maximale Tags, die ein Teilnehmer einreichen kann",
+        "min": "Minimum",
+        "max": "Maximum",
+        "step": "Schritt",
+        "tag_cloud_mode": "Wortgruppierungsmodus",
+        "tag_cloud_mode_ignore_case": "Groß/Kleinschreibung ignorieren",
+        "tag_cloud_mode_ignore_typos": "Rechtschreibfehler ignorieren",
+        "submit": "Umfrage erstellen",
+        "presets": {
+          "title": "Vorlagen",
+          "yes_no": {
+            "label": "Ja / Nein",
+            "yes": "Ja",
+            "no": "Nein"
+          },
+          "a_b_c": {
+            "label": "A / B / C"
+          },
+          "task_status": {
+            "label": "Fertig / Aufgegeben / Brauche noch Zeit",
+            "finished": "Ich habe die Aufgabe fertig",
+            "surrendered": "Ich habe aufgegeben",
+            "need_time": "Ich brauche noch Zeit"
+          },
+          "true_false": {
+            "label": "Richtig / Falsch",
+            "true": "Richtig",
+            "false": "Falsch"
+          }
+        },
+        "advanced": {
+          "anonymous_label": "Anonym",
+          "anonymous_helper": "Wenn ausgewählt, kann niemand sehen, wer welche Antwort eingereicht hat",
+          "anwser_final_label": "Antwort ist endgültig",
+          "anwser_final_helper": "Wenn ausgewählt, kann eine einmal abgegebene Antwort nicht mehr geändert werden",
+          "open_label": "Bei Erstellung öffnen",
+          "open_helper": "Wenn ausgewählt, wird die Umfrage sofort geöffnet",
+          "publish_results_label": "Ergebnisse bei der Erstellung veröffentlichen",
+          "publish_results_helper": "Wenn ausgewählt, sind die Ergebnisse der Umfrage sofort für alle sichtbar",
+          "global_label": "Global",
+          "global_helper": "Die Umfrage den Teilnehmern aller Räume anzeigen"
+        }
+      },
+      "open_poll": "Umfrage öffnen",
+      "close_poll": "Umfrage schließen",
+      "publish_results": "Ergebnisse veröffentlichen",
+      "hide_results": "Ergebnisse ausblenden",
+      "submit_answer": "Senden",
+      "chart_legend": "{{count}} Votes",
+      "results": "Ergebnisse",
+      "types": {
+        "single_choice": {
+          "label": "Single choice",
+          "axis_legend": "Antworten"
+        },
+        "multiple_choice": {
+          "label": "Multiple choice",
+          "description": "$t(conference.poll.types.multiple_choice.label) (maximale Auswahlmöglichkeiten: {{count}})"
+        },
+        "numeric": {
+          "label": "Nummer",
+          "description_min": "min {{count}}",
+          "description_max": "max {{count}}",
+          "description_between": "zwischen {{min}} und {{max}}",
+          "description_step": "Schritt {{count}}",
+          "error_invalid_number": "Ungültige Zahl",
+          "error_too_small": "Zahl ist zu klein",
+          "error_too_large": "Zahl ist zu groß",
+          "error_not_match_step": "Nummer stimmt nicht mit dem Schritt überein",
+          "your_number": "Ihre Zahl"
+        },
+        "tag_cloud": {
+          "label": "Tag Cloud",
+          "description_max": "$t(conference.poll.types.tag_cloud.label) (max Tags: {{count}})",
+          "cloud_description": "einen Tag eingereicht",
+          "cloud_description_plural": "{{count}} Tags eingereicht",
+          "your_tags": "Ihre Tags",
+          "your_tags_helper": "Drücken Sie die Eingabetaste, um hinzuzufügen",
+          "error_max_exceeded": "Maximale Anzahl von Tags überschritten mit {{count}}"
+        }
+      },
+      "desc_anonymous": "Anonym",
+      "desc_anonymous_not": "Nicht anonym",
+      "desc_answer_change": "Antwort kann geändert werden",
+      "desc_answer_change_not": "Antwort ist endgültig",
+      "desc_poll_open": "Umfrage ist geöffnet",
+      "desc_poll_open_not": "Umfrage ist geschlossen",
+      "scene": {
+        "warn_results_not_published": "Sie haben diese Szene ausgewählt, obwohl die Ergebnisse der Umfrage noch nicht für alle Teilnehmer veröffentlicht sind. Andere Teilnehmer werden die Diagramme nicht sehen.",
+        "publish": "Veröffentlichen"
       }
     }
   }
