@@ -29,6 +29,7 @@ import { Participant } from '../types';
 import ParticipantContextMenuTempPermissions from './ParticipantContextMenuTempPermissions';
 import { AccountVoice } from 'mdi-material-ui';
 import { selectIsParticipantPresenter } from 'src/features/scenes/selectors';
+import { selectIsParticipantInSameRoomAsMe } from 'src/features/rooms/selectors';
 
 const useStyles = makeStyles((theme) => ({
    infoMenuItem: {
@@ -138,6 +139,7 @@ const ParticipantContextMenu = React.forwardRef<HTMLElement, Props>(({ participa
    const canSetScene = usePermission(SCENES_CAN_SET_SCENE);
 
    const isPresenter = useSelector((state: RootState) => selectIsParticipantPresenter(state, participant.id));
+   const isInMyRoom = useSelector((state: RootState) => selectIsParticipantInSameRoomAsMe(state, participant.id));
 
    return (
       <>
@@ -195,7 +197,7 @@ const ParticipantContextMenu = React.forwardRef<HTMLElement, Props>(({ participa
                {t('conference.participant_context_menu.disable_mic_for_all')}
             </MenuItem>
          )}
-         {canSetScene && !isPresenter && (
+         {canSetScene && !isPresenter && isInMyRoom && (
             <MenuItem onClick={handleSetPresenter}>
                <ListItemIcon className={classes.menuIcon}>
                   <AccountVoice fontSize="small" />
