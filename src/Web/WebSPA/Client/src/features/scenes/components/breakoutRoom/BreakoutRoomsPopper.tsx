@@ -46,7 +46,7 @@ export default function BreakoutRoomsPopper(props: ListItemPopperProps) {
    };
 
    return (
-      <PopperWrapper {...props} placement="right-end" transformOrigin="left bottom">
+      <PopperWrapper {...props} placement="right-end" transformOrigin="left bottom" padding>
          <div>
             <Box display="flex" justifyContent="space-between" alignItems="center">
                <Typography variant="h6">
