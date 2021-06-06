@@ -60,6 +60,7 @@ Last year when I was tutor at my university, I had to use BigBlueButton which wa
 - Up-to-date and responsive UI
 - Announcements / show a message to all participants, also these in breakout rooms
 - Horizontal and vertical scalability
+- Polls (single choice, multiple choice, numeric, tag cloud)
 
 
 ### Architecture
