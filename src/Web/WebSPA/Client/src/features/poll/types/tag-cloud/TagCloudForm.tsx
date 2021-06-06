@@ -44,7 +44,7 @@ export default function TagCloudInstructionForm({
                      )}
                      control={control}
                      name="instruction.mode"
-                     defaultValue="fuzzy"
+                     defaultValue={'fuzzy' as any}
                      shouldUnregister
                   />
                </FormControl>

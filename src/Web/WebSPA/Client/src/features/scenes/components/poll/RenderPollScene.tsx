@@ -40,7 +40,7 @@ const useStyles = makeStyles((theme) => ({
    },
    alert: {
       marginTop: theme.spacing(2),
-      maxWidth: 600,
+      maxWidth: 720,
    },
 }));
 

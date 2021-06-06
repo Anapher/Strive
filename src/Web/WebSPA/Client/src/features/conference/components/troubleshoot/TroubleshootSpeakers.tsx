@@ -2,7 +2,7 @@ import { Accordion, AccordionDetails, AccordionSummary, Button, makeStyles, Typo
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import StopIcon from '@material-ui/icons/Stop';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import useStriveSound from 'src/hooks/useStriveSound';
 
@@ -30,7 +30,12 @@ type Props = {
 export default function TroubleshootSpeakers({ expanded, onChange }: Props) {
    const classes = useStyles();
    const { t } = useTranslation();
-   const [play, { isPlaying, stop }] = useStriveSound('testAudioFile');
+
+   const [isPlaying, setIsPlaying] = useState(false);
+   const [play, { stop }] = useStriveSound('testAudioFile', {
+      onplay: () => setIsPlaying(true),
+      onend: () => setIsPlaying(false),
+   });
 
    const handleChange = (_: React.ChangeEvent<unknown>, isExpanded: boolean) => {
       onChange(isExpanded);
