@@ -1,11 +1,11 @@
 # Advantages over BigBlueButton
-Initially, I created Strive because I was tired with BigBlueButton. I identified some points that I would do different than the creators of BBB. In this document, I want to describe advantages of Strive in comparison to BBB. Please note that I was a tutor at my university.
+Initially, I created Strive because I was tired of BigBlueButton. I identified some points that I would do different than the creators of BBB. In this document, I want to describe advantages of Strive in comparison to BBB. Please note that I was a tutor at my university of a class of 20-30 students.
 
 ### Global chat
 If breakout rooms are active, the global chat is very nice for students to ask questions, as all students no matter in which breakout room they currently are can see them (and especially the answer).
 
 ### Changable breakout room settings
-A common use case I identified is that I want to extend the time the breakout room are active (or reduce it). In BBB, you have to recreate all breakout rooms in order to so which is a unnecessary interruption for the students.
+A common use case I identified is that I want to extend the time the breakout rooms are active (or reduce it). In BBB, you have to recreate all breakout rooms in order to so which is a unnecessary interruption for the students.
 
 ### Announcements
 Oftentimes, you want to announce something to all students in the breakout rooms, for examples instructions for a task they are currently working on.
@@ -44,3 +44,8 @@ Everyone has a smartphone with a good camera but not everyone has a webcam. In S
 
 ### Volume of participants can be adjusted individually
 Every participant has a volume slider that can be adjusted. Also, you can adjust the volume of your current microphone in a range of 0% to 200%.
+
+### Polls
+While I hold my class in the Corona crisis, polls were a really nice feature to interact with my students. Sadly, BBB has a very limited implementation of polls. In Strive, you can choose between single choice, multiple choice, numeric and tag cloud polls (BBB offers single choice only). Furthermore you can decide for each poll whether it is anonymous, if it's global (for all rooms or just the current one) and you can select whether participants can change their answers after submission.
+
+A nice use case with the polls in Strive is to evaluate the current status of students that work on a task. You can create a global, anonymous, answer-non-final poll with the options "finished", "surrendered", "need time" (also available as template) so participants can select their current status and even change it afterwards.
