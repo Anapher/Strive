@@ -91,7 +91,7 @@ export default function ConferenceNotOpen({ conferenceInfo }: Props) {
                   {isModeratorJoined && (
                      <span style={{ color: theme.palette.secondary.main }}>
                         {' '}
-                        {t('conference_not_open.moderator_joined')}.
+                        {t('conference_not_open.moderator_joined')}
                      </span>
                   )}
                </Typography>
