@@ -58,8 +58,8 @@ Last year when I was tutor at my university, I had to use BigBlueButton which wa
 - Talking Stick / moderated talking
 - Reduce traffic using WebRTC simulcast
 - Up-to-date and responsive UI
-- Announcements / show a message to all participants, also these in breakout rooms
-- Horizontal and vertical scalability
+- Announcements / show a message to all participants, also those in breakout rooms
+- Horizontal and vertical scalability (some small things are still to do, but the architecture allows it)
 - Polls (single choice, multiple choice, numeric, tag cloud)
 
 
