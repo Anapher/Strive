@@ -1,7 +1,7 @@
 /// <reference types="Cypress" />
 
 describe("WebRTC", () => {
-  it("Activate microphone", () => {
+  it("Activate screen and check connection status", () => {
     cy.createAndJoinOpenedConference("Vincent");
     cy.get("#media-controls-troubleshooting").click();
     cy.get("#troubleshooting-connection-badge").contains("new");
