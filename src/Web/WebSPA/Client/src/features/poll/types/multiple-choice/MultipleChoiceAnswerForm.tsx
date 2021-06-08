@@ -25,7 +25,6 @@ function SelectionChip({ className, option, selected, applied, disabled, onClick
          variant={selected && !applied ? 'outlined' : undefined}
          onClick={onClick}
          component="button"
-         type="submit"
       />
    );
 }
@@ -57,15 +56,16 @@ export default function MultipleChoiceAnswerForm({
       : false;
 
    const handleSelectOption = (option: string) => {
-      setSelected(
-         selected.includes(option) ? selected.filter((x) => x !== option) : [...(selected || []), option].sort(),
-      );
+      const newSelected = selected.includes(option)
+         ? selected.filter((x) => x !== option)
+         : [...(selected || []), option].sort();
+      setSelected(newSelected);
 
       if (!poll.config.isAnswerFinal) {
          if (selected.length === 0) {
             onDelete();
          } else {
-            onSubmit(createAnswerDto(selected));
+            onSubmit(createAnswerDto(newSelected));
          }
       }
    };
@@ -79,7 +79,7 @@ export default function MultipleChoiceAnswerForm({
                      option={x}
                      className={classes.chip}
                      applied={answer?.answer.type === 'multipleChoice' && answer.answer.selected.includes(x)}
-                     selected={poll.config.isAnswerFinal && Boolean(selected?.includes(x))}
+                     selected={poll.config.isAnswerFinal && Boolean(selected.includes(x))}
                      disabled={Boolean(answer && poll.config.isAnswerFinal) || (selectedMax && !selected.includes(x))}
                      onClick={() => handleSelectOption(x)}
                   />
