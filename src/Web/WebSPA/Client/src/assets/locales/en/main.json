@@ -450,7 +450,7 @@
           "publish_results_label": "Publish results on creation",
           "publish_results_helper": "If selected, the results of the poll are immediately visible to everyone",
           "global_label": "Global",
-          "global_helper": "Show the poll to all participants of all rooms"
+          "global_helper": "Show the poll to participants of all rooms"
         }
       },
       "open_poll": "Open poll",
