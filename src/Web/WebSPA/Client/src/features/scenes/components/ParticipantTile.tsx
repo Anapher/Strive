@@ -94,7 +94,6 @@ export default function ParticipantTile({ className, participant, width, height 
    const audioBorder = useTransform(audioInfo?.audioLevel ?? new MotionValue(0), [0, 1], [0, 10]);
 
    const isSmall = width < 400;
-   const fontSize = isWebcamActive ? (isSmall ? 14 : 18) : isSmall ? 16 : 24;
 
    const [contextMenuOpen, setContextMenuOpen] = useState(false);
    const moreIconRef = useRef(null);
@@ -116,7 +115,12 @@ export default function ParticipantTile({ className, participant, width, height 
             {isWebcamActive && (
                <motion.div className={classes.infoBox}>
                   <AnimatedMicIcon activated={micActivated} disabledColor={theme.palette.error.main} />
-                  <Typography component={motion.h4} layoutId="name" variant="h4" style={{ fontSize, marginLeft: 8 }}>
+                  <Typography
+                     component={motion.h4}
+                     layoutId="name"
+                     variant="h4"
+                     style={{ fontSize: isSmall ? 14 : 18, marginLeft: 8 }}
+                  >
                      {participant.displayName}
                   </Typography>
                </motion.div>
@@ -130,7 +134,12 @@ export default function ParticipantTile({ className, participant, width, height 
                      className={classes.micIconWithoutWebcam}
                   />
                   <div className={classes.centerText}>
-                     <Typography component={motion.span} layoutId="name" variant="h4" style={{ fontSize }}>
+                     <Typography
+                        component={motion.span}
+                        layoutId="name"
+                        variant="h4"
+                        style={{ fontSize: isSmall ? 16 : 24 }}
+                     >
                         {participant.displayName}
                      </Typography>
                   </div>
