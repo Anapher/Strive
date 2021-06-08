@@ -6,12 +6,11 @@ import useMyParticipantId from 'src/hooks/useMyParticipantId';
 import { RootState } from 'src/store';
 import * as actions from '../actions';
 import { ChatChannelWithId } from '../channel-serializer';
-import { numberToColor } from 'src/utils/color-utils';
 import { clearChat, setSelectedChannel } from '../reducer';
 import { selectChannels, selectSelectedChannel } from '../selectors';
+import { getParticipantColor } from '../utils';
 import Chat from './Chat';
 import ChatChannelTabs from './ChatChannelTabs';
-import { hashCode } from 'src/utils/string-utils';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -47,7 +46,7 @@ export default function ChatBar() {
    }, [connected]);
 
    const participantColors = useMemo(
-      () => Object.fromEntries(participants.map((x) => [x.id, numberToColor(hashCode(x.id))]) ?? []),
+      () => Object.fromEntries(participants.map((x) => [x.id, getParticipantColor(x.id)]) ?? []),
       [participants],
    );
 

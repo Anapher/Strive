@@ -12,8 +12,7 @@ import { ChatMessageDto } from 'src/core-hub.types';
 import { selectParticipant } from 'src/features/conference/selectors';
 import { Participant } from 'src/features/conference/types';
 import { RootState } from 'src/store';
-import { numberToColor } from 'src/utils/color-utils';
-import { hashCode } from 'src/utils/string-utils';
+import { getParticipantColor } from '../utils';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -84,7 +83,7 @@ export default function ChatMessage({ message, participantColors }: Props) {
    const participantColor = useMemo(
       () =>
          message?.sender &&
-         (participantColors[message.sender.participantId] ?? numberToColor(hashCode(message.sender.participantId))), // numberToColor for participants that just disconnected
+         (participantColors[message.sender.participantId] ?? getParticipantColor(message.sender.participantId)), // numberToColor for participants that just disconnected
       [message?.sender?.participantId],
    );
 

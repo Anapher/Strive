@@ -5,7 +5,7 @@ import _ from 'lodash';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import ReactWordcloud from 'react-wordcloud';
-import { hashCode } from 'src/utils/string-utils';
+import { getArrayEntryByHashCode } from 'src/utils/array-utils';
 import 'tippy.js/animations/scale.css';
 import 'tippy.js/dist/tippy.css';
 import { PollResultsProps } from '../types';
@@ -25,13 +25,9 @@ const useStyles = makeStyles((theme) => ({
    },
 }));
 
-function getDefaultColors() {
-   return Array.from({ length: 23 /** prime */ })
-      .map((_, i) => i.toString())
-      .map(scaleOrdinal(schemeDark2));
-}
-
-const defaultColors = getDefaultColors();
+const defaultColors = Array.from({ length: 23 /** prime */ })
+   .map((_, i) => i.toString())
+   .map(scaleOrdinal(schemeDark2));
 
 export default function TagCloudResults({ viewModel }: PollResultsProps) {
    const classes = useStyles();
@@ -59,7 +55,7 @@ export default function TagCloudResults({ viewModel }: PollResultsProps) {
                   fontSizes: [20, 30],
                }}
                callbacks={{
-                  getWordColor: (x) => defaultColors[Math.abs(hashCode(x.text)) % defaultColors.length],
+                  getWordColor: (x) => getArrayEntryByHashCode(defaultColors, x.text),
                }}
             />
          </div>
