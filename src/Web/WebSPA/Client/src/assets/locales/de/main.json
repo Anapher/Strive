@@ -58,7 +58,7 @@
     "open_conference": "Konferenz öffnen",
     "change_conference_settings": "Konferenzeinstellungen ändern",
     "you_are_moderator": "Sie sind ein Moderator der Konferenz.",
-    "conference_scheduled_for": "Die Konferenz ist geplant für",
+    "conference_scheduled_for": "Die Konferenz ist geplant für den",
     "n_participants_waiting": "1 Teilnehmer wartet.",
     "n_participants_waiting_plural": "{{count}} Teilnehmer warten.",
     "waiting_for_moderator_to_join": "Konferenz wurde noch nicht geöffnet. Warte, dass ein Moderator beitritt...",

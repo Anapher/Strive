@@ -58,7 +58,7 @@
     "open_conference": "Open conference",
     "change_conference_settings": "Change conference settings",
     "you_are_moderator": "You are a moderator of this conference.",
-    "conference_scheduled_for": "The conference is scheduled for",
+    "conference_scheduled_for": "The conference is scheduled for the",
     "n_participants_waiting": "1 participant is waiting.",
     "n_participants_waiting_plural": "{{count}} participants are waiting.",
     "waiting_for_moderator_to_join": "Conference is not yet open. Waiting for moderator to join...",
