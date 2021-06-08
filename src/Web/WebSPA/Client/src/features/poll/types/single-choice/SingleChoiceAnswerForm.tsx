@@ -39,6 +39,7 @@ export default function SingleChoiceAnswerForm({
                   disabled={answer && poll.config.isAnswerFinal}
                   onClick={() => handleSubmitOption(x)}
                   clickable
+                  component="button"
                />
             </Grid>
          ))}

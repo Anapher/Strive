@@ -94,7 +94,11 @@ function AdvancedOption<TName extends FieldPath<CreatePollDto>>({
                control={
                   <Controller
                      render={({ field: { onChange, value } }) => (
-                        <Checkbox onChange={(e) => onChange(e.target.checked)} checked={(value as boolean) || false} />
+                        <Checkbox
+                           name={name}
+                           onChange={(e) => onChange(e.target.checked)}
+                           checked={(value as boolean) || false}
+                        />
                      )}
                      control={control}
                      name={name}
