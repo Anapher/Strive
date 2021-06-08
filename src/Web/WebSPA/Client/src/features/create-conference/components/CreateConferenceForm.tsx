@@ -171,7 +171,7 @@ export default function CreateConferenceForm({
             </Box>
          </Box>
          <DialogActions>
-            <Button autoFocus onClick={onClose} color="primary" disabled={isSubmitting}>
+            <Button onClick={onClose} color="primary" disabled={isSubmitting}>
                {t('common:cancel')}
             </Button>
             <Button type="submit" color="primary" autoFocus disabled={isSubmitting || !formState.isValid}>
