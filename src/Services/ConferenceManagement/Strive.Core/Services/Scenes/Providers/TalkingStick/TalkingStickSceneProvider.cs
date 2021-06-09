@@ -19,7 +19,6 @@ namespace Strive.Core.Services.Scenes.Providers.TalkingStick
         private static readonly IImmutableDictionary<string, JValue> DenyMediaPermissions = new[]
         {
             DefinedPermissions.Media.CanShareAudio.Configure(false),
-            DefinedPermissions.Media.CanShareWebcam.Configure(false),
             DefinedPermissions.Media.CanShareScreen.Configure(false),
         }.ToImmutableDictionary();
 
