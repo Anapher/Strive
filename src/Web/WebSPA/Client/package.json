@@ -40,7 +40,7 @@
       "eslint-plugin-react": "7.24.0",
       "fast-json-patch": "^3.0.0-1",
       "fontsource-roboto": "4.0.0",
-      "framer-motion": "4.1.17",
+      "framer-motion": "4.0.1",
       "hark": "^1.2.3",
       "history": "^5.0.0",
       "i18next": "^20.3.1",
