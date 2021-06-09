@@ -62,7 +62,7 @@ export default function MultipleChoiceAnswerForm({
       setSelected(newSelected);
 
       if (!poll.config.isAnswerFinal) {
-         if (selected.length === 0) {
+         if (newSelected.length === 0) {
             onDelete();
          } else {
             onSubmit(createAnswerDto(newSelected));
