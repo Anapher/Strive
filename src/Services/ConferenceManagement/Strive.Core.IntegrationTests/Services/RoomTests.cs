@@ -172,7 +172,7 @@ namespace Strive.Core.IntegrationTests.Services
             var createdRoom = Assert.Single(createdRooms);
 
             // act
-            await Mediator.Send(new SetParticipantRoomRequest(_testParticipant, createdRoom.RoomId));
+            await Mediator.Send(SetParticipantRoomRequest.MoveParticipant(_testParticipant, createdRoom.RoomId));
 
             // assert
             AssertSyncObjParticipantIsInRoom(createdRoom.RoomId);

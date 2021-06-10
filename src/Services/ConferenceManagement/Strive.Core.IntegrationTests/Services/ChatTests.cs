@@ -104,8 +104,8 @@ namespace Strive.Core.IntegrationTests.Services
             var rooms = await Mediator.Send(new CreateRoomsRequest(ConferenceId,
                 new[] {new RoomCreationInfo("Room1"), new RoomCreationInfo("Room2")}));
 
-            await Mediator.Send(new SetParticipantRoomRequest(TestParticipant1, rooms[0].RoomId));
-            await Mediator.Send(new SetParticipantRoomRequest(TestParticipant2, rooms[1].RoomId));
+            await Mediator.Send(SetParticipantRoomRequest.MoveParticipant(TestParticipant1, rooms[0].RoomId));
+            await Mediator.Send(SetParticipantRoomRequest.MoveParticipant(TestParticipant2, rooms[1].RoomId));
 
             // act
             await Mediator.Send(new SendChatMessageRequest(sender.Participant, "Hello World",
@@ -247,14 +247,14 @@ namespace Strive.Core.IntegrationTests.Services
             var rooms = await Mediator.Send(new CreateRoomsRequest(ConferenceId,
                 new[] {new RoomCreationInfo("Room1"), new RoomCreationInfo("Room2")}));
 
-            await Mediator.Send(new SetParticipantRoomRequest(TestParticipant1, rooms[0].RoomId));
-            await Mediator.Send(new SetParticipantRoomRequest(TestParticipant2, rooms[0].RoomId));
+            await Mediator.Send(SetParticipantRoomRequest.MoveParticipant(TestParticipant1, rooms[0].RoomId));
+            await Mediator.Send(SetParticipantRoomRequest.MoveParticipant(TestParticipant2, rooms[0].RoomId));
 
             var channel = new RoomChatChannel(rooms[0].RoomId);
             await Mediator.Send(new SetParticipantTypingRequest(TestParticipant2, channel, true));
 
             // act
-            await Mediator.Send(new SetParticipantRoomRequest(TestParticipant2, rooms[1].RoomId));
+            await Mediator.Send(SetParticipantRoomRequest.MoveParticipant(TestParticipant2, rooms[1].RoomId));
 
             // assert
             var syncObjId = SynchronizedChat.SyncObjId(channel);

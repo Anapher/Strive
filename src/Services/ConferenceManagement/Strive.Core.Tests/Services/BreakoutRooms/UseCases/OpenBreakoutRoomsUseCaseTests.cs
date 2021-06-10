@@ -7,7 +7,6 @@ using MediatR;
 using Moq;
 using Strive.Core.Interfaces;
 using Strive.Core.Interfaces.Gateways.Repositories;
-using Strive.Core.Services;
 using Strive.Core.Services.BreakoutRooms;
 using Strive.Core.Services.BreakoutRooms.Internal;
 using Strive.Core.Services.BreakoutRooms.Requests;
@@ -138,11 +137,10 @@ namespace Strive.Core.Tests.Services.BreakoutRooms.UseCases
 
             foreach (var (participantId, roomId) in expected)
             {
-                var participant = new Participant(ConferenceId, participantId);
                 _mediator.Verify(
                     x => x.Send(
-                        It.Is<SetParticipantRoomRequest>(request =>
-                            request.RoomId == roomId && request.Participant.Equals(participant)),
+                        It.Is<SetParticipantRoomRequest>(request => request.RoomAssignments.Any(assignment =>
+                            assignment.participantId == participantId && assignment.roomId == roomId)),
                         It.IsAny<CancellationToken>()), Times.Once);
             }
         }

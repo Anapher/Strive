@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
@@ -44,9 +45,8 @@ namespace Strive.Core.Tests.Services.Rooms.UseCases
                 .Throws(new ConcurrencyException("yikes"));
 
             // act
-            await Assert.ThrowsAsync<ConcurrencyException>(async () =>
-                await handler.Handle(new SetParticipantRoomRequest(_testParticipant, NewRoomId),
-                    CancellationToken.None));
+            await handler.Handle(SetParticipantRoomRequest.MoveParticipant(_testParticipant, NewRoomId),
+                CancellationToken.None);
 
             // assert
             _mediator.VerifyNoOtherCalls();
@@ -61,7 +61,8 @@ namespace Strive.Core.Tests.Services.Rooms.UseCases
             _roomRepo.Setup(x => x.SetParticipantRoom(_testParticipant, NewRoomId)).ReturnsAsync("oldRoom");
 
             // act
-            await handler.Handle(new SetParticipantRoomRequest(_testParticipant, NewRoomId), CancellationToken.None);
+            await handler.Handle(SetParticipantRoomRequest.MoveParticipant(_testParticipant, NewRoomId),
+                CancellationToken.None);
 
             // assert
             capturedNotification.AssertReceived();
@@ -71,6 +72,40 @@ namespace Strive.Core.Tests.Services.Rooms.UseCases
             Assert.Single(notification.Participants,
                 new KeyValuePair<Participant, ParticipantRoomChangeInfo>(_testParticipant,
                     ParticipantRoomChangeInfo.Switched("oldRoom", NewRoomId)));
+        }
+
+        [Fact]
+        public async Task Handle_SetParticipantsOneThrows_PublishNotificationAndAssignOthers()
+        {
+            // arrange
+            var handler = Create();
+            var capturedNotification = _mediator.CaptureNotification<ParticipantsRoomChangedNotification>();
+
+            var participants = new[]
+            {
+                new(_testParticipant.ConferenceId, "1"),
+                new Participant(_testParticipant.ConferenceId, "2"),
+                new Participant(_testParticipant.ConferenceId, "3"),
+            };
+
+            _roomRepo.Setup(x => x.SetParticipantRoom(participants[0], NewRoomId)).ReturnsAsync("oldRoom");
+            _roomRepo.Setup(x => x.SetParticipantRoom(participants[1], NewRoomId)).ReturnsAsync("oldRoom");
+            _roomRepo.Setup(x => x.SetParticipantRoom(participants[2], NewRoomId))
+                .Throws(new ConcurrencyException("yikes"));
+
+            // act
+            await handler.Handle(
+                new SetParticipantRoomRequest(_testParticipant.ConferenceId,
+                    participants.Select(x => (x.Id, NewRoomId))), CancellationToken.None);
+
+            // assert
+            capturedNotification.AssertReceived();
+
+            var notification = capturedNotification.GetNotification();
+            Assert.Equal(_testParticipant.ConferenceId, notification.ConferenceId);
+            Assert.Equal(2, notification.Participants.Count);
+            Assert.Contains(notification.Participants, x => x.Key.Equals(participants[0]));
+            Assert.Contains(notification.Participants, x => x.Key.Equals(participants[1]));
         }
     }
 }

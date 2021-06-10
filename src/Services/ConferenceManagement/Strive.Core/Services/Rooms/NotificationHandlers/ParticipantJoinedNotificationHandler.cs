@@ -26,7 +26,8 @@ namespace Strive.Core.Services.Rooms.NotificationHandlers
 
             try
             {
-                await _mediator.Send(new SetParticipantRoomRequest(participant, RoomOptions.DEFAULT_ROOM_ID),
+                await _mediator.Send(
+                    SetParticipantRoomRequest.MoveParticipant(participant, RoomOptions.DEFAULT_ROOM_ID),
                     cancellationToken);
             }
             catch (ConcurrencyException e)

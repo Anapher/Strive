@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
@@ -33,10 +35,7 @@ namespace Strive.Core.Services.Rooms.NotificationHandlers
             await EnsureDefaultRoomCreated(conferenceId);
 
             var participants = await _joinedParticipantsRepository.GetParticipantsOfConference(conferenceId);
-            foreach (var participant in participants)
-            {
-                await MoveParticipantToDefaultRoom(participant);
-            }
+            await MoveParticipantsToDefaultRoom(conferenceId, participants);
         }
 
         private async Task EnsureDefaultRoomCreated(string conferenceId)
@@ -52,9 +51,10 @@ namespace Strive.Core.Services.Rooms.NotificationHandlers
             return new(RoomOptions.DEFAULT_ROOM_ID, _options.DefaultRoomName);
         }
 
-        private async Task MoveParticipantToDefaultRoom(Participant participant)
+        private async Task MoveParticipantsToDefaultRoom(string conferenceId, IEnumerable<Participant> participant)
         {
-            await _mediator.Send(new SetParticipantRoomRequest(participant, RoomOptions.DEFAULT_ROOM_ID));
+            await _mediator.Send(new SetParticipantRoomRequest(conferenceId,
+                participant.Select(x => (x.Id, RoomOptions.DEFAULT_ROOM_ID))));
         }
     }
 }

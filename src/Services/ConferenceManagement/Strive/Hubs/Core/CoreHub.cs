@@ -233,7 +233,7 @@ namespace Strive.Hubs.Core
         {
             var participant = GetContextParticipant();
 
-            return GetInvoker().Create(new SetParticipantRoomRequest(participant, dto.RoomId))
+            return GetInvoker().Create(SetParticipantRoomRequest.MoveParticipant(participant, dto.RoomId))
                 .RequirePermissions(DefinedPermissions.Rooms.CanSwitchRoom).ValidateObject(dto).ConferenceMustBeOpen()
                 .Send();
         }

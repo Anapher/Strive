@@ -60,16 +60,19 @@ namespace Strive.Core.Services.BreakoutRooms.UseCases
             if (assignedRooms.Length > openedRooms.Count)
                 throw new ArgumentException("The assigned rooms must not be greater than the actually opened rooms.");
 
+            var assignments = new List<(string participantId, string roomId)>();
+
             for (var i = 0; i < assignedRooms.Length; i++)
             {
                 var roomId = openedRooms[i];
 
                 foreach (var participantId in assignedRooms[i])
                 {
-                    var participant = new Participant(conferenceId, participantId);
-                    await _mediator.Send(new SetParticipantRoomRequest(participant, roomId));
+                    assignments.Add((participantId, roomId));
                 }
             }
+
+            await _mediator.Send(new SetParticipantRoomRequest(conferenceId, assignments));
         }
     }
 }

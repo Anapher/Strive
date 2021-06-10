@@ -18,6 +18,8 @@ namespace Strive.Core.Services.Rooms.UseCases
         private readonly IMediator _mediator;
         private readonly ILogger<RemoveRoomsUseCase> _logger;
 
+        private readonly List<Participant> _participantsInRemovedRooms = new();
+
         public RemoveRoomsUseCase(IRoomRepository roomRepository, IMediator mediator,
             ILogger<RemoveRoomsUseCase> logger)
         {
@@ -45,6 +47,8 @@ namespace Strive.Core.Services.Rooms.UseCases
 
             if (removedRooms.Any())
             {
+                await MoveParticipantsToDefaultRoom(conferenceId);
+
                 await _mediator.Send(
                     new UpdateSynchronizedObjectRequest(request.ConferenceId, SynchronizedRooms.SyncObjId));
 
@@ -62,12 +66,7 @@ namespace Strive.Core.Services.Rooms.UseCases
                 // no possibility of a race condition, because after the deletion no new participants may join the room
                 // and the room cannot be recreated as every new room gets a new GUID
                 var participants = await _roomRepository.GetParticipantsOfRoom(conferenceId, roomId);
-                if (participants.Any())
-                {
-                    _logger.LogDebug("{count} participants were still in room {roomId}, remove them.",
-                        participants.Count, roomId);
-                    await MoveParticipantsToDefaultRoom(participants);
-                }
+                _participantsInRemovedRooms.AddRange(participants);
             }
             else
             {
@@ -77,20 +76,18 @@ namespace Strive.Core.Services.Rooms.UseCases
             return removed;
         }
 
-        private async Task MoveParticipantsToDefaultRoom(IEnumerable<Participant> participants)
+        private async Task MoveParticipantsToDefaultRoom(string conferenceId)
         {
-            foreach (var participant in participants)
+            var assignments = _participantsInRemovedRooms.Select(x => (x.Id, RoomOptions.DEFAULT_ROOM_ID));
+
+            try
             {
-                try
-                {
-                    await _mediator.Send(new SetParticipantRoomRequest(participant, RoomOptions.DEFAULT_ROOM_ID));
-                }
-                catch (Exception e)
-                {
-                    _logger.LogError(e,
-                        "An error occurred on trying to switch participant {participant} to the default room",
-                        participant);
-                }
+                await _mediator.Send(new SetParticipantRoomRequest(conferenceId, assignments));
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e,
+                    "An error occurred on trying to switch participant {participant} to the default room");
             }
         }
     }

@@ -123,8 +123,8 @@ namespace Strive.Core.Tests.Services.Rooms.UseCases
             capturedRequest.AssertReceived();
 
             var request = capturedRequest.GetRequest();
-            Assert.Equal(RoomOptions.DEFAULT_ROOM_ID, request.RoomId);
-            Assert.Equal(testParticipant, request.Participant);
+            Assert.Equal(RoomOptions.DEFAULT_ROOM_ID, request.RoomAssignments.Single().roomId);
+            Assert.Equal(testParticipant.Id, request.RoomAssignments.Single().participantId);
         }
     }
 }
