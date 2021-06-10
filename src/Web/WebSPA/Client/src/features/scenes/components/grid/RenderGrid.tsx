@@ -4,6 +4,7 @@ import _ from 'lodash';
 import { Participant } from 'src/features/conference/types';
 import { generateGrid } from '../../calculations';
 import ParticipantTile from '../ParticipantTile';
+import clsx from 'classnames';
 
 const useStyles = makeStyles({
    root: {
@@ -34,16 +35,18 @@ type Props = {
    height: number;
 
    itemMaxWidth?: number;
+
+   className?: string;
 };
 
-export default function RenderGrid({ participants, spacing = 8, itemMaxWidth = 640, width, height }: Props) {
+export default function RenderGrid({ participants, className, spacing = 8, itemMaxWidth = 640, width, height }: Props) {
    const classes = useStyles();
    if (participants.length === 0) return null;
 
    const grid = generateGrid(participants.length, itemMaxWidth, { width, height }, spacing);
 
    return (
-      <div className={classes.root}>
+      <div className={clsx(classes.root, className)}>
          <div className={classes.tilesGrid} style={{ width: grid.containerWidth, height: grid.containerHeight }}>
             {Array.from({ length: grid.rows }).map((__, i) => (
                <div key={i.toString()} className={classes.tilesRow}>
