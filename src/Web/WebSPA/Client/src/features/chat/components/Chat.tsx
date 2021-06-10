@@ -34,15 +34,17 @@ type Props = {
 };
 
 export default function Chat({ channel, participantId, participantColors }: Props) {
+   const dispatch = useDispatch();
+   const classes = useStyles();
+
    const messages = useSelector((state: RootState) => selectMessages(state, channel));
    const messagesFetched = useSelector((state: RootState) => selectMessagesFetched(state, channel));
    const error = useSelector((state: RootState) => selectMessagesError(state, channel));
-   const dispatch = useDispatch();
-   const classes = useStyles();
 
    const isNewChannel = useSelector((state: RootState) => selectIsNewChannel(state, channel));
 
    const participantsTyping = useSelector((state: RootState) => selectParticipantsTyping(state, channel));
+
    const isMeTyping = !!participantId && participantsTyping.includes(participantId);
 
    const handleFetchChat = () => {

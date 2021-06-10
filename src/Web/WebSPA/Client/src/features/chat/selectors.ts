@@ -2,11 +2,13 @@ import { createSelector } from 'reselect';
 import { RootState } from 'src/store';
 import * as channelSerializer from './channel-serializer';
 
-export const selectParticipantsTyping = (state: RootState, channelId: string) => {
-   const channel = state.chat.channels?.[channelId];
+const getChannelParticipantsTyping = (state: RootState, channelId: string) =>
+   state.chat.channels?.[channelId]?.participantsTyping;
+
+export const selectParticipantsTyping = createSelector(getChannelParticipantsTyping, (channel) => {
    if (!channel) return [];
-   return Object.keys(channel.participantsTyping) ?? [];
-};
+   return Object.keys(channel) ?? [];
+});
 
 export const selectMessages = (state: RootState, channel: string) =>
    state.chat.channels?.[channel]?.viewModel?.messages;
@@ -19,14 +21,18 @@ export const selectMessagesError = (state: RootState, channel: string) =>
 
 export const selectAnnouncements = (state: RootState) => state.chat.announcements;
 
-const selectChannelIds = (state: RootState) => {
-   const synchronizedChannels = state.chat.channels ? Object.keys(state.chat.channels) : [];
-   const privateChannels = state.chat.openedPrivateChats;
-
-   return [...synchronizedChannels.filter((x) => !privateChannels.includes(x)), ...privateChannels];
-};
-
 export const selectOpenedPrivateChats = (state: RootState) => state.chat.openedPrivateChats;
+const selectSynchronizedChannels = (state: RootState) => state.chat.channels;
+
+const selectChannelIds = createSelector(
+   selectSynchronizedChannels,
+   selectOpenedPrivateChats,
+   (channels, privateChannels) => {
+      const synchronizedChannels = channels ? Object.keys(channels) : [];
+
+      return [...synchronizedChannels.filter((x) => !privateChannels.includes(x)), ...privateChannels];
+   },
+);
 
 export const selectChannels = createSelector(
    selectChannelIds,
