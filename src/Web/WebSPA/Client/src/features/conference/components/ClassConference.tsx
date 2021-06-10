@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 import AnnouncementOverlay from 'src/features/chat/components/AnnouncementOverlay';
 import ChatBar from 'src/features/chat/components/ChatBar';
 import { selectShowChat } from 'src/features/chat/selectors';
-import ConferenceAppBar from 'src/features/conference/components/ConferenceAppBar';
+import ConferenceAppBar from './ConferenceAppBar';
 import ParticipantMicManager from 'src/features/media/components/ParticipantMicManager';
 import CurrentPollsBar from 'src/features/poll/components/CurrentPollsBar';
 import { expandToBox } from 'src/features/scenes/calculations';
@@ -13,7 +13,7 @@ import { Size } from 'src/types';
 import SceneView from '../../scenes/components/SceneView';
 import ConferenceLayoutContext, { ConferenceLayoutContextType } from '../conference-layout-context';
 import PermissionDialog from './PermissionDialog';
-import PinnableSidebar from './PinnableSidebar';
+import ConferenceSidebar from './ConferenceSidebar';
 
 const CHAT_MIN_WIDTH = 304;
 const CHAT_MAX_WIDTH = 416;
@@ -51,7 +51,6 @@ const useStyles = makeStyles((theme) => ({
 
 export default function ClassConference() {
    const classes = useStyles();
-   const [roomsPinned, setRoomsPinned] = useState(true);
 
    const showChat = useSelector(selectShowChat);
 
@@ -94,7 +93,7 @@ export default function ClassConference() {
                <AnnouncementOverlay />
                <ConferenceAppBar chatWidth={chatWidth} />
                <div className={classes.conferenceMain} ref={contentRef}>
-                  <PinnableSidebar pinned={roomsPinned} onTogglePinned={() => setRoomsPinned((x) => !x)} />
+                  <ConferenceSidebar />
                   <div className={classes.scene}>
                      <SceneView />
                   </div>
