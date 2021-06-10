@@ -20,6 +20,8 @@
   </p>
 </p>
 
+![Preview image](./img/preview_breakout_room.jpg)
+
 ## Table of content
 
 - [About the project](#about-the-project)
