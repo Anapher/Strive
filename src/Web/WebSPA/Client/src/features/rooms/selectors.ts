@@ -1,23 +1,30 @@
-import { RoomViewModel } from './types';
 import { createSelector } from '@reduxjs/toolkit';
-import { RootState } from 'src/store';
 import _ from 'lodash';
+import { RootState } from 'src/store';
+import { createArrayEqualSelector } from 'src/utils/reselect';
 import { selectMyParticipantId } from '../auth/selectors';
+import { RoomViewModel } from './types';
 
 export const selectRooms = (state: RootState) => state.rooms.synchronized;
 
-export const selectParticipantRoom = createSelector(selectRooms, selectMyParticipantId, (rooms, myId) => {
+export const selectParticipantRoom = (state: RootState) => {
+   const myId = selectMyParticipantId(state);
    if (!myId) return undefined;
+
+   const rooms = selectRooms(state);
    return rooms?.participants[myId];
-});
+};
 
-export const selectParticipantsOfCurrentRoom = createSelector(selectParticipantRoom, selectRooms, (room, rooms) => {
-   if (!rooms) return [];
+export const selectParticipantsOfCurrentRoom = createArrayEqualSelector(
+   createSelector(selectParticipantRoom, selectRooms, (room, rooms) => {
+      if (!rooms) return [];
 
-   return Object.entries(rooms.participants)
-      .filter(([, roomId]) => roomId === room)
-      .map<string>(([participantId]) => participantId);
-});
+      return Object.entries(rooms.participants)
+         .filter(([, roomId]) => roomId === room)
+         .map<string>(([participantId]) => participantId);
+   }),
+   (x) => x,
+);
 
 export const selectIsParticipantInSameRoomAsMe = (state: RootState, otherParticipantId: string) =>
    selectParticipantsOfCurrentRoom(state).includes(otherParticipantId);

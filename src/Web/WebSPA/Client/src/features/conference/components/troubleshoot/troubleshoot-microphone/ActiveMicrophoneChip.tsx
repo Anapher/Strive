@@ -2,16 +2,20 @@ import { Chip } from '@material-ui/core';
 import { motion, useMotionTemplate } from 'framer-motion';
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { selectAvailableInputDevices } from 'src/features/settings/selectors';
+import { selectAvailableInputDevicesFactory } from 'src/features/settings/selectors';
 import useConsumerMediaStream from 'src/hooks/useConsumerMediaStream';
 import useMediaStreamMotionAudioLevel from 'src/hooks/useMediaStreamMotionAudioLevel';
 import useMyParticipantId from 'src/hooks/useMyParticipantId';
+import useSelectorFactory from 'src/hooks/useSelectorFactory';
 import { RootState } from 'src/store';
 import useConsumer from 'src/store/webrtc/hooks/useConsumer';
 import { findMicrophoneLabel, getDefaultDevice } from './utilts';
 
 export default function ActiveMicrophoneChip() {
-   const mics = useSelector((state: RootState) => selectAvailableInputDevices(state, 'mic'));
+   const mics = useSelectorFactory(selectAvailableInputDevicesFactory, (state: RootState, selector) =>
+      selector(state, 'mic'),
+   );
+
    const audioDevice = useSelector((state: RootState) => state.settings.obj.mic.device) ?? getDefaultDevice(mics);
 
    const myId = useMyParticipantId();

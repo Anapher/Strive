@@ -7,11 +7,8 @@ const getSource = (_: unknown, source: ProducerSource | undefined) => source;
 export const selectLocalDevices = (state: RootState) => state.settings.availableDevices;
 export const selectEquipmentConnections = (state: RootState) => state.media.equipment?.connections;
 
-export const selectAvailableInputDevices = createSelector(
-   selectLocalDevices,
-   selectEquipmentConnections,
-   getSource,
-   (devices, equipment, source) => {
+export const selectAvailableInputDevicesFactory = () =>
+   createSelector(selectLocalDevices, selectEquipmentConnections, getSource, (devices, equipment, source) => {
       const result = new Array<DeviceGroup>();
 
       if (devices) {
@@ -43,12 +40,15 @@ export const selectAvailableInputDevices = createSelector(
       }
 
       return result;
-   },
-);
+   });
 
-export const selectIsDeviceAvailable = createSelector(selectAvailableInputDevices, getSource, (devices) => {
-   return Boolean(devices.find((x) => x.devices.length > 0));
-});
+export const selectIsDeviceAvailableFactory = () => {
+   const availableDevicesSelector = selectAvailableInputDevicesFactory();
+
+   return createSelector(availableDevicesSelector, getSource, (devices) => {
+      return Boolean(devices.find((x) => x.devices.length > 0));
+   });
+};
 
 export const selectEnableVideoOverlay = (state: RootState) => state.settings.obj.diagnostics.enableVideoOverlay;
 

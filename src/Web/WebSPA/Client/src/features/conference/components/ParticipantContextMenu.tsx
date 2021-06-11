@@ -4,7 +4,7 @@ import SendIcon from '@material-ui/icons/Send';
 import VolumeOffIcon from '@material-ui/icons/VolumeOff';
 import VolumeUpIcon from '@material-ui/icons/VolumeUp';
 import _ from 'lodash';
-import { AccountRemove } from 'mdi-material-ui';
+import { AccountRemove, AccountVoice } from 'mdi-material-ui';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
@@ -14,8 +14,11 @@ import { selectPrivateMessageEnabled } from 'src/features/chat/selectors';
 import { createPrivatChatChannel } from 'src/features/chat/utils';
 import { patchParticipantAudio } from 'src/features/media/reducer';
 import { selectParticipantAudioInfo } from 'src/features/media/selectors';
+import { selectIsParticipantInSameRoomAsMe } from 'src/features/rooms/selectors';
+import { selectIsParticipantPresenterFactory } from 'src/features/scenes/selectors';
 import useMyParticipantId from 'src/hooks/useMyParticipantId';
 import usePermission from 'src/hooks/usePermission';
+import useSelectorFactory from 'src/hooks/useSelectorFactory';
 import {
    CONFERENCE_CAN_KICK_PARTICIPANT,
    MEDIA_CAN_CHANGE_PARTICIPANTS_PRODUCER,
@@ -27,9 +30,6 @@ import { RootState } from 'src/store';
 import { showMessage } from 'src/store/notifier/actions';
 import { Participant } from '../types';
 import ParticipantContextMenuTempPermissions from './ParticipantContextMenuTempPermissions';
-import { AccountVoice } from 'mdi-material-ui';
-import { selectIsParticipantPresenter } from 'src/features/scenes/selectors';
-import { selectIsParticipantInSameRoomAsMe } from 'src/features/rooms/selectors';
 
 const useStyles = makeStyles((theme) => ({
    infoMenuItem: {
@@ -138,7 +138,9 @@ const ParticipantContextMenu = React.forwardRef<HTMLElement, Props>(({ participa
    const canChangeParticipantProducers = usePermission(MEDIA_CAN_CHANGE_PARTICIPANTS_PRODUCER);
    const canSetScene = usePermission(SCENES_CAN_SET_SCENE);
 
-   const isPresenter = useSelector((state: RootState) => selectIsParticipantPresenter(state, participant.id));
+   const isPresenter = useSelectorFactory(selectIsParticipantPresenterFactory, (state: RootState, selector) =>
+      selector(state, participant.id),
+   );
    const isInMyRoom = useSelector((state: RootState) => selectIsParticipantInSameRoomAsMe(state, participant.id));
 
    return (

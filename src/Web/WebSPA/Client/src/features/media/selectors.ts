@@ -1,17 +1,17 @@
 import { createSelector } from '@reduxjs/toolkit';
 import { RootState } from 'src/store';
 import { ProducerDevice } from 'src/store/webrtc/types';
+import { createArrayEqualSelector } from 'src/utils/reselect';
 import { selectParticipants } from '../conference/selectors';
 import { Participant } from '../conference/types';
 import { selectParticipantsOfCurrentRoom } from '../rooms/selectors';
 import { ProducerInfo } from './types';
 
-const getId = (_: unknown, id: string | undefined) => id;
 export const selectStreams = (state: RootState) => state.media.synchronized?.streams;
-
 export const selectParticipantAudio = (state: RootState) => state.media.participantAudio;
 
-export const selectParticipantProducers = createSelector(selectStreams, getId, (streams, participantId) => {
+export const selectParticipantProducers = (state: RootState, participantId: string | undefined) => {
+   const streams = selectStreams(state);
    if (!streams) return undefined;
    if (!participantId) return undefined;
 
@@ -19,21 +19,24 @@ export const selectParticipantProducers = createSelector(selectStreams, getId, (
    if (!participantStreams) return undefined;
 
    return participantStreams.producers;
-});
+};
 
-export const selectParticipantsOfRoomWebcamAvailable = createSelector(
-   selectParticipantsOfCurrentRoom,
-   selectStreams,
-   (participants, streams) => {
+// we wrap the selector with a deep equal selector to ensure that if the list stays the same,
+// the selector does not update
+export const selectParticipantsOfRoomWebcamAvailable = createArrayEqualSelector(
+   createSelector(selectParticipantsOfCurrentRoom, selectStreams, (participants, streams) => {
       if (!streams) return [];
 
       return Object.entries(streams)
          .filter(([id, media]) => participants.includes(id) && media?.producers.webcam)
          .map(([id]) => id);
-   },
+   }),
+   (x) => x,
 );
 
-export const selectParticipantMicActivated = createSelector(selectStreams, getId, (streams, participantId) => {
+export const selectParticipantMicActivated = (state: RootState, participantId: string | undefined) => {
+   const streams = selectStreams(state);
+
    if (!streams) return false;
    if (!participantId) return false;
 
@@ -41,13 +44,14 @@ export const selectParticipantMicActivated = createSelector(selectStreams, getId
    if (!participantStreams) return false;
 
    return participantStreams.producers?.mic?.paused === false;
-});
+};
 
-export const selectParticipantAudioInfo = createSelector(selectParticipantAudio, getId, (audios, participantId) => {
+export const selectParticipantAudioInfo = (state: RootState, participantId: string | undefined) => {
    if (!participantId) return undefined;
+   const audios = selectParticipantAudio(state);
 
    return audios[participantId];
-});
+};
 
 export const selectScreenSharingParticipants = createSelector(
    selectStreams,
@@ -62,9 +66,12 @@ export const selectScreenSharingParticipants = createSelector(
    },
 );
 
-export const selectSpeakingParticipants = createSelector(selectParticipantAudio, (audios) => {
-   return Object.entries(audios).filter(([, info]) => info?.speaking);
-});
+export const selectSpeakingParticipants = createArrayEqualSelector(
+   createSelector(selectParticipantAudio, (audios) => {
+      return Object.entries(audios).filter(([, info]) => info?.speaking);
+   }),
+   (x) => x,
+);
 
 export type ProducerViewModel = ProducerInfo & {
    id: string;

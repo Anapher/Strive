@@ -3,10 +3,11 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import ErrorWrapper from 'src/components/ErrorWrapper';
+import useSelectorFactory from 'src/hooks/useSelectorFactory';
 import { RootState } from 'src/store';
 import useWebRtcStatus from 'src/store/webrtc/hooks/useWebRtcStatus';
 import { setAudioGain, setCurrentDevice } from '../reducer';
-import { selectAvailableInputDevices } from '../selectors';
+import { selectAvailableInputDevicesFactory } from '../selectors';
 import AudioSettingsTest from './AudioSettingsTest';
 import DeviceSelector from './DeviceSelector';
 
@@ -39,7 +40,9 @@ export default function AudioSettings() {
       dispatch(setAudioGain(value as number));
    };
 
-   const audioDevices = useSelector((state: RootState) => selectAvailableInputDevices(state, 'mic'));
+   const audioDevices = useSelectorFactory(selectAvailableInputDevicesFactory, (state: RootState, selector) =>
+      selector(state, 'mic'),
+   );
    const webrtcState = useWebRtcStatus();
 
    return (

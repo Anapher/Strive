@@ -1,5 +1,6 @@
 import { createSelector } from 'reselect';
 import { RootState } from 'src/store';
+import { createArrayEqualSelector } from 'src/utils/reselect';
 import * as channelSerializer from './channel-serializer';
 
 const getChannelParticipantsTyping = (state: RootState, channelId: string) =>
@@ -22,16 +23,15 @@ export const selectMessagesError = (state: RootState, channel: string) =>
 export const selectAnnouncements = (state: RootState) => state.chat.announcements;
 
 export const selectOpenedPrivateChats = (state: RootState) => state.chat.openedPrivateChats;
-const selectSynchronizedChannels = (state: RootState) => state.chat.channels;
 
-const selectChannelIds = createSelector(
-   selectSynchronizedChannels,
-   selectOpenedPrivateChats,
-   (channels, privateChannels) => {
+const selectSynchronizedChannels = (state: RootState) => state.chat.channels;
+const selectChannelIds = createArrayEqualSelector(
+   createSelector(selectSynchronizedChannels, selectOpenedPrivateChats, (channels, privateChannels) => {
       const synchronizedChannels = channels ? Object.keys(channels) : [];
 
       return [...synchronizedChannels.filter((x) => !privateChannels.includes(x)), ...privateChannels];
-   },
+   }),
+   (x) => x,
 );
 
 export const selectChannels = createSelector(

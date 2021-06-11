@@ -2,13 +2,14 @@ import { Box, makeStyles } from '@material-ui/core';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from 'src/store';
-import { selectAvailableInputDevices } from '../selectors';
+import { selectAvailableInputDevicesFactory } from '../selectors';
 import { setCurrentDevice } from '../reducer';
 import DeviceSelector from './DeviceSelector';
 import WebcamSettingsTest from './WebcamSettingsTest';
 import useWebRtcStatus from 'src/store/webrtc/hooks/useWebRtcStatus';
 import ErrorWrapper from 'src/components/ErrorWrapper';
 import { useTranslation } from 'react-i18next';
+import useSelectorFactory from 'src/hooks/useSelectorFactory';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -25,7 +26,9 @@ export default function WebcamSettings() {
    const classes = useStyles();
    const { t } = useTranslation();
    const selectedDevice = useSelector((state: RootState) => state.settings.obj.webcam.device);
-   const availableDevices = useSelector((state: RootState) => selectAvailableInputDevices(state, 'webcam'));
+   const availableDevices = useSelectorFactory(selectAvailableInputDevicesFactory, (state: RootState, selector) =>
+      selector(state, 'webcam'),
+   );
    const dispatch = useDispatch();
    const webrtcState = useWebRtcStatus();
 

@@ -3,11 +3,9 @@ import { DomainError } from 'src/communication-types';
 import { RootState } from 'src/store';
 import { PollViewModel } from './types';
 
-const getPollId = (_: unknown, id: string) => id;
-
-const selectMyPolls = (state: RootState) => Object.values(state.poll.polls);
+const selectMyPolls = (state: RootState) => state.poll.polls;
 const selectMyAnswers = (state: RootState) => state.poll.answers.answers;
-const selectMyPollResults = (state: RootState) => Object.values(state.poll.results);
+const selectMyPollResults = (state: RootState) => state.poll.results;
 
 export const selectAnswerSubmissionError = (state: RootState, pollId: string) =>
    state.poll.answerSubmissionErrors[pollId] as DomainError | undefined;
@@ -17,32 +15,28 @@ export const selectPollViewModels = createSelector(
    selectMyAnswers,
    selectMyPollResults,
    (polls, answers, results) => {
-      return polls.map<PollViewModel>((poll) => ({
+      const resultsList = Object.values(results);
+
+      return Object.values(polls).map<PollViewModel>((poll) => ({
          poll,
          answer: answers[poll.id],
-         results: results.find((x) => x.pollId === poll.id),
+         results: resultsList.find((x) => x.pollId === poll.id),
       }));
    },
 );
 
+// this selector is safe as no new obj is created
 export const selectPoll = (state: RootState, pollId: string) =>
-   Object.values(state.poll.polls).find((x) => x.id === pollId);
-
-export const selectPollViewModel = createSelector(
-   selectMyPolls,
-   selectMyAnswers,
-   selectMyPollResults,
-   getPollId,
-   (polls, answers, pollResults, pollId) => {
-      const poll = polls.find((x) => x.id === pollId);
-      if (!poll) return undefined;
-
-      const results = pollResults.find((x) => x.pollId === poll.id);
-      const answer = answers[poll.id];
-
-      return { poll, results, answer } as PollViewModel;
-   },
-);
+   Object.values(selectMyPolls(state)).find((x) => x.id === pollId);
 
 export const selectPollResults = (state: RootState, pollId: string) =>
    Object.values(selectMyPollResults(state)).find((x) => x.pollId === pollId);
+
+export const selectPollAnswer = (state: RootState, pollId: string) => selectMyAnswers(state)[pollId];
+
+export const selectPollViewModelFactory = () =>
+   createSelector(selectPoll, selectPollAnswer, selectPollResults, (poll, answer, results) => {
+      if (!poll) return undefined;
+
+      return { poll, results, answer } as PollViewModel;
+   });

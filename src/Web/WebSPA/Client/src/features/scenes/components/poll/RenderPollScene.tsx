@@ -1,17 +1,18 @@
 import { Button, Chip, Collapse, makeStyles, Typography } from '@material-ui/core';
+import { Alert } from '@material-ui/lab';
+import { Incognito, IncognitoOff, Pencil, PencilOff } from 'mdi-material-ui';
 import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useTranslation } from 'react-i18next';
+import { useDispatch } from 'react-redux';
+import { updatePollState } from 'src/core-hub';
 import PollResultsView from 'src/features/poll/components/PollResultsView';
-import { selectPollViewModel } from 'src/features/poll/selectors';
+import { selectPollViewModelFactory } from 'src/features/poll/selectors';
+import usePermission from 'src/hooks/usePermission';
+import useSelectorFactory from 'src/hooks/useSelectorFactory';
+import { POLL_CAN_OPEN } from 'src/permissions';
 import { RootState } from 'src/store';
 import { PollScene, RenderSceneProps } from '../../types';
 import ActiveChipsLayout from '../ActiveChipsLayout';
-import { Incognito, IncognitoOff, Pencil, PencilOff } from 'mdi-material-ui';
-import { useTranslation } from 'react-i18next';
-import { Alert } from '@material-ui/lab';
-import usePermission from 'src/hooks/usePermission';
-import { POLL_CAN_OPEN } from 'src/permissions';
-import { updatePollState } from 'src/core-hub';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -50,7 +51,9 @@ export default function RenderPollScene({ className, scene }: RenderSceneProps<P
    const canOpenPoll = usePermission(POLL_CAN_OPEN);
    const dispatch = useDispatch();
 
-   const viewModel = useSelector((state: RootState) => selectPollViewModel(state, scene.pollId));
+   const viewModel = useSelectorFactory(selectPollViewModelFactory, (state: RootState, selector) =>
+      selector(state, scene.pollId),
+   );
 
    if (!viewModel) return null;
 

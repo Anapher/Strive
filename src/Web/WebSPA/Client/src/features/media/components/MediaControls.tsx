@@ -2,7 +2,6 @@ import { Dialog, DialogContent, DialogTitle, Fab, Grid, makeStyles, Tooltip } fr
 import BugReportIcon from '@material-ui/icons/BugReport';
 import clsx from 'classnames';
 import { motion } from 'framer-motion';
-// import { HumanHandsup } from 'mdi-material-ui';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -10,8 +9,9 @@ import AnimatedCamIcon from 'src/assets/animated-icons/AnimatedCamIcon';
 import AnimatedMicIcon from 'src/assets/animated-icons/AnimatedMicIcon';
 import AnimatedScreenIcon from 'src/assets/animated-icons/AnimatedScreenIcon';
 import Debug from 'src/features/conference/components/troubleshoot/Troubleshooting';
-import { selectIsDeviceAvailable } from 'src/features/settings/selectors';
+import { selectIsDeviceAvailableFactory } from 'src/features/settings/selectors';
 import usePermission from 'src/hooks/usePermission';
+import useSelectorFactory from 'src/hooks/useSelectorFactory';
 import { MEDIA_CAN_SHARE_AUDIO, MEDIA_CAN_SHARE_SCREEN, MEDIA_CAN_SHARE_WEBCAM } from 'src/permissions';
 import { RootState } from 'src/store';
 import useMicrophone from 'src/store/webrtc/hooks/useMicrophone';
@@ -82,17 +82,23 @@ export default function MediaControls({ className, show, leftActionsRef }: Props
    const localMic = useMicrophone(gain);
    const audioDevice = useSelector((state: RootState) => state.settings.obj.mic.device);
    const micController = useDeviceManagement('mic', localMic, audioDevice);
-   const micAvailable = useSelector((state: RootState) => selectIsDeviceAvailable(state, 'mic'));
+   const micAvailable = useSelectorFactory(selectIsDeviceAvailableFactory, (state: RootState, selector) =>
+      selector(state, 'mic'),
+   );
 
    const webcamDevice = useSelector((state: RootState) => state.settings.obj.webcam.device);
    const localWebcam = useWebcam();
    const webcamController = useDeviceManagement('webcam', localWebcam, webcamDevice);
-   const webcamAvailable = useSelector((state: RootState) => selectIsDeviceAvailable(state, 'webcam'));
+   const webcamAvailable = useSelectorFactory(selectIsDeviceAvailableFactory, (state: RootState, selector) =>
+      selector(state, 'webcam'),
+   );
 
    const screenDevice = useSelector((state: RootState) => state.settings.obj.screen.device);
    const localScreen = useScreen();
    const screenController = useDeviceManagement('screen', localScreen, screenDevice);
-   const screenAvailable = useSelector((state: RootState) => selectIsDeviceAvailable(state, 'screen'));
+   const screenAvailable = useSelectorFactory(selectIsDeviceAvailableFactory, (state: RootState, selector) =>
+      selector(state, 'screen'),
+   );
 
    const canShareScreen = usePermission(MEDIA_CAN_SHARE_SCREEN);
    const canShareAudio = usePermission(MEDIA_CAN_SHARE_AUDIO);

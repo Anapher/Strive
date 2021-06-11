@@ -2,9 +2,10 @@ import { makeStyles, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
+import useSelectorFactory from 'src/hooks/useSelectorFactory';
 import { RootState } from 'src/store';
 import { setCurrentDevice } from '../reducer';
-import { selectAvailableInputDevices, selectIsDeviceAvailable } from '../selectors';
+import { selectAvailableInputDevicesFactory, selectIsDeviceAvailableFactory } from '../selectors';
 import DeviceSelector from './DeviceSelector';
 
 const useStyles = makeStyles((theme) => ({
@@ -20,8 +21,12 @@ export default function ScreenSettings() {
    const { t } = useTranslation();
    const dispatch = useDispatch();
 
-   const devices = useSelector((state: RootState) => selectAvailableInputDevices(state, 'screen'));
-   const isAvailable = useSelector((state: RootState) => selectIsDeviceAvailable(state, 'screen'));
+   const devices = useSelectorFactory(selectAvailableInputDevicesFactory, (state: RootState, selector) =>
+      selector(state, 'screen'),
+   );
+   const isAvailable = useSelectorFactory(selectIsDeviceAvailableFactory, (state: RootState, selector) =>
+      selector(state, 'screen'),
+   );
    const device = useSelector((state: RootState) => state.settings.obj.screen.device);
 
    if (!isAvailable) {

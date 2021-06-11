@@ -5,8 +5,9 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { selectParticipantProducers } from 'src/features/media/selectors';
-import { selectAvailableInputDevices } from 'src/features/settings/selectors';
+import { selectAvailableInputDevicesFactory } from 'src/features/settings/selectors';
 import useMyParticipantId from 'src/hooks/useMyParticipantId';
+import useSelectorFactory from 'src/hooks/useSelectorFactory';
 import { RootState } from 'src/store';
 import useConsumer from 'src/store/webrtc/hooks/useConsumer';
 import { findMicrophoneLabel, getDefaultDevice } from './utilts';
@@ -32,7 +33,10 @@ type Props = {
 
 export default function DetailedStatus({ enableError }: Props) {
    const { t } = useTranslation();
-   const mics = useSelector((state: RootState) => selectAvailableInputDevices(state, 'mic'));
+
+   const mics = useSelectorFactory(selectAvailableInputDevicesFactory, (state: RootState, selector) =>
+      selector(state, 'mic'),
+   );
    const audioDevice = useSelector((state: RootState) => state.settings.obj.mic.device) ?? getDefaultDevice(mics);
 
    const myId = useMyParticipantId();
