@@ -42,8 +42,12 @@ export default function TroubleshootSpeakers({ expanded, onChange }: Props) {
    };
 
    const handleToggleAudio = (event: React.MouseEvent) => {
-      if (isPlaying) stop();
-      else play();
+      if (isPlaying) {
+         stop();
+         setIsPlaying(false);
+      } else {
+         play();
+      }
 
       event.stopPropagation();
    };
