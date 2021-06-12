@@ -1,10 +1,9 @@
-import { fade, IconButton, makeStyles, Typography, useTheme } from '@material-ui/core';
+import { IconButton, makeStyles } from '@material-ui/core';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import clsx from 'classnames';
-import { AnimateSharedLayout, motion, MotionValue, useTransform } from 'framer-motion';
+import { motion, MotionValue, useTransform } from 'framer-motion';
 import React, { useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
-import AnimatedMicIcon from 'src/assets/animated-icons/AnimatedMicIcon';
 import RenderConsumerVideo from 'src/components/RenderConsumerVideo';
 import ParticipantContextMenuPopper from 'src/features/conference/components/ParticipantContextMenuPopper';
 import { Participant } from 'src/features/conference/types';
@@ -13,6 +12,7 @@ import { selectParticipantMicActivated } from 'src/features/media/selectors';
 import useMyParticipantId from 'src/hooks/useMyParticipantId';
 import { RootState } from 'src/store';
 import useConsumer from 'src/store/webrtc/hooks/useConsumer';
+import ParticipantTileLabel from './ParticipantTileLabel';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -25,33 +25,6 @@ const useStyles = makeStyles((theme) => ({
    },
    video: {
       borderRadius: theme.shape.borderRadius,
-   },
-   infoBox: {
-      position: 'absolute',
-      display: 'flex',
-      alignItems: 'center',
-      flexDirection: 'row',
-      left: theme.spacing(1),
-      bottom: theme.spacing(1),
-
-      backgroundColor: fade(theme.palette.background.paper, 0.5),
-      padding: theme.spacing(0, 1),
-      borderRadius: theme.shape.borderRadius,
-   },
-   micIconWithoutWebcam: {
-      position: 'absolute',
-      left: theme.spacing(2),
-      bottom: theme.spacing(2),
-   },
-   centerText: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
    },
    volumeBorder: {
       position: 'absolute',
@@ -89,8 +62,6 @@ export default function ParticipantTile({ className, participant, width, height 
    const isMe = participant.id === myParticipantId;
 
    const audioInfo = useParticipantAudio(participant.id);
-
-   const theme = useTheme();
    const audioBorder = useTransform(audioInfo?.audioLevel ?? new MotionValue(0), [0, 1], [0, 10]);
 
    const isSmall = width < 400;
@@ -107,44 +78,18 @@ export default function ParticipantTile({ className, participant, width, height 
    };
 
    return (
-      <AnimateSharedLayout>
-         <motion.div className={clsx(classes.root, className)}>
+      <>
+         <div className={clsx(classes.root, className)}>
             <RenderConsumerVideo consumer={consumer} height={height} width={width} className={classes.video} />
             <motion.div style={{ borderWidth: audioBorder }} className={classes.volumeBorder} />
 
-            {isWebcamActive && (
-               <motion.div className={classes.infoBox}>
-                  <AnimatedMicIcon activated={micActivated} disabledColor={theme.palette.error.main} />
-                  <Typography
-                     component={motion.h4}
-                     layoutId="name"
-                     variant="h4"
-                     style={{ fontSize: isSmall ? 14 : 18, marginLeft: 8 }}
-                  >
-                     {participant.displayName}
-                  </Typography>
-               </motion.div>
-            )}
-
-            {!isWebcamActive && (
-               <>
-                  <AnimatedMicIcon
-                     activated={micActivated}
-                     disabledColor={theme.palette.error.main}
-                     className={classes.micIconWithoutWebcam}
-                  />
-                  <div className={classes.centerText}>
-                     <Typography
-                        component={motion.span}
-                        layoutId="name"
-                        variant="h4"
-                        style={{ fontSize: isSmall ? 16 : 24 }}
-                     >
-                        {participant.displayName}
-                     </Typography>
-                  </div>
-               </>
-            )}
+            <ParticipantTileLabel
+               label={participant.displayName}
+               tileWidth={width}
+               tileHeight={height}
+               micActivated={micActivated}
+               webcamActivated={isWebcamActive}
+            />
 
             {!isMe && (
                <div className={classes.moreButton}>
@@ -158,13 +103,13 @@ export default function ParticipantTile({ className, participant, width, height 
                   </IconButton>
                </div>
             )}
-         </motion.div>
+         </div>
          <ParticipantContextMenuPopper
             open={contextMenuOpen}
             onClose={handleCloseContextMenu}
             participant={participant}
             anchorEl={moreIconRef.current}
          />
-      </AnimateSharedLayout>
+      </>
    );
 }
