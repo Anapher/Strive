@@ -55,9 +55,7 @@ export default function ParticipantItem({ participant }: Props) {
    return (
       <div className={classes.root}>
          <ButtonBase onClick={handleToggle} ref={buttonRef} component={motion.button} className={classes.button}>
-            <Typography color={participant?.isModerator ? 'secondary' : undefined} variant="subtitle1">
-               {participant ? participant?.displayName : <Skeleton />}
-            </Typography>
+            <Typography variant="subtitle1">{participant ? participant?.displayName : <Skeleton />}</Typography>
             <IconHide hidden={!producers?.mic}>
                <AnimatedMicIcon activated={!producers?.mic?.paused} disabledColor={theme.palette.error.main} />
             </IconHide>
