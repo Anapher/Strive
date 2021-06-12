@@ -49,3 +49,12 @@ Every participant has a volume slider that can be adjusted. Also, you can adjust
 While I hold my class in the Corona crisis, polls were a really nice feature to interact with my students. Sadly, BBB has a very limited implementation of polls. In Strive, you can choose between single choice, multiple choice, numeric and tag cloud polls (BBB offers single choice only). Furthermore you can decide for each poll whether it is anonymous, if it's global (for all rooms or just the current one) and you can select whether participants can change their answers after submission.
 
 A nice use case with the polls in Strive is to evaluate the current status of students that work on a task. You can create a global, anonymous, answer-non-final poll with the options "finished", "surrendered", "need time" (also available as template) so participants can select their current status and even change it afterwards.
+
+## Missing features in Strive
+To be fair, I want to list the features of BBB that come to my mind that are still missing in Strive.
+
+### Recording conferences
+I'm not sure if I actually want to solve this with Strive. Recording would be a very huge feature that requires a lot of infrastructure. Strive was created for casual class conferences and I don't really know of these need recording. Also, there exist great tools like Open Broadcaster that can be used.
+
+### PDF upload / whiteboard
+BBB supports uploading PDF files that can be shown in the conference. You can draw on these PDFs to explain topics. To be fair, the whiteboard of BBB is not the best compared to PowerPoint or other tools and I don't know if I could actually match the whiteboard of these professional programs. In my opinion, it would anyways be much easier to just share your screen and use one of these tools.
