@@ -3,6 +3,8 @@ import React from 'react';
 import ActiveParticipantsChips from './ActiveParticipantsChips';
 import clsx from 'classnames';
 
+export const ACTIVE_CHIPS_LAYOUT_HEIGHT = 40;
+
 const useStyles = makeStyles((theme) => ({
    root: {
       display: 'flex',

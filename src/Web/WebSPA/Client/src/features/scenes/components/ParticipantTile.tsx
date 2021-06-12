@@ -79,7 +79,7 @@ export default function ParticipantTile({ className, participant, width, height 
 
    return (
       <>
-         <div className={clsx(classes.root, className)}>
+         <motion.div layout layoutId={participant.id} className={clsx(classes.root, className)}>
             <RenderConsumerVideo consumer={consumer} height={height} width={width} className={classes.video} />
             <motion.div style={{ borderWidth: audioBorder }} className={classes.volumeBorder} />
 
@@ -103,7 +103,7 @@ export default function ParticipantTile({ className, participant, width, height 
                   </IconButton>
                </div>
             )}
-         </div>
+         </motion.div>
          <ParticipantContextMenuPopper
             open={contextMenuOpen}
             onClose={handleCloseContextMenu}

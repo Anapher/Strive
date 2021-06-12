@@ -58,12 +58,10 @@ export default function ClassConference() {
    const [chatWidth, setChatWidth] = useState(CHAT_DEFAULT_WIDTH);
 
    useEffect(() => {
-      let fixedDimensions: Size | undefined;
-      if (dimensions && dimensions.width !== undefined && dimensions.height !== undefined)
-         fixedDimensions = {
-            width: dimensions.width,
-            height: dimensions.height - 40 /** for chips and the arrow back */,
-         };
+      const fixedDimensions = dimensions && {
+         width: dimensions.width,
+         height: dimensions.height - 40 /** for chips and the arrow back */,
+      };
 
       if (fixedDimensions) {
          const computedSize = expandToBox(defaultContentRatio, fixedDimensions);
@@ -74,7 +72,7 @@ export default function ClassConference() {
 
          setChatWidth(newChatWidth);
       }
-   }, [dimensions.width, dimensions.height]);
+   }, [dimensions?.width, dimensions?.height]);
 
    const chatContainer = useRef<HTMLDivElement>(null);
 

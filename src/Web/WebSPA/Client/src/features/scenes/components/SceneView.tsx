@@ -7,7 +7,6 @@ import MediaControls from 'src/features/media/components/MediaControls';
 import MediaControlsContext, { MediaControlsContextType } from 'src/features/media/media-controls-context';
 import useMyParticipantId from 'src/hooks/useMyParticipantId';
 import useThrottledResizeObserver from 'src/hooks/useThrottledResizeObserver';
-import { Size } from 'src/types';
 import presenters from '../scene-presenter-registry';
 import { selectSceneStack } from '../selectors';
 import { Scene } from '../types';
@@ -51,10 +50,6 @@ const getSceneAutoHideControls: (scene: Scene, participantId: string) => boolean
 export default function SceneView() {
    const classes = useStyles();
    const [contentRef, dimensions] = useThrottledResizeObserver(100);
-
-   let fixedDimensions: Size | undefined;
-   if (dimensions && dimensions.width !== undefined && dimensions.height !== undefined)
-      fixedDimensions = { width: dimensions.width, height: dimensions.height };
 
    const sceneStack = useSelector(selectSceneStack);
 
@@ -120,12 +115,8 @@ export default function SceneView() {
       <MediaControlsContext.Provider value={mediaControlsContextValue}>
          <div className={classes.root} ref={contentRef} onMouseMove={handleMouseMove} id="scene-view">
             <AnimateSharedLayout>
-               {fixedDimensions?.width !== undefined && fixedDimensions?.height !== undefined && sceneStack ? (
-                  <SceneSelector
-                     className={classes.currentScene}
-                     dimensions={fixedDimensions}
-                     sceneStack={sceneStack}
-                  />
+               {dimensions && sceneStack ? (
+                  <SceneSelector className={classes.currentScene} dimensions={dimensions} sceneStack={sceneStack} />
                ) : null}
             </AnimateSharedLayout>
             <MediaControls className={classes.mediaControls} show={showControls} leftActionsRef={mediaLeftActionsRef} />

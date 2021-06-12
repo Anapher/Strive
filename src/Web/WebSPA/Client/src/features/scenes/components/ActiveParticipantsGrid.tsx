@@ -18,13 +18,13 @@ const useStyles = makeStyles({
 
 type Props = {
    width: number;
-   fixedParticipants?: Participant[];
+   participant?: Participant;
 };
 
-export default function ActiveParticipantsGrid({ width, fixedParticipants }: Props) {
+export default function ActiveParticipantsGrid({ width, participant }: Props) {
    const classes = useStyles();
-   const participants = useSomeParticipants(3, {
-      includedParticipants: fixedParticipants,
+   const participants = useSomeParticipants(1, {
+      includedParticipants: participant ? [participant] : undefined,
       activeOnly: true,
       webcamOnly: true,
    });
@@ -39,10 +39,12 @@ export default function ActiveParticipantsGrid({ width, fixedParticipants }: Pro
       });
    }, [width]);
 
+   console.log(participants, 'participants');
+
    return (
       <div className={classes.root}>
          {participants.length > 0 && (
-            <div style={{ ...mainTileSize, marginBottom: 8 }}>
+            <div style={{ ...mainTileSize, marginBottom: 8 }} key={participants[0].id}>
                <ParticipantTile {...mainTileSize} participant={participants[0]} />
             </div>
          )}

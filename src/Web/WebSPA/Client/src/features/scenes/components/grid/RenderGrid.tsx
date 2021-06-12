@@ -1,10 +1,9 @@
 import { makeStyles } from '@material-ui/core';
-import { motion } from 'framer-motion';
+import clsx from 'classnames';
 import _ from 'lodash';
 import { Participant } from 'src/features/conference/types';
 import { generateGrid } from '../../calculations';
 import ParticipantTile from '../ParticipantTile';
-import clsx from 'classnames';
 
 const useStyles = makeStyles({
    root: {
@@ -55,14 +54,9 @@ export default function RenderGrid({ participants, className, spacing = 8, itemM
                      .take(grid.itemsPerRow)
                      .value()
                      .map((x, pi) => (
-                        <motion.div
-                           layout
-                           layoutId={x.id}
-                           key={x.id}
-                           style={{ ...grid.itemSize, marginLeft: pi === 0 ? 0 : spacing }}
-                        >
+                        <div key={x.id} style={{ ...grid.itemSize, marginLeft: pi === 0 ? 0 : spacing }}>
                            <ParticipantTile participant={x} {...grid.itemSize} />
-                        </motion.div>
+                        </div>
                      ))}
                </div>
             ))}

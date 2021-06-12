@@ -1,11 +1,13 @@
-import { makeStyles } from '@material-ui/core';
-import React, { useEffect } from 'react';
+import { makeStyles, Portal } from '@material-ui/core';
+import clsx from 'classnames';
+import React, { useContext } from 'react';
+import ConferenceLayoutContext from 'src/features/conference/conference-layout-context';
 import { Participant } from 'src/features/conference/types';
 import { Size } from 'src/types';
 import { expandToBox, maxWidth } from '../calculations';
-import ActiveChipsLayout from './ActiveChipsLayout';
+import ActiveChipsLayout, { ACTIVE_CHIPS_LAYOUT_HEIGHT } from './ActiveChipsLayout';
+import ActiveParticipantsGrid from './ActiveParticipantsGrid';
 import PresentationSceneParticipants from './PresentationSceneParticipants';
-import clsx from 'classnames';
 
 const useStyles = makeStyles((theme) => ({
    container: {
@@ -25,7 +27,18 @@ const useStyles = makeStyles((theme) => ({
    },
 }));
 
+/**
+ * max size: the most important thing is that the content has a maximum size.
+ * If there is no space for participant tiles in the scene, use the place over the chat
+ *
+ * default: place the participant tiles to the left or bottom of the scene and scale the content
+ * if required
+ */
+type PresentationSceneVariant = 'max-size' | 'default';
+
 export type PresentationSceneProps = {
+   variant?: PresentationSceneVariant;
+
    className?: string;
    dimensions: Size;
 
@@ -33,7 +46,7 @@ export type PresentationSceneProps = {
    maxContentWidth?: number;
 
    showParticipants?: boolean;
-   fixedParticipants?: Participant[];
+   fixedParticipants?: Participant[] | Participant;
 
    participantTileWidth?: number;
    participantTileHeight?: number;
@@ -41,11 +54,10 @@ export type PresentationSceneProps = {
    maxOverlayFactor?: number;
 
    render: (size: Size, style: React.CSSProperties) => React.ReactNode;
-
-   canShowParticipantsWithoutResize?: (canShow: boolean) => void;
 };
 
 export default function PresentationScene({
+   variant = 'default',
    className,
    contentRatio,
    maxContentWidth,
@@ -56,20 +68,16 @@ export default function PresentationScene({
    participantTileWidth = 16 * 18,
    participantTileHeight = 9 * 18,
    maxOverlayFactor = 0.3,
-   canShowParticipantsWithoutResize,
 }: PresentationSceneProps) {
    const classes = useStyles();
 
-   dimensions = { ...dimensions, height: dimensions.height - 40 };
+   dimensions = { ...dimensions, height: dimensions.height - ACTIVE_CHIPS_LAYOUT_HEIGHT };
 
    // measure
    let computedSize = expandToBox(contentRatio, dimensions);
    if (maxContentWidth) computedSize = maxWidth(computedSize, maxContentWidth);
 
    let participantsPlace: 'bottom' | 'right' | undefined;
-
-   console.log(dimensions.width);
-   console.log(computedSize.width);
 
    // compute the vertical/horizontal margin if we would use the full size content
    const marginBottom = dimensions.height - computedSize.height;
@@ -95,9 +103,24 @@ export default function PresentationScene({
       }
    }
 
-   useEffect(() => {
-      if (canShowParticipantsWithoutResize) canShowParticipantsWithoutResize(newDimensions === undefined);
-   }, [newDimensions === undefined]);
+   if (fixedParticipants !== undefined && !Array.isArray(fixedParticipants)) {
+      fixedParticipants = [fixedParticipants];
+   }
+
+   console.log('newDimensions', newDimensions);
+
+   if (variant === 'max-size' && newDimensions) {
+      return (
+         <ActiveChipsLayout className={clsx(className, classes.container)}>
+            {showParticipants && (
+               <PortalWithParticipant
+                  participant={fixedParticipants && fixedParticipants.length > 0 ? fixedParticipants[0] : undefined}
+               />
+            )}
+            {render(computedSize, {})}
+         </ActiveChipsLayout>
+      );
+   }
 
    // arrange
    if (newDimensions && showParticipants) {
@@ -117,5 +140,19 @@ export default function PresentationScene({
             />
          )}
       </ActiveChipsLayout>
+   );
+}
+
+type PortalWithParticipantProps = {
+   participant?: Participant;
+};
+
+function PortalWithParticipant({ participant }: PortalWithParticipantProps) {
+   const context = useContext(ConferenceLayoutContext);
+
+   return (
+      <Portal container={context.chatContainer}>
+         <ActiveParticipantsGrid width={context.chatWidth} participant={participant} />
+      </Portal>
    );
 }

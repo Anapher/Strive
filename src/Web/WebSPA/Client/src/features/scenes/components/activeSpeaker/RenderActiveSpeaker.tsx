@@ -47,7 +47,7 @@ export default function RenderActiveSpeaker({ className, dimensions }: RenderSce
    return (
       <div className={clsx(className, classes.root, activeParticipants.length === 1 && classes.rootCenter)}>
          <div style={{ margin: 8, ...size }}>
-            <ParticipantTile {...size} participant={activeParticipants[0]} />
+            <ParticipantTile key={activeParticipants[0].id} {...size} participant={activeParticipants[0]} />
          </div>
          <div style={{ display: 'flex', marginTop: 8 }}>
             {activeParticipants.slice(1).map((participant, i) => (
