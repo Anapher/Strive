@@ -73,6 +73,10 @@ export default function SendMessageForm({ onSendMessage, isTyping, channel }: Pr
       if (message) {
          onSendMessage({ message, options, channel });
          setMessage('');
+
+         if (options.isAnnouncement) {
+            setOptions({ ...options, isAnnouncement: false });
+         }
       }
    };
 
