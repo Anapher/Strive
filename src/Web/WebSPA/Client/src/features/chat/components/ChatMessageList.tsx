@@ -99,7 +99,6 @@ export default function ChatMessageList({ messages, participantId, participantCo
          </List>
          <Zoom in={!atBottom}>
             <Fab
-               color="primary"
                size="small"
                aria-label="scroll back down"
                className={classes.scrollDownFab}
