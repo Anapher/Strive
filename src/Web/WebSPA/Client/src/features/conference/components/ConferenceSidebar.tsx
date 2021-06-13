@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import RoomsList from 'src/features/rooms/components/RoomsList';
 import SceneManagement from 'src/features/scenes/components/SceneManagement';
 import { RootState } from 'src/store';
-import { setParticipantsOpen } from '../reducer';
+import { setSidebarOpen } from '../reducer';
 
 const drawerWidth = 216;
 
@@ -53,8 +53,8 @@ export default function ConferenceSidebar() {
    const classes = useStyles();
 
    const dispatch = useDispatch();
-   const open = useSelector((state: RootState) => state.conference.participantsOpen);
-   const setOpen = (visible: boolean) => dispatch(setParticipantsOpen(visible));
+   const open = useSelector((state: RootState) => state.conference.sidebarOpen);
+   const setOpen = (visible: boolean) => dispatch(setSidebarOpen(visible));
 
    const handleToggle = () => setOpen(!open);
 

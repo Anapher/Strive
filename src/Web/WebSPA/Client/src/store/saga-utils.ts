@@ -28,6 +28,13 @@ export function* takeEverySynchronizedObjectChange(
       },
    );
 
+   yield takeEverySynchronizedObjectInitialization(id, worker);
+}
+
+export function* takeEverySynchronizedObjectInitialization(
+   id: string,
+   worker: (action: PayloadAction<SyncStatePayload>) => any,
+) {
    yield takeEvery(
       onEventOccurred(events.onSynchronizeObjectState).type,
       function* (action: PayloadAction<SyncStatePayload>) {

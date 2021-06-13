@@ -23,7 +23,7 @@ export type ConferenceState = {
    participants: SynchronizedParticipants | null;
    conferenceState: SynchronizedConferenceInfo | null;
    myPermissions: SynchronizedParticipantsPermissions | null;
-   participantsOpen: boolean;
+   sidebarOpen: boolean;
    temporaryPermissions: TemporaryPermissions | null;
 
    conferenceLinks: ConferenceLink[] | null;
@@ -38,7 +38,7 @@ const initialState: ConferenceState = {
    participants: null,
    conferenceState: null,
    myPermissions: null,
-   participantsOpen: true,
+   sidebarOpen: false,
    permissionDialogData: null,
    permissionDialogOpen: false,
    temporaryPermissions: null,
@@ -59,8 +59,8 @@ const conferenceSlice = createSlice({
    name: 'conference',
    initialState,
    reducers: {
-      setParticipantsOpen(state, { payload }: PayloadAction<boolean>) {
-         state.participantsOpen = payload;
+      setSidebarOpen(state, { payload }: PayloadAction<boolean>) {
+         state.sidebarOpen = payload;
       },
       closePermissionDialog(state) {
          state.permissionDialogOpen = false;
@@ -102,6 +102,6 @@ const conferenceSlice = createSlice({
    },
 });
 
-export const { setParticipantsOpen, closePermissionDialog, setConnectionError } = conferenceSlice.actions;
+export const { setSidebarOpen, closePermissionDialog, setConnectionError } = conferenceSlice.actions;
 
 export default conferenceSlice.reducer;
