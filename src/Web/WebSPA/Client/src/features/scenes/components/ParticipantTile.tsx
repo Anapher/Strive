@@ -50,9 +50,10 @@ type Props = {
    participant: Participant;
    width: number;
    height: number;
+   disableLayoutAnimation?: boolean;
 };
 
-export default function ParticipantTile({ className, participant, width, height }: Props) {
+export default function ParticipantTile({ className, participant, width, height, disableLayoutAnimation }: Props) {
    const classes = useStyles();
    const consumer = useConsumer(participant.id, 'webcam');
    const micActivated = useSelector((state: RootState) => selectParticipantMicActivated(state, participant?.id));
@@ -79,7 +80,11 @@ export default function ParticipantTile({ className, participant, width, height 
 
    return (
       <>
-         <motion.div layout layoutId={participant.id} className={clsx(classes.root, className)}>
+         <motion.div
+            layout={!disableLayoutAnimation}
+            layoutId={disableLayoutAnimation ? undefined : participant.id}
+            className={clsx(classes.root, className)}
+         >
             <RenderConsumerVideo consumer={consumer} height={height} width={width} className={classes.video} />
             <motion.div style={{ borderWidth: audioBorder }} className={classes.volumeBorder} />
 

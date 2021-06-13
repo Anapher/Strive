@@ -43,6 +43,7 @@ export default function RenderGrid({ participants, className, spacing = 8, itemM
    if (participants.length === 0) return null;
 
    const grid = generateGrid(participants.length, itemMaxWidth, { width, height }, spacing);
+   const disableAnimations = participants.length > 25;
 
    return (
       <div className={clsx(classes.root, className)}>
@@ -55,7 +56,11 @@ export default function RenderGrid({ participants, className, spacing = 8, itemM
                      .value()
                      .map((x, pi) => (
                         <div key={x.id} style={{ ...grid.itemSize, marginLeft: pi === 0 ? 0 : spacing }}>
-                           <ParticipantTile participant={x} {...grid.itemSize} />
+                           <ParticipantTile
+                              participant={x}
+                              {...grid.itemSize}
+                              disableLayoutAnimation={disableAnimations}
+                           />
                         </div>
                      ))}
                </div>
