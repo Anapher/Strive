@@ -14,8 +14,17 @@ const findConsumer = (consumers: IterableIterator<Consumer>, participantId: stri
    return null;
 };
 
-export default function useConsumer(participantId: string | undefined, kind: ProducerSource): Consumer | null {
-   const [consumer, setConsumer] = useState<Consumer | null>(null);
+/**
+ * Use a consumer
+ * @param participantId the participant id
+ * @param kind the consumer kind
+ * @returns return undefined if not initialized, null if consumer was not found and the consumer if found
+ */
+export default function useConsumer(
+   participantId: string | undefined,
+   kind: ProducerSource,
+): Consumer | null | undefined {
+   const [consumer, setConsumer] = useState<Consumer | null | undefined>(undefined);
    const connection = useWebRtc();
 
    useEffect(() => {
@@ -47,8 +56,6 @@ export default function useConsumer(participantId: string | undefined, kind: Pro
 
          const onConsumerAdded = () => {
             if (!currentConsumer) {
-               console.log('uppdate consumer' + kind);
-
                updateConsumer();
             }
          };

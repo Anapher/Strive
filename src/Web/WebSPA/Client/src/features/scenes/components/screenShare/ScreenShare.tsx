@@ -12,7 +12,7 @@ import PresentationScene from '../PresentationScene';
 
 const defaultVideoSize: Size = { width: 1920, height: 1080 };
 
-function getVideoSize(consumer: Consumer | null): Size {
+function getVideoSize(consumer: Consumer | null | undefined): Size {
    const settings = consumer?.track.getSettings();
    if (typeof settings?.width === 'number' && typeof settings?.height === 'number') {
       return { width: settings.width, height: settings.height };

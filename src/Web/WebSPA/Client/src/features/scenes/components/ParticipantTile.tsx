@@ -83,13 +83,15 @@ export default function ParticipantTile({ className, participant, width, height 
             <RenderConsumerVideo consumer={consumer} height={height} width={width} className={classes.video} />
             <motion.div style={{ borderWidth: audioBorder }} className={classes.volumeBorder} />
 
-            <ParticipantTileLabel
-               label={participant.displayName}
-               tileWidth={width}
-               tileHeight={height}
-               micActivated={micActivated}
-               webcamActivated={isWebcamActive}
-            />
+            {consumer !== undefined && (
+               <ParticipantTileLabel
+                  label={participant.displayName}
+                  tileWidth={width}
+                  tileHeight={height}
+                  micActivated={micActivated}
+                  webcamActivated={isWebcamActive}
+               />
+            )}
 
             {!isMe && (
                <div className={classes.moreButton}>
