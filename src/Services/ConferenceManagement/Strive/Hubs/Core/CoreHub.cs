@@ -36,6 +36,7 @@ using Strive.Core.Services.Scenes;
 using Strive.Core.Services.Scenes.Providers.TalkingStick.Requests;
 using Strive.Core.Services.Scenes.Requests;
 using Strive.Core.Services.Synchronization.Extensions;
+using Strive.Core.Services.Whiteboard.Requests;
 using Strive.Core.Utilities;
 using Strive.Extensions;
 using Strive.Hubs.Core.Dtos;
@@ -357,7 +358,7 @@ namespace Strive.Hubs.Core
             var participant = GetContextParticipant();
             var roomId = await GetParticipantRoomId(participant);
             if (roomId == null)
-                return SuccessOrError<Unit>.Failed(SceneError.RoomNotFound);
+                return ConferenceError.RoomNotFound;
 
             return await GetInvoker().Create(new SetSceneRequest(participant.ConferenceId, roomId, scene))
                 .RequirePermissions(DefinedPermissions.Scenes.CanSetScene).Send();
@@ -368,7 +369,7 @@ namespace Strive.Hubs.Core
             var participant = GetContextParticipant();
             var roomId = await GetParticipantRoomId(participant);
             if (roomId == null)
-                return SuccessOrError<Unit>.Failed(SceneError.RoomNotFound);
+                return ConferenceError.RoomNotFound;
 
             return await GetInvoker()
                 .Create(new SetOverwrittenContentSceneRequest(participant.ConferenceId, roomId, scene))
@@ -395,7 +396,7 @@ namespace Strive.Hubs.Core
             var participant = GetContextParticipant();
             var roomId = await GetParticipantRoomId(participant);
             if (roomId == null)
-                return SuccessOrError<Unit>.Failed(SceneError.RoomNotFound);
+                return ConferenceError.RoomNotFound;
 
             return await GetInvoker().Create(new TalkingStickPassRequest(participant, roomId, false))
                 .RequirePermissions(DefinedPermissions.Scenes.CanTakeTalkingStick).Send();
@@ -410,7 +411,7 @@ namespace Strive.Hubs.Core
             var participant = GetContextParticipant();
             var roomId = await GetParticipantRoomId(participant);
             if (roomId == null)
-                return SuccessOrError<Unit>.Failed(SceneError.RoomNotFound);
+                return ConferenceError.RoomNotFound;
 
             return await GetInvoker()
                 .Create(new TalkingStickPassRequest(new Participant(participant.ConferenceId, participantId), roomId,
@@ -458,6 +459,16 @@ namespace Strive.Hubs.Core
             var participant = GetContextParticipant();
             return await GetInvoker().Create(new SubmitAnswerRequest(participant, dto.PollId, null)).ValidateObject(dto)
                 .Send();
+        }
+
+        public async Task<SuccessOrError<Unit>> CreateWhiteboard()
+        {
+            var participant = GetContextParticipant();
+            var roomId = await GetParticipantRoomId(participant);
+            if (roomId == null) return ConferenceError.RoomNotFound;
+
+            return await GetInvoker().Create(new CreateWhiteboardRequest(participant.ConferenceId, roomId))
+                .RequirePermissions(DefinedPermissions.Whiteboard.CanCreate).Send();
         }
     }
 }

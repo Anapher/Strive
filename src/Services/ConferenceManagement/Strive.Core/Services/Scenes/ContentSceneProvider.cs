@@ -13,12 +13,13 @@ namespace Strive.Core.Services.Scenes
             IReadOnlyList<IScene> sceneStack);
 
         protected abstract ValueTask<bool> InternalIsUpdateRequired(string conferenceId, string roomId,
-            object synchronizedObject, object? previousValue);
+            string syncObjId, object synchronizedObject, object? previousValue);
 
-        public async ValueTask<SceneUpdate> IsUpdateRequired(string conferenceId, string roomId,
+        public async ValueTask<SceneUpdate> IsUpdateRequired(string conferenceId, string roomId, string syncObjId,
             object synchronizedObject, object? previousValue)
         {
-            var isRequired = await InternalIsUpdateRequired(conferenceId, roomId, synchronizedObject, previousValue);
+            var isRequired =
+                await InternalIsUpdateRequired(conferenceId, roomId, syncObjId, synchronizedObject, previousValue);
             return isRequired ? SceneUpdate.AvailableScenesChanged : SceneUpdate.NotRequired;
         }
 

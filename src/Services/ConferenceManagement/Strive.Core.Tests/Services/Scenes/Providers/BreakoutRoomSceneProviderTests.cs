@@ -59,7 +59,8 @@ namespace Strive.Core.Tests.Services.Scenes.Providers
             var provider = new BreakoutRoomSceneProvider(_mediator.Object);
 
             // act
-            var result = await provider.IsUpdateRequired(ConferenceId, RoomId, _inactiveBreakoutRooms, null);
+            var result =
+                await provider.IsUpdateRequired(ConferenceId, RoomId, string.Empty, _inactiveBreakoutRooms, null);
 
             // assert
             Assert.Equal(SceneUpdate.NotRequired, result);
@@ -72,7 +73,7 @@ namespace Strive.Core.Tests.Services.Scenes.Providers
             var provider = new BreakoutRoomSceneProvider(_mediator.Object);
 
             // act
-            var result = await provider.IsUpdateRequired(ConferenceId, RoomId, _inactiveBreakoutRooms,
+            var result = await provider.IsUpdateRequired(ConferenceId, RoomId, string.Empty, _inactiveBreakoutRooms,
                 _inactiveBreakoutRooms);
 
             // assert
@@ -86,7 +87,7 @@ namespace Strive.Core.Tests.Services.Scenes.Providers
             var provider = new BreakoutRoomSceneProvider(_mediator.Object);
 
             // act
-            var result = await provider.IsUpdateRequired(ConferenceId, RoomId, _activeBreakoutRooms,
+            var result = await provider.IsUpdateRequired(ConferenceId, RoomId, string.Empty, _activeBreakoutRooms,
                 _inactiveBreakoutRooms);
 
             // assert
@@ -100,7 +101,7 @@ namespace Strive.Core.Tests.Services.Scenes.Providers
             var provider = new BreakoutRoomSceneProvider(_mediator.Object);
 
             // act
-            var result = await provider.IsUpdateRequired(ConferenceId, RoomId, _inactiveBreakoutRooms,
+            var result = await provider.IsUpdateRequired(ConferenceId, RoomId, string.Empty, _inactiveBreakoutRooms,
                 _activeBreakoutRooms);
 
             // assert
@@ -114,8 +115,8 @@ namespace Strive.Core.Tests.Services.Scenes.Providers
             var provider = new BreakoutRoomSceneProvider(_mediator.Object);
 
             // act
-            var result = await provider.IsUpdateRequired(ConferenceId, RoomId,
-                _activeBreakoutRooms, _activeBreakoutRooms);
+            var result = await provider.IsUpdateRequired(ConferenceId, RoomId, string.Empty, _activeBreakoutRooms,
+                _activeBreakoutRooms);
 
             // assert
             Assert.Equal(SceneUpdate.NotRequired, result);

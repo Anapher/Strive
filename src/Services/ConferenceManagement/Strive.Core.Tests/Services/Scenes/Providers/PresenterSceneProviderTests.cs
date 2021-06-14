@@ -80,7 +80,7 @@ namespace Strive.Core.Tests.Services.Scenes.Providers
             var provider = new PresenterSceneProvider(_mediator.Object);
 
             // act
-            var result = await provider.IsUpdateRequired(ConferenceId, RoomId,
+            var result = await provider.IsUpdateRequired(ConferenceId, RoomId, string.Empty,
                 CreateRooms(new Dictionary<string, string> {{"p1", RoomId}}),
                 CreateRooms(new Dictionary<string, string> {{"p1", RoomId}}));
 
@@ -95,7 +95,7 @@ namespace Strive.Core.Tests.Services.Scenes.Providers
             var provider = new PresenterSceneProvider(_mediator.Object);
 
             // act
-            var result = await provider.IsUpdateRequired(ConferenceId, RoomId,
+            var result = await provider.IsUpdateRequired(ConferenceId, RoomId, string.Empty,
                 CreateRooms(new Dictionary<string, string> {{"p1", RoomId}}),
                 CreateRooms(new Dictionary<string, string> {{"p1", "other room"}}));
 

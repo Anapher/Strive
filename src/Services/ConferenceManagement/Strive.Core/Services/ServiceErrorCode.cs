@@ -17,6 +17,7 @@ namespace Strive.Core.Services
         Conference_UnexpectedError,
         Conference_NotOpen,
         Conference_InternalServiceError,
+        Conference_RoomNotFound,
 
         // Chat
         Chat_InvalidChannel,
@@ -33,7 +34,6 @@ namespace Strive.Core.Services
         Equipment_ParticipantNotJoined,
 
         // Scenes
-        Scenes_RoomNotFound,
         Scenes_HasSpeaker,
 
         // Breakout Rooms

@@ -13,8 +13,8 @@ namespace Strive.Core.Services.Scenes
         ValueTask<IEnumerable<IScene>> GetAvailableScenes(string conferenceId, string roomId,
             IReadOnlyList<IScene> sceneStack);
 
-        ValueTask<SceneUpdate> IsUpdateRequired(string conferenceId, string roomId, object synchronizedObject,
-            object? previousValue);
+        ValueTask<SceneUpdate> IsUpdateRequired(string conferenceId, string roomId, string syncObjId,
+            object synchronizedObject, object? previousValue);
 
         ValueTask<IEnumerable<IScene>> BuildStack(IScene scene, SceneBuilderContext context,
             SceneStackFunc sceneProviderFunc);

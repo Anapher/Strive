@@ -5,6 +5,7 @@ import grid from './components/grid';
 import presenter from './components/presenter';
 import screenShare from './components/screenShare';
 import talkingStick from './components/talkingStick';
+import whiteboard from './components/whiteboard';
 import poll from './components/poll';
 import { ScenePresenter } from './types';
 
@@ -17,6 +18,7 @@ const presenters: ScenePresenter<any>[] = [
    talkingStick,
    presenter,
    poll,
+   whiteboard,
 ];
 
 export default presenters;

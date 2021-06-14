@@ -12,6 +12,9 @@ namespace Strive.Core
         public static Error ConferenceNotOpen =>
             Conflict("The conference is not open.", ServiceErrorCode.Conference_NotOpen);
 
+        public static Error RoomNotFound =>
+            NotFound("The room was not found.", ServiceErrorCode.Conference_RoomNotFound);
+
         public static Error UnexpectedError(string message)
         {
             return BadRequest(message, ServiceErrorCode.Conference_UnexpectedError);

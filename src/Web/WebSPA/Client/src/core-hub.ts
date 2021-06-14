@@ -64,6 +64,8 @@ export const updatePollState = createHubFn<UpdatePollStateDto>('UpdatePollState'
 export const deletePoll = createHubFn<DeletePollDto>('DeletePoll');
 export const deletePollAnswer = createHubFn<DeletePollAnswerDto>('DeletePollAnswer');
 
+export const createWhiteboard = createHubFn('CreateWhiteboard');
+
 export function createHubFn<TArg = void>(name: string) {
    const actionCreator = function (arg: TArg) {
       return invoke(name)(arg);
