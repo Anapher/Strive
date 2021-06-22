@@ -3,7 +3,7 @@ using Strive.Core.Services.Synchronization;
 
 namespace Strive.Core.Services.Whiteboard
 {
-    public record SynchronizedWhiteboards(IReadOnlyDictionary<string, WhiteboardInfo> Whiteboards)
+    public record SynchronizedWhiteboards(IReadOnlyDictionary<string, SynchronizedWhiteboardInfo> Whiteboards)
     {
         public const string ROOM_ID = "roomId";
 
@@ -12,6 +12,4 @@ namespace Strive.Core.Services.Whiteboard
             return new(SynchronizedObjectIds.WHITEBOARDS, new Dictionary<string, string> {{ROOM_ID, roomId}});
         }
     }
-
-    public record WhiteboardInfo(string FriendlyName, bool EveryoneCanEdit);
 }

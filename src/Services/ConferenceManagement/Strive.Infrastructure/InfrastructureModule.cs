@@ -7,6 +7,7 @@ using Strive.Infrastructure.Data.Repos;
 using Strive.Infrastructure.KeyValue;
 using Strive.Infrastructure.Scheduler;
 using Strive.Infrastructure.Sfu;
+using Strive.Infrastructure.Utilities;
 
 namespace Strive.Infrastructure
 {
@@ -24,6 +25,7 @@ namespace Strive.Infrastructure
             builder.RegisterType<ScheduledMediator>().As<IScheduledMediator>();
             builder.RegisterType<JwtSfuAuthTokenFactory>().AsImplementedInterfaces().SingleInstance();
             builder.RegisterType<TokenFactory>().AsImplementedInterfaces().SingleInstance();
+            builder.RegisterType<CanvasActionUtils>().AsImplementedInterfaces().SingleInstance();
         }
     }
 }

@@ -2,7 +2,7 @@ import { fabric } from 'fabric';
 import { Canvas, IEvent } from 'fabric/fabric-impl';
 import { WhiteboardToolBase } from '../whiteboard-tool';
 
-export class LineTool extends WhiteboardToolBase {
+export default class LineTool extends WhiteboardToolBase {
    private currentLine: fabric.Line | undefined;
 
    configureCanvas(canvas: Canvas) {
@@ -16,6 +16,8 @@ export class LineTool extends WhiteboardToolBase {
          o.selectable = false;
          o.evented = false;
       });
+
+      canvas.defaultCursor = 'default';
    }
 
    onMouseDown(event: IEvent): void {
@@ -50,10 +52,17 @@ export class LineTool extends WhiteboardToolBase {
    }
 
    onMouseUp(): void {
-      this.currentLine = undefined;
+      this.onFinish();
    }
 
    onMouseOut(): void {
-      this.currentLine = undefined;
+      this.onFinish();
+   }
+
+   onFinish(): void {
+      if (this.currentLine) {
+         this.emit('update', { type: 'added', id: '', obj: this.currentLine.toJSON() });
+         this.currentLine = undefined;
+      }
    }
 }

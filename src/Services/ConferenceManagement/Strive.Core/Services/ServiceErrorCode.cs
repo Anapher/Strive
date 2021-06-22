@@ -21,7 +21,6 @@ namespace Strive.Core.Services
 
         // Chat
         Chat_InvalidChannel,
-        Chat_AnonymousMessagesDisabled,
         Chat_PrivateMessagesDisabled,
 
         // Permissions
@@ -46,5 +45,10 @@ namespace Strive.Core.Services
         AnswerValidationFailed,
         Poll_AnswerCannotBeChanged,
         Poll_Closed,
+
+        // Whiteboard
+        Whiteboard_NotFound,
+        Whiteboard_UndoNotAvailable,
+        Whiteboard_RedoNotAvailable,
     }
 }

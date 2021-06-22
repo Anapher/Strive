@@ -11,6 +11,7 @@ namespace Strive.Infrastructure.KeyValue.Repos
     public class WhiteboardRepository : IWhiteboardRepository, IKeyValueRepo
     {
         private const string WHITEBOARD_PROPERTY_KEY = "whiteboards";
+        private const string WHITEBOARD_LOCK_KEY = "whiteboardLock";
 
         private readonly IKeyValueDatabase _database;
 
@@ -49,10 +50,22 @@ namespace Strive.Infrastructure.KeyValue.Repos
             await _database.KeyDeleteAsync(key);
         }
 
+        public ValueTask<IAcquiredLock> LockWhiteboard(string conferenceId, string roomId, string whiteboardId)
+        {
+            var key = GetLockKey(conferenceId, roomId, whiteboardId);
+            return _database.AcquireLock(key);
+        }
+
         private static string GetRoomKey(string conferenceId, string roomId)
         {
             return DatabaseKeyBuilder.ForProperty(WHITEBOARD_PROPERTY_KEY).ForConference(conferenceId)
                 .ForSecondary(roomId).ToString();
+        }
+
+        private static string GetLockKey(string conferenceId, string roomId, string whiteboardId)
+        {
+            return DatabaseKeyBuilder.ForProperty(WHITEBOARD_LOCK_KEY).ForConference(conferenceId).ForSecondary(roomId)
+                .ForSecondary(whiteboardId).ToString();
         }
     }
 }

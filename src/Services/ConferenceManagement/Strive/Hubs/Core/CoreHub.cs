@@ -36,6 +36,8 @@ using Strive.Core.Services.Scenes;
 using Strive.Core.Services.Scenes.Providers.TalkingStick.Requests;
 using Strive.Core.Services.Scenes.Requests;
 using Strive.Core.Services.Synchronization.Extensions;
+using Strive.Core.Services.Whiteboard;
+using Strive.Core.Services.Whiteboard.Actions;
 using Strive.Core.Services.Whiteboard.Requests;
 using Strive.Core.Utilities;
 using Strive.Extensions;
@@ -470,5 +472,55 @@ namespace Strive.Hubs.Core
             return await GetInvoker().Create(new CreateWhiteboardRequest(participant.ConferenceId, roomId))
                 .RequirePermissions(DefinedPermissions.Whiteboard.CanCreate).Send();
         }
+
+        public async Task<SuccessOrError<Unit>> WhiteboardPushAction(WhiteboardActionDto action)
+        {
+            var participant = GetContextParticipant();
+            var roomId = await GetParticipantRoomId(participant);
+            if (roomId == null) return ConferenceError.RoomNotFound;
+
+            var syncWhiteboards =
+                await _mediator.FetchSynchronizedObject<SynchronizedWhiteboards>(participant.ConferenceId,
+                    SynchronizedWhiteboards.SyncObjId(roomId));
+            if (!syncWhiteboards.Whiteboards.TryGetValue(action.WhiteboardId, out var whiteboardInfo))
+                return WhiteboardError.WhiteboardNotFound;
+
+            var needsPermissions = !whiteboardInfo.AnyoneCanEdit;
+
+            CanvasAction canvasAction;
+            switch (action)
+            {
+                case WhiteboardActionAddDto addDto:
+                    var objId = Guid.NewGuid().ToString("N");
+                    canvasAction =
+                        new CanvasActionAdd(
+                            addDto.Object.Yield().Select(x => new StoredCanvasObject(x, objId))
+                                .Select(x => new CanvasObjectRef(x, null)).ToList(), participant.Id);
+                    break;
+                case WhiteboardActionDeleteDto deleteDto:
+                    canvasAction = new CanvasActionDelete(deleteDto.ObjectIds, participant.Id);
+                    break;
+                case WhiteboardActionUpdateDto updateDto:
+                    canvasAction = new CanvasActionUpdate(updateDto.Patches, participant.Id);
+                    break;
+                case WhiteboardActionPanDto panDto:
+                    needsPermissions = true;
+                    canvasAction = new CanvasActionPan(panDto.PanX, panDto.PanY, participant.Id);
+                    break;
+                default:
+                    return new FieldValidationError(nameof(action), "Action is not defined.");
+            }
+
+            var actionInvoke = GetInvoker()
+                .Create(new PushActionRequest(participant.ConferenceId, roomId, action.WhiteboardId, canvasAction));
+            if (needsPermissions)
+                actionInvoke = actionInvoke.RequirePermissions(DefinedPermissions.Whiteboard.CanCreate);
+
+            return await actionInvoke.Send();
+        }
+
+        //public async Task<SuccessOrError<Unit>> WhiteboardHistoryAction(WhiteboardActionDto action)
+        //{
+        //}
     }
 }

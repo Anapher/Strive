@@ -1,7 +1,7 @@
 import { Canvas } from 'fabric/fabric-impl';
 import { WhiteboardToolBase } from '../whiteboard-tool';
 
-export class SelectTool extends WhiteboardToolBase {
+export default class SelectTool extends WhiteboardToolBase {
    configureCanvas(canvas: Canvas) {
       super.configureCanvas(canvas);
 
@@ -11,5 +11,7 @@ export class SelectTool extends WhiteboardToolBase {
          o.selectable = true;
          o.evented = true;
       });
+
+      canvas.defaultCursor = 'default';
    }
 }

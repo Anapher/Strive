@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.SignalR.Client;
+using Strive.Core;
 using Strive.Core.Extensions;
 using Strive.Core.Interfaces;
 using Strive.Core.Services.Permissions;
@@ -40,7 +41,7 @@ namespace Strive.IntegrationTests.Services
 
             // assert
             AssertFailed(result);
-            Assert.Equal(SceneError.RoomNotFound.Code, result.Error?.Code);
+            Assert.Equal(ConferenceError.RoomNotFound.Code, result.Error?.Code);
         }
 
         [Fact]

@@ -2,7 +2,7 @@ import { fabric } from 'fabric';
 import { Canvas, IEvent } from 'fabric/fabric-impl';
 import { WhiteboardToolBase } from '../whiteboard-tool';
 
-export class TextTool extends WhiteboardToolBase {
+export default class TextTool extends WhiteboardToolBase {
    configureCanvas(canvas: Canvas) {
       super.configureCanvas(canvas);
 
@@ -13,6 +13,8 @@ export class TextTool extends WhiteboardToolBase {
          o.selectable = false;
          o.evented = false;
       });
+
+      canvas.defaultCursor = 'text';
    }
 
    onMouseDown(event: IEvent): void {

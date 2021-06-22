@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
+using Strive.Core.Extensions;
 using Strive.Core.Services.Synchronization.Requests;
 using Strive.Core.Services.Whiteboard.Gateways;
 using Strive.Core.Services.Whiteboard.Requests;
+using Strive.Core.Services.Whiteboard.Utilities;
 
 namespace Strive.Core.Services.Whiteboard.UseCases
 {
@@ -29,9 +32,16 @@ namespace Strive.Core.Services.Whiteboard.UseCases
 
             var id = Guid.NewGuid().ToString("N");
             var name = GetFriendlyNameForWhiteboard();
-            var whiteboard = new Whiteboard(id, name, false, WhiteboardCanvas.Empty);
+            var whiteboard = new Whiteboard(id, name, false, WhiteboardCanvas.Empty,
+                ImmutableDictionary<string, ParticipantWhiteboardState>.Empty, 0);
 
             await _repository.Create(conferenceId, roomId, whiteboard);
+
+            if (!await RoomUtils.CheckRoomExists(_mediator, request.ConferenceId, request.RoomId))
+            {
+                await _repository.Delete(request.ConferenceId, request.RoomId, whiteboard.Id);
+                throw ConferenceError.RoomNotFound.ToException();
+            }
 
             await _mediator.Send(new UpdateSynchronizedObjectRequest(conferenceId,
                 SynchronizedWhiteboards.SyncObjId(roomId)));

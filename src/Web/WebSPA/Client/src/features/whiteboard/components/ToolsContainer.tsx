@@ -2,32 +2,33 @@ import { Divider, makeStyles, SvgIcon } from '@material-ui/core';
 import _ from 'lodash';
 import {
    CursorDefaultOutline,
-   Delete,
-   FormatText,
-   PencilOutline,
-   Minus,
-   Undo,
-   Redo,
    FormatLineStyle,
    FormatSize,
+   FormatText,
+   HandRight,
+   Minus,
+   PencilOutline,
+   Redo,
+   Undo,
 } from 'mdi-material-ui';
 import React from 'react';
-import { LineTool } from '../tools/LineTool';
-import { PencilTool } from '../tools/PencilTool';
-import { SelectTool } from '../tools/SelectTool';
-import { TextTool } from '../tools/TextTool';
+import LineTool from '../tools/LineTool';
+import PanTool from '../tools/PanTool';
+import PencilTool from '../tools/PencilTool';
+import SelectTool from '../tools/SelectTool';
+import TextTool from '../tools/TextTool';
 import WhiteboardTool, { WhiteboardToolOptions } from '../whiteboard-tool';
+import ClearWhiteboardButton from './ClearWhiteboardButton';
+import ToolColorPicker from './ToolColorPicker';
 import ToolIcon from './ToolIcon';
 
 const useStyles = makeStyles((theme) => ({
    root: {
       backgroundColor: theme.palette.background.paper,
       borderRadius: 24,
-      marginTop: 64,
-      marginLeft: 16,
-      marginRight: 8,
       padding: theme.spacing(1, 0),
       height: 'fit-content',
+      width: 'fit-content',
    },
    hidden: {
       visibility: 'hidden',
@@ -48,6 +49,7 @@ type Tools = {
    pencil: ToolViewModel;
    text: ToolViewModel;
    line: ToolViewModel;
+   pan: ToolViewModel;
 };
 
 const tools: Tools = {
@@ -75,6 +77,12 @@ const tools: Tools = {
       options: ['color', 'lineWidth'],
       toolFactory: () => new LineTool(),
    },
+   pan: {
+      labelTranslationKey: 'Pan',
+      Icon: HandRight,
+      options: [],
+      toolFactory: () => new PanTool(),
+   },
 } as const;
 
 const maxSupportedOptions = _.max(Object.values(tools).map((x) => x.options.length)) ?? 0;
@@ -86,11 +94,26 @@ export const getTool = (type: ToolType) => tools[type].toolFactory();
 type Props = {
    selectedTool: ToolType;
    onSelectedToolChanged: (tool: ToolType) => void;
+
+   options: WhiteboardToolOptions;
+   onOptionsChanged: (options: WhiteboardToolOptions) => void;
+
+   onClear: () => void;
 };
 
-export default function ToolsContainer({ selectedTool, onSelectedToolChanged }: Props) {
+export default function ToolsContainer({
+   selectedTool,
+   onSelectedToolChanged,
+   options,
+   onOptionsChanged,
+   onClear,
+}: Props) {
    const classes = useStyles();
-   const options = tools[selectedTool].options;
+   const requiredOptions = tools[selectedTool].options;
+
+   const handleChangeColor = (color: string) => {
+      onOptionsChanged({ ...options, color });
+   };
 
    return (
       <div className={classes.root}>
@@ -103,18 +126,21 @@ export default function ToolsContainer({ selectedTool, onSelectedToolChanged }: 
                />
             </div>
          ))}
-         <Divider className={options.length === 0 ? classes.hidden : undefined} />
+         <Divider className={requiredOptions.length === 0 ? classes.hidden : undefined} />
          <div style={{ height: maxSupportedOptions * 36 }}>
-            {options.includes('lineWidth') && <ToolIcon icon={<FormatLineStyle fontSize="small" />} />}
-            {options.includes('color') && <ToolIcon icon={<FormatLineStyle fontSize="small" />} />}
-            {options.includes('fontSize') && <ToolIcon icon={<FormatSize fontSize="small" />} />}
+            {requiredOptions.includes('color') && (
+               <ToolColorPicker value={options.color} onChange={handleChangeColor} />
+            )}
+            {requiredOptions.includes('lineWidth') && <ToolIcon icon={<FormatLineStyle fontSize="small" />} />}
+
+            {requiredOptions.includes('fontSize') && <ToolIcon icon={<FormatSize fontSize="small" />} />}
          </div>
          <Divider />
          <ToolIcon icon={<Undo fontSize="small" />} />
          <ToolIcon icon={<Redo fontSize="small" />} />
 
          <Divider style={{ marginTop: 64 }} />
-         <ToolIcon icon={<Delete fontSize="small" />} />
+         <ClearWhiteboardButton onClick={onClear} />
       </div>
    );
 }

@@ -39,14 +39,16 @@ const indicatorVariants: Variants = {
    default: { d: 'M 0 0 A 16 0 270 0 1 0 16' },
 };
 
-type Props = {
+type Props = Omit<React.ComponentProps<typeof IconButton>, 'children'> & {
    className?: string;
    icon: React.ReactNode;
    selected?: boolean;
-   onClick?: () => void;
 };
 
-export default function ToolIcon({ className, icon, selected, onClick }: Props) {
+export default React.forwardRef<HTMLButtonElement, Props>(function ToolIcon(
+   { className, icon, selected, onClick, ...props },
+   ref,
+) {
    const classes = useStyles();
 
    return (
@@ -56,6 +58,8 @@ export default function ToolIcon({ className, icon, selected, onClick }: Props) 
             className={classes.iconButton}
             onClick={onClick}
             classes={{ label: clsx(classes.label, selected && classes.labelSelected) }}
+            ref={ref}
+            {...props}
          >
             {icon}
          </IconButton>
@@ -73,4 +77,4 @@ export default function ToolIcon({ className, icon, selected, onClick }: Props) 
          </div>
       </div>
    );
-}
+});

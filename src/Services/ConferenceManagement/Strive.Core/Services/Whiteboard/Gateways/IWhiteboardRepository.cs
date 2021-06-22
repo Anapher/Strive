@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Strive.Infrastructure.KeyValue.Abstractions;
 
 namespace Strive.Core.Services.Whiteboard.Gateways
 {
@@ -14,5 +15,7 @@ namespace Strive.Core.Services.Whiteboard.Gateways
         ValueTask Delete(string conferenceId, string roomId, string whiteboardId);
 
         ValueTask DeleteAllOfRoom(string conferenceId, string roomId);
+
+        ValueTask<IAcquiredLock> LockWhiteboard(string conferenceId, string roomId, string whiteboardId);
     }
 }

@@ -1,5 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import EventEmitter from 'events';
 import { Canvas, IEvent } from 'fabric/fabric-impl';
+import { TypedEmitter } from 'tiny-typed-emitter';
+import { WhiteboardAction } from './action-types';
 
 export type WhiteboardToolOptions = {
    lineWidth: number;
@@ -7,7 +10,7 @@ export type WhiteboardToolOptions = {
    fontSize: number;
 };
 
-export default interface WhiteboardTool {
+export default interface WhiteboardTool extends TypedEmitter<WebRtcConnectionEvents> {
    /** called once when the tool is selected */
    configureCanvas(fs: Canvas): void;
 
@@ -18,9 +21,15 @@ export default interface WhiteboardTool {
    onMouseUp(event: IEvent): void;
    onMouseMove(event: IEvent): void;
    onMouseOut(event: IEvent): void;
+
+   dispose(): void;
 }
 
-export abstract class WhiteboardToolBase implements WhiteboardTool {
+interface WebRtcConnectionEvents {
+   update: (action: WhiteboardAction) => void;
+}
+
+export abstract class WhiteboardToolBase extends TypedEmitter<WebRtcConnectionEvents> implements WhiteboardTool {
    protected fs: Canvas | undefined;
    protected options: WhiteboardToolOptions | undefined;
 
@@ -45,6 +54,10 @@ export abstract class WhiteboardToolBase implements WhiteboardTool {
    }
 
    onMouseOut(event: IEvent): void {
+      // do nothing
+   }
+
+   dispose(): void {
       // do nothing
    }
 

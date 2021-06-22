@@ -1,17 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using Newtonsoft.Json.Linq;
+﻿using System.Collections.Immutable;
 
 namespace Strive.Core.Services.Whiteboard
 {
-    public record Whiteboard
-        (string Id, string FriendlyName, bool EveryoneCanEdit, WhiteboardCanvas Canvas) : WhiteboardInfo(FriendlyName,
-            EveryoneCanEdit);
-
-    public record WhiteboardCanvas(IReadOnlyList<JToken> UndoList, IReadOnlyList<JToken> RedoList,
-        IReadOnlyList<JToken> Objects)
-    {
-        public static WhiteboardCanvas Empty =>
-            new(Array.Empty<JToken>(), Array.Empty<JToken>(), Array.Empty<JToken>());
-    }
+    public record Whiteboard (string Id, string FriendlyName, bool AnyoneCanEdit, WhiteboardCanvas Canvas,
+        IImmutableDictionary<string, ParticipantWhiteboardState> ParticipantStates, int Version);
 }
