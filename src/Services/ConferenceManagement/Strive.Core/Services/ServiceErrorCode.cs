@@ -50,5 +50,6 @@ namespace Strive.Core.Services
         Whiteboard_NotFound,
         Whiteboard_UndoNotAvailable,
         Whiteboard_RedoNotAvailable,
+        Whiteboard_WhiteboardActionHadNoEffect,
     }
 }

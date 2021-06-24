@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Strive.Core.Services.Whiteboard;
-using Strive.Core.Services.Whiteboard.Gateways;
+using Strive.Core.Services.WhiteboardService;
+using Strive.Core.Services.WhiteboardService.Gateways;
 using Strive.Infrastructure.KeyValue.Abstractions;
 using Strive.Infrastructure.KeyValue.Extensions;
 

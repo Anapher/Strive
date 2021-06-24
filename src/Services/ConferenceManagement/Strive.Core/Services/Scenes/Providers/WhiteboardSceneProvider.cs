@@ -5,7 +5,7 @@ using MediatR;
 using Strive.Core.Services.Scenes.Scenes;
 using Strive.Core.Services.Synchronization;
 using Strive.Core.Services.Synchronization.Extensions;
-using Strive.Core.Services.Whiteboard;
+using Strive.Core.Services.WhiteboardService;
 
 namespace Strive.Core.Services.Scenes.Providers
 {

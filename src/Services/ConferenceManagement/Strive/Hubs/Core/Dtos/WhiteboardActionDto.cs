@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
-using Strive.Core.Services.Whiteboard.Actions;
-using Strive.Core.Services.Whiteboard.CanvasData;
+using Strive.Core.Services.WhiteboardService.Actions;
+using Strive.Core.Services.WhiteboardService.CanvasData;
 
 namespace Strive.Hubs.Core.Dtos
 {
