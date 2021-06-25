@@ -34,7 +34,7 @@ namespace Strive.Core.Tests.Services.WhiteboardService.UseCases
 
         private readonly WhiteboardOptions _options = new() {MaxUndoHistory = 2, MaxUndoHistoryForParticipant = 1};
 
-        private readonly CanvasAction _randomAction = new CanvasActionDelete(new[] {"1"}, "45");
+        private readonly CanvasAction _randomAction = new DeleteCanvasAction(new[] {"1"}, "45");
 
         private UpdateWhiteboardUseCase Create()
         {

@@ -4,7 +4,6 @@ namespace Strive.Core.Services.WhiteboardService.CanvasData
 {
     public record CanvasText : CanvasObject
     {
-        public override string Type { get; } = "i-text";
         public double CharSpacing { get; set; }
         public string Direction { get; set; }
         public string FontFamily { get; set; }

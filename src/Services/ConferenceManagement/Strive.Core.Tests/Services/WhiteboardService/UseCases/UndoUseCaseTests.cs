@@ -21,7 +21,7 @@ namespace Strive.Core.Tests.Services.WhiteboardService.UseCases
         private readonly Mock<IMediator> _mediator = new();
         private readonly Mock<ICanvasActionUtils> _actionUtils = new();
 
-        private readonly CanvasAction _addAction = new CanvasActionAdd(
+        private readonly CanvasAction _addAction = new AddCanvasAction(
             new[] {new CanvasObjectRef(new StoredCanvasObject(new CanvasLine(), "2345"), null)}, ParticipantId);
 
         private UndoUseCase Create()
@@ -80,7 +80,7 @@ namespace Strive.Core.Tests.Services.WhiteboardService.UseCases
                         ParticipantId,
                         new ParticipantWhiteboardState(new[]
                         {
-                            new VersionedAction(new CanvasActionPan(5, 5, ParticipantId), 1),
+                            new VersionedAction(new PanCanvasAction(5, 5, ParticipantId), 1),
                             new VersionedAction(_addAction, 2),
                         }.ToImmutableList(), ImmutableList<VersionedAction>.Empty)
                     },
@@ -89,7 +89,7 @@ namespace Strive.Core.Tests.Services.WhiteboardService.UseCases
             // assert
             Assert.Single(updatedWhiteboard.Canvas.Objects);
             Assert.Single(updatedWhiteboard.ParticipantStates[ParticipantId].RedoList);
-            Assert.IsType<CanvasActionPan>(Assert.Single(updatedWhiteboard.ParticipantStates[ParticipantId].UndoList)
+            Assert.IsType<PanCanvasAction>(Assert.Single(updatedWhiteboard.ParticipantStates[ParticipantId].UndoList)
                 .Action);
         }
 
@@ -112,13 +112,13 @@ namespace Strive.Core.Tests.Services.WhiteboardService.UseCases
                             new VersionedAction(_addAction, 2),
                         }.ToImmutableList(), new[]
                         {
-                            new VersionedAction(new CanvasActionPan(5, 5, ParticipantId), 1),
+                            new VersionedAction(new PanCanvasAction(5, 5, ParticipantId), 1),
                         }.ToImmutableList())
                     },
                 }, 2));
 
             // assert
-            Assert.Equal(new[] {typeof(CanvasActionPan), typeof(CanvasActionDelete)},
+            Assert.Equal(new[] {typeof(PanCanvasAction), typeof(DeleteCanvasAction)},
                 updatedWhiteboard.ParticipantStates[ParticipantId].RedoList.Select(x => x.Action.GetType()));
         }
 
@@ -138,7 +138,7 @@ namespace Strive.Core.Tests.Services.WhiteboardService.UseCases
                         "other",
                         new ParticipantWhiteboardState(new[]
                         {
-                            new VersionedAction(new CanvasActionPan(5, 5, ParticipantId), 2),
+                            new VersionedAction(new PanCanvasAction(5, 5, ParticipantId), 2),
                             new VersionedAction(_addAction, 4),
                         }.ToImmutableList(), ImmutableList<VersionedAction>.Empty)
                     },
@@ -146,7 +146,7 @@ namespace Strive.Core.Tests.Services.WhiteboardService.UseCases
                         ParticipantId,
                         new ParticipantWhiteboardState(new[]
                         {
-                            new VersionedAction(new CanvasActionPan(5, 5, ParticipantId), 3),
+                            new VersionedAction(new PanCanvasAction(5, 5, ParticipantId), 3),
                             new VersionedAction(_addAction, 5),
                         }.ToImmutableList(), ImmutableList<VersionedAction>.Empty)
                     },

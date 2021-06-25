@@ -7,13 +7,13 @@ using Xunit;
 
 namespace Strive.Core.Tests.Services.WhiteboardService.Actions
 {
-    public class CanvasActionUpdateTests
+    public class UpdateCanvasActionTests
     {
         private const string ParticipantId = "123";
         private readonly JsonPatchDocument<CanvasObject> _undoPatch = new();
         private readonly Mock<ICanvasActionUtils> _utils = new();
 
-        public CanvasActionUpdateTests()
+        public UpdateCanvasActionTests()
         {
             _utils.Setup(x => x.CreatePatch(It.IsAny<CanvasObject>(), It.IsAny<CanvasObject>())).Returns(_undoPatch);
         }
@@ -22,7 +22,7 @@ namespace Strive.Core.Tests.Services.WhiteboardService.Actions
         public void Execute_ObjectExists_Patch()
         {
             // arrange
-            var action = new CanvasActionUpdate(new[]
+            var action = new UpateCanvasAction(new[]
             {
                 new CanvasObjectPatch(new JsonPatchDocument<CanvasObject>().Add(x => x.ScaleY, 2.0), "1"),
             }, ParticipantId);
@@ -41,7 +41,7 @@ namespace Strive.Core.Tests.Services.WhiteboardService.Actions
             // assert
             Assert.Equal(new[] {new StoredCanvasObject(new CanvasLine {ScaleY = 2}, "1")}, updatedCanvas.Objects);
 
-            var undoUpdate = Assert.IsType<CanvasActionUpdate>(undoAction);
+            var undoUpdate = Assert.IsType<UpateCanvasAction>(undoAction);
             Assert.Equal(new[] {new CanvasObjectPatch(_undoPatch, "1")}, undoUpdate.Patches);
         }
 
@@ -49,7 +49,7 @@ namespace Strive.Core.Tests.Services.WhiteboardService.Actions
         public void Execute_ObjectDoesNotExist_ReturnNull()
         {
             // arrange
-            var action = new CanvasActionUpdate(new[]
+            var action = new UpateCanvasAction(new[]
             {
                 new CanvasObjectPatch(new JsonPatchDocument<CanvasObject>().Add(x => x.ScaleY, 2.0), "1"),
             }, ParticipantId);

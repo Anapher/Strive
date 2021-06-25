@@ -20,7 +20,7 @@ namespace Strive.Core.Tests.Services.WhiteboardService.UseCases
         private readonly Mock<IMediator> _mediator = new();
         private readonly Mock<ICanvasActionUtils> _actionUtils = new();
 
-        private readonly CanvasAction _addAction = new CanvasActionAdd(
+        private readonly CanvasAction _addAction = new AddCanvasAction(
             new[] {new CanvasObjectRef(new StoredCanvasObject(new CanvasLine(), "2345"), null)}, ParticipantId);
 
         private PushActionUseCase Create()
@@ -37,7 +37,7 @@ namespace Strive.Core.Tests.Services.WhiteboardService.UseCases
 
             await useCase.Handle(
                 new PushActionRequest(ConferenceId, RoomId, WhiteboardId,
-                    new CanvasActionDelete(new[] {"1", "2"}, ParticipantId)), CancellationToken.None);
+                    new DeleteCanvasAction(new[] {"1", "2"}, ParticipantId)), CancellationToken.None);
 
             // act
             var error = Assert.Throws<IdErrorException>(() => Execute(capturedRequest,
@@ -65,7 +65,7 @@ namespace Strive.Core.Tests.Services.WhiteboardService.UseCases
 
             // assert
             var undoAction = Assert.Single(updatedWhiteboard.ParticipantStates[ParticipantId].UndoList);
-            Assert.IsType<CanvasActionDelete>(undoAction.Action);
+            Assert.IsType<DeleteCanvasAction>(undoAction.Action);
             Assert.Equal(56, undoAction.Version);
         }
 

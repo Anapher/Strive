@@ -37,7 +37,6 @@ using Strive.Core.Services.Scenes.Providers.TalkingStick.Requests;
 using Strive.Core.Services.Scenes.Requests;
 using Strive.Core.Services.Synchronization.Extensions;
 using Strive.Core.Services.WhiteboardService;
-using Strive.Core.Services.WhiteboardService.Actions;
 using Strive.Core.Services.WhiteboardService.Requests;
 using Strive.Core.Utilities;
 using Strive.Extensions;
@@ -463,7 +462,7 @@ namespace Strive.Hubs.Core
                 .Send();
         }
 
-        public async Task<SuccessOrError<Unit>> CreateWhiteboard()
+        public async Task<SuccessOrError<string>> CreateWhiteboard()
         {
             var participant = GetContextParticipant();
             var roomId = await GetParticipantRoomId(participant);
@@ -473,7 +472,8 @@ namespace Strive.Hubs.Core
                 .RequirePermissions(DefinedPermissions.Whiteboard.CanCreate).Send();
         }
 
-        public async Task<SuccessOrError<Unit>> WhiteboardPushAction(WhiteboardActionDto action)
+        private async Task<SuccessOrError<(string roomId, bool anyoneCanEdit)>>
+            GetRoomIdAndCheckIfUserCanModifyWhiteboard(string whiteboardId)
         {
             var participant = GetContextParticipant();
             var roomId = await GetParticipantRoomId(participant);
@@ -482,45 +482,58 @@ namespace Strive.Hubs.Core
             var syncWhiteboards =
                 await _mediator.FetchSynchronizedObject<SynchronizedWhiteboards>(participant.ConferenceId,
                     SynchronizedWhiteboards.SyncObjId(roomId));
-            if (!syncWhiteboards.Whiteboards.TryGetValue(action.WhiteboardId, out var whiteboardInfo))
+            if (!syncWhiteboards.Whiteboards.TryGetValue(whiteboardId, out var whiteboardInfo))
                 return WhiteboardError.WhiteboardNotFound;
 
-            var needsPermissions = !whiteboardInfo.AnyoneCanEdit;
+            return (roomId, whiteboardInfo.AnyoneCanEdit);
+        }
 
-            CanvasAction canvasAction;
-            switch (action)
-            {
-                case WhiteboardActionAddDto addDto:
-                    var objId = Guid.NewGuid().ToString("N");
-                    canvasAction =
-                        new CanvasActionAdd(
-                            addDto.Object.Yield().Select(x => new StoredCanvasObject(x, objId))
-                                .Select(x => new CanvasObjectRef(x, null)).ToList(), participant.Id);
-                    break;
-                case WhiteboardActionDeleteDto deleteDto:
-                    canvasAction = new CanvasActionDelete(deleteDto.ObjectIds, participant.Id);
-                    break;
-                case WhiteboardActionUpdateDto updateDto:
-                    canvasAction = new CanvasActionUpdate(updateDto.Patches, participant.Id);
-                    break;
-                case WhiteboardActionPanDto panDto:
-                    needsPermissions = true;
-                    canvasAction = new CanvasActionPan(panDto.PanX, panDto.PanY, participant.Id);
-                    break;
-                default:
-                    return new FieldValidationError(nameof(action), "Action is not defined.");
-            }
+        public async Task<SuccessOrError<Unit>> WhiteboardPushAction(WhiteboardPushActionDto dto)
+        {
+            var participant = GetContextParticipant();
 
-            var actionInvoke = GetInvoker()
-                .Create(new PushActionRequest(participant.ConferenceId, roomId, action.WhiteboardId, canvasAction));
-            if (needsPermissions)
+            var result = await GetRoomIdAndCheckIfUserCanModifyWhiteboard(dto.WhiteboardId);
+            if (!result.Success) return result.Error;
+
+            var (roomId, anyoneCanEdit) = result.Response;
+            var actionInvoke = GetInvoker().Create(new PushActionRequest(participant.ConferenceId, roomId,
+                dto.WhiteboardId, participant.Id, dto.Action));
+            if (!anyoneCanEdit)
                 actionInvoke = actionInvoke.RequirePermissions(DefinedPermissions.Whiteboard.CanCreate);
 
             return await actionInvoke.Send();
         }
 
-        //public async Task<SuccessOrError<Unit>> WhiteboardHistoryAction(WhiteboardActionDto action)
-        //{
-        //}
+        public async Task<SuccessOrError<Unit>> WhiteboardUndo(string whiteboardId)
+        {
+            var participant = GetContextParticipant();
+
+            var result = await GetRoomIdAndCheckIfUserCanModifyWhiteboard(whiteboardId);
+            if (!result.Success) return result.Error;
+
+            var (roomId, anyoneCanEdit) = result.Response;
+            var actionInvoke = GetInvoker().Create(new UndoRequest(participant.ConferenceId, roomId,
+                whiteboardId, participant.Id));
+            if (!anyoneCanEdit)
+                actionInvoke = actionInvoke.RequirePermissions(DefinedPermissions.Whiteboard.CanCreate);
+
+            return await actionInvoke.Send();
+        }
+
+        public async Task<SuccessOrError<Unit>> WhiteboardRedo(string whiteboardId)
+        {
+            var participant = GetContextParticipant();
+
+            var result = await GetRoomIdAndCheckIfUserCanModifyWhiteboard(whiteboardId);
+            if (!result.Success) return result.Error;
+
+            var (roomId, anyoneCanEdit) = result.Response;
+            var actionInvoke = GetInvoker().Create(new RedoRequest(participant.ConferenceId, roomId,
+                whiteboardId, participant.Id));
+            if (!anyoneCanEdit)
+                actionInvoke = actionInvoke.RequirePermissions(DefinedPermissions.Whiteboard.CanCreate);
+
+            return await actionInvoke.Send();
+        }
     }
 }

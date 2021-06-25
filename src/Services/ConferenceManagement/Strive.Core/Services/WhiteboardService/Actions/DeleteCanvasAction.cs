@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace Strive.Core.Services.WhiteboardService.Actions
 {
-    public record CanvasActionDelete (IReadOnlyList<string> ObjectIds, string ParticipantId) : CanvasAction(
+    public record DeleteCanvasAction (IReadOnlyList<string> ObjectIds, string ParticipantId) : CanvasAction(
         ParticipantId)
     {
         /// <summary>
@@ -28,7 +28,7 @@ namespace Strive.Core.Services.WhiteboardService.Actions
             }
 
             var updatedCanvas = canvas with {Objects = objects};
-            var undoAction = new CanvasActionAdd(deletedObjects, ParticipantId);
+            var undoAction = new AddCanvasAction(deletedObjects, ParticipantId);
 
             return new WhiteboardCanvasUpdate(updatedCanvas, undoAction);
         }

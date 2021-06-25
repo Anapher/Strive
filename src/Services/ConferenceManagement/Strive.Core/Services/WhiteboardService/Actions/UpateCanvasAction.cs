@@ -5,7 +5,7 @@ using Strive.Core.Services.WhiteboardService.CanvasData;
 
 namespace Strive.Core.Services.WhiteboardService.Actions
 {
-    public record CanvasActionUpdate(IReadOnlyList<CanvasObjectPatch> Patches, string ParticipantId) : CanvasAction(
+    public record UpateCanvasAction(IReadOnlyList<CanvasObjectPatch> Patches, string ParticipantId) : CanvasAction(
         ParticipantId)
     {
         /// <summary>
@@ -37,7 +37,7 @@ namespace Strive.Core.Services.WhiteboardService.Actions
                 return null;
 
             var updatedCanvas = canvas with {Objects = updatedObjects};
-            var undoAction = new CanvasActionUpdate(restoreObjects, ParticipantId);
+            var undoAction = new UpateCanvasAction(restoreObjects, ParticipantId);
 
             return new WhiteboardCanvasUpdate(updatedCanvas, undoAction);
         }

@@ -4,7 +4,6 @@ namespace Strive.Core.Services.WhiteboardService.CanvasData
 {
     public abstract record CanvasObject
     {
-        public abstract string Type { get; }
         public string OriginX { get; set; }
         public string OriginY { get; set; }
         public double Left { get; set; }

@@ -12,7 +12,7 @@ using Strive.Core.Services.WhiteboardService.Utilities;
 
 namespace Strive.Core.Services.WhiteboardService.UseCases
 {
-    public class CreateWhiteboardUseCase : IRequestHandler<CreateWhiteboardRequest>
+    public class CreateWhiteboardUseCase : IRequestHandler<CreateWhiteboardRequest, string>
     {
         private static readonly IReadOnlyList<string> WhiteboardFriendlyNames =
             new[] {"Da Vinci", "Michelangelo", "Raffaello", "Donatello", "Bob Ross"};
@@ -26,7 +26,7 @@ namespace Strive.Core.Services.WhiteboardService.UseCases
             _mediator = mediator;
         }
 
-        public async Task<Unit> Handle(CreateWhiteboardRequest request, CancellationToken cancellationToken)
+        public async Task<string> Handle(CreateWhiteboardRequest request, CancellationToken cancellationToken)
         {
             var (conferenceId, roomId) = request;
 
@@ -46,7 +46,7 @@ namespace Strive.Core.Services.WhiteboardService.UseCases
             await _mediator.Send(new UpdateSynchronizedObjectRequest(conferenceId,
                 SynchronizedWhiteboards.SyncObjId(roomId)));
 
-            return Unit.Value;
+            return id;
         }
 
         private static string GetFriendlyNameForWhiteboard()

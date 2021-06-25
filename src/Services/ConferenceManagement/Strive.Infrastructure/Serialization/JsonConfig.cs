@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Autofac;
 using JsonSubTypes;
@@ -8,6 +9,9 @@ using Newtonsoft.Json.Serialization;
 using Strive.Core.Services.Poll;
 using Strive.Core.Services.Scenes;
 using Strive.Core.Services.Scenes.Scenes;
+using Strive.Core.Services.WhiteboardService.Actions;
+using Strive.Core.Services.WhiteboardService.CanvasData;
+using Strive.Core.Services.WhiteboardService.PushActions;
 using Strive.Infrastructure.Extensions;
 
 namespace Strive.Infrastructure.Serialization
@@ -32,6 +36,7 @@ namespace Strive.Infrastructure.Serialization
             settings.Converters.Add(GetSceneConverter());
             settings.Converters.Add(new ErrorConverter());
             ConfigurePollConverters(settings);
+            ConfigureWhiteboardConverters(settings);
 
             // This is a hack to accomplish the following:
             // we want to preserve the casing of dictionary keys (so dont camel case keys as they might be case sensitive ids etc.)
@@ -69,6 +74,21 @@ namespace Strive.Infrastructure.Serialization
 
             settings.Converters.Add(CreateJsonConverter<PollResults>(typeof(PollResults), "type",
                 x => x.TrimEnd("PollResults").ToCamelCase()));
+        }
+
+        private static void ConfigureWhiteboardConverters(JsonSerializerSettings settings)
+        {
+            settings.Converters.Add(CreateJsonConverter<CanvasAction>(typeof(CanvasAction), "type",
+                x => x.TrimEnd("CanvasAction").ToCamelCase()));
+
+            settings.Converters.Add(CreateJsonConverter<CanvasPushAction>(typeof(AddCanvasPushAction), "type",
+                x => x.TrimEnd("CanvasPushAction").ToCamelCase()));
+
+            var objectNameMatch = new Dictionary<string, string>
+                {{nameof(CanvasText), "i-text"}, {nameof(CanvasLine), "line"}, {nameof(CanvasPath), "path"}};
+
+            settings.Converters.Add(
+                CreateJsonConverter<CanvasObject>(typeof(CanvasObject), "type", x => objectNameMatch[x]));
         }
 
         private static JsonConverter CreateJsonConverter<T>(Type baseType, string discriminatorProperty,

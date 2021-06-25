@@ -6,7 +6,7 @@ using Xunit;
 
 namespace Strive.Core.Tests.Services.WhiteboardService.Actions
 {
-    public class CanvasActionAddTests
+    public class AddCanvasActionTests
     {
         private const string ParticipantId = "123";
 
@@ -17,7 +17,7 @@ namespace Strive.Core.Tests.Services.WhiteboardService.Actions
         public void Execute_WhiteboardEmpty_AddToCanvas()
         {
             // arrange
-            var action = new CanvasActionAdd(new[]
+            var action = new AddCanvasAction(new[]
             {
                 new CanvasObjectRef(new StoredCanvasObject(_line, "1"), null),
                 new CanvasObjectRef(new StoredCanvasObject(_text, "2"), null),
@@ -32,7 +32,7 @@ namespace Strive.Core.Tests.Services.WhiteboardService.Actions
             Assert.Equal(new[] {new StoredCanvasObject(_line, "1"), new StoredCanvasObject(_text, "2")},
                 resultCanvas.Objects);
 
-            var deleteAction = Assert.IsType<CanvasActionDelete>(undoAction);
+            var deleteAction = Assert.IsType<DeleteCanvasAction>(undoAction);
             Assert.Equal(ParticipantId, deleteAction.ParticipantId);
             Assert.Equal(new[] {"1", "2"}, deleteAction.ObjectIds);
         }
@@ -41,7 +41,7 @@ namespace Strive.Core.Tests.Services.WhiteboardService.Actions
         public void Execute_WhiteboardHasObjects_AddToCanvas()
         {
             // arrange
-            var action = new CanvasActionAdd(new[]
+            var action = new AddCanvasAction(new[]
             {
                 new CanvasObjectRef(new StoredCanvasObject(_line, "3"), 0),
                 new CanvasObjectRef(new StoredCanvasObject(_text, "4"), null),
@@ -61,7 +61,7 @@ namespace Strive.Core.Tests.Services.WhiteboardService.Actions
                 "3", "1", "2", "4",
             }, resultCanvas.Objects.Select(x => x.Id));
 
-            var deleteAction = Assert.IsType<CanvasActionDelete>(undoAction);
+            var deleteAction = Assert.IsType<DeleteCanvasAction>(undoAction);
             Assert.Equal(ParticipantId, deleteAction.ParticipantId);
             Assert.Equal(new[] {"3", "4"}, deleteAction.ObjectIds);
         }

@@ -21,7 +21,9 @@ namespace Strive.Core.Services.WhiteboardService.UseCases
 
         public Task<Unit> Handle(PushActionRequest request, CancellationToken cancellationToken)
         {
-            var (conferenceId, roomId, whiteboardId, action) = request;
+            var (conferenceId, roomId, whiteboardId, participantId, pushAction) = request;
+
+            var action = pushAction.ConvertToAction(participantId);
 
             Whiteboard Commit(Whiteboard whiteboard)
             {
