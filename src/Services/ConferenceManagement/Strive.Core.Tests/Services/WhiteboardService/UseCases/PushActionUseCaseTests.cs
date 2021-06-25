@@ -8,6 +8,7 @@ using Strive.Core.Services;
 using Strive.Core.Services.WhiteboardService;
 using Strive.Core.Services.WhiteboardService.Actions;
 using Strive.Core.Services.WhiteboardService.CanvasData;
+using Strive.Core.Services.WhiteboardService.PushActions;
 using Strive.Core.Services.WhiteboardService.Requests;
 using Strive.Core.Services.WhiteboardService.UseCases;
 using Strive.Tests.Utils;
@@ -20,8 +21,7 @@ namespace Strive.Core.Tests.Services.WhiteboardService.UseCases
         private readonly Mock<IMediator> _mediator = new();
         private readonly Mock<ICanvasActionUtils> _actionUtils = new();
 
-        private readonly CanvasAction _addAction = new AddCanvasAction(
-            new[] {new CanvasObjectRef(new StoredCanvasObject(new CanvasLine(), "2345"), null)}, ParticipantId);
+        private readonly AddCanvasPushAction _addAction = new(new CanvasLine());
 
         private PushActionUseCase Create()
         {
@@ -36,8 +36,8 @@ namespace Strive.Core.Tests.Services.WhiteboardService.UseCases
             var capturedRequest = _mediator.CaptureRequest<UpdateWhiteboardRequest, Unit>();
 
             await useCase.Handle(
-                new PushActionRequest(ConferenceId, RoomId, WhiteboardId,
-                    new DeleteCanvasAction(new[] {"1", "2"}, ParticipantId)), CancellationToken.None);
+                new PushActionRequest(ConferenceId, RoomId, WhiteboardId, ParticipantId,
+                    new DeleteCanvasPushAction(new[] {"1", "2"})), CancellationToken.None);
 
             // act
             var error = Assert.Throws<IdErrorException>(() => Execute(capturedRequest,
@@ -55,7 +55,7 @@ namespace Strive.Core.Tests.Services.WhiteboardService.UseCases
             var useCase = Create();
             var capturedRequest = _mediator.CaptureRequest<UpdateWhiteboardRequest, Unit>();
 
-            await useCase.Handle(new PushActionRequest(ConferenceId, RoomId, WhiteboardId, _addAction),
+            await useCase.Handle(new PushActionRequest(ConferenceId, RoomId, WhiteboardId, ParticipantId, _addAction),
                 CancellationToken.None);
 
             // act
@@ -76,7 +76,7 @@ namespace Strive.Core.Tests.Services.WhiteboardService.UseCases
             var useCase = Create();
             var capturedRequest = _mediator.CaptureRequest<UpdateWhiteboardRequest, Unit>();
 
-            await useCase.Handle(new PushActionRequest(ConferenceId, RoomId, WhiteboardId, _addAction),
+            await useCase.Handle(new PushActionRequest(ConferenceId, RoomId, WhiteboardId, ParticipantId, _addAction),
                 CancellationToken.None);
 
             // act
@@ -95,7 +95,7 @@ namespace Strive.Core.Tests.Services.WhiteboardService.UseCases
             var useCase = Create();
             var capturedRequest = _mediator.CaptureRequest<UpdateWhiteboardRequest, Unit>();
 
-            await useCase.Handle(new PushActionRequest(ConferenceId, RoomId, WhiteboardId, _addAction),
+            await useCase.Handle(new PushActionRequest(ConferenceId, RoomId, WhiteboardId, ParticipantId, _addAction),
                 CancellationToken.None);
 
             // act
@@ -104,8 +104,13 @@ namespace Strive.Core.Tests.Services.WhiteboardService.UseCases
                 {
                     {
                         ParticipantId,
-                        new ParticipantWhiteboardState(ImmutableList<VersionedAction>.Empty,
-                            new[] {new VersionedAction(_addAction, 45)}.ToImmutableList())
+                        new ParticipantWhiteboardState(ImmutableList<VersionedAction>.Empty, new[]
+                        {
+                            new VersionedAction(new AddCanvasAction(new[]
+                            {
+                                new CanvasObjectRef(new StoredCanvasObject(_addAction.Object, "123"), null),
+                            }, ParticipantId), 45),
+                        }.ToImmutableList())
                     },
                 }, 56));
 
