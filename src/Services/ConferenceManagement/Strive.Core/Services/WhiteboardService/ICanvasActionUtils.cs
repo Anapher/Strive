@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.JsonPatch;
 using Strive.Core.Services.WhiteboardService.CanvasData;
 
-namespace Strive.Core.Services.WhiteboardService.Actions
+namespace Strive.Core.Services.WhiteboardService
 {
     public interface ICanvasActionUtils
     {

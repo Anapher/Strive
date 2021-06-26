@@ -1,7 +1,7 @@
 ﻿using JsonPatchGenerator;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Operations;
-using Strive.Core.Services.WhiteboardService.Actions;
+using Strive.Core.Services.WhiteboardService;
 using Strive.Core.Services.WhiteboardService.CanvasData;
 using Strive.Infrastructure.Serialization;
 

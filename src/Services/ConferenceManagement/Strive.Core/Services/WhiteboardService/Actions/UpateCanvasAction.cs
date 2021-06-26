@@ -11,7 +11,8 @@ namespace Strive.Core.Services.WhiteboardService.Actions
         /// <summary>
         ///     Execute the update on the canvas. If no object could be updated, return null
         /// </summary>
-        public override WhiteboardCanvasUpdate? Execute(WhiteboardCanvas canvas, ICanvasActionUtils utils)
+        public override WhiteboardCanvasUpdate? Execute(WhiteboardCanvas canvas, ICanvasActionUtils utils,
+            int nextVersion)
         {
             var restoreObjects = new List<CanvasObjectPatch>();
             var updatedObjects = canvas.Objects.ToList();
@@ -27,7 +28,7 @@ namespace Strive.Core.Services.WhiteboardService.Actions
                 var updated = original.Data with { }; // clone
 
                 patch.Patch.ApplyTo(updated);
-                updatedObjects[index] = new StoredCanvasObject(updated, original.Id);
+                updatedObjects[index] = new VersionedCanvasObject(updated, original.Id, nextVersion);
 
                 var undoPatch = utils.CreatePatch(updated, original.Data);
                 restoreObjects.Add(new CanvasObjectPatch(undoPatch, original.Id));

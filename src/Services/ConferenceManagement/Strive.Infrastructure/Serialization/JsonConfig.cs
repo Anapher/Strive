@@ -9,7 +9,7 @@ using Newtonsoft.Json.Serialization;
 using Strive.Core.Services.Poll;
 using Strive.Core.Services.Scenes;
 using Strive.Core.Services.Scenes.Scenes;
-using Strive.Core.Services.WhiteboardService.Actions;
+using Strive.Core.Services.WhiteboardService;
 using Strive.Core.Services.WhiteboardService.CanvasData;
 using Strive.Core.Services.WhiteboardService.PushActions;
 using Strive.Infrastructure.Extensions;

@@ -1,6 +1,4 @@
-﻿using Strive.Core.Services.WhiteboardService.Actions;
-
-namespace Strive.Core.Services.WhiteboardService.PushActions
+﻿namespace Strive.Core.Services.WhiteboardService
 {
     public abstract record CanvasPushAction
     {

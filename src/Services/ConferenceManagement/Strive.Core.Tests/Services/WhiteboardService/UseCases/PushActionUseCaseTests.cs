@@ -108,7 +108,7 @@ namespace Strive.Core.Tests.Services.WhiteboardService.UseCases
                         {
                             new VersionedAction(new AddCanvasAction(new[]
                             {
-                                new CanvasObjectRef(new StoredCanvasObject(_addAction.Object, "123"), null),
+                                new CanvasObjectRef(new VersionedCanvasObject(_addAction.Object, "123", 0), null),
                             }, ParticipantId), 45),
                         }.ToImmutableList())
                     },

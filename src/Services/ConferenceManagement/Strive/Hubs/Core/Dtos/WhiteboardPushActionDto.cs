@@ -1,4 +1,4 @@
-﻿using Strive.Core.Services.WhiteboardService.PushActions;
+﻿using Strive.Core.Services.WhiteboardService;
 
 namespace Strive.Hubs.Core.Dtos
 {

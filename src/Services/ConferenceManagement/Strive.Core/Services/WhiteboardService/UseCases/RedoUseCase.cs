@@ -37,7 +37,7 @@ namespace Strive.Core.Services.WhiteboardService.UseCases
                 var (redoAction, updatedStates) =
                     WhiteboardUtils.PopParticipantRedoAction(whiteboard.ParticipantStates, participantId);
 
-                var update = redoAction.Action.Execute(whiteboard.Canvas, _canvasActionUtils);
+                var update = redoAction.Action.Execute(whiteboard.Canvas, _canvasActionUtils, whiteboard.Version + 1);
                 if (update == null)
                 {
                     return whiteboard with {ParticipantStates = updatedStates};

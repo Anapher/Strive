@@ -16,7 +16,7 @@ namespace Strive.Core.Tests.Services.WhiteboardService.Actions
             var canvas = WhiteboardCanvas.Empty with {PanX = 1, PanY = 2};
 
             // act
-            var (updatedCanvas, undoAction) = action.Execute(canvas, null!);
+            var (updatedCanvas, undoAction) = action.Execute(canvas, null!, 1)!;
 
             // assert
             Assert.Equal(4, updatedCanvas.PanX);

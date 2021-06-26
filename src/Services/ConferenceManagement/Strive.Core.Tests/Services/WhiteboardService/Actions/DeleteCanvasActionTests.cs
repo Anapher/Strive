@@ -20,7 +20,7 @@ namespace Strive.Core.Tests.Services.WhiteboardService.Actions
             var canvas = WhiteboardCanvas.Empty;
 
             // act
-            var result = action.Execute(canvas, null!);
+            var result = action.Execute(canvas, null!, 2);
 
             // assert
             Assert.Null(result);
@@ -33,17 +33,17 @@ namespace Strive.Core.Tests.Services.WhiteboardService.Actions
             var action = new DeleteCanvasAction(new[] {"1"}, ParticipantId);
             var canvas = WhiteboardCanvas.Empty with
             {
-                Objects = new[] {new StoredCanvasObject(_line, "1"), new StoredCanvasObject(_text, "2")},
+                Objects = new[] {new VersionedCanvasObject(_line, "1", 1), new VersionedCanvasObject(_text, "2", 2)},
             };
 
             // act
-            var update = action.Execute(canvas, null!);
+            var update = action.Execute(canvas, null!, 3);
             Assert.NotNull(update);
 
             var (updatedCanvas, undoAction) = update!;
 
             // assert
-            Assert.Equal(new[] {new StoredCanvasObject(_text, "2")}, updatedCanvas.Objects);
+            Assert.Equal(new[] {new VersionedCanvasObject(_text, "2", 2)}, updatedCanvas.Objects);
             Assert.Equal(ParticipantId, undoAction.ParticipantId);
 
             var undoAdd = Assert.IsType<AddCanvasAction>(undoAction);

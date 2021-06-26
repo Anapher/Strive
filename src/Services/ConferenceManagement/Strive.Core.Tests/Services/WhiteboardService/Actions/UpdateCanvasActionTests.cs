@@ -29,17 +29,17 @@ namespace Strive.Core.Tests.Services.WhiteboardService.Actions
 
             var canvas = WhiteboardCanvas.Empty with
             {
-                Objects = new[] {new StoredCanvasObject(new CanvasLine {ScaleY = 1}, "1")},
+                Objects = new[] {new VersionedCanvasObject(new CanvasLine {ScaleY = 1}, "1", 1)},
             };
 
             // act
-            var update = action.Execute(canvas, _utils.Object);
+            var update = action.Execute(canvas, _utils.Object, 2);
             Assert.NotNull(update);
 
             var (updatedCanvas, undoAction) = update!;
 
             // assert
-            Assert.Equal(new[] {new StoredCanvasObject(new CanvasLine {ScaleY = 2}, "1")}, updatedCanvas.Objects);
+            Assert.Equal(new[] {new VersionedCanvasObject(new CanvasLine {ScaleY = 2}, "1", 2)}, updatedCanvas.Objects);
 
             var undoUpdate = Assert.IsType<UpateCanvasAction>(undoAction);
             Assert.Equal(new[] {new CanvasObjectPatch(_undoPatch, "1")}, undoUpdate.Patches);
@@ -57,7 +57,7 @@ namespace Strive.Core.Tests.Services.WhiteboardService.Actions
             var canvas = WhiteboardCanvas.Empty;
 
             // act
-            var update = action.Execute(canvas, _utils.Object);
+            var update = action.Execute(canvas, _utils.Object, 1);
 
             // assert
             Assert.Null(update);

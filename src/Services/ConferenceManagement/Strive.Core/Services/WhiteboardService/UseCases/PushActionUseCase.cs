@@ -27,7 +27,7 @@ namespace Strive.Core.Services.WhiteboardService.UseCases
 
             Whiteboard Commit(Whiteboard whiteboard)
             {
-                var update = action.Execute(whiteboard.Canvas, _canvasActionUtils);
+                var update = action.Execute(whiteboard.Canvas, _canvasActionUtils, whiteboard.Version + 1);
                 if (update == null)
                 {
                     throw WhiteboardError.WhiteboardActionHadNoEffect.ToException();
