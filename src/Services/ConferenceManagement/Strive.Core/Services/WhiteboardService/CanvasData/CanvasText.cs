@@ -1,4 +1,6 @@
-﻿#pragma warning disable 8618
+﻿using Newtonsoft.Json.Linq;
+
+#pragma warning disable 8618
 
 namespace Strive.Core.Services.WhiteboardService.CanvasData
 {
@@ -17,5 +19,7 @@ namespace Strive.Core.Services.WhiteboardService.CanvasData
         public string TextAlign { get; set; }
         public string TextBackgroundColor { get; set; }
         public bool Underline { get; set; }
+        public JToken Styles { get; set; }
+        public object Path { get; set; }
     }
 }

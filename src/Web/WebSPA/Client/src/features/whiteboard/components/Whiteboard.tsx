@@ -1,10 +1,20 @@
 import React, { useEffect, useRef, useState } from 'react';
-import WhiteboardController from '../whiteboard-controller';
-import ToolsContainer, { getTool, ToolType } from './ToolsContainer';
 import '../fabric-style';
+import { CanvasPushAction, WhiteboardCanvas } from '../types';
+import WhiteboardController from '../whiteboard-controller';
 import { WhiteboardToolOptions } from '../whiteboard-tool';
+import ToolsContainer, { getTool, ToolType } from './ToolsContainer';
 
-export default function Whiteboard() {
+type Props = {
+   canvas: WhiteboardCanvas;
+   onPushAction: (action: CanvasPushAction) => void;
+   canUndo: boolean;
+   onUndo: () => void;
+   canRedo: boolean;
+   onRedo: () => void;
+};
+
+export default function Whiteboard({ canvas, onPushAction, canUndo, onUndo, canRedo, onRedo }: Props) {
    const [selectedTool, setSelectedTool] = useState<ToolType>('select');
    const [options, setOptions] = useState<WhiteboardToolOptions>({ color: 'black', fontSize: 36, lineWidth: 8 });
 
@@ -16,6 +26,23 @@ export default function Whiteboard() {
          controllerRef.current = new WhiteboardController(canvasRef.current, getTool(selectedTool), options);
       }
    }, [canvasRef.current]);
+
+   useEffect(() => {
+      if (controllerRef.current) {
+         controllerRef.current.updateCanvas(canvas);
+      }
+   }, [controllerRef.current, canvas]);
+
+   useEffect(() => {
+      const controller = controllerRef.current;
+      if (controller) {
+         controller.on('pushAction', onPushAction);
+
+         return () => {
+            controller.off('pushAction', onPushAction);
+         };
+      }
+   }, [onPushAction, controllerRef.current]);
 
    const handleChangeSelectedTool = (type: ToolType) => {
       setSelectedTool(type);
@@ -57,6 +84,10 @@ export default function Whiteboard() {
                   options={options}
                   onOptionsChanged={handleOptionsChanged}
                   onClear={handleClear}
+                  canUndo={canUndo}
+                  onUndo={onUndo}
+                  canRedo={canRedo}
+                  onRedo={onRedo}
                />
             </div>
             <div style={{ width: 1280, height: 720 }}>

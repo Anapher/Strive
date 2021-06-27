@@ -29,6 +29,13 @@ export default class PanTool extends WhiteboardToolBase {
       canvas.defaultCursor = 'grab';
    }
 
+   configureNewObjects(obj: fabric.Object[]): void {
+      obj.forEach((o) => {
+         o.selectable = false;
+         o.evented = false;
+      });
+   }
+
    onMouseDown(event: IEvent): void {
       const canvas = this.getCanvas();
 
@@ -60,14 +67,25 @@ export default class PanTool extends WhiteboardToolBase {
       this.throttledUpdate.cancel();
 
       if (this.totalPanned) {
-         this.emit('update', { type: 'pan', moveBy: this.totalPanned });
+         const canvas = this.getCanvas();
+         const currentPanned = ((canvas as any).currentPan as Point) ?? { x: 0, y: 0 };
+         this.emit('update', {
+            type: 'pan',
+            panX: currentPanned.x - this.totalPanned.x,
+            panY: currentPanned.y - this.totalPanned.y,
+         });
       }
+
+      console.log(this.getCanvas().getObjects());
    }
 
    onUpdatePan(moveBy: Point): void {
-      this.emit('update', {
-         type: 'panning',
-         moveBy,
-      });
+      const canvas = this.getCanvas();
+
+      // this.emit('update', {
+      //    type: 'pan',
+      //    panX: moveBy.x,
+      //    panY: moveBy.y,
+      // });
    }
 }

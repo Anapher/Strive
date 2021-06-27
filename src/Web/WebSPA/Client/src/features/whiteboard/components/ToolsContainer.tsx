@@ -99,6 +99,11 @@ type Props = {
    onOptionsChanged: (options: WhiteboardToolOptions) => void;
 
    onClear: () => void;
+
+   canUndo: boolean;
+   onUndo: () => void;
+   canRedo: boolean;
+   onRedo: () => void;
 };
 
 export default function ToolsContainer({
@@ -107,6 +112,11 @@ export default function ToolsContainer({
    options,
    onOptionsChanged,
    onClear,
+
+   canUndo,
+   onUndo,
+   canRedo,
+   onRedo,
 }: Props) {
    const classes = useStyles();
    const requiredOptions = tools[selectedTool].options;
@@ -136,8 +146,8 @@ export default function ToolsContainer({
             {requiredOptions.includes('fontSize') && <ToolIcon icon={<FormatSize fontSize="small" />} />}
          </div>
          <Divider />
-         <ToolIcon icon={<Undo fontSize="small" />} />
-         <ToolIcon icon={<Redo fontSize="small" />} />
+         <ToolIcon disabled={!canUndo} onClick={onUndo} icon={<Undo fontSize="small" />} />
+         <ToolIcon disabled={!canRedo} onClick={onRedo} icon={<Redo fontSize="small" />} />
 
          <Divider style={{ marginTop: 64 }} />
          <ClearWhiteboardButton onClick={onClear} />

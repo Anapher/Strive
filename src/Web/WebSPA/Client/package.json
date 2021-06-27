@@ -32,6 +32,7 @@
       "axios": "0.21.1",
       "classnames": "^2.3.1",
       "cronstrue": "1.113.0",
+      "cuid": "^2.1.8",
       "d3-scale": "^3.3.0",
       "d3-scale-chromatic": "^2.0.0",
       "emoji-regex": "^9.2.0",

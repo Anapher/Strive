@@ -1,8 +1,12 @@
 import { fabric } from 'fabric';
 import { Canvas, IEvent } from 'fabric/fabric-impl';
+import _ from 'lodash';
+import { objectToJson } from '../fabric-utils';
 import { WhiteboardToolBase } from '../whiteboard-tool';
 
 export default class TextTool extends WhiteboardToolBase {
+   private pendingTexts = new Array<fabric.IText>();
+
    configureCanvas(canvas: Canvas) {
       super.configureCanvas(canvas);
 
@@ -15,6 +19,19 @@ export default class TextTool extends WhiteboardToolBase {
       });
 
       canvas.defaultCursor = 'text';
+   }
+
+   configureNewObjects(obj: fabric.Object[]): void {
+      obj.forEach((o) => {
+         o.selectable = false;
+         o.evented = false;
+      });
+   }
+
+   dispose() {
+      for (const text of this.pendingTexts) {
+         text.exitEditing();
+      }
    }
 
    onMouseDown(event: IEvent): void {
@@ -52,5 +69,29 @@ export default class TextTool extends WhiteboardToolBase {
             canvas.requestRenderAll();
          }
       });
+
+      const unsubscribeHandler: { unsub: () => void } = {
+         unsub: () => {
+            //empty
+         },
+      };
+
+      const addHandler = () => {
+         if (iText.text) {
+            this.emit('update', { type: 'add', object: objectToJson(iText) });
+         }
+
+         _.remove(this.pendingTexts, iText);
+
+         unsubscribeHandler.unsub();
+      };
+
+      iText.on('editing:exited', addHandler);
+
+      unsubscribeHandler.unsub = () => {
+         iText.off('editing:exited', addHandler);
+      };
+
+      this.pendingTexts.push(iText);
    }
 }

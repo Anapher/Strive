@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import EventEmitter from 'events';
+import { fabric } from 'fabric';
 import { Canvas, IEvent } from 'fabric/fabric-impl';
 import { TypedEmitter } from 'tiny-typed-emitter';
-import { WhiteboardAction } from './action-types';
+import { CanvasPushAction } from './types';
 
 export type WhiteboardToolOptions = {
    lineWidth: number;
@@ -17,6 +17,8 @@ export default interface WhiteboardTool extends TypedEmitter<WebRtcConnectionEve
    /** called immediately after configureCanvas() and when selected if the options changed */
    applyOptions(options: WhiteboardToolOptions): void;
 
+   configureNewObjects(obj: fabric.Object[]): void;
+
    onMouseDown(event: IEvent): void;
    onMouseUp(event: IEvent): void;
    onMouseMove(event: IEvent): void;
@@ -26,10 +28,13 @@ export default interface WhiteboardTool extends TypedEmitter<WebRtcConnectionEve
 }
 
 interface WebRtcConnectionEvents {
-   update: (action: WhiteboardAction) => void;
+   update: (action: CanvasPushAction) => void;
 }
 
 export abstract class WhiteboardToolBase extends TypedEmitter<WebRtcConnectionEvents> implements WhiteboardTool {
+   configureNewObjects(obj: fabric.Object[]): void {
+      // do nothing
+   }
    protected fs: Canvas | undefined;
    protected options: WhiteboardToolOptions | undefined;
 

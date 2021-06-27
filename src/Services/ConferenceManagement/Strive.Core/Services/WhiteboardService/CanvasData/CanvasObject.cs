@@ -15,6 +15,8 @@ namespace Strive.Core.Services.WhiteboardService.CanvasData
         public int StrokeWidth { get; set; }
         public string StrokeLineCap { get; set; }
         public int StrokeDashOffset { get; set; }
+        public string Shadow { get; set; }
+        public string StrokeDashArray { get; set; }
         public string StrokeLineJoin { get; set; }
         public bool StrokeUniform { get; set; }
         public int StrokeMiterLimit { get; set; }

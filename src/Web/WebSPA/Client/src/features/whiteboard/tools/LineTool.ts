@@ -12,12 +12,20 @@ export default class LineTool extends WhiteboardToolBase {
 
       canvas.isDrawingMode = false;
       canvas.selection = false;
+
       canvas.forEachObject((o) => {
          o.selectable = false;
          o.evented = false;
       });
 
       canvas.defaultCursor = 'default';
+   }
+
+   configureNewObjects(obj: fabric.Object[]): void {
+      obj.forEach((o) => {
+         o.selectable = false;
+         o.evented = false;
+      });
    }
 
    onMouseDown(event: IEvent): void {
@@ -46,7 +54,6 @@ export default class LineTool extends WhiteboardToolBase {
 
       const pointer = canvas.getPointer(event.e);
       this.currentLine.set({ x2: pointer.x, y2: pointer.y });
-      this.currentLine.setCoords();
 
       canvas.renderAll();
    }
@@ -61,7 +68,7 @@ export default class LineTool extends WhiteboardToolBase {
 
    onFinish(): void {
       if (this.currentLine) {
-         this.emit('update', { type: 'added', id: '', obj: this.currentLine.toJSON() });
+         this.emit('update', { type: 'add', object: this.currentLine.toJSON() });
          this.currentLine = undefined;
       }
    }

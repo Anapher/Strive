@@ -14,4 +14,11 @@ export default class SelectTool extends WhiteboardToolBase {
 
       canvas.defaultCursor = 'default';
    }
+
+   configureNewObjects(obj: fabric.Object[]): void {
+      obj.forEach((o) => {
+         o.selectable = true;
+         o.evented = true;
+      });
+   }
 }
