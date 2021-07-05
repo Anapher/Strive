@@ -504,6 +504,22 @@ namespace Strive.Hubs.Core
             return await actionInvoke.Send();
         }
 
+        public async Task<SuccessOrError<Unit>> WhiteboardLiveAction(WhiteboardLiveActionDto dto)
+        {
+            var participant = GetContextParticipant();
+
+            var result = await GetRoomIdAndCheckIfUserCanModifyWhiteboard(dto.WhiteboardId);
+            if (!result.Success) return result.Error;
+
+            var (roomId, anyoneCanEdit) = result.Response;
+            var actionInvoke = GetInvoker().Create(new PushLiveActionRequest(participant.ConferenceId, roomId,
+                participant.Id, dto.WhiteboardId, dto.Action));
+            if (!anyoneCanEdit)
+                actionInvoke = actionInvoke.RequirePermissions(DefinedPermissions.Whiteboard.CanCreate);
+
+            return await actionInvoke.Send();
+        }
+
         public async Task<SuccessOrError<Unit>> WhiteboardUndo(string whiteboardId)
         {
             var participant = GetContextParticipant();

@@ -11,9 +11,11 @@ using Strive.Core.Services.Rooms;
 using Strive.Core.Services.WhiteboardService;
 using Strive.Core.Services.WhiteboardService.Actions;
 using Strive.Core.Services.WhiteboardService.CanvasData;
+using Strive.Core.Services.WhiteboardService.LiveActions;
 using Strive.Core.Services.WhiteboardService.PushActions;
 using Strive.Hubs.Core;
 using Strive.Hubs.Core.Dtos;
+using Strive.Hubs.Core.Responses;
 using Strive.IntegrationTests._Helpers;
 using Xunit;
 using Xunit.Abstractions;
@@ -302,6 +304,34 @@ namespace Strive.IntegrationTests.Services
             // assert
             AssertFailed(result);
             AssertErrorCode(ServiceErrorCode.Whiteboard_RedoNotAvailable, result.Error!);
+        }
+
+        [Fact]
+        public async Task WhiteboardLiveAction_Allowed_PublishToAll()
+        {
+            // arrange
+            var (conn, conference) = await ConnectToOpenedConference();
+            var whiteboardId = await CreateWhiteboard(conn);
+
+            var olaf = CreateUser();
+            var olafConnection = await ConnectUserToConference(olaf, conference);
+
+            var notification = new TaskCompletionSource<WhiteboardLiveUpdateDto>();
+            olafConnection.Hub.On(CoreHubMessages.OnWhiteboardLiveUpdate,
+                (WhiteboardLiveUpdateDto dto) => notification.SetResult(dto));
+
+            // act
+            var liveAction = new DrawingLineCanvasLiveAction("black", 4, 0, 0, 5, 5);
+            var result = await conn.Hub.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.WhiteboardLiveAction),
+                new WhiteboardLiveActionDto(whiteboardId, liveAction));
+
+            // assert
+            AssertSuccess(result);
+
+            var receivedUpdate = await notification.Task.WithDefaultTimeout();
+            Assert.Equal(conn.User.Sub, receivedUpdate.ParticipantId);
+            Assert.Equal(whiteboardId, receivedUpdate.WhiteboardId);
+            Assert.Equal(liveAction, receivedUpdate.Action);
         }
     }
 }

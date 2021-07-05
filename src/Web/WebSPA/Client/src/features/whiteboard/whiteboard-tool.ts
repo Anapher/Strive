@@ -2,7 +2,7 @@
 import { fabric } from 'fabric';
 import { Canvas, IEvent } from 'fabric/fabric-impl';
 import { TypedEmitter } from 'tiny-typed-emitter';
-import { CanvasPushAction } from './types';
+import { CanvasLiveAction, CanvasPushAction } from './types';
 
 export type WhiteboardToolOptions = {
    lineWidth: number;
@@ -29,6 +29,7 @@ export default interface WhiteboardTool extends TypedEmitter<WebRtcConnectionEve
 
 interface WebRtcConnectionEvents {
    update: (action: CanvasPushAction) => void;
+   updating: (action: CanvasLiveAction) => void;
 }
 
 export abstract class WhiteboardToolBase extends TypedEmitter<WebRtcConnectionEvents> implements WhiteboardTool {

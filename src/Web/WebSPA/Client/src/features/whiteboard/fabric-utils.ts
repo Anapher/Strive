@@ -1,4 +1,5 @@
 import { fabric } from 'fabric';
+import { CanvasObject } from './types';
 
 export function objectToJson(obj: fabric.Object) {
    const json = obj.toJSON();
@@ -31,6 +32,13 @@ export function setObjectAbsolutePosition(obj: fabric.Object) {
    }
 }
 
+export function applyObjectConfig(obj: fabric.Object, template: CanvasObject) {
+   obj.set(template);
+   setObjectAbsolutePosition(obj);
+   obj.setCoords();
+   obj.group?.setCoords();
+}
+
 export function getObjectAbsolutePosition(obj: fabric.Object): { left?: number; top?: number } {
    if (!obj.group) return { left: obj.left, top: obj.top };
 
@@ -50,4 +58,20 @@ export function getObjectAbsolutePosition(obj: fabric.Object): { left?: number; 
       left: groupLeft + left + groupWidth / 2,
       top: groupTop + top + groupHeight / 2,
    };
+}
+
+export function getId(obj: fabric.Object) {
+   return (obj as any).id as string;
+}
+
+export function setId(obj: fabric.Object, id: string) {
+   (obj as any).id = id;
+}
+
+export function isLiveObj(obj: fabric.Object) {
+   return (obj as any).isLive;
+}
+
+export function setIsLiveObj(obj: fabric.Object) {
+   (obj as any).isLive = true;
 }

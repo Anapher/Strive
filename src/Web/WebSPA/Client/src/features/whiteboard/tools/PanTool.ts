@@ -1,19 +1,11 @@
-import { Canvas, IEvent } from 'fabric/fabric-impl';
-import { WhiteboardToolBase } from '../whiteboard-tool';
 import { fabric } from 'fabric';
-import _ from 'lodash';
-import { Point } from '../action-types';
+import { Canvas, IEvent } from 'fabric/fabric-impl';
+import { Point } from '../types';
+import { WhiteboardToolBase } from '../whiteboard-tool';
 
 export default class PanTool extends WhiteboardToolBase {
    private startPoint: undefined | Point;
    private totalPanned: undefined | Point;
-   private throttledUpdate: _.DebouncedFunc<(p: Point) => void>;
-
-   constructor() {
-      super();
-
-      this.throttledUpdate = _.throttle(this.onUpdatePan.bind(this), 1000 / 30); // 30 FPS
-   }
 
    configureCanvas(canvas: Canvas) {
       super.configureCanvas(canvas);
@@ -54,38 +46,37 @@ export default class PanTool extends WhiteboardToolBase {
       canvas.relativePan(new fabric.Point(moveBy.x, moveBy.y));
       canvas.requestRenderAll();
 
-      this.throttledUpdate(moveBy);
-
       if (!this.totalPanned) {
          this.totalPanned = { x: 0, y: 0 };
       }
       this.totalPanned = { x: this.totalPanned.x + moveBy.x, y: this.totalPanned.y + moveBy.y };
+
+      this.emit('updating', {
+         type: 'panning',
+         ...this.getAbsolutePan(this.totalPanned),
+      });
    }
 
    onMouseUp(): void {
       this.startPoint = undefined;
-      this.throttledUpdate.cancel();
 
       if (this.totalPanned) {
-         const canvas = this.getCanvas();
-         const currentPanned = ((canvas as any).currentPan as Point) ?? { x: 0, y: 0 };
          this.emit('update', {
             type: 'pan',
-            panX: currentPanned.x - this.totalPanned.x,
-            panY: currentPanned.y - this.totalPanned.y,
+            ...this.getAbsolutePan(this.totalPanned),
          });
+         this.emit('updating', { type: 'end' });
       }
 
       console.log(this.getCanvas().getObjects());
    }
 
-   onUpdatePan(moveBy: Point): void {
+   private getAbsolutePan(totalPanned: Point): { panX: number; panY: number } {
       const canvas = this.getCanvas();
-
-      // this.emit('update', {
-      //    type: 'pan',
-      //    panX: moveBy.x,
-      //    panY: moveBy.y,
-      // });
+      const currentPanned = ((canvas as any).currentPan as Point) ?? { x: 0, y: 0 };
+      return {
+         panX: currentPanned.x - totalPanned.x,
+         panY: currentPanned.y - totalPanned.y,
+      };
    }
 }

@@ -37,5 +37,11 @@ namespace Strive.Hubs.Core
         {
             return clientProxy.SendAsync(CoreHubMessages.OnEquipmentError, message, token);
         }
+
+        public static Task WhiteboardLiveUpdate(this IClientProxy clientProxy, WhiteboardLiveUpdateDto message,
+            CancellationToken token = default)
+        {
+            return clientProxy.SendAsync(CoreHubMessages.OnWhiteboardLiveUpdate, message, token);
+        }
     }
 }

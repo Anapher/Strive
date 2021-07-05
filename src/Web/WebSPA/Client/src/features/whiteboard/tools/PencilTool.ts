@@ -1,18 +1,14 @@
 import { Canvas, IEvent, Point } from 'fabric/fabric-impl';
-import _ from 'lodash';
-import { objectToJson } from '../fabric-utils';
+import { getId, objectToJson } from '../fabric-utils';
 import { WhiteboardToolBase, WhiteboardToolOptions } from '../whiteboard-tool';
 
 export default class PencilTool extends WhiteboardToolBase {
    private isDown = false;
    private lastUpdateIndex = 0;
-   private throttledUpdate: _.DebouncedFunc<() => void>;
    private disposeAction: (() => void) | undefined;
 
    constructor() {
       super();
-
-      this.throttledUpdate = _.throttle(this.onUpdatePath.bind(this), 1000 / 30); // 30 FPS
    }
 
    configureCanvas(canvas: Canvas) {
@@ -51,11 +47,11 @@ export default class PencilTool extends WhiteboardToolBase {
 
    onMouseUp(): void {
       this.isDown = false;
-      this.throttledUpdate.cancel();
+      this.emit('updating', { type: 'end' });
    }
 
    onMouseMove(): void {
-      this.throttledUpdate();
+      this.onUpdatePath();
    }
 
    onUpdatePath(): void {
@@ -67,18 +63,18 @@ export default class PencilTool extends WhiteboardToolBase {
       const addedPoints = points.slice(this.lastUpdateIndex);
       this.lastUpdateIndex = points.length;
 
-      // this.emit('update', {
-      //    type: 'free-drawing',
-      //    color: canvas.freeDrawingBrush.color,
-      //    width: canvas.freeDrawingBrush.width,
-      //    appendPoints: addedPoints.map(({ x, y }) => ({ x, y })),
-      // });
+      this.emit('updating', {
+         type: 'freeDrawing',
+         color: canvas.freeDrawingBrush.color,
+         width: canvas.freeDrawingBrush.width,
+         appendPoints: addedPoints.map(({ x, y }) => ({ x, y })),
+      });
    }
 
    onElementAdded(e: IEvent) {
       if (!e.target) return;
       if (e.target.type !== 'path') return;
-      if ((e.target as any).id) return;
+      if (getId(e.target)) return;
 
       this.emit('update', { type: 'add', object: objectToJson(e.target) });
    }

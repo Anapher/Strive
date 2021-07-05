@@ -1,4 +1,5 @@
 import { Canvas } from 'fabric/fabric-impl';
+import { isLiveObj } from '../fabric-utils';
 import { WhiteboardToolBase } from '../whiteboard-tool';
 
 export default class SelectTool extends WhiteboardToolBase {
@@ -8,8 +9,10 @@ export default class SelectTool extends WhiteboardToolBase {
       canvas.isDrawingMode = false;
       canvas.selection = true;
       canvas.forEachObject((o) => {
-         o.selectable = true;
-         o.evented = true;
+         if (!isLiveObj(o)) {
+            o.selectable = true;
+            o.evented = true;
+         }
       });
 
       canvas.defaultCursor = 'default';
@@ -17,8 +20,10 @@ export default class SelectTool extends WhiteboardToolBase {
 
    configureNewObjects(obj: fabric.Object[]): void {
       obj.forEach((o) => {
-         o.selectable = true;
-         o.evented = true;
+         if (!isLiveObj(o)) {
+            o.selectable = true;
+            o.evented = true;
+         }
       });
    }
 }

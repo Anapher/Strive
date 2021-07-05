@@ -185,7 +185,6 @@ namespace Strive
                         if (rabbitMqOptions.RabbitMq != null)
                             configurator.ConfigureOptions(rabbitMqOptions.RabbitMq);
 
-                        configurator.UseHealthCheck(context);
                         configurator.UseDelayedMessageScheduler();
 
                         configurator.ConfigureEndpoints(context);

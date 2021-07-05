@@ -1,17 +1,58 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import * as coreHub from 'src/core-hub';
+import { selectParticipantsOfCurrentRoom } from 'src/features/rooms/selectors';
 import Whiteboard from 'src/features/whiteboard/components/Whiteboard';
 import { selectWhiteboard } from 'src/features/whiteboard/selectors';
-import { CanvasPushAction } from 'src/features/whiteboard/types';
+import { CanvasPushAction, WhiteboardLiveActionDto, WhiteboardLiveUpdateDto } from 'src/features/whiteboard/types';
+import { LiveUpdateHandler } from 'src/features/whiteboard/whiteboard-controller';
 import useMyParticipantId from 'src/hooks/useMyParticipantId';
 import { RootState } from 'src/store';
+import useSignalRHub from 'src/store/signal/useSignalRHub';
 import { RenderSceneProps, WhiteboardScene } from '../../types';
 
 export default function RenderWhiteboard({ scene }: RenderSceneProps<WhiteboardScene>) {
    const whiteboard = useSelector((state: RootState) => selectWhiteboard(state, scene.id));
    const dispatch = useDispatch();
    const myId = useMyParticipantId();
+   const paricipants = useSelector(selectParticipantsOfCurrentRoom);
+   const signalr = useSignalRHub();
+   const [liveUpdater, setLiveUpdater] = useState<LiveUpdateHandler | undefined>(undefined);
+
+   useEffect(() => {
+      if (!signalr) {
+         setLiveUpdater(undefined);
+      } else {
+         const state: { disposed: boolean; subscriptions: any[] } = {
+            disposed: false,
+            subscriptions: [],
+         };
+
+         setLiveUpdater({
+            submit: (action) => {
+               const payload: WhiteboardLiveActionDto = { whiteboardId: scene.id, action };
+               signalr.send('WhiteboardLiveAction', payload);
+            },
+            on: (method) => {
+               console.log('subscribe');
+
+               if (state.disposed) return;
+
+               const handler = (arg: WhiteboardLiveUpdateDto) => {
+                  if (arg.participantId === myId) return;
+                  method(arg);
+               };
+               signalr.on('OnWhiteboardLiveUpdate', handler);
+               state.subscriptions.push(handler);
+            },
+         });
+
+         return () => {
+            state.disposed = true;
+            state.subscriptions.forEach((sub) => signalr.off('OnWhiteboardLiveUpdate', sub));
+         };
+      }
+   }, [signalr]);
 
    if (!whiteboard) return null;
 
@@ -37,6 +78,8 @@ export default function RenderWhiteboard({ scene }: RenderSceneProps<WhiteboardS
          canRedo={Boolean(myState?.canRedo)}
          onUndo={handleUndo}
          onRedo={handleRedo}
+         participants={paricipants}
+         liveUpdateHandler={liveUpdater}
       />
    );
 }

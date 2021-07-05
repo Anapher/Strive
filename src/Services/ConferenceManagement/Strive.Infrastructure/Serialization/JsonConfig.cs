@@ -84,6 +84,9 @@ namespace Strive.Infrastructure.Serialization
             settings.Converters.Add(CreateJsonConverter<CanvasPushAction>(typeof(AddCanvasPushAction), "type",
                 x => x.TrimEnd("CanvasPushAction").ToCamelCase()));
 
+            settings.Converters.Add(CreateJsonConverter<CanvasLiveAction>(typeof(CanvasLiveAction), "type",
+                x => x.TrimEnd("CanvasLiveAction").ToCamelCase()));
+
             var objectNameMatch = new Dictionary<string, string>
                 {{nameof(CanvasText), "i-text"}, {nameof(CanvasLine), "line"}, {nameof(CanvasPath), "path"}};
 

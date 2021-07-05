@@ -55,7 +55,17 @@ export default class LineTool extends WhiteboardToolBase {
       const pointer = canvas.getPointer(event.e);
       this.currentLine.set({ x2: pointer.x, y2: pointer.y });
 
-      canvas.renderAll();
+      canvas.requestRenderAll();
+
+      this.emit('updating', {
+         type: 'drawingLine',
+         strokeWidth: this.currentLine.strokeWidth as number,
+         color: this.currentLine.fill as string,
+         startX: this.currentLine.x1 as number,
+         startY: this.currentLine.y1 as number,
+         endX: this.currentLine.x2 as number,
+         endY: this.currentLine.y2 as number,
+      });
    }
 
    onMouseUp(): void {
@@ -69,6 +79,7 @@ export default class LineTool extends WhiteboardToolBase {
    onFinish(): void {
       if (this.currentLine) {
          this.emit('update', { type: 'add', object: this.currentLine.toJSON() });
+         this.emit('updating', { type: 'end' });
          this.currentLine = undefined;
       }
    }

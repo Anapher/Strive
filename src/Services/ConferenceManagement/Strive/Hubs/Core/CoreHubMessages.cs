@@ -10,6 +10,7 @@ namespace Strive.Hubs.Core
         public const string ChatMessage = "ChatMessage";
 
         public const string OnEquipmentError = "OnEquipmentError";
+        public const string OnWhiteboardLiveUpdate = "OnWhiteboardLiveUpdate";
 
         public const string OnRequestDisconnect = "OnRequestDisconnect";
     }

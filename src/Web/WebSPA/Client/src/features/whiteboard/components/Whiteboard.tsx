@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import '../fabric-style';
 import { CanvasPushAction, WhiteboardCanvas } from '../types';
-import WhiteboardController from '../whiteboard-controller';
+import WhiteboardController, { LiveUpdateHandler } from '../whiteboard-controller';
 import { WhiteboardToolOptions } from '../whiteboard-tool';
 import ToolsContainer, { getTool, ToolType } from './ToolsContainer';
 
@@ -12,9 +12,20 @@ type Props = {
    onUndo: () => void;
    canRedo: boolean;
    onRedo: () => void;
+   participants: string[];
+   liveUpdateHandler?: LiveUpdateHandler;
 };
 
-export default function Whiteboard({ canvas, onPushAction, canUndo, onUndo, canRedo, onRedo }: Props) {
+export default function Whiteboard({
+   canvas,
+   onPushAction,
+   canUndo,
+   onUndo,
+   canRedo,
+   onRedo,
+   liveUpdateHandler,
+   participants,
+}: Props) {
    const [selectedTool, setSelectedTool] = useState<ToolType>('select');
    const [options, setOptions] = useState<WhiteboardToolOptions>({ color: 'black', fontSize: 36, lineWidth: 8 });
 
@@ -43,6 +54,17 @@ export default function Whiteboard({ canvas, onPushAction, canUndo, onUndo, canR
          };
       }
    }, [onPushAction, controllerRef.current]);
+
+   useEffect(() => {
+      const controller = controllerRef.current;
+      if (controller && liveUpdateHandler) {
+         controller.setupLiveUpdateHandler(liveUpdateHandler);
+      }
+   }, [liveUpdateHandler, controllerRef.current]);
+
+   useEffect(() => {
+      controllerRef.current?.updateParticipants(participants);
+   }, [participants, controllerRef.current]);
 
    const handleChangeSelectedTool = (type: ToolType) => {
       setSelectedTool(type);
