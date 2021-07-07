@@ -1,6 +1,7 @@
 import { fabric } from 'fabric';
 import { applyPatch } from 'fast-json-patch';
-import { applyObjectConfig, getId, objectToJson, setIsLiveObj } from './fabric-utils';
+import _ from 'lodash';
+import { applyObjectConfig, getId, setIsLiveObj } from './fabric-utils';
 import {
    CanvasLiveAction,
    DrawingLineCanvasLiveAction,
@@ -82,10 +83,13 @@ class ModifyingObjectsCanvasLiveUpdateControl implements LiveUpdateControl<Modif
          const obj = objects.find((x) => getId(x) === objectId);
          if (!obj) continue;
 
-         const data = objectToJson(obj);
+         const existing = currentCanvas.objects.find((x) => x.id === objectId);
+         if (!existing) continue;
+
+         const data = _.cloneDeep(existing.data);
          applyPatch(data, patch);
 
-         applyObjectConfig(obj, data);
+         obj.set(data);
          this.modifiedObjs.push(objectId);
       }
 
@@ -114,27 +118,27 @@ class ModifyingObjectsCanvasLiveUpdateControl implements LiveUpdateControl<Modif
 }
 
 class FreeDrawingCanvasLiveUpdateControl implements LiveUpdateControl<FreeDrawingCanvasLiveAction> {
-   private currentBrush: fabric.PencilBrush | undefined;
+   private currentBrush: any | undefined;
 
    apply(fc: fabric.Canvas, action: FreeDrawingCanvasLiveAction): void {
       let index = 0;
       if (!this.currentBrush) {
          this.currentBrush = new fabric.PencilBrush();
-         (this.currentBrush as any).initialize(fc);
+         this.currentBrush.initialize(fc);
          this.currentBrush.color = action.color;
          this.currentBrush.width = action.width;
-         (this.currentBrush as any).onMouseDown(action.appendPoints[index++], { e: { isPrimary: true } });
+         this.currentBrush.onMouseDown(action.appendPoints[index++], { e: { isPrimary: true } });
       }
 
       for (; index < action.appendPoints.length; index++) {
-         (this.currentBrush as any).onMouseMove(action.appendPoints[index], { e: { isPrimary: true } });
+         this.currentBrush.onMouseMove(action.appendPoints[index], { e: { isPrimary: true } });
       }
    }
 
-   delete(fc: fabric.Canvas, currentCanvas: WhiteboardCanvas): void {
-      // this.currentBrush?.createPath()
-      // if (this.currentBrush) {
-      //    fc.remove(this.currentBrush);
-      // }
+   delete(): void {
+      if (this.currentBrush) {
+         this.currentBrush.oldEnd = undefined;
+         this.currentBrush._reset();
+      }
    }
 }

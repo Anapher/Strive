@@ -54,7 +54,6 @@ export default React.forwardRef<HTMLButtonElement, Props>(function ToolIcon(
    return (
       <div className={clsx(classes.root, className)}>
          <IconButton
-            aria-label="delete"
             className={classes.iconButton}
             onClick={onClick}
             classes={{ label: clsx(classes.label, selected && classes.labelSelected) }}

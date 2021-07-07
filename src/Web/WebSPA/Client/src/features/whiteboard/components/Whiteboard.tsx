@@ -1,9 +1,34 @@
+import { makeStyles } from '@material-ui/core';
 import React, { useEffect, useRef, useState } from 'react';
 import '../fabric-style';
 import { CanvasPushAction, WhiteboardCanvas } from '../types';
 import WhiteboardController, { LiveUpdateHandler } from '../whiteboard-controller';
 import { WhiteboardToolOptions } from '../whiteboard-tool';
 import ToolsContainer, { getTool, ToolType } from './ToolsContainer';
+
+const useStyles = makeStyles({
+   root: {
+      display: 'flex',
+      height: '100%',
+      width: '100%',
+      flexDirection: 'column',
+      justifyContent: 'center',
+   },
+   container: {
+      display: 'flex',
+   },
+   toolsContainer: {
+      flex: 1,
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'flex-end',
+      marginLeft: 16,
+      marginRight: 8,
+   },
+   flexFill: {
+      flex: 1,
+   },
+});
 
 type Props = {
    canvas: WhiteboardCanvas;
@@ -26,8 +51,10 @@ export default function Whiteboard({
    liveUpdateHandler,
    participants,
 }: Props) {
+   const classes = useStyles();
+
    const [selectedTool, setSelectedTool] = useState<ToolType>('select');
-   const [options, setOptions] = useState<WhiteboardToolOptions>({ color: 'black', fontSize: 36, lineWidth: 8 });
+   const [options, setOptions] = useState<WhiteboardToolOptions>({ color: 'black', fontSize: 36, lineWidth: 5 });
 
    const canvasRef = useRef<HTMLCanvasElement>(null);
    const controllerRef = useRef<WhiteboardController | undefined>();
@@ -85,21 +112,42 @@ export default function Whiteboard({
       }
    };
 
+   const handleKeyPress = (key: string, ctrl: boolean, shift: boolean) => {
+      if (key === 'z' && ctrl && !shift) {
+         if (canUndo) onUndo();
+      }
+
+      if (key === 'Z' && ctrl && shift) {
+         if (canRedo) onRedo();
+      }
+
+      if (!ctrl && !shift) {
+         switch (key) {
+            case 'v':
+               handleChangeSelectedTool('select');
+               break;
+            case 't':
+               handleChangeSelectedTool('text');
+               break;
+            case 'h':
+               handleChangeSelectedTool('pan');
+               break;
+            case 'u':
+               handleChangeSelectedTool('line');
+               break;
+            case 'b':
+               handleChangeSelectedTool('pencil');
+               break;
+            default:
+               break;
+         }
+      }
+   };
+
    return (
-      <div
-         style={{ display: 'flex', height: '100%', width: '100%', flexDirection: 'column', justifyContent: 'center' }}
-      >
-         <div style={{ display: 'flex' }}>
-            <div
-               style={{
-                  flex: 1,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'flex-end',
-                  marginLeft: 16,
-                  marginRight: 8,
-               }}
-            >
+      <div className={classes.root} onKeyDown={(e) => handleKeyPress(e.key, e.ctrlKey, e.shiftKey)} tabIndex={-1}>
+         <div className={classes.container}>
+            <div className={classes.toolsContainer}>
                <ToolsContainer
                   selectedTool={selectedTool}
                   onSelectedToolChanged={handleChangeSelectedTool}
@@ -117,7 +165,7 @@ export default function Whiteboard({
                   Sorry, Canvas HTML5 element is not supported by your browser :(
                </canvas>
             </div>
-            <div style={{ flex: 1 }} />
+            <div className={classes.flexFill} />
          </div>
       </div>
    );

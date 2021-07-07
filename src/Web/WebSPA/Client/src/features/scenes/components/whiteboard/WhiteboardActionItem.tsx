@@ -18,7 +18,7 @@ export default function WhiteboardActionItem({ onClose }: ActionListItemProps) {
    return (
       <MenuItem id="scene-management-actions-whiteboard" onClick={handleOpen}>
          <Draw fontSize="small" style={{ marginRight: 16 }} />
-         Whiteboard
+         {t('conference.whiteboard.whiteboard')}
       </MenuItem>
    );
 }
