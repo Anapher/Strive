@@ -7,6 +7,8 @@ import { selectWhiteboard } from 'src/features/whiteboard/selectors';
 import { CanvasPushAction, WhiteboardLiveActionDto, WhiteboardLiveUpdateDto } from 'src/features/whiteboard/types';
 import { LiveUpdateHandler } from 'src/features/whiteboard/whiteboard-controller';
 import useMyParticipantId from 'src/hooks/useMyParticipantId';
+import usePermission from 'src/hooks/usePermission';
+import { WHITEBOARD_CAN_CREATE } from 'src/permissions';
 import { RootState } from 'src/store';
 import useSignalRHub from 'src/store/signal/useSignalRHub';
 import { RenderSceneProps, WhiteboardScene } from '../../types';
@@ -18,6 +20,7 @@ export default function RenderWhiteboard({ scene }: RenderSceneProps<WhiteboardS
    const paricipants = useSelector(selectParticipantsOfCurrentRoom);
    const signalr = useSignalRHub();
    const [liveUpdater, setLiveUpdater] = useState<LiveUpdateHandler | undefined>(undefined);
+   const canCreateWhiteboard = usePermission(WHITEBOARD_CAN_CREATE);
 
    useEffect(() => {
       if (!signalr) {
@@ -34,8 +37,6 @@ export default function RenderWhiteboard({ scene }: RenderSceneProps<WhiteboardS
                signalr.send('WhiteboardLiveAction', payload);
             },
             on: (method) => {
-               console.log('subscribe');
-
                if (state.disposed) return;
 
                const handler = (arg: WhiteboardLiveUpdateDto) => {
@@ -55,6 +56,8 @@ export default function RenderWhiteboard({ scene }: RenderSceneProps<WhiteboardS
    }, [signalr]);
 
    if (!whiteboard) return null;
+
+   const readOnly = !whiteboard.everyoneCanEdit && !canCreateWhiteboard;
 
    const handlePushAction = (action: CanvasPushAction) => {
       dispatch(coreHub.whiteboardPushAction({ whiteboardId: scene.id, action }));
@@ -80,6 +83,7 @@ export default function RenderWhiteboard({ scene }: RenderSceneProps<WhiteboardS
          onRedo={handleRedo}
          participants={paricipants}
          liveUpdateHandler={liveUpdater}
+         readOnly={readOnly}
       />
    );
 }

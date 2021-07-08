@@ -1,5 +1,6 @@
 import { Canvas, IEvent, Point } from 'fabric/fabric-impl';
 import { getId, objectToJson } from '../fabric-utils';
+import { compressPathData } from '../path-compression';
 import { WhiteboardToolBase, WhiteboardToolOptions } from '../whiteboard-tool';
 
 export default class PencilTool extends WhiteboardToolBase {
@@ -14,6 +15,7 @@ export default class PencilTool extends WhiteboardToolBase {
    configureCanvas(canvas: Canvas) {
       super.configureCanvas(canvas);
 
+      (canvas.freeDrawingBrush as any).decimate = 5;
       canvas.isDrawingMode = true;
       canvas.defaultCursor = 'default';
       this.lastUpdateIndex = 0;
@@ -76,6 +78,9 @@ export default class PencilTool extends WhiteboardToolBase {
       if (e.target.type !== 'path') return;
       if (getId(e.target)) return;
 
-      this.emit('update', { type: 'add', object: objectToJson(e.target) });
+      const data = objectToJson(e.target);
+      compressPathData(data);
+
+      this.emit('update', { type: 'add', object: data });
    }
 }

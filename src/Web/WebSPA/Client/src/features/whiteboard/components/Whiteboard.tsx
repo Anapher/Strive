@@ -1,6 +1,7 @@
 import { makeStyles } from '@material-ui/core';
 import React, { useEffect, useRef, useState } from 'react';
 import '../fabric-style';
+import NoTool from '../tools/NoTool';
 import { CanvasPushAction, WhiteboardCanvas } from '../types';
 import WhiteboardController, { LiveUpdateHandler } from '../whiteboard-controller';
 import { WhiteboardToolOptions } from '../whiteboard-tool';
@@ -39,6 +40,8 @@ type Props = {
    onRedo: () => void;
    participants: string[];
    liveUpdateHandler?: LiveUpdateHandler;
+
+   readOnly?: boolean;
 };
 
 export default function Whiteboard({
@@ -50,10 +53,11 @@ export default function Whiteboard({
    onRedo,
    liveUpdateHandler,
    participants,
+   readOnly,
 }: Props) {
    const classes = useStyles();
 
-   const [selectedTool, setSelectedTool] = useState<ToolType>('select');
+   const [selectedTool, setSelectedTool] = useState<ToolType | undefined>('select');
    const [options, setOptions] = useState<WhiteboardToolOptions>({ color: 'black', fontSize: 36, lineWidth: 5 });
 
    const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -61,7 +65,11 @@ export default function Whiteboard({
 
    useEffect(() => {
       if (canvasRef.current && !controllerRef.current) {
-         controllerRef.current = new WhiteboardController(canvasRef.current, getTool(selectedTool), options);
+         controllerRef.current = new WhiteboardController(
+            canvasRef.current,
+            selectedTool ? getTool(selectedTool) : new NoTool(),
+            options,
+         );
       }
    }, [canvasRef.current]);
 
@@ -70,6 +78,15 @@ export default function Whiteboard({
          controllerRef.current.updateCanvas(canvas);
       }
    }, [controllerRef.current, canvas]);
+
+   useEffect(() => {
+      if (readOnly) {
+         setSelectedTool(undefined);
+         if (controllerRef.current) {
+            controllerRef.current.setTool(new NoTool());
+         }
+      }
+   }, [readOnly, controllerRef.current]);
 
    useEffect(() => {
       const controller = controllerRef.current;
@@ -107,12 +124,16 @@ export default function Whiteboard({
    };
 
    const handleClear = () => {
+      if (readOnly) return;
+
       if (controllerRef.current) {
          controllerRef.current.clearWhiteboard();
       }
    };
 
    const handleKeyPress = (key: string, ctrl: boolean, shift: boolean) => {
+      if (readOnly) return;
+
       if (key === 'z' && ctrl && !shift) {
          if (canUndo) onUndo();
       }
@@ -120,6 +141,8 @@ export default function Whiteboard({
       if (key === 'Z' && ctrl && shift) {
          if (canRedo) onRedo();
       }
+
+      console.log(key);
 
       if (!ctrl && !shift) {
          switch (key) {
@@ -138,6 +161,9 @@ export default function Whiteboard({
             case 'b':
                handleChangeSelectedTool('pencil');
                break;
+            case 'Delete':
+               controllerRef.current?.deleteSelection();
+               break;
             default:
                break;
          }
@@ -148,17 +174,19 @@ export default function Whiteboard({
       <div className={classes.root} onKeyDown={(e) => handleKeyPress(e.key, e.ctrlKey, e.shiftKey)} tabIndex={-1}>
          <div className={classes.container}>
             <div className={classes.toolsContainer}>
-               <ToolsContainer
-                  selectedTool={selectedTool}
-                  onSelectedToolChanged={handleChangeSelectedTool}
-                  options={options}
-                  onOptionsChanged={handleOptionsChanged}
-                  onClear={handleClear}
-                  canUndo={canUndo}
-                  onUndo={onUndo}
-                  canRedo={canRedo}
-                  onRedo={onRedo}
-               />
+               {!readOnly && (
+                  <ToolsContainer
+                     selectedTool={selectedTool}
+                     onSelectedToolChanged={handleChangeSelectedTool}
+                     options={options}
+                     onOptionsChanged={handleOptionsChanged}
+                     onClear={handleClear}
+                     canUndo={canUndo}
+                     onUndo={onUndo}
+                     canRedo={canRedo}
+                     onRedo={onRedo}
+                  />
+               )}
             </div>
             <div style={{ width: 1280, height: 720 }}>
                <canvas id="test-canvas" ref={canvasRef}>

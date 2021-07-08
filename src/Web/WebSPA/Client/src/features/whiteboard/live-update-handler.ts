@@ -118,27 +118,33 @@ class ModifyingObjectsCanvasLiveUpdateControl implements LiveUpdateControl<Modif
 }
 
 class FreeDrawingCanvasLiveUpdateControl implements LiveUpdateControl<FreeDrawingCanvasLiveAction> {
-   private currentBrush: any | undefined;
+   private path: fabric.Path | undefined;
+   private points: fabric.Point[] = [];
 
    apply(fc: fabric.Canvas, action: FreeDrawingCanvasLiveAction): void {
-      let index = 0;
-      if (!this.currentBrush) {
-         this.currentBrush = new fabric.PencilBrush();
-         this.currentBrush.initialize(fc);
-         this.currentBrush.color = action.color;
-         this.currentBrush.width = action.width;
-         this.currentBrush.onMouseDown(action.appendPoints[index++], { e: { isPrimary: true } });
+      this.points.push(...action.appendPoints.map(({ x, y }) => new fabric.Point(x, y)));
+
+      const brush = new fabric.PencilBrush() as any;
+      const result = brush.convertPointsToSVGPath(this.points).join('');
+
+      if (this.path) {
+         fc.remove(this.path);
       }
 
-      for (; index < action.appendPoints.length; index++) {
-         this.currentBrush.onMouseMove(action.appendPoints[index], { e: { isPrimary: true } });
-      }
+      this.path = new fabric.Path(result);
+      this.path.strokeWidth = action.width;
+      this.path.stroke = action.color;
+      this.path.fill = undefined;
+      setIsLiveObj(this.path);
+
+      fc.add(this.path);
    }
 
-   delete(): void {
-      if (this.currentBrush) {
-         this.currentBrush.oldEnd = undefined;
-         this.currentBrush._reset();
+   delete(fc: fabric.Canvas): void {
+      if (this.path) {
+         fc.remove(this.path);
       }
+
+      this.points = [];
    }
 }

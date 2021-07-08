@@ -1,3 +1,4 @@
+import cuid from 'cuid';
 import { fabric } from 'fabric';
 import { CanvasObject } from './types';
 
@@ -58,6 +59,26 @@ export function getObjectAbsolutePosition(obj: fabric.Object): { left?: number; 
       left: groupLeft + left + groupWidth / 2,
       top: groupTop + top + groupHeight / 2,
    };
+}
+
+export function deleteObject(canvas: fabric.Canvas, target: fabric.Object) {
+   const selected: fabric.Object[] = [];
+   if (target.type === 'activeSelection') {
+      (target as fabric.ActiveSelection).forEachObject((obj) => selected.push(obj));
+   } else {
+      selected.push(target);
+   }
+
+   const deletionId = cuid();
+   selected.forEach((x) => {
+      (x as any).deletionId = deletionId;
+      (x as any).deletedWith = selected;
+   });
+
+   canvas.remove(...selected);
+
+   canvas.discardActiveObject();
+   canvas.requestRenderAll();
 }
 
 export function getId(obj: fabric.Object) {

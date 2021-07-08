@@ -85,7 +85,7 @@ export type ToolType = keyof Tools;
 export const getTool = (type: ToolType) => tools[type].toolFactory();
 
 type Props = {
-   selectedTool: ToolType;
+   selectedTool: ToolType | undefined;
    onSelectedToolChanged: (tool: ToolType) => void;
 
    options: WhiteboardToolOptions;
@@ -114,7 +114,7 @@ export default function ToolsContainer({
    const classes = useStyles();
    const { t } = useTranslation();
 
-   const requiredOptions = tools[selectedTool].options;
+   const requiredOptions = selectedTool ? tools[selectedTool].options : [];
 
    const handleChangeColor = (color: string) => {
       onOptionsChanged({ ...options, color });

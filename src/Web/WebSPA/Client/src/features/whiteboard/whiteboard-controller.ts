@@ -3,7 +3,7 @@ import { IEvent } from 'fabric/fabric-impl';
 import jsonPatch from 'fast-json-patch';
 import _ from 'lodash';
 import { TypedEmitter } from 'tiny-typed-emitter';
-import { applyObjectConfig, getId, isLiveObj, objectToJson } from './fabric-utils';
+import { applyObjectConfig, deleteObject, getId, isLiveObj, objectToJson } from './fabric-utils';
 import LiveUpdateControl, { getUpdateControl } from './live-update-handler';
 import {
    CanvasLiveAction,
@@ -310,5 +310,10 @@ export default class WhiteboardController extends TypedEmitter<WhiteboardControl
             .filter((x) => !isLiveObj(x))
             .map((x) => getId(x)),
       });
+   }
+
+   public deleteSelection() {
+      const selected = this.fc.getActiveObject();
+      deleteObject(this.fc, selected);
    }
 }
