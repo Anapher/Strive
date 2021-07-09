@@ -5,6 +5,7 @@ import _ from 'lodash';
 import { TypedEmitter } from 'tiny-typed-emitter';
 import { applyObjectConfig, deleteObject, getId, isLiveObj, objectToJson } from './fabric-utils';
 import LiveUpdateControl, { getUpdateControl } from './live-update-handler';
+import PathCache from './path-cache';
 import {
    CanvasLiveAction,
    CanvasObjectPatch,
@@ -37,6 +38,7 @@ export default class WhiteboardController extends TypedEmitter<WhiteboardControl
       { type: CanvasLiveAction['type']; updateControl: LiveUpdateControl<CanvasLiveAction> }
    >();
    private throttledLiveUpdate: _.DebouncedFunc<(update: CanvasLiveAction) => void> | undefined;
+   private pathCache = new PathCache();
 
    constructor(canvas: HTMLCanvasElement, initialTool: WhiteboardTool, initialOptions: WhiteboardToolOptions) {
       super();
@@ -74,6 +76,8 @@ export default class WhiteboardController extends TypedEmitter<WhiteboardControl
    }
 
    public updateCanvas(canvas: WhiteboardCanvas) {
+      canvas = this.pathCache.preprocess(canvas);
+
       if (!this.currentVersion) {
          this.fc.loadFromJSON(
             {

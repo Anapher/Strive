@@ -1,5 +1,6 @@
 import { fabric } from 'fabric';
 import simplify from 'simplify-js';
+import { Point } from './types';
 
 /**
  * Compress the path by simplifying the points
@@ -7,20 +8,25 @@ import simplify from 'simplify-js';
  */
 export function compressPathData(data: any): void {
    const simplifiedPoints = simplify(data.path.map((x: any) => ({ x: x[1], y: x[2] })));
+   data.path = simplifiedPoints;
+}
 
+/**
+ * Uncompress path data
+ * @param data the compressed data
+ */
+export function uncompressPathData(data: any): any {
+   const points = data.path as Point[];
    const brush = new fabric.PencilBrush();
-   const path = brush.convertPointsToSVGPath(simplifiedPoints.map(({ x, y }) => new fabric.Point(x, y)));
-
-   console.log(path);
-
-   data.path = fixPathGetInstructions(path);
+   const path = brush.convertPointsToSVGPath(points.map(({ x, y }) => new fabric.Point(x, y)));
+   return fixPathInstructions(path);
 }
 
 /**
  * Return the path data for fabric js
  * @param segments the input segments, something like ["M ", 60.4315, " ", 10.205996948242188, " ", "Q ", 60.4325, ...]
  */
-function fixPathGetInstructions(segments: string[]): (string | number)[][] {
+function fixPathInstructions(segments: string[]): (string | number)[][] {
    if (segments.length === 0) return [];
 
    const result = new Array<(string | number)[]>();

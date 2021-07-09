@@ -15,7 +15,7 @@ export default class PencilTool extends WhiteboardToolBase {
    configureCanvas(canvas: Canvas) {
       super.configureCanvas(canvas);
 
-      (canvas.freeDrawingBrush as any).decimate = 5;
+      (canvas.freeDrawingBrush as any).decimate = 2;
       canvas.isDrawingMode = true;
       canvas.defaultCursor = 'default';
       this.lastUpdateIndex = 0;
