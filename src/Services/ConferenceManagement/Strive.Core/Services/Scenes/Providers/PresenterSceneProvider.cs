@@ -44,7 +44,7 @@ namespace Strive.Core.Services.Scenes.Providers
             return Enumerable.Empty<IScene>();
         }
 
-        public async ValueTask<SceneUpdate> IsUpdateRequired(string conferenceId, string roomId,
+        public async ValueTask<SceneUpdate> IsUpdateRequired(string conferenceId, string roomId, string syncObjId,
             object synchronizedObject, object? previousValue)
         {
             if (synchronizedObject is SynchronizedRooms rooms)

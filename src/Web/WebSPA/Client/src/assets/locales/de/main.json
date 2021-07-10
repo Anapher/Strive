@@ -501,6 +501,22 @@
         "warn_results_not_published": "Sie haben diese Szene ausgewählt, obwohl die Ergebnisse der Umfrage noch nicht für alle Teilnehmer veröffentlicht sind. Andere Teilnehmer können die Diagramme nicht sehen.",
         "publish": "Veröffentlichen"
       }
+    },
+    "whiteboard": {
+      "allow_anyone": "Jedem erlauben zu zeichnen",
+      "disallow_anyone": "Berechtigungen für das Zeichnen erfordern",
+      "toolbar": {
+        "clear": "Alles löschen",
+        "color": "Farbe (mit Doppelklick tauschen)",
+        "line": "Linie (U)",
+        "pan": "Hand-Werkzeug (H)",
+        "pencil": "Stift (B)",
+        "redo": "Wiederholen (Strg+Shift+Z)",
+        "select": "Auswählen (V)",
+        "text": "Text (T)",
+        "undo": "Rückgängig (Strg+Z)"
+      },
+      "whiteboard": "Whiteboard"
     }
   }
 }

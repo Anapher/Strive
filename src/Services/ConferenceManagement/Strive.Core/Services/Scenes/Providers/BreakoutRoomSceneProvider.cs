@@ -30,7 +30,7 @@ namespace Strive.Core.Services.Scenes.Providers
         }
 
         protected override async ValueTask<bool> InternalIsUpdateRequired(string conferenceId, string roomId,
-            object synchronizedObject, object? previousValue)
+            string syncObjId, object synchronizedObject, object? previousValue)
         {
             if (synchronizedObject is SynchronizedBreakoutRooms syncBreakoutRooms)
             {

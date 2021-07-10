@@ -501,6 +501,22 @@
         "warn_results_not_published": "You selected this scene while the results of this poll are not yet published to all participants. Others won't see the chart.",
         "publish": "Publish"
       }
+    },
+    "whiteboard": {
+      "whiteboard": "Whiteboard",
+      "toolbar": {
+        "select": "Select (V)",
+        "pencil": "Pencil (B)",
+        "text": "Text (T)",
+        "line": "Line (U)",
+        "pan": "Pan (H)",
+        "undo": "Undo (Ctrl+Z)",
+        "redo": "Redo (Ctrl+Shift+Z)",
+        "color": "Color (swap with double-click)",
+        "clear": "Clear"
+      },
+      "allow_anyone": "Allow anyone to draw",
+      "disallow_anyone": "Require permissions for drawing"
     }
   }
 }

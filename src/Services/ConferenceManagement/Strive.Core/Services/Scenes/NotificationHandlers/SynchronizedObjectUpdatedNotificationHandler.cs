@@ -37,7 +37,7 @@ namespace Strive.Core.Services.Scenes.NotificationHandlers
             foreach (var room in rooms.Rooms)
             {
                 var providersWithUpdate = await FetchSceneProvidersWithRequiredUpdate(conferenceId, room.RoomId,
-                    notification.Value, notification.PreviousValue);
+                    notification.SyncObjId, notification.Value, notification.PreviousValue);
 
                 if (providersWithUpdate.Any())
                 {
@@ -47,12 +47,13 @@ namespace Strive.Core.Services.Scenes.NotificationHandlers
         }
 
         private async ValueTask<IReadOnlyList<(ISceneProvider, SceneUpdate)>> FetchSceneProvidersWithRequiredUpdate(
-            string conferenceId, string roomId, object syncObj, object? previousSyncObj)
+            string conferenceId, string roomId, string syncObjId, object syncObj, object? previousSyncObj)
         {
             var result = new List<(ISceneProvider, SceneUpdate)>();
             foreach (var sceneProvider in _sceneProviders)
             {
-                var sceneUpdate = await sceneProvider.IsUpdateRequired(conferenceId, roomId, syncObj, previousSyncObj);
+                var sceneUpdate =
+                    await sceneProvider.IsUpdateRequired(conferenceId, roomId, syncObjId, syncObj, previousSyncObj);
 
                 if (sceneUpdate != SceneUpdate.NotRequired)
                     result.Add((sceneProvider, sceneUpdate));

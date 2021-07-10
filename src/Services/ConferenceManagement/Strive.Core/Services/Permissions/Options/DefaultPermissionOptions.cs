@@ -47,6 +47,7 @@ namespace Strive.Core.Services.Permissions.Options
                     DefinedPermissions.Scenes.CanPassTalkingStick.Configure(true),
                     DefinedPermissions.Poll.CanOpenPoll.Configure(true),
                     DefinedPermissions.Poll.CanSeeUnpublishedPollResults.Configure(true),
+                    DefinedPermissions.Whiteboard.CanCreate.Configure(true),
                 }.ToImmutableDictionary()
             },
             // Breakout room permissions
@@ -58,6 +59,7 @@ namespace Strive.Core.Services.Permissions.Options
                     DefinedPermissions.Media.CanShareScreen.Configure(true),
                     DefinedPermissions.Scenes.CanSetScene.Configure(true),
                     DefinedPermissions.Scenes.CanOverwriteContentScene.Configure(true),
+                    DefinedPermissions.Whiteboard.CanCreate.Configure(true),
                 }.ToImmutableDictionary()
             },
         };

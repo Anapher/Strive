@@ -49,13 +49,7 @@ namespace Strive.Infrastructure.Serialization
 
         public override bool CanConvert(Type objectType)
         {
-            if (!IsStringDictionary(objectType)) return false;
-
-            if (!objectType.IsAssignableTo(typeof(IDictionary)))
-                throw new InvalidOperationException(
-                    $"{objectType} is a string dictionary that does not implement IDictionary. For this converter we assume that every IReadOnlyDictionary<string, any> also implements IDictionary, please check this type.");
-
-            return true;
+            return IsStringDictionary(objectType);
         }
 
         private static bool IsStringDictionary(Type givenType)

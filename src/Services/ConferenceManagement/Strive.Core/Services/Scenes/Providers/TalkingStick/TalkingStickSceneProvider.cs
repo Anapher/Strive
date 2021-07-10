@@ -73,7 +73,7 @@ namespace Strive.Core.Services.Scenes.Providers.TalkingStick
             return sceneStack.OfType<TalkingStickScene>();
         }
 
-        public async ValueTask<SceneUpdate> IsUpdateRequired(string conferenceId, string roomId,
+        public async ValueTask<SceneUpdate> IsUpdateRequired(string conferenceId, string roomId, string syncObjId,
             object synchronizedObject, object? previousValue)
         {
             if (synchronizedObject is SynchronizedSceneTalkingStick talkingStick)

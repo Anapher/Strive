@@ -38,7 +38,7 @@ namespace Strive.Core.Services.Scenes.Utilities
             if (!await IsRoomExisting(conferenceId, roomId))
             {
                 await _sceneRepository.RemoveScene(conferenceId, roomId);
-                throw SceneError.RoomNotFound.ToException();
+                throw ConferenceError.RoomNotFound.ToException();
             }
 
             await _mediator.Send(new UpdateScenesRequest(conferenceId, roomId));

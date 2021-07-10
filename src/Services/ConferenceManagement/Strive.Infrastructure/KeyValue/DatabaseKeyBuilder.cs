@@ -5,12 +5,13 @@ namespace Strive.Infrastructure.KeyValue
     public class DatabaseKeyBuilder
     {
         private string? _conferenceId;
-        private string? _secondary;
+        private readonly List<string> _secondary;
         private readonly string _propertyKey;
 
         private DatabaseKeyBuilder(string propertyKey)
         {
             _propertyKey = propertyKey;
+            _secondary = new List<string>();
         }
 
         public static DatabaseKeyBuilder ForProperty(string propertyKey)
@@ -26,7 +27,7 @@ namespace Strive.Infrastructure.KeyValue
 
         public DatabaseKeyBuilder ForSecondary(string secondary)
         {
-            _secondary = secondary;
+            _secondary.Add(secondary);
             return this;
         }
 
@@ -34,7 +35,7 @@ namespace Strive.Infrastructure.KeyValue
         {
             var segments = new List<string>();
             if (_conferenceId != null) segments.Add(_conferenceId);
-            if (_secondary != null) segments.Add(_secondary);
+            segments.AddRange(_secondary);
             segments.Add(_propertyKey);
 
             return string.Join(":", segments);

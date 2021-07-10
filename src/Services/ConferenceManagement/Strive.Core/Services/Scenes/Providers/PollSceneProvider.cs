@@ -29,7 +29,7 @@ namespace Strive.Core.Services.Scenes.Providers
         }
 
         protected override ValueTask<bool> InternalIsUpdateRequired(string conferenceId, string roomId,
-            object synchronizedObject, object? previousValue)
+            string syncObjId, object synchronizedObject, object? previousValue)
         {
             // Poll scenes are updated manually using UpdateScenesRequest
             // as every poll has an own sync obj and the scene must only be updated

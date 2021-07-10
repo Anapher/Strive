@@ -13,7 +13,7 @@ namespace Strive.Core.Services.Scenes.Providers
         }
 
         protected override ValueTask<bool> InternalIsUpdateRequired(string conferenceId, string roomId,
-            object synchronizedObject, object? previousValue)
+            string syncObjId, object synchronizedObject, object? previousValue)
         {
             return new(false);
         }

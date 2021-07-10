@@ -36,6 +36,9 @@ using Strive.Core.Services.Scenes;
 using Strive.Core.Services.Scenes.Providers.TalkingStick.Requests;
 using Strive.Core.Services.Scenes.Requests;
 using Strive.Core.Services.Synchronization.Extensions;
+using Strive.Core.Services.WhiteboardService;
+using Strive.Core.Services.WhiteboardService.Requests;
+using Strive.Core.Services.WhiteboardService.Responses;
 using Strive.Core.Utilities;
 using Strive.Extensions;
 using Strive.Hubs.Core.Dtos;
@@ -357,7 +360,7 @@ namespace Strive.Hubs.Core
             var participant = GetContextParticipant();
             var roomId = await GetParticipantRoomId(participant);
             if (roomId == null)
-                return SuccessOrError<Unit>.Failed(SceneError.RoomNotFound);
+                return ConferenceError.RoomNotFound;
 
             return await GetInvoker().Create(new SetSceneRequest(participant.ConferenceId, roomId, scene))
                 .RequirePermissions(DefinedPermissions.Scenes.CanSetScene).Send();
@@ -368,7 +371,7 @@ namespace Strive.Hubs.Core
             var participant = GetContextParticipant();
             var roomId = await GetParticipantRoomId(participant);
             if (roomId == null)
-                return SuccessOrError<Unit>.Failed(SceneError.RoomNotFound);
+                return ConferenceError.RoomNotFound;
 
             return await GetInvoker()
                 .Create(new SetOverwrittenContentSceneRequest(participant.ConferenceId, roomId, scene))
@@ -395,7 +398,7 @@ namespace Strive.Hubs.Core
             var participant = GetContextParticipant();
             var roomId = await GetParticipantRoomId(participant);
             if (roomId == null)
-                return SuccessOrError<Unit>.Failed(SceneError.RoomNotFound);
+                return ConferenceError.RoomNotFound;
 
             return await GetInvoker().Create(new TalkingStickPassRequest(participant, roomId, false))
                 .RequirePermissions(DefinedPermissions.Scenes.CanTakeTalkingStick).Send();
@@ -410,7 +413,7 @@ namespace Strive.Hubs.Core
             var participant = GetContextParticipant();
             var roomId = await GetParticipantRoomId(participant);
             if (roomId == null)
-                return SuccessOrError<Unit>.Failed(SceneError.RoomNotFound);
+                return ConferenceError.RoomNotFound;
 
             return await GetInvoker()
                 .Create(new TalkingStickPassRequest(new Participant(participant.ConferenceId, participantId), roomId,
@@ -458,6 +461,118 @@ namespace Strive.Hubs.Core
             var participant = GetContextParticipant();
             return await GetInvoker().Create(new SubmitAnswerRequest(participant, dto.PollId, null)).ValidateObject(dto)
                 .Send();
+        }
+
+        public async Task<SuccessOrError<string>> CreateWhiteboard()
+        {
+            var participant = GetContextParticipant();
+            var roomId = await GetParticipantRoomId(participant);
+            if (roomId == null) return ConferenceError.RoomNotFound;
+
+            return await GetInvoker().Create(new CreateWhiteboardRequest(participant.ConferenceId, roomId))
+                .RequirePermissions(DefinedPermissions.Whiteboard.CanCreate).Send();
+        }
+
+        private async Task<SuccessOrError<(string roomId, bool anyoneCanEdit)>>
+            GetRoomIdAndCheckIfUserCanModifyWhiteboard(string whiteboardId)
+        {
+            var participant = GetContextParticipant();
+            var roomId = await GetParticipantRoomId(participant);
+            if (roomId == null) return ConferenceError.RoomNotFound;
+
+            var syncWhiteboards =
+                await _mediator.FetchSynchronizedObject<SynchronizedWhiteboards>(participant.ConferenceId,
+                    SynchronizedWhiteboards.SyncObjId(roomId));
+            if (!syncWhiteboards.Whiteboards.TryGetValue(whiteboardId, out var whiteboardInfo))
+                return WhiteboardError.WhiteboardNotFound;
+
+            return (roomId, whiteboardInfo.AnyoneCanEdit);
+        }
+
+        public async Task<SuccessOrError<WhiteboardUpdatedResponse>> WhiteboardPushAction(WhiteboardPushActionDto dto)
+        {
+            var participant = GetContextParticipant();
+
+            var roomCheckResult = await GetRoomIdAndCheckIfUserCanModifyWhiteboard(dto.WhiteboardId);
+            if (!roomCheckResult.Success) return roomCheckResult.Error;
+
+            var (roomId, anyoneCanEdit) = roomCheckResult.Response;
+            var actionInvoke = GetInvoker().Create(new PushActionRequest(participant.ConferenceId, roomId,
+                dto.WhiteboardId, participant.Id, dto.Action));
+            if (!anyoneCanEdit)
+                actionInvoke = actionInvoke.RequirePermissions(DefinedPermissions.Whiteboard.CanCreate);
+
+            return await actionInvoke.Send();
+        }
+
+        public async Task<SuccessOrError<Unit>> WhiteboardLiveAction(WhiteboardLiveActionDto dto)
+        {
+            var participant = GetContextParticipant();
+
+            var result = await GetRoomIdAndCheckIfUserCanModifyWhiteboard(dto.WhiteboardId);
+            if (!result.Success) return result.Error;
+
+            var (roomId, anyoneCanEdit) = result.Response;
+            var actionInvoke = GetInvoker().Create(new PushLiveActionRequest(participant.ConferenceId, roomId,
+                participant.Id, dto.WhiteboardId, dto.Action));
+            if (!anyoneCanEdit)
+                actionInvoke = actionInvoke.RequirePermissions(DefinedPermissions.Whiteboard.CanCreate);
+
+            return await actionInvoke.Send();
+        }
+
+        public async Task<SuccessOrError<Unit>> WhiteboardUndo(string whiteboardId)
+        {
+            var participant = GetContextParticipant();
+
+            var result = await GetRoomIdAndCheckIfUserCanModifyWhiteboard(whiteboardId);
+            if (!result.Success) return result.Error;
+
+            var (roomId, anyoneCanEdit) = result.Response;
+            var actionInvoke = GetInvoker().Create(new UndoRequest(participant.ConferenceId, roomId,
+                whiteboardId, participant.Id));
+            if (!anyoneCanEdit)
+                actionInvoke = actionInvoke.RequirePermissions(DefinedPermissions.Whiteboard.CanCreate);
+
+            return await actionInvoke.Send();
+        }
+
+        public async Task<SuccessOrError<Unit>> WhiteboardRedo(string whiteboardId)
+        {
+            var participant = GetContextParticipant();
+
+            var result = await GetRoomIdAndCheckIfUserCanModifyWhiteboard(whiteboardId);
+            if (!result.Success) return result.Error;
+
+            var (roomId, anyoneCanEdit) = result.Response;
+            var actionInvoke = GetInvoker().Create(new RedoRequest(participant.ConferenceId, roomId,
+                whiteboardId, participant.Id));
+            if (!anyoneCanEdit)
+                actionInvoke = actionInvoke.RequirePermissions(DefinedPermissions.Whiteboard.CanCreate);
+
+            return await actionInvoke.Send();
+        }
+
+        public async Task<SuccessOrError<Unit>> WhiteboardUpdateSettings(WhiteboardUpdateSettingsDto dto)
+        {
+            var participant = GetContextParticipant();
+            var roomId = await GetParticipantRoomId(participant);
+            if (roomId == null) return ConferenceError.RoomNotFound;
+
+            return await GetInvoker()
+                .Create(new UpdateWhiteboardSettingsRequest(participant.ConferenceId, roomId, dto.WhiteboardId,
+                    dto.Settings)).RequirePermissions(DefinedPermissions.Whiteboard.CanCreate).Send();
+        }
+
+        public async Task<SuccessOrError<Unit>> WhiteboardDelete(string whiteboardId)
+        {
+            var participant = GetContextParticipant();
+            var roomId = await GetParticipantRoomId(participant);
+            if (roomId == null) return ConferenceError.RoomNotFound;
+
+            return await GetInvoker()
+                .Create(new DeleteWhiteboardRequest(participant.ConferenceId, roomId, whiteboardId))
+                .RequirePermissions(DefinedPermissions.Whiteboard.CanCreate).Send();
         }
     }
 }

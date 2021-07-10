@@ -32,7 +32,7 @@ namespace Strive.Core.Services.Scenes.Providers.TalkingStick.UseCases
                 SynchronizedRooms.SyncObjId);
 
             if (!rooms.Participants.TryGetValue(participant.Id, out var roomId))
-                throw SceneError.RoomNotFound.ToException();
+                throw ConferenceError.RoomNotFound.ToException();
 
             await using (await _repository.LockRoom(participant.ConferenceId, roomId))
             {

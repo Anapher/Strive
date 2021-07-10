@@ -61,5 +61,10 @@ namespace Strive.Core.Services.Permissions
             public static readonly PermissionDescriptor<bool> CanSeeUnpublishedPollResults =
                 new("poll/canSeeUnpublishedPollResults");
         }
+
+        public static class Whiteboard
+        {
+            public static readonly PermissionDescriptor<bool> CanCreate = new("whiteboard/canCreate");
+        }
     }
 }

@@ -17,10 +17,10 @@ namespace Strive.Core.Services
         Conference_UnexpectedError,
         Conference_NotOpen,
         Conference_InternalServiceError,
+        Conference_RoomNotFound,
 
         // Chat
         Chat_InvalidChannel,
-        Chat_AnonymousMessagesDisabled,
         Chat_PrivateMessagesDisabled,
 
         // Permissions
@@ -33,7 +33,6 @@ namespace Strive.Core.Services
         Equipment_ParticipantNotJoined,
 
         // Scenes
-        Scenes_RoomNotFound,
         Scenes_HasSpeaker,
 
         // Breakout Rooms
@@ -46,5 +45,11 @@ namespace Strive.Core.Services
         AnswerValidationFailed,
         Poll_AnswerCannotBeChanged,
         Poll_Closed,
+
+        // Whiteboard
+        Whiteboard_NotFound,
+        Whiteboard_UndoNotAvailable,
+        Whiteboard_RedoNotAvailable,
+        Whiteboard_WhiteboardActionHadNoEffect,
     }
 }

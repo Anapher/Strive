@@ -17,6 +17,11 @@ export type PollScene = {
    pollId: string;
 };
 
+export type WhiteboardScene = {
+   type: 'whiteboard';
+   id: string;
+};
+
 export type GridScene = {
    type: 'grid';
 };
@@ -43,6 +48,7 @@ export type Scene =
    | AutonomousScene
    | BreakoutRoomScene
    | PollScene
+   | WhiteboardScene
    | GridScene
    | PresenterScene
    | ScreenShareScene
