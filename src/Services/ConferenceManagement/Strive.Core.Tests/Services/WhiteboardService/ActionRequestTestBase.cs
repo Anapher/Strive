@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Immutable;
-using MediatR;
 using Strive.Core.Services.WhiteboardService;
 using Strive.Core.Services.WhiteboardService.Requests;
+using Strive.Core.Services.WhiteboardService.Responses;
 using Strive.Tests.Utils;
 
 namespace Strive.Core.Tests.Services.WhiteboardService
@@ -14,8 +14,8 @@ namespace Strive.Core.Tests.Services.WhiteboardService
         protected const string WhiteboardId = "DaVinci";
         protected const string ParticipantId = "1";
 
-        protected Whiteboard Execute(CapturedRequest<UpdateWhiteboardRequest, Unit> capturedRequest,
-            Whiteboard whiteboard)
+        protected Whiteboard Execute(
+            CapturedRequest<UpdateWhiteboardRequest, WhiteboardUpdatedResponse> capturedRequest, Whiteboard whiteboard)
         {
             var action = capturedRequest.GetRequest().Action;
             return action(whiteboard);

@@ -10,6 +10,7 @@ using Strive.Core.Services.WhiteboardService.Actions;
 using Strive.Core.Services.WhiteboardService.CanvasData;
 using Strive.Core.Services.WhiteboardService.PushActions;
 using Strive.Core.Services.WhiteboardService.Requests;
+using Strive.Core.Services.WhiteboardService.Responses;
 using Strive.Core.Services.WhiteboardService.UseCases;
 using Strive.Tests.Utils;
 using Xunit;
@@ -33,7 +34,7 @@ namespace Strive.Core.Tests.Services.WhiteboardService.UseCases
         {
             // arrange
             var useCase = Create();
-            var capturedRequest = _mediator.CaptureRequest<UpdateWhiteboardRequest, Unit>();
+            var capturedRequest = _mediator.CaptureRequest<UpdateWhiteboardRequest, WhiteboardUpdatedResponse>();
 
             await useCase.Handle(
                 new PushActionRequest(ConferenceId, RoomId, WhiteboardId, ParticipantId,
@@ -53,7 +54,7 @@ namespace Strive.Core.Tests.Services.WhiteboardService.UseCases
         {
             // arrange
             var useCase = Create();
-            var capturedRequest = _mediator.CaptureRequest<UpdateWhiteboardRequest, Unit>();
+            var capturedRequest = _mediator.CaptureRequest<UpdateWhiteboardRequest, WhiteboardUpdatedResponse>();
 
             await useCase.Handle(new PushActionRequest(ConferenceId, RoomId, WhiteboardId, ParticipantId, _addAction),
                 CancellationToken.None);
@@ -74,7 +75,7 @@ namespace Strive.Core.Tests.Services.WhiteboardService.UseCases
         {
             // arrange
             var useCase = Create();
-            var capturedRequest = _mediator.CaptureRequest<UpdateWhiteboardRequest, Unit>();
+            var capturedRequest = _mediator.CaptureRequest<UpdateWhiteboardRequest, WhiteboardUpdatedResponse>();
 
             await useCase.Handle(new PushActionRequest(ConferenceId, RoomId, WhiteboardId, ParticipantId, _addAction),
                 CancellationToken.None);
@@ -93,7 +94,7 @@ namespace Strive.Core.Tests.Services.WhiteboardService.UseCases
         {
             // arrange
             var useCase = Create();
-            var capturedRequest = _mediator.CaptureRequest<UpdateWhiteboardRequest, Unit>();
+            var capturedRequest = _mediator.CaptureRequest<UpdateWhiteboardRequest, WhiteboardUpdatedResponse>();
 
             await useCase.Handle(new PushActionRequest(ConferenceId, RoomId, WhiteboardId, ParticipantId, _addAction),
                 CancellationToken.None);
