@@ -81,7 +81,7 @@ export function deleteObject(canvas: fabric.Canvas, target: fabric.Object) {
    canvas.requestRenderAll();
 }
 
-export function getId(obj: fabric.Object) {
+export function getId(obj: fabric.Object): string | undefined {
    return (obj as any).id as string;
 }
 
@@ -89,10 +89,18 @@ export function setId(obj: fabric.Object, id: string) {
    (obj as any).id = id;
 }
 
-export function isLiveObj(obj: fabric.Object) {
+export function isLiveObj(obj: fabric.Object): boolean | undefined {
    return (obj as any).isLive;
 }
 
 export function setIsLiveObj(obj: fabric.Object) {
    (obj as any).isLive = true;
+}
+
+export function setDeleteAtVersion(obj: fabric.Object, version: number) {
+   (obj as any).deleteAtVersion = version;
+}
+
+export function getDeleteAtVersion(obj: fabric.Object): number | undefined {
+   return (obj as any).deleteAtVersion;
 }

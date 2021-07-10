@@ -78,7 +78,7 @@ export default class LineTool extends WhiteboardToolBase {
 
    onFinish(): void {
       if (this.currentLine) {
-         this.emit('update', { type: 'add', object: this.currentLine.toJSON() });
+         this.emit('addObj', { type: 'add', object: this.currentLine.toJSON() }, this.currentLine);
          this.emit('updating', { type: 'end' });
          this.currentLine = undefined;
       }

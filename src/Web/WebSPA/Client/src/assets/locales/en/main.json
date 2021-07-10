@@ -514,7 +514,9 @@
         "redo": "Redo (Ctrl+Shift+Z)",
         "color": "Color (swap with double-click)",
         "clear": "Clear"
-      }
+      },
+      "allow_anyone": "Allow anyone to draw",
+      "disallow_anyone": "Require permissions for drawing"
     }
   }
 }

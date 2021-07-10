@@ -2,16 +2,16 @@
 using System.Threading.Tasks;
 using MediatR;
 using Strive.Core.Extensions;
-using Strive.Core.Services.WhiteboardService.Actions;
 using Strive.Core.Services.WhiteboardService.Requests;
+using Strive.Core.Services.WhiteboardService.Responses;
 using Strive.Core.Services.WhiteboardService.Utilities;
 
 namespace Strive.Core.Services.WhiteboardService.UseCases
 {
-    public class PushActionUseCase : IRequestHandler<PushActionRequest>
+    public class PushActionUseCase : IRequestHandler<PushActionRequest, WhiteboardUpdatedResponse>
     {
-        private readonly IMediator _mediator;
         private readonly ICanvasActionUtils _canvasActionUtils;
+        private readonly IMediator _mediator;
 
         public PushActionUseCase(IMediator mediator, ICanvasActionUtils canvasActionUtils)
         {
@@ -19,10 +19,9 @@ namespace Strive.Core.Services.WhiteboardService.UseCases
             _canvasActionUtils = canvasActionUtils;
         }
 
-        public Task<Unit> Handle(PushActionRequest request, CancellationToken cancellationToken)
+        public Task<WhiteboardUpdatedResponse> Handle(PushActionRequest request, CancellationToken cancellationToken)
         {
             var (conferenceId, roomId, whiteboardId, participantId, pushAction) = request;
-
             var action = pushAction.ConvertToAction(participantId);
 
             Whiteboard Commit(Whiteboard whiteboard)

@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.JsonPatch;
@@ -13,6 +14,7 @@ using Strive.Core.Services.WhiteboardService.Actions;
 using Strive.Core.Services.WhiteboardService.CanvasData;
 using Strive.Core.Services.WhiteboardService.LiveActions;
 using Strive.Core.Services.WhiteboardService.PushActions;
+using Strive.Core.Services.WhiteboardService.Responses;
 using Strive.Hubs.Core;
 using Strive.Hubs.Core.Dtos;
 using Strive.Hubs.Core.Responses;
@@ -42,22 +44,40 @@ namespace Strive.IntegrationTests.Services
         {
             var addedObj = new CanvasLine {X1 = 0, Y1 = 0, X2 = 5, Y2 = 5, StrokeWidth = 2, Stroke = "black"};
 
-            var result = await conn.Hub.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.WhiteboardPushAction),
+            var result = await conn.Hub.InvokeAsync<SuccessOrError<WhiteboardUpdatedResponse>>(
+                nameof(CoreHub.WhiteboardPushAction),
                 new WhiteboardPushActionDto(whiteboardId, new AddCanvasPushAction(addedObj)));
 
             // assert
             AssertSuccess(result);
+            Assert.NotNull(result.Response);
 
             string? objId = null;
             await conn.SyncObjects.AssertSyncObject(SynchronizedWhiteboards.SyncObjId(RoomOptions.DEFAULT_ROOM_ID),
                 (SynchronizedWhiteboards whiteboards) =>
                 {
-                    var canvas = whiteboards.Whiteboards[whiteboardId].Canvas;
+                    var whiteboard = whiteboards.Whiteboards[whiteboardId];
+                    var canvas = whiteboard.Canvas;
                     objId = canvas.Objects.Single(x => x.Data.Equals(addedObj)).Id;
+
+                    Assert.Equal(whiteboard.Version, result.Response!.Version);
                 });
 
             Assert.NotNull(objId);
             return (objId!, addedObj);
+        }
+
+        private async Task SwitchToDifferentRoom(UserConnection conn)
+        {
+            var rooms = await conn.Hub.InvokeAsync<SuccessOrError<IReadOnlyList<Room>>>(nameof(CoreHub.CreateRooms),
+                new List<RoomCreationInfo> {new("test")});
+            AssertSuccess(rooms);
+
+            var room = rooms.Response!.Single();
+
+            var switchResult = await conn.Hub.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.SwitchRoom),
+                new SwitchRoomDto(room.RoomId));
+            AssertSuccess(switchResult);
         }
 
         [Fact]
@@ -101,6 +121,96 @@ namespace Strive.IntegrationTests.Services
         }
 
         [Fact]
+        public async Task DeleteWhiteboard_WhiteboardExists_UpdateSyncObj()
+        {
+            // arrange
+            var (conn, _) = await ConnectToOpenedConference();
+            var whiteboardId = await CreateWhiteboard(conn);
+
+            var syncObjId = SynchronizedWhiteboards.SyncObjId(RoomOptions.DEFAULT_ROOM_ID);
+
+            await conn.SyncObjects.AssertSyncObject(syncObjId,
+                (SynchronizedWhiteboards whiteboards) => Assert.Single(whiteboards.Whiteboards));
+
+            // act
+            var result =
+                await conn.Hub.InvokeAsync<SuccessOrError<string>>(nameof(CoreHub.WhiteboardDelete), whiteboardId);
+
+            // assert
+            AssertSuccess(result);
+            await conn.SyncObjects.AssertSyncObject(syncObjId,
+                (SynchronizedWhiteboards whiteboards) => Assert.Empty(whiteboards.Whiteboards));
+        }
+
+        [Fact]
+        public async Task DeleteWhiteboard_WhiteboardInDifferentRoom_Error()
+        {
+            // arrange
+            var (conn, _) = await ConnectToOpenedConference();
+            var whiteboardId = await CreateWhiteboard(conn);
+
+            var syncObjId = SynchronizedWhiteboards.SyncObjId(RoomOptions.DEFAULT_ROOM_ID);
+            await conn.SyncObjects.AssertSyncObject(syncObjId,
+                (SynchronizedWhiteboards whiteboards) => Assert.Single(whiteboards.Whiteboards));
+
+            await SwitchToDifferentRoom(conn);
+
+            // act
+            var result =
+                await conn.Hub.InvokeAsync<SuccessOrError<string>>(nameof(CoreHub.WhiteboardDelete), whiteboardId);
+
+            // assert
+            AssertFailed(result);
+            AssertErrorCode(ServiceErrorCode.Whiteboard_NotFound, result.Error!);
+        }
+
+        [Fact]
+        public async Task UpdateSettings_WhiteboardExists_UpdateSyncObj()
+        {
+            // arrange
+            var (conn, _) = await ConnectToOpenedConference();
+            var whiteboardId = await CreateWhiteboard(conn);
+
+            var syncObjId = SynchronizedWhiteboards.SyncObjId(RoomOptions.DEFAULT_ROOM_ID);
+
+            await conn.SyncObjects.AssertSyncObject(syncObjId,
+                (SynchronizedWhiteboards whiteboards) =>
+                    Assert.False(whiteboards.Whiteboards.Single().Value.AnyoneCanEdit));
+
+            // act
+            var result = await conn.Hub.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.WhiteboardUpdateSettings),
+                new WhiteboardUpdateSettingsDto(whiteboardId, new WhiteboardSettings(true)));
+
+            // assert
+            AssertSuccess(result);
+            await conn.SyncObjects.AssertSyncObject(syncObjId,
+                (SynchronizedWhiteboards whiteboards) =>
+                    Assert.True(whiteboards.Whiteboards.Single().Value.AnyoneCanEdit));
+        }
+
+        [Fact]
+        public async Task UpdateSettings_WhiteboardDoesNotExist_Error()
+        {
+            // arrange
+            var (conn, _) = await ConnectToOpenedConference();
+            await CreateWhiteboard(conn);
+
+            var syncObjId = SynchronizedWhiteboards.SyncObjId(RoomOptions.DEFAULT_ROOM_ID);
+
+            await conn.SyncObjects.AssertSyncObject(syncObjId,
+                (SynchronizedWhiteboards whiteboards) =>
+                    Assert.False(whiteboards.Whiteboards.Single().Value.AnyoneCanEdit));
+
+            // act
+            var result = await conn.Hub.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.WhiteboardUpdateSettings),
+                new WhiteboardUpdateSettingsDto("wtf", new WhiteboardSettings(true)));
+
+            // assert
+            AssertFailed(result);
+            AssertErrorCode(ServiceErrorCode.Whiteboard_NotFound, result.Error!);
+        }
+
+        [Fact]
         public async Task PushAction_CreateLine_UpdateSyncObj()
         {
             // arrange
@@ -110,7 +220,8 @@ namespace Strive.IntegrationTests.Services
             // act
             var addedObj = new CanvasLine {X1 = 0, Y1 = 0, X2 = 5, Y2 = 5, StrokeWidth = 2, Stroke = "black"};
 
-            var result = await conn.Hub.InvokeAsync<SuccessOrError<Unit>>(nameof(CoreHub.WhiteboardPushAction),
+            var result = await conn.Hub.InvokeAsync<SuccessOrError<WhiteboardUpdatedResponse>>(
+                nameof(CoreHub.WhiteboardPushAction),
                 new WhiteboardPushActionDto(whiteboardId, new AddCanvasPushAction(addedObj)));
 
             // assert
@@ -121,6 +232,7 @@ namespace Strive.IntegrationTests.Services
                     var whiteboard = whiteboards.Whiteboards[whiteboardId];
                     var obj = Assert.Single(whiteboard.Canvas.Objects);
                     Assert.NotEmpty(obj.Id);
+                    Assert.Equal(whiteboard.Version, result.Response!.Version);
                     Assert.Equal(addedObj, obj.Data);
                 });
         }

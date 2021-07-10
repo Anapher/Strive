@@ -78,7 +78,7 @@ export default class TextTool extends WhiteboardToolBase {
 
       const addHandler = () => {
          if (iText.text) {
-            this.emit('update', { type: 'add', object: objectToJson(iText) });
+            this.emit('addObj', { type: 'add', object: objectToJson(iText) }, iText);
          }
 
          _.remove(this.pendingTexts, iText);

@@ -26,7 +26,7 @@ export type SynchronizedParticipantState = {
 
 export type WhiteboardInfo = {
    friendlyName: string;
-   everyoneCanEdit: boolean;
+   anyoneCanEdit: boolean;
    version: number;
    canvas: WhiteboardCanvas;
 
@@ -125,4 +125,13 @@ export type WhiteboardLiveUpdateDto = {
 export type WhiteboardLiveActionDto = {
    whiteboardId: string;
    action: CanvasLiveAction;
+};
+
+export type WhiteboardUpdateSettingsDto = {
+   whiteboardId: string;
+   settings: WhiteboardSettings;
+};
+
+export type WhiteboardSettings = {
+   anyoneCanEdit: boolean;
 };

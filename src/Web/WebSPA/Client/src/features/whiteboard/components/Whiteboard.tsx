@@ -33,7 +33,7 @@ const useStyles = makeStyles({
 
 type Props = {
    canvas: WhiteboardCanvas;
-   onPushAction: (action: CanvasPushAction) => void;
+   onPushAction: (action: CanvasPushAction) => Promise<number>;
    canUndo: boolean;
    onUndo: () => void;
    canRedo: boolean;
@@ -91,10 +91,10 @@ export default function Whiteboard({
    useEffect(() => {
       const controller = controllerRef.current;
       if (controller) {
-         controller.on('pushAction', onPushAction);
+         controller.pushAction = onPushAction;
 
          return () => {
-            controller.off('pushAction', onPushAction);
+            controller.pushAction = undefined;
          };
       }
    }, [onPushAction, controllerRef.current]);
@@ -141,8 +141,6 @@ export default function Whiteboard({
       if (key === 'Z' && ctrl && shift) {
          if (canRedo) onRedo();
       }
-
-      console.log(key);
 
       if (!ctrl && !shift) {
          switch (key) {

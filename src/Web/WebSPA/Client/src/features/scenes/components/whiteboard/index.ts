@@ -1,6 +1,5 @@
-import OpenPollDialog from 'src/features/poll/components/OpenPollDialog';
 import usePermission from 'src/hooks/usePermission';
-import { POLL_CAN_OPEN } from 'src/permissions';
+import { WHITEBOARD_CAN_CREATE } from 'src/permissions';
 import allowOverwrite from '../../allow-overwrite-hoc';
 import { ScenePresenter, WhiteboardScene } from '../../types';
 import RenderWhiteboard from './RenderWhiteboard';
@@ -12,9 +11,8 @@ const presenter: ScenePresenter<WhiteboardScene> = {
    AvailableSceneListItem: WhiteboardListItem,
    RenderScene: allowOverwrite(RenderWhiteboard),
    ActionListItem: WhiteboardActionItem,
-   AlwaysRender: OpenPollDialog,
    getAutoHideMediaControls: () => false,
-   getIsActionListItemVisible: () => usePermission(POLL_CAN_OPEN),
+   getIsActionListItemVisible: () => usePermission(WHITEBOARD_CAN_CREATE),
 };
 
 export default presenter;

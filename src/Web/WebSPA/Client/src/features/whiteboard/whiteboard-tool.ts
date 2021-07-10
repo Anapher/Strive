@@ -2,7 +2,7 @@
 import { fabric } from 'fabric';
 import { Canvas, IEvent } from 'fabric/fabric-impl';
 import { TypedEmitter } from 'tiny-typed-emitter';
-import { CanvasLiveAction, CanvasPushAction } from './types';
+import { AddCanvasPushAction, CanvasLiveAction, CanvasPushAction } from './types';
 
 export type WhiteboardToolOptions = {
    lineWidth: number;
@@ -28,6 +28,9 @@ export default interface WhiteboardTool extends TypedEmitter<WebRtcConnectionEve
 }
 
 interface WebRtcConnectionEvents {
+   /** Add an object by issuing a push action and handle replacing the locally added object with the update */
+   addObj: (action: AddCanvasPushAction, obj: fabric.Object) => void;
+
    update: (action: CanvasPushAction) => void;
    updating: (action: CanvasLiveAction) => void;
 }

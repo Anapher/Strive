@@ -9,6 +9,7 @@ using Strive.Core.Extensions;
 using Strive.Core.Services.Synchronization.Requests;
 using Strive.Core.Services.WhiteboardService.Gateways;
 using Strive.Core.Services.WhiteboardService.Requests;
+using Strive.Core.Services.WhiteboardService.Responses;
 using Strive.Core.Services.WhiteboardService.Utilities;
 
 namespace Strive.Core.Services.WhiteboardService.UseCases
@@ -18,7 +19,7 @@ namespace Strive.Core.Services.WhiteboardService.UseCases
     ///     concurrency, versioning and updating the synchronized state. Also, the undo action limitations are enforced by this
     ///     use case.
     /// </summary>
-    public class UpdateWhiteboardUseCase : IRequestHandler<UpdateWhiteboardRequest>
+    public class UpdateWhiteboardUseCase : IRequestHandler<UpdateWhiteboardRequest, WhiteboardUpdatedResponse>
     {
         private readonly IMediator _mediator;
         private readonly IWhiteboardRepository _repository;
@@ -32,10 +33,12 @@ namespace Strive.Core.Services.WhiteboardService.UseCases
             _options = options.Value;
         }
 
-        public async Task<Unit> Handle(UpdateWhiteboardRequest request, CancellationToken cancellationToken)
+        public async Task<WhiteboardUpdatedResponse> Handle(UpdateWhiteboardRequest request,
+            CancellationToken cancellationToken)
         {
             var (conferenceId, roomId, whiteboardId, action) = request;
 
+            int newVersion;
             await using (var @lock = await _repository.LockWhiteboard(conferenceId, roomId, whiteboardId))
             {
                 var whiteboard = await _repository.Get(conferenceId, roomId, whiteboardId);
@@ -55,12 +58,14 @@ namespace Strive.Core.Services.WhiteboardService.UseCases
                     await _repository.Delete(conferenceId, roomId, whiteboard.Id);
                     throw ConferenceError.RoomNotFound.ToException();
                 }
+
+                newVersion = updated.Version;
             }
 
             await _mediator.Send(new UpdateSynchronizedObjectRequest(conferenceId,
                 SynchronizedWhiteboards.SyncObjId(roomId)));
 
-            return Unit.Value;
+            return new WhiteboardUpdatedResponse(newVersion);
         }
 
         private Whiteboard EnforceUndoLimitations(Whiteboard whiteboard)

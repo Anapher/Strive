@@ -2,8 +2,15 @@ import { fabric } from 'fabric';
 import { IEvent } from 'fabric/fabric-impl';
 import jsonPatch from 'fast-json-patch';
 import _ from 'lodash';
-import { TypedEmitter } from 'tiny-typed-emitter';
-import { applyObjectConfig, deleteObject, getId, isLiveObj, objectToJson } from './fabric-utils';
+import {
+   applyObjectConfig,
+   deleteObject,
+   getDeleteAtVersion,
+   getId,
+   isLiveObj,
+   objectToJson,
+   setDeleteAtVersion,
+} from './fabric-utils';
 import LiveUpdateControl, { getUpdateControl } from './live-update-handler';
 import PathCache from './path-cache';
 import {
@@ -21,11 +28,7 @@ export type LiveUpdateHandler = {
    on: (handler: (update: WhiteboardLiveUpdateDto) => void) => void;
 };
 
-interface WhiteboardControllerEvents {
-   pushAction: (action: CanvasPushAction) => void;
-}
-
-export default class WhiteboardController extends TypedEmitter<WhiteboardControllerEvents> {
+export default class WhiteboardController {
    private fc: fabric.Canvas;
    private tool: WhiteboardTool;
    private options: WhiteboardToolOptions;
@@ -41,8 +44,6 @@ export default class WhiteboardController extends TypedEmitter<WhiteboardControl
    private pathCache = new PathCache();
 
    constructor(canvas: HTMLCanvasElement, initialTool: WhiteboardTool, initialOptions: WhiteboardToolOptions) {
-      super();
-
       this.fc = new fabric.Canvas(canvas);
 
       this.options = initialOptions;
@@ -57,8 +58,6 @@ export default class WhiteboardController extends TypedEmitter<WhiteboardControl
       this.fc.on('object:rotating', this.onObjectModifying.bind(this));
       this.fc.on('object:skewing', this.onObjectModifying.bind(this));
 
-      this.fc.on('text:changed', this.onTextChanged.bind(this));
-
       this.fc.on('mouse:down', this.onMouseDown.bind(this));
       this.fc.on('mouse:move', this.onMouseMove.bind(this));
       this.fc.on('mouse:up', this.onMouseUp.bind(this));
@@ -68,6 +67,8 @@ export default class WhiteboardController extends TypedEmitter<WhiteboardControl
       this.fc.setHeight(720);
    }
 
+   public pushAction: ((action: CanvasPushAction) => Promise<number>) | undefined;
+
    public setupLiveUpdateHandler(handler: LiveUpdateHandler): void {
       handler.on(this.onLiveUpdateReceived.bind(this));
       this.throttledLiveUpdate = _.throttle((update) => {
@@ -76,7 +77,8 @@ export default class WhiteboardController extends TypedEmitter<WhiteboardControl
    }
 
    public updateCanvas(canvas: WhiteboardCanvas) {
-      canvas = this.pathCache.preprocess(canvas);
+      canvas = this.pathCache.preprocess(canvas); // paths must be unpacked from point array to svg paths
+      const newVersion = _.maxBy(canvas.objects, (x) => x.version)?.version ?? 0;
 
       if (!this.currentVersion) {
          this.fc.loadFromJSON(
@@ -93,11 +95,16 @@ export default class WhiteboardController extends TypedEmitter<WhiteboardControl
          const appliedVersion = this.currentVersion;
          const updatedObjects = canvas.objects.filter((x) => x.version > appliedVersion);
 
-         const existingObjects = this.fc.getObjects();
+         const existingObjects = Object.fromEntries(
+            this.fc
+               .getObjects()
+               .map((x) => [getId(x) as string, x])
+               .filter((x) => x[0]),
+         );
          const newObjects = new Array<VersionedCanvasObject>();
 
          for (const obj of updatedObjects) {
-            const existing = existingObjects.find((x) => getId(x) === obj.id);
+            const existing = existingObjects[obj.id];
             if (existing) {
                applyObjectConfig(existing, obj.data);
             } else {
@@ -105,7 +112,21 @@ export default class WhiteboardController extends TypedEmitter<WhiteboardControl
             }
          }
 
-         const deletedObjects = existingObjects.filter((x) => !canvas.objects.find((y) => getId(x) === y.id));
+         const checkObjDeleted = (obj: fabric.Object) => {
+            const objId = getId(obj);
+            if (objId && !canvas.objects.find((y) => objId === y.id)) {
+               return true;
+            }
+
+            const deleteAt = getDeleteAtVersion(obj);
+            if (deleteAt !== undefined && newVersion >= deleteAt) {
+               return true;
+            }
+
+            return false;
+         };
+
+         const deletedObjects = this.fc.getObjects().filter(checkObjDeleted);
          this.fc.remove(...deletedObjects);
 
          fabric.util.enlivenObjects(
@@ -119,11 +140,11 @@ export default class WhiteboardController extends TypedEmitter<WhiteboardControl
             },
             '',
          );
+
+         this.fc.absolutePan(new fabric.Point(canvas.panX, canvas.panY));
       }
 
-      this.fc.absolutePan(new fabric.Point(canvas.panX, canvas.panY));
-
-      this.currentVersion = _.maxBy(canvas.objects, (x) => x.version)?.version ?? 0;
+      this.currentVersion = newVersion;
       this.currentCanvas = canvas;
       (this.fc as any).currentPan = { x: canvas.panX, y: canvas.panY };
    }
@@ -148,7 +169,7 @@ export default class WhiteboardController extends TypedEmitter<WhiteboardControl
       const patches = this.generatePatch(objects);
       if (patches.length === 0) return;
 
-      this.emit('pushAction', { type: 'update', patches });
+      this.pushActionAndForget({ type: 'update', patches });
    }
 
    private onLiveUpdateObjects(objects: fabric.Object[]): void {
@@ -175,10 +196,6 @@ export default class WhiteboardController extends TypedEmitter<WhiteboardControl
       return patches;
    }
 
-   private onTextChanged(e: IEvent) {
-      console.log('text changed', e.target?.toJSON());
-   }
-
    private onObjectRemoved(e: IEvent) {
       if (!e.target) return;
       const deletionId = (e.target as any).deletionId;
@@ -188,11 +205,11 @@ export default class WhiteboardController extends TypedEmitter<WhiteboardControl
          this.currentDeletionId = deletionId;
 
          const objectIds = (e.target as any).deletedWith.filter((x: any) => !isLiveObj(x)).map((x: any) => getId(x));
-         this.emit('pushAction', { type: 'delete', objectIds: objectIds });
+         this.pushActionAndForget({ type: 'delete', objectIds: objectIds });
       } else {
          const targetId = getId(e.target);
          if (targetId) {
-            this.emit('pushAction', { type: 'delete', objectIds: [targetId] });
+            this.pushActionAndForget({ type: 'delete', objectIds: [targetId] });
          }
       }
    }
@@ -271,14 +288,17 @@ export default class WhiteboardController extends TypedEmitter<WhiteboardControl
 
       const onToolUpdateHandler = this.onToolUpdate.bind(this);
       const onToolUpdatingHandler = this.onToolUpdating.bind(this);
+      const onToolAddObjectHandler = this.onToolAddObject.bind(this);
 
       tool.on('update', onToolUpdateHandler);
       tool.on('updating', onToolUpdatingHandler);
+      tool.on('addObj', onToolAddObjectHandler);
 
       this.unsubscribeTool = () => {
          tool.dispose();
          tool.off('update', onToolUpdateHandler);
          tool.off('updating', onToolUpdatingHandler);
+         tool.off('addObj', onToolAddObjectHandler);
       };
 
       tool.configureCanvas(this.fc);
@@ -289,11 +309,29 @@ export default class WhiteboardController extends TypedEmitter<WhiteboardControl
    }
 
    private onToolUpdate(update: CanvasPushAction): void {
-      this.emit('pushAction', update);
+      this.pushActionAndForget(update);
    }
 
    private onToolUpdating(update: CanvasLiveAction): void {
       this.throttledLiveUpdate?.(update);
+   }
+
+   private async onToolAddObject(update: CanvasPushAction, obj: fabric.Object) {
+      if (!this.pushAction) return;
+
+      let version: number;
+      try {
+         version = await this.pushAction(update);
+      } catch (error) {
+         return;
+      }
+
+      if (this.currentVersion !== undefined && this.currentVersion >= version) {
+         this.fc.remove(obj);
+         return;
+      }
+
+      setDeleteAtVersion(obj, version);
    }
 
    public updateOptions(options: WhiteboardToolOptions) {
@@ -307,17 +345,27 @@ export default class WhiteboardController extends TypedEmitter<WhiteboardControl
 
    public clearWhiteboard() {
       this.fc.discardActiveObject();
-      this.emit('pushAction', {
+      this.pushActionAndForget({
          type: 'delete',
          objectIds: this.fc
             .getObjects()
-            .filter((x) => !isLiveObj(x))
-            .map((x) => getId(x)),
+            .map((x) => getId(x))
+            .filter((x): x is string => !!x),
       });
    }
 
    public deleteSelection() {
       const selected = this.fc.getActiveObject();
       deleteObject(this.fc, selected);
+   }
+
+   private pushActionAndForget(action: CanvasPushAction) {
+      try {
+         this.pushAction?.(action).catch(() => {
+            // ignore
+         });
+      } catch (error) {
+         // ignore
+      }
    }
 }

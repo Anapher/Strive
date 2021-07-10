@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using MediatR;
 using Strive.Core.Extensions;
-using Strive.Core.Services.WhiteboardService.Actions;
 using Strive.Core.Services.WhiteboardService.Requests;
 using Strive.Core.Services.WhiteboardService.Utilities;
 
@@ -19,7 +18,7 @@ namespace Strive.Core.Services.WhiteboardService.UseCases
             _canvasActionUtils = canvasActionUtils;
         }
 
-        public Task<Unit> Handle(UndoRequest request, CancellationToken cancellationToken)
+        public async Task<Unit> Handle(UndoRequest request, CancellationToken cancellationToken)
         {
             var (conferenceId, roomId, whiteboardId, participantId) = request;
 
@@ -51,8 +50,9 @@ namespace Strive.Core.Services.WhiteboardService.UseCases
                 };
             }
 
-            return _mediator.Send(new UpdateWhiteboardRequest(conferenceId, roomId, whiteboardId, UpdateAction),
+            await _mediator.Send(new UpdateWhiteboardRequest(conferenceId, roomId, whiteboardId, UpdateAction),
                 cancellationToken);
+            return Unit.Value;
         }
     }
 }

@@ -1,16 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { SuccessOrError } from 'src/communication-types';
 import * as coreHub from 'src/core-hub';
 import { selectParticipantsOfCurrentRoom } from 'src/features/rooms/selectors';
 import Whiteboard from 'src/features/whiteboard/components/Whiteboard';
 import { selectWhiteboard } from 'src/features/whiteboard/selectors';
-import { CanvasPushAction, WhiteboardLiveActionDto, WhiteboardLiveUpdateDto } from 'src/features/whiteboard/types';
+import {
+   CanvasPushAction,
+   WhiteboardLiveActionDto,
+   WhiteboardLiveUpdateDto,
+   WhiteboardPushActionDto,
+} from 'src/features/whiteboard/types';
 import { LiveUpdateHandler } from 'src/features/whiteboard/whiteboard-controller';
 import useMyParticipantId from 'src/hooks/useMyParticipantId';
 import usePermission from 'src/hooks/usePermission';
 import { WHITEBOARD_CAN_CREATE } from 'src/permissions';
 import { RootState } from 'src/store';
+import { showMessage } from 'src/store/notifier/actions';
 import useSignalRHub from 'src/store/signal/useSignalRHub';
+import { formatErrorMessage } from 'src/utils/error-utils';
 import { RenderSceneProps, WhiteboardScene } from '../../types';
 
 export default function RenderWhiteboard({ scene }: RenderSceneProps<WhiteboardScene>) {
@@ -57,10 +65,20 @@ export default function RenderWhiteboard({ scene }: RenderSceneProps<WhiteboardS
 
    if (!whiteboard) return null;
 
-   const readOnly = !whiteboard.everyoneCanEdit && !canCreateWhiteboard;
+   const readOnly = !whiteboard.anyoneCanEdit && !canCreateWhiteboard;
 
-   const handlePushAction = (action: CanvasPushAction) => {
-      dispatch(coreHub.whiteboardPushAction({ whiteboardId: scene.id, action }));
+   const handlePushAction = async (action: CanvasPushAction) => {
+      if (signalr) {
+         const dto: WhiteboardPushActionDto = { action, whiteboardId: scene.id };
+         const result = await signalr.invoke<SuccessOrError<{ version: number }>>('WhiteboardPushAction', dto);
+         if (result.success) {
+            return result.response.version;
+         } else {
+            dispatch(showMessage({ type: 'error', message: formatErrorMessage(result.error) }));
+            throw new Error(result.error.message);
+         }
+      }
+      throw new Error('SignalR not available');
    };
 
    const handleUndo = () => {

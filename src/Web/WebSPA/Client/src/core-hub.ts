@@ -17,7 +17,7 @@ import {
    DeletePollAnswerDto,
 } from './core-hub.types';
 import { Scene } from './features/scenes/types';
-import { WhiteboardPushActionDto } from './features/whiteboard/types';
+import { WhiteboardPushActionDto, WhiteboardUpdateSettingsDto } from './features/whiteboard/types';
 import { connectSignal, invoke, onInvokeReturn } from './store/signal/actions';
 import { ChangeProducerSourceRequest } from './store/webrtc/types';
 
@@ -69,6 +69,8 @@ export const createWhiteboard = createHubFn('CreateWhiteboard');
 export const whiteboardPushAction = createHubFn<WhiteboardPushActionDto>('WhiteboardPushAction');
 export const whiteboardUndo = createHubFn<string>('WhiteboardUndo');
 export const whiteboardRedo = createHubFn<string>('WhiteboardRedo');
+export const whiteboardDelete = createHubFn<string>('WhiteboardDelete');
+export const whiteboardUpdateSettings = createHubFn<WhiteboardUpdateSettingsDto>('WhiteboardUpdateSettings');
 
 export function createHubFn<TArg = void>(name: string) {
    const actionCreator = function (arg: TArg) {

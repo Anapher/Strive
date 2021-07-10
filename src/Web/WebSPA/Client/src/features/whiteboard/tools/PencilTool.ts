@@ -1,5 +1,5 @@
 import { Canvas, IEvent, Point } from 'fabric/fabric-impl';
-import { getId, objectToJson } from '../fabric-utils';
+import { getId, isLiveObj, objectToJson } from '../fabric-utils';
 import { compressPathData } from '../path-compression';
 import { WhiteboardToolBase, WhiteboardToolOptions } from '../whiteboard-tool';
 
@@ -77,10 +77,11 @@ export default class PencilTool extends WhiteboardToolBase {
       if (!e.target) return;
       if (e.target.type !== 'path') return;
       if (getId(e.target)) return;
+      if (isLiveObj(e.target)) return;
 
       const data = objectToJson(e.target);
       compressPathData(data);
 
-      this.emit('update', { type: 'add', object: data });
+      this.emit('addObj', { type: 'add', object: data }, e.target);
    }
 }
