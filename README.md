@@ -63,6 +63,7 @@ Last year when I was tutor at my university, I had to use BigBlueButton which wa
 - Announcements / show a message to all participants, also those in breakout rooms
 - Horizontal and vertical scalability (some small things are still to do, but the architecture allows it)
 - Polls (single choice, multiple choice, numeric, tag cloud)
+- Whiteboard
 
 
 ### Architecture
