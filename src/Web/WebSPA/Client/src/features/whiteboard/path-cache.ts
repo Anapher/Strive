@@ -1,4 +1,4 @@
-import { uncompressPathData } from './path-compression';
+import { uncompressPathData, isPathCompressed } from './path-compression';
 import { CanvasObject, VersionedCanvasObject, WhiteboardCanvas } from './types';
 
 export default class PathCache {
@@ -9,6 +9,8 @@ export default class PathCache {
 
       const uncompressPath = (obj: VersionedCanvasObject) => {
          requiredPathIds[obj.id] = true;
+
+         if (!isPathCompressed(obj.data)) return obj;
 
          let cached: any = this.uncompressedPaths.get(obj.id);
          if (!cached) {

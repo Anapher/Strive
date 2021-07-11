@@ -169,7 +169,7 @@ export default class WhiteboardController {
       const patches = this.generatePatch(objects);
       if (patches.length === 0) return;
 
-      this.pushActionAndForget({ type: 'update', patches });
+      this.pushActionAndResetOnError({ type: 'update', patches });
    }
 
    private onLiveUpdateObjects(objects: fabric.Object[]): void {
@@ -205,11 +205,11 @@ export default class WhiteboardController {
          this.currentDeletionId = deletionId;
 
          const objectIds = (e.target as any).deletedWith.filter((x: any) => !isLiveObj(x)).map((x: any) => getId(x));
-         this.pushActionAndForget({ type: 'delete', objectIds: objectIds });
+         this.pushActionAndResetOnError({ type: 'delete', objectIds: objectIds });
       } else {
          const targetId = getId(e.target);
          if (targetId) {
-            this.pushActionAndForget({ type: 'delete', objectIds: [targetId] });
+            this.pushActionAndResetOnError({ type: 'delete', objectIds: [targetId] });
          }
       }
    }
@@ -309,7 +309,7 @@ export default class WhiteboardController {
    }
 
    private onToolUpdate(update: CanvasPushAction): void {
-      this.pushActionAndForget(update);
+      this.pushActionAndResetOnError(update);
    }
 
    private onToolUpdating(update: CanvasLiveAction): void {
@@ -323,6 +323,7 @@ export default class WhiteboardController {
       try {
          version = await this.pushAction(update);
       } catch (error) {
+         this.fc.remove(obj);
          return;
       }
 
@@ -345,7 +346,7 @@ export default class WhiteboardController {
 
    public clearWhiteboard() {
       this.fc.discardActiveObject();
-      this.pushActionAndForget({
+      this.pushActionAndResetOnError({
          type: 'delete',
          objectIds: this.fc
             .getObjects()
@@ -359,13 +360,19 @@ export default class WhiteboardController {
       deleteObject(this.fc, selected);
    }
 
-   private pushActionAndForget(action: CanvasPushAction) {
+   private pushActionAndResetOnError(action: CanvasPushAction) {
       try {
          this.pushAction?.(action).catch(() => {
-            // ignore
+            this.resetCanvas();
          });
       } catch (error) {
-         // ignore
+         this.resetCanvas();
       }
+   }
+
+   private resetCanvas() {
+      if (!this.currentCanvas) return;
+      this.currentVersion = undefined;
+      this.updateCanvas(this.currentCanvas);
    }
 }

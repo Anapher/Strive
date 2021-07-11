@@ -23,6 +23,16 @@ export function uncompressPathData(data: any): any {
 }
 
 /**
+ * Determines whether a path is a Point[] or a SVG path
+ * @param data the path data
+ * @returns Return true if the path is compressed (as Point[])
+ */
+export function isPathCompressed(data: any): any {
+   if (data.path.length === 0) return false;
+   return data.path[0].x !== undefined;
+}
+
+/**
  * Return the path data for fabric js
  * @param segments the input segments, something like ["M ", 60.4315, " ", 10.205996948242188, " ", "Q ", 60.4325, ...]
  */
