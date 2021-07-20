@@ -1,8 +1,8 @@
 import { Size } from 'src/types';
 
 /**
- * Calculate the maximum size the content can get to to be contained in the bounding box while maintaining the aspect ratio
- * @param content the size of the content
+ * Calculate the maximum size the content can get to be contained in the bounding box while maintaining the aspect ratio
+ * @param content the size of the content (for aspect ratio)
  * @param boundingBox the bounding box (container)
  */
 export function expandToBox(content: Size, boundingBox: Size): Size {
@@ -23,10 +23,14 @@ export function expandToBox(content: Size, boundingBox: Size): Size {
  */
 export function maxWidth(size: Size, maxWidth: number): Size {
    if (size.width > maxWidth) {
-      return { width: maxWidth, height: (size.height / size.width) * maxWidth };
+      return resizeMaintainAspectRatio(size, maxWidth);
    }
 
    return size;
+}
+
+export function resizeMaintainAspectRatio(original: Size, newWidth: number): Size {
+   return { width: newWidth, height: (original.height / original.width) * newWidth };
 }
 
 type ComputedGrid = {
