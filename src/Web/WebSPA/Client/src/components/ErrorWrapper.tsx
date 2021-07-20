@@ -1,6 +1,7 @@
 import { Button, makeStyles, Typography } from '@material-ui/core';
 import { Alert } from '@material-ui/lab';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 const useStyles = makeStyles((theme) => ({
    retryButton: {
@@ -18,6 +19,7 @@ type Props = {
 
 export default function ErrorWrapper({ failed, children, error, onRetry, type = 'alert' }: Props) {
    const classes = useStyles();
+   const { t } = useTranslation();
 
    return failed ? (
       <div>
@@ -27,19 +29,19 @@ export default function ErrorWrapper({ failed, children, error, onRetry, type = 
                action={
                   onRetry && (
                      <Button color="inherit" size="small" onClick={onRetry}>
-                        Retry
+                        {t('common:try_again')}
                      </Button>
                   )
                }
             >
-               {error ?? 'An error occcurred.'}
+               {error ?? t('error_occurred')}
             </Alert>
          ) : (
             <>
                <Typography color="error">{error}</Typography>
                {onRetry && (
                   <Button variant="contained" onClick={onRetry} className={classes.retryButton}>
-                     Retry
+                     {t('common:try_again')}
                   </Button>
                )}
             </>

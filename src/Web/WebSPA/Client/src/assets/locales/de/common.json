@@ -23,5 +23,6 @@
   "screen": "Bildschirm",
   "delete": "Löschen",
   "participant": "Teilnehmer",
-  "participant_plural": "Teilnehmer"
+  "participant_plural": "Teilnehmer",
+  "try_again": "Erneut versuchen"
 }

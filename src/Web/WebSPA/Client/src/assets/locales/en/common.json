@@ -23,5 +23,6 @@
   "language": "Language",
   "delete": "Delete",
   "participant": "participant",
-  "participant_plural": "participants"
+  "participant_plural": "participants",
+  "try_again": "Try again"
 }
