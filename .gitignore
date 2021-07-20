@@ -329,3 +329,7 @@ Thumbs.db
 
 # Traefik Let's Encrypt
 acme.json
+
+
+## Identity Server
+is-signing-key*
