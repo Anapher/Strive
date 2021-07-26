@@ -3,6 +3,34 @@ import { expandToBox, maxWidth, resizeMaintainAspectRatio } from './calculations
 
 type Margin = { top: number; left: number; bottom: number; right: number };
 
+type TilesSceneBarState = {
+   width: number;
+   tileSpaceBetween: number;
+   tileSize: Size;
+   tileMinWidth: number;
+};
+
+export type TilesSceneBarInstructions = {
+   tileAmount: number;
+   tileSize: Size;
+   tileSpaceBetween: number;
+};
+
+export function computeTilesSceneBar({
+   width,
+   tileSpaceBetween,
+   tileSize,
+   tileMinWidth,
+}: TilesSceneBarState): TilesSceneBarInstructions {
+   const tileAmount = Math.floor((width + tileSpaceBetween) / (tileMinWidth + tileSpaceBetween));
+
+   // substract the space between for all tiles and compute the max width for each tile
+   const singleTileWidth = (width - tileSpaceBetween * tileAmount + tileSpaceBetween) / tileAmount;
+   const newTileSize = resizeMaintainAspectRatio(tileSize, singleTileWidth);
+
+   return { tileAmount, tileSize: newTileSize, tileSpaceBetween };
+}
+
 export type GridTopInstructions = {
    contentDimensions: Size;
    tileSpaceBetween: number;

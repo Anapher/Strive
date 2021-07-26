@@ -1,62 +1,84 @@
-import React, { useMemo } from 'react';
+import { makeStyles } from '@material-ui/core';
+import clsx from 'classnames';
+import React, { useContext } from 'react';
+import { Participant } from 'src/features/conference/types';
 import { Size } from 'src/types';
-import { computeGridTop } from '../../tile-frame-calculations';
+import { expandToBox } from '../../calculations';
+import LayoutChildSizeContext from '../../layout-child-size-context';
 import { ActiveSpeakerScene, RenderSceneProps } from '../../types';
 import useSomeParticipants from '../../useSomeParticipants';
-import ActiveChipsLayout, { ACTIVE_CHIPS_LAYOUT_HEIGHT } from '../ActiveChipsLayout';
 import ParticipantTile from '../ParticipantTile';
-import TileFrameGridTop from '../TileFrameGridTop';
+import TilesBarLayout from '../TilesBarLayout';
 
-const getListeningParticipantsWidth = (width: number) => {
-   if (width <= 400) return 100;
-   if (width <= 800) return 180;
-   if (width <= 1200) return 260;
+const MAIN_SPEAKER_MARGIN_TOP = 0;
+const MAIN_SPEAKER_MARGIN_BOTTOM = 16;
+const MAIN_SPEAKER_MARGIN_LEFT = 8;
+const MAIN_SPEAKER_MARGIN_RIGHT = 8;
 
-   return 340;
-};
-
-const participantTileRatio: Size = { width: 16, height: 9 };
+const useStyles = makeStyles((theme) => ({
+   root: {
+      display: 'flex',
+      flexDirection: 'column',
+   },
+   chips: {
+      marginTop: theme.spacing(1),
+      marginBottom: theme.spacing(1),
+      paddingRight: theme.spacing(2),
+      height: 24,
+   },
+   content: {
+      flex: 1,
+      minHeight: 0,
+   },
+   mainParticipantTile: {
+      width: '100%',
+      height: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'flex-start',
+      paddingLeft: MAIN_SPEAKER_MARGIN_LEFT,
+      paddingRight: MAIN_SPEAKER_MARGIN_RIGHT,
+      paddingTop: MAIN_SPEAKER_MARGIN_TOP,
+      paddingBottom: MAIN_SPEAKER_MARGIN_BOTTOM,
+   },
+}));
 
 export default function RenderActiveSpeaker({ className, dimensions }: RenderSceneProps<ActiveSpeakerScene>) {
-   const instructions = useMemo(
-      () =>
-         computeGridTop({
-            contentRatio: participantTileRatio,
-            dimensions: { width: dimensions.width - 16, height: dimensions.height - ACTIVE_CHIPS_LAYOUT_HEIGHT - 8 },
-            tileMinWidth: 260,
-            tileSize: participantTileRatio,
-            tileSpaceBetween: 8,
-            tilesMargin: { left: 8, right: 8, bottom: 8, top: 0 },
-            contentMargin: { left: 8, right: 8, bottom: 48, top: 0 },
-         }),
-      [dimensions.width, dimensions.height],
-   );
-
-   const activeParticipants = useSomeParticipants(instructions.tileAmount);
+   const classes = useStyles();
+   const activeParticipants = useSomeParticipants(16);
    if (activeParticipants.length === 0) return null;
 
    return (
-      <ActiveChipsLayout className={className}>
-         <TileFrameGridTop
-            instructions={instructions}
-            participants={activeParticipants.slice(1)}
-            render={(size) => (
-               <div
-                  style={{
-                     width: '100%',
-                     height: '100%',
-                     display: 'flex',
-                     flexDirection: 'column',
-                     alignItems: 'center',
-                     justifyContent: 'center',
-                  }}
-               >
-                  <div style={{ ...size }}>
-                     <ParticipantTile key={activeParticipants[0].id} {...size} participant={activeParticipants[0]} />
-                  </div>
-               </div>
-            )}
-         />
-      </ActiveChipsLayout>
+      <div className={clsx(className, classes.root)}>
+         <div className={classes.content}>
+            <TilesBarLayout participants={activeParticipants.slice(1)} sceneSize={dimensions}>
+               <RenderMainSpeakerTile participant={activeParticipants[0]} />
+            </TilesBarLayout>
+         </div>
+      </div>
+   );
+}
+
+type RenderMainSpeakerTileProps = {
+   participant: Participant;
+};
+
+function RenderMainSpeakerTile({ participant }: RenderMainSpeakerTileProps) {
+   const size = useContext(LayoutChildSizeContext);
+   const classes = useStyles();
+
+   const contentSize: Size = {
+      width: size.width - MAIN_SPEAKER_MARGIN_LEFT - MAIN_SPEAKER_MARGIN_RIGHT,
+      height: size.height - MAIN_SPEAKER_MARGIN_TOP - MAIN_SPEAKER_MARGIN_BOTTOM,
+   };
+   const fixedContentSize = expandToBox({ width: 16, height: 9 }, contentSize);
+
+   return (
+      <div className={classes.mainParticipantTile}>
+         <div style={{ ...fixedContentSize }}>
+            <ParticipantTile key={participant.id} {...fixedContentSize} participant={participant} />
+         </div>
+      </div>
    );
 }

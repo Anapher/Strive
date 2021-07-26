@@ -1,4 +1,4 @@
-import { makeStyles, Typography } from '@material-ui/core';
+import { Typography } from '@material-ui/core';
 import { DateTime } from 'luxon';
 import React from 'react';
 import Countdown from 'react-countdown';
@@ -6,33 +6,15 @@ import { useSelector } from 'react-redux';
 import CountdownRenderer from 'src/components/CountdownRenderer';
 import { selectBreakoutRoomState } from 'src/features/breakout-rooms/selectors';
 import { BreakoutRoomScene, RenderSceneProps } from '../../types';
-import ActiveChipsLayout from '../ActiveChipsLayout';
+import AutoSceneLayout from '../AutoSceneLayout';
 
-const useStyles = makeStyles({
-   root: {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-   },
-   content: {
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-   },
-});
-
-export default function RenderBreakoutRoom({ className, next }: RenderSceneProps<BreakoutRoomScene>) {
-   const classes = useStyles();
+export default function RenderBreakoutRoom({ className, dimensions }: RenderSceneProps<BreakoutRoomScene>) {
    const state = useSelector(selectBreakoutRoomState);
-
-   const overwrite = next();
-   if (overwrite) return <>{overwrite}</>;
-
    if (!state) return null;
 
    return (
-      <ActiveChipsLayout className={className} contentClassName={classes.root}>
-         <div className={classes.content}>
+      <AutoSceneLayout className={className} {...dimensions} center>
+         <div>
             {state.deadline && (
                <Typography variant="h1">
                   <Countdown date={DateTime.fromISO(state.deadline).toJSDate()} renderer={CountdownRenderer} />
@@ -40,6 +22,6 @@ export default function RenderBreakoutRoom({ className, next }: RenderSceneProps
             )}
             <Typography variant="h5">{state.description}</Typography>
          </div>
-      </ActiveChipsLayout>
+      </AutoSceneLayout>
    );
 }

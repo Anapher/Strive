@@ -13,7 +13,6 @@ const useStyles = makeStyles({
       height: '100%',
       width: '100%',
       flexDirection: 'column',
-      justifyContent: 'center',
    },
    container: {
       display: 'flex',

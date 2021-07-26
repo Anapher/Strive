@@ -10,6 +10,7 @@ import AddToListFab from './AddToListFab';
 import PassStickList from './PassStickList';
 import FrameWithPassFab from './FrameWithPassFab';
 import TalkingStickScreen from './TalkingStickScreen';
+import { Size } from 'src/types';
 
 const useStyles = makeStyles((theme) => ({
    participantList: {
@@ -27,19 +28,21 @@ export default function TalkingStickSpeakerPassingStick({
    className,
    next,
    scene,
+   dimensions,
 }: RenderSceneProps<TalkingStickScene>) {
    const overwritten = next();
    if (overwritten) return <FrameWithPassFab>{overwritten}</FrameWithPassFab>;
 
-   return <NoPresenter className={className} scene={scene} />;
+   return <NoPresenter className={className} scene={scene} dimensions={dimensions} />;
 }
 
 type NoPresenterProps = {
    className?: string;
    scene: TalkingStickScene;
+   dimensions: Size;
 };
 
-function NoPresenter({ className, scene }: NoPresenterProps) {
+function NoPresenter({ className, scene, dimensions }: NoPresenterProps) {
    const { t } = useTranslation();
    const dispatch = useDispatch();
    const classes = useStyles();
@@ -54,6 +57,7 @@ function NoPresenter({ className, scene }: NoPresenterProps) {
       <TalkingStickScreen
          className={className}
          mode={scene.mode}
+         dimensions={dimensions}
          footerChildren={
             canPass && (
                <div className={classes.participantList}>

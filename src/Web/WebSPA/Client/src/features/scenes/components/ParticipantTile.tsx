@@ -106,7 +106,7 @@ export default function ParticipantTile({ className, participant, width, height,
                      size={isSmall ? 'small' : 'medium'}
                      onClick={handleOpenContextMenu}
                   >
-                     <MoreVertIcon />
+                     <MoreVertIcon fontSize={isSmall ? 'small' : 'default'} />
                   </IconButton>
                </div>
             )}

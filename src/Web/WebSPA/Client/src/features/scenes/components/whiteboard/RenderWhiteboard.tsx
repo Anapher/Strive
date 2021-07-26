@@ -20,8 +20,9 @@ import { showMessage } from 'src/store/notifier/actions';
 import useSignalRHub from 'src/store/signal/useSignalRHub';
 import { formatErrorMessage } from 'src/utils/error-utils';
 import { RenderSceneProps, WhiteboardScene } from '../../types';
+import AutoSceneLayout from '../AutoSceneLayout';
 
-export default function RenderWhiteboard({ scene }: RenderSceneProps<WhiteboardScene>) {
+export default function RenderWhiteboard({ scene, dimensions }: RenderSceneProps<WhiteboardScene>) {
    const whiteboard = useSelector((state: RootState) => selectWhiteboard(state, scene.id));
    const dispatch = useDispatch();
    const myId = useMyParticipantId();
@@ -92,16 +93,18 @@ export default function RenderWhiteboard({ scene }: RenderSceneProps<WhiteboardS
    const myState = whiteboard.participantStates[myId];
 
    return (
-      <Whiteboard
-         canvas={whiteboard.canvas}
-         onPushAction={handlePushAction}
-         canUndo={Boolean(myState?.canUndo)}
-         canRedo={Boolean(myState?.canRedo)}
-         onUndo={handleUndo}
-         onRedo={handleRedo}
-         participants={paricipants}
-         liveUpdateHandler={liveUpdater}
-         readOnly={readOnly}
-      />
+      <AutoSceneLayout {...dimensions}>
+         <Whiteboard
+            canvas={whiteboard.canvas}
+            onPushAction={handlePushAction}
+            canUndo={Boolean(myState?.canUndo)}
+            canRedo={Boolean(myState?.canRedo)}
+            onUndo={handleUndo}
+            onRedo={handleRedo}
+            participants={paricipants}
+            liveUpdateHandler={liveUpdater}
+            readOnly={readOnly}
+         />
+      </AutoSceneLayout>
    );
 }

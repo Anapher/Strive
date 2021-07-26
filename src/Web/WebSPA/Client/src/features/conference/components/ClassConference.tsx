@@ -14,6 +14,7 @@ import SceneView from '../../scenes/components/SceneView';
 import ConferenceLayoutContext, { ConferenceLayoutContextType } from '../conference-layout-context';
 import PermissionDialog from './PermissionDialog';
 import ConferenceSidebar from './ConferenceSidebar';
+import { ACTIVE_CHIPS_LAYOUT_HEIGHT } from 'src/features/scenes/components/ActiveChipsLayout';
 
 const CHAT_MIN_WIDTH = 304;
 const CHAT_MAX_WIDTH = 416;
@@ -35,7 +36,19 @@ const useStyles = makeStyles((theme) => ({
       position: 'relative',
       minHeight: 0,
    },
+   sceneLayout: {
+      flex: 1,
+      display: 'flex',
+      flexDirection: 'row',
+      minHeight: 0,
+   },
    scene: {
+      flex: 1,
+      display: 'flex',
+      flexDirection: 'column',
+      minWidth: 0,
+   },
+   sceneContainer: {
       flex: 1,
       display: 'flex',
       flexDirection: 'column',
@@ -60,7 +73,7 @@ export default function ClassConference() {
    useEffect(() => {
       const fixedDimensions = dimensions && {
          width: dimensions.width,
-         height: dimensions.height - 40 /** for chips and the arrow back */,
+         height: dimensions.height - ACTIVE_CHIPS_LAYOUT_HEIGHT /** for chips and the arrow back */,
       };
 
       if (fixedDimensions) {
@@ -75,13 +88,16 @@ export default function ClassConference() {
    }, [dimensions?.width, dimensions?.height]);
 
    const chatContainer = useRef<HTMLDivElement>(null);
+   const sceneBarContainer = useRef<HTMLDivElement>(null);
 
    const context = useMemo<ConferenceLayoutContextType>(
       () => ({
          chatContainer: chatContainer.current,
          chatWidth,
+         sceneBarContainer: sceneBarContainer.current,
+         sceneBarWidth: dimensions?.width,
       }),
-      [chatContainer.current, chatWidth],
+      [chatContainer.current, chatWidth, dimensions?.width],
    );
 
    return (
@@ -90,18 +106,23 @@ export default function ClassConference() {
             <div className={classes.root}>
                <AnnouncementOverlay />
                <ConferenceAppBar chatWidth={chatWidth} />
-               <div className={classes.conferenceMain} ref={contentRef}>
+               <div className={classes.conferenceMain}>
                   <ConferenceSidebar />
-                  <div className={classes.scene}>
-                     <SceneView />
-                  </div>
-                  {showChat && (
-                     <div className={classes.chat} style={{ width: chatWidth }}>
-                        <Grid ref={chatContainer} />
-                        <CurrentPollsBar />
-                        <ChatBar />
+                  <div className={classes.sceneContainer}>
+                     <div ref={sceneBarContainer} />
+                     <div className={classes.sceneLayout} ref={contentRef}>
+                        <div className={classes.scene}>
+                           <SceneView />
+                        </div>
+                        {showChat && (
+                           <div className={classes.chat} style={{ width: chatWidth }}>
+                              <Grid ref={chatContainer} />
+                              <CurrentPollsBar />
+                              <ChatBar />
+                           </div>
+                        )}
                      </div>
-                  )}
+                  </div>
                </div>
                <PermissionDialog />
             </div>
