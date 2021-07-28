@@ -5,5 +5,5 @@ export default function* mySaga() {
    yield showLoadingHubAction(createPoll, 'Loading...');
    yield showLoadingHubAction(updatePollState, 'Loading...');
    yield showLoadingHubAction(deletePoll, 'Loading...');
-   yield showErrorOn(submitPollAnswer);
+   yield showErrorOn(submitPollAnswer.returnAction);
 }
