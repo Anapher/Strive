@@ -51,7 +51,7 @@ function SceneLayoutPresentator(props: Omit<Props, 'type'>) {
 }
 
 function SceneLayoutTiles({ participant, width, height, className, children }: Omit<Props, 'type'>) {
-   const participants = useSomeParticipants(1000, {
+   const participants = useSomeParticipants({
       includedParticipants: participant ? [participant] : undefined,
    });
 
@@ -68,10 +68,13 @@ type PortalWithParticipantProps = {
 };
 function PortalWithParticipant({ participant }: PortalWithParticipantProps) {
    const context = useContext(ConferenceLayoutContext);
-   const participants = useSomeParticipants(1, {
-      includedParticipants: participant ? [participant] : undefined,
-      webcamOnly: true,
-   });
+   const participants = useSomeParticipants(
+      {
+         includedParticipants: participant ? [participant] : undefined,
+         webcamOnly: true,
+      },
+      1,
+   );
 
    const width = context.chatWidth - 8;
    const size: Size = { width, height: width * ACTIVE_PARTICIPANTS_WEBCAM_RATIO };

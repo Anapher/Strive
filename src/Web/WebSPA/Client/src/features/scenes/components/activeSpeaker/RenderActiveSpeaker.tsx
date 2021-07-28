@@ -46,7 +46,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function RenderActiveSpeaker({ className, dimensions }: RenderSceneProps<ActiveSpeakerScene>) {
    const classes = useStyles();
-   const activeParticipants = useSomeParticipants(16);
+   const activeParticipants = useSomeParticipants({}, 16);
    if (activeParticipants.length === 0) return null;
 
    return (
