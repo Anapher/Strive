@@ -1,5 +1,5 @@
 import { Action, configureStore, Middleware, ThunkAction } from '@reduxjs/toolkit';
-import { persistStore } from 'redux-persist';
+import { persistStore, FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER } from 'redux-persist';
 import createSagaMiddleware from 'redux-saga';
 import notifierMiddleware from './notifier/create-middleware';
 import rootReducer from './root-reducer';
@@ -16,7 +16,12 @@ const middlewares: Middleware[] = [signalrMiddleware, sagaMiddleware, notifierMi
 // create store
 const store = configureStore({
    reducer: rootReducer,
-   middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(middlewares),
+   middleware: (getDefaultMiddleware) =>
+      getDefaultMiddleware({
+         serializableCheck: {
+            ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+         },
+      }).concat(middlewares),
 });
 
 export const persistor = persistStore(store);
