@@ -1,7 +1,10 @@
 import { makeStyles } from '@material-ui/core';
 import React, { useContext } from 'react';
+import { useSelector } from 'react-redux';
 import { Participant } from 'src/features/conference/types';
+import { SceneLayoutTypeWithAuto } from 'src/features/create-conference/types';
 import LayoutChildSizeContext from '../layout-child-size-context';
+import { hasAnyParticipantInCurrentRoomWebcamActicated, selectSceneLayoutType } from '../selectors';
 import SceneLayout from './SceneLayout';
 
 const useStyles = makeStyles({
@@ -24,9 +27,27 @@ type Props = {
    center?: boolean;
 };
 
-export default function AutoSceneLayout({ children, center, ...props }: Props) {
+export default function AutoSceneLayout({ ...props }: Props) {
+   const type = useSelector(selectSceneLayoutType) || 'auto';
+   return <RenderSceneLayoutByType type={type} {...props} />;
+}
+
+export function RenderSceneLayoutByType({
+   type,
+   children,
+   center,
+   ...props
+}: Props & { type: SceneLayoutTypeWithAuto }) {
+   const hasAnyParticipantWebcam = useSelector(hasAnyParticipantInCurrentRoomWebcamActicated);
+   let layoutType = type;
+   if (layoutType === 'auto') {
+      layoutType = hasAnyParticipantWebcam ? 'tiles' : 'chipsWithPresenter';
+   }
+
+   console.log('chips', layoutType);
+
    return (
-      <SceneLayout type="tiles-bar" {...props}>
+      <SceneLayout type={layoutType} {...props}>
          {center ? <CenteredLayout>{children}</CenteredLayout> : children}
       </SceneLayout>
    );

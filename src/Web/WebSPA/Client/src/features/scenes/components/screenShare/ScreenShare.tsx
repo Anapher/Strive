@@ -8,8 +8,9 @@ import useConsumer from 'src/store/webrtc/hooks/useConsumer';
 import { Size } from 'src/types';
 import { expandToBox } from '../../calculations';
 import LayoutChildSizeContext from '../../layout-child-size-context';
+import { selectScreenShareSceneLayoutType } from '../../selectors';
 import { RenderSceneProps, ScreenShareScene } from '../../types';
-import AutoSceneLayout from '../AutoSceneLayout';
+import { RenderSceneLayoutByType } from '../AutoSceneLayout';
 
 const defaultVideoSize: Size = { width: 1920, height: 1080 };
 
@@ -26,11 +27,12 @@ export default function ScreenShare({ className, dimensions, scene }: RenderScen
    const { participantId } = scene;
    const consumer = useConsumer(participantId, 'screen');
    const participant = useSelector((state: RootState) => selectParticipant(state, participantId));
+   const type = useSelector(selectScreenShareSceneLayoutType) || 'chipsWithPresenter';
 
    return (
-      <AutoSceneLayout {...dimensions} className={className} participant={participant}>
+      <RenderSceneLayoutByType type={type} {...dimensions} className={className} participant={participant}>
          <RenderSceen consumer={consumer} />
-      </AutoSceneLayout>
+      </RenderSceneLayoutByType>
    );
 }
 

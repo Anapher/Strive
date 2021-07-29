@@ -14,10 +14,13 @@ export type ChatOptions = {
    isPrivateChatEnabled: boolean;
 };
 
+export type SceneLayoutType = 'chips' | 'chipsWithPresenter' | 'tiles';
+export type SceneLayoutTypeWithAuto = 'auto' | SceneLayoutType;
 export type SceneOptions = {
    defaultScene: Scene['type'];
+   sceneLayout: SceneLayoutTypeWithAuto;
+   screenShareLayout: SceneLayoutTypeWithAuto;
    hideParticipantsWithoutWebcam: boolean;
-   overlayScene: boolean;
 };
 
 export type PermissionType = 'conference' | 'moderator' | 'breakoutRoom';

@@ -2,14 +2,13 @@ import { Portal } from '@material-ui/core';
 import React, { useContext, useMemo } from 'react';
 import ConferenceLayoutContext from 'src/features/conference/conference-layout-context';
 import { Participant } from 'src/features/conference/types';
+import { SceneLayoutType } from 'src/features/create-conference/types';
 import { Size } from 'src/types';
 import LayoutChildSizeContext from '../layout-child-size-context';
 import useSomeParticipants from '../useSomeParticipants';
 import ActiveChipsLayout, { ACTIVE_CHIPS_LAYOUT_HEIGHT } from './ActiveChipsLayout';
 import ParticipantTile from './ParticipantTile';
 import TilesBarLayout from './TilesBarLayout';
-
-type SceneLayoutType = 'tiles-bar' | 'presentator' | 'chips';
 
 type Props = {
    children?: React.ReactNode;
@@ -24,7 +23,7 @@ export default function SceneLayout({ type, ...props }: Props) {
    switch (type) {
       case 'chips':
          return <SceneLayoutChips {...props} />;
-      case 'presentator':
+      case 'chipsWithPresenter':
          return <SceneLayoutPresentator {...props} />;
       default:
          return <SceneLayoutTiles {...props} />;

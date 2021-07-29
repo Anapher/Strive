@@ -22,6 +22,7 @@ import MobileAwareSelect from 'src/components/MobileAwareSelect';
 import NativeIsoDateInput from 'src/components/NativeIsoDateInput';
 import { wrapForInputRef } from 'src/utils/reat-hook-form-utils';
 import { ConferenceDataForm } from '../form';
+import SceneLayoutSelect from './SceneLayoutSelect';
 
 const checkBoxWidth = 150;
 
@@ -39,7 +40,7 @@ const useStyles = makeStyles((theme) => ({
       paddingTop: theme.spacing(3),
    },
    selectFormControl: {
-      maxWidth: 240,
+      maxWidth: 248,
       margin: theme.spacing(2, 0),
    },
 }));
@@ -264,6 +265,50 @@ export default function TabCommon({
                   />
                </FormControl>
             </div>
+         </Grid>
+         <Grid item xs={12} md={6}>
+            <div className={classes.selectFormControl}>
+               <FormControl fullWidth>
+                  <InputLabel id="scene-layout-select-label">
+                     {t('dialog_create_conference.tabs.common.scene_layout')}
+                  </InputLabel>
+                  <Controller
+                     render={({ field: { onChange, value } }) => (
+                        <SceneLayoutSelect
+                           labelId="scene-layout-select-label"
+                           id="scene-layout-select"
+                           value={value}
+                           onChange={onChange}
+                        />
+                     )}
+                     control={control}
+                     name="configuration.scenes.sceneLayout"
+                  />
+               </FormControl>
+            </div>
+         </Grid>
+         <Grid item xs={12} md={6}>
+            <div className={classes.selectFormControl}>
+               <FormControl fullWidth>
+                  <InputLabel id="scene-layout-screenshare-select-label">
+                     {t('dialog_create_conference.tabs.common.scene_layout_screen_share')}
+                  </InputLabel>
+                  <Controller
+                     render={({ field: { onChange, value } }) => (
+                        <SceneLayoutSelect
+                           labelId="scene-layout-screenshare-select-label"
+                           id="scene-layout-screenshare-select"
+                           value={value}
+                           onChange={onChange}
+                        />
+                     )}
+                     control={control}
+                     name="configuration.scenes.screenShareLayout"
+                  />
+               </FormControl>
+            </div>
+         </Grid>
+         <Grid item xs={12}>
             <FormControlLabel
                control={
                   <Controller
@@ -275,18 +320,6 @@ export default function TabCommon({
                   />
                }
                label={t('dialog_create_conference.tabs.common.hide_participants_without_webcam')}
-            />
-            <FormControlLabel
-               control={
-                  <Controller
-                     render={({ field: { onChange, value } }) => (
-                        <Checkbox onChange={(e) => onChange(e.target.checked)} checked={value} />
-                     )}
-                     control={control}
-                     name="configuration.scenes.overlayScene"
-                  />
-               }
-               label={t('dialog_create_conference.tabs.common.overlay_scene')}
             />
          </Grid>
       </Grid>
