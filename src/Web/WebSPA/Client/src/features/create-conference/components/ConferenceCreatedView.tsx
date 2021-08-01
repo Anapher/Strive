@@ -1,14 +1,27 @@
-import { Box, Button, DialogActions, DialogContent, makeStyles, TextField } from '@material-ui/core';
+import { Button, DialogActions, DialogContent, makeStyles, TextField } from '@material-ui/core';
 import React from 'react';
-import { useDispatch } from 'react-redux';
-import { closeDialog } from '../reducer';
-import to from 'src/utils/to';
 import { useTranslation } from 'react-i18next';
+import { useDispatch } from 'react-redux';
+import to from 'src/utils/to';
+import { closeDialog } from '../reducer';
 
 const useStyles = makeStyles((theme) => ({
    conferenceUrlField: {
       flex: 1,
-      marginRight: theme.spacing(2),
+      [theme.breakpoints.up('md')]: {
+         marginRight: theme.spacing(2),
+      },
+      [theme.breakpoints.down('sm')]: {
+         marginBottom: theme.spacing(1),
+      },
+   },
+   conferenceUrlContainer: {
+      display: 'flex',
+      flexDirection: 'column',
+      [theme.breakpoints.up('md')]: {
+         alignItems: 'center',
+         flexDirection: 'row',
+      },
    },
 }));
 
@@ -25,7 +38,7 @@ export default function ConferenceCreatedView({ conferenceId }: Props) {
 
    return (
       <DialogContent>
-         <Box display="flex" flexDirection="row" alignItems="center">
+         <div className={classes.conferenceUrlContainer}>
             <TextField
                id="created-conference-url"
                variant="outlined"
@@ -43,7 +56,7 @@ export default function ConferenceCreatedView({ conferenceId }: Props) {
             >
                {t('dialog_create_conference.created.join')}
             </Button>
-         </Box>
+         </div>
          <DialogActions>
             <Button onClick={handleClose} color="primary">
                {t('common:close')}
