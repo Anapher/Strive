@@ -31,7 +31,9 @@ export default function ScreenShare({ className, dimensions, scene }: RenderScen
 
    return (
       <RenderSceneLayoutByType type={type} {...dimensions} className={className} participant={participant}>
-         <RenderSceen consumer={consumer} />
+         <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <RenderSceen consumer={consumer} />
+         </div>
       </RenderSceneLayoutByType>
    );
 }
