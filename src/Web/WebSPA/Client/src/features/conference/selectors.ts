@@ -3,11 +3,11 @@ import { RootState } from 'src/store';
 import { selectMyParticipantId } from '../auth/selectors';
 import { Participant } from './types';
 
-const selectParticipantsMapRaw = (state: RootState) => state.conference.participants?.participants ?? {};
+export const selectParticipantsMap = (state: RootState) => state.conference.participants?.participants ?? {};
 
 export type ParticipantsMap = { [participantId: string]: Participant };
 export const selectParticipants = createSelector(
-   selectParticipantsMapRaw,
+   selectParticipantsMap,
    (participants) =>
       Object.fromEntries(Object.entries(participants).map(([id, data]) => [id, { ...data, id }])) as ParticipantsMap,
 );

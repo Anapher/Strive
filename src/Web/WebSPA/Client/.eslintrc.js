@@ -24,5 +24,6 @@ module.exports = {
       'react/prop-types': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
       'react/react-in-jsx-scope': 'off',
+      '@typescript-eslint/no-non-null-assertion': 'off',
    },
 };

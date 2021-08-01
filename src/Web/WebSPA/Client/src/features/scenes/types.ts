@@ -115,11 +115,15 @@ export type ScenePresenter<S extends Scene> = {
 };
 
 export type ActiveParticipantData = {
-   /** if the participant is not currently active, this property contains the exact timestamp the participant went inactive */
-   deletedOn?: string;
+   /** if the participant is not currently active, this property contains the exact timestamp the participant went inactive.
+    * After a specific time after this timestamp, the participant will become inactive */
+   lastActivity?: string;
 
    /** a number that determines the order of this participant */
    orderNumber: number;
+
+   /** true if the participant is currently inactive */
+   inactive?: boolean;
 };
 
 export type ActiveParticipants = {

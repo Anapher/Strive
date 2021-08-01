@@ -1,60 +1,83 @@
 import { makeStyles } from '@material-ui/core';
 import clsx from 'classnames';
-import React from 'react';
+import React, { useContext } from 'react';
+import { Participant } from 'src/features/conference/types';
 import { Size } from 'src/types';
 import { expandToBox } from '../../calculations';
+import LayoutChildSizeContext from '../../layout-child-size-context';
 import { ActiveSpeakerScene, RenderSceneProps } from '../../types';
 import useSomeParticipants from '../../useSomeParticipants';
 import ParticipantTile from '../ParticipantTile';
+import TilesBarLayout from '../TilesBarLayout';
 
-const useStyles = makeStyles({
+const MAIN_SPEAKER_MARGIN_TOP = 0;
+const MAIN_SPEAKER_MARGIN_BOTTOM = 16;
+const MAIN_SPEAKER_MARGIN_LEFT = 8;
+const MAIN_SPEAKER_MARGIN_RIGHT = 8;
+
+const useStyles = makeStyles((theme) => ({
    root: {
       display: 'flex',
       flexDirection: 'column',
+   },
+   chips: {
+      marginTop: theme.spacing(1),
+      marginBottom: theme.spacing(1),
+      paddingRight: theme.spacing(2),
+      height: 24,
+   },
+   content: {
+      flex: 1,
+      minHeight: 0,
+   },
+   mainParticipantTile: {
+      width: '100%',
+      height: '100%',
+      display: 'flex',
+      flexDirection: 'column',
       alignItems: 'center',
+      justifyContent: 'flex-start',
+      paddingLeft: MAIN_SPEAKER_MARGIN_LEFT,
+      paddingRight: MAIN_SPEAKER_MARGIN_RIGHT,
+      paddingTop: MAIN_SPEAKER_MARGIN_TOP,
+      paddingBottom: MAIN_SPEAKER_MARGIN_BOTTOM,
    },
-   rootCenter: {
-      justifyContent: 'center',
-   },
-});
-
-const getListeningParticipantsWidth = (width: number) => {
-   if (width <= 400) return 100;
-   if (width <= 800) return 180;
-   if (width <= 1200) return 260;
-
-   return 340;
-};
+}));
 
 export default function RenderActiveSpeaker({ className, dimensions }: RenderSceneProps<ActiveSpeakerScene>) {
    const classes = useStyles();
-
-   const tileWidth = getListeningParticipantsWidth(dimensions.width);
-   const tileHeight = (tileWidth / 16) * 9;
-
-   const activeParticipantDimensions: Size = {
-      width: dimensions.width - 16,
-      height: dimensions.height - 8 - 8 - 16 - tileHeight,
-   };
-
-   const size = expandToBox({ height: 9, width: 16 }, activeParticipantDimensions);
-   const smallTileCount = (dimensions.width - 8) / (tileWidth + 8);
-
-   const activeParticipants = useSomeParticipants(smallTileCount);
-
+   const activeParticipants = useSomeParticipants({}, 16);
    if (activeParticipants.length === 0) return null;
 
    return (
-      <div className={clsx(className, classes.root, activeParticipants.length === 1 && classes.rootCenter)}>
-         <div style={{ margin: 8, ...size }}>
-            <ParticipantTile key={activeParticipants[0].id} {...size} participant={activeParticipants[0]} />
+      <div className={clsx(className, classes.root)}>
+         <div className={classes.content}>
+            <TilesBarLayout participants={activeParticipants.slice(1)} sceneSize={dimensions}>
+               <RenderMainSpeakerTile participant={activeParticipants[0]} />
+            </TilesBarLayout>
          </div>
-         <div style={{ display: 'flex', marginTop: 8 }}>
-            {activeParticipants.slice(1).map((participant, i) => (
-               <div style={{ width: tileWidth, height: tileHeight, marginLeft: i === 0 ? 0 : 16 }} key={participant.id}>
-                  <ParticipantTile width={tileWidth} height={tileHeight} participant={participant} />
-               </div>
-            ))}
+      </div>
+   );
+}
+
+type RenderMainSpeakerTileProps = {
+   participant: Participant;
+};
+
+function RenderMainSpeakerTile({ participant }: RenderMainSpeakerTileProps) {
+   const size = useContext(LayoutChildSizeContext);
+   const classes = useStyles();
+
+   const contentSize: Size = {
+      width: size.width - MAIN_SPEAKER_MARGIN_LEFT - MAIN_SPEAKER_MARGIN_RIGHT,
+      height: size.height - MAIN_SPEAKER_MARGIN_TOP - MAIN_SPEAKER_MARGIN_BOTTOM,
+   };
+   const fixedContentSize = expandToBox({ width: 16, height: 9 }, contentSize);
+
+   return (
+      <div className={classes.mainParticipantTile}>
+         <div style={{ ...fixedContentSize }}>
+            <ParticipantTile key={participant.id} {...fixedContentSize} participant={participant} />
          </div>
       </div>
    );

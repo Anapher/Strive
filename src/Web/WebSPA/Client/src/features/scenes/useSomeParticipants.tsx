@@ -21,25 +21,43 @@ export type UseParticipantsOptions = {
 };
 
 export default function useSomeParticipants(
-   count: number,
    { includedParticipants, excludedParticipants, webcamOnly, activeOnly }: UseParticipantsOptions = {},
+   count?: number,
 ): Participant[] {
    const activeParticipants = useSelector(selectActiveParticipants);
    const allParticipants = useSelector(selectParticipants);
    const participantsInRoom = useSelector(selectParticipantsOfCurrentRoom);
    const participantsWithWebcam = useSelector(selectParticipantsOfRoomWebcamAvailable);
 
-   const orderedActiveParticipants = _.orderBy(Object.entries(activeParticipants), (x) => x[1].orderNumber)
+   const orderedActiveParticipantsOfCurrentRoom = _(Object.entries(activeParticipants))
+      .filter(([id]) => participantsInRoom.includes(id))
+      .orderBy(([, state]) => state.orderNumber)
       .map(([participantId]) => allParticipants[participantId])
-      .filter((x): x is Participant => !!x);
-
-   return _(includedParticipants ?? [])
-      .concat(orderedActiveParticipants)
-      .concat(participantsInRoom.map((x) => allParticipants[x]).filter((x): x is Participant => !!x))
-      .uniqBy((x) => x.id)
-      .filter((x) => !activeOnly || !!activeParticipants[x.id] || includedParticipants?.find((y) => y.id === x.id))
-      .filter((x) => !excludedParticipants?.includes(x.id))
-      .filter((x) => !webcamOnly || participantsWithWebcam.includes(x.id))
-      .slice(0, count)
+      .filter((x): x is Participant => !!x)
       .value();
+
+   let query = _(includedParticipants ?? [])
+      .concat(orderedActiveParticipantsOfCurrentRoom)
+      .concat(participantsInRoom.map((x) => allParticipants[x]).filter((x): x is Participant => !!x))
+      .uniqBy((x) => x.id);
+
+   if (activeOnly) {
+      query = query.filter(
+         (x) => !activeParticipants[x.id]?.inactive || !!includedParticipants?.find((y) => y.id === x.id),
+      );
+   }
+
+   if (excludedParticipants) {
+      query = query.filter((x) => !excludedParticipants?.includes(x.id));
+   }
+
+   if (webcamOnly) {
+      query = query.filter((x) => participantsWithWebcam.includes(x.id));
+   }
+
+   if (count !== undefined) {
+      query = query.slice(0, count);
+   }
+
+   return query.value();
 }

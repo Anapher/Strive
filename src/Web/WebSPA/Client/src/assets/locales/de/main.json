@@ -36,7 +36,16 @@
         "show_participants_typing": "Teilnehmer anzeigen, die gerade in den Chat tippen",
         "default_scene": "Standard Szene",
         "hide_participants_without_webcam": "Blende Teilnehmer ohne aktive Webcam aus",
-        "overlay_scene": "Szene mit Webcam überlagern, falls erforderlich"
+        "scene_layout": "Szenen-Layout",
+        "scene_layout_auto": "Automatisch",
+        "scene_layout_auto_desc": "Chips anzeigen, wenn keine Webcams aktiv sind, sonst Kacheln anzeigen",
+        "scene_layout_chips": "Chips",
+        "scene_layout_chipsWithPresenter_desc": "Chips und eine Kachel über dem Chat anzeigen",
+        "scene_layout_chips_desc": "Die Namen der Teilnehmer anzeigen, die aktuell aktiv sind und sprechen",
+        "scene_layout_chips_with_presenter": "Chips und Präsentator",
+        "scene_layout_screen_share": "Layout für Bildschirmübertragung",
+        "scene_layout_tiles": "Kacheln über der Szene",
+        "scene_layout_tiles_desc": "Zeige eine Reihe von Kacheln über der Szene an"
       },
       "moderators": {
         "error_user_not_found": "Benutzer mit Id \"{{id}}\" wurde nicht gefunden",

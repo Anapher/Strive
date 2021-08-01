@@ -12,7 +12,7 @@ import useSelectorFactory from 'src/hooks/useSelectorFactory';
 import { POLL_CAN_OPEN } from 'src/permissions';
 import { RootState } from 'src/store';
 import { PollScene, RenderSceneProps } from '../../types';
-import ActiveChipsLayout from '../ActiveChipsLayout';
+import AutoSceneLayout from '../AutoSceneLayout';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -45,7 +45,7 @@ const useStyles = makeStyles((theme) => ({
    },
 }));
 
-export default function RenderPollScene({ className, scene }: RenderSceneProps<PollScene>) {
+export default function RenderPollScene({ className, scene, dimensions }: RenderSceneProps<PollScene>) {
    const classes = useStyles();
    const { t } = useTranslation();
    const canOpenPoll = usePermission(POLL_CAN_OPEN);
@@ -65,7 +65,7 @@ export default function RenderPollScene({ className, scene }: RenderSceneProps<P
    };
 
    return (
-      <ActiveChipsLayout className={className} contentClassName={classes.root}>
+      <AutoSceneLayout className={className} {...dimensions} center>
          <div className={classes.content}>
             <Typography variant="h4">{config.question}</Typography>
             {viewModel.results && (
@@ -113,6 +113,6 @@ export default function RenderPollScene({ className, scene }: RenderSceneProps<P
                </Collapse>
             )}
          </div>
-      </ActiveChipsLayout>
+      </AutoSceneLayout>
    );
 }

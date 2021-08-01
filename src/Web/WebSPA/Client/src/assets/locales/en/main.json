@@ -35,8 +35,17 @@
         "disable_room_chat_master": "Disable room chat for master room",
         "show_participants_typing": "Show participants that are currently typing below chat",
         "hide_participants_without_webcam": "Don't show participants without active webcam",
-        "overlay_scene": "Overlay scene with webcam if necessary",
-        "default_scene": "Default Scene"
+        "default_scene": "Default Scene",
+        "scene_layout": "Scene Layout",
+        "scene_layout_screen_share": "Scene layout for screen share",
+        "scene_layout_auto": "Auto",
+        "scene_layout_chips": "Chips",
+        "scene_layout_chips_with_presenter": "Chips with presenter",
+        "scene_layout_tiles": "Tiles above scene",
+        "scene_layout_auto_desc": "Display chips when no webcams are active, else show tiles",
+        "scene_layout_chips_desc": "If a participant is speaking, display his name above the scene",
+        "scene_layout_chipsWithPresenter_desc": "Display chips and a participant tile above the chat",
+        "scene_layout_tiles_desc": "Display a row of participant tiles above the scene"
       },
       "moderators": {
         "error_user_not_found": "User with id \"{{id}}\" not found",

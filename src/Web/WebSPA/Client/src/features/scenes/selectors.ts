@@ -1,14 +1,13 @@
-import { selectParticipantsOfRoomWebcamAvailable } from 'src/features/media/selectors';
-import { PresenterScene } from './types';
 import { createSelector } from '@reduxjs/toolkit';
 import _ from 'lodash';
+import { selectParticipantsOfRoomWebcamAvailable } from 'src/features/media/selectors';
 import { RootState } from 'src/store';
-import { selectMyParticipantId } from '../auth/selectors';
-import { selectStreams } from '../media/selectors';
 import { createArrayEqualSelector } from 'src/utils/reselect';
-import { selectParticipantsOfCurrentRoom } from '../rooms/selectors';
+import { selectMyParticipantId } from '../auth/selectors';
 import { selectParticipants } from '../conference/selectors';
 import { Participant } from '../conference/types';
+import { selectParticipantsOfCurrentRoom } from '../rooms/selectors';
+import { PresenterScene } from './types';
 
 export const selectSceneOptions = (state: RootState) => state.conference.conferenceState?.sceneOptions;
 
@@ -42,22 +41,13 @@ export const selectIsMeInQueue = (state: RootState) => {
    return queue.includes(myId);
 };
 
-export const selectActiveParticipantsWithWebcam = createArrayEqualSelector(
-   createSelector(selectActiveParticipants, selectStreams, (participants, streams) => {
-      if (!streams) return [];
-
-      return _(Object.entries(participants))
-         .filter(([participantId]) => streams[participantId]?.producers.webcam?.paused === false)
-         .orderBy(([, info]) => info.orderNumber, 'asc')
-         .map(([participantId]) => participantId)
-         .orderBy((x) => x)
-         .value();
-   }),
-   (x) => x,
-);
-
 export const selectHideParticipantsWithoutWebcam = (state: RootState) =>
    selectSceneOptions(state)?.hideParticipantsWithoutWebcam;
+
+export const selectSceneLayoutType = (state: RootState) => selectSceneOptions(state)?.sceneLayout;
+export const selectScreenShareSceneLayoutType = (state: RootState) => selectSceneOptions(state)?.screenShareLayout;
+export const hasAnyParticipantInCurrentRoomWebcamActicated = (state: RootState) =>
+   selectParticipantsOfRoomWebcamAvailable(state).length > 0;
 
 export const selectParticipantGridList = createArrayEqualSelector(
    createSelector(

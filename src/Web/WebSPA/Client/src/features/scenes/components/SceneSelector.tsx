@@ -6,12 +6,13 @@ type SceneSelectorProps = Omit<Omit<RenderSceneProps, 'next'>, 'scene'> & { scen
 
 export default function SceneSelector({ sceneStack, ...props }: SceneSelectorProps) {
    const scene = sceneStack[0];
-   const otherScenes = sceneStack.slice(1);
 
    const presenter = scenePresenters.find((x) => x.type === scene.type);
    if (!presenter) return null;
 
    const next = (additional?: any) => {
+      const otherScenes = sceneStack.slice(1);
+
       if (otherScenes.length === 0) return null;
       return <SceneSelector {...props} {...additional} sceneStack={otherScenes} />;
    };

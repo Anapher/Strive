@@ -95,7 +95,6 @@ export default function SceneManagement() {
 
    const availableScenePresenters = _.orderBy(
       availableScenes.map((scene) => {
-         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
          const presenter = scenePresenters.find((x) => x.type === scene.type)!;
          if (!presenter) console.error('Presenter not found', scene);
 

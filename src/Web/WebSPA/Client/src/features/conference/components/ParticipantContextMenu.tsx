@@ -3,7 +3,7 @@ import MicOffRounded from '@material-ui/icons/MicOff';
 import SendIcon from '@material-ui/icons/Send';
 import VolumeOffIcon from '@material-ui/icons/VolumeOff';
 import VolumeUpIcon from '@material-ui/icons/VolumeUp';
-import _ from 'lodash';
+import { throttle } from 'lodash';
 import { AccountRemove, AccountVoice } from 'mdi-material-ui';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -45,7 +45,8 @@ type Props = {
    onClose: () => void;
 };
 
-const ParticipantContextMenu = React.forwardRef<HTMLElement, Props>(({ participant, onClose }) => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const ParticipantContextMenu = React.forwardRef<HTMLElement, Props>(({ participant, onClose }, _) => {
    const dispatch = useDispatch();
    const classes = useStyles();
    const { t } = useTranslation();
@@ -68,7 +69,7 @@ const ParticipantContextMenu = React.forwardRef<HTMLElement, Props>(({ participa
    }, [audioInfo?.volume]);
 
    const handlePatchVolume = useCallback(
-      _.throttle((volume: number) => {
+      throttle((volume: number) => {
          dispatch(patchParticipantAudio({ participantId: participant.id, data: { volume } }));
       }, 1000),
       [participant.id],
