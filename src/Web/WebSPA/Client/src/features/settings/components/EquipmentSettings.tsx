@@ -14,14 +14,27 @@ import { useTranslation } from 'react-i18next';
 
 const QR_CODE_PADDING = 8;
 
-const useStyles = makeStyles({
-   qrCodeContainer: {
+const useStyles = makeStyles((theme) => ({
+   qrCode: {
       backgroundColor: 'white',
       padding: QR_CODE_PADDING,
       height: 200 + 2 * QR_CODE_PADDING,
       width: 200 + 2 * QR_CODE_PADDING,
+
+      [theme.breakpoints.down('sm')]: {
+         marginBottom: theme.spacing(4),
+      },
    },
-});
+   qrCodeContainer: {
+      display: 'flex',
+      marginTop: theme.spacing(4),
+
+      [theme.breakpoints.down('sm')]: {
+         flexDirection: 'column',
+         alignItems: 'center',
+      },
+   },
+}));
 
 export default function EquipmentSettings() {
    const dispatch = useDispatch();
@@ -60,9 +73,9 @@ export default function EquipmentSettings() {
                </Button>
             </Box>
          ) : (
-            <Box display="flex" mt={4}>
+            <div className={classes.qrCodeContainer}>
                {token ? (
-                  <div className={classes.qrCodeContainer}>
+                  <div className={classes.qrCode}>
                      <QRCode value={url} size={200} renderAs="svg" />
                   </div>
                ) : (
@@ -82,7 +95,7 @@ export default function EquipmentSettings() {
                   </Typography>
                   <Typography>{token ? t('conference.settings.equipment.step_3') : <Skeleton />}</Typography>
                </Box>
-            </Box>
+            </div>
          )}
          {equipment && (
             <Box mt={2}>

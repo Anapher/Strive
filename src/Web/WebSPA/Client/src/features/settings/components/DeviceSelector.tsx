@@ -10,11 +10,13 @@ import { DeviceGroup, EquipmentDeviceGroup } from '../selectors';
 import { fetchDevices } from '../thunks';
 import { AnyInputDevice } from '../types';
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
    control: {
-      minWidth: 400,
+      [theme.breakpoints.up('md')]: {
+         minWidth: 400,
+      },
    },
-});
+}));
 
 type Props = {
    devices: DeviceGroup[];
@@ -80,7 +82,7 @@ export default function DeviceSelector({ devices, defaultName, className, select
 
    return (
       <Box display="flex" alignItems="flex-end">
-         <FormControl className={clsx(className, classes.control)}>
+         <FormControl className={clsx(className, classes.control)} fullWidth>
             <InputLabel htmlFor={selectId}>{label}</InputLabel>
             <MobileAwareSelect
                id={selectId}

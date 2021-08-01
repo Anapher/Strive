@@ -10,7 +10,7 @@ import DeviceSelector from './DeviceSelector';
 
 const useStyles = makeStyles((theme) => ({
    root: {
-      width: '100%',
+      flex: 1,
       padding: theme.spacing(3),
       paddingTop: 0,
    },

@@ -1,8 +1,9 @@
-import { Dialog, DialogTitle, makeStyles, useMediaQuery, useTheme } from '@material-ui/core';
+import { Dialog, makeStyles, useMediaQuery, useTheme } from '@material-ui/core';
 import { compare } from 'fast-json-patch';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
+import DialogTitleWithClose from 'src/components/DialogTitleWithClose';
 import { RootState } from 'src/store';
 import { ConferenceDataForm, mapDataToForm, mapFormToData } from '../form';
 import { closeDialog, createConferenceAsync, patchConferenceAsync } from '../reducer';
@@ -14,16 +15,15 @@ const useStyles = makeStyles((theme) => ({
    dialog: {
       display: 'flex',
       flexDirection: 'column',
-
-      [theme.breakpoints.down('xs')]: {
-         height: '100%',
-      },
    },
    dialogContent: {
       minHeight: 0,
-      height: 496,
-      [theme.breakpoints.down('xs')]: {
+
+      [theme.breakpoints.down('sm')]: {
          flex: 1,
+      },
+      [theme.breakpoints.up('md')]: {
+         height: 496,
       },
    },
 }));
@@ -34,7 +34,8 @@ function CreateConferenceDialog() {
    const classes = useStyles();
    const { t } = useTranslation();
 
-   const fullScreen = useMediaQuery(theme.breakpoints.down('xs'));
+   const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
+   const showCloseInTitle = fullScreen;
 
    const { dialogOpen, createdConferenceId, isCreating, conferenceData, mode } = useSelector(
       (state: RootState) => state.createConference,
@@ -67,15 +68,15 @@ function CreateConferenceDialog() {
          fullScreen={fullScreen}
          className={classes.dialog}
       >
-         <DialogTitle id="create-conference-dialog-title">
+         <DialogTitleWithClose id="create-conference-dialog-title" onClose={handleClose} showClose={showCloseInTitle}>
             {t(
                mode === 'patch'
                   ? 'dialog_create_conference.title_mode_patch'
                   : 'dialog_create_conference.title_mode_create',
             )}
-         </DialogTitle>
+         </DialogTitleWithClose>
          {createdConferenceId && mode !== 'patch' ? (
-            <ConferenceCreatedView conferenceId={createdConferenceId} />
+            <ConferenceCreatedView conferenceId={createdConferenceId} showClose={!showCloseInTitle} />
          ) : (
             <div className={classes.dialogContent}>
                {conferenceData ? (
@@ -86,6 +87,7 @@ function CreateConferenceDialog() {
                      defaultValues={mapDataToForm(conferenceData)}
                      mode={mode}
                      conferenceId={createdConferenceId}
+                     showClose={!showCloseInTitle}
                   />
                ) : (
                   <CreateConferenceFormSkeleton />

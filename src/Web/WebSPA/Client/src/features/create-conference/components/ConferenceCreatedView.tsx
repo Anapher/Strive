@@ -27,9 +27,10 @@ const useStyles = makeStyles((theme) => ({
 
 type Props = {
    conferenceId: string;
+   showClose: boolean;
 };
 
-export default function ConferenceCreatedView({ conferenceId }: Props) {
+export default function ConferenceCreatedView({ conferenceId, showClose }: Props) {
    const classes = useStyles();
    const dispatch = useDispatch();
    const { t } = useTranslation();
@@ -57,11 +58,13 @@ export default function ConferenceCreatedView({ conferenceId }: Props) {
                {t('dialog_create_conference.created.join')}
             </Button>
          </div>
-         <DialogActions>
-            <Button onClick={handleClose} color="primary">
-               {t('common:close')}
-            </Button>
-         </DialogActions>
+         {showClose && (
+            <DialogActions>
+               <Button onClick={handleClose} color="primary">
+                  {t('common:close')}
+               </Button>
+            </DialogActions>
+         )}
       </DialogContent>
    );
 }

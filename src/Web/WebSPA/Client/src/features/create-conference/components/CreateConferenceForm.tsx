@@ -79,6 +79,7 @@ type Props = {
    isSubmitting: boolean;
    onClose: () => void;
    conferenceId: string | null;
+   showClose: boolean;
 
    mode: 'create' | 'patch';
 };
@@ -94,6 +95,7 @@ export default function CreateConferenceForm({
    onClose,
    mode,
    conferenceId,
+   showClose,
 }: Props) {
    const classes = useStyles();
    const theme = useTheme();
@@ -171,9 +173,11 @@ export default function CreateConferenceForm({
             </Box>
          </Box>
          <DialogActions>
-            <Button onClick={onClose} color="primary" disabled={isSubmitting}>
-               {t('common:cancel')}
-            </Button>
+            {showClose && (
+               <Button onClick={onClose} color="primary" disabled={isSubmitting}>
+                  {t('common:cancel')}
+               </Button>
+            )}
             <Button type="submit" color="primary" autoFocus disabled={isSubmitting || !formState.isValid}>
                {mode === 'patch' ? t('common:change') : t('common:create')}
             </Button>
