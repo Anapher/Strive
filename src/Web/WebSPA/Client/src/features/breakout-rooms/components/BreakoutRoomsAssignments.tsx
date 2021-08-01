@@ -11,7 +11,7 @@ import {
    useMediaQuery,
    useTheme,
 } from '@material-ui/core';
-import PersonIcon from '@material-ui/icons/Person';
+import DragIndicatorIcon from '@material-ui/icons/DragIndicator';
 import clsx from 'classnames';
 import _ from 'lodash';
 import React, { useEffect } from 'react';
@@ -237,7 +237,7 @@ function RoomList({ id, participants, title, fullHeight }: RoomListProps) {
                                  style={provided.draggableProps.style}
                               >
                                  <ListItemIcon>
-                                    <PersonIcon />
+                                    <DragIndicatorIcon />
                                  </ListItemIcon>
                                  <ListItemText primary={item.displayName} />
                               </ListItem>
