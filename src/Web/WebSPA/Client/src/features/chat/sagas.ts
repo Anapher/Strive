@@ -5,16 +5,17 @@ import { events, sendChatMessage } from 'src/core-hub';
 import { ChatMessageDto } from 'src/core-hub.types';
 import { showErrorOn } from 'src/store/notifier/utils';
 import { takeEverySynchronizedObjectChange } from 'src/store/saga-utils';
-import { onEventOccurred } from 'src/store/signal/actions';
+import { onConnected, onEventOccurred, onReconnected } from 'src/store/signal/actions';
 import { CHAT } from 'src/store/signal/synchronization/synchronized-object-ids';
 import { ChatChannelWithId, decode } from './channel-serializer';
-import { addAnnouncement, openPrivateChat, setSelectedChannel } from './reducer';
+import { addAnnouncement, clearChat, openPrivateChat, setSelectedChannel } from './reducer';
 import { selectChannels, selectOpenedPrivateChats, selectSelectedChannel } from './selectors';
 
 export default function* mySaga() {
    yield showErrorOn(sendChatMessage.returnAction);
    yield* takeEverySynchronizedObjectChange(CHAT, adjustSelectedChannel);
    yield takeEvery(onEventOccurred(events.chatMessage).type, onChatMessage);
+   yield takeEvery([onReconnected.type, onConnected.type], onSocketConnected);
 }
 
 function* adjustSelectedChannel(): any {
@@ -57,4 +58,8 @@ function* onChatMessage({ payload }: PayloadAction<ChatMessageDto>) {
 function getDefaultChannel(channels: ChatChannelWithId[]): ChatChannelWithId {
    const globalChannel = channels.find((x) => x.type === 'global');
    return globalChannel ?? channels[0];
+}
+
+function* onSocketConnected(): any {
+   yield put(clearChat());
 }

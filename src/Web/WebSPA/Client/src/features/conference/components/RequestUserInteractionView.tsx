@@ -2,7 +2,7 @@ import { makeStyles, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles((theme) => ({
    root: {
       height: '100%',
       width: '100%',
@@ -21,6 +21,7 @@ const useStyles = makeStyles(() => ({
       display: 'flex',
       alignItems: 'center',
       flex: 1,
+      margin: theme.spacing(0, 2),
    },
    fill: {
       flex: 1,

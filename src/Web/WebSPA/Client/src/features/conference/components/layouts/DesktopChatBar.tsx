@@ -1,16 +1,14 @@
 import { makeStyles, Paper } from '@material-ui/core';
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { ChatChannelWithId } from 'src/features/chat/channel-serializer';
+import Chat from 'src/features/chat/components/Chat';
+import ChatChannelTabs from 'src/features/chat/components/ChatChannelTabs';
+import { setSelectedChannel } from 'src/features/chat/reducer';
+import { selectChannels, selectSelectedChannel } from 'src/features/chat/selectors';
+import { getParticipantColor } from 'src/features/chat/utils';
 import { selectParticipantList } from 'src/features/conference/selectors';
 import useMyParticipantId from 'src/hooks/useMyParticipantId';
-import { RootState } from 'src/store';
-import * as actions from '../actions';
-import { ChatChannelWithId } from '../channel-serializer';
-import { clearChat, setSelectedChannel } from '../reducer';
-import { selectChannels, selectSelectedChannel } from '../selectors';
-import { getParticipantColor } from '../utils';
-import Chat from './Chat';
-import ChatChannelTabs from './ChatChannelTabs';
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -24,10 +22,9 @@ const useStyles = makeStyles((theme) => ({
    },
 }));
 
-export default function ChatBar() {
+export default function DesktopChatBar() {
    const classes = useStyles();
    const participants = useSelector(selectParticipantList);
-   const connected = useSelector((state: RootState) => state.signalr.isConnected);
    const channels = useSelector(selectChannels);
    const selectedChannelId = useSelector(selectSelectedChannel);
    const myParticipantId = useMyParticipantId();
@@ -37,13 +34,6 @@ export default function ChatBar() {
    const handleChangeSelectedChannel = (channel: ChatChannelWithId) => {
       dispatch(setSelectedChannel(channel.id));
    };
-
-   useEffect(() => {
-      if (connected) {
-         dispatch(clearChat());
-         dispatch(actions.subscribeChatMessages());
-      }
-   }, [connected]);
 
    const participantColors = useMemo(
       () => Object.fromEntries(participants.map((x) => [x.id, getParticipantColor(x.id)]) ?? []),

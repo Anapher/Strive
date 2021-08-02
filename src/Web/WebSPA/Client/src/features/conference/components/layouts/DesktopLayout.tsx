@@ -2,19 +2,19 @@ import { Grid, makeStyles } from '@material-ui/core';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import AnnouncementOverlay from 'src/features/chat/components/AnnouncementOverlay';
-import ChatBar from 'src/features/chat/components/ChatBar';
 import { selectShowChat } from 'src/features/chat/selectors';
-import ConferenceAppBar from './ConferenceAppBar';
 import ParticipantMicManager from 'src/features/media/components/ParticipantMicManager';
 import CurrentPollsBar from 'src/features/poll/components/CurrentPollsBar';
 import { expandToBox } from 'src/features/scenes/calculations';
+import { ACTIVE_CHIPS_LAYOUT_HEIGHT } from 'src/features/scenes/components/ActiveChipsLayout';
+import SceneView from 'src/features/scenes/components/SceneView';
 import useThrottledResizeObserver from 'src/hooks/useThrottledResizeObserver';
 import { Size } from 'src/types';
-import SceneView from '../../scenes/components/SceneView';
-import ConferenceLayoutContext, { ConferenceLayoutContextType } from '../conference-layout-context';
-import PermissionDialog from './PermissionDialog';
-import ConferenceSidebar from './ConferenceSidebar';
-import { ACTIVE_CHIPS_LAYOUT_HEIGHT } from 'src/features/scenes/components/ActiveChipsLayout';
+import ConferenceLayoutContext, { ConferenceLayoutContextType } from '../../conference-layout-context';
+import ConferenceAppBar from '../ConferenceAppBar';
+import ConferenceSidebar from '../ConferenceSidebar';
+import PermissionDialog from '../PermissionDialog';
+import DesktopChatBar from './DesktopChatBar';
 
 const CHAT_MIN_WIDTH = 304;
 const CHAT_MAX_WIDTH = 416;
@@ -62,7 +62,7 @@ const useStyles = makeStyles((theme) => ({
    },
 }));
 
-export default function ClassConference() {
+export default function DesktopLayout() {
    const classes = useStyles();
 
    const showChat = useSelector(selectShowChat);
@@ -118,7 +118,7 @@ export default function ClassConference() {
                            <div className={classes.chat} style={{ width: chatWidth }}>
                               <Grid ref={chatContainer} />
                               <CurrentPollsBar />
-                              <ChatBar />
+                              <DesktopChatBar />
                            </div>
                         )}
                      </div>
