@@ -11,9 +11,10 @@ import TroubleshootAccordion from './TroubleshootAccordion';
 type Props = {
    expanded: boolean;
    onChange: (isExpanded: boolean) => void;
+   className?: string;
 };
 
-export default function TroubleshootDiagnostics({ expanded, onChange }: Props) {
+export default function TroubleshootDiagnostics({ expanded, onChange, className }: Props) {
    const { t } = useTranslation();
    const dispatch = useDispatch();
 
@@ -27,6 +28,7 @@ export default function TroubleshootDiagnostics({ expanded, onChange }: Props) {
 
    return (
       <TroubleshootAccordion
+         className={className}
          title={t('conference.troubleshooting.diagnostics.title')}
          expanded={expanded}
          onChange={onChange}

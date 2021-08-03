@@ -12,9 +12,10 @@ import TroubleshootAccordion from './TroubleshootAccordion';
 type Props = {
    expanded: boolean;
    onChange: (isExpanded: boolean) => void;
+   className?: string;
 };
 
-export default function TroubleshootMicrophone({ expanded, onChange }: Props) {
+export default function TroubleshootMicrophone({ expanded, onChange, className }: Props) {
    const { t } = useTranslation();
    const gain = useSelector((state: RootState) => state.settings.obj.mic.audioGain);
 
@@ -47,6 +48,7 @@ export default function TroubleshootMicrophone({ expanded, onChange }: Props) {
 
    return (
       <TroubleshootAccordion
+         className={className}
          title={t('common:Microphone')}
          expanded={expanded}
          onChange={onChange}

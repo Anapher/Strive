@@ -90,7 +90,11 @@
       "signed_in_as": "Eingeloggt als",
       "webrtc_error": "WebRTC Verbindungsfehler",
       "breakout_room_chip": "Breakoutraum Phase",
-      "breakout_room_chip_deadline": "bis {{deadline}}"
+      "breakout_room_chip_deadline": "bis {{deadline}}",
+      "chat": "Chat",
+      "rooms": "Räume",
+      "menu_more_options": "Weitere Optionen anzeigen",
+      "conference": "Konferenz"
     },
     "chat": {
       "new_chat_info": "Sag Hallo!",
@@ -187,7 +191,9 @@
           "label_enable": "Webcam aktivieren",
           "paused": "Webcam ist pausiert"
         }
-      }
+      },
+      "mic_not_available": "Das Mikrofon ist nicht verfügbar",
+      "mic_permission_denied": "Sie haben keine Berechtigungen um das Mikrofon zu verwenden"
     },
     "troubleshooting": {
       "speakers": {

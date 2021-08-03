@@ -1,5 +1,6 @@
 import { List, ListItem, ListItemText, Typography } from '@material-ui/core';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { selectParticipants } from 'src/features/conference/selectors';
 import { Participant } from 'src/features/conference/types';
@@ -8,14 +9,16 @@ import { selectTalkingStickQueue } from '../../selectors';
 type Props = {
    onPassStick: (participantId: string) => void;
 };
+
 export default function PassStickList({ onPassStick }: Props) {
    const queue = useSelector(selectTalkingStickQueue);
    const participants = useSelector(selectParticipants);
+   const { t } = useTranslation();
 
    if (queue.length === 0) {
       return (
          <Typography variant="body2" align="center" style={{ marginTop: 8 }}>
-            At the moment, no participants want to say something...
+            {t('conference.scenes.talking_stick_modes.no_participants_want_to_say_something')}
          </Typography>
       );
    }

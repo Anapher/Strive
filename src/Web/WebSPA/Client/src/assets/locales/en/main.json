@@ -90,7 +90,11 @@
       "participants": "Participants: {{count}}",
       "webrtc_error": "WebRTC connection error",
       "breakout_room_chip": "Breakout Room phase",
-      "breakout_room_chip_deadline": "until {{deadline}}"
+      "breakout_room_chip_deadline": "until {{deadline}}",
+      "conference": "Conference",
+      "chat": "Chat",
+      "rooms": "Rooms",
+      "menu_more_options": "Show more options"
     },
     "participant_context_menu": {
       "mute": "Mute",
@@ -203,7 +207,8 @@
         "add_to_list_status_plural": "{{count}} others want to say something",
         "remove_from_list": "I don't want to say something",
         "pass_stick": "Pass Stick",
-        "pass_stick_to_participant": "Pass Stick to Participant"
+        "pass_stick_to_participant": "Pass Stick to Participant",
+        "no_participants_want_to_say_something": "At the moment, no participants want to say something..."
       },
       "breakout_rooms": {
         "label": "Breakout Rooms",
@@ -264,7 +269,9 @@
           "label_enable": "Enable screen",
           "label_disable": "Disable screen"
         }
-      }
+      },
+      "mic_not_available": "The microphone is not available",
+      "mic_permission_denied": "Permission denied to activate microphone"
     },
     "troubleshooting": {
       "title": "Troubleshooting",

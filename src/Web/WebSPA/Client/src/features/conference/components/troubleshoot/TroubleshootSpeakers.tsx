@@ -10,9 +10,12 @@ const useStyles = makeStyles((theme) => ({
    heading: {
       fontSize: theme.typography.pxToRem(15),
       flex: 1,
+      marginRight: theme.spacing(1),
    },
    playButton: {
-      minWidth: 160,
+      [theme.breakpoints.up('md')]: {
+         minWidth: 160,
+      },
    },
    accordionSummary: {
       display: 'flex',
@@ -25,9 +28,10 @@ const useStyles = makeStyles((theme) => ({
 type Props = {
    expanded: boolean;
    onChange: (isExpanded: boolean) => void;
+   className?: string;
 };
 
-export default function TroubleshootSpeakers({ expanded, onChange }: Props) {
+export default function TroubleshootSpeakers({ expanded, onChange, className }: Props) {
    const classes = useStyles();
    const { t } = useTranslation();
 
@@ -59,7 +63,7 @@ export default function TroubleshootSpeakers({ expanded, onChange }: Props) {
    }, [stop]);
 
    return (
-      <Accordion expanded={expanded} onChange={handleChange}>
+      <Accordion expanded={expanded} onChange={handleChange} className={className}>
          <AccordionSummary
             expandIcon={<ExpandMoreIcon />}
             aria-controls="troubleshoot-speakers-content"

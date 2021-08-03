@@ -28,9 +28,10 @@ function filterIncludes(filter: string | null | undefined, namespace: string) {
 type Props = {
    expanded: boolean;
    onChange: (isExpanded: boolean) => void;
+   className?: string;
 };
 
-export default function TroubleshootLogging({ expanded, onChange }: Props) {
+export default function TroubleshootLogging({ expanded, onChange, className }: Props) {
    const { t } = useTranslation();
    const [currentFilter, setCurrentFilter] = useState<string | null>();
 
@@ -51,6 +52,7 @@ export default function TroubleshootLogging({ expanded, onChange }: Props) {
 
    return (
       <TroubleshootAccordion
+         className={className}
          title={t('conference.troubleshooting.logging.title')}
          expanded={expanded}
          onChange={onChange}

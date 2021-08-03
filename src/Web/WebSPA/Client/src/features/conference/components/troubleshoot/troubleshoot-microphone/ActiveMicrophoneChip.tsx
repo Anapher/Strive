@@ -27,8 +27,8 @@ export default function ActiveMicrophoneChip() {
 
    return (
       <Chip
-         component={motion.div}
-         style={{ backgroundColor: audioColor as any, cursor: 'pointer' }}
+         component={motion.span}
+         style={{ backgroundColor: audioColor as any, cursor: 'pointer', textOverflow: 'ellipsis', width: '100%' }}
          size="small"
          label={audioDevice && findMicrophoneLabel(audioDevice, mics)}
       />

@@ -1,3 +1,4 @@
+import { fade, makeStyles, Paper } from '@material-ui/core';
 import React, { useState } from 'react';
 import TroubleshootConnection from './TroubleshootConnection';
 import TroubleshootDiagnostics from './TroubleshootDiagnostics';
@@ -5,7 +6,14 @@ import TroubleshootLogging from './TroubleshootLogging';
 import TroubleshootMicrophone from './TroubleshootMicrophone';
 import TroubleshootSpeakers from './TroubleshootSpeakers';
 
+const useStyles = makeStyles((theme) => ({
+   root: {
+      backgroundColor: fade(theme.palette.text.primary, 0.04),
+   },
+}));
+
 export default function Troubleshooting() {
+   const classes = useStyles();
    const [expanded, setExpanded] = useState<string | null>(null);
 
    const handleChangeExpanded = (name: string) => () => {
@@ -14,15 +22,32 @@ export default function Troubleshooting() {
    };
 
    return (
-      <div>
-         <TroubleshootConnection expanded={expanded === 'connection'} onChange={handleChangeExpanded('connection')} />
-         <TroubleshootSpeakers expanded={expanded === 'speakers'} onChange={handleChangeExpanded('speakers')} />
-         <TroubleshootMicrophone expanded={expanded === 'mic'} onChange={handleChangeExpanded('mic')} />
+      <Paper elevation={1}>
+         <TroubleshootConnection
+            className={classes.root}
+            expanded={expanded === 'connection'}
+            onChange={handleChangeExpanded('connection')}
+         />
+         <TroubleshootSpeakers
+            className={classes.root}
+            expanded={expanded === 'speakers'}
+            onChange={handleChangeExpanded('speakers')}
+         />
+         <TroubleshootMicrophone
+            className={classes.root}
+            expanded={expanded === 'mic'}
+            onChange={handleChangeExpanded('mic')}
+         />
          <TroubleshootDiagnostics
+            className={classes.root}
             expanded={expanded === 'diagnostics'}
             onChange={handleChangeExpanded('diagnostics')}
          />
-         <TroubleshootLogging expanded={expanded === 'logging'} onChange={handleChangeExpanded('logging')} />
-      </div>
+         <TroubleshootLogging
+            className={classes.root}
+            expanded={expanded === 'logging'}
+            onChange={handleChangeExpanded('logging')}
+         />
+      </Paper>
    );
 }

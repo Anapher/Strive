@@ -10,6 +10,7 @@ import ConferenceNotOpenModerator from './conference-not-open/ConferenceNotOpenM
 import RequestUserInteractionView from './RequestUserInteractionView';
 import { useMediaQuery, useTheme } from '@material-ui/core';
 import MobileLayout from './layouts/MobileLayout';
+import ParticipantMicManager from 'src/features/media/components/ParticipantMicManager';
 
 type Props = {
    conference: SynchronizedConferenceInfo;
@@ -42,9 +43,5 @@ export default function index({ conference }: Props) {
       return <RequestUserInteractionView />;
    }
 
-   if (mobileLayout) {
-      return <MobileLayout />;
-   }
-
-   return <DesktopLayout />;
+   return <ParticipantMicManager>{mobileLayout ? <MobileLayout /> : <DesktopLayout />}</ParticipantMicManager>;
 }

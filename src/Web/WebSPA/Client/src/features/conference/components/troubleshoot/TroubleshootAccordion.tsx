@@ -6,16 +6,23 @@ const useStyles = makeStyles((theme) => ({
    heading: {
       fontSize: theme.typography.pxToRem(15),
       flex: 1,
+      marginRight: theme.spacing(1),
    },
    accordionSummary: {
       display: 'flex',
       flexDirection: 'row',
       alignItems: 'center',
       flex: 1,
+      minWidth: 0,
+   },
+   content: {
+      minWidth: 0,
    },
 }));
 
 type Props = {
+   className?: string;
+
    expanded: boolean;
    onChange: (isExpanded: boolean) => void;
 
@@ -25,7 +32,7 @@ type Props = {
    children?: React.ReactNode;
 };
 
-export default function TroubleshootAccordion({ expanded, onChange, title, renderStatus, children }: Props) {
+export default function TroubleshootAccordion({ expanded, onChange, title, renderStatus, children, className }: Props) {
    const classes = useStyles();
 
    const handleChange = (_: React.ChangeEvent<unknown>, isExpanded: boolean) => {
@@ -33,15 +40,17 @@ export default function TroubleshootAccordion({ expanded, onChange, title, rende
    };
 
    return (
-      <Accordion expanded={expanded} onChange={handleChange}>
+      <Accordion expanded={expanded} onChange={handleChange} className={className}>
          <AccordionSummary
             expandIcon={<ExpandMoreIcon />}
             aria-controls={`troubleshoot-${title.toLowerCase()}-content`}
             id={`troubleshoot-${title.toLowerCase()}-header`}
+            style={{ width: '100%', overflow: 'hidden', minWidth: 0 }}
+            classes={{ content: classes.content }}
          >
             <div className={classes.accordionSummary}>
                <Typography className={classes.heading}>{title}</Typography>
-               {renderStatus && renderStatus()}
+               <div style={{ minWidth: 0, overflow: 'hidden' }}>{renderStatus && renderStatus()}</div>
             </div>
          </AccordionSummary>
          <AccordionDetails>{children}</AccordionDetails>

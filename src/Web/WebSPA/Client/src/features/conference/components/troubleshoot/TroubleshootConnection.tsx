@@ -21,11 +21,12 @@ const useStyles = makeStyles(() => ({
 }));
 
 type Props = {
+   className?: string;
    expanded: boolean;
    onChange: (isExpanded: boolean) => void;
 };
 
-export default function TroubleshootConnection({ expanded, onChange }: Props) {
+export default function TroubleshootConnection({ expanded, onChange, className }: Props) {
    const classes = useStyles();
    const { t } = useTranslation();
 
@@ -33,6 +34,7 @@ export default function TroubleshootConnection({ expanded, onChange }: Props) {
 
    return (
       <TroubleshootAccordion
+         className={className}
          title={t('conference.troubleshooting.webrtc.title')}
          expanded={expanded}
          onChange={onChange}
