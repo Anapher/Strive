@@ -98,7 +98,7 @@ export default function DesktopLayout() {
 
    const showChat = useSelector(selectShowChat);
 
-   const [contentRef, dimensions] = useThrottledResizeObserver(100);
+   const [dimensions, contentRef] = useThrottledResizeObserver(100);
    const [chatWidth, setChatWidth] = useState(CHAT_DEFAULT_WIDTH);
 
    useEffect(() => {

@@ -51,7 +51,7 @@ export default function TileFrameGridTop({ instructions, participants, render }:
                      key={x.id}
                      style={{ ...instructions.tileSize, marginLeft: i === 0 ? 0 : instructions.tileSpaceBetween }}
                   >
-                     <ParticipantTile {...instructions.tileSize} participant={x} />
+                     <ParticipantTile participant={x} />
                   </div>
                ))}
             </div>

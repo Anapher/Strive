@@ -1,16 +1,11 @@
 import { makeStyles } from '@material-ui/core';
+import clsx from 'classnames';
 import { Consumer } from 'mediasoup-client/lib/Consumer';
 import React, { useEffect, useRef } from 'react';
-import useWebRtc from 'src/store/webrtc/hooks/useWebRtc';
-import ConsumerDiagnosticInfo from './ConsumerDiagnosticInfo';
-import clsx from 'classnames';
 import { useSelector } from 'react-redux';
+import useResponsiveConsumer from 'src/features/media/useResponsiveConsumer';
 import { selectEnableVideoOverlay } from 'src/features/settings/selectors';
-import { ProducerDevice, ProducerSource } from 'src/store/webrtc/types';
-import { layerResolutions as screenResolutions } from 'src/store/webrtc/hooks/useScreen';
-import { layerResolutions as webcamResolutions } from 'src/store/webrtc/hooks/useWebcam';
-import { parseScalabilityMode } from 'mediasoup-client';
-import { ScalabilityMode } from 'mediasoup-client/lib/scalabilityModes';
+import ConsumerDiagnosticInfo from './ConsumerDiagnosticInfo';
 
 const useStyles = makeStyles(() => ({
    video: {
@@ -35,51 +30,7 @@ const useStyles = makeStyles(() => ({
    },
 }));
 
-const computePrefferredLayerForResolutions = (
-   height: number,
-   scalabilityMode: ScalabilityMode,
-   resolutions: number[],
-) => {
-   for (let i = 0; i < Math.min(scalabilityMode.spatialLayers, resolutions.length); i++) {
-      const resolution = resolutions[i];
-
-      if (resolution * 1.1 < height) continue; // allow scaling to a maximum of 10%
-      return i;
-   }
-
-   return scalabilityMode.spatialLayers - 1;
-};
-
-const computePrefferredLayerForDevice = (height: number, scalabilityMode: ScalabilityMode, device: ProducerDevice) => {
-   switch (device) {
-      case 'screen':
-         return computePrefferredLayerForResolutions(height, scalabilityMode, screenResolutions);
-      case 'webcam':
-         return computePrefferredLayerForResolutions(height, scalabilityMode, webcamResolutions);
-      default:
-         return 0;
-   }
-};
-
-const getProducerDevice: (source: ProducerSource) => ProducerDevice = (source) => {
-   switch (source) {
-      case 'mic':
-      case 'webcam':
-      case 'screen':
-         return source;
-      case 'loopback-mic':
-         return 'mic';
-      case 'loopback-webcam':
-         return 'webcam';
-      case 'loopback-screen':
-         return 'screen';
-   }
-};
-
 type Props = Omit<Omit<React.HTMLProps<HTMLVideoElement>, 'hidden'>, 'style'> & {
-   width: number;
-   height: number;
-
    consumer?: Consumer | null;
    className?: string;
 
@@ -90,35 +41,17 @@ type Props = Omit<Omit<React.HTMLProps<HTMLVideoElement>, 'hidden'>, 'style'> & 
 
 export default function RenderConsumerVideo({
    consumer,
-   width,
-   height,
    className,
    videoContain,
    diagnosticsLocation = 'bottom-right',
    ...props
 }: Props) {
-   const connection = useWebRtc();
    const classes = useStyles();
 
    const videoRef = useRef<HTMLVideoElement | null>(null);
    const showDiagnostics = useSelector(selectEnableVideoOverlay);
 
-   useEffect(() => {
-      if (connection && consumer) {
-         const source: ProducerSource = consumer.appData.source;
-         const device = getProducerDevice(source);
-
-         const scalability = consumer.rtpParameters.encodings?.[0].scalabilityMode;
-         const scalabilityMode = parseScalabilityMode(scalability);
-
-         connection
-            .setConsumerLayers({
-               consumerId: consumer.id,
-               layers: { spatialLayer: computePrefferredLayerForDevice(height, scalabilityMode, device) },
-            })
-            .catch((err) => console.error('Error setting preferred layers', err));
-      }
-   }, [height, connection, consumer]);
+   useResponsiveConsumer(videoRef, consumer);
 
    useEffect(() => {
       if (consumer?.track) {
@@ -150,7 +83,7 @@ export default function RenderConsumerVideo({
                   [classes.consumerInfoTopRight]: diagnosticsLocation === 'top-right',
                })}
             >
-               <ConsumerDiagnosticInfo consumer={consumer} tileWidth={width} tileHeight={height} />
+               <ConsumerDiagnosticInfo consumer={consumer} videoElement={videoRef} />
             </div>
          )}
       </>

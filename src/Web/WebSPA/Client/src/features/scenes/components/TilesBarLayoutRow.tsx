@@ -40,7 +40,7 @@ export default function TilesBarLayoutRow({ marginHorizontal, instructions, part
                      marginLeft: i === 0 ? 0 : instructions.tileSpaceBetween,
                   }}
                >
-                  <ParticipantTile {...instructions.tileSize} participant={x} />
+                  <ParticipantTile participant={x} />
                </div>
             ))}
          </div>

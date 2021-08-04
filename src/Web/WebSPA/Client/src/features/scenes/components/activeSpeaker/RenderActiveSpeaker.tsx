@@ -77,7 +77,7 @@ function RenderMainSpeakerTile({ participant }: RenderMainSpeakerTileProps) {
    return (
       <div className={classes.mainParticipantTile}>
          <div style={{ ...fixedContentSize }}>
-            <ParticipantTile key={participant.id} {...fixedContentSize} participant={participant} />
+            <ParticipantTile key={participant.id} participant={participant} />
          </div>
       </div>
    );

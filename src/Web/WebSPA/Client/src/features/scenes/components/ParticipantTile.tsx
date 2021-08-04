@@ -10,6 +10,7 @@ import { Participant } from 'src/features/conference/types';
 import { useParticipantAudio } from 'src/features/media/components/ParticipantMicManager';
 import { selectParticipantMicActivated } from 'src/features/media/selectors';
 import useMyParticipantId from 'src/hooks/useMyParticipantId';
+import useThrottledResizeObserver from 'src/hooks/useThrottledResizeObserver';
 import { RootState } from 'src/store';
 import useConsumer from 'src/store/webrtc/hooks/useConsumer';
 import ParticipantTileLabel from './ParticipantTileLabel';
@@ -48,24 +49,26 @@ const useStyles = makeStyles((theme) => ({
 type Props = {
    className?: string;
    participant: Participant;
-   width: number;
-   height: number;
    disableLayoutAnimation?: boolean;
+   dense?: boolean;
 };
 
-export default function ParticipantTile({ className, participant, width, height, disableLayoutAnimation }: Props) {
+export default function ParticipantTile({ className, participant, dense, disableLayoutAnimation }: Props) {
    const classes = useStyles();
    const consumer = useConsumer(participant.id, 'webcam');
    const micActivated = useSelector((state: RootState) => selectParticipantMicActivated(state, participant?.id));
    const isWebcamActive = consumer?.paused === false;
    const myParticipantId = useMyParticipantId();
+   const rootRef = useRef<HTMLDivElement>(null);
+
+   const [computedDense, setComputedDense] = useState(false);
+   useThrottledResizeObserver(50, { onResize: (size) => setComputedDense(size ? size?.width < 400 : false) });
+   dense = dense === undefined ? computedDense : dense;
 
    const isMe = participant.id === myParticipantId;
 
    const audioInfo = useParticipantAudio(participant.id);
    const audioBorder = useTransform(audioInfo?.audioLevel ?? new MotionValue(0), [0, 1], [0, 10]);
-
-   const isSmall = width < 400;
 
    const [contextMenuOpen, setContextMenuOpen] = useState(false);
    const moreIconRef = useRef(null);
@@ -84,17 +87,18 @@ export default function ParticipantTile({ className, participant, width, height,
             layout={!disableLayoutAnimation}
             layoutId={disableLayoutAnimation ? undefined : participant.id}
             className={clsx(classes.root, className)}
+            ref={rootRef}
          >
-            <RenderConsumerVideo consumer={consumer} height={height} width={width} className={classes.video} />
+            <RenderConsumerVideo consumer={consumer} className={classes.video} />
             <motion.div style={{ borderWidth: audioBorder }} className={classes.volumeBorder} />
 
             {consumer !== undefined && (
                <ParticipantTileLabel
                   label={participant.displayName}
-                  tileWidth={width}
-                  tileHeight={height}
                   micActivated={micActivated}
                   webcamActivated={isWebcamActive}
+                  dense={dense}
+                  containerRef={rootRef}
                />
             )}
 
@@ -103,10 +107,10 @@ export default function ParticipantTile({ className, participant, width, height,
                   <IconButton
                      ref={moreIconRef}
                      aria-label="options"
-                     size={isSmall ? 'small' : 'medium'}
+                     size={dense ? 'small' : 'medium'}
                      onClick={handleOpenContextMenu}
                   >
-                     <MoreVertIcon fontSize={isSmall ? 'small' : 'default'} />
+                     <MoreVertIcon fontSize={dense ? 'small' : 'default'} />
                   </IconButton>
                </div>
             )}

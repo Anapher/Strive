@@ -1,7 +1,8 @@
 import { fade, makeStyles, Typography, useTheme } from '@material-ui/core';
 import clsx from 'classnames';
-import React from 'react';
+import React, { RefObject } from 'react';
 import AnimatedMicIcon from 'src/assets/animated-icons/AnimatedMicIcon';
+import useThrottledResizeObserver from 'src/hooks/useThrottledResizeObserver';
 
 const INFO_BOX_MARGIN = 16;
 
@@ -43,23 +44,24 @@ const useStyles = makeStyles((theme) => ({
 type Props = {
    micActivated: boolean;
    webcamActivated: boolean;
-   tileWidth: number;
-   tileHeight: number;
    label: string;
+   dense?: boolean;
+   containerRef: RefObject<any> | null | undefined;
 };
 
-export default function ParticipantTileLabel({ micActivated, webcamActivated, tileWidth, tileHeight, label }: Props) {
+export default function ParticipantTileLabel({ micActivated, webcamActivated, containerRef, label, dense }: Props) {
    const classes = useStyles();
    const theme = useTheme();
+   const [containerSize] = useThrottledResizeObserver(100, { ref: containerRef });
 
-   const isSmall = tileWidth < 400;
+   if (!containerSize) return null;
 
    return (
       <div
          className={clsx(classes.infoBox, {
             [classes.infoBoxWebcamEnabled]: webcamActivated,
             [classes.infoBoxWebcamDisabled]: !webcamActivated,
-            [classes.infoBoxEnabledSmall]: webcamActivated && isSmall,
+            [classes.infoBoxEnabledSmall]: webcamActivated && dense,
          })}
       >
          <AnimatedMicIcon activated={micActivated} disabledColor={theme.palette.error.main} />
@@ -67,11 +69,11 @@ export default function ParticipantTileLabel({ micActivated, webcamActivated, ti
             variant="h4"
             className={clsx(classes.label)}
             style={{
-               fontSize: isSmall ? 16 : 24,
+               fontSize: dense ? 16 : 24,
                transform: webcamActivated
                   ? 'translate(0px, 0px) scale(0.75)'
-                  : `translate(calc(${tileWidth / 2}px - ${INFO_BOX_MARGIN}px - 18px - 50%), calc(-${
-                       tileHeight / 2
+                  : `translate(calc(${(containerSize?.width ?? 0) / 2}px - ${INFO_BOX_MARGIN}px - 18px - 50%), calc(-${
+                       (containerSize?.height ?? 0) / 2
                     }px + 50% + ${INFO_BOX_MARGIN}px))`,
             }}
          >

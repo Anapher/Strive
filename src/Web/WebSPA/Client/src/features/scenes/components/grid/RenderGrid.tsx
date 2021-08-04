@@ -56,11 +56,7 @@ export default function RenderGrid({ participants, className, spacing = 8, itemM
                      .value()
                      .map((x, pi) => (
                         <div key={x.id} style={{ ...grid.itemSize, marginLeft: pi === 0 ? 0 : spacing }}>
-                           <ParticipantTile
-                              participant={x}
-                              {...grid.itemSize}
-                              disableLayoutAnimation={disableAnimations}
-                           />
+                           <ParticipantTile participant={x} disableLayoutAnimation={disableAnimations} />
                         </div>
                      ))}
                </div>

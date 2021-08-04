@@ -42,7 +42,7 @@ type Props = {
 
 export default function SceneView({ setAutoHideControls }: Props) {
    const classes = useStyles();
-   const [contentRef, dimensions] = useThrottledResizeObserver(100);
+   const [dimensions, contentRef] = useThrottledResizeObserver(100);
    const sceneStack = useSelector(selectSceneStack);
 
    const participantId = useMyParticipantId();

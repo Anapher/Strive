@@ -1,6 +1,7 @@
 import { makeStyles } from '@material-ui/core';
 import { Consumer } from 'mediasoup-client/lib/Consumer';
-import React, { useEffect, useState } from 'react';
+import React, { RefObject, useEffect, useState } from 'react';
+import useThrottledResizeObserver from 'src/hooks/useThrottledResizeObserver';
 import useConsumerStatusInfo from 'src/store/webrtc/hooks/useConsumerStatusInfo';
 
 const useStyles = makeStyles({
@@ -13,16 +14,17 @@ const useStyles = makeStyles({
 
 type Props = {
    consumer: Consumer;
-   tileWidth: number;
-   tileHeight: number;
+   videoElement: RefObject<any> | null | undefined;
 };
 
-export default function ConsumerDiagnosticInfo({ consumer, tileWidth, tileHeight }: Props) {
+export default function ConsumerDiagnosticInfo({ consumer, videoElement }: Props) {
    const classes = useStyles();
 
    const [videoWidth, setVideoWidth] = useState<number | undefined>();
    const [videoHeight, setVideoHeight] = useState<number | undefined>();
    const info = useConsumerStatusInfo(consumer.id);
+
+   const [tileSize] = useThrottledResizeObserver(100, { ref: videoElement });
 
    useEffect(() => {
       const updateVideoSize = () => {
@@ -58,7 +60,8 @@ export default function ConsumerDiagnosticInfo({ consumer, tileWidth, tileHeight
          </span>
          <br />
          <span>
-            Tile Size: {Math.round(tileWidth)}x{Math.round(tileHeight)}
+            Tile Size: {tileSize ? Math.round(tileSize.width) : 'unknown'}x
+            {tileSize ? Math.round(tileSize.height) : 'unknown'}
          </span>
       </div>
    );

@@ -82,7 +82,7 @@ function PortalWithParticipant({ participant }: PortalWithParticipantProps) {
       <Portal container={context.chatContainer}>
          {participants.length > 0 && (
             <div style={{ ...size, marginBottom: 8, marginRight: 8 }} key={participants[0].id}>
-               <ParticipantTile {...size} participant={participants[0]} />
+               <ParticipantTile participant={participants[0]} />
             </div>
          )}
       </Portal>
