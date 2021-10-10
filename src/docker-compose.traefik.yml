@@ -16,9 +16,6 @@ services:
       - "traefik.http.routers.identity-api.entrypoints=websecure"
       - "traefik.http.routers.identity-api.middlewares=cors@docker"
       - "traefik.http.routers.identity-api.tls=true"
-    networks:
-      - traefik
-      - default
 
   strive:
     labels:
@@ -32,9 +29,6 @@ services:
       - SFU__UrlTemplate=https://sfu.${SITE_HOST}/{0}
       - Authentication__NoSslRequired=true
       - Authentication__Issuer=https://identity.${SITE_HOST}
-    networks:
-      - traefik
-      - default
 
   webspa:
     labels:
@@ -49,9 +43,6 @@ services:
       - App__ConferenceUrl=https://api.${SITE_HOST}/
       - App__SignalrHubUrl=https://api.${SITE_HOST}/signalr
       - App__EquipmentSignalrHubUrl=https://api.${SITE_HOST}/equipment-signalr
-    networks:
-      - traefik
-      - default
 
   sfu:
     labels:
@@ -63,11 +54,3 @@ services:
       - "traefik.http.services.sfu.loadbalancer.server.port=3000"
       - "traefik.http.routers.sfu.middlewares=cors@docker"
       - "traefik.http.routers.sfu.tls=true"
-    networks:
-      - traefik
-      - default
-
-networks:
-  traefik:
-    external:
-      name: traefik_proxy

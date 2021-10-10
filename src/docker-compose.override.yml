@@ -1,19 +1,9 @@
 version: "3.4"
 
 services:
-  nosqldata:
-    ports:
-      - "27017:27017"
-
-  rabbitmq:
-    ports:
-      - "5672:5672"
-
   identity-api:
     environment:
       - ASPNETCORE_ENVIRONMENT=${APP_ENVIRONMENT}
-    ports:
-      - "5105:80"
 
   strive:
     environment:
@@ -25,12 +15,6 @@ services:
       - MongoDb__ConnectionString=mongodb://nosqldata
       - SFU__TokenSecret=${STRIVE_TOKEN_SECRET}
       - SFU__ApiKey=${STRIVE_API_KEY}
-    ports:
-      - "5101:80"
-
-  webspa:
-    ports:
-      - "5100:80"
 
   sfu:
     environment:

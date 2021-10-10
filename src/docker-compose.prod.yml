@@ -1,23 +1,23 @@
 version: "3.4"
 
 services:
-  traefik:
-    volumes:
-      - "./acme.json:/acme.json"
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-
   identity-api:
     labels:
       - "traefik.http.routers.identity-api.tls.certresolver=letsEncrypt"
+    networks:
+      - traefik
 
   strive:
     labels:
       - "traefik.http.routers.api.tls.certresolver=letsEncrypt"
+    networks:
+      - traefik
 
   webspa:
     labels:
       - "traefik.http.routers.spa.tls.certresolver=letsEncrypt"
+    networks:
+      - traefik
 
   sfu:
     build:
@@ -26,8 +26,22 @@ services:
         - MEDIASOUP_MAX_PORT=${MEDIASOUP_MAX_PORT}
     labels:
       - "traefik.http.routers.sfu.tls.certresolver=letsEncrypt"
+      - "traefik.http.services.sfu.loadbalancer.server.url=http://host.docker.internal:3000/"
     environment:
       - DEBUG=strive-mediasoup**
       - API_CONFERENCE_MANAGEMENT=http://0.0.0.0:5101/v1/sfu/{conferenceId}?apiKey=${STRIVE_API_KEY}
       - AMQP_CONNECTION_STRING=amqp://0.0.0.0:5672
     network_mode: host # we need to export a large port range https://docs.docker.com/network/host/
+
+  nosqldata:
+    networks:
+      - traefik
+
+  rabbitmq:
+    networks:
+      - traefik
+
+networks:
+  traefik:
+    external:
+      name: traefik_proxy
