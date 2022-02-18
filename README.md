@@ -27,6 +27,7 @@
 - [About the project](#about-the-project)
     - [Features](#features)
     - [Architecture](#architecture)
+    - [Preview](#preview)
 - [Getting Started](#getting-started)
     - [Running on localhost with Docker Compose and Traefik](#running-on-localhost-with-docker-compose-and-traefik)
     - [Running on production server](#running-on-production-server)
@@ -80,6 +81,11 @@ Redirects the media traffic (audio/video) between the participants.
 
 #### Conference Management
 This is the heart of Strive, here are conferences created, chat messages delivered, rooms created etc.
+
+### Preview
+https://user-images.githubusercontent.com/7737876/154677692-506e50aa-6b58-4ab7-bd32-628d447b4aa8.mp4
+
+
 
 <!-- GETTING STARTED -->
 ## Getting Started
