@@ -10,7 +10,7 @@ FROM ${NODE_IMAGE} as node-build
 WORKDIR /web
 COPY Client/package.json .
 COPY Client/yarn.lock .
-RUN yarn install
+RUN yarn install --network-timeout 100000
 COPY Client/ .
 RUN yarn build
 
